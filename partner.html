@@ -1,0 +1,1425 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>TripStore Partners</title>
+<link href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.6/dist/web/static/pretendard.css" rel="stylesheet">
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: 'Pretendard', 'Apple SD Gothic Neo', -apple-system, sans-serif; font-size: 14px; color: rgba(0,0,0,0.88); background: #f5f5f5; }
+
+/* ===== GNB (파트너 전용 — 배경 구분) ===== */
+.gnb { background: #f0f5ff; height: 48px; display: flex; align-items: center; position: sticky; top: 0; z-index: 100; padding: 0 20px; border-bottom: 1px solid #d6e4ff; box-shadow: 0 1px 4px rgba(0,0,0,0.06); }
+.gnb-logo { color: #222427; font-weight: 800; font-size: 15px; margin-right: 24px; white-space: nowrap; letter-spacing: -0.3px; }
+.gnb-logo span { color: #1677ff; }
+.gnb-logo .partners-badge { background: #1677ff; color: #fff; font-size: 10px; font-weight: 700; padding: 2px 6px; border-radius: 4px; margin-left: 6px; letter-spacing: 0.3px; vertical-align: middle; }
+.gnb-menu { display: flex; gap: 0; }
+.gnb-item { color: rgba(0,0,0,0.55); padding: 0 14px; height: 48px; display: flex; align-items: center; cursor: pointer; font-size: 13px; white-space: nowrap; position: relative; transition: color 0.15s; font-weight: 500; }
+.gnb-item:hover { color: rgba(0,0,0,0.88); }
+.gnb-item.active { color: #1677ff; }
+.gnb-item.active::after { content: ''; position: absolute; bottom: 0; left: 0; right: 0; height: 2px; background: #1677ff; }
+.caret { margin-left: 3px; font-size: 9px; opacity: 0.5; }
+.gnb-dropdown { position: absolute; top: 48px; left: 0; background: #fff; border-radius: 8px; box-shadow: 0 8px 24px rgba(0,0,0,0.12); min-width: 180px; padding: 6px 0; display: none; z-index: 200; border: 1px solid #f0f0f0; }
+.gnb-item:hover .gnb-dropdown, .gnb-item.open .gnb-dropdown, .gnb-item:focus-within .gnb-dropdown { display: block; }
+.gnb-dropdown-item { padding: 8px 18px; cursor: pointer; font-size: 13px; color: rgba(0,0,0,0.75); white-space: nowrap; transition: all 0.12s; font-weight: 400; }
+.gnb-dropdown-item:hover { background: #f5f5f5; color: rgba(0,0,0,0.88); }
+.gnb-dropdown-item.active { color: #1677ff; background: #e6f4ff; font-weight: 500; }
+.gnb-dropdown-group { padding: 8px 18px 3px; font-size: 11px; color: rgba(0,0,0,0.35); font-weight: 700; letter-spacing: 0.6px; text-transform: uppercase; }
+.gnb-dropdown-divider { height: 1px; background: #f0f0f0; margin: 4px 0; }
+.gnb-right { margin-left: auto; display: flex; align-items: center; gap: 14px; }
+.gnb-partner-name { font-size: 12px; color: #2f54eb; font-weight: 600; background: #e6f4ff; padding: 4px 10px; border-radius: 4px; }
+.gnb-user { font-size: 12px; color: rgba(0,0,0,0.55); cursor: pointer; }
+
+/* ===== BREADCRUMB ===== */
+.breadcrumb { padding: 14px 24px 0; font-size: 12px; color: rgba(0,0,0,0.45); display: flex; align-items: center; gap: 6px; }
+.breadcrumb span:not(.breadcrumb-sep) { cursor: pointer; }
+.breadcrumb span:not(.breadcrumb-sep):hover { color: #1677ff; }
+.breadcrumb-sep { color: rgba(0,0,0,0.25); cursor: default !important; }
+
+/* ===== LAYOUT ===== */
+.layout { padding: 14px 24px 40px; min-height: calc(100vh - 48px); }
+.page-header { display: flex; align-items: center; justify-content: space-between; margin: 12px 0 16px; }
+.page-title { font-size: 20px; font-weight: 600; color: rgba(0,0,0,0.88); }
+
+/* ===== CARD ===== */
+.card { background: #fff; border-radius: 8px; box-shadow: 0 1px 3px rgba(0,0,0,0.07); }
+
+/* ===== STAT CARDS ===== */
+.stat-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; margin-bottom: 16px; }
+.stat-card { background: #fff; border-radius: 8px; padding: 18px 20px; box-shadow: 0 1px 3px rgba(0,0,0,0.07); }
+.stat-label { font-size: 12px; color: rgba(0,0,0,0.45); margin-bottom: 6px; }
+.stat-value { font-size: 24px; font-weight: 700; color: rgba(0,0,0,0.88); }
+.stat-value.blue { color: #1677ff; }
+.stat-value.green { color: #52c41a; }
+.stat-value.orange { color: #fa8c16; }
+.stat-value.red { color: #f5222d; }
+
+/* ===== FILTER BAR ===== */
+.filter-bar { padding: 14px 20px; border-bottom: 1px solid #f0f0f0; display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+.fi { height: 32px; border: 1px solid #d9d9d9; border-radius: 6px; font-size: 13px; font-family: inherit; color: rgba(0,0,0,0.88); outline: none; transition: border 0.2s; background: #fff; }
+.fi:focus { border-color: #1677ff; box-shadow: 0 0 0 2px rgba(22,119,255,0.1); }
+input.fi { padding: 0 10px; }
+input.fi::placeholder { color: rgba(0,0,0,0.25); }
+select.fi { padding: 0 28px 0 10px; appearance: none; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='%23bbb'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 8px center; cursor: pointer; }
+.fi-sm { width: 80px; }
+.fi-md { width: 130px; }
+.fi-lg { width: 170px; }
+.filter-actions { display: flex; gap: 6px; }
+
+/* ===== BUTTONS ===== */
+.btn { height: 32px; padding: 0 14px; border-radius: 6px; font-size: 13px; font-family: inherit; cursor: pointer; border: 1px solid transparent; display: inline-flex; align-items: center; gap: 5px; transition: all 0.15s; white-space: nowrap; font-weight: 400; }
+.btn-primary { background: #1677ff; color: #fff; border-color: #1677ff; }
+.btn-primary:hover { background: #4096ff; border-color: #4096ff; }
+.btn-default { background: #fff; color: rgba(0,0,0,0.88); border-color: #d9d9d9; }
+.btn-default:hover { color: #1677ff; border-color: #1677ff; }
+.btn-text { background: transparent; color: #1677ff; border-color: transparent; padding: 0 8px; height: 28px; font-size: 12px; }
+.btn-text:hover { background: #e6f4ff; }
+.btn-sm { height: 28px; padding: 0 10px; font-size: 12px; }
+.btn-back { background: transparent; border: none; color: rgba(0,0,0,0.45); font-size: 13px; cursor: pointer; display: flex; align-items: center; gap: 6px; padding: 0; font-family: inherit; transition: color 0.15s; }
+.btn-back:hover { color: rgba(0,0,0,0.88); }
+
+/* ===== TABLE ===== */
+.table-wrap { overflow-x: auto; }
+table { width: 100%; border-collapse: collapse; }
+th { padding: 12px 16px; text-align: left; font-weight: 500; font-size: 13px; color: rgba(0,0,0,0.65); background: #fafafa; border-bottom: 1px solid #f0f0f0; white-space: nowrap; }
+td { padding: 11px 16px; font-size: 13px; color: rgba(0,0,0,0.88); border-bottom: 1px solid #f5f5f5; vertical-align: middle; }
+tr:last-child td { border-bottom: none; }
+tbody tr:hover td { background: #fafafa; }
+
+/* ===== TAGS ===== */
+.tag { display: inline-block; padding: 2px 8px; border-radius: 4px; font-size: 12px; font-weight: 500; }
+.tag-blue { background: #e6f4ff; color: #1677ff; }
+.tag-green { background: #f6ffed; color: #389e0d; }
+.tag-orange { background: #fff7e6; color: #d48806; }
+.tag-red { background: #fff1f0; color: #f5222d; }
+.tag-gray { background: #f5f5f5; color: rgba(0,0,0,0.45); }
+.tag-purple { background: #f9f0ff; color: #722ed1; }
+
+/* ===== PAGINATION ===== */
+.pagination { padding: 12px 20px; display: flex; align-items: center; gap: 6px; justify-content: flex-end; border-top: 1px solid #f0f0f0; }
+.pag-total { font-size: 12px; color: rgba(0,0,0,0.45); margin-right: auto; }
+.pag-size { height: 28px; border: 1px solid #d9d9d9; border-radius: 4px; font-size: 12px; font-family: inherit; padding: 0 6px; }
+.pag-btn { width: 28px; height: 28px; border: 1px solid #d9d9d9; border-radius: 4px; background: #fff; cursor: pointer; font-size: 13px; display: flex; align-items: center; justify-content: center; }
+.pag-btn.active { border-color: #1677ff; color: #1677ff; font-weight: 600; }
+
+/* ===== FORM ===== */
+.form-section { padding: 20px 24px; border-bottom: 1px solid #f0f0f0; }
+.section-title { font-size: 15px; font-weight: 600; margin-bottom: 16px; color: rgba(0,0,0,0.88); }
+.form-row { display: flex; gap: 16px; margin-bottom: 14px; }
+.form-row:last-child { margin-bottom: 0; }
+.form-item { display: flex; flex-direction: column; gap: 6px; }
+.form-item.half { flex: 1; }
+.form-item.full { width: 100%; }
+.form-label { font-size: 13px; font-weight: 500; color: rgba(0,0,0,0.65); }
+.req { color: #f5222d; }
+.fc { height: 32px; border: 1px solid #d9d9d9; border-radius: 6px; padding: 0 10px; font-size: 13px; font-family: inherit; outline: none; transition: border 0.2s; width: 100%; }
+.fc:focus { border-color: #1677ff; box-shadow: 0 0 0 2px rgba(22,119,255,0.1); }
+.form-hint { font-size: 11px; color: rgba(0,0,0,0.35); }
+.form-footer { padding: 16px 24px; border-top: 1px solid #f0f0f0; display: flex; justify-content: flex-end; gap: 10px; background: #fafafa; border-radius: 0 0 8px 8px; }
+
+/* ===== TABS ===== */
+.tab-bar { display: flex; gap: 0; border-bottom: 2px solid #f0f0f0; margin-bottom: 16px; }
+.tab-btn { background: transparent; border: none; padding: 10px 20px; font-size: 14px; font-weight: 500; cursor: pointer; color: rgba(0,0,0,0.45); border-bottom: 2px solid transparent; margin-bottom: -2px; font-family: inherit; transition: all 0.15s; }
+.tab-btn:hover { color: rgba(0,0,0,0.88); }
+.tab-btn.active { color: #1677ff; border-bottom-color: #1677ff; }
+
+/* ===== TIMELINE ===== */
+.timeline { padding: 0 0 0 20px; border-left: 2px solid #e8e8e8; }
+.timeline-item { position: relative; padding: 0 0 20px 20px; }
+.timeline-item:last-child { padding-bottom: 0; }
+.timeline-dot { position: absolute; left: -27px; top: 2px; width: 12px; height: 12px; border-radius: 50%; border: 2px solid #d9d9d9; background: #fff; }
+.timeline-dot.done { border-color: #52c41a; background: #52c41a; }
+.timeline-dot.current { border-color: #1677ff; background: #1677ff; }
+.timeline-title { font-size: 13px; font-weight: 500; color: rgba(0,0,0,0.88); }
+.timeline-time { font-size: 11px; color: rgba(0,0,0,0.35); margin-top: 2px; }
+
+/* ===== ALERT BOX ===== */
+.alert-box { padding: 10px 14px; border-radius: 6px; font-size: 12px; line-height: 1.6; margin-bottom: 14px; }
+.alert-blue { background: #f0f5ff; border: 1px solid #d6e4ff; color: #2f54eb; }
+.alert-orange { background: #fff7e6; border: 1px solid #ffd591; color: #874d00; }
+
+/* ===== READONLY INDICATOR ===== */
+.readonly-badge { display: inline-flex; align-items: center; gap: 4px; font-size: 11px; color: rgba(0,0,0,0.35); background: #f5f5f5; padding: 2px 8px; border-radius: 4px; }
+
+/* ===== VIEW TOGGLE ===== */
+.view { display: none; }
+.view.active { display: block; }
+
+/* ===== DASHBOARD SPECIFIC ===== */
+.dash-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+.noti-item { padding: 10px 0; border-bottom: 1px solid #f5f5f5; font-size: 13px; color: rgba(0,0,0,0.75); }
+.noti-item:last-child { border-bottom: none; }
+.noti-time { font-size: 11px; color: rgba(0,0,0,0.35); margin-top: 2px; }
+
+/* ===== SETTLEMENT SUMMARY ===== */
+.settle-summary { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; margin-bottom: 16px; }
+.settle-card { background: #fff; border-radius: 8px; padding: 18px 20px; box-shadow: 0 1px 3px rgba(0,0,0,0.07); text-align: center; }
+.settle-card .stat-label { text-align: center; }
+.settle-card .stat-value { text-align: center; }
+</style>
+</head>
+<body>
+
+<!-- ===== GNB ===== -->
+<div class="gnb">
+  <div class="gnb-logo" onclick="showView('dashboard')" style="cursor:pointer;">Trip<span>Store</span> <span class="partners-badge">Partners</span></div>
+  <div class="gnb-menu">
+    <div class="gnb-item active" onclick="showView('dashboard')">대시보드</div>
+    <div class="gnb-item" tabindex="0">상품관리 <span class="caret">▾</span>
+      <div class="gnb-dropdown">
+        <div class="gnb-dropdown-group">상품</div>
+        <div class="gnb-dropdown-item" onclick="event.stopPropagation();showView('product-list')">상품 목록</div>
+        <div class="gnb-dropdown-item" onclick="event.stopPropagation();showView('product-form')">상품 등록</div>
+        <div class="gnb-dropdown-divider"></div>
+        <div class="gnb-dropdown-group">Stock 조회</div>
+        <div class="gnb-dropdown-item" onclick="event.stopPropagation();showView('stock-flight')">항공권 Stock</div>
+        <div class="gnb-dropdown-item" onclick="event.stopPropagation();showView('stock-hotel')">숙박권 Stock</div>
+        <div class="gnb-dropdown-item" onclick="event.stopPropagation();showView('stock-tour')">투어/티켓 Stock</div>
+        <div class="gnb-dropdown-divider"></div>
+        <div class="gnb-dropdown-group">콘텐츠</div>
+        <div class="gnb-dropdown-item" onclick="event.stopPropagation();showView('post-mgmt')">POST 관리</div>
+      </div>
+    </div>
+    <div class="gnb-item" onclick="showView('reservation-list')">예약관리</div>
+    <div class="gnb-item" onclick="showView('settlement-list')">정산관리</div>
+    <div class="gnb-item" onclick="showView('settings')">설정</div>
+  </div>
+  <div class="gnb-right">
+    <div class="gnb-partner-name">JV Vietnam</div>
+    <div class="gnb-user">홍길동 ▾</div>
+  </div>
+</div>
+
+<!-- ============================================================ -->
+<!-- P1: 대시보드 -->
+<!-- ============================================================ -->
+<div id="view-dashboard" class="view active">
+  <div class="layout">
+    <div class="page-header">
+      <div class="page-title">대시보드</div>
+    </div>
+
+    <div class="stat-row">
+      <div class="stat-card">
+        <div class="stat-label">판매중 상품</div>
+        <div class="stat-value blue">24</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">이번 달 예약</div>
+        <div class="stat-value green">156</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">이번 달 매출</div>
+        <div class="stat-value">234,500,000</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">처리 대기 예약</div>
+        <div class="stat-value red">8</div>
+      </div>
+    </div>
+
+    <div class="dash-grid">
+      <!-- 최근 예약 -->
+      <div class="card" style="padding:20px;">
+        <div style="font-size:15px;font-weight:600;margin-bottom:14px;">최근 예약</div>
+        <table>
+          <thead>
+            <tr><th>예약번호</th><th>상품명</th><th>고객명</th><th>상태</th></tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td style="font-weight:500;color:#1677ff;">RSV-20260325-001</td>
+              <td>푸꾸옥 5일 패키지</td>
+              <td>김영희</td>
+              <td><span class="tag tag-orange">확인중</span></td>
+            </tr>
+            <tr>
+              <td style="font-weight:500;color:#1677ff;">RSV-20260325-002</td>
+              <td>나트랑 4일 에어텔</td>
+              <td>이철수</td>
+              <td><span class="tag tag-green">확정</span></td>
+            </tr>
+            <tr>
+              <td style="font-weight:500;color:#1677ff;">RSV-20260324-015</td>
+              <td>다낭 3일 자유여행</td>
+              <td>박민아</td>
+              <td><span class="tag tag-blue">예약접수</span></td>
+            </tr>
+            <tr>
+              <td style="font-weight:500;color:#1677ff;">RSV-20260324-014</td>
+              <td>푸꾸옥 솔바이 5일</td>
+              <td>최승호</td>
+              <td><span class="tag tag-green">확정</span></td>
+            </tr>
+            <tr>
+              <td style="font-weight:500;color:#1677ff;">RSV-20260324-013</td>
+              <td>나트랑 빈펄 4일</td>
+              <td>정수진</td>
+              <td><span class="tag tag-red">취소요청</span></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- 알림 -->
+      <div class="card" style="padding:20px;">
+        <div style="font-size:15px;font-weight:600;margin-bottom:14px;">알림</div>
+        <div class="noti-item">
+          <div>Stock POST 업데이트: 비엣젯 수하물규정 변경</div>
+          <div class="noti-time">2시간 전</div>
+        </div>
+        <div class="noti-item">
+          <div>신규 Stock 배정: 제주항공 인천-푸꾸옥</div>
+          <div class="noti-time">1일 전</div>
+        </div>
+        <div class="noti-item">
+          <div>정산 완료: 2026년 2월분 ₩45,200,000</div>
+          <div class="noti-time">3일 전</div>
+        </div>
+        <div class="noti-item">
+          <div>예약 확정 필요: RSV-20260323-008 (출발 7일 전)</div>
+          <div class="noti-time">3일 전</div>
+        </div>
+        <div class="noti-item">
+          <div>신규 Stock 배정: 솔바이멜리아 디럭스룸</div>
+          <div class="noti-time">5일 전</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ============================================================ -->
+<!-- P2: 상품 목록 -->
+<!-- ============================================================ -->
+<div id="view-product-list" class="view">
+  <div class="layout">
+    <div class="breadcrumb">
+      <span onclick="showView('dashboard')">대시보드</span><span class="breadcrumb-sep">/</span>
+      <span style="color:rgba(0,0,0,0.88);font-weight:500;">상품 목록</span>
+    </div>
+    <div class="page-header">
+      <div class="page-title">상품 목록</div>
+      <button class="btn btn-primary" onclick="showView('product-form')">+ 상품 등록</button>
+    </div>
+    <div class="card">
+      <div class="filter-bar">
+        <input class="fi fi-lg" type="text" placeholder="상품명 검색">
+        <select class="fi fi-md">
+          <option value="">여행지</option>
+          <option>푸꾸옥</option><option>나트랑</option><option>다낭</option><option>방콕</option>
+        </select>
+        <select class="fi fi-md">
+          <option value="">상태</option>
+          <option>판매중</option><option>준비중</option><option>판매종료</option>
+        </select>
+        <div class="filter-actions">
+          <button class="btn btn-primary btn-sm">검색</button>
+          <button class="btn btn-default btn-sm">초기화</button>
+        </div>
+      </div>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th style="width:60px;">ID</th>
+              <th>상품명</th>
+              <th>여행지</th>
+              <th>항공 Stock</th>
+              <th>숙박 Stock</th>
+              <th style="text-align:right;">가격</th>
+              <th>상태</th>
+              <th style="text-align:center;">예약수</th>
+              <th>등록일</th>
+              <th style="text-align:center;">액션</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>101</td>
+              <td><strong>푸꾸옥 솔바이멜리아 5일</strong></td>
+              <td>푸꾸옥</td>
+              <td><span class="tag tag-orange" style="font-size:11px;">비엣젯 VJ</span></td>
+              <td><span class="tag tag-green" style="font-size:11px;">솔바이멜리아</span></td>
+              <td style="text-align:right;font-weight:600;">₩1,890,000</td>
+              <td><span class="tag tag-green">판매중</span></td>
+              <td style="text-align:center;">42</td>
+              <td style="color:rgba(0,0,0,0.4);font-size:12px;">2026-01-15</td>
+              <td style="text-align:center;">
+                <button class="btn btn-text btn-sm" onclick="showView('product-form')">수정</button>
+                <button class="btn btn-text btn-sm">복제</button>
+              </td>
+            </tr>
+            <tr>
+              <td>102</td>
+              <td><strong>나트랑 빈펄 리조트 4일</strong></td>
+              <td>나트랑</td>
+              <td><span class="tag tag-orange" style="font-size:11px;">대한항공 KE</span></td>
+              <td><span class="tag tag-green" style="font-size:11px;">빈펄 리조트</span></td>
+              <td style="text-align:right;font-weight:600;">₩2,350,000</td>
+              <td><span class="tag tag-green">판매중</span></td>
+              <td style="text-align:center;">28</td>
+              <td style="color:rgba(0,0,0,0.4);font-size:12px;">2026-02-03</td>
+              <td style="text-align:center;">
+                <button class="btn btn-text btn-sm" onclick="showView('product-form')">수정</button>
+                <button class="btn btn-text btn-sm">복제</button>
+              </td>
+            </tr>
+            <tr>
+              <td>103</td>
+              <td><strong>다낭 인터컨 3일 에어텔</strong></td>
+              <td>다낭</td>
+              <td><span class="tag tag-orange" style="font-size:11px;">제주항공 7C</span></td>
+              <td><span class="tag tag-green" style="font-size:11px;">인터컨티넨탈</span></td>
+              <td style="text-align:right;font-weight:600;">₩1,450,000</td>
+              <td><span class="tag" style="background:#fff7e6;color:#d48806;">준비중</span></td>
+              <td style="text-align:center;">0</td>
+              <td style="color:rgba(0,0,0,0.4);font-size:12px;">2026-03-20</td>
+              <td style="text-align:center;">
+                <button class="btn btn-text btn-sm" onclick="showView('product-form')">수정</button>
+                <button class="btn btn-text btn-sm">복제</button>
+              </td>
+            </tr>
+            <tr>
+              <td>104</td>
+              <td><strong>푸꾸옥 소나가 비치 4일</strong></td>
+              <td>푸꾸옥</td>
+              <td><span class="tag tag-orange" style="font-size:11px;">비엣젯 VJ</span></td>
+              <td><span class="tag tag-green" style="font-size:11px;">소나가 비치</span></td>
+              <td style="text-align:right;font-weight:600;">₩1,650,000</td>
+              <td><span class="tag tag-green">판매중</span></td>
+              <td style="text-align:center;">35</td>
+              <td style="color:rgba(0,0,0,0.4);font-size:12px;">2026-01-28</td>
+              <td style="text-align:center;">
+                <button class="btn btn-text btn-sm" onclick="showView('product-form')">수정</button>
+                <button class="btn btn-text btn-sm">복제</button>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="pagination">
+        <span class="pag-total">총 24건</span>
+        <select class="pag-size"><option>10개</option><option>20개</option></select>
+        <button class="pag-btn active">1</button>
+        <button class="pag-btn">2</button>
+        <button class="pag-btn">3</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ============================================================ -->
+<!-- P3: 상품 등록/수정 -->
+<!-- ============================================================ -->
+<div id="view-product-form" class="view">
+  <div class="layout">
+    <div class="breadcrumb">
+      <span onclick="showView('dashboard')">대시보드</span><span class="breadcrumb-sep">/</span>
+      <span onclick="showView('product-list')">상품 목록</span><span class="breadcrumb-sep">/</span>
+      <span style="color:rgba(0,0,0,0.88);font-weight:500;">상품 등록</span>
+    </div>
+    <div class="page-header">
+      <div style="display:flex;align-items:center;gap:14px;">
+        <button class="btn-back" onclick="showView('product-list')">← 목록으로</button>
+        <div class="page-title">상품 등록</div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="form-section">
+        <div class="section-title">Stock 선택</div>
+        <div class="alert-blue alert-box">할당된 Stock만 선택할 수 있습니다. Stock 추가가 필요하면 어드민에 요청해주세요.</div>
+        <div class="form-row">
+          <div class="form-item half">
+            <label class="form-label">항공권 Stock <span class="req">*</span></label>
+            <select class="fc">
+              <option value="">항공권 선택</option>
+              <option>비엣젯(VJ) 인천-푸꾸옥</option>
+              <option>대한항공(KE) 인천-나트랑</option>
+              <option>제주항공(7C) 인천-다낭</option>
+            </select>
+          </div>
+          <div class="form-item half">
+            <label class="form-label">숙박권 Stock <span class="req">*</span></label>
+            <select class="fc">
+              <option value="">숙박권 선택</option>
+              <option>솔바이멜리아 푸꾸옥</option>
+              <option>소나가 비치 리조트</option>
+            </select>
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-item half">
+            <label class="form-label">투어/티켓 Stock</label>
+            <select class="fc">
+              <option value="">선택 (선택사항)</option>
+              <option>빈원더스 입장권</option>
+              <option>푸꾸옥 선셋 투어</option>
+            </select>
+          </div>
+          <div class="form-item half"></div>
+        </div>
+      </div>
+
+      <div class="form-section">
+        <div class="section-title">상품 정보</div>
+        <div class="form-row">
+          <div class="form-item half">
+            <label class="form-label">상품명 <span class="req">*</span></label>
+            <input class="fc" type="text" placeholder="예: 푸꾸옥 솔바이멜리아 5일">
+          </div>
+          <div class="form-item half">
+            <label class="form-label">여행지</label>
+            <input class="fc" type="text" placeholder="Stock 선택 시 자동 설정" disabled style="background:#f5f5f5;">
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-item half">
+            <label class="form-label">판매 시작일 <span class="req">*</span></label>
+            <input class="fc" type="date">
+          </div>
+          <div class="form-item half">
+            <label class="form-label">판매 종료일</label>
+            <input class="fc" type="date">
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-item half">
+            <label class="form-label">최소 인원</label>
+            <input class="fc" type="number" value="2" min="1">
+          </div>
+          <div class="form-item half">
+            <label class="form-label">최대 인원</label>
+            <input class="fc" type="number" value="20" min="1">
+          </div>
+        </div>
+      </div>
+
+      <div class="form-section">
+        <div class="section-title">가격 설정</div>
+        <div class="form-row">
+          <div class="form-item half">
+            <label class="form-label">성인 판매가 <span class="req">*</span></label>
+            <input class="fc" type="text" placeholder="₩0" style="text-align:right;">
+          </div>
+          <div class="form-item half">
+            <label class="form-label">아동 판매가</label>
+            <input class="fc" type="text" placeholder="₩0" style="text-align:right;">
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-item half">
+            <label class="form-label">유아 판매가</label>
+            <input class="fc" type="text" placeholder="₩0" style="text-align:right;">
+          </div>
+          <div class="form-item half">
+            <label class="form-label">예약 마감</label>
+            <select class="fc">
+              <option>출발 3일 전</option><option>출발 5일 전</option><option>출발 7일 전</option><option>출발 14일 전</option>
+            </select>
+          </div>
+        </div>
+      </div>
+
+      <div class="form-section">
+        <div class="section-title">POST 관리</div>
+        <div class="tab-bar">
+          <button class="tab-btn active" onclick="switchProductPostTab(this,'stock-posts')">Stock POST (읽기전용)</button>
+          <button class="tab-btn" onclick="switchProductPostTab(this,'product-posts')">Product POST (직접 작성)</button>
+        </div>
+        <div id="stock-posts">
+          <div class="alert-blue alert-box">Stock POST는 어드민에서 관리됩니다. 변경사항은 자동으로 반영됩니다.</div>
+          <table>
+            <thead><tr><th>ID</th><th>카테고리</th><th>관리명</th><th>최종 싱크</th><th></th></tr></thead>
+            <tbody>
+              <tr>
+                <td>2516</td>
+                <td><span class="tag tag-purple">스페셜 혜택</span></td>
+                <td>푸꾸옥_솔바이멜리아_빌라 스위트</td>
+                <td style="font-size:12px;color:rgba(0,0,0,0.4);">2026-03-25 14:30</td>
+                <td><span class="readonly-badge">읽기전용</span></td>
+              </tr>
+              <tr>
+                <td>2515</td>
+                <td><span class="tag tag-gray">유의사항</span></td>
+                <td>푸꾸옥_솔바이멜리아_체크인 안내</td>
+                <td style="font-size:12px;color:rgba(0,0,0,0.4);">2026-03-24 09:15</td>
+                <td><span class="readonly-badge">읽기전용</span></td>
+              </tr>
+              <tr>
+                <td>1877</td>
+                <td><span class="tag tag-blue">소개</span></td>
+                <td>푸꾸옥_솔바이멜리아_리조트 소개</td>
+                <td style="font-size:12px;color:rgba(0,0,0,0.4);">2026-03-20 11:40</td>
+                <td><span class="readonly-badge">읽기전용</span></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        <div id="product-posts" style="display:none;">
+          <div style="display:flex;justify-content:flex-end;margin-bottom:10px;">
+            <button class="btn btn-primary btn-sm">+ Product POST 작성</button>
+          </div>
+          <table>
+            <thead><tr><th>ID</th><th>카테고리</th><th>관리명</th><th>상태</th><th style="text-align:center;">액션</th></tr></thead>
+            <tbody>
+              <tr>
+                <td>P-001</td>
+                <td><span class="tag" style="background:#fff7e6;color:#d46b08;">핵심포인트</span></td>
+                <td>JV 자체 제작 — 솔바이멜리아 추천 포인트</td>
+                <td><span class="tag tag-green">게시중</span></td>
+                <td style="text-align:center;">
+                  <button class="btn btn-text btn-sm">수정</button>
+                  <button class="btn btn-text btn-sm" style="color:#f5222d;">삭제</button>
+                </td>
+              </tr>
+              <tr>
+                <td>P-002</td>
+                <td><span class="tag tag-gray">유의사항</span></td>
+                <td>JV 자체 제작 — 현지 교통편 안내</td>
+                <td><span class="tag tag-gray">임시저장</span></td>
+                <td style="text-align:center;">
+                  <button class="btn btn-text btn-sm">수정</button>
+                  <button class="btn btn-text btn-sm" style="color:#f5222d;">삭제</button>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="form-footer">
+        <button class="btn btn-default" onclick="showView('product-list')">취소</button>
+        <button class="btn btn-default">임시저장</button>
+        <button class="btn btn-primary" onclick="alert('상품이 등록되었습니다.')">등록 완료</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ============================================================ -->
+<!-- P4: Stock 조회 - 항공권 -->
+<!-- ============================================================ -->
+<div id="view-stock-flight" class="view">
+  <div class="layout">
+    <div class="breadcrumb">
+      <span onclick="showView('dashboard')">대시보드</span><span class="breadcrumb-sep">/</span>
+      <span style="color:rgba(0,0,0,0.88);font-weight:500;">항공권 Stock 조회</span>
+    </div>
+    <div class="page-header">
+      <div class="page-title">항공권 Stock 조회</div>
+      <span class="readonly-badge" style="font-size:12px;padding:4px 12px;">읽기전용</span>
+    </div>
+    <div class="card">
+      <div class="filter-bar">
+        <select class="fi fi-md"><option value="">항공사</option><option>비엣젯(VJ)</option><option>대한항공(KE)</option><option>제주항공(7C)</option></select>
+        <select class="fi fi-md"><option value="">여행지</option><option>푸꾸옥</option><option>나트랑</option><option>다낭</option></select>
+        <button class="btn btn-primary btn-sm">검색</button>
+      </div>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr><th>ID</th><th>항공사</th><th>노선</th><th>시즌</th><th style="text-align:right;">단가</th><th>상태</th><th style="text-align:center;">연결 POST</th><th>상세</th></tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>3201</td><td>비엣젯(VJ)</td><td>인천 → 푸꾸옥</td><td style="font-size:12px;">2026.04 - 2026.10</td>
+              <td style="text-align:right;">₩320,000</td><td><span class="tag tag-green">판매중</span></td><td style="text-align:center;">3</td>
+              <td><button class="btn btn-text btn-sm">상세보기</button></td>
+            </tr>
+            <tr>
+              <td>3202</td><td>대한항공(KE)</td><td>인천 → 나트랑</td><td style="font-size:12px;">2026.04 - 2026.09</td>
+              <td style="text-align:right;">₩480,000</td><td><span class="tag tag-green">판매중</span></td><td style="text-align:center;">2</td>
+              <td><button class="btn btn-text btn-sm">상세보기</button></td>
+            </tr>
+            <tr>
+              <td>3205</td><td>제주항공(7C)</td><td>인천 → 다낭</td><td style="font-size:12px;">2026.05 - 2026.11</td>
+              <td style="text-align:right;">₩280,000</td><td><span class="tag tag-green">판매중</span></td><td style="text-align:center;">1</td>
+              <td><button class="btn btn-text btn-sm">상세보기</button></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ============================================================ -->
+<!-- P5: Stock 조회 - 숙박권 -->
+<!-- ============================================================ -->
+<div id="view-stock-hotel" class="view">
+  <div class="layout">
+    <div class="breadcrumb">
+      <span onclick="showView('dashboard')">대시보드</span><span class="breadcrumb-sep">/</span>
+      <span style="color:rgba(0,0,0,0.88);font-weight:500;">숙박권 Stock 조회</span>
+    </div>
+    <div class="page-header">
+      <div class="page-title">숙박권 Stock 조회</div>
+      <span class="readonly-badge" style="font-size:12px;padding:4px 12px;">읽기전용</span>
+    </div>
+    <div class="card">
+      <div class="filter-bar">
+        <input class="fi fi-lg" type="text" placeholder="숙소명 검색">
+        <select class="fi fi-md"><option value="">여행지</option><option>푸꾸옥</option><option>나트랑</option><option>다낭</option></select>
+        <button class="btn btn-primary btn-sm">검색</button>
+      </div>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr><th>ID</th><th>숙소명</th><th>객실타입</th><th>여행지</th><th style="text-align:right;">1박 단가</th><th>상태</th><th style="text-align:center;">연결 POST</th><th>상세</th></tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>4512</td><td>솔바이멜리아 푸꾸옥</td><td>빌라 스위트</td><td>푸꾸옥</td>
+              <td style="text-align:right;">₩380,000</td><td><span class="tag tag-green">판매중</span></td><td style="text-align:center;">5</td>
+              <td><button class="btn btn-text btn-sm">상세보기</button></td>
+            </tr>
+            <tr>
+              <td>4513</td><td>소나가 비치 리조트</td><td>3베드룸 비치프론트</td><td>푸꾸옥</td>
+              <td style="text-align:right;">₩520,000</td><td><span class="tag tag-green">판매중</span></td><td style="text-align:center;">3</td>
+              <td><button class="btn btn-text btn-sm">상세보기</button></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ============================================================ -->
+<!-- P6: Stock 조회 - 투어/티켓 -->
+<!-- ============================================================ -->
+<div id="view-stock-tour" class="view">
+  <div class="layout">
+    <div class="breadcrumb">
+      <span onclick="showView('dashboard')">대시보드</span><span class="breadcrumb-sep">/</span>
+      <span style="color:rgba(0,0,0,0.88);font-weight:500;">투어/티켓 Stock 조회</span>
+    </div>
+    <div class="page-header">
+      <div class="page-title">투어/티켓 Stock 조회</div>
+      <span class="readonly-badge" style="font-size:12px;padding:4px 12px;">읽기전용</span>
+    </div>
+    <div class="card">
+      <div class="filter-bar">
+        <input class="fi fi-lg" type="text" placeholder="상품명 검색">
+        <select class="fi fi-md"><option value="">카테고리</option><option>투어</option><option>티켓</option><option>액티비티</option><option>교통</option></select>
+        <button class="btn btn-primary btn-sm">검색</button>
+      </div>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr><th>ID</th><th>상품명</th><th>카테고리</th><th>소요시간</th><th style="text-align:right;">단가</th><th>상태</th><th>상세</th></tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>5001</td><td>빈원더스 입장권</td><td><span class="tag tag-blue">티켓</span></td><td>종일</td>
+              <td style="text-align:right;">₩45,000</td><td><span class="tag tag-green">판매중</span></td>
+              <td><button class="btn btn-text btn-sm">상세보기</button></td>
+            </tr>
+            <tr>
+              <td>5005</td><td>푸꾸옥 선셋 투어</td><td><span class="tag tag-purple">투어</span></td><td>4시간</td>
+              <td style="text-align:right;">₩65,000</td><td><span class="tag tag-green">판매중</span></td>
+              <td><button class="btn btn-text btn-sm">상세보기</button></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ============================================================ -->
+<!-- P7: POST 관리 -->
+<!-- ============================================================ -->
+<div id="view-post-mgmt" class="view">
+  <div class="layout">
+    <div class="breadcrumb">
+      <span onclick="showView('dashboard')">대시보드</span><span class="breadcrumb-sep">/</span>
+      <span style="color:rgba(0,0,0,0.88);font-weight:500;">POST 관리</span>
+    </div>
+    <div class="page-header">
+      <div class="page-title">POST 관리</div>
+    </div>
+
+    <div class="tab-bar">
+      <button class="tab-btn active" onclick="switchPostTab(this,'post-stock-tab')">Stock POST (읽기전용)</button>
+      <button class="tab-btn" onclick="switchPostTab(this,'post-product-tab')">Product POST</button>
+    </div>
+
+    <!-- Stock POST -->
+    <div id="post-stock-tab" class="card">
+      <div class="filter-bar">
+        <input class="fi fi-lg" type="text" placeholder="관리명 검색">
+        <select class="fi fi-md"><option value="">카테고리</option><option>소개</option><option>유의사항</option><option>스페셜 혜택</option><option>취소환불규정</option></select>
+        <button class="btn btn-primary btn-sm">검색</button>
+      </div>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>ID</th><th>카테고리</th><th>관리명</th><th>타겟유형</th><th>최종 싱크</th><th></th></tr></thead>
+          <tbody>
+            <tr>
+              <td>2516</td>
+              <td><span class="tag tag-purple">스페셜 혜택</span></td>
+              <td>푸꾸옥_솔바이멜리아_빌라 스위트</td>
+              <td><span class="tag tag-green">객실</span></td>
+              <td style="font-size:12px;color:rgba(0,0,0,0.4);">2026-03-25 14:30</td>
+              <td><span class="readonly-badge">읽기전용</span></td>
+            </tr>
+            <tr>
+              <td>2515</td>
+              <td><span class="tag tag-gray">유의사항</span></td>
+              <td>푸꾸옥_소나가 비치_3베드룸 비치프론트</td>
+              <td><span class="tag tag-green">객실</span></td>
+              <td style="font-size:12px;color:rgba(0,0,0,0.4);">2026-03-24 09:15</td>
+              <td><span class="readonly-badge">읽기전용</span></td>
+            </tr>
+            <tr>
+              <td>1877</td>
+              <td><span class="tag tag-blue">소개</span></td>
+              <td>푸꾸옥_솔바이멜리아_리조트 소개</td>
+              <td><span class="tag tag-blue">숙소</span></td>
+              <td style="font-size:12px;color:rgba(0,0,0,0.4);">2026-03-20 11:40</td>
+              <td><span class="readonly-badge">읽기전용</span></td>
+            </tr>
+            <tr>
+              <td>642</td>
+              <td><span class="tag tag-gray">유의사항</span></td>
+              <td>비엣젯_수하물 규정 안내</td>
+              <td><span class="tag tag-orange">항공사</span></td>
+              <td style="font-size:12px;color:rgba(0,0,0,0.4);">2026-03-25 16:00</td>
+              <td><span class="readonly-badge">읽기전용</span></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Product POST -->
+    <div id="post-product-tab" class="card" style="display:none;">
+      <div class="filter-bar" style="justify-content:space-between;">
+        <div style="display:flex;gap:8px;">
+          <input class="fi fi-lg" type="text" placeholder="관리명 검색">
+          <button class="btn btn-primary btn-sm">검색</button>
+        </div>
+        <button class="btn btn-primary btn-sm">+ Product POST 작성</button>
+      </div>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>ID</th><th>카테고리</th><th>관리명</th><th>연결 상품</th><th>상태</th><th style="text-align:center;">액션</th></tr></thead>
+          <tbody>
+            <tr>
+              <td>P-001</td>
+              <td><span class="tag" style="background:#fff7e6;color:#d46b08;">핵심포인트</span></td>
+              <td>JV 자체 — 솔바이멜리아 추천 포인트</td>
+              <td>푸꾸옥 솔바이멜리아 5일</td>
+              <td><span class="tag tag-green">게시중</span></td>
+              <td style="text-align:center;">
+                <button class="btn btn-text btn-sm">수정</button>
+                <button class="btn btn-text btn-sm" style="color:#f5222d;">삭제</button>
+              </td>
+            </tr>
+            <tr>
+              <td>P-002</td>
+              <td><span class="tag tag-gray">유의사항</span></td>
+              <td>JV 자체 — 현지 교통편 안내</td>
+              <td>나트랑 빈펄 리조트 4일</td>
+              <td><span class="tag tag-gray">임시저장</span></td>
+              <td style="text-align:center;">
+                <button class="btn btn-text btn-sm">수정</button>
+                <button class="btn btn-text btn-sm" style="color:#f5222d;">삭제</button>
+              </td>
+            </tr>
+            <tr>
+              <td>P-003</td>
+              <td><span class="tag tag-blue">소개</span></td>
+              <td>JV 자체 — 푸꾸옥 현지 가이드 소개</td>
+              <td>푸꾸옥 소나가 비치 4일</td>
+              <td><span class="tag tag-green">게시중</span></td>
+              <td style="text-align:center;">
+                <button class="btn btn-text btn-sm">수정</button>
+                <button class="btn btn-text btn-sm" style="color:#f5222d;">삭제</button>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ============================================================ -->
+<!-- P8: 예약 목록 -->
+<!-- ============================================================ -->
+<div id="view-reservation-list" class="view">
+  <div class="layout">
+    <div class="breadcrumb">
+      <span onclick="showView('dashboard')">대시보드</span><span class="breadcrumb-sep">/</span>
+      <span style="color:rgba(0,0,0,0.88);font-weight:500;">예약 관리</span>
+    </div>
+    <div class="page-header">
+      <div class="page-title">예약 관리</div>
+    </div>
+    <div class="card">
+      <div class="filter-bar">
+        <input class="fi fi-lg" type="text" placeholder="예약번호 / 고객명 검색">
+        <select class="fi fi-md">
+          <option value="">상태</option>
+          <option>예약접수</option><option>공급사 확인중</option><option>예약확정</option>
+          <option>변경요청</option><option>취소요청</option><option>취소완료</option><option>이용완료</option>
+        </select>
+        <select class="fi fi-md">
+          <option value="">상품명</option>
+          <option>푸꾸옥 솔바이 5일</option><option>나트랑 빈펄 4일</option><option>다낭 인터컨 3일</option>
+        </select>
+        <input class="fi fi-md" type="date" title="출발일 시작">
+        <input class="fi fi-md" type="date" title="출발일 끝">
+        <div class="filter-actions">
+          <button class="btn btn-primary btn-sm">검색</button>
+          <button class="btn btn-default btn-sm">초기화</button>
+        </div>
+      </div>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>예약번호</th>
+              <th>상품명</th>
+              <th>고객명</th>
+              <th style="text-align:center;">인원</th>
+              <th>출발일</th>
+              <th style="text-align:right;">결제금액</th>
+              <th>상태</th>
+              <th>예약일</th>
+              <th style="text-align:center;">액션</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td style="font-weight:500;color:#1677ff;">RSV-20260325-001</td>
+              <td>푸꾸옥 솔바이 5일</td>
+              <td>김영희</td>
+              <td style="text-align:center;">성인2</td>
+              <td>2026-04-15</td>
+              <td style="text-align:right;font-weight:600;">₩3,780,000</td>
+              <td><span class="tag tag-orange">공급사 확인중</span></td>
+              <td style="font-size:12px;color:rgba(0,0,0,0.4);">2026-03-25</td>
+              <td style="text-align:center;"><button class="btn btn-text btn-sm" onclick="showView('reservation-detail')">상세</button></td>
+            </tr>
+            <tr>
+              <td style="font-weight:500;color:#1677ff;">RSV-20260325-002</td>
+              <td>나트랑 빈펄 4일</td>
+              <td>이철수</td>
+              <td style="text-align:center;">성인2 아동1</td>
+              <td>2026-04-20</td>
+              <td style="text-align:right;font-weight:600;">₩5,950,000</td>
+              <td><span class="tag tag-green">예약확정</span></td>
+              <td style="font-size:12px;color:rgba(0,0,0,0.4);">2026-03-25</td>
+              <td style="text-align:center;"><button class="btn btn-text btn-sm" onclick="showView('reservation-detail')">상세</button></td>
+            </tr>
+            <tr>
+              <td style="font-weight:500;color:#1677ff;">RSV-20260324-015</td>
+              <td>다낭 인터컨 3일</td>
+              <td>박민아</td>
+              <td style="text-align:center;">성인1</td>
+              <td>2026-04-10</td>
+              <td style="text-align:right;font-weight:600;">₩1,450,000</td>
+              <td><span class="tag tag-blue">예약접수</span></td>
+              <td style="font-size:12px;color:rgba(0,0,0,0.4);">2026-03-24</td>
+              <td style="text-align:center;"><button class="btn btn-text btn-sm" onclick="showView('reservation-detail')">상세</button></td>
+            </tr>
+            <tr>
+              <td style="font-weight:500;color:#1677ff;">RSV-20260324-014</td>
+              <td>푸꾸옥 솔바이 5일</td>
+              <td>최승호</td>
+              <td style="text-align:center;">성인2 아동2</td>
+              <td>2026-05-01</td>
+              <td style="text-align:right;font-weight:600;">₩6,560,000</td>
+              <td><span class="tag tag-green">예약확정</span></td>
+              <td style="font-size:12px;color:rgba(0,0,0,0.4);">2026-03-24</td>
+              <td style="text-align:center;"><button class="btn btn-text btn-sm" onclick="showView('reservation-detail')">상세</button></td>
+            </tr>
+            <tr>
+              <td style="font-weight:500;color:#1677ff;">RSV-20260324-013</td>
+              <td>나트랑 빈펄 4일</td>
+              <td>정수진</td>
+              <td style="text-align:center;">성인2</td>
+              <td>2026-04-25</td>
+              <td style="text-align:right;font-weight:600;">₩4,700,000</td>
+              <td><span class="tag tag-red">취소요청</span></td>
+              <td style="font-size:12px;color:rgba(0,0,0,0.4);">2026-03-24</td>
+              <td style="text-align:center;"><button class="btn btn-text btn-sm" onclick="showView('reservation-detail')">상세</button></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="pagination">
+        <span class="pag-total">총 156건</span>
+        <select class="pag-size"><option>10개</option><option>20개</option><option>50개</option></select>
+        <button class="pag-btn active">1</button>
+        <button class="pag-btn">2</button>
+        <button class="pag-btn">3</button>
+        <span style="font-size:13px;color:rgba(0,0,0,0.35);">...</span>
+        <button class="pag-btn">16</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ============================================================ -->
+<!-- P9: 예약 상세 -->
+<!-- ============================================================ -->
+<div id="view-reservation-detail" class="view">
+  <div class="layout">
+    <div class="breadcrumb">
+      <span onclick="showView('dashboard')">대시보드</span><span class="breadcrumb-sep">/</span>
+      <span onclick="showView('reservation-list')">예약 관리</span><span class="breadcrumb-sep">/</span>
+      <span style="color:rgba(0,0,0,0.88);font-weight:500;">예약 상세</span>
+    </div>
+    <div class="page-header">
+      <div style="display:flex;align-items:center;gap:14px;">
+        <button class="btn-back" onclick="showView('reservation-list')">← 목록으로</button>
+        <div class="page-title">RSV-20260325-001</div>
+        <span class="tag tag-orange" style="font-size:13px;padding:4px 12px;">공급사 확인중</span>
+      </div>
+    </div>
+
+    <div style="display:grid;grid-template-columns:1fr 340px;gap:16px;">
+      <!-- 좌측: 예약 정보 -->
+      <div>
+        <div class="card" style="margin-bottom:16px;">
+          <div class="form-section">
+            <div class="section-title">예약 기본정보</div>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+              <div><span style="font-size:12px;color:rgba(0,0,0,0.45);">상품명</span><div style="font-weight:500;margin-top:2px;">푸꾸옥 솔바이멜리아 5일</div></div>
+              <div><span style="font-size:12px;color:rgba(0,0,0,0.45);">고객명</span><div style="font-weight:500;margin-top:2px;">김영희</div></div>
+              <div><span style="font-size:12px;color:rgba(0,0,0,0.45);">연락처</span><div style="margin-top:2px;">010-1234-5678</div></div>
+              <div><span style="font-size:12px;color:rgba(0,0,0,0.45);">인원</span><div style="margin-top:2px;">성인 2명</div></div>
+              <div><span style="font-size:12px;color:rgba(0,0,0,0.45);">출발일</span><div style="margin-top:2px;">2026-04-15 (화)</div></div>
+              <div><span style="font-size:12px;color:rgba(0,0,0,0.45);">결제금액</span><div style="font-weight:600;color:#f5222d;margin-top:2px;">₩3,780,000</div></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="card" style="margin-bottom:16px;">
+          <div class="form-section">
+            <div class="section-title">구성 상세</div>
+            <table>
+              <thead><tr><th>구분</th><th>상세</th><th>비고</th></tr></thead>
+              <tbody>
+                <tr><td><span class="tag tag-orange" style="font-size:11px;">항공</span></td><td>비엣젯(VJ) 인천→푸꾸옥 / VJ867 08:30</td><td>이코노미</td></tr>
+                <tr><td><span class="tag tag-orange" style="font-size:11px;">항공</span></td><td>비엣젯(VJ) 푸꾸옥→인천 / VJ868 23:50</td><td>이코노미</td></tr>
+                <tr><td><span class="tag tag-green" style="font-size:11px;">숙박</span></td><td>솔바이멜리아 빌라 스위트 4박</td><td>조식 포함</td></tr>
+                <tr><td><span class="tag tag-blue" style="font-size:11px;">투어</span></td><td>빈원더스 입장권 x2</td><td>—</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- 환불 처리 -->
+        <div class="card">
+          <div class="form-section">
+            <div class="section-title">환불 처리</div>
+            <div class="form-row">
+              <div class="form-item half">
+                <label class="form-label">환불 유형</label>
+                <select class="fc">
+                  <option>전액 환불</option><option>부분 환불</option>
+                </select>
+              </div>
+              <div class="form-item half">
+                <label class="form-label">환불 금액</label>
+                <input class="fc" type="text" value="₩3,780,000" style="text-align:right;">
+              </div>
+            </div>
+            <div class="form-row">
+              <div class="form-item half">
+                <label class="form-label">수수료</label>
+                <input class="fc" type="text" value="₩0" style="text-align:right;">
+              </div>
+              <div class="form-item half">
+                <label class="form-label">환불 사유</label>
+                <select class="fc">
+                  <option>고객 요청</option><option>공급사 불가</option><option>천재지변</option><option>기타</option>
+                </select>
+              </div>
+            </div>
+            <div style="display:flex;justify-content:flex-end;margin-top:12px;">
+              <button class="btn btn-primary" onclick="alert('환불이 처리되었습니다.')">환불 승인</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 우측: 상태 타임라인 + 변경 -->
+      <div>
+        <div class="card" style="padding:20px;margin-bottom:16px;">
+          <div style="font-size:15px;font-weight:600;margin-bottom:16px;">상태 타임라인</div>
+          <div class="timeline">
+            <div class="timeline-item">
+              <div class="timeline-dot done"></div>
+              <div class="timeline-title">예약접수</div>
+              <div class="timeline-time">2026-03-25 10:30</div>
+            </div>
+            <div class="timeline-item">
+              <div class="timeline-dot current"></div>
+              <div class="timeline-title">공급사 확인중</div>
+              <div class="timeline-time">2026-03-25 10:35</div>
+            </div>
+            <div class="timeline-item">
+              <div class="timeline-dot"></div>
+              <div class="timeline-title" style="color:rgba(0,0,0,0.35);">예약확정</div>
+            </div>
+            <div class="timeline-item">
+              <div class="timeline-dot"></div>
+              <div class="timeline-title" style="color:rgba(0,0,0,0.35);">이용완료</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="card" style="padding:20px;">
+          <div style="font-size:15px;font-weight:600;margin-bottom:16px;">상태 변경</div>
+          <div style="display:flex;flex-direction:column;gap:8px;">
+            <button class="btn btn-primary" style="width:100%;justify-content:center;" onclick="alert('예약이 확정되었습니다.')">예약확정</button>
+            <button class="btn btn-default" style="width:100%;justify-content:center;">대안 제시</button>
+            <button class="btn btn-default" style="width:100%;justify-content:center;color:#f5222d;border-color:#ffa39e;" onclick="alert('예약이 취소되었습니다.')">예약 취소</button>
+          </div>
+          <div style="margin-top:14px;">
+            <label class="form-label">내부 메모</label>
+            <textarea class="fc" style="height:80px;padding:8px 10px;resize:vertical;" placeholder="상태 변경 시 메모를 남겨주세요"></textarea>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ============================================================ -->
+<!-- P10: 정산 목록 -->
+<!-- ============================================================ -->
+<div id="view-settlement-list" class="view">
+  <div class="layout">
+    <div class="breadcrumb">
+      <span onclick="showView('dashboard')">대시보드</span><span class="breadcrumb-sep">/</span>
+      <span style="color:rgba(0,0,0,0.88);font-weight:500;">정산 관리</span>
+    </div>
+    <div class="page-header">
+      <div class="page-title">정산 관리</div>
+    </div>
+
+    <div class="settle-summary">
+      <div class="settle-card">
+        <div class="stat-label">이번 달 확정 매출</div>
+        <div class="stat-value" style="font-size:20px;">₩234,500,000</div>
+      </div>
+      <div class="settle-card">
+        <div class="stat-label">정산 예정 금액 (수수료 차감)</div>
+        <div class="stat-value blue" style="font-size:20px;">₩206,360,000</div>
+      </div>
+      <div class="settle-card">
+        <div class="stat-label">다음 지급 예정일</div>
+        <div class="stat-value green" style="font-size:20px;">2026-04-10</div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="filter-bar">
+        <select class="fi fi-md">
+          <option value="">기간</option>
+          <option>2026년 3월</option><option>2026년 2월</option><option>2026년 1월</option><option>2025년 12월</option>
+        </select>
+        <select class="fi fi-md">
+          <option value="">상태</option>
+          <option>정산대기</option><option>정산완료</option>
+        </select>
+        <button class="btn btn-primary btn-sm">검색</button>
+      </div>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>정산ID</th>
+              <th>정산기간</th>
+              <th style="text-align:center;">예약건수</th>
+              <th style="text-align:right;">총매출</th>
+              <th style="text-align:right;">수수료</th>
+              <th style="text-align:right;">정산금액</th>
+              <th>상태</th>
+              <th>지급일</th>
+              <th style="text-align:center;">액션</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td style="font-weight:500;">STL-202603</td>
+              <td>2026.03.01 - 03.31</td>
+              <td style="text-align:center;">156</td>
+              <td style="text-align:right;">₩234,500,000</td>
+              <td style="text-align:right;color:#f5222d;">₩28,140,000</td>
+              <td style="text-align:right;font-weight:600;">₩206,360,000</td>
+              <td><span class="tag tag-orange">정산대기</span></td>
+              <td>2026-04-10</td>
+              <td style="text-align:center;"><button class="btn btn-text btn-sm" onclick="showView('settlement-detail')">상세</button></td>
+            </tr>
+            <tr>
+              <td style="font-weight:500;">STL-202602</td>
+              <td>2026.02.01 - 02.28</td>
+              <td style="text-align:center;">134</td>
+              <td style="text-align:right;">₩198,200,000</td>
+              <td style="text-align:right;color:#f5222d;">₩23,784,000</td>
+              <td style="text-align:right;font-weight:600;">₩174,416,000</td>
+              <td><span class="tag tag-green">정산완료</span></td>
+              <td>2026-03-10</td>
+              <td style="text-align:center;"><button class="btn btn-text btn-sm" onclick="showView('settlement-detail')">상세</button></td>
+            </tr>
+            <tr>
+              <td style="font-weight:500;">STL-202601</td>
+              <td>2026.01.01 - 01.31</td>
+              <td style="text-align:center;">112</td>
+              <td style="text-align:right;">₩167,800,000</td>
+              <td style="text-align:right;color:#f5222d;">₩20,136,000</td>
+              <td style="text-align:right;font-weight:600;">₩147,664,000</td>
+              <td><span class="tag tag-green">정산완료</span></td>
+              <td>2026-02-10</td>
+              <td style="text-align:center;"><button class="btn btn-text btn-sm" onclick="showView('settlement-detail')">상세</button></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ============================================================ -->
+<!-- P11: 정산 상세 -->
+<!-- ============================================================ -->
+<div id="view-settlement-detail" class="view">
+  <div class="layout">
+    <div class="breadcrumb">
+      <span onclick="showView('dashboard')">대시보드</span><span class="breadcrumb-sep">/</span>
+      <span onclick="showView('settlement-list')">정산 관리</span><span class="breadcrumb-sep">/</span>
+      <span style="color:rgba(0,0,0,0.88);font-weight:500;">정산 상세</span>
+    </div>
+    <div class="page-header">
+      <div style="display:flex;align-items:center;gap:14px;">
+        <button class="btn-back" onclick="showView('settlement-list')">← 목록으로</button>
+        <div class="page-title">STL-202603 정산 상세</div>
+        <span class="tag tag-orange" style="font-size:13px;padding:4px 12px;">정산대기</span>
+      </div>
+    </div>
+
+    <div class="settle-summary">
+      <div class="settle-card">
+        <div class="stat-label">총매출</div>
+        <div class="stat-value" style="font-size:20px;">₩234,500,000</div>
+      </div>
+      <div class="settle-card">
+        <div class="stat-label">수수료 (12%)</div>
+        <div class="stat-value red" style="font-size:20px;">₩28,140,000</div>
+      </div>
+      <div class="settle-card">
+        <div class="stat-label">정산 금액</div>
+        <div class="stat-value blue" style="font-size:20px;">₩206,360,000</div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div style="padding:14px 20px;font-size:14px;font-weight:600;border-bottom:1px solid #f0f0f0;">예약건별 내역 (2026.03.01 - 03.31)</div>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>예약번호</th>
+              <th>상품명</th>
+              <th style="text-align:right;">결제금액</th>
+              <th style="text-align:center;">수수료율</th>
+              <th style="text-align:right;">수수료</th>
+              <th style="text-align:right;">정산액</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>RSV-20260325-001</td><td>푸꾸옥 솔바이 5일</td>
+              <td style="text-align:right;">₩3,780,000</td><td style="text-align:center;">12%</td>
+              <td style="text-align:right;color:#f5222d;">₩453,600</td><td style="text-align:right;font-weight:600;">₩3,326,400</td>
+            </tr>
+            <tr>
+              <td>RSV-20260325-002</td><td>나트랑 빈펄 4일</td>
+              <td style="text-align:right;">₩5,950,000</td><td style="text-align:center;">12%</td>
+              <td style="text-align:right;color:#f5222d;">₩714,000</td><td style="text-align:right;font-weight:600;">₩5,236,000</td>
+            </tr>
+            <tr>
+              <td>RSV-20260324-014</td><td>푸꾸옥 솔바이 5일</td>
+              <td style="text-align:right;">₩6,560,000</td><td style="text-align:center;">12%</td>
+              <td style="text-align:right;color:#f5222d;">₩787,200</td><td style="text-align:right;font-weight:600;">₩5,772,800</td>
+            </tr>
+            <tr>
+              <td colspan="2" style="font-weight:600;text-align:right;">... 외 153건</td>
+              <td style="text-align:right;font-weight:600;">₩218,210,000</td><td></td>
+              <td style="text-align:right;font-weight:600;color:#f5222d;">₩26,185,200</td>
+              <td style="text-align:right;font-weight:600;">₩192,024,800</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ============================================================ -->
+<!-- P12: 설정 -->
+<!-- ============================================================ -->
+<div id="view-settings" class="view">
+  <div class="layout">
+    <div class="breadcrumb">
+      <span onclick="showView('dashboard')">대시보드</span><span class="breadcrumb-sep">/</span>
+      <span style="color:rgba(0,0,0,0.88);font-weight:500;">설정</span>
+    </div>
+    <div class="page-header">
+      <div class="page-title">설정</div>
+    </div>
+
+    <!-- 기본정보 -->
+    <div class="card" style="margin-bottom:16px;">
+      <div class="form-section">
+        <div class="section-title">기본정보 <span class="readonly-badge" style="margin-left:8px;">읽기전용</span></div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;">
+          <div><span style="font-size:12px;color:rgba(0,0,0,0.45);">파트너명</span><div style="font-weight:500;margin-top:2px;">JV Vietnam</div></div>
+          <div><span style="font-size:12px;color:rgba(0,0,0,0.45);">파트너 유형</span><div style="margin-top:2px;">DMC</div></div>
+          <div><span style="font-size:12px;color:rgba(0,0,0,0.45);">사업자번호</span><div style="margin-top:2px;">123-45-67890</div></div>
+          <div><span style="font-size:12px;color:rgba(0,0,0,0.45);">대표자</span><div style="margin-top:2px;">Nguyen Van A</div></div>
+          <div><span style="font-size:12px;color:rgba(0,0,0,0.45);">연락처</span><div style="margin-top:2px;">+84-123-456-7890</div></div>
+          <div><span style="font-size:12px;color:rgba(0,0,0,0.45);">이메일</span><div style="margin-top:2px;">admin@jvvietnam.com</div></div>
+          <div><span style="font-size:12px;color:rgba(0,0,0,0.45);">수수료율</span><div style="margin-top:2px;">12%</div></div>
+          <div><span style="font-size:12px;color:rgba(0,0,0,0.45);">정산 주기</span><div style="margin-top:2px;">월 정산</div></div>
+        </div>
+        <div class="form-hint" style="margin-top:12px;">기본정보 변경이 필요한 경우 어드민에 문의해주세요.</div>
+      </div>
+    </div>
+
+    <!-- 멤버 관리 -->
+    <div class="card" style="margin-bottom:16px;">
+      <div class="form-section">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;">
+          <div class="section-title" style="margin-bottom:0;">멤버 관리</div>
+          <button class="btn btn-primary btn-sm">+ 멤버 초대</button>
+        </div>
+        <table>
+          <thead>
+            <tr><th>이름</th><th>이메일</th><th>역할</th><th>상태</th><th>가입일</th><th style="text-align:center;">액션</th></tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><strong>Nguyen Van A</strong></td>
+              <td>admin@jvvietnam.com</td>
+              <td><span class="tag tag-blue">OWNER</span></td>
+              <td><span class="tag tag-green" style="font-size:11px;">활성</span></td>
+              <td style="font-size:12px;color:rgba(0,0,0,0.4);">2025-01-15</td>
+              <td style="text-align:center;color:rgba(0,0,0,0.25);">—</td>
+            </tr>
+            <tr>
+              <td>Tran Thi C</td>
+              <td>tran@jvvietnam.com</td>
+              <td><span class="tag tag-purple">MANAGER</span></td>
+              <td><span class="tag tag-green" style="font-size:11px;">활성</span></td>
+              <td style="font-size:12px;color:rgba(0,0,0,0.4);">2025-03-01</td>
+              <td style="text-align:center;">
+                <button class="btn btn-text btn-sm">역할변경</button>
+                <button class="btn btn-text btn-sm" style="color:#f5222d;">비활성화</button>
+              </td>
+            </tr>
+            <tr>
+              <td>Le Van D</td>
+              <td>le@jvvietnam.com</td>
+              <td><span class="tag tag-gray">OPERATOR</span></td>
+              <td><span class="tag tag-green" style="font-size:11px;">활성</span></td>
+              <td style="font-size:12px;color:rgba(0,0,0,0.4);">2025-06-15</td>
+              <td style="text-align:center;">
+                <button class="btn btn-text btn-sm">역할변경</button>
+                <button class="btn btn-text btn-sm" style="color:#f5222d;">비활성화</button>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- 알림 설정 -->
+    <div class="card">
+      <div class="form-section">
+        <div class="section-title">알림 설정</div>
+        <table>
+          <thead>
+            <tr><th>알림 유형</th><th style="text-align:center;">이메일</th><th style="text-align:center;">슬랙</th></tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>예약 접수</td>
+              <td style="text-align:center;"><input type="checkbox" checked style="width:16px;height:16px;accent-color:#1677ff;"></td>
+              <td style="text-align:center;"><input type="checkbox" checked style="width:16px;height:16px;accent-color:#1677ff;"></td>
+            </tr>
+            <tr>
+              <td>Stock 변경 알림</td>
+              <td style="text-align:center;"><input type="checkbox" checked style="width:16px;height:16px;accent-color:#1677ff;"></td>
+              <td style="text-align:center;"><input type="checkbox" style="width:16px;height:16px;accent-color:#1677ff;"></td>
+            </tr>
+            <tr>
+              <td>정산 완료</td>
+              <td style="text-align:center;"><input type="checkbox" checked style="width:16px;height:16px;accent-color:#1677ff;"></td>
+              <td style="text-align:center;"><input type="checkbox" checked style="width:16px;height:16px;accent-color:#1677ff;"></td>
+            </tr>
+            <tr>
+              <td>취소/환불 요청</td>
+              <td style="text-align:center;"><input type="checkbox" checked style="width:16px;height:16px;accent-color:#1677ff;"></td>
+              <td style="text-align:center;"><input type="checkbox" checked style="width:16px;height:16px;accent-color:#1677ff;"></td>
+            </tr>
+          </tbody>
+        </table>
+        <div style="display:flex;justify-content:flex-end;margin-top:12px;">
+          <button class="btn btn-primary" onclick="alert('알림 설정이 저장되었습니다.')">저장</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+// ===== View Routing =====
+function showView(name) {
+  document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+  const target = document.getElementById('view-' + name);
+  if (target) target.classList.add('active');
+
+  // GNB active state
+  document.querySelectorAll('.gnb-item').forEach(item => item.classList.remove('active'));
+  const menuMap = {
+    'dashboard': 0,
+    'product-list': 1, 'product-form': 1, 'stock-flight': 1, 'stock-hotel': 1, 'stock-tour': 1, 'post-mgmt': 1,
+    'reservation-list': 2, 'reservation-detail': 2,
+    'settlement-list': 3, 'settlement-detail': 3,
+    'settings': 4
+  };
+  const idx = menuMap[name];
+  if (idx !== undefined) {
+    document.querySelectorAll('.gnb-menu > .gnb-item')[idx]?.classList.add('active');
+  }
+  window.scrollTo(0, 0);
+}
+
+// ===== Tab Switching =====
+function switchProductPostTab(btn, showId) {
+  btn.parentElement.querySelectorAll('.tab-btn').forEach(t => t.classList.remove('active'));
+  btn.classList.add('active');
+  document.getElementById('stock-posts').style.display = showId === 'stock-posts' ? 'block' : 'none';
+  document.getElementById('product-posts').style.display = showId === 'product-posts' ? 'block' : 'none';
+}
+
+function switchPostTab(btn, showId) {
+  btn.parentElement.querySelectorAll('.tab-btn').forEach(t => t.classList.remove('active'));
+  btn.classList.add('active');
+  document.getElementById('post-stock-tab').style.display = showId === 'post-stock-tab' ? 'block' : 'none';
+  document.getElementById('post-product-tab').style.display = showId === 'post-product-tab' ? 'block' : 'none';
+}
+</script>
+</body>
+</html>

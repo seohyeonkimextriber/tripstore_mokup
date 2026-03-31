@@ -205,6 +205,16 @@ select.fc { height: 36px; padding: 0 32px 0 12px; appearance: none; background-i
 .ps-row-meta { font-size: 11px; color: rgba(0,0,0,0.45); flex-shrink: 0; }
 .ps-row-btn { background: #1677ff; color: #fff; border: none; border-radius: 5px; padding: 4px 12px; font-size: 12px; cursor: pointer; font-family: inherit; flex-shrink: 0; }
 
+/* ===== 콘텐츠 노출 관리 탭 ===== */
+.cv-tab { background:transparent; border:none; padding:10px 20px; font-size:14px; font-weight:500; cursor:pointer; color:rgba(0,0,0,0.45); border-bottom:2px solid transparent; margin-bottom:-2px; font-family:inherit; transition:all 0.15s; }
+.cv-tab:hover { color:rgba(0,0,0,0.88); }
+.cv-tab.active { color:#1677ff; border-bottom-color:#1677ff; }
+
+/* ===== 파트너 노출 설정 ===== */
+.partner-cb-item { display:flex; align-items:center; gap:6px; font-size:13px; cursor:pointer; padding:6px 8px; border-radius:4px; transition:background 0.1s; }
+.partner-cb-item:hover { background:#e6f4ff; }
+.partner-cb-item input[type="checkbox"] { width:15px; height:15px; accent-color:#1677ff; cursor:pointer; }
+
 /* ===== 파트너스 일정표 ===== */
 .itin-day { border:1px solid #e8e8e8; border-radius:10px; margin-bottom:12px; background:#fff; overflow:hidden; }
 .itin-day-header { display:flex; align-items:center; gap:12px; padding:14px 16px; background:#fafafa; border-bottom:1px solid #f0f0f0; cursor:pointer; user-select:none; }
@@ -410,10 +420,17 @@ select.fc { height: 36px; padding: 0 32px 0 12px; appearance: none; background-i
         </div>
       </div>
     </div>
-    <div class="gnb-item" onclick="showView('partner-product')" style="cursor:pointer;">파트너스관리 <span class="caret">▾</span>
-      <div class="gnb-dropdown">
-        <div class="gnb-dropdown-item" onclick="event.stopPropagation();showView('partner-product')">🏢 파트너스 상품등록 (시뮬레이션)</div>
-        <div class="gnb-dropdown-item" onclick="event.stopPropagation();showView('partner-flow')">📊 파트너스 POST 플로우</div>
+    <div class="gnb-item" tabindex="0" style="cursor:pointer;">파트너 관리 <span class="caret">▾</span>
+      <div class="gnb-dropdown" style="min-width:200px;">
+        <div class="gnb-dropdown-group">파트너 관리</div>
+        <div class="gnb-dropdown-item" onclick="event.stopPropagation();showView('partner-list')">파트너 목록</div>
+        <div class="gnb-dropdown-item" onclick="event.stopPropagation();showView('partner-form')">파트너 등록</div>
+        <div class="gnb-dropdown-item" onclick="event.stopPropagation();showView('partner-members')">파트너 멤버 관리</div>
+        <div class="gnb-dropdown-item" onclick="event.stopPropagation();showView('content-visibility')">콘텐츠 노출 관리</div>
+        <div class="gnb-dropdown-divider"></div>
+        <div class="gnb-dropdown-group">파트너스 시뮬레이션</div>
+        <div class="gnb-dropdown-item" onclick="event.stopPropagation();showView('partner-product')">파트너스 상품등록</div>
+        <div class="gnb-dropdown-item" onclick="event.stopPropagation();showView('partner-flow')">파트너스 POST 플로우</div>
       </div>
     </div>
     <div class="gnb-item">마케팅</div>
@@ -439,7 +456,7 @@ select.fc { height: 36px; padding: 0 32px 0 12px; appearance: none; background-i
       <div class="filter-bar">
         <input class="fi fi-sm" type="text" placeholder="ID">
         <select class="fi fi-md" id="lf-supplier">
-          <option value="">공급사</option>
+          <option value="">상세구분</option>
           <option>TMG</option>
           <option>피크타임</option>
           <option>직계약</option>
@@ -477,7 +494,7 @@ select.fc { height: 36px; padding: 0 32px 0 12px; appearance: none; background-i
               <th class="col-id">ID</th>
               <th class="col-cat">카테고리</th>
               <th class="col-name">관리명</th>
-              <th style="width:90px;">공급사</th>
+              <th style="width:90px;">상세구분</th>
               <th class="col-type">타겟유형</th>
               <th class="col-target">타겟ID</th>
               <th class="col-stock" title="이 POST를 사용 중인 숙박권/항공권/투어티켓 등의 수">연결 상품권 수</th>
@@ -649,25 +666,25 @@ select.fc { height: 36px; padding: 0 32px 0 12px; appearance: none; background-i
           <div class="form-item half">
             <label class="form-label">관리명 <span class="req">*</span></label>
             <div style="display:flex;gap:6px;">
-              <input class="fc" type="text" id="cf-mgmt" placeholder="카테고리, 타겟, 공급사(선택) 선택 시 자동 생성됩니다" style="flex:1;">
+              <input class="fc" type="text" id="cf-mgmt" placeholder="카테고리, 타겟, 상세구분(선택) 선택 시 자동 생성됩니다" style="flex:1;">
               <button type="button" onclick="autoGenMgmtForm()" style="height:32px;padding:0 10px;border:1px solid #d9d9d9;border-radius:6px;background:#fafafa;font-size:12px;font-family:inherit;cursor:pointer;white-space:nowrap;color:rgba(0,0,0,0.65);">자동생성</button>
             </div>
           </div>
         </div>
         <div class="form-row">
           <div class="form-item half">
-            <label class="form-label">공급사</label>
+            <label class="form-label">상세구분</label>
             <select class="fc" id="cf-supplier" onchange="autoGenMgmtForm()">
-              <option value="">공급사 없음 (공통)</option>
+              <option value="">없음 (공통)</option>
               <option>TMG</option>
               <option>피크타임</option>
               <option>직계약</option>
             </select>
-            <div class="form-hint">비워두면 모든 공급사에 공통 적용되는 POST입니다.</div>
+            <div class="form-hint">비워두면 모든 상세구분에 공통 적용되는 POST입니다.</div>
           </div>
           <div class="form-item half" style="align-self:flex-start;padding-top:0;">
             <div style="background:#fff7e6;border:1px solid #ffd591;border-radius:6px;padding:10px 12px;font-size:12px;color:#874d00;line-height:1.6;margin-top:24px;">
-              💡 <strong>공급사 지정 POST</strong>는 해당 공급사 stock에만 연결됩니다.<br>공통 POST는 모든 공급사 stock에 공유됩니다.
+              💡 <strong>상세구분 지정 POST</strong>는 해당 상세구분 stock에만 연결됩니다.<br>공통 POST는 모든 상세구분 stock에 공유됩니다.
             </div>
           </div>
         </div>
@@ -751,6 +768,36 @@ select.fc { height: 36px; padding: 0 32px 0 12px; appearance: none; background-i
           <div class="upload-zone-icon">📁</div>
           <div class="upload-zone-text">클릭하거나 이미지를 드래그해 올려주세요</div>
           <div class="upload-zone-hint">JPG, PNG, WebP · 최대 10MB · 최대 20장</div>
+        </div>
+      </div>
+
+      <!-- 파트너 노출 설정 -->
+      <div class="form-section" id="partner-visibility-post">
+        <div class="section-title">파트너 노출 설정</div>
+        <div class="form-row">
+          <div class="form-item full">
+            <label class="form-label">노출 대상</label>
+            <div class="toggle-group" style="margin-bottom:12px;">
+              <button class="toggle-btn on" onclick="togglePartnerTarget(this,'post')">전체 파트너</button>
+              <button class="toggle-btn" onclick="togglePartnerTarget(this,'post')">특정 파트너 선택</button>
+            </div>
+            <div id="partner-select-post" style="display:none;">
+              <div style="display:flex;gap:6px;margin-bottom:10px;">
+                <input class="fc" type="text" placeholder="파트너명 검색" style="flex:1;max-width:260px;" oninput="filterPartnerCheckboxes(this.value,'post')">
+                <button class="btn btn-default btn-sm" onclick="toggleAllPartners(true,'post')">전체 선택</button>
+                <button class="btn btn-default btn-sm" onclick="toggleAllPartners(false,'post')">선택 해제</button>
+              </div>
+              <div class="partner-checkbox-list" id="partner-list-post" style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px;padding:12px;background:#fafafa;border-radius:6px;border:1px solid #f0f0f0;">
+                <label class="partner-cb-item"><input type="checkbox" checked> <span>JV Vietnam</span> <span style="font-size:11px;color:rgba(0,0,0,0.35);">DMC</span></label>
+                <label class="partner-cb-item"><input type="checkbox" checked> <span>피크타임 트래블</span> <span style="font-size:11px;color:rgba(0,0,0,0.35);">여행사</span></label>
+                <label class="partner-cb-item"><input type="checkbox"> <span>써니투어</span> <span style="font-size:11px;color:rgba(0,0,0,0.35);">랜드사</span></label>
+                <label class="partner-cb-item"><input type="checkbox"> <span>하나프리</span> <span style="font-size:11px;color:rgba(0,0,0,0.35);">여행사</span></label>
+                <label class="partner-cb-item"><input type="checkbox"> <span>모두투어</span> <span style="font-size:11px;color:rgba(0,0,0,0.35);">여행사</span></label>
+                <label class="partner-cb-item"><input type="checkbox"> <span>참좋은여행</span> <span style="font-size:11px;color:rgba(0,0,0,0.35);">여행사</span></label>
+              </div>
+              <div class="form-hint" style="margin-top:6px;">선택된 파트너: <strong id="partner-count-post" style="color:#1677ff;">2개</strong></div>
+            </div>
+          </div>
         </div>
       </div>
 
@@ -1398,6 +1445,38 @@ select.fc { height: 36px; padding: 0 32px 0 12px; appearance: none; background-i
       </div>
     </div>
 
+    <!-- 파트너 노출 설정 -->
+    <div class="card" style="margin-top:16px;">
+      <div class="form-section" id="partner-visibility-flight">
+        <div class="section-title">파트너 노출 설정</div>
+        <div class="form-row">
+          <div class="form-item full">
+            <label class="form-label">노출 대상</label>
+            <div class="toggle-group" style="margin-bottom:12px;">
+              <button class="toggle-btn on" onclick="togglePartnerTarget(this,'flight')">전체 파트너</button>
+              <button class="toggle-btn" onclick="togglePartnerTarget(this,'flight')">특정 파트너 선택</button>
+            </div>
+            <div id="partner-select-flight" style="display:none;">
+              <div style="display:flex;gap:6px;margin-bottom:10px;">
+                <input class="fc" type="text" placeholder="파트너명 검색" style="flex:1;max-width:260px;" oninput="filterPartnerCheckboxes(this.value,'flight')">
+                <button class="btn btn-default btn-sm" onclick="toggleAllPartners(true,'flight')">전체 선택</button>
+                <button class="btn btn-default btn-sm" onclick="toggleAllPartners(false,'flight')">선택 해제</button>
+              </div>
+              <div class="partner-checkbox-list" id="partner-list-flight" style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px;padding:12px;background:#fafafa;border-radius:6px;border:1px solid #f0f0f0;">
+                <label class="partner-cb-item"><input type="checkbox" checked> <span>JV Vietnam</span> <span style="font-size:11px;color:rgba(0,0,0,0.35);">DMC</span></label>
+                <label class="partner-cb-item"><input type="checkbox" checked> <span>피크타임 트래블</span> <span style="font-size:11px;color:rgba(0,0,0,0.35);">여행사</span></label>
+                <label class="partner-cb-item"><input type="checkbox"> <span>써니투어</span> <span style="font-size:11px;color:rgba(0,0,0,0.35);">랜드사</span></label>
+                <label class="partner-cb-item"><input type="checkbox"> <span>하나프리</span> <span style="font-size:11px;color:rgba(0,0,0,0.35);">여행사</span></label>
+                <label class="partner-cb-item"><input type="checkbox"> <span>모두투어</span> <span style="font-size:11px;color:rgba(0,0,0,0.35);">여행사</span></label>
+                <label class="partner-cb-item"><input type="checkbox"> <span>참좋은여행</span> <span style="font-size:11px;color:rgba(0,0,0,0.35);">여행사</span></label>
+              </div>
+              <div class="form-hint" style="margin-top:6px;">선택된 파트너: <strong id="partner-count-flight" style="color:#1677ff;">2개</strong></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
     <div class="form-footer" style="background:#fff;border:none;justify-content:flex-end;padding:0 0 32px;">
       <button class="btn btn-default" onclick="showView('flight')">등록 취소</button>
       <button class="btn btn-primary" onclick="alert('항공권이 등록되었습니다.')">등록 완료</button>
@@ -1550,6 +1629,38 @@ select.fc { height: 36px; padding: 0 32px 0 12px; appearance: none; background-i
                 <div class="post-slot" id="pslot-hotel-전체-자주묻는질문" data-cat="자주 묻는 질문" data-view="hotel" data-room="전체"></div>
                 <div class="post-slot" id="pslot-hotel-전체-안내사항" data-cat="안내사항" data-view="hotel" data-room="전체"></div>
               </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 파트너 노출 설정 -->
+    <div class="card" style="margin-top:16px;">
+      <div class="form-section" id="partner-visibility-hotel">
+        <div class="section-title">파트너 노출 설정</div>
+        <div class="form-row">
+          <div class="form-item full">
+            <label class="form-label">노출 대상</label>
+            <div class="toggle-group" style="margin-bottom:12px;">
+              <button class="toggle-btn on" onclick="togglePartnerTarget(this,'hotel')">전체 파트너</button>
+              <button class="toggle-btn" onclick="togglePartnerTarget(this,'hotel')">특정 파트너 선택</button>
+            </div>
+            <div id="partner-select-hotel" style="display:none;">
+              <div style="display:flex;gap:6px;margin-bottom:10px;">
+                <input class="fc" type="text" placeholder="파트너명 검색" style="flex:1;max-width:260px;" oninput="filterPartnerCheckboxes(this.value,'hotel')">
+                <button class="btn btn-default btn-sm" onclick="toggleAllPartners(true,'hotel')">전체 선택</button>
+                <button class="btn btn-default btn-sm" onclick="toggleAllPartners(false,'hotel')">선택 해제</button>
+              </div>
+              <div class="partner-checkbox-list" id="partner-list-hotel" style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px;padding:12px;background:#fafafa;border-radius:6px;border:1px solid #f0f0f0;">
+                <label class="partner-cb-item"><input type="checkbox" checked> <span>JV Vietnam</span> <span style="font-size:11px;color:rgba(0,0,0,0.35);">DMC</span></label>
+                <label class="partner-cb-item"><input type="checkbox" checked> <span>피크타임 트래블</span> <span style="font-size:11px;color:rgba(0,0,0,0.35);">여행사</span></label>
+                <label class="partner-cb-item"><input type="checkbox"> <span>써니투어</span> <span style="font-size:11px;color:rgba(0,0,0,0.35);">랜드사</span></label>
+                <label class="partner-cb-item"><input type="checkbox"> <span>하나프리</span> <span style="font-size:11px;color:rgba(0,0,0,0.35);">여행사</span></label>
+                <label class="partner-cb-item"><input type="checkbox"> <span>모두투어</span> <span style="font-size:11px;color:rgba(0,0,0,0.35);">여행사</span></label>
+                <label class="partner-cb-item"><input type="checkbox"> <span>참좋은여행</span> <span style="font-size:11px;color:rgba(0,0,0,0.35);">여행사</span></label>
+              </div>
+              <div class="form-hint" style="margin-top:6px;">선택된 파트너: <strong id="partner-count-hotel" style="color:#1677ff;">2개</strong></div>
             </div>
           </div>
         </div>
@@ -1804,9 +1915,642 @@ select.fc { height: 36px; padding: 0 32px 0 12px; appearance: none; background-i
       </div>
     </div>
 
+    <!-- 파트너 노출 설정 -->
+    <div class="card" style="margin-top:16px;">
+      <div class="form-section" id="partner-visibility-tour">
+        <div class="section-title">파트너 노출 설정</div>
+        <div class="form-row">
+          <div class="form-item full">
+            <label class="form-label">노출 대상</label>
+            <div class="toggle-group" style="margin-bottom:12px;">
+              <button class="toggle-btn on" onclick="togglePartnerTarget(this,'tour')">전체 파트너</button>
+              <button class="toggle-btn" onclick="togglePartnerTarget(this,'tour')">특정 파트너 선택</button>
+            </div>
+            <div id="partner-select-tour" style="display:none;">
+              <div style="display:flex;gap:6px;margin-bottom:10px;">
+                <input class="fc" type="text" placeholder="파트너명 검색" style="flex:1;max-width:260px;" oninput="filterPartnerCheckboxes(this.value,'tour')">
+                <button class="btn btn-default btn-sm" onclick="toggleAllPartners(true,'tour')">전체 선택</button>
+                <button class="btn btn-default btn-sm" onclick="toggleAllPartners(false,'tour')">선택 해제</button>
+              </div>
+              <div class="partner-checkbox-list" id="partner-list-tour" style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px;padding:12px;background:#fafafa;border-radius:6px;border:1px solid #f0f0f0;">
+                <label class="partner-cb-item"><input type="checkbox" checked> <span>JV Vietnam</span> <span style="font-size:11px;color:rgba(0,0,0,0.35);">DMC</span></label>
+                <label class="partner-cb-item"><input type="checkbox" checked> <span>피크타임 트래블</span> <span style="font-size:11px;color:rgba(0,0,0,0.35);">여행사</span></label>
+                <label class="partner-cb-item"><input type="checkbox"> <span>써니투어</span> <span style="font-size:11px;color:rgba(0,0,0,0.35);">랜드사</span></label>
+                <label class="partner-cb-item"><input type="checkbox"> <span>하나프리</span> <span style="font-size:11px;color:rgba(0,0,0,0.35);">여행사</span></label>
+                <label class="partner-cb-item"><input type="checkbox"> <span>모두투어</span> <span style="font-size:11px;color:rgba(0,0,0,0.35);">여행사</span></label>
+                <label class="partner-cb-item"><input type="checkbox"> <span>참좋은여행</span> <span style="font-size:11px;color:rgba(0,0,0,0.35);">여행사</span></label>
+              </div>
+              <div class="form-hint" style="margin-top:6px;">선택된 파트너: <strong id="partner-count-tour" style="color:#1677ff;">2개</strong></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
     <div class="form-footer" style="background:#fff;border:none;justify-content:flex-end;padding:0 0 32px;">
       <button class="btn btn-default" onclick="showView('tour')">등록 취소</button>
       <button class="btn btn-primary" onclick="alert('투어/티켓이 등록되었습니다.')">등록 완료</button>
+    </div>
+  </div>
+</div>
+
+<!-- ============================================================ -->
+<!-- ============================================================ -->
+<!-- VIEW: 파트너 목록 -->
+<!-- ============================================================ -->
+<div id="view-partner-list" class="view">
+  <div class="layout">
+    <div class="breadcrumb">
+      <span>파트너 관리</span><span class="breadcrumb-sep">/</span>
+      <span style="color:rgba(0,0,0,0.88);font-weight:500;">파트너 목록</span>
+    </div>
+    <div class="page-header">
+      <div class="page-title">파트너 목록</div>
+      <button class="btn btn-primary" onclick="showView('partner-form')">+ 파트너 등록</button>
+    </div>
+    <div class="card">
+      <div class="filter-bar">
+        <input class="fi fi-lg" type="text" placeholder="파트너명 검색">
+        <select class="fi fi-md">
+          <option value="">파트너 유형</option>
+          <option>여행사</option><option>랜드사</option><option>DMC</option><option>항공사</option>
+        </select>
+        <select class="fi fi-md">
+          <option value="">지역</option>
+          <option>베트남</option><option>한국</option><option>태국</option><option>일본</option>
+        </select>
+        <select class="fi fi-md">
+          <option value="">상태</option>
+          <option>활성</option><option>비활성</option><option>대기</option>
+        </select>
+        <div class="filter-actions">
+          <button class="btn btn-primary btn-sm">검색</button>
+          <button class="btn btn-default btn-sm">초기화</button>
+        </div>
+      </div>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th style="width:60px;">ID</th>
+              <th>파트너명</th>
+              <th>유형</th>
+              <th>지역</th>
+              <th>대표자</th>
+              <th style="text-align:center;">등록상품</th>
+              <th style="text-align:center;">활성예약</th>
+              <th>수수료율</th>
+              <th>상태</th>
+              <th>등록일</th>
+              <th style="text-align:center;">액션</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>1</td>
+              <td><strong>JV Vietnam</strong></td>
+              <td><span class="tag" style="background:#f0f5ff;color:#2f54eb;">DMC</span></td>
+              <td>베트남</td>
+              <td>Nguyen Van A</td>
+              <td style="text-align:center;">48</td>
+              <td style="text-align:center;">156</td>
+              <td>12%</td>
+              <td><span class="tag tag-green" style="font-size:11px;">활성</span></td>
+              <td style="color:rgba(0,0,0,0.4);font-size:12px;">2025-01-15</td>
+              <td style="text-align:center;">
+                <button class="btn btn-text btn-sm" onclick="showView('partner-form')">수정</button>
+              </td>
+            </tr>
+            <tr>
+              <td>2</td>
+              <td><strong>피크타임 트래블</strong></td>
+              <td><span class="tag" style="background:#fff0f6;color:#c41d7f;">여행사</span></td>
+              <td>한국</td>
+              <td>김민수</td>
+              <td style="text-align:center;">32</td>
+              <td style="text-align:center;">89</td>
+              <td>10%</td>
+              <td><span class="tag tag-green" style="font-size:11px;">활성</span></td>
+              <td style="color:rgba(0,0,0,0.4);font-size:12px;">2025-03-20</td>
+              <td style="text-align:center;">
+                <button class="btn btn-text btn-sm" onclick="showView('partner-form')">수정</button>
+              </td>
+            </tr>
+            <tr>
+              <td>3</td>
+              <td><strong>써니투어</strong></td>
+              <td><span class="tag" style="background:#f6ffed;color:#389e0d;">랜드사</span></td>
+              <td>베트남</td>
+              <td>Tran Thi B</td>
+              <td style="text-align:center;">15</td>
+              <td style="text-align:center;">42</td>
+              <td>8%</td>
+              <td><span class="tag tag-green" style="font-size:11px;">활성</span></td>
+              <td style="color:rgba(0,0,0,0.4);font-size:12px;">2025-06-01</td>
+              <td style="text-align:center;">
+                <button class="btn btn-text btn-sm" onclick="showView('partner-form')">수정</button>
+              </td>
+            </tr>
+            <tr>
+              <td>4</td>
+              <td><strong>하나프리</strong></td>
+              <td><span class="tag" style="background:#fff0f6;color:#c41d7f;">여행사</span></td>
+              <td>한국</td>
+              <td>박지영</td>
+              <td style="text-align:center;">0</td>
+              <td style="text-align:center;">0</td>
+              <td>10%</td>
+              <td><span class="tag" style="background:#fff7e6;color:#d48806;font-size:11px;">대기</span></td>
+              <td style="color:rgba(0,0,0,0.4);font-size:12px;">2026-03-25</td>
+              <td style="text-align:center;">
+                <button class="btn btn-text btn-sm" onclick="showView('partner-form')">수정</button>
+              </td>
+            </tr>
+            <tr>
+              <td>5</td>
+              <td><strong>모두투어</strong></td>
+              <td><span class="tag" style="background:#fff0f6;color:#c41d7f;">여행사</span></td>
+              <td>한국</td>
+              <td>이승호</td>
+              <td style="text-align:center;">22</td>
+              <td style="text-align:center;">67</td>
+              <td>10%</td>
+              <td><span class="tag tag-green" style="font-size:11px;">활성</span></td>
+              <td style="color:rgba(0,0,0,0.4);font-size:12px;">2025-08-10</td>
+              <td style="text-align:center;">
+                <button class="btn btn-text btn-sm" onclick="showView('partner-form')">수정</button>
+              </td>
+            </tr>
+            <tr>
+              <td>6</td>
+              <td><strong>참좋은여행</strong></td>
+              <td><span class="tag" style="background:#fff0f6;color:#c41d7f;">여행사</span></td>
+              <td>한국</td>
+              <td>최은비</td>
+              <td style="text-align:center;">8</td>
+              <td style="text-align:center;">23</td>
+              <td>9%</td>
+              <td><span class="tag" style="background:#f5f5f5;color:rgba(0,0,0,0.35);font-size:11px;">비활성</span></td>
+              <td style="color:rgba(0,0,0,0.4);font-size:12px;">2025-11-05</td>
+              <td style="text-align:center;">
+                <button class="btn btn-text btn-sm" onclick="showView('partner-form')">수정</button>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="pagination">
+        <span class="pag-total">총 6건</span>
+        <select class="pag-size"><option>10개</option><option>20개</option></select>
+        <button class="pag-btn active">1</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ============================================================ -->
+<!-- VIEW: 파트너 등록/수정 -->
+<!-- ============================================================ -->
+<div id="view-partner-form" class="view">
+  <div class="layout">
+    <div class="breadcrumb">
+      <span onclick="showView('partner-list')">파트너 관리</span><span class="breadcrumb-sep">/</span>
+      <span onclick="showView('partner-list')">파트너 목록</span><span class="breadcrumb-sep">/</span>
+      <span style="color:rgba(0,0,0,0.88);font-weight:500;">파트너 등록</span>
+    </div>
+    <div class="page-header">
+      <div style="display:flex;align-items:center;gap:14px;">
+        <button class="btn-back" onclick="showView('partner-list')">← 목록으로</button>
+        <div class="page-title">파트너 등록</div>
+      </div>
+    </div>
+    <div class="card">
+      <!-- 기본정보 -->
+      <div class="form-section">
+        <div class="section-title">기본정보</div>
+        <div class="form-row">
+          <div class="form-item half">
+            <label class="form-label">파트너명 <span class="req">*</span></label>
+            <input class="fc" type="text" placeholder="파트너사 이름">
+          </div>
+          <div class="form-item half">
+            <label class="form-label">파트너 코드</label>
+            <input class="fc" type="text" value="PTR-006" disabled style="background:#f5f5f5;color:rgba(0,0,0,0.45);">
+            <div class="form-hint">자동 생성됩니다.</div>
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-item half">
+            <label class="form-label">파트너 유형 <span class="req">*</span></label>
+            <select class="fc">
+              <option value="">유형 선택</option>
+              <option>여행사</option><option>랜드사</option><option>DMC</option><option>항공사</option>
+            </select>
+          </div>
+          <div class="form-item half">
+            <label class="form-label">사업자번호</label>
+            <input class="fc" type="text" placeholder="000-00-00000">
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-item half">
+            <label class="form-label">대표자명 <span class="req">*</span></label>
+            <input class="fc" type="text" placeholder="대표자 이름">
+          </div>
+          <div class="form-item half">
+            <label class="form-label">연락처</label>
+            <input class="fc" type="text" placeholder="010-0000-0000">
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-item half">
+            <label class="form-label">이메일 <span class="req">*</span></label>
+            <input class="fc" type="email" placeholder="partner@example.com">
+          </div>
+          <div class="form-item half">
+            <label class="form-label">지역 <span class="req">*</span></label>
+            <select class="fc">
+              <option value="">지역 선택</option>
+              <option>한국</option><option>베트남</option><option>태국</option><option>일본</option>
+            </select>
+          </div>
+        </div>
+      </div>
+
+      <!-- 계약정보 -->
+      <div class="form-section">
+        <div class="section-title">계약정보</div>
+        <div class="form-row">
+          <div class="form-item half">
+            <label class="form-label">계약 시작일 <span class="req">*</span></label>
+            <input class="fc" type="date">
+          </div>
+          <div class="form-item half">
+            <label class="form-label">계약 종료일</label>
+            <input class="fc" type="date">
+            <div class="form-hint">비워두면 무기한입니다.</div>
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-item half">
+            <label class="form-label">수수료율 (%) <span class="req">*</span></label>
+            <input class="fc" type="number" placeholder="10" min="0" max="100" step="0.5">
+          </div>
+          <div class="form-item half">
+            <label class="form-label">정산 주기</label>
+            <select class="fc">
+              <option>월 정산</option><option>주 정산</option><option>건별 정산</option>
+            </select>
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-item full">
+            <label class="form-label">정산 계좌</label>
+            <div style="display:flex;gap:8px;">
+              <select class="fc" style="width:140px;">
+                <option>은행 선택</option><option>신한은행</option><option>국민은행</option><option>하나은행</option><option>우리은행</option>
+              </select>
+              <input class="fc" type="text" placeholder="계좌번호" style="flex:1;">
+              <input class="fc" type="text" placeholder="예금주" style="width:120px;">
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Stock 할당 -->
+      <div class="form-section">
+        <div class="section-title">Stock 노출 설정</div>
+        <div style="background:#f0f5ff;border:1px solid #d6e4ff;border-radius:6px;padding:10px 14px;font-size:12px;color:#2f54eb;margin-bottom:14px;line-height:1.6;">
+          이 파트너에게 노출할 Stock을 선택합니다. 선택된 Stock만 파트너 화면에서 조회할 수 있습니다.
+        </div>
+        <div class="form-row">
+          <div class="form-item full">
+            <label class="form-label">항공권 Stock</label>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;padding:10px;background:#fafafa;border-radius:6px;border:1px solid #f0f0f0;">
+              <label class="partner-cb-item"><input type="checkbox" checked> 비엣젯(VJ) 인천-푸꾸옥</label>
+              <label class="partner-cb-item"><input type="checkbox" checked> 대한항공(KE) 인천-나트랑</label>
+              <label class="partner-cb-item"><input type="checkbox"> 베트남항공(VN) 인천-호치민</label>
+              <label class="partner-cb-item"><input type="checkbox" checked> 제주항공(7C) 인천-다낭</label>
+              <label class="partner-cb-item"><input type="checkbox"> 에어아시아(AK) 인천-방콕</label>
+            </div>
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-item full">
+            <label class="form-label">숙박권 Stock</label>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;padding:10px;background:#fafafa;border-radius:6px;border:1px solid #f0f0f0;">
+              <label class="partner-cb-item"><input type="checkbox" checked> 솔바이멜리아 푸꾸옥</label>
+              <label class="partner-cb-item"><input type="checkbox" checked> 소나가 비치 리조트</label>
+              <label class="partner-cb-item"><input type="checkbox"> 빈펄 리조트 나트랑</label>
+              <label class="partner-cb-item"><input type="checkbox"> 인터컨티넨탈 다낭</label>
+            </div>
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-item full">
+            <label class="form-label">투어/티켓 Stock</label>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;padding:10px;background:#fafafa;border-radius:6px;border:1px solid #f0f0f0;">
+              <label class="partner-cb-item"><input type="checkbox" checked> 빈원더스 입장권</label>
+              <label class="partner-cb-item"><input type="checkbox"> 하롱베이 크루즈</label>
+              <label class="partner-cb-item"><input type="checkbox" checked> 푸꾸옥 선셋 투어</label>
+              <label class="partner-cb-item"><input type="checkbox"> 미선유적 투어</label>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 계정 관리 -->
+      <div class="form-section">
+        <div class="section-title">Owner 계정</div>
+        <div class="form-row">
+          <div class="form-item half">
+            <label class="form-label">Owner 이메일 <span class="req">*</span></label>
+            <input class="fc" type="email" placeholder="owner@partner.com">
+            <div class="form-hint">이 이메일로 초대 메일이 발송됩니다.</div>
+          </div>
+          <div class="form-item half">
+            <label class="form-label">초기 역할</label>
+            <select class="fc" disabled style="background:#f5f5f5;">
+              <option>PARTNER_OWNER</option>
+            </select>
+            <div class="form-hint">첫 계정은 항상 Owner 권한입니다.</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="form-footer">
+        <button class="btn btn-default" onclick="showView('partner-list')">취소</button>
+        <button class="btn btn-primary" onclick="alert('파트너가 등록되었습니다.')">등록 완료</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ============================================================ -->
+<!-- VIEW: 파트너 멤버 관리 -->
+<!-- ============================================================ -->
+<div id="view-partner-members" class="view">
+  <div class="layout">
+    <div class="breadcrumb">
+      <span onclick="showView('partner-list')">파트너 관리</span><span class="breadcrumb-sep">/</span>
+      <span style="color:rgba(0,0,0,0.88);font-weight:500;">파트너 멤버 관리</span>
+    </div>
+    <div class="page-header">
+      <div class="page-title">파트너 멤버 관리</div>
+    </div>
+    <div class="card" style="margin-bottom:16px;">
+      <div class="filter-bar">
+        <select class="fi fi-lg" id="pm-partner-select">
+          <option value="">파트너 선택</option>
+          <option selected>JV Vietnam</option>
+          <option>피크타임 트래블</option>
+          <option>써니투어</option>
+          <option>하나프리</option>
+          <option>모두투어</option>
+          <option>참좋은여행</option>
+        </select>
+        <input class="fi fi-lg" type="text" placeholder="이름 / 이메일 검색">
+        <div class="filter-actions">
+          <button class="btn btn-primary btn-sm">검색</button>
+        </div>
+      </div>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>이름</th>
+              <th>이메일</th>
+              <th>역할</th>
+              <th>상태</th>
+              <th>가입일</th>
+              <th style="text-align:center;">액션</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><strong>Nguyen Van A</strong></td>
+              <td>admin@jvvietnam.com</td>
+              <td><span class="tag tag-blue">PARTNER_OWNER</span></td>
+              <td><span class="tag tag-green" style="font-size:11px;">활성</span></td>
+              <td style="color:rgba(0,0,0,0.4);font-size:12px;">2025-01-15</td>
+              <td style="text-align:center;color:rgba(0,0,0,0.25);">—</td>
+            </tr>
+            <tr>
+              <td>Tran Thi C</td>
+              <td>tran@jvvietnam.com</td>
+              <td><span class="tag tag-purple">PARTNER_MANAGER</span></td>
+              <td><span class="tag tag-green" style="font-size:11px;">활성</span></td>
+              <td style="color:rgba(0,0,0,0.4);font-size:12px;">2025-03-01</td>
+              <td style="text-align:center;">
+                <button class="btn btn-text btn-sm">역할변경</button>
+                <button class="btn btn-text btn-sm" style="color:#f5222d;">비활성화</button>
+              </td>
+            </tr>
+            <tr>
+              <td>Le Van D</td>
+              <td>le@jvvietnam.com</td>
+              <td><span class="tag tag-gray">PARTNER_OPERATOR</span></td>
+              <td><span class="tag tag-green" style="font-size:11px;">활성</span></td>
+              <td style="color:rgba(0,0,0,0.4);font-size:12px;">2025-06-15</td>
+              <td style="text-align:center;">
+                <button class="btn btn-text btn-sm">역할변경</button>
+                <button class="btn btn-text btn-sm" style="color:#f5222d;">비활성화</button>
+              </td>
+            </tr>
+            <tr>
+              <td>Pham E</td>
+              <td>pham@jvvietnam.com</td>
+              <td><span class="tag" style="background:#f5f5f5;color:rgba(0,0,0,0.45);">PARTNER_VIEWER</span></td>
+              <td><span class="tag" style="background:#f5f5f5;color:rgba(0,0,0,0.35);font-size:11px;">비활성</span></td>
+              <td style="color:rgba(0,0,0,0.4);font-size:12px;">2025-09-20</td>
+              <td style="text-align:center;">
+                <button class="btn btn-text btn-sm">역할변경</button>
+                <button class="btn btn-text btn-sm" style="color:#52c41a;">활성화</button>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="pagination">
+        <span class="pag-total">총 4명</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ============================================================ -->
+<!-- VIEW: 콘텐츠 노출 관리 -->
+<!-- ============================================================ -->
+<div id="view-content-visibility" class="view">
+  <div class="layout">
+    <div class="breadcrumb">
+      <span>파트너 관리</span><span class="breadcrumb-sep">/</span>
+      <span style="color:rgba(0,0,0,0.88);font-weight:500;">콘텐츠 노출 관리</span>
+    </div>
+    <div class="page-header">
+      <div class="page-title">콘텐츠 노출 관리</div>
+    </div>
+
+    <!-- 탭 -->
+    <div style="display:flex;gap:0;margin-bottom:16px;border-bottom:2px solid #f0f0f0;">
+      <button class="cv-tab active" onclick="switchCvTab(this,'cv-post')">POST 노출</button>
+      <button class="cv-tab" onclick="switchCvTab(this,'cv-stock')">Stock 노출</button>
+    </div>
+
+    <!-- POST 노출 매트릭스 -->
+    <div id="cv-post" class="card">
+      <div class="filter-bar">
+        <input class="fi fi-lg" type="text" placeholder="POST 관리명 검색">
+        <select class="fi fi-md">
+          <option value="">카테고리</option>
+          <option>소개</option><option>유의사항</option><option>스페셜 혜택</option><option>취소환불규정</option>
+        </select>
+        <button class="btn btn-primary btn-sm">검색</button>
+      </div>
+      <div class="table-wrap" style="overflow-x:auto;">
+        <table style="min-width:800px;">
+          <thead>
+            <tr>
+              <th style="width:60px;">ID</th>
+              <th style="width:100px;">카테고리</th>
+              <th style="min-width:200px;">관리명</th>
+              <th style="text-align:center;width:110px;">JV Vietnam</th>
+              <th style="text-align:center;width:110px;">피크타임 트래블</th>
+              <th style="text-align:center;width:110px;">써니투어</th>
+              <th style="text-align:center;width:110px;">하나프리</th>
+              <th style="text-align:center;width:110px;">모두투어</th>
+              <th style="text-align:center;width:110px;">참좋은여행</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>2516</td>
+              <td><span class="tag tag-purple">스페셜 혜택</span></td>
+              <td>푸꾸옥_솔바이멜리아_빌라 스위트</td>
+              <td style="text-align:center;"><input type="checkbox" checked style="width:16px;height:16px;accent-color:#1677ff;cursor:pointer;"></td>
+              <td style="text-align:center;"><input type="checkbox" checked style="width:16px;height:16px;accent-color:#1677ff;cursor:pointer;"></td>
+              <td style="text-align:center;"><input type="checkbox" style="width:16px;height:16px;accent-color:#1677ff;cursor:pointer;"></td>
+              <td style="text-align:center;"><input type="checkbox" style="width:16px;height:16px;accent-color:#1677ff;cursor:pointer;"></td>
+              <td style="text-align:center;"><input type="checkbox" checked style="width:16px;height:16px;accent-color:#1677ff;cursor:pointer;"></td>
+              <td style="text-align:center;"><input type="checkbox" style="width:16px;height:16px;accent-color:#1677ff;cursor:pointer;"></td>
+            </tr>
+            <tr>
+              <td>2515</td>
+              <td><span class="tag tag-gray">유의사항</span></td>
+              <td>푸꾸옥_소나가 비치 리조트_3베드룸</td>
+              <td style="text-align:center;"><input type="checkbox" checked style="width:16px;height:16px;accent-color:#1677ff;cursor:pointer;"></td>
+              <td style="text-align:center;"><input type="checkbox" style="width:16px;height:16px;accent-color:#1677ff;cursor:pointer;"></td>
+              <td style="text-align:center;"><input type="checkbox" checked style="width:16px;height:16px;accent-color:#1677ff;cursor:pointer;"></td>
+              <td style="text-align:center;"><input type="checkbox" style="width:16px;height:16px;accent-color:#1677ff;cursor:pointer;"></td>
+              <td style="text-align:center;"><input type="checkbox" style="width:16px;height:16px;accent-color:#1677ff;cursor:pointer;"></td>
+              <td style="text-align:center;"><input type="checkbox" checked style="width:16px;height:16px;accent-color:#1677ff;cursor:pointer;"></td>
+            </tr>
+            <tr>
+              <td>1877</td>
+              <td><span class="tag tag-purple">스페셜 혜택</span></td>
+              <td>푸꾸옥_솔바이멜리아_빌라 스위트</td>
+              <td style="text-align:center;"><input type="checkbox" checked style="width:16px;height:16px;accent-color:#1677ff;cursor:pointer;"></td>
+              <td style="text-align:center;"><input type="checkbox" checked style="width:16px;height:16px;accent-color:#1677ff;cursor:pointer;"></td>
+              <td style="text-align:center;"><input type="checkbox" checked style="width:16px;height:16px;accent-color:#1677ff;cursor:pointer;"></td>
+              <td style="text-align:center;"><input type="checkbox" checked style="width:16px;height:16px;accent-color:#1677ff;cursor:pointer;"></td>
+              <td style="text-align:center;"><input type="checkbox" checked style="width:16px;height:16px;accent-color:#1677ff;cursor:pointer;"></td>
+              <td style="text-align:center;"><input type="checkbox" checked style="width:16px;height:16px;accent-color:#1677ff;cursor:pointer;"></td>
+            </tr>
+            <tr>
+              <td>1761</td>
+              <td><span class="tag tag-blue">소개</span></td>
+              <td>푸꾸옥_솔바이멜리아_엑스트라 솔 스위트</td>
+              <td style="text-align:center;"><input type="checkbox" checked style="width:16px;height:16px;accent-color:#1677ff;cursor:pointer;"></td>
+              <td style="text-align:center;"><input type="checkbox" style="width:16px;height:16px;accent-color:#1677ff;cursor:pointer;"></td>
+              <td style="text-align:center;"><input type="checkbox" style="width:16px;height:16px;accent-color:#1677ff;cursor:pointer;"></td>
+              <td style="text-align:center;"><input type="checkbox" style="width:16px;height:16px;accent-color:#1677ff;cursor:pointer;"></td>
+              <td style="text-align:center;"><input type="checkbox" style="width:16px;height:16px;accent-color:#1677ff;cursor:pointer;"></td>
+              <td style="text-align:center;"><input type="checkbox" style="width:16px;height:16px;accent-color:#1677ff;cursor:pointer;"></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <div style="padding:12px 20px;display:flex;justify-content:flex-end;">
+        <button class="btn btn-primary" onclick="alert('노출 설정이 저장되었습니다.')">변경사항 저장</button>
+      </div>
+    </div>
+
+    <!-- Stock 노출 매트릭스 -->
+    <div id="cv-stock" class="card" style="display:none;">
+      <div class="filter-bar">
+        <input class="fi fi-lg" type="text" placeholder="Stock명 검색">
+        <select class="fi fi-md">
+          <option value="">유형</option>
+          <option>항공권</option><option>숙박권</option><option>투어/티켓</option>
+        </select>
+        <button class="btn btn-primary btn-sm">검색</button>
+      </div>
+      <div class="table-wrap" style="overflow-x:auto;">
+        <table style="min-width:800px;">
+          <thead>
+            <tr>
+              <th style="width:60px;">ID</th>
+              <th style="width:80px;">유형</th>
+              <th style="min-width:200px;">Stock명</th>
+              <th style="text-align:center;width:110px;">JV Vietnam</th>
+              <th style="text-align:center;width:110px;">피크타임 트래블</th>
+              <th style="text-align:center;width:110px;">써니투어</th>
+              <th style="text-align:center;width:110px;">하나프리</th>
+              <th style="text-align:center;width:110px;">모두투어</th>
+              <th style="text-align:center;width:110px;">참좋은여행</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>3201</td>
+              <td><span class="tag tag-orange" style="font-size:11px;">항공</span></td>
+              <td>비엣젯(VJ) 인천-푸꾸옥</td>
+              <td style="text-align:center;"><input type="checkbox" checked style="width:16px;height:16px;accent-color:#1677ff;cursor:pointer;"></td>
+              <td style="text-align:center;"><input type="checkbox" checked style="width:16px;height:16px;accent-color:#1677ff;cursor:pointer;"></td>
+              <td style="text-align:center;"><input type="checkbox" checked style="width:16px;height:16px;accent-color:#1677ff;cursor:pointer;"></td>
+              <td style="text-align:center;"><input type="checkbox" style="width:16px;height:16px;accent-color:#1677ff;cursor:pointer;"></td>
+              <td style="text-align:center;"><input type="checkbox" style="width:16px;height:16px;accent-color:#1677ff;cursor:pointer;"></td>
+              <td style="text-align:center;"><input type="checkbox" style="width:16px;height:16px;accent-color:#1677ff;cursor:pointer;"></td>
+            </tr>
+            <tr>
+              <td>3202</td>
+              <td><span class="tag tag-orange" style="font-size:11px;">항공</span></td>
+              <td>대한항공(KE) 인천-나트랑</td>
+              <td style="text-align:center;"><input type="checkbox" checked style="width:16px;height:16px;accent-color:#1677ff;cursor:pointer;"></td>
+              <td style="text-align:center;"><input type="checkbox" checked style="width:16px;height:16px;accent-color:#1677ff;cursor:pointer;"></td>
+              <td style="text-align:center;"><input type="checkbox" style="width:16px;height:16px;accent-color:#1677ff;cursor:pointer;"></td>
+              <td style="text-align:center;"><input type="checkbox" style="width:16px;height:16px;accent-color:#1677ff;cursor:pointer;"></td>
+              <td style="text-align:center;"><input type="checkbox" checked style="width:16px;height:16px;accent-color:#1677ff;cursor:pointer;"></td>
+              <td style="text-align:center;"><input type="checkbox" style="width:16px;height:16px;accent-color:#1677ff;cursor:pointer;"></td>
+            </tr>
+            <tr>
+              <td>4512</td>
+              <td><span class="tag tag-green" style="font-size:11px;">숙박</span></td>
+              <td>솔바이멜리아 푸꾸옥</td>
+              <td style="text-align:center;"><input type="checkbox" checked style="width:16px;height:16px;accent-color:#1677ff;cursor:pointer;"></td>
+              <td style="text-align:center;"><input type="checkbox" checked style="width:16px;height:16px;accent-color:#1677ff;cursor:pointer;"></td>
+              <td style="text-align:center;"><input type="checkbox" style="width:16px;height:16px;accent-color:#1677ff;cursor:pointer;"></td>
+              <td style="text-align:center;"><input type="checkbox" style="width:16px;height:16px;accent-color:#1677ff;cursor:pointer;"></td>
+              <td style="text-align:center;"><input type="checkbox" style="width:16px;height:16px;accent-color:#1677ff;cursor:pointer;"></td>
+              <td style="text-align:center;"><input type="checkbox" style="width:16px;height:16px;accent-color:#1677ff;cursor:pointer;"></td>
+            </tr>
+            <tr>
+              <td>5001</td>
+              <td><span class="tag tag-blue" style="font-size:11px;">투어</span></td>
+              <td>빈원더스 입장권</td>
+              <td style="text-align:center;"><input type="checkbox" checked style="width:16px;height:16px;accent-color:#1677ff;cursor:pointer;"></td>
+              <td style="text-align:center;"><input type="checkbox" checked style="width:16px;height:16px;accent-color:#1677ff;cursor:pointer;"></td>
+              <td style="text-align:center;"><input type="checkbox" checked style="width:16px;height:16px;accent-color:#1677ff;cursor:pointer;"></td>
+              <td style="text-align:center;"><input type="checkbox" checked style="width:16px;height:16px;accent-color:#1677ff;cursor:pointer;"></td>
+              <td style="text-align:center;"><input type="checkbox" checked style="width:16px;height:16px;accent-color:#1677ff;cursor:pointer;"></td>
+              <td style="text-align:center;"><input type="checkbox" checked style="width:16px;height:16px;accent-color:#1677ff;cursor:pointer;"></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <div style="padding:12px 20px;display:flex;justify-content:flex-end;">
+        <button class="btn btn-primary" onclick="alert('노출 설정이 저장되었습니다.')">변경사항 저장</button>
+      </div>
     </div>
   </div>
 </div>
@@ -2172,16 +2916,16 @@ flowchart LR
         <div style="background:#fafafa;border:1px solid #f0f0f0;border-radius:10px;padding:18px 20px;margin-bottom:16px;">
           <div style="font-size:12px;font-weight:700;color:rgba(0,0,0,0.35);letter-spacing:0.6px;text-transform:uppercase;margin-bottom:14px;">파일 정보 설정</div>
 
-          <!-- 공급사 + 파일유형 -->
+          <!-- 상세구분 + 파일유형 -->
           <div style="display:flex;gap:24px;margin-bottom:14px;flex-wrap:wrap;">
             <div style="display:flex;flex-direction:column;gap:6px;min-width:160px;">
-              <label style="font-size:12px;font-weight:600;color:rgba(0,0,0,0.55);">공급사 <span style="color:#ff4d4f;">*</span></label>
+              <label style="font-size:12px;font-weight:600;color:rgba(0,0,0,0.55);">상세구분 <span style="color:#ff4d4f;">*</span></label>
               <select id="s1-supplier" style="height:32px;border:1px solid #d9d9d9;border-radius:6px;padding:0 28px 0 10px;font-size:13px;font-family:inherit;background:#fff url('data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%2210%22 height=%226%22%3E%3Cpath d=%22M0 0l5 6 5-6z%22 fill=%22%23bbb%22/%3E%3C/svg%3E') no-repeat right 8px center;appearance:none;cursor:pointer;outline:none;">
-                <option value="">공급사 선택</option>
+                <option value="">상세구분 선택</option>
                 <option value="TMG">TMG</option>
                 <option value="피크타임">피크타임</option>
                 <option value="직계약">직계약</option>
-                <option value="">공통 (공급사 없음)</option>
+                <option value="">공통 (상세구분 없음)</option>
               </select>
             </div>
             <div style="display:flex;flex-direction:column;gap:6px;flex:1;min-width:280px;">
@@ -2203,6 +2947,8 @@ flowchart LR
               <option value="220">씨셀스 푸꾸옥 (ID: 220)</option>
               <option value="300">소나가비치 리조트 (ID: 300)</option>
               <option value="180">JW메리어트 푸꾸옥 (ID: 180)</option>
+              <option value="401">베스트웨스턴 프리미어 푸꾸옥 (ID: 401)</option>
+              <option value="402">리젠트 푸꾸옥 (ID: 402)</option>
             </select>
             <div id="s1-hotel-hint" style="font-size:12px;color:rgba(0,0,0,0.4);display:none;">숙소 선택 시 해당 숙소의 객실 카탈로그도 타겟으로 활용됩니다.</div>
           </div>
@@ -2268,7 +3014,7 @@ flowchart LR
         <!-- Step 1 입력값 요약 카드 (동적) -->
         <div id="s3-summary" style="background:#f6ffed;border:1px solid #b7eb8f;border-radius:8px;padding:12px 16px;margin-bottom:16px;display:flex;align-items:center;gap:20px;flex-wrap:wrap;">
           <div style="display:flex;align-items:center;gap:6px;">
-            <span style="font-size:11px;font-weight:700;color:rgba(0,0,0,0.35);letter-spacing:0.5px;text-transform:uppercase;">공급사</span>
+            <span style="font-size:11px;font-weight:700;color:rgba(0,0,0,0.35);letter-spacing:0.5px;text-transform:uppercase;">상세구분</span>
             <span id="s3-sup-label" style="font-size:13px;font-weight:600;color:rgba(0,0,0,0.88);">TMG</span>
           </div>
           <div style="width:1px;height:16px;background:#d9f7be;"></div>
@@ -2281,13 +3027,13 @@ flowchart LR
             <span style="font-size:11px;font-weight:700;color:rgba(0,0,0,0.35);letter-spacing:0.5px;text-transform:uppercase;">카탈로그</span>
             <span id="s3-cat-label" style="font-size:13px;font-weight:600;color:rgba(0,0,0,0.88);">솔바이멜리아 푸꾸옥 (ID: 45)</span>
           </div>
-          <div style="margin-left:auto;font-size:12px;color:#389e0d;">✓ <span id="s3-confirm-msg">TMG 공급사 전용 POST로 등록됩니다</span></div>
+          <div style="margin-left:auto;font-size:12px;color:#389e0d;">✓ <span id="s3-confirm-msg">TMG 전용 POST로 등록됩니다</span></div>
         </div>
 
         <!-- 요약 헤더 -->
         <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;">
-          <div style="font-size:13px;color:rgba(0,0,0,0.55);">등록할 항목을 선택하고 타겟을 설정하세요. AI가 <strong style="color:#722ed1;">4개</strong>의 POST 초안을 생성했습니다.</div>
-          <div style="font-size:12px;color:rgba(0,0,0,0.45);white-space:nowrap;"><span id="sel-count">4</span>개 선택됨</div>
+          <div style="font-size:13px;color:rgba(0,0,0,0.55);">등록할 항목을 선택하고 타겟을 설정하세요. AI가 <strong style="color:#722ed1;"><span id="s3-card-count">5</span>개</strong>의 POST 초안을 생성했습니다.</div>
+          <div style="font-size:12px;color:rgba(0,0,0,0.45);white-space:nowrap;"><span id="sel-count">5</span>개 선택됨</div>
         </div>
         <div style="font-size:12px;color:rgba(0,0,0,0.35);background:#fffbe6;border:1px solid #ffe58f;border-radius:6px;padding:7px 12px;margin-bottom:14px;">
           💡 소개·핵심포인트는 이미지가 필요해 별도 등록하세요. AI는 나머지 카테고리만 생성합니다.
@@ -2336,7 +3082,7 @@ flowchart LR
               <input type="checkbox" class="pc-check" checked style="width:16px;height:16px;margin-top:3px;accent-color:#722ed1;cursor:pointer;flex-shrink:0;" onchange="toggleCard(this,1)">
               <div style="flex:1;min-width:0;">
                 <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px;">
-                  <span class="tag tag-gray">유의사항</span>
+                  <span class="tag tag-orange">유의사항</span>
                   <button class="btn btn-text btn-sm" onclick="editCard(this,1)" style="margin-left:auto;">수정</button>
                 </div>
                 <div id="pc-rv-1">
@@ -2368,7 +3114,7 @@ flowchart LR
               <input type="checkbox" class="pc-check" checked style="width:16px;height:16px;margin-top:3px;accent-color:#722ed1;cursor:pointer;flex-shrink:0;" onchange="toggleCard(this,2)">
               <div style="flex:1;min-width:0;">
                 <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px;">
-                  <span class="tag" style="background:#f6ffed;color:#389e0d;">취소환불규정</span>
+                  <span class="tag tag-red">취소환불규정</span>
                   <button class="btn btn-text btn-sm" onclick="editCard(this,2)" style="margin-left:auto;">수정</button>
                 </div>
                 <div id="pc-rv-2">
@@ -2421,6 +3167,38 @@ flowchart LR
                 <div style="display:flex;align-items:center;gap:8px;padding-top:10px;border-top:1px solid #f0f0f0;">
                   <span class="pt-type-label" style="font-size:11px;font-weight:600;color:rgba(0,0,0,0.4);letter-spacing:0.4px;white-space:nowrap;">타겟</span>
                   <select id="pt-sel-3" style="height:26px;border:1px solid #d9d9d9;border-radius:6px;padding:0 22px 0 8px;font-size:12px;font-family:inherit;background:#fafafa url('data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%228%22 height=%225%22%3E%3Cpath d=%22M0 0l4 5 4-5z%22 fill=%22%23bbb%22/%3E%3C/svg%3E') no-repeat right 6px center;appearance:none;cursor:pointer;min-width:220px;"></select>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- 카드 4: 안내사항 -->
+          <div class="preview-item" id="pc-4" style="padding:14px 16px;transition:opacity 0.2s;">
+            <div style="display:flex;align-items:flex-start;gap:10px;">
+              <input type="checkbox" class="pc-check" checked style="width:16px;height:16px;margin-top:3px;accent-color:#722ed1;cursor:pointer;flex-shrink:0;" onchange="toggleCard(this,4)">
+              <div style="flex:1;min-width:0;">
+                <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px;">
+                  <span class="tag tag-teal">안내사항</span>
+                  <button class="btn btn-text btn-sm" onclick="editCard(this,4)" style="margin-left:auto;">수정</button>
+                </div>
+                <div id="pc-rv-4">
+                  <div style="display:grid;grid-template-columns:52px 1fr;gap:4px 8px;margin-bottom:8px;">
+                    <span style="font-size:11px;color:rgba(0,0,0,0.35);font-weight:600;line-height:20px;">관리명</span><span class="rv-mgmt" style="font-size:12px;color:rgba(0,0,0,0.65);line-height:20px;">솔바이멜리아_안내사항_TMG</span>
+                    <span style="font-size:11px;color:rgba(0,0,0,0.35);font-weight:600;line-height:20px;">제목</span><span class="rv-title" style="font-size:13px;font-weight:600;color:rgba(0,0,0,0.88);line-height:20px;">이용 안내 & 아동 정책</span>
+                    <span style="font-size:11px;color:rgba(0,0,0,0.35);font-weight:600;line-height:20px;">요약</span><span class="rv-summary" style="font-size:12px;color:rgba(0,0,0,0.55);line-height:20px;">아동 정책, 체크인/아웃, 시즌 안내</span>
+                  </div>
+                </div>
+                <div id="pc-ev-4" style="display:none;">
+                  <div style="display:flex;flex-direction:column;gap:8px;margin-bottom:8px;">
+                    <div style="display:flex;align-items:center;gap:8px;"><label style="font-size:11px;font-weight:600;color:rgba(0,0,0,0.4);white-space:nowrap;width:40px;">관리명</label><input class="ec-mgmt" style="flex:1;height:28px;border:1px solid #d9d9d9;border-radius:5px;padding:0 8px;font-size:12px;font-family:inherit;outline:none;" value="솔바이멜리아_안내사항_TMG"></div>
+                    <div style="display:flex;align-items:center;gap:8px;"><label style="font-size:11px;font-weight:600;color:rgba(0,0,0,0.4);white-space:nowrap;width:40px;">제목</label><input class="ec-title" style="flex:1;height:28px;border:1px solid #d9d9d9;border-radius:5px;padding:0 8px;font-size:12px;font-family:inherit;outline:none;" value="이용 안내 & 아동 정책"></div>
+                    <div style="display:flex;align-items:center;gap:8px;"><label style="font-size:11px;font-weight:600;color:rgba(0,0,0,0.4);white-space:nowrap;width:40px;">요약</label><input class="ec-summary" style="flex:1;height:28px;border:1px solid #d9d9d9;border-radius:5px;padding:0 8px;font-size:12px;font-family:inherit;outline:none;" value="아동 정책, 체크인/아웃, 시즌 안내"></div>
+                    <div style="display:flex;align-items:flex-start;gap:8px;"><label style="font-size:11px;font-weight:600;color:rgba(0,0,0,0.4);white-space:nowrap;width:40px;padding-top:6px;">내용</label><textarea class="ec-content" style="flex:1;min-height:68px;border:1px solid #722ed1;border-radius:5px;padding:7px 8px;font-size:12px;font-family:inherit;outline:none;resize:vertical;line-height:1.6;">객실 종류 안내 / 시즌 기간 / 아동 연령별 정책 / 체크인·체크아웃 시간</textarea></div>
+                  </div>
+                </div>
+                <div style="display:flex;align-items:center;gap:8px;padding-top:10px;border-top:1px solid #f0f0f0;">
+                  <span class="pt-type-label" style="font-size:11px;font-weight:600;color:rgba(0,0,0,0.4);letter-spacing:0.4px;white-space:nowrap;">타겟</span>
+                  <select id="pt-sel-4" style="height:26px;border:1px solid #d9d9d9;border-radius:6px;padding:0 22px 0 8px;font-size:12px;font-family:inherit;background:#fafafa url('data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%228%22 height=%225%22%3E%3Cpath d=%22M0 0l4 5 4-5z%22 fill=%22%23bbb%22/%3E%3C/svg%3E') no-repeat right 6px center;appearance:none;cursor:pointer;min-width:220px;"></select>
                 </div>
               </div>
             </div>
@@ -2639,7 +3417,7 @@ function renderPSTabs(cat, context, slotId) {
       ];
       if (psCurTab !== 'room' && psCurTab !== 'common') psCurTab = 'room';
     } else {
-      // 숙소 전체 탭: 공급사 숙소 전용 + 공통
+      // 숙소 전체 탭: 상세구분 숙소 전용 + 공통
       const hotelPosts = posts.filter(p => p.type === '숙소' && (!hotelName || p.target === hotelName) && (!supplier || !p.supplier || p.supplier === supplier));
       const hotelLabel = hotelName || '숙소';
       tabs = [
@@ -2941,7 +3719,7 @@ const targets = {
   '공통':    [],
   '항공사':  [{id:1,n:'비엣젯(VJ)'},{id:2,n:'에어아시아(AK)'},{id:3,n:'대한항공(KE)'},{id:12,n:'베트남항공(VN)'},{id:15,n:'제주항공(7C)'}],
   '공항':    [{id:1,n:'인천국제공항(ICN)'},{id:2,n:'푸꾸옥국제공항(PQC)'},{id:3,n:'호치민공항(SGN)'}],
-  '숙소':    [{id:45,n:'솔바이멜리아 푸꾸옥'},{id:220,n:'씨셀스 푸꾸옥'},{id:300,n:'소나가비치 리조트'},{id:180,n:'JW메리어트 푸꾸옥'}],
+  '숙소':    [{id:45,n:'솔바이멜리아 푸꾸옥'},{id:220,n:'씨셀스 푸꾸옥'},{id:300,n:'소나가비치 리조트'},{id:180,n:'JW메리어트 푸꾸옥'},{id:401,n:'베스트웨스턴 프리미어 푸꾸옥'},{id:402,n:'리젠트 푸꾸옥'}],
   '객실':    [{id:158,n:'엑스트라 솔 스위트 (솔바이멜리아)'},{id:871,n:'3베드룸 비치프론트 (소나가)'},{id:870,n:'4베드룸 가든뷰 (소나가)'}],
   '국가':    [{id:1,n:'베트남'},{id:2,n:'태국'},{id:3,n:'일본'},{id:4,n:'필리핀'}],
   '여행지':  [{id:1,n:'푸꾸옥'},{id:2,n:'나트랑'},{id:3,n:'다낭'},{id:4,n:'방콕'}],
@@ -3061,11 +3839,13 @@ const aiHotelRooms = {
   45: [{id:158,n:'엑스트라 솔 스위트'},{id:159,n:'디럭스 오션뷰'},{id:160,n:'슈페리어 가든뷰'},{id:161,n:'패밀리 비치프론트'}],
   220: [{id:220,n:'씨셀스 디럭스 씨뷰'},{id:221,n:'씨셀스 프리미엄 비치프론트'},{id:222,n:'씨셀스 풀빌라'}],
   300: [{id:871,n:'3베드룸 비치프론트'},{id:870,n:'4베드룸 가든뷰'},{id:872,n:'스튜디오 풀액세스'}],
-  180: [{id:300,n:'디럭스 가든뷰'},{id:301,n:'디럭스 오션뷰'},{id:302,n:'주니어 스위트'}]
+  180: [{id:300,n:'디럭스 가든뷰'},{id:301,n:'디럭스 오션뷰'},{id:302,n:'주니어 스위트'}],
+  401: [{id:501,n:'Deluxe Garden'},{id:502,n:'Deluxe Garden(Triple)'},{id:503,n:'Deluxe Pool Access'},{id:504,n:'Premier Deluxe'},{id:505,n:'Premier Deluxe(Triple)'},{id:506,n:'Executive Suite 1BR'},{id:507,n:'Executive Suite 2BR'},{id:508,n:'Family Suite'},{id:509,n:'Premier Suite'},{id:510,n:'Sonasea Pool Villa 2BR'},{id:511,n:'Sonasea Pool Villa 3BR'},{id:512,n:'Sonasea Pool Villa 4BR'},{id:513,n:'Sonasea Pool Villa 5BR'}],
+  402: [{id:601,n:'Garden Pool Suite'},{id:602,n:'Club Pool Suite'},{id:603,n:'King Terrace Pool Villa'},{id:604,n:'Club Terrace Pool Villa'},{id:605,n:'Duplex Pool Villa'},{id:606,n:'Club Duplex Pool Villa'},{id:607,n:'Family Duplex Pool Villa'},{id:608,n:'2BR Pool Villa'},{id:609,n:'Club 2BR Villa'},{id:610,n:'Family 2BR Villa'},{id:611,n:'3BR Pool Villa'},{id:612,n:'Club 3BR Villa'},{id:613,n:'4BR Club Lagoon Pool Villa'}]
 };
 
 // 호텔 이름 맵
-const hotelNames = {45:'솔바이멜리아 푸꾸옥', 220:'씨셀스 푸꾸옥', 300:'소나가비치 리조트', 180:'JW메리어트 푸꾸옥'};
+const hotelNames = {45:'솔바이멜리아 푸꾸옥', 220:'씨셀스 푸꾸옥', 300:'소나가비치 리조트', 180:'JW메리어트 푸꾸옥', 401:'베스트웨스턴 프리미어 푸꾸옥', 402:'리젠트 푸꾸옥'};
 
 // Step 1 상태값
 let s1FileType = 'hotel';
@@ -3189,8 +3969,8 @@ function buildStep3() {
   document.getElementById('s3-sup-label').textContent = s1Supplier || '공통';
   document.getElementById('s3-type-label').textContent = typeLabels[s1FileType];
   const confirmMsg = s1Supplier && s1Supplier !== '공통'
-    ? `${s1Supplier} 공급사 전용 POST로 등록됩니다`
-    : '모든 공급사 공통 POST로 등록됩니다';
+    ? `${s1Supplier} 전용 POST로 등록됩니다`
+    : '모든 상세구분 공통 POST로 등록됩니다';
   document.getElementById('s3-confirm-msg').textContent = confirmMsg;
 
   // 카탈로그 레이블
@@ -3208,29 +3988,127 @@ function buildStep3() {
   // 카드 타겟 옵션 채우기
   const selStyle = `height:26px;border:1px solid #d9d9d9;border-radius:6px;padding:0 22px 0 8px;font-size:12px;font-family:inherit;background:#fafafa url('data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%228%22 height=%225%22%3E%3Cpath d=%22M0 0l4 5 4-5z%22 fill=%22%23bbb%22/%3E%3C/svg%3E') no-repeat right 6px center;appearance:none;cursor:pointer;min-width:220px;`;
 
-  // 카테고리별 제목/요약 샘플 (숙소 기준)
-  const cardSamples = {
+  // 호텔별 계약 템플릿 (PDF 기반)
+  const contractTemplates = {
+    // 솔바이멜리아 푸꾸옥 (hotelId: 45)
+    45: {
+      '스페셜 혜택': {
+        title: '조식 뷔페 & 공항 셔틀 무료 제공!',
+        summary: 'The Kitchen 조식 포함, 10인 미만 공항 셔틀 무료, 세금·서비스 차지 포함',
+        content: '▸ 조식 뷔페: The Kitchen Restaurant (매일)\n▸ 공항 셔틀: 리조트 스케줄에 따라 무료 제공 (10인 미만)\n▸ 세금·서비스 차지 포함\n▸ 싱글/더블 기준 요금 동일',
+      },
+      '유의사항': {
+        title: '예약 전 반드시 확인하세요',
+        summary: 'FIT 전용, 초과인원 추가요금, 일일 Allotment 9실',
+        content: '▸ FIT 전용 요금 (5실 이상 그룹·시리즈·차터 불가)\n▸ 초과인원 시 추가 요금 발생\n▸ 일일 Allotment: 9실 (Standard 3 + Standard OV 2 + Superior 3 + Superior OV 1)\n▸ Allotment 초과 시 잔여 확인 필요',
+      },
+      '취소환불규정': {
+        title: '취소·환불 정책 안내',
+        summary: '선불 환불불가 (Prepaid & Non-refundable)',
+        content: '▸ 선불 비환불 조건 (Prepaid & Non-refundable)\n▸ No-show 시 전액 부과',
+      },
+      '포함사항': {
+        title: '이 상품에 포함된 것들',
+        summary: '1박 숙박(싱글/더블), 조식 뷔페, 세금·서비스 차지, 공항 셔틀',
+        content: '▸ 1박 숙박 (싱글 또는 더블)\n▸ 조식 뷔페 (The Kitchen Restaurant)\n▸ 세금 및 서비스 차지 포함\n▸ 공항 셔틀 (10인 미만, 리조트 스케줄)',
+      },
+      '안내사항': {
+        title: '이용 안내 & 아동 정책',
+        summary: '객실 7종, 아동 4세 미만 무료, 객실당 최대 2명',
+        content: '▸ 객실: Standard / Standard OV / Superior / Superior OV / Swim-up / Junior Suite / Suite\n▸ 시즌: Normal(4~10월, 3월중순~말) / High(11~12월, 1~2월, 2~3월) / Peak(연말연시, 설)\n▸ 아동(4-11세): 엑스트라베드 또는 베드쉐어 선택 가능\n▸ 4세 미만: 무료\n▸ 객실당 최대 12세 미만 아동 2명\n▸ 기준인원 초과 시 추가요금 발생',
+      },
+    },
+
+    // 베스트웨스턴 프리미어 푸꾸옥 (hotelId: 401, 공급사: 피크타임)
+    401: {
+      '스페셜 혜택': {
+        title: 'F&B 크레딧 & 스파 20% 할인!',
+        summary: 'F&B 크레딧 1회(3박 이상), F&B·스파 20% 할인, 무료 셔틀, 수영장·헬스장',
+        content: '▸ F&B 전용 크레딧 1회 제공 (3박 이상 투숙 시)\n▸ F&B·스파 20% 할인\n▸ 무료 공항 셔틀 (사전예약 필수, 시간표 운영)\n▸ 매일 물 2병 제공\n▸ 수영장·헬스장 무료 이용',
+      },
+      '유의사항': {
+        title: '예약 전 반드시 확인하세요',
+        summary: '빌라 최소 2박, 얼리체크인/레이트체크아웃 1박의 50%',
+        content: '▸ Sonasea Pool Villa: 최소 2박 이상 예약 필수\n▸ 얼리 체크인: 1박 요금의 50% (10:00부터)\n▸ 레이트 체크아웃: 1박 요금의 50% (18:00까지)\n▸ 20% 할인과 F&B 크레딧 바우처 중복 사용 불가\n▸ 셔틀: 사전예약 필수, 시간표에 따라 운영',
+      },
+      '취소환불규정': {
+        title: '취소·환불 정책 안내',
+        summary: '하이시즌 24일전 / 피크시즌 33일전까지 환불 가능',
+        content: '▸ High Season: 체크인 24일 전까지 100% 환불\n▸ Peak Season: 체크인 33일 전까지 100% 환불\n▸ 기한 이후 취소 시 환불 불가',
+      },
+      '포함사항': {
+        title: '이 상품에 포함된 것들',
+        summary: '1박 숙박, 소아·유아 무료(베드쉐어), 물 2병, 수영장·헬스장',
+        content: '▸ 1박 숙박\n▸ 소아·유아 추가요금 없이 투숙 및 조식 무료 (베드쉐어 기준)\n▸ 매일 물 2병\n▸ 수영장·헬스장 무료 이용',
+      },
+      '안내사항': {
+        title: '이용 안내 & 아동 정책',
+        summary: '객실 13종(일반 9 + 빌라 4), 5세 이하 무료, 체크인 15:00',
+        content: '▸ 일반 객실: Deluxe Garden / Deluxe Garden(Triple) / Deluxe Pool Access / Premier Deluxe / Premier Deluxe(Triple) / Executive Suite 1BR / Executive Suite 2BR / Family Suite / Premier Suite\n▸ 빌라: Sonasea Pool Villa 2BR / 3BR / 4BR / 5BR\n▸ 시즌: High Season / Peak Season\n▸ 성인 추가: 엑스트라베드 + 조식 포함\n▸ 소아(6-11세): 엑스트라베드 또는 조식만 선택 가능\n▸ 유아(5세 이하): 무료\n▸ 체크인 15:00 / 체크아웃 12:00',
+      },
+    },
+
+    // 리젠트 푸꾸옥 (hotelId: 402, 공급사: 피크타임)
+    402: {
+      '스페셜 혜택': {
+        title: '미니바 무료(주류포함) & 세탁 서비스!',
+        summary: '미니바 데일리 리필, 세탁 3피스/일, 턴다운 2회, 프로모션 3종',
+        content: '▸ 미니바(주류 포함) 무료 제공 (데일리 리필)\n▸ 베드룸당 세탁 3피스/일\n▸ 신발 클리닝 서비스\n▸ 하우스키핑·턴다운 2회/일\n▸ 얼리버드 10% 할인 (시즌별 예약 기한 상이)\n▸ 롱스테이 10% 할인 (5박 이상)\n▸ 허니문 패키지 (공항 픽업 + 특별 어메니티)',
+      },
+      '유의사항': {
+        title: '예약 전 반드시 확인하세요',
+        summary: 'Peak 최소 4박, 공항픽업 유료, 프로모션 택 1',
+        content: '▸ Peak Season: 최소 4박 이상 예약 필수\n▸ 공항 픽업/샌딩: 편도 유료 (Range Rover 또는 벤츠 비아노)\n▸ 프로모션 중복 적용 불가 (택 1)\n▸ 허니문 패키지: 1년 이내 결혼증명서 필수\n▸ 빌라: 최소 2박 이상 예약',
+      },
+      '취소환불규정': {
+        title: '취소·환불 정책 안내',
+        summary: 'Low 18일 / High 33일 / Peak 48일 전까지 환불 가능',
+        content: '▸ Low Season: 체크인 18일 전 (얼리버드 30일 전)\n▸ High Season: 체크인 33일 전 (얼리버드 48일 전)\n▸ Peak Season: 체크인 48일 전 (얼리버드 63일 전)\n▸ 기한 내 100% 환불, 이후 환불 불가',
+      },
+      '포함사항': {
+        title: '이 상품에 포함된 것들',
+        summary: '1박 숙박, 미니바(주류), 세탁 3피스, 신발 클리닝, 턴다운 2회',
+        content: '▸ 1박 숙박\n▸ 미니바 무료 (주류 포함, 데일리 리필)\n▸ 세탁 3피스/일\n▸ 신발 클리닝 서비스\n▸ 하우스키핑·턴다운 2회/일',
+      },
+      '안내사항': {
+        title: '이용 안내 & 아동 정책',
+        summary: '객실 13종(5카테고리), 3세 이하 무료, NON-CLUB/CLUB 구분',
+        content: '▸ NON-CLUB: Garden Pool Suite / King Terrace Pool Villa / Duplex Pool Villa / 2BR Pool Villa / 3BR Pool Villa\n▸ CLUB: Club Pool Suite / Club Terrace Pool Villa / Club Duplex Pool Villa / Club 2BR Villa / Club 3BR Villa\n▸ FAMILY: Family Duplex Pool Villa / Family 2BR Villa\n▸ GRAND: 4BR Club Lagoon Pool Villa\n▸ 시즌: Low Season / High Season / Peak Season\n▸ NON-CLUB 성인 추가: 엑스트라베드 + 조식\n▸ CLUB 성인 추가: 엑스트라베드 + 조식 (Club 혜택 포함)\n▸ 소아(4-11세): 엑스트라베드 또는 조식만 선택 가능\n▸ 유아(3세 이하): 무료',
+      },
+    },
+  };
+
+  // 기본 fallback 샘플
+  const defaultCardSamples = {
     '스페셜 혜택': {
       title: '레이트 체크아웃 & 스파 무료 제공!',
-      summary: `${s1Supplier || '공통'} 고객 전용 스페셜 혜택 3가지`,
+      summary: `${s1Supplier || '공통'} 고객 전용 스페셜 혜택`,
     },
     '유의사항': {
       title: '체크인 전에 꼭 확인하세요',
-      summary: '보증금·반려동물·흡연 등 이용 규정 안내',
+      summary: '이용 규정 안내',
     },
     '취소환불규정': {
       title: '취소·환불 정책 안내',
-      summary: `${s1Supplier || '공통'} 계약 기준 일자별 환불율`,
+      summary: '시즌별 취소 기한 및 환불 규정',
     },
     '포함사항': {
       title: '이 상품에 포함된 것들',
       summary: '숙박·조식·공항 픽업 포함 확인',
     },
+    '안내사항': {
+      title: '이용 안내 & 아동 정책',
+      summary: '아동 정책, 체크인/아웃, 시즌 안내',
+    },
   };
 
-  const cardCategories = ['스페셜 혜택', '유의사항', '취소환불규정', '포함사항'];
+  const cardSamples = (s1FileType === 'hotel' && contractTemplates[s1HotelId])
+    ? contractTemplates[s1HotelId]
+    : defaultCardSamples;
 
-  for (let i = 0; i < 4; i++) {
+  const cardCategories = ['스페셜 혜택', '유의사항', '취소환불규정', '포함사항', '안내사항'];
+
+  for (let i = 0; i < cardCategories.length; i++) {
     const sel = document.getElementById('pt-sel-' + i);
     sel.innerHTML = '';
     sel.setAttribute('style', selStyle);
@@ -3272,10 +4150,17 @@ function buildStep3() {
       card.querySelector('.rv-summary').textContent = sample.summary;
       card.querySelector('.ec-summary').value = sample.summary;
     }
+    if (sample.content) {
+      const contentEl = card.querySelector('.ec-content');
+      if (contentEl) contentEl.value = sample.content;
+    }
 
     // 관리명: 첫 옵션 기준으로 생성
     setTimeout(() => onCardTargetChange(document.getElementById('pt-sel-' + i), i), 0);
   }
+  // 카드 카운트 업데이트
+  const countEl = document.getElementById('s3-card-count');
+  if (countEl) countEl.textContent = cardCategories.length;
   updateSelCount();
 }
 
@@ -3810,6 +4695,59 @@ function toggleStockPostHide(hideKey) {
   hiddenStockPosts[hideKey] = !hiddenStockPosts[hideKey];
   renderPartnerPosts();
 }
+
+// ===== 콘텐츠 노출 관리 탭 =====
+function switchCvTab(btn, showId) {
+  document.querySelectorAll('.cv-tab').forEach(t => t.classList.remove('active'));
+  btn.classList.add('active');
+  document.getElementById('cv-post').style.display = showId === 'cv-post' ? 'block' : 'none';
+  document.getElementById('cv-stock').style.display = showId === 'cv-stock' ? 'block' : 'none';
+}
+
+// ===== 파트너 노출 설정 =====
+function togglePartnerTarget(btn, ctx) {
+  const group = btn.parentElement;
+  group.querySelectorAll('.toggle-btn').forEach(b => b.classList.remove('on'));
+  btn.classList.add('on');
+  const isSpecific = btn.textContent.includes('특정');
+  const selectDiv = document.getElementById('partner-select-' + ctx);
+  if (selectDiv) selectDiv.style.display = isSpecific ? 'block' : 'none';
+}
+
+function toggleAllPartners(checked, ctx) {
+  const list = document.getElementById('partner-list-' + ctx);
+  if (!list) return;
+  list.querySelectorAll('input[type="checkbox"]').forEach(cb => {
+    if (cb.closest('label').style.display !== 'none') cb.checked = checked;
+  });
+  updatePartnerCount(ctx);
+}
+
+function filterPartnerCheckboxes(query, ctx) {
+  const list = document.getElementById('partner-list-' + ctx);
+  if (!list) return;
+  const q = query.toLowerCase();
+  list.querySelectorAll('.partner-cb-item').forEach(label => {
+    const name = label.querySelector('span').textContent.toLowerCase();
+    label.style.display = name.includes(q) ? 'flex' : 'none';
+  });
+}
+
+function updatePartnerCount(ctx) {
+  const list = document.getElementById('partner-list-' + ctx);
+  const countEl = document.getElementById('partner-count-' + ctx);
+  if (!list || !countEl) return;
+  const checked = list.querySelectorAll('input[type="checkbox"]:checked').length;
+  countEl.textContent = checked + '개';
+}
+// 체크박스 변경 시 카운트 업데이트
+document.addEventListener('change', function(e) {
+  if (e.target.closest('.partner-checkbox-list')) {
+    const listId = e.target.closest('.partner-checkbox-list').id;
+    const ctx = listId.replace('partner-list-', '');
+    updatePartnerCount(ctx);
+  }
+});
 
 
 </script>
