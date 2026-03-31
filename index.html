@@ -2776,7 +2776,7 @@ flowchart LR
           </label>
         </div>
         <div style="font-size:12px;color:rgba(0,0,0,0.45);margin-bottom:16px;">
-          일정표를 등록하려면 토글을 ON하세요. 항목의 type, id, extra, determined 값이 저장됩니다.
+          일정표를 등록하려면 토글을 ON하세요. 항목의 유형, 카탈로그 ID, 설명(250자), 확정 여부가 저장됩니다.
         </div>
 
         <div id="pp-itinerary-wrap" style="display:none;">
@@ -4233,6 +4233,19 @@ const ITIN_TYPES = ['NONE','AIRLINE','AIRPORT','COUNTRY','PLACE','REGION','ACCOM
 const ITIN_TYPE_LABELS = {NONE:'기타',AIRLINE:'항공',AIRPORT:'공항',COUNTRY:'국가',PLACE:'장소',REGION:'지역',ACCOMMODATION:'숙소',MEAL:'식사',SPOT_ACTIVITY:'스팟/체험'};
 const ITIN_TYPE_CLASS = {AIRLINE:'airline',AIRPORT:'airport',ACCOMMODATION:'accommodation',SPOT_ACTIVITY:'spot',PLACE:'place'};
 
+// 카탈로그 ID 샘플 데이터 (유형별)
+const ITIN_CATALOGS = {
+  AIRLINE: [{id:10,name:'비엣젯(VJ)'},{id:11,name:'에어아시아(AK)'},{id:12,name:'대한항공(KE)'},{id:13,name:'베트남항공(VN)'}],
+  AIRPORT: [{id:1,name:'인천국제공항(ICN)'},{id:2,name:'푸꾸옥국제공항(PQC)'},{id:3,name:'깜라인국제공항(CXR)'},{id:4,name:'노이바이국제공항(HAN)'}],
+  COUNTRY: [{id:100,name:'베트남'},{id:101,name:'태국'},{id:102,name:'일본'}],
+  PLACE: [{id:200,name:'푸꾸옥'},{id:201,name:'나트랑'},{id:202,name:'다낭'},{id:203,name:'호이안'}],
+  REGION: [{id:300,name:'동남아시아'},{id:301,name:'동북아시아'}],
+  ACCOMMODATION: [{id:45,name:'솔바이멜리아 푸꾸옥'},{id:220,name:'씨셀스 푸꾸옥'},{id:346,name:'오션 브리즈 방갈로'},{id:300,name:'소나가비치 리조트'}],
+  SPOT_ACTIVITY: [{id:10,name:'빈펄 사파리'},{id:11,name:'빈원더스 푸꾸옥'},{id:20,name:'선셋 크루즈'},{id:21,name:'호핑투어'}],
+  MEAL: [],
+  NONE: [],
+};
+
 // 기본 5일 일정 샘플
 let itineraryDays = [
   {dayNum:1, meals:{breakfast:{type:'NONE',name:''},lunch:{type:'MEAL',name:'기내식'},dinner:{type:'MEAL',name:'현지식'}},
@@ -4329,6 +4342,10 @@ function renderItinerary() {
     const itemsHtml = day.items.map((it, ii) => {
       const typeClass = ITIN_TYPE_CLASS[it.type] || '';
       const typeLabel = ITIN_TYPE_LABELS[it.type] || it.type;
+      const catalogs = ITIN_CATALOGS[it.type] || [];
+      const hasCatalogs = catalogs.length > 0;
+      const extraLen = (it.extra || '').length;
+      const extraOver = extraLen > 250;
       return `<div class="itin-item-row">
         <div style="display:flex;flex-direction:column;gap:2px;">
           <span style="font-size:10px;color:rgba(0,0,0,0.45);">유형 <span class="req">*</span></span>
@@ -4338,12 +4355,21 @@ function renderItinerary() {
         </div>
         <span class="itin-type-badge ${typeClass}">${typeLabel}</span>
         <div style="display:flex;flex-direction:column;gap:2px;flex:1;">
-          <span style="font-size:10px;color:rgba(0,0,0,0.45);">이름 <span class="req">*</span></span>
-          <input class="fc" type="text" value="${it.name}" placeholder="항목명 (필수)" style="height:26px;font-size:12px;padding:0 8px;" onchange="updateItinItem(${di},${ii},'name',this.value)">
+          <span style="font-size:10px;color:rgba(0,0,0,0.45);">카탈로그 <span class="req">*</span></span>
+          ${hasCatalogs
+            ? `<select class="fc" style="height:26px;font-size:12px;" onchange="onItinCatalogSelect(${di},${ii},this)">
+                <option value="">카탈로그 선택</option>
+                ${catalogs.map(c=>`<option value="${c.id}" ${it.id===c.id?'selected':''}>${c.name} (ID: ${c.id})</option>`).join('')}
+                <option value="__new__" style="color:#1677ff;">+ 신규 카탈로그 생성</option>
+              </select>`
+            : `<input class="fc" type="text" value="${it.name}" placeholder="직접 입력" style="height:26px;font-size:12px;padding:0 8px;" onchange="updateItinItem(${di},${ii},'name',this.value)">`
+          }
+          ${it._isNew ? `<div style="font-size:10px;color:#1677ff;margin-top:2px;">⚡ 입력한 이름으로 새 카탈로그가 생성됩니다</div>` : ''}
         </div>
         <div style="display:flex;flex-direction:column;gap:2px;">
-          <span style="font-size:10px;color:rgba(0,0,0,0.45);">extra</span>
-          <input class="fc" type="text" value="${it.extra}" placeholder="부가정보" style="height:26px;font-size:11px;padding:0 8px;width:120px;color:rgba(0,0,0,0.55);" onchange="updateItinItem(${di},${ii},'extra',this.value)">
+          <span style="font-size:10px;color:rgba(0,0,0,0.45);">설명 <span style="font-size:9px;color:${extraOver?'#ff4d4f':'rgba(0,0,0,0.3)'};">${extraLen}/250</span></span>
+          <input class="fc" type="text" value="${it.extra}" placeholder="설명 (250자 이내)" maxlength="250" style="height:26px;font-size:11px;padding:0 8px;width:160px;color:rgba(0,0,0,0.55);${extraOver?'border-color:#ff4d4f;':''}" onchange="updateItinItem(${di},${ii},'extra',this.value)" oninput="updateItinItem(${di},${ii},'extra',this.value)">
+          <span style="font-size:9px;color:rgba(0,0,0,0.25);">인벤토리 관리 필드</span>
         </div>
         <label style="display:flex;align-items:center;gap:3px;font-size:11px;cursor:pointer;white-space:nowrap;margin-top:12px;" title="확정 여부">
           <input type="checkbox" ${it.determined?'checked':''} onchange="updateItinItem(${di},${ii},'determined',this.checked)"> 확정
@@ -4386,11 +4412,44 @@ function updateMeal(di, mk, field, val) {
 
 function updateItinItem(di, ii, field, val) {
   itineraryDays[di].items[ii][field] = val;
-  if (field === 'type') renderItinerary(); // 타입 변경 시 배지 업데이트
+  if (field === 'type') {
+    // 유형 변경 시 카탈로그 초기화
+    itineraryDays[di].items[ii].id = 0;
+    itineraryDays[di].items[ii].name = '';
+    itineraryDays[di].items[ii]._isNew = false;
+    renderItinerary();
+  }
+  if (field === 'extra') renderItinerary(); // 글자수 카운터 업데이트
+}
+
+function onItinCatalogSelect(di, ii, sel) {
+  const val = sel.value;
+  if (val === '__new__') {
+    // 신규 카탈로그 생성 모드
+    const newName = prompt('새 카탈로그 이름을 입력하세요:');
+    if (newName) {
+      itineraryDays[di].items[ii].name = newName;
+      itineraryDays[di].items[ii].id = 0;
+      itineraryDays[di].items[ii]._isNew = true;
+    }
+    renderItinerary();
+  } else if (val) {
+    const type = itineraryDays[di].items[ii].type;
+    const catalog = (ITIN_CATALOGS[type] || []).find(c => c.id === parseInt(val));
+    if (catalog) {
+      itineraryDays[di].items[ii].id = catalog.id;
+      itineraryDays[di].items[ii].name = catalog.name;
+      itineraryDays[di].items[ii]._isNew = false;
+    }
+  } else {
+    itineraryDays[di].items[ii].id = 0;
+    itineraryDays[di].items[ii].name = '';
+    itineraryDays[di].items[ii]._isNew = false;
+  }
 }
 
 function addItinItem(di) {
-  itineraryDays[di].items.push({type:'NONE',id:0,name:'',extra:'',determined:false});
+  itineraryDays[di].items.push({type:'NONE',id:0,name:'',extra:'',determined:false,_isNew:false});
   renderItinerary();
 }
 
