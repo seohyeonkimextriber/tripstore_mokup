@@ -2581,7 +2581,7 @@ flowchart LR
     B2 --> C
     B3 --> C
     C --> D["🔒 Stock POST<br/>(수정/삭제 불가)"]
-    D --> D1["👁️ 노출/미노출 토글<br/>(8개 카테고리)"]
+    D --> D1["항상 노출<br/>(전 카테고리)"]
     A --> E["✏️ 상품 POST 직접 작성"]
     E --> F["📝 상품 POST<br/>(수정/삭제 가능)"]
     F --> F1[수정]
@@ -2621,8 +2621,6 @@ flowchart LR
     B --> C["등록<br/>(POST 직접 작성)"]
     B --> D["수정<br/>(기존 상품 POST)"]
     B --> E["삭제<br/>(기존 상품 POST)"]
-    B --> F["노출 토글<br/>(Stock POST만)"]
-
     C --> C1["카테고리 선택"]
     C1 --> C2["관리명 + 제목 + 내용 입력"]
     C2 --> C3{"소개/핵심포인트?"}
@@ -2636,15 +2634,10 @@ flowchart LR
     E --> E1["삭제 확인"]
     E1 --> E2["상품에서 제거"]
 
-    F --> F1{"미노출 대상?<br/>(8개 카테고리)"}
-    F1 -->|Yes| F2["👁️ → 🙈<br/>미노출 처리"]
-    F1 -->|No| F3["토글 불가"]
-
     style A fill:#e6f4ff,stroke:#1677ff,color:#1677ff
     style C fill:#f6ffed,stroke:#52c41a,color:#389e0d
     style D fill:#e6f4ff,stroke:#1677ff,color:#1677ff
     style E fill:#fff1f0,stroke:#ff4d4f,color:#ff4d4f
-    style F fill:#fff7e6,stroke:#d48806,color:#d48806
       </div>
     </div>
 
@@ -2657,7 +2650,7 @@ flowchart LR
             <th style="padding:10px 14px;text-align:left;border-bottom:2px solid #f0f0f0;font-weight:600;">등록</th>
             <th style="padding:10px 14px;text-align:left;border-bottom:2px solid #f0f0f0;font-weight:600;">수정</th>
             <th style="padding:10px 14px;text-align:left;border-bottom:2px solid #f0f0f0;font-weight:600;">삭제</th>
-            <th style="padding:10px 14px;text-align:left;border-bottom:2px solid #f0f0f0;font-weight:600;">노출 토글</th>
+            <th style="padding:10px 14px;text-align:left;border-bottom:2px solid #f0f0f0;font-weight:600;">노출</th>
             <th style="padding:10px 14px;text-align:left;border-bottom:2px solid #f0f0f0;font-weight:600;">싱크</th>
           </tr>
         </thead>
@@ -2667,7 +2660,7 @@ flowchart LR
             <td style="padding:10px 14px;border-bottom:1px solid #f0f0f0;color:rgba(0,0,0,0.45);">자동 (Stock 연결)</td>
             <td style="padding:10px 14px;border-bottom:1px solid #f0f0f0;color:#ff4d4f;">불가 (어드민만)</td>
             <td style="padding:10px 14px;border-bottom:1px solid #f0f0f0;color:#ff4d4f;">불가</td>
-            <td style="padding:10px 14px;border-bottom:1px solid #f0f0f0;color:#52c41a;">가능 (8개 카테고리)</td>
+            <td style="padding:10px 14px;border-bottom:1px solid #f0f0f0;color:#52c41a;">항상 노출</td>
             <td style="padding:10px 14px;border-bottom:1px solid #f0f0f0;color:#1677ff;">Kafka 자동 싱크</td>
           </tr>
           <tr>
@@ -4424,10 +4417,7 @@ function removeItinDay(di) {
 // ===== 파트너스 상품 POST 관리 =====
 const POST_CATS_PRODUCT = ['소개','핵심포인트','스페셜 혜택','포함사항','불포함사항','유의사항','안내사항','취소환불규정','자주 묻는 질문'];
 const CAT_ICONS = {'소개':'🏠','핵심포인트':'⭐','스페셜 혜택':'🎁','포함사항':'✅','불포함사항':'❌','유의사항':'⚠️','안내사항':'📋','취소환불규정':'💳','자주 묻는 질문':'❓'};
-// 미노출 토글 가능한 카테고리
-const HIDEABLE_CATS = ['소개','핵심포인트','스페셜 혜택','포함사항','불포함사항','유의사항','안내사항','취소환불규정','자주 묻는 질문'];
-// 미노출 상태: { 'stockKey_postId': true } — true면 미노출
-let hiddenStockPosts = {};
+// Stock POST는 항상 노출 (토글 불가)
 
 // Stock별 연결 POST (어드민이 등록한 것들 시뮬레이션)
 const stockPosts = {
@@ -4546,26 +4536,15 @@ function renderPartnerPosts() {
     const pps = partnerProductPosts[cat] || [];
     const icon = CAT_ICONS[cat] || '📄';
 
-    const isHideable = HIDEABLE_CATS.includes(cat);
     const stockItems = sps.map(p => {
-      const hideKey = p.stockKey + '_' + p.id;
-      const isHidden = !!hiddenStockPosts[hideKey];
-      const opacity = isHidden ? 'opacity:0.45;' : '';
-      const strikethrough = isHidden ? 'text-decoration:line-through;' : '';
-      const eyeIcon = isHidden ? '🙈' : '👁️';
-      const eyeTitle = isHidden ? '미노출 중 (클릭하여 노출)' : '노출 중 (클릭하여 미노출)';
-      const hideBtn = isHideable ? `<button class="btn btn-text btn-sm" onclick="toggleStockPostHide('${hideKey}')" title="${eyeTitle}" style="font-size:16px;padding:2px 6px;">${eyeIcon}</button>` : '';
-      const hideBadge = isHidden ? '<span style="font-size:10px;background:#fff1f0;color:#cf1322;border:1px solid #ffa39e;padding:2px 6px;border-radius:10px;font-weight:600;flex-shrink:0;">미노출</span>' : '';
       return `
-      <div class="pp-post-item stock-post" style="${opacity}">
+      <div class="pp-post-item stock-post">
         <span class="pp-post-lock" title="Stock POST (수정 불가)">🔒</span>
         <div class="pp-post-info">
-          <div class="pp-post-mgmt" style="${strikethrough}">${p.mgmt}</div>
+          <div class="pp-post-mgmt">${p.mgmt}</div>
           <div class="pp-post-meta">#${p.id} · ${p.source} · ${p.stockType}</div>
         </div>
-        ${hideBadge}
         <span class="pp-post-badge stock">Stock</span>
-        ${hideBtn}
       </div>`;
     }).join('');
 
@@ -4688,11 +4667,6 @@ function editPartnerPost(cat, idx) {
 function removePartnerPost(cat, idx) {
   if (!confirm('이 상품 POST를 삭제하시겠습니까?')) return;
   partnerProductPosts[cat].splice(idx, 1);
-  renderPartnerPosts();
-}
-
-function toggleStockPostHide(hideKey) {
-  hiddenStockPosts[hideKey] = !hiddenStockPosts[hideKey];
   renderPartnerPosts();
 }
 
