@@ -348,6 +348,19 @@ select.fc { height: 36px; padding: 0 32px 0 12px; appearance: none; background-i
 /* ===== VIEW ===== */
 .view { display: none; }
 .view.on { display: block; }
+
+/* ===== WIZARD STEPS ===== */
+.wz-step { display:flex;align-items:center;gap:10px;cursor:pointer;padding:8px 14px;border-radius:10px;transition:all 0.15s; }
+.wz-step:hover { background:#faf5ff; }
+.wz-num { width:30px;height:30px;border-radius:50%;background:#f0f0f0;color:rgba(0,0,0,0.35);display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;flex-shrink:0;transition:all 0.2s; }
+.wz-label { font-size:13px;font-weight:600;color:rgba(0,0,0,0.35);transition:color 0.15s; }
+.wz-sub { font-size:11px;color:rgba(0,0,0,0.25);margin-top:1px; }
+.wz-active .wz-num { background:#722ed1;color:#fff; }
+.wz-active .wz-label { color:#722ed1; }
+.wz-done .wz-num { background:#52c41a;color:#fff; }
+.wz-done .wz-label { color:#237804; }
+.wz-line { flex:1;height:2px;background:#f0f0f0;transition:background 0.2s; }
+.wz-line-on { background:#722ed1; }
 </style>
 </head>
 <body>
@@ -358,10 +371,13 @@ select.fc { height: 36px; padding: 0 32px 0 12px; appearance: none; background-i
   <div class="gnb-menu">
     <div class="gnb-item">대시보드</div>
     <div class="gnb-item">페이지관리</div>
-    <div class="gnb-item">상품관리 <span class="caret">▾</span>
+    <div class="gnb-item" tabindex="0">상품관리 <span class="caret">▾</span>
       <div class="gnb-dropdown">
         <div class="gnb-dropdown-item">상품 관리</div>
         <div class="gnb-dropdown-item">상품 옵션 관리</div>
+        <div class="gnb-dropdown-divider"></div>
+        <div class="gnb-dropdown-group" style="display:flex;align-items:center;gap:4px;">원스톱 등록 <span class="new-badge">NEW</span></div>
+        <div class="gnb-dropdown-item" onclick="event.stopPropagation();showView('product-wizard')" style="color:#722ed1;font-weight:500;">상품 원스톱 등록</div>
       </div>
     </div>
     <div class="gnb-item">예약관리</div>
@@ -405,6 +421,8 @@ select.fc { height: 36px; padding: 0 32px 0 12px; appearance: none; background-i
           <div class="mega-col">
             <div class="mega-col-title" style="display:flex;align-items:center;gap:6px;">게시판 <span class="new-badge">NEW</span></div>
             <span class="mega-col-item active" onclick="showView('list')">카탈로그 게시판 관리</span>
+            <span class="mega-col-item" onclick="showView('list')" style="color:#2f54eb;font-weight:500;">공급사 게시판 관리</span>
+            <span class="mega-col-item" onclick="showView('list')" style="color:#d48806;">상품단위 게시판 관리</span>
           </div>
         </div>
         <!-- 하단 이미지/파일 -->
@@ -455,11 +473,12 @@ select.fc { height: 36px; padding: 0 32px 0 12px; appearance: none; background-i
     <div class="card">
       <div class="filter-bar">
         <input class="fi fi-sm" type="text" placeholder="ID">
-        <select class="fi fi-md" id="lf-supplier">
-          <option value="">상세구분</option>
-          <option>TMG</option>
-          <option>피크타임</option>
-          <option>직계약</option>
+        <select class="fi fi-md" id="lf-supplier" style="display:none;">
+          <option value="">Sub_key</option>
+          <option value="default">default (전체공통)</option>
+          <option>항공사_대한항공</option>
+          <option>숙소_솔바이멜리아 푸꾸옥</option>
+          <option>숙소_솔바이멜리아 푸꾸옥_BB</option>
         </select>
         <select class="fi fi-md" id="lf-cat">
           <option value="">카테고리</option>
@@ -468,17 +487,27 @@ select.fc { height: 36px; padding: 0 32px 0 12px; appearance: none; background-i
           <option>자주 묻는 질문</option><option>취소환불규정</option>
           <option>안내사항</option><option>출발 전 안내</option><option>수하물 규정</option>
         </select>
-        <select class="fi fi-md" id="lf-type" onchange="syncListTargetId()">
+        <select class="fi fi-md" id="lf-type" onchange="syncListTargetId();toggleListSubKey()">
           <option value="">타겟유형</option>
-          <option>공통</option>
-          <option>항공사</option>
-          <option>공항</option>
-          <option>숙소</option>
-          <option>객실</option>
-          <option>국가</option>
-          <option>여행지</option>
-          <option>스팟/체험</option>
-          <option>투어/티켓</option>
+          <optgroup label="── 카탈로그">
+            <option>공통</option>
+            <option>항공사</option>
+            <option>공항</option>
+            <option>숙소</option>
+            <option>객실</option>
+            <option>국가</option>
+            <option>여행지</option>
+            <option>스팟/체험</option>
+          </optgroup>
+          <optgroup label="── 상품단위">
+            <option>항공권</option>
+            <option>숙박권</option>
+            <option>투어/티켓</option>
+            <option>상품</option>
+          </optgroup>
+          <optgroup label="── 신규">
+            <option>공급사</option>
+          </optgroup>
         </select>
         <select class="fi fi-md" id="lf-target"><option value="">타겟ID</option></select>
         <input class="fi fi-lg" type="text" placeholder="관리명 검색">
@@ -494,7 +523,7 @@ select.fc { height: 36px; padding: 0 32px 0 12px; appearance: none; background-i
               <th class="col-id">ID</th>
               <th class="col-cat">카테고리</th>
               <th class="col-name">관리명</th>
-              <th style="width:90px;">상세구분</th>
+              <th style="width:140px;">Sub_key</th>
               <th class="col-type">타겟유형</th>
               <th class="col-target">타겟ID</th>
               <th class="col-stock" title="이 POST를 사용 중인 숙박권/항공권/투어티켓 등의 수">연결 상품권 수</th>
@@ -503,11 +532,85 @@ select.fc { height: 36px; padding: 0 32px 0 12px; appearance: none; background-i
             </tr>
           </thead>
           <tbody>
+            <!-- 공급사 게시판 POST (NEW) -->
+            <tr style="background:#f0f5ff;">
+              <td>2620</td>
+              <td><span class="tag tag-purple">스페셜 혜택</span></td>
+              <td>피크타임_숙소_솔바이멜리아 푸꾸옥_BB_스페셜혜택</td>
+              <td><code style="font-size:11px;background:#e6f7e6;padding:1px 5px;border-radius:3px;color:#389e0d;">숙소_솔바이멜리아 푸꾸옥_BB</code></td>
+              <td><span class="tag" style="background:#f0f5ff;color:#2f54eb;border:1px solid #adc6ff;">공급사</span></td>
+              <td style="text-align:center;">1</td>
+              <td style="text-align:center;"><span class="stock-num">4</span></td>
+              <td style="color:rgba(0,0,0,0.4);font-size:12px;">2026-04-01 09:30</td>
+              <td style="text-align:center;">
+                <button class="btn btn-text btn-sm" onclick="showView('create')">수정</button>
+                <button class="btn btn-text btn-sm">복제</button>
+              </td>
+            </tr>
+            <tr style="background:#f0f5ff;">
+              <td>2619</td>
+              <td><span class="tag tag-gray">수하물 규정</span></td>
+              <td>피크타임_항공사_대한항공_이코노미_수하물규정</td>
+              <td><code style="font-size:11px;background:#e6f7e6;padding:1px 5px;border-radius:3px;color:#389e0d;">항공사_대한항공(KE)_이코노미</code></td>
+              <td><span class="tag" style="background:#f0f5ff;color:#2f54eb;border:1px solid #adc6ff;">공급사</span></td>
+              <td style="text-align:center;">1</td>
+              <td style="text-align:center;"><span class="stock-num">2</span></td>
+              <td style="color:rgba(0,0,0,0.4);font-size:12px;">2026-04-01 09:15</td>
+              <td style="text-align:center;">
+                <button class="btn btn-text btn-sm" onclick="showView('create')">수정</button>
+                <button class="btn btn-text btn-sm">복제</button>
+              </td>
+            </tr>
+            <tr style="background:#f0f5ff;">
+              <td>2618</td>
+              <td><span class="tag tag-gray">유의사항</span></td>
+              <td>피크타임_default_유의사항</td>
+              <td><code style="font-size:11px;background:#e6f7e6;padding:1px 5px;border-radius:3px;color:#389e0d;">default</code></td>
+              <td><span class="tag" style="background:#f0f5ff;color:#2f54eb;border:1px solid #adc6ff;">공급사</span></td>
+              <td style="text-align:center;">1</td>
+              <td style="text-align:center;"><span class="stock-num">15</span></td>
+              <td style="color:rgba(0,0,0,0.4);font-size:12px;">2026-04-01 09:00</td>
+              <td style="text-align:center;">
+                <button class="btn btn-text btn-sm" onclick="showView('create')">수정</button>
+                <button class="btn btn-text btn-sm">복제</button>
+              </td>
+            </tr>
+            <!-- 숙박권 게시판 POST (NEW) -->
+            <tr style="background:#fffbe6;">
+              <td>2617</td>
+              <td><span class="tag tag-purple">포함사항</span></td>
+              <td>숙박권#456_엑스트라솔스위트_BB_포함사항</td>
+              <td><code style="font-size:11px;background:#fff1e6;padding:1px 5px;border-radius:3px;color:#874d00;">엑스트라 솔 스위트_BB</code></td>
+              <td><span class="tag" style="background:#fffbe6;color:#d48806;border:1px solid #ffe58f;">숙박권</span></td>
+              <td style="text-align:center;">456</td>
+              <td style="text-align:center;"><span style="font-size:12px;color:rgba(0,0,0,0.3);">—</span></td>
+              <td style="color:rgba(0,0,0,0.4);font-size:12px;">2026-03-31 17:20</td>
+              <td style="text-align:center;">
+                <button class="btn btn-text btn-sm" onclick="showView('create')">수정</button>
+                <button class="btn btn-text btn-sm">복제</button>
+              </td>
+            </tr>
+            <!-- 항공권 게시판 POST (NEW) -->
+            <tr style="background:#fff7e6;">
+              <td>2616</td>
+              <td><span class="tag tag-gray">유의사항</span></td>
+              <td>항공권#123_유의사항</td>
+              <td><span style="font-size:12px;color:rgba(0,0,0,0.3);">—</span></td>
+              <td><span class="tag" style="background:#fff7e6;color:#d46b08;border:1px solid #ffd591;">항공권</span></td>
+              <td style="text-align:center;">123</td>
+              <td style="text-align:center;"><span style="font-size:12px;color:rgba(0,0,0,0.3);">—</span></td>
+              <td style="color:rgba(0,0,0,0.4);font-size:12px;">2026-03-31 16:45</td>
+              <td style="text-align:center;">
+                <button class="btn btn-text btn-sm" onclick="showView('create')">수정</button>
+                <button class="btn btn-text btn-sm">복제</button>
+              </td>
+            </tr>
+            <!-- 기존 카탈로그 POST (sub_key 없음) -->
             <tr>
               <td>2516</td>
               <td><span class="tag tag-purple">스페셜 혜택</span></td>
-              <td>푸꾸옥_씨셀스 푸꾸옥 스파 트리트먼트 1회 제공</td>
-              <td><span class="tag" style="background:#e6fffb;color:#006d75;font-size:11px;">TMG</span></td>
+              <td>푸꾸옥_숙소_스페셜혜택_씨셀스 푸꾸옥</td>
+              <td><span style="font-size:12px;color:rgba(0,0,0,0.3);">—</span></td>
               <td><span class="tag tag-blue">숙소</span></td>
               <td style="text-align:center;">220</td>
               <td style="text-align:center;"><span class="stock-num">3</span></td>
@@ -520,8 +623,8 @@ select.fc { height: 36px; padding: 0 32px 0 12px; appearance: none; background-i
             <tr>
               <td>2515</td>
               <td><span class="tag tag-gray">유의사항</span></td>
-              <td>푸꾸옥_소나가 비치 리조트_3베드룸 비치프론트</td>
-              <td><span class="tag" style="background:#e6fffb;color:#006d75;font-size:11px;">TMG</span></td>
+              <td>객실_유의사항_소나가비치 리조트_3베드룸 비치프론트</td>
+              <td><span style="font-size:12px;color:rgba(0,0,0,0.3);">—</span></td>
               <td><span class="tag tag-green">객실</span></td>
               <td style="text-align:center;">871</td>
               <td style="text-align:center;"><span class="stock-num">1</span></td>
@@ -534,8 +637,8 @@ select.fc { height: 36px; padding: 0 32px 0 12px; appearance: none; background-i
             <tr>
               <td>1877</td>
               <td><span class="tag tag-purple">스페셜 혜택</span></td>
-              <td>푸꾸옥_솔바이멜리아_빌라 스위트</td>
-              <td><span class="tag" style="background:#fff0f6;color:#c41d7f;font-size:11px;">피크타임</span></td>
+              <td>객실_스페셜혜택_솔바이멜리아_빌라 스위트</td>
+              <td><span style="font-size:12px;color:rgba(0,0,0,0.3);">—</span></td>
               <td><span class="tag tag-green">객실</span></td>
               <td style="text-align:center;">159</td>
               <td style="text-align:center;"><span class="stock-num">2</span></td>
@@ -546,40 +649,12 @@ select.fc { height: 36px; padding: 0 32px 0 12px; appearance: none; background-i
               </td>
             </tr>
             <tr>
-              <td>1761</td>
-              <td><span class="tag tag-blue">소개</span></td>
-              <td>푸꾸옥_솔바이멜리아_엑스트라 솔 스위트</td>
-              <td><span style="font-size:12px;color:rgba(0,0,0,0.3);">—</span></td>
-              <td><span class="tag tag-green">객실</span></td>
-              <td style="text-align:center;">158</td>
-              <td style="text-align:center;"><span class="stock-zero">0</span></td>
-              <td style="color:rgba(0,0,0,0.4);font-size:12px;">2025-06-16 10:50</td>
-              <td style="text-align:center;">
-                <button class="btn btn-text btn-sm" onclick="showView('create')">수정</button>
-                <button class="btn btn-text btn-sm">복제</button>
-              </td>
-            </tr>
-            <tr>
-              <td>642</td>
-              <td><span class="tag tag-gray">유의사항</span></td>
-              <td>푸꾸옥_솔바이멜리아_엑스트라 솔 스위트</td>
-              <td><span class="tag" style="background:#e6fffb;color:#006d75;font-size:11px;">TMG</span></td>
-              <td><span class="tag tag-green">객실</span></td>
-              <td style="text-align:center;">158</td>
-              <td style="text-align:center;"><span class="stock-num">5</span></td>
-              <td style="color:rgba(0,0,0,0.4);font-size:12px;">2024-12-12 14:31</td>
-              <td style="text-align:center;">
-                <button class="btn btn-text btn-sm" onclick="showView('create')">수정</button>
-                <button class="btn btn-text btn-sm">복제</button>
-              </td>
-            </tr>
-            <tr>
               <td>577</td>
-              <td><span class="tag tag-purple">스페셜 혜택</span></td>
-              <td>푸꾸옥_솔바이 멜리아 제공 혜택</td>
-              <td><span class="tag" style="background:#fff0f6;color:#c41d7f;font-size:11px;">피크타임</span></td>
+              <td><span class="tag tag-orange">수하물 규정</span></td>
+              <td>항공_수하물규정_푸꾸옥_대한항공(KE)_일반석</td>
+              <td><span style="font-size:12px;color:rgba(0,0,0,0.3);">—</span></td>
               <td><span class="tag tag-orange">항공사</span></td>
-              <td style="text-align:center;">12</td>
+              <td style="text-align:center;">3</td>
               <td style="text-align:center;"><span class="stock-num">8</span></td>
               <td style="color:rgba(0,0,0,0.4);font-size:12px;">2024-12-12 13:52</td>
               <td style="text-align:center;">
@@ -590,7 +665,7 @@ select.fc { height: 36px; padding: 0 32px 0 12px; appearance: none; background-i
             <tr>
               <td>439</td>
               <td><span class="tag" style="background:#fff7e6;color:#d46b08;">핵심포인트</span></td>
-              <td>로맨틱한 레스토랑</td>
+              <td>푸꾸옥_숙소_핵심포인트_솔바이멜리아 푸꾸옥</td>
               <td><span style="font-size:12px;color:rgba(0,0,0,0.3);">—</span></td>
               <td><span class="tag tag-blue">숙소</span></td>
               <td style="text-align:center;">45</td>
@@ -666,25 +741,66 @@ select.fc { height: 36px; padding: 0 32px 0 12px; appearance: none; background-i
           <div class="form-item half">
             <label class="form-label">관리명 <span class="req">*</span></label>
             <div style="display:flex;gap:6px;">
-              <input class="fc" type="text" id="cf-mgmt" placeholder="카테고리, 타겟, 상세구분(선택) 선택 시 자동 생성됩니다" style="flex:1;">
+              <input class="fc" type="text" id="cf-mgmt" placeholder="카테고리, 타겟유형 선택 시 자동 생성됩니다" style="flex:1;">
               <button type="button" onclick="autoGenMgmtForm()" style="height:32px;padding:0 10px;border:1px solid #d9d9d9;border-radius:6px;background:#fafafa;font-size:12px;font-family:inherit;cursor:pointer;white-space:nowrap;color:rgba(0,0,0,0.65);">자동생성</button>
             </div>
           </div>
         </div>
-        <div class="form-row">
-          <div class="form-item half">
-            <label class="form-label">상세구분</label>
-            <select class="fc" id="cf-supplier" onchange="autoGenMgmtForm()">
-              <option value="">없음 (공통)</option>
-              <option>TMG</option>
-              <option>피크타임</option>
-              <option>직계약</option>
-            </select>
-            <div class="form-hint">비워두면 모든 상세구분에 공통 적용되는 POST입니다.</div>
+        <!-- Sub_key 영역: 공급사/숙박권 선택 시에만 표시 -->
+        <div class="form-row" id="cf-subkey-section" style="display:none;">
+          <!-- 공급사 게시판 sub_key 조합 UI -->
+          <div class="form-item full" id="cf-supplier-subkey" style="display:none;">
+            <label class="form-label">Sub_key 조합 <span style="font-size:11px;color:#1677ff;font-weight:400;">(공급사 게시판)</span></label>
+            <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:flex-start;">
+              <select class="fc" id="cf-sk-type" onchange="onSkTypeChange()" style="width:140px;">
+                <option value="">전체 공통</option>
+                <option value="항공사">항공사</option>
+                <option value="숙소">숙소</option>
+                <option value="스팟체험">스팟/체험</option>
+                <option value="콜렉션">콜렉션</option>
+                <option value="여행지">여행지</option>
+              </select>
+              <select class="fc" id="cf-sk-item" onchange="onSkItemChange()" style="width:200px;display:none;">
+                <option value="">선택</option>
+              </select>
+              <!-- 항공사: 좌석등급 -->
+              <select class="fc" id="cf-sk-attr" onchange="buildSubKeyPreview()" style="width:160px;display:none;">
+                <option value="">전체 (선택안함)</option>
+              </select>
+              <!-- 숙소: 객실 + 식사타입 -->
+              <select class="fc" id="cf-sk-room" onchange="buildSubKeyPreview()" style="width:200px;display:none;">
+                <option value="">전체 객실</option>
+              </select>
+              <select class="fc" id="cf-sk-meal" onchange="buildSubKeyPreview()" style="width:160px;display:none;">
+                <option value="">전체 식사타입</option>
+              </select>
+            </div>
+            <div id="cf-sk-preview" style="margin-top:8px;padding:8px 12px;background:#f6ffed;border:1px solid #b7eb8f;border-radius:6px;font-size:12px;color:#389e0d;display:none;">
+              <strong>sub_key:</strong> <code id="cf-sk-value" style="background:#e6f7e6;padding:2px 6px;border-radius:3px;">default</code>
+            </div>
+            <div class="form-hint" style="margin-top:4px;">유형 → 항목 → 속성 순서로 선택하면 sub_key가 자동 조합됩니다. 비워두면 <code>default</code> (이 공급사 전체 공통)</div>
           </div>
-          <div class="form-item half" style="align-self:flex-start;padding-top:0;">
-            <div style="background:#fff7e6;border:1px solid #ffd591;border-radius:6px;padding:10px 12px;font-size:12px;color:#874d00;line-height:1.6;margin-top:24px;">
-              💡 <strong>상세구분 지정 POST</strong>는 해당 상세구분 stock에만 연결됩니다.<br>공통 POST는 모든 상세구분 stock에 공유됩니다.
+          <!-- 숙박권 게시판 sub_key UI -->
+          <div class="form-item full" id="cf-accom-subkey" style="display:none;">
+            <label class="form-label">Sub_key 조합 <span style="font-size:11px;color:#fa8c16;font-weight:400;">(숙박권 게시판)</span></label>
+            <div style="display:flex;gap:8px;align-items:flex-start;">
+              <select class="fc" id="cf-ak-room" onchange="buildAccomSubKeyPreview()" style="width:220px;">
+                <option value="">전체 공통 (숙박권 전체)</option>
+              </select>
+              <select class="fc" id="cf-ak-meal" onchange="buildAccomSubKeyPreview()" style="width:180px;">
+                <option value="">전체 식사타입</option>
+              </select>
+            </div>
+            <div id="cf-ak-preview" style="margin-top:8px;padding:8px 12px;background:#fff7e6;border:1px solid #ffd591;border-radius:6px;font-size:12px;color:#874d00;display:none;">
+              <strong>sub_key:</strong> <code id="cf-ak-value" style="background:#fff1e6;padding:2px 6px;border-radius:3px;"></code>
+            </div>
+            <div class="form-hint" style="margin-top:4px;">이 숙박권의 특정 객실요금표에만 적용되는 POST입니다. 비워두면 숙박권 전체 공통.</div>
+          </div>
+          <!-- 안내 배너 -->
+          <div class="form-item half" id="cf-subkey-info" style="display:none;align-self:flex-start;padding-top:0;">
+            <div style="background:#e6f4ff;border:1px solid #91caff;border-radius:6px;padding:10px 12px;font-size:12px;color:#0958d9;line-height:1.6;margin-top:24px;">
+              💡 <strong>sub_key</strong>는 프론트/백엔드가 동일 로직으로 조합합니다.<br>
+              프로덕트 팩토리가 속성 기반으로 sub_key 리스트를 생성 → exact match 필터.
             </div>
           </div>
         </div>
@@ -693,15 +809,25 @@ select.fc { height: 36px; padding: 0 32px 0 12px; appearance: none; background-i
             <label class="form-label">타겟유형 <span class="req">*</span></label>
             <select class="fc" id="cf-type" onchange="onCreateTypeChange()">
               <option value="">타겟유형을 선택해주세요</option>
-              <option>공통</option>
-              <option>항공사</option>
-              <option>공항</option>
-              <option>숙소</option>
-              <option>객실</option>
-              <option>국가</option>
-              <option>여행지</option>
-              <option>스팟/체험</option>
-              <option>투어/티켓</option>
+              <optgroup label="── 카탈로그">
+                <option>공통</option>
+                <option>항공사</option>
+                <option>공항</option>
+                <option>숙소</option>
+                <option>객실</option>
+                <option>국가</option>
+                <option>여행지</option>
+                <option>스팟/체험</option>
+              </optgroup>
+              <optgroup label="── 상품단위">
+                <option>항공권</option>
+                <option>숙박권</option>
+                <option>투어/티켓</option>
+                <option>상품</option>
+              </optgroup>
+              <optgroup label="── 신규">
+                <option>공급사</option>
+              </optgroup>
             </select>
           </div>
           <div class="form-item half" id="cf-target-wrap" style="display:none;">
@@ -2885,6 +3011,562 @@ flowchart LR
 </div>
 
 <!-- ============================================================ -->
+<!-- VIEW: 원스톱 상품 등록 위자드 -->
+<!-- ============================================================ -->
+<div id="view-product-wizard" class="view">
+  <div class="layout">
+    <div class="breadcrumb">
+      <span>상품관리</span><span class="breadcrumb-sep">/</span>
+      <span style="color:rgba(0,0,0,0.88);font-weight:500;">원스톱 상품 등록</span>
+    </div>
+    <div class="page-header">
+      <div style="display:flex;align-items:center;gap:14px;">
+        <div class="page-title">상품 원스톱 등록</div>
+        <span style="background:#f9f0ff;color:#722ed1;font-size:11px;font-weight:600;padding:3px 8px;border-radius:4px;border:1px solid #d3adf7;">BETA</span>
+      </div>
+    </div>
+
+    <!-- 위자드 스텝 표시 -->
+    <div style="display:flex;align-items:center;gap:0;margin-bottom:28px;padding:0 40px;">
+      <div id="wz-s1" class="wz-step wz-active" onclick="goWizStep(1)">
+        <div class="wz-num">1</div>
+        <div><div class="wz-label">문서 업로드</div><div class="wz-sub">PDF · Excel · 링크</div></div>
+      </div>
+      <div class="wz-line wz-line-off" id="wz-l12"></div>
+      <div id="wz-s2" class="wz-step" onclick="goWizStep(2)">
+        <div class="wz-num">2</div>
+        <div><div class="wz-label">AI 파싱 결과</div><div class="wz-sub">Stock · POST 자동 생성</div></div>
+      </div>
+      <div class="wz-line wz-line-off" id="wz-l23"></div>
+      <div id="wz-s3" class="wz-step" onclick="goWizStep(3)">
+        <div class="wz-num">3</div>
+        <div><div class="wz-label">검토 · 수정</div><div class="wz-sub">요금 · POST · 일정표</div></div>
+      </div>
+      <div class="wz-line wz-line-off" id="wz-l34"></div>
+      <div id="wz-s4" class="wz-step" onclick="goWizStep(4)">
+        <div class="wz-num">4</div>
+        <div><div class="wz-label">일괄 등록</div><div class="wz-sub">미리보기 · 확인</div></div>
+      </div>
+    </div>
+
+    <!-- ===== STEP 1: 문서 업로드 ===== -->
+    <div id="wz-body-1" class="card" style="padding:32px;">
+      <div class="section-title" style="margin-bottom:20px;">문서 업로드 및 기본 설정</div>
+
+      <div class="form-row">
+        <div class="form-item half">
+          <label class="form-label">공급사 <span class="req">*</span></label>
+          <select class="fc" id="wz-supplier">
+            <option value="">공급사를 선택해주세요</option>
+            <option>피크타임</option>
+            <option>TMG</option>
+            <option>직계약</option>
+            <option>인스타항공</option>
+          </select>
+        </div>
+        <div class="form-item half">
+          <label class="form-label">여행지 <span class="req">*</span></label>
+          <select class="fc" id="wz-dest">
+            <option value="">여행지를 선택해주세요</option>
+            <option>푸꾸옥</option>
+            <option>나트랑</option>
+            <option>다낭</option>
+            <option>방콕</option>
+          </select>
+        </div>
+      </div>
+
+      <!-- 문서 업로드 영역 -->
+      <div style="margin-top:20px;">
+        <label class="form-label">문서 업로드 <span class="req">*</span></label>
+        <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px;margin-top:8px;">
+          <!-- 숙소 요금표 -->
+          <div id="wz-drop-accom" style="border:2px dashed #d9d9d9;border-radius:12px;padding:24px 16px;text-align:center;cursor:pointer;transition:all 0.2s;background:#fafafa;" onmouseenter="this.style.borderColor='#722ed1';this.style.background='#faf5ff'" onmouseleave="this.style.borderColor='#d9d9d9';this.style.background='#fafafa'" onclick="this.querySelector('.wz-file-check').style.display='flex';this.style.borderColor='#722ed1';this.style.borderStyle='solid';this.style.background='#faf5ff'">
+            <div style="font-size:28px;margin-bottom:8px;">🏨</div>
+            <div style="font-size:13px;font-weight:600;color:rgba(0,0,0,0.75);">숙소 요금표</div>
+            <div style="font-size:11px;color:rgba(0,0,0,0.4);margin-top:4px;">PDF · Excel</div>
+            <div class="wz-file-check" style="display:none;align-items:center;gap:4px;justify-content:center;margin-top:10px;font-size:12px;color:#722ed1;font-weight:500;">
+              <span>✓</span> 리젠트_거래처_요금표_2026.pdf
+            </div>
+          </div>
+          <!-- 항공 요금표 -->
+          <div id="wz-drop-flight" style="border:2px dashed #d9d9d9;border-radius:12px;padding:24px 16px;text-align:center;cursor:pointer;transition:all 0.2s;background:#fafafa;" onmouseenter="this.style.borderColor='#1677ff';this.style.background='#f0f5ff'" onmouseleave="this.style.borderColor='#d9d9d9';this.style.background='#fafafa'" onclick="this.querySelector('.wz-file-check').style.display='flex';this.style.borderColor='#1677ff';this.style.borderStyle='solid';this.style.background='#f0f5ff'">
+            <div style="font-size:28px;margin-bottom:8px;">✈️</div>
+            <div style="font-size:13px;font-weight:600;color:rgba(0,0,0,0.75);">항공 요금표</div>
+            <div style="font-size:11px;color:rgba(0,0,0,0.4);margin-top:4px;">Excel · 링크</div>
+            <div class="wz-file-check" style="display:none;align-items:center;gap:4px;justify-content:center;margin-top:10px;font-size:12px;color:#1677ff;font-weight:500;">
+              <span>✓</span> 푸꾸옥_프로모_요금표_VJ.xlsx
+            </div>
+          </div>
+          <!-- 투어/티켓 공급가 -->
+          <div id="wz-drop-tour" style="border:2px dashed #d9d9d9;border-radius:12px;padding:24px 16px;text-align:center;cursor:pointer;transition:all 0.2s;background:#fafafa;" onmouseenter="this.style.borderColor='#52c41a';this.style.background='#f6ffed'" onmouseleave="this.style.borderColor='#d9d9d9';this.style.background='#fafafa'" onclick="this.querySelector('.wz-file-check').style.display='flex';this.style.borderColor='#52c41a';this.style.borderStyle='solid';this.style.background='#f6ffed'">
+            <div style="font-size:28px;margin-bottom:8px;">🎫</div>
+            <div style="font-size:13px;font-weight:600;color:rgba(0,0,0,0.75);">투어 · 티켓 공급가</div>
+            <div style="font-size:11px;color:rgba(0,0,0,0.4);margin-top:4px;">Excel · 링크</div>
+            <div class="wz-file-check" style="display:none;align-items:center;gap:4px;justify-content:center;margin-top:10px;font-size:12px;color:#52c41a;font-weight:500;">
+              <span>✓</span> 트립스토어_공급가_20260303.xlsx
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 상품 기본 설정 -->
+      <div style="margin-top:24px;padding-top:20px;border-top:1px solid #f0f0f0;">
+        <label class="form-label">상품 기본 설정 <span style="font-size:11px;color:rgba(0,0,0,0.4);font-weight:400;">(선택)</span></label>
+        <div class="form-row" style="margin-top:8px;">
+          <div class="form-item" style="width:200px;">
+            <label class="form-label" style="font-size:12px;">숙소</label>
+            <select class="fc" id="wz-hotel">
+              <option value="">자동 감지</option>
+              <option>리젠트 푸꾸옥</option>
+              <option>솔바이멜리아 푸꾸옥</option>
+              <option>씨셀스 푸꾸옥</option>
+            </select>
+          </div>
+          <div class="form-item" style="width:160px;">
+            <label class="form-label" style="font-size:12px;">여행 일수</label>
+            <select class="fc" id="wz-days">
+              <option>3박 5일</option>
+              <option>4박 6일</option>
+              <option>5박 7일</option>
+            </select>
+          </div>
+          <div class="form-item" style="width:160px;">
+            <label class="form-label" style="font-size:12px;">항공사</label>
+            <select class="fc">
+              <option value="">자동 감지</option>
+              <option>비엣젯(VJ)</option>
+              <option>대한항공(KE)</option>
+              <option>이스타항공(ZE)</option>
+            </select>
+          </div>
+        </div>
+      </div>
+
+      <div style="margin-top:28px;display:flex;justify-content:flex-end;">
+        <button class="btn btn-primary" onclick="goWizStep(2)" style="padding:8px 32px;font-size:14px;background:#722ed1;border-color:#722ed1;">AI 파싱 시작 →</button>
+      </div>
+    </div>
+
+    <!-- ===== STEP 2: AI 파싱 결과 ===== -->
+    <div id="wz-body-2" class="card" style="padding:32px;display:none;">
+      <div style="display:flex;align-items:center;gap:10px;margin-bottom:20px;">
+        <div class="section-title" style="margin:0;">AI 파싱 결과</div>
+        <span style="background:#f6ffed;color:#52c41a;font-size:11px;font-weight:600;padding:2px 8px;border-radius:4px;border:1px solid #b7eb8f;">파싱 완료</span>
+        <span style="font-size:12px;color:rgba(0,0,0,0.4);">3개 문서에서 총 28건 추출 · 소요 4.2초</span>
+      </div>
+
+      <!-- 파싱 결과 요약 카드 -->
+      <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:24px;">
+        <div style="background:#f0f5ff;border:1px solid #adc6ff;border-radius:10px;padding:16px;">
+          <div style="font-size:11px;color:#2f54eb;font-weight:600;margin-bottom:4px;">✈️ 항공권</div>
+          <div style="font-size:24px;font-weight:700;color:#1d39c4;">2<span style="font-size:13px;font-weight:400;color:#4096ff;"> 건</span></div>
+          <div style="font-size:11px;color:rgba(0,0,0,0.4);margin-top:4px;">VJ977 · VJ976 (날짜별 요금 62건)</div>
+        </div>
+        <div style="background:#faf5ff;border:1px solid #d3adf7;border-radius:10px;padding:16px;">
+          <div style="font-size:11px;color:#722ed1;font-weight:600;margin-bottom:4px;">🏨 숙박권</div>
+          <div style="font-size:24px;font-weight:700;color:#531dab;">13<span style="font-size:13px;font-weight:400;color:#9254de;"> 객실</span></div>
+          <div style="font-size:11px;color:rgba(0,0,0,0.4);margin-top:4px;">리젠트 푸꾸옥 · 시즌 3종 · 식사타입 포함</div>
+        </div>
+        <div style="background:#f6ffed;border:1px solid #b7eb8f;border-radius:10px;padding:16px;">
+          <div style="font-size:11px;color:#389e0d;font-weight:600;margin-bottom:4px;">🎫 투어/티켓</div>
+          <div style="font-size:24px;font-weight:700;color:#237804;">5<span style="font-size:13px;font-weight:400;color:#52c41a;"> 건</span></div>
+          <div style="font-size:11px;color:rgba(0,0,0,0.4);margin-top:4px;">패스트트랙 · 사파리 · 빈원더스 · 스파 등</div>
+        </div>
+        <div style="background:#fff7e6;border:1px solid #ffd591;border-radius:10px;padding:16px;">
+          <div style="font-size:11px;color:#d48806;font-weight:600;margin-bottom:4px;">📝 POST</div>
+          <div style="font-size:24px;font-weight:700;color:#ad6800;">8<span style="font-size:13px;font-weight:400;color:#fa8c16;"> 건</span></div>
+          <div style="font-size:11px;color:rgba(0,0,0,0.4);margin-top:4px;">유의사항 · 취소규정 · 프로모션 · 포함/불포함</div>
+        </div>
+      </div>
+
+      <!-- 숙박권 파싱 결과 테이블 -->
+      <div style="margin-bottom:20px;">
+        <div style="font-size:13px;font-weight:600;color:rgba(0,0,0,0.75);margin-bottom:10px;display:flex;align-items:center;gap:6px;">
+          🏨 숙박권 — 리젠트 푸꾸옥 <span style="font-size:11px;font-weight:400;color:rgba(0,0,0,0.4);">13객실 × 3시즌</span>
+          <label style="margin-left:auto;font-size:12px;font-weight:400;color:rgba(0,0,0,0.55);cursor:pointer;display:flex;align-items:center;gap:4px;">
+            <input type="checkbox" checked style="accent-color:#722ed1;"> 전체 선택
+          </label>
+        </div>
+        <div class="table-wrap">
+          <table>
+            <thead><tr>
+              <th style="width:30px;"><input type="checkbox" checked style="accent-color:#722ed1;"></th>
+              <th>객실명</th>
+              <th style="width:90px;">Low ($)</th>
+              <th style="width:90px;">High ($)</th>
+              <th style="width:90px;">Peak ($)</th>
+              <th style="width:60px;">기준인원</th>
+              <th style="width:80px;">최대인원</th>
+            </tr></thead>
+            <tbody>
+              <tr><td><input type="checkbox" checked style="accent-color:#722ed1;"></td><td>Garden Pool Suite</td><td>480</td><td>556</td><td>709</td><td>2</td><td>2A+1CHD</td></tr>
+              <tr><td><input type="checkbox" checked style="accent-color:#722ed1;"></td><td>King Sky Pool Villa</td><td>775</td><td>852</td><td style="color:rgba(0,0,0,0.3);">N/A</td><td>2</td><td>2A+1CHD</td></tr>
+              <tr><td><input type="checkbox" checked style="accent-color:#722ed1;"></td><td>Two Bedroom Sky Pool Villa</td><td>1,127</td><td>1,239</td><td>1,392</td><td>4</td><td>4A+2CHD</td></tr>
+              <tr><td><input type="checkbox" checked style="accent-color:#722ed1;"></td><td>King Terrace Pool Villa</td><td>663</td><td>740</td><td>898</td><td>2</td><td>2A+1CHD</td></tr>
+              <tr><td><input type="checkbox" checked style="accent-color:#722ed1;"></td><td>Two Bedroom Terrace Pool Villa</td><td>1,076</td><td>1,183</td><td>1,341</td><td>4</td><td>4A+2CHD</td></tr>
+              <tr><td><input type="checkbox" checked style="accent-color:#722ed1;"></td><td>Three Bedroom Terrace Pool Villa</td><td>1,560</td><td>1,693</td><td>1,948</td><td>6</td><td>6A+3CHD</td></tr>
+              <tr style="background:#faf5ff;"><td><input type="checkbox" checked style="accent-color:#722ed1;"></td><td style="font-weight:500;">King Beach Pool Villa<br><span style="font-size:11px;color:rgba(0,0,0,0.4);">공항 왕복 셔틀 포함</span></td><td>1,219</td><td>1,362</td><td style="color:rgba(0,0,0,0.3);">N/A</td><td>2</td><td>2A+1CHD</td></tr>
+              <tr><td><input type="checkbox" checked style="accent-color:#722ed1;"></td><td>Four Bedroom Club Lagoon Pool Villa</td><td>3,498</td><td>3,707</td><td>4,410</td><td>8</td><td>8A+4CHD</td></tr>
+            </tbody>
+          </table>
+          <div style="text-align:center;padding:6px;font-size:12px;color:rgba(0,0,0,0.35);background:#fafafa;border-top:1px solid #f0f0f0;cursor:pointer;" onclick="this.textContent='나머지 5개 객실 표시됨'">+ 나머지 5개 객실 더보기</div>
+        </div>
+      </div>
+
+      <!-- POST 파싱 결과 -->
+      <div style="margin-bottom:20px;">
+        <div style="font-size:13px;font-weight:600;color:rgba(0,0,0,0.75);margin-bottom:10px;">
+          📝 POST 자동 생성 — 8건
+          <span style="font-size:11px;font-weight:400;color:rgba(0,0,0,0.4);margin-left:6px;">PDF에서 추출된 콘텐츠</span>
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
+          <div style="border:1px solid #f0f0f0;border-radius:8px;padding:12px 14px;display:flex;align-items:center;gap:10px;">
+            <input type="checkbox" checked style="accent-color:#722ed1;">
+            <span class="tag tag-gray" style="font-size:11px;">유의사항</span>
+            <span style="font-size:12px;flex:1;">FIT 전용 요금, 초과인원 추가요금, Allotment 9실</span>
+            <button class="btn btn-text btn-sm">미리보기</button>
+          </div>
+          <div style="border:1px solid #f0f0f0;border-radius:8px;padding:12px 14px;display:flex;align-items:center;gap:10px;">
+            <input type="checkbox" checked style="accent-color:#722ed1;">
+            <span class="tag tag-gray" style="font-size:11px;">취소환불규정</span>
+            <span style="font-size:12px;flex:1;">시즌별 취소기한 (Low 18일 / High 33일 / Peak 48일)</span>
+            <button class="btn btn-text btn-sm">미리보기</button>
+          </div>
+          <div style="border:1px solid #f0f0f0;border-radius:8px;padding:12px 14px;display:flex;align-items:center;gap:10px;">
+            <input type="checkbox" checked style="accent-color:#722ed1;">
+            <span class="tag tag-purple" style="font-size:11px;">스페셜 혜택</span>
+            <span style="font-size:12px;flex:1;">얼리버드 10% · 롱스테이 10% · 허니문 프로모션</span>
+            <button class="btn btn-text btn-sm">미리보기</button>
+          </div>
+          <div style="border:1px solid #f0f0f0;border-radius:8px;padding:12px 14px;display:flex;align-items:center;gap:10px;">
+            <input type="checkbox" checked style="accent-color:#722ed1;">
+            <span class="tag tag-purple" style="font-size:11px;">포함사항</span>
+            <span style="font-size:12px;flex:1;">미니바 무료(데일리 리필), 세탁 3피스, 하우스키핑 2회</span>
+            <button class="btn btn-text btn-sm">미리보기</button>
+          </div>
+          <div style="border:1px solid #f0f0f0;border-radius:8px;padding:12px 14px;display:flex;align-items:center;gap:10px;">
+            <input type="checkbox" checked style="accent-color:#722ed1;">
+            <span class="tag" style="background:#fff7e6;color:#d46b08;font-size:11px;">안내사항</span>
+            <span style="font-size:12px;flex:1;">인원 추가요금 (성인 107$/박, 소아 80$/박, 유아 27$/박)</span>
+            <button class="btn btn-text btn-sm">미리보기</button>
+          </div>
+          <div style="border:1px solid #f0f0f0;border-radius:8px;padding:12px 14px;display:flex;align-items:center;gap:10px;">
+            <input type="checkbox" checked style="accent-color:#722ed1;">
+            <span class="tag" style="background:#fff7e6;color:#d46b08;font-size:11px;">안내사항</span>
+            <span style="font-size:12px;flex:1;">픽업/샌딩 서비스 (레인지로버 60$ / 벤츠비아노 60$)</span>
+            <button class="btn btn-text btn-sm">미리보기</button>
+          </div>
+          <div style="border:1px solid #f0f0f0;border-radius:8px;padding:12px 14px;display:flex;align-items:center;gap:10px;border-color:#d3adf7;background:#faf5ff;">
+            <input type="checkbox" checked style="accent-color:#722ed1;">
+            <span class="tag" style="background:#f0f5ff;color:#2f54eb;font-size:11px;">공급사 POST</span>
+            <span style="font-size:12px;flex:1;">피크타임_숙소_리젠트 푸꾸옥 <code style="font-size:10px;background:#e6f7e6;padding:0 4px;border-radius:2px;">sub_key</code></span>
+            <button class="btn btn-text btn-sm">미리보기</button>
+          </div>
+          <div style="border:1px solid #f0f0f0;border-radius:8px;padding:12px 14px;display:flex;align-items:center;gap:10px;border-color:#d3adf7;background:#faf5ff;">
+            <input type="checkbox" checked style="accent-color:#722ed1;">
+            <span class="tag" style="background:#f0f5ff;color:#2f54eb;font-size:11px;">공급사 POST</span>
+            <span style="font-size:12px;flex:1;">피크타임_default (전체 공통 유의사항)</span>
+            <button class="btn btn-text btn-sm">미리보기</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- 투어/티켓 -->
+      <div style="margin-bottom:20px;">
+        <div style="font-size:13px;font-weight:600;color:rgba(0,0,0,0.75);margin-bottom:10px;">
+          🎫 투어/티켓 — 5건
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;">
+          <div style="border:1px solid #b7eb8f;border-radius:8px;padding:12px;background:#f6ffed;">
+            <div style="font-size:12px;font-weight:600;">입국 패스트트랙</div>
+            <div style="font-size:11px;color:rgba(0,0,0,0.45);margin-top:2px;">성인 17,500원 · 아동 12,500원</div>
+          </div>
+          <div style="border:1px solid #b7eb8f;border-radius:8px;padding:12px;background:#f6ffed;">
+            <div style="font-size:12px;font-weight:600;">빈펄 사파리 티켓</div>
+            <div style="font-size:11px;color:rgba(0,0,0,0.45);margin-top:2px;">성인 44,000원 · 아동 35,600원</div>
+          </div>
+          <div style="border:1px solid #b7eb8f;border-radius:8px;padding:12px;background:#f6ffed;">
+            <div style="font-size:12px;font-weight:600;">라온스파 아로마 60분</div>
+            <div style="font-size:11px;color:rgba(0,0,0,0.45);margin-top:2px;">성인 31,270원 · 아동 19,000원</div>
+          </div>
+          <div style="border:1px solid #b7eb8f;border-radius:8px;padding:12px;background:#f6ffed;">
+            <div style="font-size:12px;font-weight:600;">빈원더스 티켓</div>
+            <div style="font-size:11px;color:rgba(0,0,0,0.45);margin-top:2px;">성인 51,500원 · 아동 38,500원</div>
+          </div>
+          <div style="border:1px solid #b7eb8f;border-radius:8px;padding:12px;background:#f6ffed;">
+            <div style="font-size:12px;font-weight:600;">체크아웃 투어</div>
+            <div style="font-size:11px;color:rgba(0,0,0,0.45);margin-top:2px;">성인 68,000원 · 아동 46,250원</div>
+          </div>
+        </div>
+      </div>
+
+      <div style="display:flex;justify-content:space-between;margin-top:24px;">
+        <button class="btn btn-default" onclick="goWizStep(1)">← 이전</button>
+        <button class="btn btn-primary" onclick="goWizStep(3)" style="padding:8px 32px;background:#722ed1;border-color:#722ed1;">검토 · 수정 →</button>
+      </div>
+    </div>
+
+    <!-- ===== STEP 3: 검토/수정 ===== -->
+    <div id="wz-body-3" class="card" style="padding:32px;display:none;">
+      <div class="section-title" style="margin-bottom:20px;">검토 및 수정</div>
+
+      <!-- 탭 -->
+      <div style="display:flex;gap:0;border-bottom:1px solid #e8e8e8;margin-bottom:20px;">
+        <div id="wz3-tab-accom" onclick="switchWz3Tab('accom')" style="padding:10px 20px;font-size:13px;font-weight:600;cursor:pointer;color:#722ed1;border-bottom:2px solid #722ed1;">🏨 숙박권 (13)</div>
+        <div id="wz3-tab-flight" onclick="switchWz3Tab('flight')" style="padding:10px 20px;font-size:13px;cursor:pointer;color:rgba(0,0,0,0.45);">✈️ 항공권 (2)</div>
+        <div id="wz3-tab-tour" onclick="switchWz3Tab('tour')" style="padding:10px 20px;font-size:13px;cursor:pointer;color:rgba(0,0,0,0.45);">🎫 투어/티켓 (5)</div>
+        <div id="wz3-tab-post" onclick="switchWz3Tab('post')" style="padding:10px 20px;font-size:13px;cursor:pointer;color:rgba(0,0,0,0.45);">📝 POST (8)</div>
+        <div id="wz3-tab-schedule" onclick="switchWz3Tab('schedule')" style="padding:10px 20px;font-size:13px;cursor:pointer;color:rgba(0,0,0,0.45);">📅 일정표</div>
+      </div>
+
+      <!-- 숙박권 편집 -->
+      <div id="wz3-body-accom">
+        <div style="background:#faf5ff;border:1px solid #d3adf7;border-radius:8px;padding:14px 18px;margin-bottom:16px;">
+          <div style="display:flex;align-items:center;justify-content:space-between;">
+            <div>
+              <span style="font-size:14px;font-weight:600;">King Terrace Pool Villa</span>
+              <span style="font-size:12px;color:rgba(0,0,0,0.4);margin-left:8px;">기준 2인 / 최대 2A+1CHD</span>
+            </div>
+            <div style="display:flex;gap:6px;">
+              <button class="btn btn-text btn-sm" style="color:#722ed1;">편집</button>
+              <button class="btn btn-text btn-sm" style="color:#ff4d4f;">제외</button>
+            </div>
+          </div>
+          <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:12px;">
+            <div>
+              <label style="font-size:11px;color:rgba(0,0,0,0.45);display:block;">Low Season</label>
+              <input class="fc" value="$663" style="font-size:13px;font-weight:500;text-align:right;">
+            </div>
+            <div>
+              <label style="font-size:11px;color:rgba(0,0,0,0.45);display:block;">High Season</label>
+              <input class="fc" value="$740" style="font-size:13px;font-weight:500;text-align:right;">
+            </div>
+            <div>
+              <label style="font-size:11px;color:rgba(0,0,0,0.45);display:block;">Peak Season</label>
+              <input class="fc" value="$898" style="font-size:13px;font-weight:500;text-align:right;">
+            </div>
+          </div>
+        </div>
+        <div style="font-size:12px;color:rgba(0,0,0,0.35);text-align:center;padding:16px 0;">나머지 12개 객실도 동일한 편집 카드가 표시됩니다</div>
+      </div>
+
+      <!-- 항공권 탭 -->
+      <div id="wz3-body-flight" style="display:none;">
+        <div style="background:#f0f5ff;border:1px solid #adc6ff;border-radius:8px;padding:14px 18px;margin-bottom:16px;">
+          <div style="display:flex;align-items:center;justify-content:space-between;">
+            <div>
+              <span style="font-size:14px;font-weight:600;">VJ977 — ICN → PQC</span>
+              <span style="font-size:12px;color:rgba(0,0,0,0.4);margin-left:8px;">비엣젯 · 인천→푸꾸옥</span>
+            </div>
+            <button class="btn btn-text btn-sm" style="color:#1677ff;">편집</button>
+          </div>
+          <div style="font-size:12px;color:rgba(0,0,0,0.55);margin-top:8px;">날짜별 요금 31건 파싱됨 · 380,000원 ~ 560,000원 (특가 340,000 ~ 520,000원)</div>
+        </div>
+        <div style="background:#f0f5ff;border:1px solid #adc6ff;border-radius:8px;padding:14px 18px;">
+          <div style="display:flex;align-items:center;justify-content:space-between;">
+            <div>
+              <span style="font-size:14px;font-weight:600;">VJ976 — PQC → ICN</span>
+              <span style="font-size:12px;color:rgba(0,0,0,0.4);margin-left:8px;">비엣젯 · 푸꾸옥→인천</span>
+            </div>
+            <button class="btn btn-text btn-sm" style="color:#1677ff;">편집</button>
+          </div>
+          <div style="font-size:12px;color:rgba(0,0,0,0.55);margin-top:8px;">날짜별 요금 31건 파싱됨 · 동일 요금 구조</div>
+        </div>
+      </div>
+      <!-- 투어/티켓 탭 -->
+      <div id="wz3-body-tour" style="display:none;">
+        <div style="display:flex;flex-direction:column;gap:10px;">
+          <div style="background:#f6ffed;border:1px solid #b7eb8f;border-radius:8px;padding:14px 18px;display:flex;align-items:center;justify-content:space-between;">
+            <div><span style="font-size:14px;font-weight:600;">입국 패스트트랙</span><span style="font-size:12px;color:rgba(0,0,0,0.4);margin-left:8px;">성인 17,500원 · 아동 12,500원</span></div>
+            <div style="display:flex;gap:6px;"><button class="btn btn-text btn-sm" style="color:#52c41a;">편집</button><button class="btn btn-text btn-sm" style="color:#ff4d4f;">제외</button></div>
+          </div>
+          <div style="background:#f6ffed;border:1px solid #b7eb8f;border-radius:8px;padding:14px 18px;display:flex;align-items:center;justify-content:space-between;">
+            <div><span style="font-size:14px;font-weight:600;">빈펄 사파리 티켓</span><span style="font-size:12px;color:rgba(0,0,0,0.4);margin-left:8px;">성인 44,000원 · 아동 35,600원</span></div>
+            <div style="display:flex;gap:6px;"><button class="btn btn-text btn-sm" style="color:#52c41a;">편집</button><button class="btn btn-text btn-sm" style="color:#ff4d4f;">제외</button></div>
+          </div>
+          <div style="background:#f6ffed;border:1px solid #b7eb8f;border-radius:8px;padding:14px 18px;display:flex;align-items:center;justify-content:space-between;">
+            <div><span style="font-size:14px;font-weight:600;">라온스파 아로마 60분</span><span style="font-size:12px;color:rgba(0,0,0,0.4);margin-left:8px;">성인 31,270원 · 아동 19,000원</span></div>
+            <div style="display:flex;gap:6px;"><button class="btn btn-text btn-sm" style="color:#52c41a;">편집</button><button class="btn btn-text btn-sm" style="color:#ff4d4f;">제외</button></div>
+          </div>
+          <div style="background:#f6ffed;border:1px solid #b7eb8f;border-radius:8px;padding:14px 18px;display:flex;align-items:center;justify-content:space-between;">
+            <div><span style="font-size:14px;font-weight:600;">빈원더스 티켓</span><span style="font-size:12px;color:rgba(0,0,0,0.4);margin-left:8px;">성인 51,500원 · 아동 38,500원</span></div>
+            <div style="display:flex;gap:6px;"><button class="btn btn-text btn-sm" style="color:#52c41a;">편집</button><button class="btn btn-text btn-sm" style="color:#ff4d4f;">제외</button></div>
+          </div>
+          <div style="background:#f6ffed;border:1px solid #b7eb8f;border-radius:8px;padding:14px 18px;display:flex;align-items:center;justify-content:space-between;">
+            <div><span style="font-size:14px;font-weight:600;">체크아웃 투어</span><span style="font-size:12px;color:rgba(0,0,0,0.4);margin-left:8px;">성인 68,000원 · 아동 46,250원</span></div>
+            <div style="display:flex;gap:6px;"><button class="btn btn-text btn-sm" style="color:#52c41a;">편집</button><button class="btn btn-text btn-sm" style="color:#ff4d4f;">제외</button></div>
+          </div>
+        </div>
+      </div>
+      <!-- POST 탭 -->
+      <div id="wz3-body-post" style="display:none;">
+        <div style="display:flex;flex-direction:column;gap:10px;">
+          <div style="border:1px solid #f0f0f0;border-radius:8px;padding:14px 18px;">
+            <div style="display:flex;align-items:center;gap:10px;margin-bottom:8px;">
+              <span class="tag tag-gray" style="font-size:11px;">유의사항</span>
+              <span style="font-size:13px;font-weight:600;">FIT 전용 요금 안내</span>
+              <button class="btn btn-text btn-sm" style="margin-left:auto;">편집</button>
+            </div>
+            <div style="font-size:12px;color:rgba(0,0,0,0.55);line-height:1.8;background:#fafafa;padding:10px 12px;border-radius:6px;">
+              ▸ FIT 전용 요금 (5실 이상 그룹·시리즈·차터 불가)<br>
+              ▸ 초과인원 시 추가 요금 발생<br>
+              ▸ 일일 Allotment: 9실
+            </div>
+          </div>
+          <div style="border:1px solid #f0f0f0;border-radius:8px;padding:14px 18px;">
+            <div style="display:flex;align-items:center;gap:10px;margin-bottom:8px;">
+              <span class="tag tag-gray" style="font-size:11px;">취소환불규정</span>
+              <span style="font-size:13px;font-weight:600;">시즌별 취소 정책</span>
+              <button class="btn btn-text btn-sm" style="margin-left:auto;">편집</button>
+            </div>
+            <div style="font-size:12px;color:rgba(0,0,0,0.55);line-height:1.8;background:#fafafa;padding:10px 12px;border-radius:6px;">
+              ▸ Low season: 체크인 18일 전 취소 시 100% 환불<br>
+              ▸ High season: 체크인 33일 전 취소 시 100% 환불<br>
+              ▸ Peak season: 체크인 48일 전 취소 시 100% 환불
+            </div>
+          </div>
+          <div style="border:1px solid #f0f0f0;border-radius:8px;padding:14px 18px;">
+            <div style="display:flex;align-items:center;gap:10px;margin-bottom:8px;">
+              <span class="tag tag-purple" style="font-size:11px;">스페셜 혜택</span>
+              <span style="font-size:13px;font-weight:600;">프로모션 3종</span>
+              <button class="btn btn-text btn-sm" style="margin-left:auto;">편집</button>
+            </div>
+            <div style="font-size:12px;color:rgba(0,0,0,0.55);line-height:1.8;background:#fafafa;padding:10px 12px;border-radius:6px;">
+              ▸ 얼리버드: 체크인 31~61일 전 예약 시 객실 요금 10% 할인<br>
+              ▸ 롱스테이: 5박 이상 투숙 시 객실 요금 10% 할인<br>
+              ▸ 허니문: 왕복 픽업/샌딩 + 허니문 어메니티 + 로맨틱 목조 어메니티(1회)
+            </div>
+          </div>
+          <div style="font-size:12px;color:rgba(0,0,0,0.35);text-align:center;padding:10px 0;">나머지 5건도 동일한 편집 카드가 표시됩니다</div>
+        </div>
+      </div>
+      <!-- 일정표 (숨김) -->
+      <div id="wz3-body-schedule" style="display:none;">
+        <div style="background:#fff7e6;border:1px solid #ffd591;border-radius:8px;padding:14px 18px;margin-bottom:16px;font-size:12px;color:#874d00;">
+          💡 업로드된 항공편 기준으로 <strong>3박 5일</strong> 일정표를 자동 생성했습니다. 드래그로 투어/티켓을 일정에 배치하세요.
+        </div>
+        <div style="display:flex;flex-direction:column;gap:10px;">
+          <div style="display:flex;align-items:flex-start;gap:12px;">
+            <div style="min-width:60px;text-align:center;padding:8px 0;">
+              <div style="font-size:18px;font-weight:700;color:#722ed1;">DAY 1</div>
+              <div style="font-size:10px;color:rgba(0,0,0,0.35);">6/22 월</div>
+            </div>
+            <div style="flex:1;border:1px solid #f0f0f0;border-radius:8px;padding:12px;">
+              <div style="font-size:12px;">✈️ 인천 → 푸꾸옥 (VJ977 19:30-23:20)</div>
+              <div style="font-size:12px;margin-top:4px;">🎫 <span style="color:#52c41a;">입국 패스트트랙</span></div>
+              <div style="font-size:12px;margin-top:4px;">🏨 리젠트 푸꾸옥 체크인</div>
+            </div>
+          </div>
+          <div style="display:flex;align-items:flex-start;gap:12px;">
+            <div style="min-width:60px;text-align:center;padding:8px 0;">
+              <div style="font-size:18px;font-weight:700;color:#722ed1;">DAY 2</div>
+              <div style="font-size:10px;color:rgba(0,0,0,0.35);">6/23 화</div>
+            </div>
+            <div style="flex:1;border:2px dashed #d9d9d9;border-radius:8px;padding:12px;min-height:50px;">
+              <div style="font-size:12px;color:rgba(0,0,0,0.35);">자유일정 — 투어/티켓을 여기로 드래그</div>
+              <div style="display:flex;gap:6px;margin-top:6px;flex-wrap:wrap;">
+                <span style="font-size:11px;background:#f6ffed;border:1px solid #b7eb8f;padding:2px 8px;border-radius:4px;cursor:grab;">🎫 사파리+그랜드월드</span>
+                <span style="font-size:11px;background:#f6ffed;border:1px solid #b7eb8f;padding:2px 8px;border-radius:4px;cursor:grab;">💆 라온스파 60분</span>
+              </div>
+            </div>
+          </div>
+          <div style="display:flex;align-items:flex-start;gap:12px;">
+            <div style="min-width:60px;text-align:center;padding:8px 0;">
+              <div style="font-size:18px;font-weight:700;color:rgba(0,0,0,0.25);">DAY 3-4</div>
+              <div style="font-size:10px;color:rgba(0,0,0,0.35);">6/24-25</div>
+            </div>
+            <div style="flex:1;border:2px dashed #d9d9d9;border-radius:8px;padding:12px;min-height:50px;">
+              <div style="font-size:12px;color:rgba(0,0,0,0.35);">자유일정</div>
+            </div>
+          </div>
+          <div style="display:flex;align-items:flex-start;gap:12px;">
+            <div style="min-width:60px;text-align:center;padding:8px 0;">
+              <div style="font-size:18px;font-weight:700;color:#722ed1;">DAY 5</div>
+              <div style="font-size:10px;color:rgba(0,0,0,0.35);">6/26 금</div>
+            </div>
+            <div style="flex:1;border:1px solid #f0f0f0;border-radius:8px;padding:12px;">
+              <div style="font-size:12px;">🏨 체크아웃 (12:00)</div>
+              <div style="font-size:12px;margin-top:4px;">✈️ 푸꾸옥 → 인천 (VJ976 02:20-08:35)</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div style="display:flex;justify-content:space-between;margin-top:24px;">
+        <button class="btn btn-default" onclick="goWizStep(2)">← 이전</button>
+        <button class="btn btn-primary" onclick="goWizStep(4)" style="padding:8px 32px;background:#722ed1;border-color:#722ed1;">일괄 등록 미리보기 →</button>
+      </div>
+    </div>
+
+    <!-- ===== STEP 4: 일괄 등록 ===== -->
+    <div id="wz-body-4" class="card" style="padding:32px;display:none;">
+      <div class="section-title" style="margin-bottom:20px;">일괄 등록 미리보기</div>
+
+      <div style="background:#f6ffed;border:1px solid #b7eb8f;border-radius:10px;padding:20px;margin-bottom:20px;">
+        <div style="font-size:14px;font-weight:600;color:#237804;margin-bottom:12px;">등록 예정 항목 요약</div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
+          <div style="display:flex;align-items:center;gap:8px;font-size:13px;">
+            <span style="color:#52c41a;">✓</span> <strong>항공권 2건</strong> — VJ977/VJ976, 날짜별 요금 62건
+          </div>
+          <div style="display:flex;align-items:center;gap:8px;font-size:13px;">
+            <span style="color:#52c41a;">✓</span> <strong>숙박권 13건</strong> — 리젠트 푸꾸옥, 시즌별 요금 39건
+          </div>
+          <div style="display:flex;align-items:center;gap:8px;font-size:13px;">
+            <span style="color:#52c41a;">✓</span> <strong>투어/티켓 5건</strong> — 패스트트랙, 사파리, 스파 등
+          </div>
+          <div style="display:flex;align-items:center;gap:8px;font-size:13px;">
+            <span style="color:#52c41a;">✓</span> <strong>POST 8건</strong> — 카탈로그 6건 + 공급사 2건
+          </div>
+          <div style="display:flex;align-items:center;gap:8px;font-size:13px;">
+            <span style="color:#52c41a;">✓</span> <strong>일정표 1건</strong> — 3박 5일 기본 일정
+          </div>
+          <div style="display:flex;align-items:center;gap:8px;font-size:13px;">
+            <span style="color:#52c41a;">✓</span> <strong>상품 1건</strong> — 리젠트 푸꾸옥 3박 5일 패키지
+          </div>
+        </div>
+      </div>
+
+      <!-- 비교: AS-IS vs TO-BE -->
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:24px;">
+        <div style="border:1px solid #ffccc7;border-radius:10px;padding:16px;background:#fff2f0;">
+          <div style="font-size:13px;font-weight:600;color:#cf1322;margin-bottom:10px;">기존 방식 (수작업)</div>
+          <div style="font-size:12px;color:rgba(0,0,0,0.65);line-height:2;">
+            1. 숙소 요금표 PDF 열어서 13객실 × 3시즌 수동 입력<br>
+            2. 항공 요금표 Excel에서 날짜별 요금 수동 입력<br>
+            3. 투어/티켓 공급가 Excel에서 5건 개별 등록<br>
+            4. POST 8건 각각 내용 작성 (유의/취소/포함 등)<br>
+            5. 공급사 게시판 POST 별도 등록 + sub_key 설정<br>
+            6. 상품 조합 + 일정표 작성<br>
+            <strong style="color:#cf1322;">예상 소요: 2~3시간</strong>
+          </div>
+        </div>
+        <div style="border:1px solid #d3adf7;border-radius:10px;padding:16px;background:#faf5ff;">
+          <div style="font-size:13px;font-weight:600;color:#722ed1;margin-bottom:10px;">원스톱 등록 (AI 파싱)</div>
+          <div style="font-size:12px;color:rgba(0,0,0,0.65);line-height:2;">
+            1. 문서 3개 업로드 (드래그 앤 드롭)<br>
+            2. AI 파싱 결과 확인 (4초)<br>
+            3. 요금/POST 검토 및 수정<br>
+            4. [일괄 등록] 클릭<br>
+            <br>
+            <strong style="color:#722ed1;">예상 소요: 15~20분</strong>
+          </div>
+        </div>
+      </div>
+
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-top:24px;">
+        <button class="btn btn-default" onclick="goWizStep(3)">← 이전</button>
+        <div style="display:flex;gap:10px;">
+          <button class="btn btn-default" style="border-color:#d3adf7;color:#722ed1;">임시저장</button>
+          <button class="btn btn-primary" style="padding:10px 40px;font-size:15px;background:#722ed1;border-color:#722ed1;font-weight:600;" onclick="alert('총 30건이 일괄 등록되었습니다!\n\n항공권 2건 ✅\n숙박권 13건 ✅\n투어/티켓 5건 ✅\nPOST 8건 ✅\n일정표 1건 ✅\n상품 1건 ✅')">🚀 일괄 등록 (30건)</button>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ============================================================ -->
 <!-- AI 자동생성 모달 -->
 <!-- ============================================================ -->
 <div class="modal-overlay hidden" id="ai-modal" onclick="handleOverlayClick(event)">
@@ -3565,10 +4247,13 @@ function showView(name) {
   const pbViews = ['flight','hotel-mgmt','tour','flight-create','hotel-create','tour-create'];
   const catViews = ['list','create'];
   const partnerViews = ['partner-product', 'partner-flow'];
+  const wizardViews = ['product-wizard'];
   if (pbViews.includes(name)) {
     document.querySelectorAll('.gnb-item').forEach(el => { if (el.textContent.includes('PB관리')) el.classList.add('active'); });
   } else if (partnerViews.includes(name)) {
     // 파트너스 뷰에서는 GNB 활성 없음
+  } else if (wizardViews.includes(name)) {
+    document.querySelectorAll('.gnb-item').forEach(el => { if (el.textContent.includes('상품관리')) el.classList.add('active'); });
   } else {
     document.querySelectorAll('.gnb-item').forEach(el => { if (el.textContent.includes('카탈로그')) el.classList.add('active'); });
   }
@@ -3709,6 +4394,7 @@ function setTourPriceTab(tab, btn) {
 
 // ===== TARGET DATA =====
 const targets = {
+  // 카탈로그 레벨
   '공통':    [],
   '항공사':  [{id:1,n:'비엣젯(VJ)'},{id:2,n:'에어아시아(AK)'},{id:3,n:'대한항공(KE)'},{id:12,n:'베트남항공(VN)'},{id:15,n:'제주항공(7C)'}],
   '공항':    [{id:1,n:'인천국제공항(ICN)'},{id:2,n:'푸꾸옥국제공항(PQC)'},{id:3,n:'호치민공항(SGN)'}],
@@ -3717,7 +4403,40 @@ const targets = {
   '국가':    [{id:1,n:'베트남'},{id:2,n:'태국'},{id:3,n:'일본'},{id:4,n:'필리핀'}],
   '여행지':  [{id:1,n:'푸꾸옥'},{id:2,n:'나트랑'},{id:3,n:'다낭'},{id:4,n:'방콕'}],
   '스팟/체험': [{id:10,n:'빈펄 사파리'},{id:11,n:'빈원더스 푸꾸옥'},{id:12,n:'그랜드월드 야시장'}],
-  '투어/티켓': [{id:20,n:'선셋 크루즈'},{id:21,n:'스노클링 투어'},{id:22,n:'시내 반일투어'}]
+  // 상품단위 (신규)
+  '항공권':  [{id:123,n:'[피크타임] 비엣젯 푸꾸옥 25.04'},{id:124,n:'[피크타임] 대한항공 푸꾸옥 25.05'},{id:125,n:'[TMG] 비엣젯 나트랑 25.04'}],
+  '숙박권':  [{id:456,n:'[피크타임] 솔바이멜리아 25.04-06'},{id:457,n:'[TMG] 씨셀스 25.04-06'},{id:458,n:'[직계약] 소나가 25.05-07'}],
+  '투어/티켓': [{id:20,n:'선셋 크루즈'},{id:21,n:'스노클링 투어'},{id:22,n:'시내 반일투어'},{id:789,n:'[피크타임] 체크아웃 케어 푸꾸옥'}],
+  '상품':    [{id:200,n:'푸꾸옥 5일 솔바이멜리아 패키지'},{id:201,n:'나트랑 4일 가족여행'}],
+  // 공급사 (신규)
+  '공급사':  [{id:1,n:'피크타임'},{id:2,n:'TMG'},{id:3,n:'직계약'},{id:4,n:'인스타항공'}],
+};
+
+// 공급사 게시판 sub_key 조합용 데이터
+const supplierSubKeyOptions = {
+  '항공사': { label: '항공사', items: targets['항공사'], attrs: [{v:'이코노미',l:'이코노미'},{v:'비즈니스',l:'비즈니스'},{v:'퍼스트클래스',l:'퍼스트클래스'}], attrLabel: '좌석등급' },
+  '숙소':   { label: '숙소', items: targets['숙소'], attrs: null, attrLabel: null,
+              subAttrs: {
+                '객실': targets['객실'],
+                '식사타입': [{v:'RO',l:'RO (식사 불포함)'},{v:'BB',l:'BB (조식 포함)'},{v:'HB',l:'HB (2끼 포함)'},{v:'FB',l:'FB (전식 포함)'},{v:'AI',l:'AI (올인클루시브)'}]
+              }},
+  '스팟체험': { label: '스팟/체험', items: targets['스팟/체험'], attrs: null, attrLabel: null },
+  '콜렉션':  { label: '콜렉션', items: [{id:1,n:'체크아웃 케어'},{id:2,n:'얼리체크인 패키지'},{id:3,n:'허니문 패키지'}], attrs: null, attrLabel: null },
+  '여행지':  { label: '여행지', items: targets['여행지'], attrs: null, attrLabel: null },
+};
+
+// 숙박권 게시판 sub_key 조합용 데이터
+const accomTicketSubKeyData = {
+  456: { rooms: [{id:158,n:'엑스트라 솔 스위트'},{id:160,n:'더 레벨 스위트'}], meals: ['RO','BB','HB','FB','AI'] },
+  457: { rooms: [{id:220,n:'디럭스 씨뷰'},{id:221,n:'프리미어 풀빌라'}], meals: ['RO','BB'] },
+  458: { rooms: [{id:871,n:'3베드룸 비치프론트'},{id:870,n:'4베드룸 가든뷰'}], meals: ['RO','BB','HB'] },
+};
+
+// target type 그룹 정의
+const TARGET_GROUPS = {
+  '카탈로그': ['공통','항공사','공항','숙소','객실','국가','여행지','스팟/체험'],
+  '상품단위': ['항공권','숙박권','투어/티켓','상품'],
+  '신규':     ['공급사'],
 };
 
 // 숙소별 여행지
@@ -3729,6 +4448,7 @@ function generateMgmtName(targetType, category, supplier, targetName, opts) {
   const dest = opts?.destination || '푸꾸옥';
   const hotelName = opts?.hotelName || targetName;
   const cat = category.replace(/\s/g, ''); // 공백 제거
+  const subKey = opts?.subKey || '';
 
   const rules = {
     '숙소': {
@@ -3755,7 +4475,7 @@ function generateMgmtName(targetType, category, supplier, targetName, opts) {
       '수하물규정':   `항공_수하물규정_${dest}_${targetName}_일반석`,
     },
     '공통': {
-      '스페셜혜택':   `공통_스페셜혜택_${sup}`,
+      '스페셜혜택':   `공통_스페셜혜택_기본`,
       '자주묻는질문': `공통_자주묻는질문_기본`,
       '불포함사항':   `공통_불포함사항_기본`,
       '포함사항':     `공통_포함사항_기본`,
@@ -3764,28 +4484,62 @@ function generateMgmtName(targetType, category, supplier, targetName, opts) {
       '안내사항':     `공통_안내사항_기본`,
     },
     '여행지': {
-      '소개':         `여행지_소개_${targetName}_${sup}`,
-      '안내사항':     `여행지_안내사항_${targetName}_${sup}`,
+      '소개':         `여행지_소개_${targetName}`,
+      '안내사항':     `여행지_안내사항_${targetName}`,
     },
     '스팟/체험': {},
+    // ===== 상품단위 =====
+    '항공권': {
+      _default: `항공권#${opts?.targetId||''}_${cat}`,
+    },
+    '숙박권': {
+      _default: subKey ? `숙박권#${opts?.targetId||''}_${subKey}_${cat}` : `숙박권#${opts?.targetId||''}_${cat}`,
+    },
+    '투어/티켓': {
+      _default: `투어티켓#${opts?.targetId||''}_${cat}`,
+    },
+    '상품': {
+      _default: `상품#${opts?.targetId||''}_${cat}`,
+    },
+    // ===== 공급사 =====
+    '공급사': {
+      _default: subKey && subKey !== 'default'
+        ? `${targetName}_${subKey}_${cat}`
+        : `${targetName}_default_${cat}`,
+    },
   };
 
   const typeRules = rules[targetType] || {};
-  return typeRules[cat] || `${targetType}_${cat}_${sup}_${targetName}`.replace(/\s/g,'');
+  if (typeRules._default) return typeRules._default.replace(/\s/g,'');
+  return typeRules[cat] || `${targetType}_${cat}_${targetName}`.replace(/\s/g,'');
 }
 
 // ===== 등록 폼 관리명 자동생성 =====
 function autoGenMgmtForm() {
   const cat = document.getElementById('cf-category').value;
   const targetType = document.getElementById('cf-type').value;
-  const supplier = document.getElementById('cf-supplier')?.value || '';
   const targetRaw = document.getElementById('cf-target-selected')?.textContent || '';
   if (!cat || !targetType) return;
+
   let targetName = targetRaw.replace(/^\[.+?\]\s*/, '').trim() || '—';
+  const targetIdMatch = targetRaw.match(/^\[(\d+)\]/);
+  const targetId = targetIdMatch ? targetIdMatch[1] : '';
+
   const dest = targetName.includes('푸꾸옥') ? '푸꾸옥' :
                targetName.includes('나트랑') ? '나트랑' :
                targetName.includes('다낭')   ? '다낭'   : '푸꾸옥';
-  const mgmt = generateMgmtName(targetType, cat, supplier, targetName, { destination: dest });
+
+  // sub_key 수집
+  let subKey = '';
+  if (targetType === '공급사') {
+    subKey = document.getElementById('cf-sk-value')?.textContent || 'default';
+  } else if (targetType === '숙박권') {
+    subKey = document.getElementById('cf-ak-value')?.textContent || '';
+  }
+
+  const mgmt = generateMgmtName(targetType, cat, '', targetName, {
+    destination: dest, subKey, targetId
+  });
   const el = document.getElementById('cf-mgmt');
   if (el) el.value = mgmt;
 }
@@ -3885,15 +4639,188 @@ function onCreateTypeChange() {
   const lbl = document.getElementById('cf-target-label');
   const input = document.getElementById('cf-target-input');
   const sel = document.getElementById('cf-target-selected');
-  if (t) {
-    wrap.style.display = 'flex';
+
+  // 타겟 선택 영역
+  const needsTarget = t && t !== '공통';
+  wrap.style.display = needsTarget ? 'flex' : 'none';
+  if (needsTarget) {
     lbl.innerHTML = t + ' 선택 <span class="req">*</span>';
     input.placeholder = t + ' 이름 또는 ID 검색';
     input.value = '';
     sel.textContent = '없음';
     document.getElementById('cf-target-dd').style.display = 'none';
+  }
+
+  // Sub_key 영역 제어
+  const skSection = document.getElementById('cf-subkey-section');
+  const supplierSk = document.getElementById('cf-supplier-subkey');
+  const accomSk = document.getElementById('cf-accom-subkey');
+  const skInfo = document.getElementById('cf-subkey-info');
+
+  if (t === '공급사') {
+    skSection.style.display = 'flex';
+    supplierSk.style.display = 'block';
+    accomSk.style.display = 'none';
+    skInfo.style.display = 'block';
+    resetSupplierSubKey();
+  } else if (t === '숙박권') {
+    skSection.style.display = 'flex';
+    supplierSk.style.display = 'none';
+    accomSk.style.display = 'block';
+    skInfo.style.display = 'block';
+    resetAccomSubKey();
   } else {
-    wrap.style.display = 'none';
+    skSection.style.display = 'none';
+    supplierSk.style.display = 'none';
+    accomSk.style.display = 'none';
+    skInfo.style.display = 'none';
+  }
+  autoGenMgmtForm();
+}
+
+// ===== 공급사 게시판 Sub_key 조합 =====
+function resetSupplierSubKey() {
+  document.getElementById('cf-sk-type').value = '';
+  document.getElementById('cf-sk-item').style.display = 'none';
+  document.getElementById('cf-sk-attr').style.display = 'none';
+  document.getElementById('cf-sk-room').style.display = 'none';
+  document.getElementById('cf-sk-meal').style.display = 'none';
+  document.getElementById('cf-sk-preview').style.display = 'none';
+}
+
+function onSkTypeChange() {
+  const skType = document.getElementById('cf-sk-type').value;
+  const itemSel = document.getElementById('cf-sk-item');
+  const attrSel = document.getElementById('cf-sk-attr');
+  const roomSel = document.getElementById('cf-sk-room');
+  const mealSel = document.getElementById('cf-sk-meal');
+
+  // 모두 숨기기
+  itemSel.style.display = 'none';
+  attrSel.style.display = 'none';
+  roomSel.style.display = 'none';
+  mealSel.style.display = 'none';
+
+  if (!skType) { buildSubKeyPreview(); return; }
+
+  const opt = supplierSubKeyOptions[skType];
+  if (!opt) { buildSubKeyPreview(); return; }
+
+  // 항목 드롭다운 채우기
+  itemSel.innerHTML = `<option value="">전체 ${opt.label}</option>`;
+  opt.items.forEach(i => itemSel.innerHTML += `<option value="${i.n}">${i.n}</option>`);
+  itemSel.style.display = 'block';
+
+  buildSubKeyPreview();
+}
+
+function onSkItemChange() {
+  const skType = document.getElementById('cf-sk-type').value;
+  const skItem = document.getElementById('cf-sk-item').value;
+  const attrSel = document.getElementById('cf-sk-attr');
+  const roomSel = document.getElementById('cf-sk-room');
+  const mealSel = document.getElementById('cf-sk-meal');
+  const opt = supplierSubKeyOptions[skType];
+
+  attrSel.style.display = 'none';
+  roomSel.style.display = 'none';
+  mealSel.style.display = 'none';
+
+  if (!skItem || !opt) { buildSubKeyPreview(); return; }
+
+  if (skType === '항공사' && opt.attrs) {
+    // 좌석등급
+    attrSel.innerHTML = '<option value="">전체 (선택안함)</option>';
+    opt.attrs.forEach(a => attrSel.innerHTML += `<option value="${a.v}">${a.l}</option>`);
+    attrSel.style.display = 'block';
+  } else if (skType === '숙소' && opt.subAttrs) {
+    // 객실 + 식사타입
+    roomSel.innerHTML = '<option value="">전체 객실</option>';
+    opt.subAttrs['객실'].forEach(r => roomSel.innerHTML += `<option value="${r.n}">${r.n}</option>`);
+    roomSel.style.display = 'block';
+
+    mealSel.innerHTML = '<option value="">전체 식사타입</option>';
+    opt.subAttrs['식사타입'].forEach(m => mealSel.innerHTML += `<option value="${m.v}">${m.l}</option>`);
+    mealSel.style.display = 'block';
+  }
+  buildSubKeyPreview();
+}
+
+function buildSubKeyPreview() {
+  const skType = document.getElementById('cf-sk-type').value;
+  const skItem = document.getElementById('cf-sk-item').value;
+  const skAttr = document.getElementById('cf-sk-attr').value;
+  const skRoom = document.getElementById('cf-sk-room').value;
+  const skMeal = document.getElementById('cf-sk-meal').value;
+  const preview = document.getElementById('cf-sk-preview');
+  const valueEl = document.getElementById('cf-sk-value');
+
+  let key = 'default';
+  if (skType && skItem) {
+    const prefix = skType === '스팟체험' ? '스팟체험' : skType;
+    key = `${prefix}_${skItem}`;
+    if (skType === '항공사' && skAttr) key += `_${skAttr}`;
+    if (skType === '숙소') {
+      if (skRoom) key += `_${skRoom}`;
+      if (skMeal) key += `_${skMeal}`;
+    }
+  } else if (skType && !skItem) {
+    key = 'default';
+  }
+
+  valueEl.textContent = key;
+  preview.style.display = 'block';
+  autoGenMgmtForm();
+}
+
+// ===== 숙박권 게시판 Sub_key 조합 =====
+function resetAccomSubKey() {
+  const roomSel = document.getElementById('cf-ak-room');
+  const mealSel = document.getElementById('cf-ak-meal');
+  roomSel.innerHTML = '<option value="">전체 공통 (숙박권 전체)</option>';
+  mealSel.innerHTML = '<option value="">전체 식사타입</option>';
+  document.getElementById('cf-ak-preview').style.display = 'none';
+}
+
+function populateAccomSubKey(ticketId) {
+  const data = accomTicketSubKeyData[ticketId];
+  const roomSel = document.getElementById('cf-ak-room');
+  const mealSel = document.getElementById('cf-ak-meal');
+  roomSel.innerHTML = '<option value="">전체 공통 (숙박권 전체)</option>';
+  mealSel.innerHTML = '<option value="">전체 식사타입</option>';
+  if (!data) return;
+  data.rooms.forEach(r => roomSel.innerHTML += `<option value="${r.n}">${r.n}</option>`);
+  const mealLabels = {RO:'RO (식사 불포함)',BB:'BB (조식 포함)',HB:'HB (2끼 포함)',FB:'FB (전식 포함)',AI:'AI (올인클루시브)'};
+  data.meals.forEach(m => mealSel.innerHTML += `<option value="${m}">${mealLabels[m]||m}</option>`);
+}
+
+function buildAccomSubKeyPreview() {
+  const room = document.getElementById('cf-ak-room').value;
+  const meal = document.getElementById('cf-ak-meal').value;
+  const preview = document.getElementById('cf-ak-preview');
+  const valueEl = document.getElementById('cf-ak-value');
+
+  if (!room && !meal) {
+    preview.style.display = 'none';
+    return;
+  }
+  let key = '';
+  if (room) key = room;
+  if (room && meal) key += `_${meal}`;
+  else if (meal) key = meal;
+
+  valueEl.textContent = key;
+  preview.style.display = 'block';
+  autoGenMgmtForm();
+}
+
+// 목록 필터 sub_key 토글
+function toggleListSubKey() {
+  const t = document.getElementById('lf-type').value;
+  const supplierFilter = document.getElementById('lf-supplier');
+  if (supplierFilter) {
+    // 공급사/숙박권 선택 시에만 상세구분 필터 의미 있음
+    supplierFilter.style.display = (t === '공급사' || t === '숙박권') ? 'block' : 'none';
   }
 }
 
@@ -3912,12 +4839,53 @@ function pickTarget(id, name) {
   document.getElementById('cf-target-input').value = `[${id}] ${name}`;
   document.getElementById('cf-target-selected').textContent = `[${id}] ${name}`;
   document.getElementById('cf-target-dd').style.display = 'none';
+  // 숙박권 선택 시 해당 숙박권의 객실/식사 데이터 로드
+  const t = document.getElementById('cf-type').value;
+  if (t === '숙박권') populateAccomSubKey(id);
   autoGenMgmtForm();
 }
 
 document.addEventListener('click', e => {
   if (!e.target.closest('#cf-target-wrap')) document.getElementById('cf-target-dd').style.display = 'none';
 });
+
+// ===== WIZARD NAVIGATION =====
+let wizStep = 1;
+function goWizStep(n) {
+  wizStep = n;
+  // 바디 전환
+  [1,2,3,4].forEach(i => {
+    const b = document.getElementById('wz-body-' + i);
+    if (b) b.style.display = i === n ? 'block' : 'none';
+  });
+  // 스텝 표시 업데이트
+  [1,2,3,4].forEach(i => {
+    const s = document.getElementById('wz-s' + i);
+    s.className = 'wz-step';
+    if (i < n) s.classList.add('wz-done');
+    else if (i === n) s.classList.add('wz-active');
+  });
+  // 라인 업데이트
+  ['12','23','34'].forEach(k => {
+    const l = document.getElementById('wz-l' + k);
+    const fromStep = parseInt(k[0]);
+    l.className = fromStep < n ? 'wz-line wz-line-on' : 'wz-line wz-line-off';
+  });
+  window.scrollTo(0, 0);
+}
+
+function switchWz3Tab(tab) {
+  ['accom','flight','tour','post','schedule'].forEach(t => {
+    const body = document.getElementById('wz3-body-' + t);
+    const tabEl = document.getElementById('wz3-tab-' + t);
+    if (body) body.style.display = t === tab ? 'block' : 'none';
+    if (tabEl) {
+      tabEl.style.color = t === tab ? '#722ed1' : 'rgba(0,0,0,0.45)';
+      tabEl.style.borderBottom = t === tab ? '2px solid #722ed1' : 'none';
+      tabEl.style.fontWeight = t === tab ? '600' : '400';
+    }
+  });
+}
 
 // ===== CATEGORY CHANGE =====
 function onCategoryChange() {
@@ -3963,7 +4931,7 @@ function buildStep3() {
   document.getElementById('s3-type-label').textContent = typeLabels[s1FileType];
   const confirmMsg = s1Supplier && s1Supplier !== '공통'
     ? `${s1Supplier} 전용 POST로 등록됩니다`
-    : '모든 상세구분 공통 POST로 등록됩니다';
+    : '전체 공통 POST로 등록됩니다';
   document.getElementById('s3-confirm-msg').textContent = confirmMsg;
 
   // 카탈로그 레이블
