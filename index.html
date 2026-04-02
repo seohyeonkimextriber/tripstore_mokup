@@ -200,6 +200,29 @@ select.fc { height: 36px; padding: 0 32px 0 12px; appearance: none; background-i
 .wiz-step-title { font-size:16px; font-weight:700; color:rgba(0,0,0,0.88); margin-bottom:6px; }
 .wiz-step-sub { font-size:13px; color:rgba(0,0,0,0.45); margin-bottom:20px; }
 
+/* ===== 일괄 POST 항목 ===== */
+.bulk-post-list { display:flex; flex-direction:column; gap:10px; }
+.bulk-post-item { border:1.5px solid #e8e8e8; border-radius:10px; background:#fff; overflow:hidden; transition:all 0.2s; }
+.bulk-post-item.expanded { border-color:#91caff; box-shadow:0 2px 10px rgba(22,119,255,0.09); }
+.bpi-header { display:flex; align-items:center; gap:10px; padding:12px 16px; cursor:pointer; user-select:none; background:#fafafa; transition:background 0.15s; }
+.bulk-post-item.expanded .bpi-header { background:#f0f7ff; }
+.bpi-num { width:22px; height:22px; border-radius:50%; background:#e0e0e0; color:rgba(0,0,0,0.45); font-size:11px; font-weight:700; display:flex; align-items:center; justify-content:center; flex-shrink:0; transition:all 0.2s; }
+.bulk-post-item.expanded .bpi-num { background:#1677ff; color:#fff; }
+.bpi-cat-tag { background:#e6f4ff; color:#1677ff; font-size:12px; font-weight:600; padding:2px 9px; border-radius:10px; flex-shrink:0; }
+.bpi-title-preview { font-size:13px; color:rgba(0,0,0,0.45); flex:1; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; font-style:italic; }
+.bpi-title-preview.has-title { color:rgba(0,0,0,0.65); font-style:normal; }
+.bpi-arrow { font-size:10px; color:rgba(0,0,0,0.3); transition:transform 0.2s; flex-shrink:0; }
+.bulk-post-item.expanded .bpi-arrow { transform:rotate(180deg); }
+.bpi-del { background:none; border:1px solid #ffa39e; border-radius:5px; padding:3px 9px; font-size:11px; color:#cf1322; cursor:pointer; font-family:inherit; transition:all 0.15s; flex-shrink:0; }
+.bpi-del:hover { background:#fff1f0; }
+.bpi-body { display:none; padding:20px 24px; border-top:1px solid #f0f0f0; }
+.bulk-post-item.expanded .bpi-body { display:block; }
+.bulk-add-btn { border:2px dashed #d9d9d9; border-radius:10px; padding:13px; text-align:center; cursor:pointer; transition:all 0.15s; background:#fafafa; color:rgba(0,0,0,0.45); font-size:13px; font-weight:500; margin-top:10px; }
+.bulk-add-btn:hover { border-color:#1677ff; background:#f0f7ff; color:#1677ff; }
+.bulk-count-badge { display:inline-flex; align-items:center; justify-content:center; background:#1677ff; color:#fff; font-size:12px; font-weight:700; border-radius:12px; padding:1px 9px; margin-left:6px; vertical-align:middle; }
+.bulk-section-header { display:flex; align-items:center; justify-content:space-between; padding:20px 28px 14px; border-bottom:1px solid #f5f5f5; }
+.bulk-body-wrap { padding:20px 28px; }
+
 /* ===== AI BANNER ===== */
 .ai-banner { background: linear-gradient(135deg, #f9f0ff 0%, #eff6ff 100%); border: 1.5px solid #d3adf7; border-radius: 10px; padding: 16px 20px; margin-bottom: 16px; display: flex; align-items: center; justify-content: space-between; gap: 20px; }
 .ai-banner-info h3 { font-size: 15px; font-weight: 700; color: #531dab; margin-bottom: 4px; }
@@ -1218,117 +1241,66 @@ select.fc { height: 36px; padding: 0 32px 0 12px; appearance: none; background-i
 
     <!-- ③ STEP 3: 내용 작성 -->
     <div id="wiz-s3" class="card" style="display:none;">
-      <!-- 등록 요약 뱃지 -->
-      <div id="wiz3-summary" style="background:#f6ffed;border:1px solid #b7eb8f;border-radius:8px;padding:12px 16px;margin-bottom:20px;font-size:13px;display:flex;align-items:center;gap:12px;flex-wrap:wrap;">
-        <span>📌 등록 위치:</span>
-        <strong id="wiz3-sum-board" style="color:#389e0d;"></strong>
-        <span style="color:rgba(0,0,0,0.3);">|</span>
-        <span id="wiz3-sum-target"></span>
-        <span id="wiz3-sum-scope" style="color:rgba(0,0,0,0.45);"></span>
-      </div>
-      <div class="form-section">
-        <div class="section-title">내용 분류</div>
-        <div class="form-row">
-          <div class="form-item half">
-            <label class="form-label">카테고리 <span class="req">*</span></label>
-            <select class="fc" id="cf-category">
-              <option value="">카테고리를 선택해주세요</option>
-              <option>소개</option><option>핵심포인트</option><option>스페셜 혜택</option>
-              <option>포함사항</option><option>불포함사항</option>
-              <option>자주 묻는 질문</option><option>취소환불규정</option>
-              <option>유의사항</option><option>안내사항</option>
-              <option>출발 전 안내</option><option>수하물 규정</option>
-            </select>
-          </div>
-          <div class="form-item half">
-            <label class="form-label" style="display:flex;align-items:center;gap:6px;">
-              관리용 이름
-              <span style="font-size:11px;font-weight:400;color:rgba(0,0,0,0.35);">(내부 식별용, 고객에게 노출되지 않음)</span>
-            </label>
-            <div style="display:flex;gap:6px;">
-              <input class="fc" type="text" id="cf-mgmt" placeholder="자동 생성됩니다" style="flex:1;color:rgba(0,0,0,0.55);" readonly>
-              <button type="button" onclick="document.getElementById('cf-mgmt').readOnly=false;document.getElementById('cf-mgmt').focus();" style="height:32px;padding:0 10px;border:1px solid #d9d9d9;border-radius:6px;background:#fafafa;font-size:12px;font-family:inherit;cursor:pointer;color:rgba(0,0,0,0.55);">수정</button>
-            </div>
-          </div>
+
+      <!-- 등록 위치 요약 뱃지 -->
+      <div style="padding:20px 28px 0;">
+        <div id="wiz3-summary" style="background:#f6ffed;border:1px solid #b7eb8f;border-radius:8px;padding:12px 16px;font-size:13px;display:flex;align-items:center;gap:12px;flex-wrap:wrap;">
+          <span>📌 등록 위치:</span>
+          <strong id="wiz3-sum-board" style="color:#389e0d;"></strong>
+          <span style="color:rgba(0,0,0,0.3);">|</span>
+          <span id="wiz3-sum-target"></span>
+          <span id="wiz3-sum-scope" style="color:rgba(0,0,0,0.45);"></span>
         </div>
       </div>
-      <div class="form-section">
-        <div class="section-title">내용 작성</div>
-        <div class="form-row">
-          <div class="form-item full">
-            <label class="form-label">제목</label>
-            <input class="fc" type="text" placeholder="제목을 입력해주세요">
+
+      <!-- 파트너 노출 설정 (모든 POST 공통 적용) -->
+      <div style="padding:18px 28px 0;" id="partner-visibility-post">
+        <div style="border:1px solid #f0f0f0;border-radius:8px;padding:14px 18px;background:#fafafa;">
+          <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px;">
+            <span style="font-size:13px;font-weight:600;color:rgba(0,0,0,0.75);">파트너 노출 설정</span>
+            <span style="font-size:11px;color:rgba(0,0,0,0.35);background:#f0f0f0;border-radius:8px;padding:1px 7px;">아래 모든 POST에 공통 적용</span>
           </div>
-        </div>
-        <div class="form-row">
-          <div class="form-item full">
-            <label class="form-label">요약 <span style="font-size:11px;font-weight:400;color:rgba(0,0,0,0.35);">(한 줄 설명)</span></label>
-            <input class="fc" type="text" placeholder="한 줄 요약을 입력해주세요">
+          <div class="toggle-group">
+            <button class="toggle-btn on" onclick="togglePartnerTarget(this,'post')">전체 파트너</button>
+            <button class="toggle-btn" onclick="togglePartnerTarget(this,'post')">특정 파트너 선택</button>
           </div>
-        </div>
-        <div class="form-row">
-          <div class="form-item full">
-            <label class="form-label">내용</label>
-            <div class="editor-wrap">
-              <div class="editor-toolbar">
-                <button class="etb" title="굵게"><b>B</b></button>
-                <button class="etb" title="기울임"><i>I</i></button>
-                <button class="etb" title="밑줄"><u>U</u></button>
-                <div class="etb-sep"></div>
-                <button class="etb" title="불릿 목록">☰</button>
-                <button class="etb" title="번호 목록">1≡</button>
-                <div class="etb-sep"></div>
-                <button class="etb" title="이미지">🖼</button>
-                <button class="etb" title="링크">🔗</button>
-                <div class="etb-sep"></div>
-                <button class="etb" title="표">⊞</button>
-                <button class="etb" title="구분선">—</button>
-              </div>
-              <div class="editor-body" contenteditable="true" data-placeholder="내용을 입력해주세요"></div>
+          <div id="partner-select-post" style="display:none;margin-top:10px;">
+            <div style="display:flex;gap:6px;margin-bottom:10px;">
+              <input class="fc" type="text" placeholder="파트너명 검색" style="flex:1;max-width:260px;" oninput="filterPartnerCheckboxes(this.value,'post')">
+              <button class="btn btn-default btn-sm" onclick="toggleAllPartners(true,'post')">전체 선택</button>
+              <button class="btn btn-default btn-sm" onclick="toggleAllPartners(false,'post')">선택 해제</button>
             </div>
+            <div class="partner-checkbox-list" id="partner-list-post" style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px;padding:12px;background:#fff;border-radius:6px;border:1px solid #f0f0f0;">
+              <label class="partner-cb-item"><input type="checkbox" checked> <span>JV Vietnam</span> <span style="font-size:11px;color:rgba(0,0,0,0.35);">DMC</span></label>
+              <label class="partner-cb-item"><input type="checkbox" checked> <span>피크타임 트래블</span> <span style="font-size:11px;color:rgba(0,0,0,0.35);">여행사</span></label>
+              <label class="partner-cb-item"><input type="checkbox"> <span>써니투어</span> <span style="font-size:11px;color:rgba(0,0,0,0.35);">랜드사</span></label>
+              <label class="partner-cb-item"><input type="checkbox"> <span>하나프리</span> <span style="font-size:11px;color:rgba(0,0,0,0.35);">여행사</span></label>
+              <label class="partner-cb-item"><input type="checkbox"> <span>모두투어</span> <span style="font-size:11px;color:rgba(0,0,0,0.35);">여행사</span></label>
+              <label class="partner-cb-item"><input type="checkbox"> <span>참좋은여행</span> <span style="font-size:11px;color:rgba(0,0,0,0.35);">여행사</span></label>
+            </div>
+            <div class="form-hint" style="margin-top:6px;">선택된 파트너: <strong id="partner-count-post" style="color:#1677ff;">2개</strong></div>
           </div>
         </div>
       </div>
-      <div class="form-section" id="cf-image-section">
-        <div class="section-title">이미지 <span style="font-size:12px;font-weight:400;color:rgba(0,0,0,0.35);">(선택)</span></div>
-        <div class="toggle-group" style="margin-bottom:14px;">
-          <button class="toggle-btn on" onclick="toggleImg(this)">단일</button>
-          <button class="toggle-btn" onclick="toggleImg(this)">리스트</button>
-          <button class="toggle-btn" onclick="toggleImg(this)">슬라이드</button>
-          <button class="toggle-btn" onclick="toggleImg(this)">그리드</button>
+
+      <!-- POST 항목 목록 (일괄 등록) -->
+      <div class="bulk-section-header" style="margin-top:18px;">
+        <div style="display:flex;align-items:center;">
+          <span style="font-size:15px;font-weight:700;color:rgba(0,0,0,0.88);">POST 항목</span>
+          <span class="bulk-count-badge" id="bulk-count-num">1</span>
+          <span style="font-size:12px;color:rgba(0,0,0,0.35);margin-left:8px;">카테고리별로 각각 작성해주세요</span>
         </div>
-        <div class="upload-zone">
-          <div class="upload-zone-icon">📁</div>
-          <div class="upload-zone-text">클릭하거나 이미지를 드래그해 올려주세요</div>
-          <div class="upload-zone-hint">JPG, PNG, WebP · 최대 10MB · 최대 20장</div>
+        <div style="display:flex;gap:8px;">
+          <button class="btn" style="background:#f9f0ff;border-color:#d3adf7;color:#531dab;font-size:12px;height:30px;" onclick="openAiModal()">✨ AI 초안 일괄 생성</button>
+          <button class="btn btn-primary" style="height:30px;font-size:12px;" onclick="addWizPost()">+ 카테고리 추가</button>
         </div>
       </div>
-      <div class="form-section" id="partner-visibility-post">
-        <div class="section-title">파트너 노출 설정</div>
-        <div class="form-row">
-          <div class="form-item full">
-            <label class="form-label">노출 대상</label>
-            <div class="toggle-group" style="margin-bottom:12px;">
-              <button class="toggle-btn on" onclick="togglePartnerTarget(this,'post')">전체 파트너</button>
-              <button class="toggle-btn" onclick="togglePartnerTarget(this,'post')">특정 파트너 선택</button>
-            </div>
-            <div id="partner-select-post" style="display:none;">
-              <div style="display:flex;gap:6px;margin-bottom:10px;">
-                <input class="fc" type="text" placeholder="파트너명 검색" style="flex:1;max-width:260px;" oninput="filterPartnerCheckboxes(this.value,'post')">
-                <button class="btn btn-default btn-sm" onclick="toggleAllPartners(true,'post')">전체 선택</button>
-                <button class="btn btn-default btn-sm" onclick="toggleAllPartners(false,'post')">선택 해제</button>
-              </div>
-              <div class="partner-checkbox-list" id="partner-list-post" style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px;padding:12px;background:#fafafa;border-radius:6px;border:1px solid #f0f0f0;">
-                <label class="partner-cb-item"><input type="checkbox" checked> <span>JV Vietnam</span> <span style="font-size:11px;color:rgba(0,0,0,0.35);">DMC</span></label>
-                <label class="partner-cb-item"><input type="checkbox" checked> <span>피크타임 트래블</span> <span style="font-size:11px;color:rgba(0,0,0,0.35);">여행사</span></label>
-                <label class="partner-cb-item"><input type="checkbox"> <span>써니투어</span> <span style="font-size:11px;color:rgba(0,0,0,0.35);">랜드사</span></label>
-                <label class="partner-cb-item"><input type="checkbox"> <span>하나프리</span> <span style="font-size:11px;color:rgba(0,0,0,0.35);">여행사</span></label>
-                <label class="partner-cb-item"><input type="checkbox"> <span>모두투어</span> <span style="font-size:11px;color:rgba(0,0,0,0.35);">여행사</span></label>
-                <label class="partner-cb-item"><input type="checkbox"> <span>참좋은여행</span> <span style="font-size:11px;color:rgba(0,0,0,0.35);">여행사</span></label>
-              </div>
-              <div class="form-hint" style="margin-top:6px;">선택된 파트너: <strong id="partner-count-post" style="color:#1677ff;">2개</strong></div>
-            </div>
-          </div>
+      <div class="bulk-body-wrap">
+        <div class="bulk-post-list" id="wiz-post-list">
+          <!-- JS로 렌더링됨 -->
+        </div>
+        <div class="bulk-add-btn" onclick="addWizPost()">
+          ＋ POST 항목 추가하기 (카테고리 단위)
         </div>
       </div>
     </div>
@@ -5550,9 +5522,20 @@ function wizNext() {
     document.getElementById('wiz3-sum-target').textContent = targetText;
     const scopeEl = document.getElementById('wiz2-sup-preview-label') || document.getElementById('wiz2-prod-preview-label');
     document.getElementById('wiz3-sum-scope').textContent = scopeEl?.textContent ? '· ' + scopeEl.textContent : '';
-    document.getElementById('wiz-next-btn').textContent = '✓ 등록 완료';
+    // POST 항목 초기화
+    initWizPosts();
   } else if (s.step === 3) {
-    alert('POST가 등록되었습니다!');
+    // 모든 항목에 카테고리가 있는지 확인
+    const missing = wizPosts.filter(p => !p.category);
+    if (missing.length > 0) {
+      // 첫 번째 미선택 항목 펼치기
+      wizPosts.forEach(p => p.expanded = missing.includes(p));
+      renderWizPosts();
+      alert(`카테고리가 선택되지 않은 항목이 ${missing.length}개 있습니다.`);
+      return;
+    }
+    const cats = wizPosts.map(p => `✅ ${p.category}${p.title ? ' — ' + p.title : ''}`).join('\n');
+    alert(`POST ${wizPosts.length}개가 등록되었습니다!\n\n${cats}`);
     showView('list');
   }
 }
@@ -5572,7 +5555,14 @@ function wizGoStep(n) {
     if (line) { line.classList.toggle('done', i < n); }
   }
   document.getElementById('wiz-prev-btn').style.display = n > 1 ? 'block' : 'none';
-  document.getElementById('wiz-next-btn').textContent = n < 3 ? '다음 단계 →' : '✓ 등록 완료';
+  if (n < 3) {
+    document.getElementById('wiz-next-btn').textContent = '다음 단계 →';
+  } else {
+    const cnt = wizPosts.length || 1;
+    document.getElementById('wiz-next-btn').textContent = `✓ POST ${cnt}개 등록`;
+    document.getElementById('wiz-next-btn').style.background = cnt > 1 ? '#722ed1' : '';
+    document.getElementById('wiz-next-btn').style.borderColor = cnt > 1 ? '#722ed1' : '';
+  }
 }
 
 function wizSupplierChange(val) {
@@ -5628,6 +5618,184 @@ function wizBuildProdKey() {
   const rn = r.options[r.selectedIndex]?.text; const mn = m.options[m.selectedIndex]?.text;
   const label = [rn, mn].filter(v => v && !['객실 선택','+ 식사 선택 (선택)'].includes(v)).join(' · ');
   if (label) { document.getElementById('wiz2-prod-preview').style.display = 'block'; document.getElementById('wiz2-prod-preview-label').textContent = label; }
+}
+
+// ===== 일괄 POST 항목 관리 =====
+let wizPostIdSeq = 1;
+let wizPosts = [];
+const WIZ_CATEGORIES = ['소개','핵심포인트','스페셜 혜택','포함사항','불포함사항','자주 묻는 질문','취소환불규정','유의사항','안내사항','출발 전 안내','수하물 규정'];
+
+function initWizPosts() {
+  wizPosts = [];
+  wizPostIdSeq = 1;
+  addWizPost();
+}
+
+function addWizPost() {
+  const id = wizPostIdSeq++;
+  // 기존 항목 모두 접기
+  wizPosts.forEach(p => { p.expanded = false; });
+  wizPosts.push({ id, category: '', title: '', expanded: true });
+  renderWizPosts();
+}
+
+function removeWizPost(id) {
+  if (wizPosts.length <= 1) { alert('최소 1개의 POST 항목이 필요합니다.'); return; }
+  // 현재 입력값 저장
+  saveWizPostValues();
+  wizPosts = wizPosts.filter(p => p.id !== id);
+  if (!wizPosts.some(p => p.expanded)) wizPosts[wizPosts.length - 1].expanded = true;
+  renderWizPosts();
+}
+
+function toggleWizPost(id) {
+  saveWizPostValues();
+  const post = wizPosts.find(p => p.id === id);
+  if (!post) return;
+  post.expanded = !post.expanded;
+  renderWizPosts();
+}
+
+function saveWizPostValues() {
+  wizPosts.forEach(p => {
+    const catEl = document.getElementById('bpi-cat-' + p.id);
+    const titleEl = document.getElementById('bpi-title-' + p.id);
+    const summEl = document.getElementById('bpi-summ-' + p.id);
+    if (catEl) p.category = catEl.value;
+    if (titleEl) p.title = titleEl.value;
+    if (summEl) p.summary = summEl.value;
+  });
+}
+
+function renderWizPosts() {
+  const container = document.getElementById('wiz-post-list');
+  if (!container) return;
+  container.innerHTML = wizPosts.map((p, idx) => {
+    const catOpts = ['<option value="">카테고리를 선택해주세요</option>',
+      ...WIZ_CATEGORIES.map(c => `<option value="${c}"${p.category===c?' selected':''}>${c}</option>`)
+    ].join('');
+    const hasCat = !!p.category;
+    const hasTitle = !!p.title;
+    const delBtn = wizPosts.length > 1
+      ? `<button class="bpi-del" onclick="event.stopPropagation();removeWizPost(${p.id})">삭제</button>`
+      : '';
+    return `
+    <div class="bulk-post-item${p.expanded?' expanded':''}" id="bpi-${p.id}">
+      <div class="bpi-header" onclick="toggleWizPost(${p.id})">
+        <div class="bpi-num">${idx+1}</div>
+        ${hasCat ? `<span class="bpi-cat-tag">${p.category}</span>` : '<span style="font-size:12px;color:rgba(0,0,0,0.35);flex-shrink:0;">카테고리 미선택</span>'}
+        <span class="bpi-title-preview${hasTitle?' has-title':''}">${hasTitle ? p.title : '제목을 입력해주세요'}</span>
+        <span class="bpi-arrow">▼</span>
+        ${delBtn}
+      </div>
+      <div class="bpi-body">
+        <div class="form-row">
+          <div class="form-item half">
+            <label class="form-label">카테고리 <span class="req">*</span></label>
+            <select class="fc" id="bpi-cat-${p.id}" onchange="wizPostCatChange(${p.id},this.value)">
+              ${catOpts}
+            </select>
+          </div>
+          <div class="form-item half">
+            <label class="form-label" style="display:flex;align-items:center;gap:5px;">
+              관리용 이름
+              <span style="font-size:11px;font-weight:400;color:rgba(0,0,0,0.35);">(내부 식별용)</span>
+            </label>
+            <input class="fc" type="text" id="bpi-mgmt-${p.id}" placeholder="카테고리 선택 시 자동 생성" style="color:rgba(0,0,0,0.45);" readonly>
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-item full">
+            <label class="form-label">제목</label>
+            <input class="fc" type="text" id="bpi-title-${p.id}" placeholder="제목을 입력해주세요" value="${p.title||''}" oninput="wizPostTitleChange(${p.id},this.value)">
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-item full">
+            <label class="form-label">요약 <span style="font-size:11px;font-weight:400;color:rgba(0,0,0,0.35);">(한 줄 설명)</span></label>
+            <input class="fc" type="text" id="bpi-summ-${p.id}" placeholder="한 줄 요약을 입력해주세요" value="${p.summary||''}">
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-item full">
+            <label class="form-label">내용</label>
+            <div class="editor-wrap">
+              <div class="editor-toolbar">
+                <button class="etb" title="굵게"><b>B</b></button>
+                <button class="etb" title="기울임"><i>I</i></button>
+                <button class="etb" title="밑줄"><u>U</u></button>
+                <div class="etb-sep"></div>
+                <button class="etb" title="불릿 목록">☰</button>
+                <button class="etb" title="번호 목록">1≡</button>
+                <div class="etb-sep"></div>
+                <button class="etb" title="이미지">🖼</button>
+                <button class="etb" title="링크">🔗</button>
+                <div class="etb-sep"></div>
+                <button class="etb" title="표">⊞</button>
+                <button class="etb" title="구분선">—</button>
+              </div>
+              <div class="editor-body" contenteditable="true" data-placeholder="내용을 입력해주세요"></div>
+            </div>
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-item full">
+            <label class="form-label">이미지 <span style="font-size:11px;font-weight:400;color:rgba(0,0,0,0.35);">(선택)</span></label>
+            <div class="toggle-group" style="margin-bottom:10px;">
+              <button class="toggle-btn on" onclick="toggleImg(this)">단일</button>
+              <button class="toggle-btn" onclick="toggleImg(this)">리스트</button>
+              <button class="toggle-btn" onclick="toggleImg(this)">슬라이드</button>
+              <button class="toggle-btn" onclick="toggleImg(this)">그리드</button>
+            </div>
+            <div class="upload-zone" style="padding:18px;">
+              <div class="upload-zone-icon">📁</div>
+              <div class="upload-zone-text" style="font-size:13px;">클릭하거나 이미지를 드래그해 올려주세요</div>
+              <div class="upload-zone-hint">JPG, PNG, WebP · 최대 10MB · 최대 20장</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>`;
+  }).join('');
+
+  // 카운트 뱃지 + 버튼 텍스트 업데이트
+  const countEl = document.getElementById('bulk-count-num');
+  if (countEl) countEl.textContent = wizPosts.length;
+  const nextBtn = document.getElementById('wiz-next-btn');
+  if (nextBtn && wizState.step === 3) {
+    nextBtn.textContent = `✓ POST ${wizPosts.length}개 등록`;
+    nextBtn.style.background = wizPosts.length > 1 ? '#722ed1' : '#1677ff';
+    nextBtn.style.borderColor = wizPosts.length > 1 ? '#722ed1' : '#1677ff';
+  }
+}
+
+function wizPostCatChange(id, val) {
+  const post = wizPosts.find(p => p.id === id);
+  if (!post) return;
+  post.category = val;
+  // 헤더 카테고리 태그만 업데이트 (재렌더링 없이)
+  const item = document.getElementById('bpi-' + id);
+  if (!item) return;
+  const hdr = item.querySelector('.bpi-header');
+  const oldCatEl = hdr.querySelector('.bpi-cat-tag, span[style*="카테고리"]');
+  if (oldCatEl) {
+    if (val) { oldCatEl.className = 'bpi-cat-tag'; oldCatEl.textContent = val; oldCatEl.removeAttribute('style'); }
+    else { oldCatEl.className = ''; oldCatEl.setAttribute('style','font-size:12px;color:rgba(0,0,0,0.35);flex-shrink:0;'); oldCatEl.textContent = '카테고리 미선택'; }
+  }
+  // 관리명 자동생성 힌트
+  const mgmtEl = document.getElementById('bpi-mgmt-' + id);
+  if (mgmtEl && val) mgmtEl.placeholder = `${val} — 자동 생성 예정`;
+}
+
+function wizPostTitleChange(id, val) {
+  const post = wizPosts.find(p => p.id === id);
+  if (post) post.title = val;
+  // 헤더 제목 미리보기 업데이트
+  const previewEl = document.querySelector(`#bpi-${id} .bpi-title-preview`);
+  if (previewEl) {
+    previewEl.textContent = val || '제목을 입력해주세요';
+    previewEl.classList.toggle('has-title', !!val);
+  }
 }
 
 const wizCatalogSearchData = {
