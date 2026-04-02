@@ -5907,13 +5907,19 @@ function wizProdSearch(kw) {
   dd.innerHTML = items.map(i => {
     const sel = wizSelectedProds.some(p => p.id === i.id);
     return `<div style="padding:9px 14px;font-size:13px;display:flex;align-items:center;justify-content:space-between;gap:12px;${sel ? 'opacity:0.5;cursor:default;' : 'cursor:pointer;'}"
-      ${!sel ? `onmouseover="this.style.background='#f5f5f5'" onmouseout="this.style.background=''" onclick="wizProdSelect(${i.id},${JSON.stringify(i.n)})"` : ''}>
+      ${!sel ? `onmouseover="this.style.background='#f5f5f5'" onmouseout="this.style.background=''" onclick="wizProdSelectById(${i.id})"` : ''}>
       <span style="flex:1;">${i.n}</span>
       ${sel
         ? '<span style="font-size:11px;color:#52c41a;flex-shrink:0;">✓ 선택됨</span>'
         : '<span style="font-size:11px;color:#1677ff;font-weight:600;flex-shrink:0;">+ 선택</span>'}
     </div>`;
   }).join('');
+}
+
+function wizProdSelectById(id) {
+  const type = wizState.productType;
+  const item = (wizProdSearchData[type] || []).find(i => i.id === id);
+  if (item) wizProdSelect(item.id, item.n);
 }
 
 function wizProdSelect(id, name) {
