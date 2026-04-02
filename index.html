@@ -1098,6 +1098,24 @@ select.fc { height: 36px; padding: 0 32px 0 12px; appearance: none; background-i
           <div id="wiz2-cat-dd" style="display:none;position:absolute;top:calc(100%+3px);left:0;right:0;background:#fff;border:1px solid #d9d9d9;border-radius:6px;box-shadow:0 4px 12px rgba(0,0,0,.1);z-index:50;max-height:200px;overflow-y:auto;"></div>
         </div>
         <div style="margin-top:8px;font-size:13px;color:rgba(0,0,0,0.45);">선택됨: <strong id="wiz2-cat-selected" style="color:#1677ff;">없음</strong></div>
+
+        <!-- 항공사 선택 시에만: 좌석등급 선택 -->
+        <div id="wiz2-cat-seatclass" style="display:none;margin-top:20px;padding:14px 16px;background:#f0f7ff;border:1px solid #91caff;border-radius:8px;">
+          <div style="font-size:13px;font-weight:600;color:rgba(0,0,0,0.75);margin-bottom:10px;">
+            좌석등급 선택
+            <span style="font-size:11px;font-weight:400;color:rgba(0,0,0,0.4);margin-left:6px;">선택하지 않으면 전 좌석 공통으로 적용됩니다</span>
+          </div>
+          <div style="display:flex;gap:8px;flex-wrap:wrap;">
+            <button class="type-chip" onclick="wizCatSeatClass(this,'')">전체 공통</button>
+            <button class="type-chip" onclick="wizCatSeatClass(this,'Z1')">🪑 이코노미</button>
+            <button class="type-chip" onclick="wizCatSeatClass(this,'Z2')">✨ 프레스티지</button>
+            <button class="type-chip" onclick="wizCatSeatClass(this,'Z3')">💼 비즈니스</button>
+            <button class="type-chip" onclick="wizCatSeatClass(this,'Z4')">👑 퍼스트클래스</button>
+          </div>
+          <div id="wiz2-cat-seatclass-preview" style="display:none;margin-top:10px;font-size:12px;color:#1677ff;">
+            적용 범위: <strong id="wiz2-cat-seatclass-label"></strong>
+          </div>
+        </div>
       </div>
 
       <!-- 공급사: 공급사 선택 + 적용 범위 -->
@@ -1123,13 +1141,21 @@ select.fc { height: 36px; padding: 0 32px 0 12px; appearance: none; background-i
               </label>
               <label><input type="radio" name="sup-scope" value="airline" onchange="wizSupScopeChange('airline')">
                 <div><strong>특정 항공사에만</strong>
-                  <div class="scope-sub" id="wiz2-airline-sub" style="display:none;">
+                  <div class="scope-sub" id="wiz2-airline-sub" style="display:none;flex-direction:column;gap:8px;">
                     <select class="fc" id="wiz2-airline-sel" style="width:200px;" onchange="wizBuildSupKey()">
                       <option value="">항공사 선택</option>
                       <option value="A3">대한항공(KE)</option>
                       <option value="A5">비엣젯(VJ)</option>
                       <option value="A7">아시아나(OZ)</option>
                     </select>
+                    <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;">
+                      <span style="font-size:12px;color:rgba(0,0,0,0.45);">좌석등급:</span>
+                      <button class="type-chip selected" id="sup-sc-all" onclick="wizSupSeatClass(this,'')" style="font-size:11px;padding:3px 10px;">전체 공통</button>
+                      <button class="type-chip" id="sup-sc-z1" onclick="wizSupSeatClass(this,'Z1')" style="font-size:11px;padding:3px 10px;">이코노미</button>
+                      <button class="type-chip" id="sup-sc-z2" onclick="wizSupSeatClass(this,'Z2')" style="font-size:11px;padding:3px 10px;">프레스티지</button>
+                      <button class="type-chip" id="sup-sc-z3" onclick="wizSupSeatClass(this,'Z3')" style="font-size:11px;padding:3px 10px;">비즈니스</button>
+                      <button class="type-chip" id="sup-sc-z4" onclick="wizSupSeatClass(this,'Z4')" style="font-size:11px;padding:3px 10px;">퍼스트</button>
+                    </div>
                   </div>
                 </div>
               </label>
@@ -5670,7 +5696,14 @@ function wizBuildSupKey() {
   const scope = document.querySelector('input[name="sup-scope"]:checked')?.value;
   let label = '';
   if (scope === 'default') { label = '모든 상품 공통'; }
-  else if (scope === 'airline') { const v = document.getElementById('wiz2-airline-sel').options[document.getElementById('wiz2-airline-sel').selectedIndex]?.text; label = v && v !== '항공사 선택' ? v : ''; }
+  else if (scope === 'airline') {
+    const v = document.getElementById('wiz2-airline-sel');
+    const airlineName = v.options[v.selectedIndex]?.text;
+    if (airlineName && airlineName !== '항공사 선택') {
+      const scNames = { Z1: '이코노미', Z2: '프레스티지', Z3: '비즈니스', Z4: '퍼스트클래스' };
+      label = wizSupSeatClassVal ? `${airlineName} · ${scNames[wizSupSeatClassVal]}` : airlineName;
+    }
+  }
   else if (scope === 'accom') {
     const a = document.getElementById('wiz2-accom-sel'); const r = document.getElementById('wiz2-room-sel'); const m = document.getElementById('wiz2-meal-sel');
     const an = a.options[a.selectedIndex]?.text; const rn = r.options[r.selectedIndex]?.text; const mn = m.options[m.selectedIndex]?.text;
@@ -5898,7 +5931,37 @@ function wizCatalogSelect(name) {
   document.getElementById('wiz2-cat-search').value = name;
   document.getElementById('wiz2-cat-selected').textContent = name;
   document.getElementById('wiz2-cat-dd').style.display = 'none';
-  wizRevealSection3(); // 대상 선택 완료 → s3 공개
+  // 항공사 선택 시 좌석등급 선택 UI 표시
+  const seatBox = document.getElementById('wiz2-cat-seatclass');
+  if (seatBox) seatBox.style.display = wizState.catalogType === '항공사' ? 'block' : 'none';
+  // 항공사는 좌석등급 선택 후 s3 공개 (기본 "전체 공통" 선택 상태이므로 바로 공개)
+  wizRevealSection3();
+}
+
+// 카탈로그 항공사 좌석등급 선택
+let wizCatSeatClassVal = '';
+function wizCatSeatClass(el, val) {
+  wizCatSeatClassVal = val;
+  document.querySelectorAll('#wiz2-cat-seatclass .type-chip').forEach(c => c.classList.remove('selected'));
+  el.classList.add('selected');
+  const preview = document.getElementById('wiz2-cat-seatclass-preview');
+  const label = document.getElementById('wiz2-cat-seatclass-label');
+  const names = { Z1: '이코노미', Z2: '프레스티지', Z3: '비즈니스', Z4: '퍼스트클래스' };
+  if (val) { preview.style.display = 'block'; label.textContent = names[val] + ` (${val})`; }
+  else { preview.style.display = 'none'; }
+  updateWiz3Summary();
+}
+
+// 공급사 항공사 좌석등급 선택
+let wizSupSeatClassVal = '';
+function wizSupSeatClass(el, val) {
+  wizSupSeatClassVal = val;
+  ['sup-sc-all','sup-sc-z1','sup-sc-z2','sup-sc-z3','sup-sc-z4'].forEach(id => {
+    const btn = document.getElementById(id);
+    if (btn) btn.classList.remove('selected');
+  });
+  el.classList.add('selected');
+  wizBuildSupKey();
 }
 
 // ===== 상품단위: 복수 선택 =====
