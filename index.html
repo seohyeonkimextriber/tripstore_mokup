@@ -1192,24 +1192,41 @@ select.fc { height: 36px; padding: 0 32px 0 12px; appearance: none; background-i
 
       <!-- 상품단위: 상품 검색 + 숙박권 적용 범위 -->
       <div id="wiz2-product" style="display:none;">
-        <div class="wiz-step-title">어떤 <span id="wiz2-prod-typename" style="color:#d48806;"></span>인가요?</div>
-        <div class="wiz-step-sub">상품 ID 또는 이름으로 검색해주세요.</div>
-        <div style="max-width:400px;margin-bottom:20px;">
+        <div class="wiz-step-title">어떤 <span id="wiz2-prod-typename" style="color:#d48806;"></span>에 적용할 POST인가요?</div>
+        <div class="wiz-step-sub">상품 ID 또는 이름으로 검색 후 선택해주세요. <strong style="color:#d48806;">여러 개 선택 가능</strong>합니다 — 선택된 상품들에 동일한 POST가 적용됩니다.</div>
+
+        <!-- 검색 인풋 -->
+        <div style="max-width:480px;margin-bottom:16px;">
           <label class="form-label">상품 검색 <span class="req">*</span></label>
           <div style="position:relative;">
-            <input class="fc" type="text" id="wiz2-prod-search" placeholder="상품 ID 또는 이름 검색" autocomplete="off" oninput="wizProdSearch(this.value)">
-            <div id="wiz2-prod-dd" style="display:none;position:absolute;top:calc(100%+3px);left:0;right:0;background:#fff;border:1px solid #d9d9d9;border-radius:6px;box-shadow:0 4px 12px rgba(0,0,0,.1);z-index:50;max-height:200px;overflow-y:auto;"></div>
+            <span style="position:absolute;left:10px;top:50%;transform:translateY(-50%);font-size:13px;color:rgba(0,0,0,0.3);pointer-events:none;">🔍</span>
+            <input class="fc" type="text" id="wiz2-prod-search" placeholder="상품 ID 또는 이름으로 검색" autocomplete="off" oninput="wizProdSearch(this.value)" style="padding-left:32px;">
+            <div id="wiz2-prod-dd" style="display:none;position:absolute;top:calc(100%+3px);left:0;right:0;background:#fff;border:1px solid #d9d9d9;border-radius:6px;box-shadow:0 6px 16px rgba(0,0,0,.12);z-index:50;max-height:240px;overflow-y:auto;"></div>
           </div>
-          <div style="margin-top:8px;font-size:13px;color:rgba(0,0,0,0.45);">선택됨: <strong id="wiz2-prod-selected" style="color:#d48806;">없음</strong></div>
         </div>
 
-        <!-- 숙박권만: 적용 범위 -->
+        <!-- 선택된 상품 태그 목록 -->
+        <div style="margin-bottom:20px;">
+          <div style="font-size:12px;color:rgba(0,0,0,0.45);margin-bottom:8px;display:flex;align-items:center;gap:6px;">
+            선택된 상품
+            <span id="wiz2-prod-count" style="background:#d48806;color:#fff;font-size:11px;font-weight:700;border-radius:10px;padding:1px 7px;">0개</span>
+            <span style="color:rgba(0,0,0,0.3);">— 태그의 ✕ 를 눌러 제거</span>
+          </div>
+          <div id="wiz2-prod-tags" style="display:flex;flex-wrap:wrap;gap:6px;min-height:40px;background:#fafafa;border:1.5px dashed #d9d9d9;border-radius:8px;padding:8px 12px;transition:border-color 0.15s;">
+            <span style="font-size:12px;color:rgba(0,0,0,0.3);line-height:24px;font-style:italic;">검색 후 상품을 선택하면 여기에 표시됩니다</span>
+          </div>
+        </div>
+
+        <!-- 숙박권만: 객실요금표 적용 범위 -->
         <div id="wiz2-accom-scope" style="display:none;">
-          <div style="font-size:14px;font-weight:600;color:rgba(0,0,0,0.88);margin-bottom:12px;">이 POST는 어느 객실요금표에 적용되나요?</div>
+          <div style="font-size:14px;font-weight:600;color:rgba(0,0,0,0.88);margin-bottom:12px;">
+            이 POST는 어느 객실요금표에 적용되나요?
+            <span style="font-size:12px;font-weight:400;color:rgba(0,0,0,0.35);margin-left:6px;">선택된 모든 숙박권에 공통 적용됩니다</span>
+          </div>
           <div class="scope-section">
             <div class="scope-radio">
               <label><input type="radio" name="prod-scope" value="all" checked onchange="wizProdScopeChange('all')">
-                <div><strong>이 숙박권 전체에 공통</strong><div style="font-size:12px;color:rgba(0,0,0,0.45);">모든 객실요금표에 동일하게 적용</div></div>
+                <div><strong>전체 공통</strong><div style="font-size:12px;color:rgba(0,0,0,0.45);">모든 객실요금표에 동일하게 적용</div></div>
               </label>
               <label><input type="radio" name="prod-scope" value="room" onchange="wizProdScopeChange('room')">
                 <div><strong>특정 객실요금표에만</strong>
@@ -5511,14 +5528,30 @@ function wizNext() {
     }
     if (s.board === 'product') {
       document.getElementById('wiz2-prod-typename').textContent = s.productType;
-      document.getElementById('wiz2-accom-scope').style.display = s.productType === '숙박권' ? 'block' : 'none';
+      document.getElementById('wiz2-accom-scope').style.display = 'none'; // 초기엔 숨김 (상품 선택 후 표시)
+      initWizProdSelect(); // 복수 선택 초기화
     }
   } else if (s.step === 2) {
+    // 상품단위: 선택된 상품이 없으면 진행 불가
+    if (s.board === 'product' && wizSelectedProds.length === 0) {
+      const tagsEl = document.getElementById('wiz2-prod-tags');
+      if (tagsEl) { tagsEl.style.borderColor = '#ff4d4f'; setTimeout(() => { tagsEl.style.borderColor = '#d9d9d9'; }, 1800); }
+      alert('상품을 1개 이상 선택해주세요.');
+      return;
+    }
     wizGoStep(3);
     // Step 3 요약 뱃지 업데이트
     const boardLabel = { catalog: '카탈로그 게시판', supplier: '공급사 게시판', product: '상품단위 게시판' }[s.board];
     document.getElementById('wiz3-sum-board').textContent = boardLabel;
-    let targetText = s.board === 'catalog' ? (s.catalogType || '') : s.board === 'supplier' ? (document.getElementById('wiz2-sup-select')?.value || '') : (s.productType || '');
+    let targetText;
+    if (s.board === 'catalog') {
+      targetText = s.catalogType || '';
+    } else if (s.board === 'supplier') {
+      targetText = document.getElementById('wiz2-sup-select')?.value || '';
+    } else {
+      // 상품단위: "항공권 3개" 형식
+      targetText = `${s.productType} ${wizSelectedProds.length}개`;
+    }
     document.getElementById('wiz3-sum-target').textContent = targetText;
     const scopeEl = document.getElementById('wiz2-sup-preview-label') || document.getElementById('wiz2-prod-preview-label');
     document.getElementById('wiz3-sum-scope').textContent = scopeEl?.textContent ? '· ' + scopeEl.textContent : '';
@@ -5820,23 +5853,103 @@ function wizCatalogSelect(name) {
   document.getElementById('wiz2-cat-dd').style.display = 'none';
 }
 
+// ===== 상품단위: 복수 선택 =====
+let wizSelectedProds = [];
+
+function initWizProdSelect() {
+  wizSelectedProds = [];
+  const tagsEl = document.getElementById('wiz2-prod-tags');
+  if (tagsEl) tagsEl.innerHTML = '<span style="font-size:12px;color:rgba(0,0,0,0.3);line-height:24px;font-style:italic;">검색 후 상품을 선택하면 여기에 표시됩니다</span>';
+  const countEl = document.getElementById('wiz2-prod-count');
+  if (countEl) countEl.textContent = '0개';
+  const accomScope = document.getElementById('wiz2-accom-scope');
+  if (accomScope) accomScope.style.display = 'none';
+}
+
 const wizProdSearchData = {
-  '항공권': [{id:123,n:'항공권 #123 · 인천→푸꾸옥 비엣젯'},{id:124,n:'항공권 #124 · 인천→다낭 아시아나'}],
-  '숙박권': [{id:456,n:'숙박권 #456 · 솔바이멜리아 푸꾸옥'},{id:457,n:'숙박권 #457 · 씨셀스 푸꾸옥'}],
-  '투어/티켓': [{id:789,n:'투어/티켓 #789 · 빈원더스 풀패키지'},{id:790,n:'투어/티켓 #790 · 빈펄사파리'}],
-  '상품': [{id:200,n:'상품 #200 · 푸꾸옥 3박 5일'},{id:201,n:'상품 #201 · 나트랑 4박 6일'}],
+  '항공권': [
+    {id:123, n:'항공권 #123 · 대한항공(KE) 인천→호치민 (2026.05.10)'},
+    {id:124, n:'항공권 #124 · 대한항공(KE) 인천→호치민 (2026.05.17)'},
+    {id:125, n:'항공권 #125 · 비엣젯(VJ) 인천→푸꾸옥 (2026.05.10)'},
+    {id:126, n:'항공권 #126 · 비엣젯(VJ) 인천→푸꾸옥 (2026.05.17)'},
+    {id:201, n:'항공권 #201 · 아시아나(OZ) 인천→다낭 (2026.06.01)'},
+    {id:202, n:'항공권 #202 · 비엣젯(VJ) 인천→나트랑 (2026.06.05)'},
+  ],
+  '숙박권': [
+    {id:456, n:'숙박권 #456 · 솔바이멜리아 푸꾸옥 (2026.05.10~13)'},
+    {id:457, n:'숙박권 #457 · 솔바이멜리아 푸꾸옥 (2026.05.17~20)'},
+    {id:458, n:'숙박권 #458 · 씨셀스 푸꾸옥 (2026.05.10~12)'},
+    {id:459, n:'숙박권 #459 · 멜리아빈펄 푸꾸옥 (2026.06.01~04)'},
+    {id:460, n:'숙박권 #460 · 소나가비치 리조트 (2026.06.01~03)'},
+  ],
+  '투어/티켓': [
+    {id:789, n:'투어/티켓 #789 · 빈원더스 풀패키지'},
+    {id:790, n:'투어/티켓 #790 · 빈펄사파리 입장권'},
+    {id:791, n:'투어/티켓 #791 · 호핑투어 (오전 출발)'},
+    {id:792, n:'투어/티켓 #792 · 빈펄 골프클럽'},
+    {id:793, n:'투어/티켓 #793 · 선셋 크루즈'},
+  ],
+  '상품': [
+    {id:200, n:'상품 #200 · 푸꾸옥 3박 5일 (솔바이멜리아)'},
+    {id:201, n:'상품 #201 · 나트랑 4박 6일 (빈펄리조트)'},
+    {id:202, n:'상품 #202 · 다낭 3박 4일 (풀만 다낭)'},
+    {id:203, n:'상품 #203 · 호치민 2박 3일 (꼭 테마여행)'},
+  ],
 };
+
 function wizProdSearch(kw) {
   const type = wizState.productType;
-  const items = (wizProdSearchData[type] || []).filter(i => !kw || i.n.includes(kw));
+  const items = (wizProdSearchData[type] || []).filter(i => !kw || i.n.toLowerCase().includes(kw.toLowerCase()));
   const dd = document.getElementById('wiz2-prod-dd');
-  dd.style.display = items.length ? 'block' : 'none';
-  dd.innerHTML = items.map(i => `<div style="padding:8px 12px;cursor:pointer;font-size:13px;" onmouseover="this.style.background='#f5f5f5'" onmouseout="this.style.background=''" onclick="wizProdSelect(${i.id},'${i.n}')">${i.n}</div>`).join('');
+  if (!items.length && kw) { dd.innerHTML = '<div style="padding:12px;font-size:13px;color:rgba(0,0,0,0.35);text-align:center;">검색 결과가 없습니다</div>'; dd.style.display = 'block'; return; }
+  if (!items.length) { dd.style.display = 'none'; return; }
+  dd.style.display = 'block';
+  dd.innerHTML = items.map(i => {
+    const sel = wizSelectedProds.some(p => p.id === i.id);
+    return `<div style="padding:9px 14px;font-size:13px;display:flex;align-items:center;justify-content:space-between;gap:12px;${sel ? 'opacity:0.5;cursor:default;' : 'cursor:pointer;'}"
+      ${!sel ? `onmouseover="this.style.background='#f5f5f5'" onmouseout="this.style.background=''" onclick="wizProdSelect(${i.id},${JSON.stringify(i.n)})"` : ''}>
+      <span style="flex:1;">${i.n}</span>
+      ${sel
+        ? '<span style="font-size:11px;color:#52c41a;flex-shrink:0;">✓ 선택됨</span>'
+        : '<span style="font-size:11px;color:#1677ff;font-weight:600;flex-shrink:0;">+ 선택</span>'}
+    </div>`;
+  }).join('');
 }
+
 function wizProdSelect(id, name) {
-  document.getElementById('wiz2-prod-search').value = name;
-  document.getElementById('wiz2-prod-selected').textContent = name;
+  if (wizSelectedProds.some(p => p.id === id)) return;
+  wizSelectedProds.push({id, n: name});
+  document.getElementById('wiz2-prod-search').value = '';
   document.getElementById('wiz2-prod-dd').style.display = 'none';
+  renderProdTags();
+}
+
+function wizProdRemove(id) {
+  wizSelectedProds = wizSelectedProds.filter(p => p.id !== id);
+  renderProdTags();
+}
+
+function renderProdTags() {
+  const tagsEl = document.getElementById('wiz2-prod-tags');
+  const countEl = document.getElementById('wiz2-prod-count');
+  if (!tagsEl) return;
+  if (wizSelectedProds.length === 0) {
+    tagsEl.innerHTML = '<span style="font-size:12px;color:rgba(0,0,0,0.3);line-height:24px;font-style:italic;">검색 후 상품을 선택하면 여기에 표시됩니다</span>';
+    if (countEl) countEl.textContent = '0개';
+  } else {
+    tagsEl.innerHTML = wizSelectedProds.map(p =>
+      `<span style="display:inline-flex;align-items:center;gap:5px;background:#fffbe6;border:1px solid #ffe58f;border-radius:16px;padding:4px 10px 4px 12px;font-size:12px;color:#874d00;max-width:320px;">
+        <span style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${p.n}</span>
+        <button onclick="wizProdRemove(${p.id})" title="제거" style="background:none;border:none;cursor:pointer;padding:0;color:#ad8b00;font-size:13px;line-height:1;flex-shrink:0;font-family:inherit;">✕</button>
+      </span>`
+    ).join('');
+    if (countEl) countEl.textContent = `${wizSelectedProds.length}개`;
+  }
+  // 숙박권이고 상품이 선택된 경우만 scope 섹션 표시
+  const accomScope = document.getElementById('wiz2-accom-scope');
+  if (accomScope) accomScope.style.display = (wizState.productType === '숙박권' && wizSelectedProds.length > 0) ? 'block' : 'none';
+  // Step 3 버튼 텍스트도 갱신 (dropwdown 재검색 시 갱신)
+  wizProdSearch(document.getElementById('wiz2-prod-search')?.value || '');
 }
 
 function openProductLinkModal() {
