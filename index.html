@@ -665,6 +665,7 @@ select.fc { height: 36px; padding: 0 32px 0 12px; appearance: none; background-i
           <option>A* (항공사)</option>
           <option>P* (공항)</option>
           <option>H* (숙소)</option>
+          <option>R* (객실)</option>
           <option>S* (스팟/체험)</option>
           <option>M* (식사)</option>
           <option>L* (여행지)</option>
@@ -994,6 +995,7 @@ select.fc { height: 36px; padding: 0 32px 0 12px; appearance: none; background-i
                 <option value="AIRLINE">A — 항공사 (AIRLINE)</option>
                 <option value="AIRPORT">P — 공항 (AIRPORT)</option>
                 <option value="ACCOMMODATION">H — 숙소 (ACCOMMODATION)</option>
+                <option value="ROOM">R — 객실 (ROOM)</option>
                 <option value="SPOT_ACTIVITY">S — 스팟/체험 (SPOT_ACTIVITY)</option>
                 <option value="MEAL">M — 식사 (MEAL)</option>
                 <option value="PLACE">L — 여행지 (PLACE)</option>
@@ -1002,11 +1004,18 @@ select.fc { height: 36px; padding: 0 32px 0 12px; appearance: none; background-i
               <select class="fc" id="cf-sk-item" onchange="onSkItemChange()" style="width:240px;display:none;">
                 <option value="">카탈로그 선택</option>
               </select>
-              <!-- 2차 조합: 추가 content_type 선택 -->
+              <!-- 2차 조합 -->
               <select class="fc" id="cf-sk-type2" onchange="onSkType2Change()" style="width:180px;display:none;">
                 <option value="">+ 조합 추가 (선택)</option>
               </select>
-              <select class="fc" id="cf-sk-item2" onchange="buildSubKeyPreview()" style="width:240px;display:none;">
+              <select class="fc" id="cf-sk-item2" onchange="onSkItem2Change()" style="width:240px;display:none;">
+                <option value="">카탈로그 선택</option>
+              </select>
+              <!-- 3차 조합 -->
+              <select class="fc" id="cf-sk-type3" onchange="onSkType3Change()" style="width:180px;display:none;">
+                <option value="">+ 3차 조합 (선택)</option>
+              </select>
+              <select class="fc" id="cf-sk-item3" onchange="buildSubKeyPreview()" style="width:240px;display:none;">
                 <option value="">카탈로그 선택</option>
               </select>
             </div>
@@ -1015,8 +1024,8 @@ select.fc { height: 36px; padding: 0 32px 0 12px; appearance: none; background-i
               <span id="cf-sk-label" style="margin-left:8px;color:#8c8c8c;font-size:11px;"></span>
             </div>
             <div class="form-hint" style="margin-top:4px;">
-              content_type → 카탈로그 ID 순서로 선택하면 sub_key가 자동 조합됩니다. 2개 타입까지 조합 가능.<br>
-              비워두면 <code>default</code> (이 공급사 전체 공통). 결과값 예시: <code>ACCOMMODATION_45_MEAL_1</code>
+              content_type → 카탈로그 ID 순서로 선택하면 sub_key가 자동 조합됩니다. 최대 3depth 조합 가능.<br>
+              비워두면 <code>default</code> (이 공급사 전체 공통). 결과값 예시: <code>H45_R158_M2</code>
             </div>
           </div>
           <!-- 숙박권 게시판 sub_key UI -->
@@ -4670,20 +4679,22 @@ const catalogData = {
   'AIRLINE':        { char:'A', sort:1, label: '항공사',    items: [{id:3,n:'대한항공(KE)'},{id:5,n:'비엣젯(VJ)'},{id:7,n:'아시아나(OZ)'}] },
   'AIRPORT':        { char:'P', sort:2, label: '공항',      items: [{id:5,n:'인천국제공항(ICN)'},{id:12,n:'탄손냣(SGN)'},{id:18,n:'푸꾸옥(PQC)'}] },
   'ACCOMMODATION':  { char:'H', sort:3, label: '숙소',      items: [{id:45,n:'솔바이멜리아 푸꾸옥'},{id:220,n:'씨셀스 푸꾸옥'},{id:300,n:'멜리아빈펄'},{id:180,n:'소나가비치 리조트'}] },
-  'SPOT_ACTIVITY':  { char:'S', sort:4, label: '스팟/체험', items: [{id:12,n:'빈펄사파리'},{id:15,n:'빈원더스'},{id:23,n:'호핑투어'},{id:30,n:'코코넛 프리즌'}] },
-  'MEAL':           { char:'M', sort:5, label: '식사',      items: [{id:1,n:'RO (식사 불포함)'},{id:2,n:'BB (조식 포함)'},{id:3,n:'HB (2끼 포함)'},{id:4,n:'FB (전식 포함)'},{id:5,n:'AI (올인클루시브)'}] },
-  'PLACE':          { char:'L', sort:6, label: '여행지',    items: [{id:23,n:'푸꾸옥'},{id:31,n:'나트랑'},{id:42,n:'호치민'},{id:55,n:'다낭'}] },
-  'COUNTRY':        { char:'C', sort:7, label: '국가',      items: [{id:1,n:'베트남'},{id:2,n:'태국'},{id:3,n:'일본'},{id:8,n:'괌'}] },
+  'ROOM':           { char:'R', sort:4, label: '객실',      items: [{id:158,n:'엑스트라 솔 스위트'},{id:160,n:'더 레벨 스위트'},{id:220,n:'디럭스 씨뷰'},{id:221,n:'프리미어 풀빌라'}] },
+  'SPOT_ACTIVITY':  { char:'S', sort:5, label: '스팟/체험', items: [{id:12,n:'빈펄사파리'},{id:15,n:'빈원더스'},{id:23,n:'호핑투어'},{id:30,n:'코코넛 프리즌'}] },
+  'MEAL':           { char:'M', sort:6, label: '식사',      items: [{id:1,n:'RO (식사 불포함)'},{id:2,n:'BB (조식 포함)'},{id:3,n:'HB (2끼 포함)'},{id:4,n:'FB (전식 포함)'},{id:5,n:'AI (올인클루시브)'}] },
+  'PLACE':          { char:'L', sort:7, label: '여행지',    items: [{id:23,n:'푸꾸옥'},{id:31,n:'나트랑'},{id:42,n:'호치민'},{id:55,n:'다낭'}] },
+  'COUNTRY':        { char:'C', sort:8, label: '국가',      items: [{id:1,n:'베트남'},{id:2,n:'태국'},{id:3,n:'일본'},{id:8,n:'괌'}] },
 };
 
 // 2차 조합 가능한 content_type 매핑 (1차 선택 시 어떤 2차가 가능한지)
 const subKeyCombinations = {
-  'ACCOMMODATION': ['MEAL','SPOT_ACTIVITY','PLACE'],
+  'ACCOMMODATION': ['ROOM','MEAL','SPOT_ACTIVITY','PLACE'],
+  'ROOM':          ['MEAL','ACCOMMODATION'],
   'AIRLINE':       ['AIRPORT'],
   'PLACE':         ['ACCOMMODATION','SPOT_ACTIVITY','AIRLINE'],
   'SPOT_ACTIVITY': ['PLACE'],
   'AIRPORT':       ['AIRLINE'],
-  'MEAL':          ['ACCOMMODATION'],
+  'MEAL':          ['ACCOMMODATION','ROOM'],
   'COUNTRY':       ['PLACE'],
 };
 
@@ -4946,6 +4957,8 @@ function resetSupplierSubKey() {
   document.getElementById('cf-sk-item').style.display = 'none';
   document.getElementById('cf-sk-type2').style.display = 'none';
   document.getElementById('cf-sk-item2').style.display = 'none';
+  document.getElementById('cf-sk-type3').style.display = 'none';
+  document.getElementById('cf-sk-item3').style.display = 'none';
   document.getElementById('cf-sk-preview').style.display = 'none';
 }
 
@@ -4999,8 +5012,12 @@ function onSkItemChange() {
 function onSkType2Change() {
   const skType2 = document.getElementById('cf-sk-type2').value;
   const item2Sel = document.getElementById('cf-sk-item2');
+  const type3Sel = document.getElementById('cf-sk-type3');
+  const item3Sel = document.getElementById('cf-sk-item3');
 
   item2Sel.style.display = 'none';
+  type3Sel.style.display = 'none';
+  item3Sel.style.display = 'none';
   if (!skType2) { buildSubKeyPreview(); return; }
 
   const cat = catalogData[skType2];
@@ -5013,6 +5030,54 @@ function onSkType2Change() {
   buildSubKeyPreview();
 }
 
+function onSkItem2Change() {
+  const skType = document.getElementById('cf-sk-type').value;
+  const skType2 = document.getElementById('cf-sk-type2').value;
+  const skItem2 = document.getElementById('cf-sk-item2').value;
+  const type3Sel = document.getElementById('cf-sk-type3');
+  const item3Sel = document.getElementById('cf-sk-item3');
+
+  type3Sel.style.display = 'none';
+  item3Sel.style.display = 'none';
+
+  if (skItem2) {
+    // 이미 사용된 타입 제외하고 3차 조합 가능한 타입 찾기
+    const used = [skType, skType2];
+    const allCombo = new Set();
+    if (subKeyCombinations[skType]) subKeyCombinations[skType].forEach(t => allCombo.add(t));
+    if (subKeyCombinations[skType2]) subKeyCombinations[skType2].forEach(t => allCombo.add(t));
+    const available = [...allCombo].filter(t => !used.includes(t));
+
+    if (available.length > 0) {
+      type3Sel.innerHTML = '<option value="">+ 3차 조합 (선택)</option>';
+      available.forEach(t => {
+        const c = catalogData[t];
+        if (c) type3Sel.innerHTML += `<option value="${t}">${c.char} — ${c.label} (${t})</option>`;
+      });
+      type3Sel.style.display = 'block';
+    }
+  }
+
+  buildSubKeyPreview();
+}
+
+function onSkType3Change() {
+  const skType3 = document.getElementById('cf-sk-type3').value;
+  const item3Sel = document.getElementById('cf-sk-item3');
+
+  item3Sel.style.display = 'none';
+  if (!skType3) { buildSubKeyPreview(); return; }
+
+  const cat = catalogData[skType3];
+  if (!cat) { buildSubKeyPreview(); return; }
+
+  item3Sel.innerHTML = `<option value="">— ${cat.label} 선택 —</option>`;
+  cat.items.forEach(i => item3Sel.innerHTML += `<option value="${i.id}" data-name="${i.n}">${i.n} (id:${i.id})</option>`);
+  item3Sel.style.display = 'block';
+
+  buildSubKeyPreview();
+}
+
 function buildSubKeyPreview() {
   const skType = document.getElementById('cf-sk-type').value;
   const skItemSel = document.getElementById('cf-sk-item');
@@ -5020,6 +5085,9 @@ function buildSubKeyPreview() {
   const skType2 = document.getElementById('cf-sk-type2').value;
   const skItem2Sel = document.getElementById('cf-sk-item2');
   const skItem2 = skItem2Sel.value;
+  const skType3 = document.getElementById('cf-sk-type3').value;
+  const skItem3Sel = document.getElementById('cf-sk-item3');
+  const skItem3 = skItem3Sel.value;
   const preview = document.getElementById('cf-sk-preview');
   const valueEl = document.getElementById('cf-sk-value');
   const labelEl = document.getElementById('cf-sk-label');
@@ -5038,6 +5106,13 @@ function buildSubKeyPreview() {
       key += `_${c2}${skItem2}`;
       const name2 = skItem2Sel.selectedOptions[0]?.dataset.name || '';
       label += ` + ${catalogData[skType2]?.label}: ${name2}`;
+
+      if (skType3 && skItem3) {
+        const c3 = catalogData[skType3]?.char || skType3[0];
+        key += `_${c3}${skItem3}`;
+        const name3 = skItem3Sel.selectedOptions[0]?.dataset.name || '';
+        label += ` + ${catalogData[skType3]?.label}: ${name3}`;
+      }
     }
   }
 
