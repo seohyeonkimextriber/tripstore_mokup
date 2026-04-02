@@ -1182,6 +1182,49 @@ select.fc { height: 36px; padding: 0 32px 0 12px; appearance: none; background-i
                   </div>
                 </div>
               </label>
+              <label><input type="radio" name="sup-scope" value="flight" onchange="wizSupScopeChange('flight')">
+                <div><strong>특정 항공권에만</strong>
+                  <div style="font-size:12px;color:rgba(0,0,0,0.45);">이 공급사의 특정 항공권 상품에만 적용</div>
+                  <div class="scope-sub" id="wiz2-flight-sub" style="display:none;flex-direction:column;gap:6px;">
+                    <select class="fc" id="wiz2-flight-sel" style="width:340px;" onchange="wizBuildSupKey()">
+                      <option value="">항공권 선택</option>
+                      <option value="123">항공권 #123 · 대한항공(KE) 인천→호치민 (2026.05.10)</option>
+                      <option value="124">항공권 #124 · 대한항공(KE) 인천→호치민 (2026.05.17)</option>
+                      <option value="125">항공권 #125 · 비엣젯(VJ) 인천→푸꾸옥 (2026.05.10)</option>
+                      <option value="126">항공권 #126 · 비엣젯(VJ) 인천→푸꾸옥 (2026.05.17)</option>
+                      <option value="201">항공권 #201 · 아시아나(OZ) 인천→다낭 (2026.06.01)</option>
+                    </select>
+                  </div>
+                </div>
+              </label>
+              <label><input type="radio" name="sup-scope" value="hotel-ticket" onchange="wizSupScopeChange('hotel-ticket')">
+                <div><strong>특정 숙박권에만</strong>
+                  <div style="font-size:12px;color:rgba(0,0,0,0.45);">이 공급사의 특정 숙박권 상품에만 적용</div>
+                  <div class="scope-sub" id="wiz2-hotel-ticket-sub" style="display:none;flex-direction:column;gap:6px;">
+                    <select class="fc" id="wiz2-hotel-ticket-sel" style="width:340px;" onchange="wizBuildSupKey()">
+                      <option value="">숙박권 선택</option>
+                      <option value="456">숙박권 #456 · 솔바이멜리아 푸꾸옥 (2026.05.10~13)</option>
+                      <option value="457">숙박권 #457 · 솔바이멜리아 푸꾸옥 (2026.05.17~20)</option>
+                      <option value="458">숙박권 #458 · 씨셀스 푸꾸옥 (2026.05.10~12)</option>
+                      <option value="459">숙박권 #459 · 멜리아빈펄 푸꾸옥 (2026.06.01~04)</option>
+                    </select>
+                  </div>
+                </div>
+              </label>
+              <label><input type="radio" name="sup-scope" value="tour" onchange="wizSupScopeChange('tour')">
+                <div><strong>특정 투어/티켓에만</strong>
+                  <div style="font-size:12px;color:rgba(0,0,0,0.45);">이 공급사의 특정 투어/티켓 상품에만 적용</div>
+                  <div class="scope-sub" id="wiz2-tour-sub" style="display:none;flex-direction:column;gap:6px;">
+                    <select class="fc" id="wiz2-tour-sel" style="width:340px;" onchange="wizBuildSupKey()">
+                      <option value="">투어/티켓 선택</option>
+                      <option value="789">투어/티켓 #789 · 빈원더스 풀패키지</option>
+                      <option value="790">투어/티켓 #790 · 빈펄사파리 입장권</option>
+                      <option value="791">투어/티켓 #791 · 호핑투어 (오전 출발)</option>
+                      <option value="792">투어/티켓 #792 · 빈펄 골프클럽</option>
+                    </select>
+                  </div>
+                </div>
+              </label>
             </div>
             <!-- 적용 범위 결과 미리보기 -->
             <div id="wiz2-sup-preview" style="margin-top:16px;padding:10px 14px;background:#f0f7ff;border:1px solid #91caff;border-radius:6px;font-size:13px;color:#1677ff;display:none;">
@@ -5605,7 +5648,7 @@ function wizSupplierChange(val) {
 }
 
 function wizSupScopeChange(scope) {
-  ['airline','accom','spot','place'].forEach(s => {
+  ['airline','accom','spot','place','flight','hotel-ticket','tour'].forEach(s => {
     const el = document.getElementById('wiz2-' + s + '-sub');
     if (el) el.style.display = s === scope ? 'flex' : 'none';
   });
@@ -5636,6 +5679,9 @@ function wizBuildSupKey() {
   }
   else if (scope === 'spot') { const v = document.getElementById('wiz2-spot-sel').options[document.getElementById('wiz2-spot-sel').selectedIndex]?.text; label = v && v !== '스팟/체험 선택' ? v : ''; }
   else if (scope === 'place') { const v = document.getElementById('wiz2-place-sel').options[document.getElementById('wiz2-place-sel').selectedIndex]?.text; label = v && v !== '여행지 선택' ? v : ''; }
+  else if (scope === 'flight') { const v = document.getElementById('wiz2-flight-sel'); const t = v.options[v.selectedIndex]?.text; label = t && t !== '항공권 선택' ? t : ''; }
+  else if (scope === 'hotel-ticket') { const v = document.getElementById('wiz2-hotel-ticket-sel'); const t = v.options[v.selectedIndex]?.text; label = t && t !== '숙박권 선택' ? t : ''; }
+  else if (scope === 'tour') { const v = document.getElementById('wiz2-tour-sel'); const t = v.options[v.selectedIndex]?.text; label = t && t !== '투어/티켓 선택' ? t : ''; }
   const prev = document.getElementById('wiz2-sup-preview');
   if (label) { prev.style.display = 'block'; document.getElementById('wiz2-sup-preview-label').textContent = label; }
 }
