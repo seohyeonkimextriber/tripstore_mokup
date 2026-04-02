@@ -33,7 +33,8 @@ body { font-family: 'Pretendard', 'Apple SD Gothic Neo', -apple-system, sans-ser
 
 /* 메가메뉴 */
 .mega-menu { position: fixed; top: 48px; left: 0; right: 0; background: #fff; border-top: 1px solid #f0f0f0; box-shadow: 0 8px 24px rgba(0,0,0,0.1); display: none; z-index: 200; padding: 24px 40px 20px; }
-.gnb-item:hover .mega-menu, .gnb-item.open .mega-menu, .gnb-item:focus-within .mega-menu { display: block; }
+.mega-menu::before { content: ''; position: absolute; top: -16px; left: 0; right: 0; height: 16px; }
+.gnb-item:hover .mega-menu, .gnb-item.open .mega-menu, .gnb-item:focus-within .mega-menu, .mega-menu:hover { display: block; }
 .mega-cols { display: flex; gap: 48px; margin-bottom: 20px; }
 .mega-col { min-width: 160px; }
 .mega-col-title { font-size: 12px; font-weight: 700; color: rgba(0,0,0,0.35); letter-spacing: 0.6px; text-transform: uppercase; margin-bottom: 10px; padding-bottom: 8px; border-bottom: 1px solid #f0f0f0; }
@@ -395,7 +396,7 @@ select.fc { height: 36px; padding: 0 32px 0 12px; appearance: none; background-i
         <div class="gnb-dropdown-item">숙박권 예약관리</div>
       </div>
     </div>
-    <div class="gnb-item active" tabindex="0">카탈로그 <span class="caret">▾</span>
+    <div class="gnb-item active" tabindex="0" onclick="this.classList.toggle('open')">카탈로그 <span class="caret">▾</span>
       <div class="mega-menu">
         <!-- 상단 컬럼들 -->
         <div class="mega-cols">
@@ -420,9 +421,9 @@ select.fc { height: 36px; padding: 0 32px 0 12px; appearance: none; background-i
           </div>
           <div class="mega-col">
             <div class="mega-col-title" style="display:flex;align-items:center;gap:6px;">게시판 <span class="new-badge">NEW</span></div>
-            <span class="mega-col-item active" onclick="showView('list')">카탈로그 게시판 관리</span>
-            <span class="mega-col-item" onclick="showView('board-supplier')" style="color:#2f54eb;font-weight:500;">공급사 게시판 관리</span>
-            <span class="mega-col-item" onclick="showView('board-product')" style="color:#d48806;">상품단위 게시판 관리</span>
+            <span class="mega-col-item active" onclick="event.stopPropagation();showView('list')">카탈로그 게시판 관리</span>
+            <span class="mega-col-item" onclick="event.stopPropagation();showView('board-supplier')" style="color:#2f54eb;font-weight:500;">공급사 게시판 관리</span>
+            <span class="mega-col-item" onclick="event.stopPropagation();showView('board-product')" style="color:#d48806;">상품단위 게시판 관리</span>
           </div>
         </div>
         <!-- 하단 이미지/파일 -->
@@ -661,13 +662,13 @@ select.fc { height: 36px; padding: 0 32px 0 12px; appearance: none; background-i
         <select class="fi fi-md">
           <option value="">Sub_key 유형</option>
           <option>default (전체공통)</option>
-          <option>AIRLINE_*</option>
-          <option>AIRPORT_*</option>
-          <option>ACCOMMODATION_*</option>
-          <option>SPOT_ACTIVITY_*</option>
-          <option>MEAL_*</option>
-          <option>PLACE_*</option>
-          <option>COUNTRY_*</option>
+          <option>A* (항공사)</option>
+          <option>P* (공항)</option>
+          <option>H* (숙소)</option>
+          <option>S* (스팟/체험)</option>
+          <option>M* (식사)</option>
+          <option>L* (여행지)</option>
+          <option>C* (국가)</option>
         </select>
         <input class="fi fi-lg" type="text" placeholder="Sub_key 또는 관리명 검색">
         <div class="filter-actions">
@@ -692,8 +693,8 @@ select.fc { height: 36px; padding: 0 32px 0 12px; appearance: none; background-i
             <tr>
               <td>2620</td>
               <td><span class="tag tag-purple">스페셜 혜택</span></td>
-              <td>피크타임_ACCOMMODATION_45_MEAL_2_스페셜혜택</td>
-              <td><code style="font-size:11px;background:#e6f7e6;padding:2px 6px;border-radius:3px;color:#389e0d;">ACCOMMODATION_45_MEAL_2</code></td>
+              <td>피크타임_H45_M2_스페셜혜택</td>
+              <td><code style="font-size:11px;background:#e6f7e6;padding:2px 6px;border-radius:3px;color:#389e0d;">H45_M2</code></td>
               <td style="text-align:center;"><span class="stock-num">4</span></td>
               <td style="color:rgba(0,0,0,0.4);font-size:12px;">2026-04-01 09:30</td>
               <td style="text-align:center;">
@@ -704,8 +705,8 @@ select.fc { height: 36px; padding: 0 32px 0 12px; appearance: none; background-i
             <tr>
               <td>2619</td>
               <td><span class="tag tag-gray">수하물 규정</span></td>
-              <td>피크타임_AIRLINE_3_AIRPORT_5_수하물규정</td>
-              <td><code style="font-size:11px;background:#e6f7e6;padding:2px 6px;border-radius:3px;color:#389e0d;">AIRLINE_3_AIRPORT_5</code></td>
+              <td>피크타임_A3_P5_수하물규정</td>
+              <td><code style="font-size:11px;background:#e6f7e6;padding:2px 6px;border-radius:3px;color:#389e0d;">A3_P5</code></td>
               <td style="text-align:center;"><span class="stock-num">2</span></td>
               <td style="color:rgba(0,0,0,0.4);font-size:12px;">2026-04-01 09:15</td>
               <td style="text-align:center;">
@@ -728,8 +729,8 @@ select.fc { height: 36px; padding: 0 32px 0 12px; appearance: none; background-i
             <tr>
               <td>2610</td>
               <td><span class="tag tag-purple">포함사항</span></td>
-              <td>피크타임_ACCOMMODATION_45_포함사항</td>
-              <td><code style="font-size:11px;background:#e6f7e6;padding:2px 6px;border-radius:3px;color:#389e0d;">ACCOMMODATION_45</code></td>
+              <td>피크타임_H45_포함사항</td>
+              <td><code style="font-size:11px;background:#e6f7e6;padding:2px 6px;border-radius:3px;color:#389e0d;">H45</code></td>
               <td style="text-align:center;"><span class="stock-num">6</span></td>
               <td style="color:rgba(0,0,0,0.4);font-size:12px;">2026-03-30 14:20</td>
               <td style="text-align:center;">
@@ -740,8 +741,8 @@ select.fc { height: 36px; padding: 0 32px 0 12px; appearance: none; background-i
             <tr>
               <td>2605</td>
               <td><span class="tag tag-gray">취소환불규정</span></td>
-              <td>피크타임_ACCOMMODATION_300_취소환불규정</td>
-              <td><code style="font-size:11px;background:#e6f7e6;padding:2px 6px;border-radius:3px;color:#389e0d;">ACCOMMODATION_300</code></td>
+              <td>피크타임_H300_취소환불규정</td>
+              <td><code style="font-size:11px;background:#e6f7e6;padding:2px 6px;border-radius:3px;color:#389e0d;">H300</code></td>
               <td style="text-align:center;"><span class="stock-num">3</span></td>
               <td style="color:rgba(0,0,0,0.4);font-size:12px;">2026-03-28 10:45</td>
               <td style="text-align:center;">
@@ -752,8 +753,8 @@ select.fc { height: 36px; padding: 0 32px 0 12px; appearance: none; background-i
             <tr>
               <td>2598</td>
               <td><span class="tag" style="background:#fff7e6;color:#d46b08;">핵심포인트</span></td>
-              <td>피크타임_SPOT_ACTIVITY_12_핵심포인트</td>
-              <td><code style="font-size:11px;background:#e6f7e6;padding:2px 6px;border-radius:3px;color:#389e0d;">SPOT_ACTIVITY_12</code></td>
+              <td>피크타임_S12_핵심포인트</td>
+              <td><code style="font-size:11px;background:#e6f7e6;padding:2px 6px;border-radius:3px;color:#389e0d;">S12</code></td>
               <td style="text-align:center;"><span class="stock-num">1</span></td>
               <td style="color:rgba(0,0,0,0.4);font-size:12px;">2026-03-25 16:10</td>
               <td style="text-align:center;">
@@ -990,13 +991,13 @@ select.fc { height: 36px; padding: 0 32px 0 12px; appearance: none; background-i
             <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:flex-start;">
               <select class="fc" id="cf-sk-type" onchange="onSkTypeChange()" style="width:180px;">
                 <option value="">default (전체 공통)</option>
-                <option value="AIRLINE">AIRLINE (항공사)</option>
-                <option value="AIRPORT">AIRPORT (공항)</option>
-                <option value="ACCOMMODATION">ACCOMMODATION (숙소)</option>
-                <option value="SPOT_ACTIVITY">SPOT_ACTIVITY (스팟/체험)</option>
-                <option value="MEAL">MEAL (식사)</option>
-                <option value="PLACE">PLACE (여행지)</option>
-                <option value="COUNTRY">COUNTRY (국가)</option>
+                <option value="AIRLINE">A — 항공사 (AIRLINE)</option>
+                <option value="AIRPORT">P — 공항 (AIRPORT)</option>
+                <option value="ACCOMMODATION">H — 숙소 (ACCOMMODATION)</option>
+                <option value="SPOT_ACTIVITY">S — 스팟/체험 (SPOT_ACTIVITY)</option>
+                <option value="MEAL">M — 식사 (MEAL)</option>
+                <option value="PLACE">L — 여행지 (PLACE)</option>
+                <option value="COUNTRY">C — 국가 (COUNTRY)</option>
               </select>
               <select class="fc" id="cf-sk-item" onchange="onSkItemChange()" style="width:240px;display:none;">
                 <option value="">카탈로그 선택</option>
@@ -4472,6 +4473,7 @@ function handlePSOverlayClick(e) {
 function showView(name) {
   document.querySelectorAll('.view').forEach(v => v.classList.remove('on'));
   document.getElementById('view-' + name).classList.add('on');
+  document.querySelectorAll('.gnb-item.open').forEach(g => g.classList.remove('open'));
   window.scrollTo(0, 0);
   // POST 슬롯 초기화 (등록 뷰 진입 시)
   if (name === 'flight-create' || name === 'hotel-create' || name === 'tour-create') initPostSlots();
@@ -4665,13 +4667,13 @@ const targets = {
 // 공급사 게시판 sub_key 조합용 데이터
 // DB content_type 기반 카탈로그 데이터
 const catalogData = {
-  'AIRLINE':        { label: '항공사',    items: [{id:3,n:'대한항공(KE)'},{id:5,n:'비엣젯(VJ)'},{id:7,n:'아시아나(OZ)'}] },
-  'AIRPORT':        { label: '공항',      items: [{id:5,n:'인천국제공항(ICN)'},{id:12,n:'탄손냣(SGN)'},{id:18,n:'푸꾸옥(PQC)'}] },
-  'ACCOMMODATION':  { label: '숙소',      items: [{id:45,n:'솔바이멜리아 푸꾸옥'},{id:220,n:'씨셀스 푸꾸옥'},{id:300,n:'멜리아빈펄'},{id:180,n:'소나가비치 리조트'}] },
-  'SPOT_ACTIVITY':  { label: '스팟/체험', items: [{id:12,n:'빈펄사파리'},{id:15,n:'빈원더스'},{id:23,n:'호핑투어'},{id:30,n:'코코넛 프리즌'}] },
-  'MEAL':           { label: '식사',      items: [{id:1,n:'RO (식사 불포함)'},{id:2,n:'BB (조식 포함)'},{id:3,n:'HB (2끼 포함)'},{id:4,n:'FB (전식 포함)'},{id:5,n:'AI (올인클루시브)'}] },
-  'PLACE':          { label: '여행지',    items: [{id:23,n:'푸꾸옥'},{id:31,n:'나트랑'},{id:42,n:'호치민'},{id:55,n:'다낭'}] },
-  'COUNTRY':        { label: '국가',      items: [{id:1,n:'베트남'},{id:2,n:'태국'},{id:3,n:'일본'},{id:8,n:'괌'}] },
+  'AIRLINE':        { char:'A', sort:1, label: '항공사',    items: [{id:3,n:'대한항공(KE)'},{id:5,n:'비엣젯(VJ)'},{id:7,n:'아시아나(OZ)'}] },
+  'AIRPORT':        { char:'P', sort:2, label: '공항',      items: [{id:5,n:'인천국제공항(ICN)'},{id:12,n:'탄손냣(SGN)'},{id:18,n:'푸꾸옥(PQC)'}] },
+  'ACCOMMODATION':  { char:'H', sort:3, label: '숙소',      items: [{id:45,n:'솔바이멜리아 푸꾸옥'},{id:220,n:'씨셀스 푸꾸옥'},{id:300,n:'멜리아빈펄'},{id:180,n:'소나가비치 리조트'}] },
+  'SPOT_ACTIVITY':  { char:'S', sort:4, label: '스팟/체험', items: [{id:12,n:'빈펄사파리'},{id:15,n:'빈원더스'},{id:23,n:'호핑투어'},{id:30,n:'코코넛 프리즌'}] },
+  'MEAL':           { char:'M', sort:5, label: '식사',      items: [{id:1,n:'RO (식사 불포함)'},{id:2,n:'BB (조식 포함)'},{id:3,n:'HB (2끼 포함)'},{id:4,n:'FB (전식 포함)'},{id:5,n:'AI (올인클루시브)'}] },
+  'PLACE':          { char:'L', sort:6, label: '여행지',    items: [{id:23,n:'푸꾸옥'},{id:31,n:'나트랑'},{id:42,n:'호치민'},{id:55,n:'다낭'}] },
+  'COUNTRY':        { char:'C', sort:7, label: '국가',      items: [{id:1,n:'베트남'},{id:2,n:'태국'},{id:3,n:'일본'},{id:8,n:'괌'}] },
 };
 
 // 2차 조합 가능한 content_type 매핑 (1차 선택 시 어떤 2차가 가능한지)
@@ -5026,12 +5028,14 @@ function buildSubKeyPreview() {
   let label = '이 공급사 전체 공통';
 
   if (skType && skItem) {
-    key = `${skType}_${skItem}`;
+    const c1 = catalogData[skType]?.char || skType[0];
+    key = `${c1}${skItem}`;
     const name1 = skItemSel.selectedOptions[0]?.dataset.name || '';
     label = `${catalogData[skType]?.label}: ${name1}`;
 
     if (skType2 && skItem2) {
-      key += `_${skType2}_${skItem2}`;
+      const c2 = catalogData[skType2]?.char || skType2[0];
+      key += `_${c2}${skItem2}`;
       const name2 = skItem2Sel.selectedOptions[0]?.dataset.name || '';
       label += ` + ${catalogData[skType2]?.label}: ${name2}`;
     }
