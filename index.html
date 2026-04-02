@@ -223,6 +223,16 @@ select.fc { height: 36px; padding: 0 32px 0 12px; appearance: none; background-i
 .bulk-section-header { display:flex; align-items:center; justify-content:space-between; padding:20px 28px 14px; border-bottom:1px solid #f5f5f5; }
 .bulk-body-wrap { padding:20px 28px; }
 
+/* ===== 인라인 위저드 (촥촥촥 흐름) ===== */
+.wiz-reveal-wrap { max-height:0; overflow:hidden; opacity:0; transition:max-height 0.55s cubic-bezier(0.4,0,0.2,1), opacity 0.4s ease 0.08s; }
+.wiz-reveal-wrap.shown { max-height:9000px; opacity:1; }
+.wiz-connector { display:flex; align-items:center; gap:8px; padding:8px 4px; color:rgba(0,0,0,0.2); font-size:12px; }
+.wiz-connector::before, .wiz-connector::after { content:''; flex:1; height:1px; background:#e8e8e8; }
+.wiz-section-tag { display:inline-flex; align-items:center; gap:5px; font-size:11px; font-weight:700; letter-spacing:0.3px; color:rgba(0,0,0,0.35); text-transform:uppercase; margin-bottom:14px; }
+.wiz-section-tag .wst-num { width:18px; height:18px; border-radius:50%; background:#e0e0e0; color:rgba(0,0,0,0.45); font-size:10px; display:flex; align-items:center; justify-content:center; font-weight:700; }
+.wiz-section-tag.blue .wst-num { background:#1677ff; color:#fff; }
+.wiz-section-tag.green .wst-num { background:#52c41a; color:#fff; }
+
 /* ===== AI BANNER ===== */
 .ai-banner { background: linear-gradient(135deg, #f9f0ff 0%, #eff6ff 100%); border: 1.5px solid #d3adf7; border-radius: 10px; padding: 16px 20px; margin-bottom: 16px; display: flex; align-items: center; justify-content: space-between; gap: 20px; }
 .ai-banner-info h3 { font-size: 15px; font-weight: 700; color: #531dab; margin-bottom: 4px; }
@@ -1022,17 +1032,9 @@ select.fc { height: 36px; padding: 0 32px 0 12px; appearance: none; background-i
       <button class="btn btn-ai" onclick="openAiModal()">AI 자동 생성 →</button>
     </div>
 
-    <!-- Step 인디케이터 -->
-    <div class="wiz-bar">
-      <div class="wiz-bar-step active" id="wiz-ind-1"><div class="wiz-num">1</div><div class="wiz-label">게시판 선택</div></div>
-      <div class="wiz-bar-line" id="wiz-line-1"></div>
-      <div class="wiz-bar-step" id="wiz-ind-2"><div class="wiz-num">2</div><div class="wiz-label">대상 및 적용 범위</div></div>
-      <div class="wiz-bar-line" id="wiz-line-2"></div>
-      <div class="wiz-bar-step" id="wiz-ind-3"><div class="wiz-num">3</div><div class="wiz-label">내용 작성</div></div>
-    </div>
-
     <!-- ① STEP 1: 게시판 선택 -->
     <div id="wiz-s1" class="card" style="padding:28px;">
+      <div class="wiz-section-tag blue"><div class="wst-num">1</div> 게시판 선택</div>
       <div class="wiz-step-title">어디에 POST를 등록할까요?</div>
       <div class="wiz-step-sub">등록할 게시판 유형을 선택해주세요. 유형에 따라 이 콘텐츠가 적용되는 범위가 달라집니다.</div>
       <div class="board-cards">
@@ -1082,8 +1084,11 @@ select.fc { height: 36px; padding: 0 32px 0 12px; appearance: none; background-i
     </div>
 
     <!-- ② STEP 2: 대상 및 적용 범위 -->
-    <div id="wiz-s2" class="card" style="padding:28px;display:none;">
+    <div class="wiz-reveal-wrap" id="wiz-s2-wrap">
+      <div class="wiz-connector">↓</div>
+      <div id="wiz-s2" class="card" style="padding:28px;">
 
+      <div class="wiz-section-tag blue"><div class="wst-num">2</div> 대상 및 적용 범위</div>
       <!-- 카탈로그: 대상 검색 -->
       <div id="wiz2-catalog" style="display:none;">
         <div class="wiz-step-title">어떤 <span id="wiz2-cat-typename" style="color:#1677ff;"></span>에 대한 내용인가요?</div>
@@ -1299,12 +1304,16 @@ select.fc { height: 36px; padding: 0 32px 0 12px; appearance: none; background-i
         </div>
       </div>
     </div>
+    </div><!-- /wiz-s2-wrap -->
 
     <!-- ③ STEP 3: 내용 작성 -->
-    <div id="wiz-s3" class="card" style="display:none;">
+    <div class="wiz-reveal-wrap" id="wiz-s3-wrap">
+      <div class="wiz-connector">↓</div>
+      <div id="wiz-s3" class="card">
 
-      <!-- 등록 위치 요약 뱃지 -->
+      <!-- 섹션 태그 + 등록 위치 요약 뱃지 -->
       <div style="padding:20px 28px 0;">
+        <div class="wiz-section-tag green" style="margin-bottom:10px;"><div class="wst-num">✓</div> POST 내용 작성</div>
         <div id="wiz3-summary" style="background:#f6ffed;border:1px solid #b7eb8f;border-radius:8px;padding:12px 16px;font-size:13px;display:flex;align-items:center;gap:12px;flex-wrap:wrap;">
           <span>📌 등록 위치:</span>
           <strong id="wiz3-sum-board" style="color:#389e0d;"></strong>
@@ -1366,13 +1375,13 @@ select.fc { height: 36px; padding: 0 32px 0 12px; appearance: none; background-i
       </div>
     </div>
 
-    <!-- 위저드 네비게이션 -->
-    <div class="wiz-nav">
-      <button class="btn btn-default" id="wiz-prev-btn" onclick="wizPrev()" style="display:none;">← 이전 단계</button>
-      <button class="btn btn-default" onclick="showView('list')">등록 취소</button>
-      <div style="flex:1;"></div>
-      <button class="btn btn-primary" id="wiz-next-btn" onclick="wizNext()">다음 단계 →</button>
+      <!-- 등록 버튼 (wiz-s3 하단) -->
+      <div style="padding:16px 28px 24px;display:flex;justify-content:space-between;align-items:center;border-top:1px solid #f0f0f0;margin-top:4px;">
+        <button class="btn btn-default" onclick="showView('list')">취소</button>
+        <button class="btn btn-primary" id="wiz-next-btn" onclick="wizNext()" style="padding:0 28px;font-size:14px;height:38px;font-weight:600;">POST 등록</button>
+      </div>
     </div>
+    </div><!-- /wiz-s3-wrap -->
   </div>
 </div>
 
@@ -5539,15 +5548,46 @@ function wizSelectBoard(type) {
   document.getElementById('bc-' + type).classList.add('selected');
   document.getElementById('wiz-catalog-types').style.display = type === 'catalog' ? 'block' : 'none';
   document.getElementById('wiz-product-types').style.display = type === 'product' ? 'block' : 'none';
-  // 공급사면 바로 next 활성화
   if (type === 'supplier') { wizState.catalogType = null; wizState.productType = null; }
-  if (type === 'product') { wizState.productType = '상품'; } // 상품만 다루므로 자동 선택
+  if (type === 'product') { wizState.productType = '상품'; }
+
+  // 보드 재선택 시 s3 숨기기
+  const s3wrap = document.getElementById('wiz-s3-wrap');
+  if (s3wrap) s3wrap.classList.remove('shown');
+
+  // s2 콘텐츠 세팅
+  document.getElementById('wiz2-catalog').style.display = type === 'catalog' ? 'block' : 'none';
+  document.getElementById('wiz2-supplier').style.display = type === 'supplier' ? 'block' : 'none';
+  document.getElementById('wiz2-product').style.display = type === 'product' ? 'block' : 'none';
+  if (type === 'catalog') {
+    document.getElementById('wiz2-cat-typename').textContent = '';
+    document.getElementById('wiz2-cat-search').value = '';
+    document.getElementById('wiz2-cat-selected').textContent = '없음';
+  }
+  if (type === 'product') {
+    document.getElementById('wiz2-accom-scope').style.display = 'none';
+    initWizProdSelect();
+  }
+  if (type === 'supplier') {
+    document.getElementById('wiz2-sup-select').value = '';
+    document.getElementById('wiz2-sup-scope').style.display = 'none';
+  }
+
+  // s2 펼치기
+  wizRevealSection2();
 }
 
 function wizSelectCatalogType(el, type) {
   wizState.catalogType = type;
   document.querySelectorAll('#wiz-catalog-types .type-chip').forEach(c => c.classList.remove('selected'));
   el.classList.add('selected');
+  // s2 typename 업데이트
+  const typename = document.getElementById('wiz2-cat-typename');
+  if (typename) typename.textContent = type === '공통' ? '공통 콘텐츠' : type;
+  if (type === '공통') {
+    document.getElementById('wiz2-catalog').innerHTML = '<div class="wiz-section-tag blue"><div class="wst-num">2</div> 대상 및 적용 범위</div><div class="wiz-step-title">전체 공통 POST 등록</div><div class="wiz-step-sub">모든 상품에 공통 적용되는 POST입니다. 대상 선택 없이 바로 내용을 작성할 수 있습니다.</div>';
+    wizRevealSection3(); // 공통은 대상 선택 없이 바로 s3
+  }
 }
 
 function wizSelectProductType(el, type) {
@@ -5556,95 +5596,54 @@ function wizSelectProductType(el, type) {
   el.classList.add('selected');
 }
 
-function wizNext() {
+// ===== 인라인 위저드: S2/S3 순차 공개 =====
+
+function wizRevealSection2() {
+  const wrap = document.getElementById('wiz-s2-wrap');
+  if (!wrap) return;
+  wrap.classList.add('shown');
+  setTimeout(() => wrap.scrollIntoView({ behavior: 'smooth', block: 'nearest' }), 80);
+}
+
+function wizRevealSection3() {
+  const wrap = document.getElementById('wiz-s3-wrap');
+  if (!wrap || wrap.classList.contains('shown')) return;
+  wrap.classList.add('shown');
+  updateWiz3Summary();
+  initWizPosts();
+  setTimeout(() => wrap.scrollIntoView({ behavior: 'smooth', block: 'nearest' }), 150);
+}
+
+function updateWiz3Summary() {
   const s = wizState;
-  if (s.step === 1) {
-    if (!s.board) { alert('게시판 유형을 선택해주세요.'); return; }
-    if (s.board === 'catalog' && !s.catalogType) { alert('콘텐츠 유형을 선택해주세요.'); return; }
-    if (s.board === 'product' && !s.productType) { alert('상품 유형을 선택해주세요.'); return; }
-    wizGoStep(2);
-    // Step 2 콘텐츠 세팅
-    document.getElementById('wiz2-catalog').style.display = s.board === 'catalog' ? 'block' : 'none';
-    document.getElementById('wiz2-supplier').style.display = s.board === 'supplier' ? 'block' : 'none';
-    document.getElementById('wiz2-product').style.display = s.board === 'product' ? 'block' : 'none';
-    if (s.board === 'catalog') {
-      document.getElementById('wiz2-cat-typename').textContent = s.catalogType === '공통' ? '공통 콘텐츠' : s.catalogType;
-      if (s.catalogType === '공통') { document.getElementById('wiz2-catalog').innerHTML = '<div class="wiz-step-title">전체 공통 POST 등록</div><div class="wiz-step-sub">모든 상품에 공통 적용되는 POST입니다. 대상 선택 없이 바로 내용을 작성할 수 있습니다.</div>'; }
-    }
-    if (s.board === 'product') {
-      document.getElementById('wiz2-prod-typename').textContent = s.productType;
-      document.getElementById('wiz2-accom-scope').style.display = 'none'; // 초기엔 숨김 (상품 선택 후 표시)
-      initWizProdSelect(); // 복수 선택 초기화
-    }
-  } else if (s.step === 2) {
-    // 상품단위: 선택된 상품이 없으면 진행 불가
-    if (s.board === 'product' && wizSelectedProds.length === 0) {
-      const tagsEl = document.getElementById('wiz2-prod-tags');
-      if (tagsEl) { tagsEl.style.borderColor = '#ff4d4f'; setTimeout(() => { tagsEl.style.borderColor = '#d9d9d9'; }, 1800); }
-      alert('상품을 1개 이상 선택해주세요.');
-      return;
-    }
-    wizGoStep(3);
-    // Step 3 요약 뱃지 업데이트
-    const boardLabel = { catalog: '카탈로그 게시판', supplier: '공급사 게시판', product: '상품단위 게시판' }[s.board];
-    document.getElementById('wiz3-sum-board').textContent = boardLabel;
-    let targetText;
-    if (s.board === 'catalog') {
-      targetText = s.catalogType || '';
-    } else if (s.board === 'supplier') {
-      targetText = document.getElementById('wiz2-sup-select')?.value || '';
-    } else {
-      // 상품단위: "항공권 3개" 형식
-      targetText = `${s.productType} ${wizSelectedProds.length}개`;
-    }
-    document.getElementById('wiz3-sum-target').textContent = targetText;
-    const scopeEl = document.getElementById('wiz2-sup-preview-label') || document.getElementById('wiz2-prod-preview-label');
-    document.getElementById('wiz3-sum-scope').textContent = scopeEl?.textContent ? '· ' + scopeEl.textContent : '';
-    // POST 항목 초기화
-    initWizPosts();
-  } else if (s.step === 3) {
-    // 모든 항목에 카테고리가 있는지 확인
-    const missing = wizPosts.filter(p => !p.category);
-    if (missing.length > 0) {
-      // 첫 번째 미선택 항목 펼치기
-      wizPosts.forEach(p => p.expanded = missing.includes(p));
-      renderWizPosts();
-      alert(`카테고리가 선택되지 않은 항목이 ${missing.length}개 있습니다.`);
-      return;
-    }
-    const cats = wizPosts.map(p => `✅ ${p.category}${p.title ? ' — ' + p.title : ''}`).join('\n');
-    alert(`POST ${wizPosts.length}개가 등록되었습니다!\n\n${cats}`);
-    showView('list');
-  }
+  if (!s.board) return;
+  const boardLabel = { catalog: '카탈로그 게시판', supplier: '공급사 게시판', product: '상품단위 게시판' }[s.board];
+  document.getElementById('wiz3-sum-board').textContent = boardLabel;
+  let targetText = s.board === 'catalog' ? (s.catalogType || '')
+    : s.board === 'supplier' ? (document.getElementById('wiz2-sup-select')?.value || '')
+    : `상품 ${wizSelectedProds.length}개`;
+  document.getElementById('wiz3-sum-target').textContent = targetText;
+  const scopeEl = document.getElementById('wiz2-sup-preview-label') || document.getElementById('wiz2-prod-preview-label');
+  document.getElementById('wiz3-sum-scope').textContent = scopeEl?.textContent ? '· ' + scopeEl.textContent : '';
 }
 
-function wizPrev() {
-  if (wizState.step > 1) wizGoStep(wizState.step - 1);
-}
-
-function wizGoStep(n) {
-  wizState.step = n;
-  for (let i = 1; i <= 3; i++) {
-    const el = document.getElementById('wiz-s' + i);
-    if (el) el.style.display = i === n ? 'block' : 'none';
-    const ind = document.getElementById('wiz-ind-' + i);
-    if (ind) { ind.classList.remove('active','done'); if (i < n) ind.classList.add('done'); else if (i === n) ind.classList.add('active'); }
-    const line = document.getElementById('wiz-line-' + i);
-    if (line) { line.classList.toggle('done', i < n); }
+function wizNext() {
+  // 등록 버튼 — 카테고리 검증 후 제출
+  const missing = wizPosts.filter(p => !p.category);
+  if (missing.length > 0) {
+    wizPosts.forEach(p => p.expanded = missing.includes(p));
+    renderWizPosts();
+    alert(`카테고리가 선택되지 않은 항목이 ${missing.length}개 있습니다.`);
+    return;
   }
-  document.getElementById('wiz-prev-btn').style.display = n > 1 ? 'block' : 'none';
-  if (n < 3) {
-    document.getElementById('wiz-next-btn').textContent = '다음 단계 →';
-  } else {
-    const cnt = wizPosts.length || 1;
-    document.getElementById('wiz-next-btn').textContent = `✓ POST ${cnt}개 등록`;
-    document.getElementById('wiz-next-btn').style.background = cnt > 1 ? '#722ed1' : '';
-    document.getElementById('wiz-next-btn').style.borderColor = cnt > 1 ? '#722ed1' : '';
-  }
+  const cats = wizPosts.map(p => `✅ ${p.category}${p.title ? ' — ' + p.title : ''}`).join('\n');
+  alert(`POST ${wizPosts.length}개가 등록되었습니다!\n\n${cats}`);
+  showView('list');
 }
 
 function wizSupplierChange(val) {
   document.getElementById('wiz2-sup-scope').style.display = val ? 'block' : 'none';
+  if (val) wizRevealSection3();
 }
 
 function wizSupScopeChange(scope) {
@@ -5899,6 +5898,7 @@ function wizCatalogSelect(name) {
   document.getElementById('wiz2-cat-search').value = name;
   document.getElementById('wiz2-cat-selected').textContent = name;
   document.getElementById('wiz2-cat-dd').style.display = 'none';
+  wizRevealSection3(); // 대상 선택 완료 → s3 공개
 }
 
 // ===== 상품단위: 복수 선택 =====
@@ -6002,7 +6002,9 @@ function renderProdTags() {
   // 숙박권이고 상품이 선택된 경우만 scope 섹션 표시
   const accomScope = document.getElementById('wiz2-accom-scope');
   if (accomScope) accomScope.style.display = (wizState.productType === '숙박권' && wizSelectedProds.length > 0) ? 'block' : 'none';
-  // Step 3 버튼 텍스트도 갱신 (dropwdown 재검색 시 갱신)
+  // 상품 1개 이상 선택 → s3 공개
+  if (wizSelectedProds.length > 0) wizRevealSection3();
+  // 드롭다운 재검색 (선택됨 표시 갱신)
   wizProdSearch(document.getElementById('wiz2-prod-search')?.value || '');
 }
 
