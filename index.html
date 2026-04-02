@@ -170,6 +170,35 @@ select.fc { height: 36px; padding: 0 32px 0 12px; appearance: none; background-i
 
 /* ===== FORM FOOTER ===== */
 .form-footer { padding: 16px 24px; border-top: 1px solid #f0f0f0; display: flex; justify-content: flex-end; gap: 10px; background: #fafafa; border-radius: 0 0 8px 8px; }
+/* 위저드 스타일 */
+.wiz-bar { display:flex; align-items:center; margin-bottom:20px; }
+.wiz-bar-step { display:flex; align-items:center; gap:8px; cursor:default; }
+.wiz-num { width:28px; height:28px; border-radius:50%; background:#e8e8e8; color:rgba(0,0,0,0.35); font-size:12px; font-weight:700; display:flex; align-items:center; justify-content:center; flex-shrink:0; transition:all 0.2s; }
+.wiz-label { font-size:13px; color:rgba(0,0,0,0.35); font-weight:400; transition:all 0.2s; white-space:nowrap; }
+.wiz-bar-step.active .wiz-num { background:#1677ff; color:#fff; }
+.wiz-bar-step.active .wiz-label { color:rgba(0,0,0,0.88); font-weight:600; }
+.wiz-bar-step.done .wiz-num { background:#52c41a; color:#fff; }
+.wiz-bar-step.done .wiz-label { color:rgba(0,0,0,0.45); }
+.wiz-bar-line { flex:1; height:2px; background:#f0f0f0; margin:0 12px; }
+.wiz-bar-line.done { background:#52c41a; }
+.board-cards { display:grid; grid-template-columns:1fr 1fr 1fr; gap:12px; margin-bottom:20px; }
+.board-card { border:2px solid #f0f0f0; border-radius:10px; padding:16px 18px; cursor:pointer; transition:all 0.2s; background:#fff; }
+.board-card:hover { border-color:#91caff; background:#f0f7ff; }
+.board-card.selected { border-color:#1677ff; background:#f0f7ff; }
+.board-card .bc-icon { font-size:22px; margin-bottom:8px; }
+.board-card .bc-title { font-size:14px; font-weight:700; color:rgba(0,0,0,0.88); margin-bottom:4px; }
+.board-card .bc-desc { font-size:12px; color:rgba(0,0,0,0.45); line-height:1.5; }
+.type-chips { display:flex; flex-wrap:wrap; gap:8px; margin-top:12px; }
+.type-chip { padding:6px 14px; border:1.5px solid #d9d9d9; border-radius:20px; font-size:13px; cursor:pointer; transition:all 0.15s; background:#fff; color:rgba(0,0,0,0.65); font-family:inherit; }
+.type-chip:hover { border-color:#91caff; color:#1677ff; }
+.type-chip.selected { border-color:#1677ff; background:#e6f4ff; color:#1677ff; font-weight:600; }
+.scope-section { background:#fafafa; border:1px solid #f0f0f0; border-radius:8px; padding:16px; margin-top:12px; }
+.scope-radio { display:flex; flex-direction:column; gap:12px; }
+.scope-radio label { display:flex; align-items:flex-start; gap:10px; cursor:pointer; font-size:13px; }
+.scope-sub { margin-left:24px; display:flex; gap:8px; flex-wrap:wrap; margin-top:8px; }
+.wiz-nav { display:flex; align-items:center; gap:10px; padding:16px 0; }
+.wiz-step-title { font-size:16px; font-weight:700; color:rgba(0,0,0,0.88); margin-bottom:6px; }
+.wiz-step-sub { font-size:13px; color:rgba(0,0,0,0.45); margin-bottom:20px; }
 
 /* ===== AI BANNER ===== */
 .ai-banner { background: linear-gradient(135deg, #f9f0ff 0%, #eff6ff 100%); border: 1.5px solid #d3adf7; border-radius: 10px; padding: 16px 20px; margin-bottom: 16px; display: flex; align-items: center; justify-content: space-between; gap: 20px; }
@@ -660,18 +689,18 @@ select.fc { height: 36px; padding: 0 32px 0 12px; appearance: none; background-i
           <option>수하물 규정</option>
         </select>
         <select class="fi fi-md">
-          <option value="">Sub_key 유형</option>
-          <option>default (전체공통)</option>
-          <option>A* (항공사)</option>
-          <option>P* (공항)</option>
-          <option>H* (숙소)</option>
-          <option>R* (객실)</option>
-          <option>S* (스팟/체험)</option>
-          <option>M* (식사)</option>
-          <option>L* (여행지)</option>
-          <option>C* (국가)</option>
+          <option value="">적용 범위</option>
+          <option>전체 공통</option>
+          <option>항공사별</option>
+          <option>공항별</option>
+          <option>숙소별</option>
+          <option>객실별</option>
+          <option>스팟/체험별</option>
+          <option>식사별</option>
+          <option>여행지별</option>
+          <option>국가별</option>
         </select>
-        <input class="fi fi-lg" type="text" placeholder="Sub_key 또는 관리명 검색">
+        <input class="fi fi-lg" type="text" placeholder="적용 범위 또는 관리명 검색">
         <div class="filter-actions">
           <button class="btn btn-primary btn-sm" style="background:#2f54eb;border-color:#2f54eb;">검색</button>
           <button class="btn btn-default btn-sm">초기화</button>
@@ -684,9 +713,9 @@ select.fc { height: 36px; padding: 0 32px 0 12px; appearance: none; background-i
               <th class="col-id">ID</th>
               <th class="col-cat">카테고리</th>
               <th class="col-name">관리명</th>
-              <th style="width:180px;">Sub_key</th>
+              <th style="width:200px;">적용 범위</th>
               <th class="col-stock">연결 상품권 수</th>
-              <th class="col-date">생성일시 ↓</th>
+              <th class="col-date">수정일시 ↓</th>
               <th class="col-action">액션</th>
             </tr>
           </thead>
@@ -695,7 +724,7 @@ select.fc { height: 36px; padding: 0 32px 0 12px; appearance: none; background-i
               <td>2620</td>
               <td><span class="tag tag-purple">스페셜 혜택</span></td>
               <td>피크타임_H45_M2_스페셜혜택</td>
-              <td><code style="font-size:11px;background:#e6f7e6;padding:2px 6px;border-radius:3px;color:#389e0d;">H45_M2</code></td>
+              <td><span style="font-size:12px;">솔바이멜리아 푸꾸옥 · <span style="color:#52c41a;">BB (조식 포함)</span></span></td>
               <td style="text-align:center;"><span class="stock-num">4</span></td>
               <td style="color:rgba(0,0,0,0.4);font-size:12px;">2026-04-01 09:30</td>
               <td style="text-align:center;">
@@ -707,7 +736,7 @@ select.fc { height: 36px; padding: 0 32px 0 12px; appearance: none; background-i
               <td>2619</td>
               <td><span class="tag tag-gray">수하물 규정</span></td>
               <td>피크타임_A3_P5_수하물규정</td>
-              <td><code style="font-size:11px;background:#e6f7e6;padding:2px 6px;border-radius:3px;color:#389e0d;">A3_P5</code></td>
+              <td><span style="font-size:12px;">대한항공(KE) · <span style="color:rgba(0,0,0,0.45);">인천국제공항(ICN)</span></span></td>
               <td style="text-align:center;"><span class="stock-num">2</span></td>
               <td style="color:rgba(0,0,0,0.4);font-size:12px;">2026-04-01 09:15</td>
               <td style="text-align:center;">
@@ -719,7 +748,7 @@ select.fc { height: 36px; padding: 0 32px 0 12px; appearance: none; background-i
               <td>2618</td>
               <td><span class="tag tag-gray">유의사항</span></td>
               <td>피크타임_default_유의사항</td>
-              <td><code style="font-size:11px;background:#e6f7e6;padding:2px 6px;border-radius:3px;color:#389e0d;">default</code></td>
+              <td><span style="font-size:12px;color:rgba(0,0,0,0.45);">전체 공통</span></td>
               <td style="text-align:center;"><span class="stock-num">15</span></td>
               <td style="color:rgba(0,0,0,0.4);font-size:12px;">2026-04-01 09:00</td>
               <td style="text-align:center;">
@@ -731,7 +760,7 @@ select.fc { height: 36px; padding: 0 32px 0 12px; appearance: none; background-i
               <td>2610</td>
               <td><span class="tag tag-purple">포함사항</span></td>
               <td>피크타임_H45_포함사항</td>
-              <td><code style="font-size:11px;background:#e6f7e6;padding:2px 6px;border-radius:3px;color:#389e0d;">H45</code></td>
+              <td><span style="font-size:12px;">솔바이멜리아 푸꾸옥</span></td>
               <td style="text-align:center;"><span class="stock-num">6</span></td>
               <td style="color:rgba(0,0,0,0.4);font-size:12px;">2026-03-30 14:20</td>
               <td style="text-align:center;">
@@ -743,7 +772,7 @@ select.fc { height: 36px; padding: 0 32px 0 12px; appearance: none; background-i
               <td>2605</td>
               <td><span class="tag tag-gray">취소환불규정</span></td>
               <td>피크타임_H300_취소환불규정</td>
-              <td><code style="font-size:11px;background:#e6f7e6;padding:2px 6px;border-radius:3px;color:#389e0d;">H300</code></td>
+              <td><span style="font-size:12px;">멜리아빈펄</span></td>
               <td style="text-align:center;"><span class="stock-num">3</span></td>
               <td style="color:rgba(0,0,0,0.4);font-size:12px;">2026-03-28 10:45</td>
               <td style="text-align:center;">
@@ -755,7 +784,7 @@ select.fc { height: 36px; padding: 0 32px 0 12px; appearance: none; background-i
               <td>2598</td>
               <td><span class="tag" style="background:#fff7e6;color:#d46b08;">핵심포인트</span></td>
               <td>피크타임_S12_핵심포인트</td>
-              <td><code style="font-size:11px;background:#e6f7e6;padding:2px 6px;border-radius:3px;color:#389e0d;">S12</code></td>
+              <td><span style="font-size:12px;">빈펄사파리</span></td>
               <td style="text-align:center;"><span class="stock-num">1</span></td>
               <td style="color:rgba(0,0,0,0.4);font-size:12px;">2026-03-25 16:10</td>
               <td style="text-align:center;">
@@ -831,11 +860,11 @@ select.fc { height: 36px; padding: 0 32px 0 12px; appearance: none; background-i
               <th class="col-id">ID</th>
               <th class="col-cat">카테고리</th>
               <th class="col-name">관리명</th>
-              <th style="width:80px;">타겟유형</th>
-              <th style="width:90px;">상품권 ID</th>
-              <th style="width:120px;">Sub_key</th>
+              <th style="width:80px;">유형</th>
+              <th style="width:90px;">상품 ID</th>
+              <th style="width:140px;">적용 범위</th>
               <th style="width:80px;">등록방식</th>
-              <th class="col-date">생성일시 ↓</th>
+              <th class="col-date">수정일시 ↓</th>
               <th class="col-action">액션</th>
             </tr>
           </thead>
@@ -846,7 +875,7 @@ select.fc { height: 36px; padding: 0 32px 0 12px; appearance: none; background-i
               <td>숙박권#456_R158_M2_포함사항</td>
               <td><span class="tag" style="background:#fffbe6;color:#d48806;border:1px solid #ffe58f;">숙박권</span></td>
               <td style="text-align:center;font-weight:500;">456</td>
-              <td><code style="font-size:11px;background:#fff1e6;padding:2px 6px;border-radius:3px;color:#874d00;">R158_M2</code></td>
+              <td><span style="font-size:12px;">엑스트라 솔 스위트<br><span style="color:#52c41a;">BB (조식 포함)</span></span></td>
               <td><span class="tag" style="font-size:11px;background:#f6ffed;color:#389e0d;border:1px solid #b7eb8f;padding:1px 5px;">직접 작성</span></td>
               <td style="color:rgba(0,0,0,0.4);font-size:12px;">2026-03-31 17:20</td>
               <td style="text-align:center;">
@@ -888,7 +917,7 @@ select.fc { height: 36px; padding: 0 32px 0 12px; appearance: none; background-i
               <td>숙박권#457_H300_R160_M2_스페셜혜택</td>
               <td><span class="tag" style="background:#fffbe6;color:#d48806;border:1px solid #ffe58f;">숙박권</span></td>
               <td style="text-align:center;font-weight:500;">457</td>
-              <td><code style="font-size:11px;background:#fff1e6;padding:2px 6px;border-radius:3px;color:#874d00;">R160_M2</code></td>
+              <td><span style="font-size:12px;">더 레벨 스위트<br><span style="color:#52c41a;">BB (조식 포함)</span></span></td>
               <td><span class="tag" style="font-size:11px;background:#e6f4ff;color:#1677ff;border:1px solid #91caff;padding:1px 5px;">연결됨</span></td>
               <td style="color:rgba(0,0,0,0.4);font-size:12px;">2026-03-29 15:00</td>
               <td style="text-align:center;">
@@ -945,14 +974,13 @@ select.fc { height: 36px; padding: 0 32px 0 12px; appearance: none; background-i
 </div>
 
 <!-- ============================================================ -->
-<!-- VIEW 2: POST 등록 -->
+<!-- VIEW 2: POST 등록 (위저드) -->
 <!-- ============================================================ -->
 <div id="view-create" class="view">
   <div class="layout">
     <div class="breadcrumb">
       <span onclick="showView('list')">카탈로그</span><span class="breadcrumb-sep">/</span>
       <span onclick="showView('list')">게시판</span><span class="breadcrumb-sep">/</span>
-      <span onclick="showView('list')">카탈로그 게시판 관리</span><span class="breadcrumb-sep">/</span>
       <span style="color:rgba(0,0,0,0.88);font-weight:500;">POST 등록</span>
     </div>
     <div class="page-header">
@@ -971,137 +999,261 @@ select.fc { height: 36px; padding: 0 32px 0 12px; appearance: none; background-i
       <button class="btn btn-ai" onclick="openAiModal()">AI 자동 생성 →</button>
     </div>
 
-    <div class="card">
-      <!-- 기본정보 -->
-      <div class="form-section">
-        <div class="section-title">기본정보</div>
-        <div class="form-row">
-          <div class="form-item half">
-            <label class="form-label">카테고리 <span class="req">*</span></label>
-            <select class="fc" id="cf-category" onchange="onCategoryChange()">
-              <option value="">카테고리를 선택해주세요</option>
-              <option>소개</option><option>핵심포인트</option><option>스페셜 혜택</option>
-              <option>자주 묻는 질문</option><option>불포함사항</option><option>포함사항</option>
-              <option>취소환불규정</option><option>유의사항</option><option>안내사항</option>
-              <option>출발 전 안내</option><option>수하물 규정</option>
-            </select>
-          </div>
-          <div class="form-item half">
-            <label class="form-label">관리명 <span class="req">*</span></label>
-            <div style="display:flex;gap:6px;">
-              <input class="fc" type="text" id="cf-mgmt" placeholder="카테고리, 타겟유형 선택 시 자동 생성됩니다" style="flex:1;">
-              <button type="button" onclick="autoGenMgmtForm()" style="height:32px;padding:0 10px;border:1px solid #d9d9d9;border-radius:6px;background:#fafafa;font-size:12px;font-family:inherit;cursor:pointer;white-space:nowrap;color:rgba(0,0,0,0.65);">자동생성</button>
-            </div>
-          </div>
+    <!-- Step 인디케이터 -->
+    <div class="wiz-bar">
+      <div class="wiz-bar-step active" id="wiz-ind-1"><div class="wiz-num">1</div><div class="wiz-label">게시판 선택</div></div>
+      <div class="wiz-bar-line" id="wiz-line-1"></div>
+      <div class="wiz-bar-step" id="wiz-ind-2"><div class="wiz-num">2</div><div class="wiz-label">대상 및 적용 범위</div></div>
+      <div class="wiz-bar-line" id="wiz-line-2"></div>
+      <div class="wiz-bar-step" id="wiz-ind-3"><div class="wiz-num">3</div><div class="wiz-label">내용 작성</div></div>
+    </div>
+
+    <!-- ① STEP 1: 게시판 선택 -->
+    <div id="wiz-s1" class="card" style="padding:28px;">
+      <div class="wiz-step-title">어디에 POST를 등록할까요?</div>
+      <div class="wiz-step-sub">등록할 게시판 유형을 선택해주세요. 유형에 따라 이 콘텐츠가 적용되는 범위가 달라집니다.</div>
+      <div class="board-cards">
+        <div class="board-card" id="bc-catalog" onclick="wizSelectBoard('catalog')">
+          <div class="bc-icon">📚</div>
+          <div class="bc-title">카탈로그 게시판</div>
+          <div class="bc-desc">숙소, 항공사, 여행지 등 카탈로그 정보에 대한 공용 콘텐츠. 공급사와 무관하게 모든 상품에 공통 적용됩니다.</div>
         </div>
-        <!-- Sub_key 영역: 공급사/숙박권 선택 시에만 표시 -->
-        <div class="form-row" id="cf-subkey-section" style="display:none;">
-          <!-- 공급사 게시판 sub_key 조합 UI -->
-          <div class="form-item full" id="cf-supplier-subkey" style="display:none;">
-            <label class="form-label">Sub_key 조합 <span style="font-size:11px;color:#1677ff;font-weight:400;">(공급사 게시판 — DB content_type 기반)</span></label>
-            <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:flex-start;">
-              <select class="fc" id="cf-sk-type" onchange="onSkTypeChange()" style="width:180px;">
-                <option value="">default (전체 공통)</option>
-                <option value="AIRLINE">A — 항공사 (AIRLINE)</option>
-                <option value="AIRPORT">P — 공항 (AIRPORT)</option>
-                <option value="ACCOMMODATION">H — 숙소 (ACCOMMODATION)</option>
-                <!-- ROOM은 depth 1 불가 — 숙소(H) 선택 후 2차 조합에서만 선택 가능 -->
-                <option value="SPOT_ACTIVITY">S — 스팟/체험 (SPOT_ACTIVITY)</option>
-                <option value="MEAL">M — 식사 (MEAL)</option>
-                <option value="PLACE">L — 여행지 (PLACE)</option>
-                <option value="COUNTRY">C — 국가 (COUNTRY)</option>
-              </select>
-              <select class="fc" id="cf-sk-item" onchange="onSkItemChange()" style="width:240px;display:none;">
-                <option value="">카탈로그 선택</option>
-              </select>
-              <!-- 2차 조합 -->
-              <select class="fc" id="cf-sk-type2" onchange="onSkType2Change()" style="width:180px;display:none;">
-                <option value="">+ 조합 추가 (선택)</option>
-              </select>
-              <select class="fc" id="cf-sk-item2" onchange="onSkItem2Change()" style="width:240px;display:none;">
-                <option value="">카탈로그 선택</option>
-              </select>
-              <!-- 3차 조합 -->
-              <select class="fc" id="cf-sk-type3" onchange="onSkType3Change()" style="width:180px;display:none;">
-                <option value="">+ 3차 조합 (선택)</option>
-              </select>
-              <select class="fc" id="cf-sk-item3" onchange="buildSubKeyPreview()" style="width:240px;display:none;">
-                <option value="">카탈로그 선택</option>
-              </select>
-            </div>
-            <div id="cf-sk-preview" style="margin-top:8px;padding:8px 12px;background:#f6ffed;border:1px solid #b7eb8f;border-radius:6px;font-size:12px;color:#389e0d;display:none;">
-              <strong>sub_key:</strong> <code id="cf-sk-value" style="background:#e6f7e6;padding:2px 6px;border-radius:3px;">default</code>
-              <span id="cf-sk-label" style="margin-left:8px;color:#8c8c8c;font-size:11px;"></span>
-            </div>
-            <div class="form-hint" style="margin-top:4px;">
-              content_type → 카탈로그 ID 순서로 선택하면 sub_key가 자동 조합됩니다. 최대 3depth 조합 가능.<br>
-              비워두면 <code>default</code> (이 공급사 전체 공통). 결과값 예시: <code>H45_R158_M2</code>
-            </div>
-          </div>
-          <!-- 숙박권 게시판 sub_key UI -->
-          <div class="form-item full" id="cf-accom-subkey" style="display:none;">
-            <label class="form-label">Sub_key 조합 <span style="font-size:11px;color:#fa8c16;font-weight:400;">(숙박권 게시판)</span></label>
-            <div style="display:flex;gap:8px;align-items:flex-start;">
-              <select class="fc" id="cf-ak-room" onchange="buildAccomSubKeyPreview()" style="width:220px;">
-                <option value="">전체 공통 (숙박권 전체)</option>
-              </select>
-              <select class="fc" id="cf-ak-meal" onchange="buildAccomSubKeyPreview()" style="width:180px;">
-                <option value="">전체 식사타입</option>
-              </select>
-            </div>
-            <div id="cf-ak-preview" style="margin-top:8px;padding:8px 12px;background:#fff7e6;border:1px solid #ffd591;border-radius:6px;font-size:12px;color:#874d00;display:none;">
-              <strong>sub_key:</strong> <code id="cf-ak-value" style="background:#fff1e6;padding:2px 6px;border-radius:3px;"></code>
-            </div>
-            <div class="form-hint" style="margin-top:4px;">이 숙박권의 특정 객실요금표에만 적용되는 POST입니다. 비워두면 숙박권 전체 공통.</div>
-          </div>
-          <!-- 안내 배너 -->
-          <div class="form-item half" id="cf-subkey-info" style="display:none;align-self:flex-start;padding-top:0;">
-            <div style="background:#e6f4ff;border:1px solid #91caff;border-radius:6px;padding:10px 12px;font-size:12px;color:#0958d9;line-height:1.6;margin-top:24px;">
-              💡 <strong>sub_key</strong>는 프론트/백엔드가 동일 로직으로 조합합니다.<br>
-              프로덕트 팩토리가 속성 기반으로 sub_key 리스트를 생성 → exact match 필터.
-            </div>
-          </div>
+        <div class="board-card" id="bc-supplier" onclick="wizSelectBoard('supplier')">
+          <div class="bc-icon">🏢</div>
+          <div class="bc-title">공급사 게시판</div>
+          <div class="bc-desc">특정 공급사(여행사, 랜드사 등)를 통한 상품에만 적용되는 콘텐츠. 공급사별로 구분하여 관리합니다.</div>
         </div>
-        <div class="form-row">
-          <div class="form-item half">
-            <label class="form-label">타겟유형 <span class="req">*</span></label>
-            <select class="fc" id="cf-type" onchange="onCreateTypeChange()">
-              <option value="">타겟유형을 선택해주세요</option>
-              <optgroup label="── 카탈로그">
-                <option>공통</option>
-                <option>항공사</option>
-                <option>공항</option>
-                <option>숙소</option>
-                <option>객실</option>
-                <option>국가</option>
-                <option>여행지</option>
-                <option>스팟/체험</option>
-              </optgroup>
-              <optgroup label="── 상품단위">
-                <option>항공권</option>
-                <option>숙박권</option>
-                <option>투어/티켓</option>
-                <option>상품</option>
-              </optgroup>
-              <optgroup label="── 신규">
-                <option>공급사</option>
-              </optgroup>
-            </select>
-          </div>
-          <div class="form-item half" id="cf-target-wrap" style="display:none;">
-            <label class="form-label" id="cf-target-label">타겟 선택 <span class="req">*</span></label>
-            <div style="position:relative;">
-              <input class="fc" type="text" id="cf-target-input" placeholder="이름 또는 ID 검색" oninput="onTargetSearch(this.value)" autocomplete="off">
-              <div id="cf-target-dd" style="display:none;position:absolute;top:calc(100% + 3px);left:0;right:0;background:#fff;border:1px solid #d9d9d9;border-radius:6px;box-shadow:0 4px 12px rgba(0,0,0,0.1);z-index:50;max-height:200px;overflow-y:auto;"></div>
+        <div class="board-card" id="bc-product" onclick="wizSelectBoard('product')">
+          <div class="bc-icon">🎫</div>
+          <div class="bc-title">상품단위 게시판</div>
+          <div class="bc-desc">특정 항공권, 숙박권, 투어/티켓 상품 1건에만 전용으로 적용되는 콘텐츠입니다.</div>
+        </div>
+      </div>
+
+      <!-- 카탈로그 선택 시: 콘텐츠 유형 선택 -->
+      <div id="wiz-catalog-types" style="display:none;">
+        <div style="font-size:13px;font-weight:600;color:rgba(0,0,0,0.65);margin-bottom:10px;">어떤 종류의 정보인가요?</div>
+        <div class="type-chips">
+          <button class="type-chip" onclick="wizSelectCatalogType(this,'공통')">🌐 전체 공통</button>
+          <button class="type-chip" onclick="wizSelectCatalogType(this,'항공사')">✈️ 항공사</button>
+          <button class="type-chip" onclick="wizSelectCatalogType(this,'공항')">🛫 공항</button>
+          <button class="type-chip" onclick="wizSelectCatalogType(this,'숙소')">🏨 숙소</button>
+          <button class="type-chip" onclick="wizSelectCatalogType(this,'객실')">🛏 객실</button>
+          <button class="type-chip" onclick="wizSelectCatalogType(this,'여행지')">📍 여행지</button>
+          <button class="type-chip" onclick="wizSelectCatalogType(this,'국가')">🌏 국가</button>
+          <button class="type-chip" onclick="wizSelectCatalogType(this,'스팟/체험')">🎡 스팟/체험</button>
+        </div>
+      </div>
+
+      <!-- 상품단위 선택 시: 상품 유형 선택 -->
+      <div id="wiz-product-types" style="display:none;">
+        <div style="font-size:13px;font-weight:600;color:rgba(0,0,0,0.65);margin-bottom:10px;">어떤 상품 유형인가요?</div>
+        <div class="type-chips">
+          <button class="type-chip" onclick="wizSelectProductType(this,'항공권')">✈️ 항공권</button>
+          <button class="type-chip" onclick="wizSelectProductType(this,'숙박권')">🏨 숙박권</button>
+          <button class="type-chip" onclick="wizSelectProductType(this,'투어/티켓')">🎡 투어/티켓</button>
+          <button class="type-chip" onclick="wizSelectProductType(this,'상품')">📦 상품</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ② STEP 2: 대상 및 적용 범위 -->
+    <div id="wiz-s2" class="card" style="padding:28px;display:none;">
+
+      <!-- 카탈로그: 대상 검색 -->
+      <div id="wiz2-catalog" style="display:none;">
+        <div class="wiz-step-title">어떤 <span id="wiz2-cat-typename" style="color:#1677ff;"></span>에 대한 내용인가요?</div>
+        <div class="wiz-step-sub">등록할 대상을 검색해서 선택해주세요.</div>
+        <div style="position:relative;max-width:400px;">
+          <input class="fc" type="text" id="wiz2-cat-search" placeholder="이름으로 검색" oninput="wizCatalogSearch(this.value)" autocomplete="off">
+          <div id="wiz2-cat-dd" style="display:none;position:absolute;top:calc(100%+3px);left:0;right:0;background:#fff;border:1px solid #d9d9d9;border-radius:6px;box-shadow:0 4px 12px rgba(0,0,0,.1);z-index:50;max-height:200px;overflow-y:auto;"></div>
+        </div>
+        <div style="margin-top:8px;font-size:13px;color:rgba(0,0,0,0.45);">선택됨: <strong id="wiz2-cat-selected" style="color:#1677ff;">없음</strong></div>
+      </div>
+
+      <!-- 공급사: 공급사 선택 + 적용 범위 -->
+      <div id="wiz2-supplier" style="display:none;">
+        <div class="wiz-step-title">어떤 공급사의 POST인가요?</div>
+        <div class="wiz-step-sub">공급사를 선택한 후, 이 POST를 어느 범위에 적용할지 설정해주세요.</div>
+        <div style="max-width:320px;margin-bottom:20px;">
+          <label class="form-label">공급사 선택 <span class="req">*</span></label>
+          <select class="fc" id="wiz2-sup-select" onchange="wizSupplierChange(this.value)">
+            <option value="">공급사를 선택해주세요</option>
+            <option value="피크타임">피크타임</option>
+            <option value="TMG">TMG</option>
+            <option value="써니투어">써니투어</option>
+            <option value="직계약">직계약</option>
+          </select>
+        </div>
+        <div id="wiz2-sup-scope" style="display:none;">
+          <div style="font-size:14px;font-weight:600;color:rgba(0,0,0,0.88);margin-bottom:12px;">이 POST는 어느 범위에 적용되나요?</div>
+          <div class="scope-section">
+            <div class="scope-radio">
+              <label><input type="radio" name="sup-scope" value="default" checked onchange="wizSupScopeChange('default')">
+                <div><strong>전체 공통</strong><div style="font-size:12px;color:rgba(0,0,0,0.45);">이 공급사를 통한 모든 상품에 적용</div></div>
+              </label>
+              <label><input type="radio" name="sup-scope" value="airline" onchange="wizSupScopeChange('airline')">
+                <div><strong>특정 항공사에만</strong>
+                  <div class="scope-sub" id="wiz2-airline-sub" style="display:none;">
+                    <select class="fc" id="wiz2-airline-sel" style="width:200px;" onchange="wizBuildSupKey()">
+                      <option value="">항공사 선택</option>
+                      <option value="A3">대한항공(KE)</option>
+                      <option value="A5">비엣젯(VJ)</option>
+                      <option value="A7">아시아나(OZ)</option>
+                    </select>
+                  </div>
+                </div>
+              </label>
+              <label><input type="radio" name="sup-scope" value="accom" onchange="wizSupScopeChange('accom')">
+                <div><strong>특정 숙소에만</strong>
+                  <div class="scope-sub" id="wiz2-accom-sub" style="display:none;">
+                    <select class="fc" id="wiz2-accom-sel" style="width:220px;" onchange="wizSupAccomChange(this.value)">
+                      <option value="">숙소 선택</option>
+                      <option value="H45">솔바이멜리아 푸꾸옥</option>
+                      <option value="H220">씨셀스 푸꾸옥</option>
+                      <option value="H300">멜리아빈펄</option>
+                      <option value="H180">소나가비치 리조트</option>
+                    </select>
+                    <select class="fc" id="wiz2-room-sel" style="width:200px;display:none;" onchange="wizBuildSupKey()">
+                      <option value="">+ 특정 객실만 (선택)</option>
+                      <option value="R158">엑스트라 솔 스위트</option>
+                      <option value="R160">더 레벨 스위트</option>
+                      <option value="R220">디럭스 씨뷰</option>
+                      <option value="R221">프리미어 풀빌라</option>
+                    </select>
+                    <select class="fc" id="wiz2-meal-sel" style="width:180px;display:none;" onchange="wizBuildSupKey()">
+                      <option value="">+ 특정 식사만 (선택)</option>
+                      <option value="M1">RO (식사 불포함)</option>
+                      <option value="M2">BB (조식 포함)</option>
+                      <option value="M3">HB (2끼 포함)</option>
+                      <option value="M4">FB (전식 포함)</option>
+                      <option value="M5">AI (올인클루시브)</option>
+                    </select>
+                  </div>
+                </div>
+              </label>
+              <label><input type="radio" name="sup-scope" value="spot" onchange="wizSupScopeChange('spot')">
+                <div><strong>특정 스팟/체험에만</strong>
+                  <div class="scope-sub" id="wiz2-spot-sub" style="display:none;">
+                    <select class="fc" id="wiz2-spot-sel" style="width:200px;" onchange="wizBuildSupKey()">
+                      <option value="">스팟/체험 선택</option>
+                      <option value="S12">빈펄사파리</option>
+                      <option value="S15">빈원더스</option>
+                      <option value="S23">호핑투어</option>
+                      <option value="S30">코코넛 프리즌</option>
+                    </select>
+                  </div>
+                </div>
+              </label>
+              <label><input type="radio" name="sup-scope" value="place" onchange="wizSupScopeChange('place')">
+                <div><strong>특정 여행지에만</strong>
+                  <div class="scope-sub" id="wiz2-place-sub" style="display:none;">
+                    <select class="fc" id="wiz2-place-sel" style="width:180px;" onchange="wizBuildSupKey()">
+                      <option value="">여행지 선택</option>
+                      <option value="L23">푸꾸옥</option>
+                      <option value="L31">나트랑</option>
+                      <option value="L42">호치민</option>
+                      <option value="L55">다낭</option>
+                    </select>
+                  </div>
+                </div>
+              </label>
             </div>
-            <div class="form-hint">선택됨: <strong id="cf-target-selected" style="color:#1677ff;">없음</strong></div>
+            <!-- 적용 범위 결과 미리보기 -->
+            <div id="wiz2-sup-preview" style="margin-top:16px;padding:10px 14px;background:#f0f7ff;border:1px solid #91caff;border-radius:6px;font-size:13px;color:#1677ff;display:none;">
+              적용 범위: <strong id="wiz2-sup-preview-label"></strong>
+            </div>
           </div>
         </div>
       </div>
 
-      <!-- 상세정보 -->
+      <!-- 상품단위: 상품 검색 + 숙박권 적용 범위 -->
+      <div id="wiz2-product" style="display:none;">
+        <div class="wiz-step-title">어떤 <span id="wiz2-prod-typename" style="color:#d48806;"></span>인가요?</div>
+        <div class="wiz-step-sub">상품 ID 또는 이름으로 검색해주세요.</div>
+        <div style="max-width:400px;margin-bottom:20px;">
+          <label class="form-label">상품 검색 <span class="req">*</span></label>
+          <div style="position:relative;">
+            <input class="fc" type="text" id="wiz2-prod-search" placeholder="상품 ID 또는 이름 검색" autocomplete="off" oninput="wizProdSearch(this.value)">
+            <div id="wiz2-prod-dd" style="display:none;position:absolute;top:calc(100%+3px);left:0;right:0;background:#fff;border:1px solid #d9d9d9;border-radius:6px;box-shadow:0 4px 12px rgba(0,0,0,.1);z-index:50;max-height:200px;overflow-y:auto;"></div>
+          </div>
+          <div style="margin-top:8px;font-size:13px;color:rgba(0,0,0,0.45);">선택됨: <strong id="wiz2-prod-selected" style="color:#d48806;">없음</strong></div>
+        </div>
+
+        <!-- 숙박권만: 적용 범위 -->
+        <div id="wiz2-accom-scope" style="display:none;">
+          <div style="font-size:14px;font-weight:600;color:rgba(0,0,0,0.88);margin-bottom:12px;">이 POST는 어느 객실요금표에 적용되나요?</div>
+          <div class="scope-section">
+            <div class="scope-radio">
+              <label><input type="radio" name="prod-scope" value="all" checked onchange="wizProdScopeChange('all')">
+                <div><strong>이 숙박권 전체에 공통</strong><div style="font-size:12px;color:rgba(0,0,0,0.45);">모든 객실요금표에 동일하게 적용</div></div>
+              </label>
+              <label><input type="radio" name="prod-scope" value="room" onchange="wizProdScopeChange('room')">
+                <div><strong>특정 객실요금표에만</strong>
+                  <div class="scope-sub" id="wiz2-prod-room-sub" style="display:none;">
+                    <select class="fc" id="wiz2-prod-room-sel" style="width:220px;" onchange="wizBuildProdKey()">
+                      <option value="">객실 선택</option>
+                      <option value="R158">엑스트라 솔 스위트</option>
+                      <option value="R160">더 레벨 스위트</option>
+                    </select>
+                    <select class="fc" id="wiz2-prod-meal-sel" style="width:180px;" onchange="wizBuildProdKey()">
+                      <option value="">+ 식사 선택 (선택)</option>
+                      <option value="M1">RO (식사 불포함)</option>
+                      <option value="M2">BB (조식 포함)</option>
+                      <option value="M3">HB (2끼 포함)</option>
+                      <option value="M4">FB (전식 포함)</option>
+                      <option value="M5">AI (올인클루시브)</option>
+                    </select>
+                  </div>
+                </div>
+              </label>
+            </div>
+            <div id="wiz2-prod-preview" style="margin-top:16px;padding:10px 14px;background:#fffbe6;border:1px solid #ffe58f;border-radius:6px;font-size:13px;color:#874d00;display:none;">
+              적용 범위: <strong id="wiz2-prod-preview-label"></strong>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ③ STEP 3: 내용 작성 -->
+    <div id="wiz-s3" class="card" style="display:none;">
+      <!-- 등록 요약 뱃지 -->
+      <div id="wiz3-summary" style="background:#f6ffed;border:1px solid #b7eb8f;border-radius:8px;padding:12px 16px;margin-bottom:20px;font-size:13px;display:flex;align-items:center;gap:12px;flex-wrap:wrap;">
+        <span>📌 등록 위치:</span>
+        <strong id="wiz3-sum-board" style="color:#389e0d;"></strong>
+        <span style="color:rgba(0,0,0,0.3);">|</span>
+        <span id="wiz3-sum-target"></span>
+        <span id="wiz3-sum-scope" style="color:rgba(0,0,0,0.45);"></span>
+      </div>
       <div class="form-section">
-        <div class="section-title">상세정보</div>
+        <div class="section-title">내용 분류</div>
+        <div class="form-row">
+          <div class="form-item half">
+            <label class="form-label">카테고리 <span class="req">*</span></label>
+            <select class="fc" id="cf-category">
+              <option value="">카테고리를 선택해주세요</option>
+              <option>소개</option><option>핵심포인트</option><option>스페셜 혜택</option>
+              <option>포함사항</option><option>불포함사항</option>
+              <option>자주 묻는 질문</option><option>취소환불규정</option>
+              <option>유의사항</option><option>안내사항</option>
+              <option>출발 전 안내</option><option>수하물 규정</option>
+            </select>
+          </div>
+          <div class="form-item half">
+            <label class="form-label" style="display:flex;align-items:center;gap:6px;">
+              관리용 이름
+              <span style="font-size:11px;font-weight:400;color:rgba(0,0,0,0.35);">(내부 식별용, 고객에게 노출되지 않음)</span>
+            </label>
+            <div style="display:flex;gap:6px;">
+              <input class="fc" type="text" id="cf-mgmt" placeholder="자동 생성됩니다" style="flex:1;color:rgba(0,0,0,0.55);" readonly>
+              <button type="button" onclick="document.getElementById('cf-mgmt').readOnly=false;document.getElementById('cf-mgmt').focus();" style="height:32px;padding:0 10px;border:1px solid #d9d9d9;border-radius:6px;background:#fafafa;font-size:12px;font-family:inherit;cursor:pointer;color:rgba(0,0,0,0.55);">수정</button>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="form-section">
+        <div class="section-title">내용 작성</div>
         <div class="form-row">
           <div class="form-item full">
             <label class="form-label">제목</label>
@@ -1110,7 +1262,7 @@ select.fc { height: 36px; padding: 0 32px 0 12px; appearance: none; background-i
         </div>
         <div class="form-row">
           <div class="form-item full">
-            <label class="form-label">요약</label>
+            <label class="form-label">요약 <span style="font-size:11px;font-weight:400;color:rgba(0,0,0,0.35);">(한 줄 설명)</span></label>
             <input class="fc" type="text" placeholder="한 줄 요약을 입력해주세요">
           </div>
         </div>
@@ -1137,11 +1289,8 @@ select.fc { height: 36px; padding: 0 32px 0 12px; appearance: none; background-i
           </div>
         </div>
       </div>
-
-      <!-- 이미지 -->
-      <div class="form-section" id="cf-image-section" style="display:none;">
-        <div class="section-title">이미지</div>
-        <div style="margin-bottom:8px;font-size:12px;color:rgba(0,0,0,0.45);">표시방식</div>
+      <div class="form-section" id="cf-image-section">
+        <div class="section-title">이미지 <span style="font-size:12px;font-weight:400;color:rgba(0,0,0,0.35);">(선택)</span></div>
         <div class="toggle-group" style="margin-bottom:14px;">
           <button class="toggle-btn on" onclick="toggleImg(this)">단일</button>
           <button class="toggle-btn" onclick="toggleImg(this)">리스트</button>
@@ -1154,8 +1303,6 @@ select.fc { height: 36px; padding: 0 32px 0 12px; appearance: none; background-i
           <div class="upload-zone-hint">JPG, PNG, WebP · 최대 10MB · 최대 20장</div>
         </div>
       </div>
-
-      <!-- 파트너 노출 설정 -->
       <div class="form-section" id="partner-visibility-post">
         <div class="section-title">파트너 노출 설정</div>
         <div class="form-row">
@@ -1184,11 +1331,14 @@ select.fc { height: 36px; padding: 0 32px 0 12px; appearance: none; background-i
           </div>
         </div>
       </div>
+    </div>
 
-      <div class="form-footer">
-        <button class="btn btn-default" onclick="showView('list')">등록 취소</button>
-        <button class="btn btn-primary" onclick="alert('등록 완료!')">등록 완료</button>
-      </div>
+    <!-- 위저드 네비게이션 -->
+    <div class="wiz-nav">
+      <button class="btn btn-default" id="wiz-prev-btn" onclick="wizPrev()" style="display:none;">← 이전 단계</button>
+      <button class="btn btn-default" onclick="showView('list')">등록 취소</button>
+      <div style="flex:1;"></div>
+      <button class="btn btn-primary" id="wiz-next-btn" onclick="wizNext()">다음 단계 →</button>
     </div>
   </div>
 </div>
@@ -5346,6 +5496,180 @@ function toggleImg(btn) {
 
 // ===== AI MODAL =====
 let step = 1;
+
+// ===== 위저드 상태 =====
+const wizState = { step: 1, board: null, catalogType: null, productType: null, supKey: '', prodKey: '' };
+
+function wizSelectBoard(type) {
+  wizState.board = type;
+  document.querySelectorAll('.board-card').forEach(c => c.classList.remove('selected'));
+  document.getElementById('bc-' + type).classList.add('selected');
+  document.getElementById('wiz-catalog-types').style.display = type === 'catalog' ? 'block' : 'none';
+  document.getElementById('wiz-product-types').style.display = type === 'product' ? 'block' : 'none';
+  // 공급사면 바로 next 활성화
+  if (type === 'supplier') { wizState.catalogType = null; wizState.productType = null; }
+}
+
+function wizSelectCatalogType(el, type) {
+  wizState.catalogType = type;
+  document.querySelectorAll('#wiz-catalog-types .type-chip').forEach(c => c.classList.remove('selected'));
+  el.classList.add('selected');
+}
+
+function wizSelectProductType(el, type) {
+  wizState.productType = type;
+  document.querySelectorAll('#wiz-product-types .type-chip').forEach(c => c.classList.remove('selected'));
+  el.classList.add('selected');
+}
+
+function wizNext() {
+  const s = wizState;
+  if (s.step === 1) {
+    if (!s.board) { alert('게시판 유형을 선택해주세요.'); return; }
+    if (s.board === 'catalog' && !s.catalogType) { alert('콘텐츠 유형을 선택해주세요.'); return; }
+    if (s.board === 'product' && !s.productType) { alert('상품 유형을 선택해주세요.'); return; }
+    wizGoStep(2);
+    // Step 2 콘텐츠 세팅
+    document.getElementById('wiz2-catalog').style.display = s.board === 'catalog' ? 'block' : 'none';
+    document.getElementById('wiz2-supplier').style.display = s.board === 'supplier' ? 'block' : 'none';
+    document.getElementById('wiz2-product').style.display = s.board === 'product' ? 'block' : 'none';
+    if (s.board === 'catalog') {
+      document.getElementById('wiz2-cat-typename').textContent = s.catalogType === '공통' ? '공통 콘텐츠' : s.catalogType;
+      if (s.catalogType === '공통') { document.getElementById('wiz2-catalog').innerHTML = '<div class="wiz-step-title">전체 공통 POST 등록</div><div class="wiz-step-sub">모든 상품에 공통 적용되는 POST입니다. 대상 선택 없이 바로 내용을 작성할 수 있습니다.</div>'; }
+    }
+    if (s.board === 'product') {
+      document.getElementById('wiz2-prod-typename').textContent = s.productType;
+      document.getElementById('wiz2-accom-scope').style.display = s.productType === '숙박권' ? 'block' : 'none';
+    }
+  } else if (s.step === 2) {
+    wizGoStep(3);
+    // Step 3 요약 뱃지 업데이트
+    const boardLabel = { catalog: '카탈로그 게시판', supplier: '공급사 게시판', product: '상품단위 게시판' }[s.board];
+    document.getElementById('wiz3-sum-board').textContent = boardLabel;
+    let targetText = s.board === 'catalog' ? (s.catalogType || '') : s.board === 'supplier' ? (document.getElementById('wiz2-sup-select')?.value || '') : (s.productType || '');
+    document.getElementById('wiz3-sum-target').textContent = targetText;
+    const scopeEl = document.getElementById('wiz2-sup-preview-label') || document.getElementById('wiz2-prod-preview-label');
+    document.getElementById('wiz3-sum-scope').textContent = scopeEl?.textContent ? '· ' + scopeEl.textContent : '';
+    document.getElementById('wiz-next-btn').textContent = '✓ 등록 완료';
+  } else if (s.step === 3) {
+    alert('POST가 등록되었습니다!');
+    showView('list');
+  }
+}
+
+function wizPrev() {
+  if (wizState.step > 1) wizGoStep(wizState.step - 1);
+}
+
+function wizGoStep(n) {
+  wizState.step = n;
+  for (let i = 1; i <= 3; i++) {
+    const el = document.getElementById('wiz-s' + i);
+    if (el) el.style.display = i === n ? 'block' : 'none';
+    const ind = document.getElementById('wiz-ind-' + i);
+    if (ind) { ind.classList.remove('active','done'); if (i < n) ind.classList.add('done'); else if (i === n) ind.classList.add('active'); }
+    const line = document.getElementById('wiz-line-' + i);
+    if (line) { line.classList.toggle('done', i < n); }
+  }
+  document.getElementById('wiz-prev-btn').style.display = n > 1 ? 'block' : 'none';
+  document.getElementById('wiz-next-btn').textContent = n < 3 ? '다음 단계 →' : '✓ 등록 완료';
+}
+
+function wizSupplierChange(val) {
+  document.getElementById('wiz2-sup-scope').style.display = val ? 'block' : 'none';
+}
+
+function wizSupScopeChange(scope) {
+  ['airline','accom','spot','place'].forEach(s => {
+    const el = document.getElementById('wiz2-' + s + '-sub');
+    if (el) el.style.display = s === scope ? 'flex' : 'none';
+  });
+  if (scope === 'default') {
+    const prev = document.getElementById('wiz2-sup-preview');
+    prev.style.display = 'block';
+    document.getElementById('wiz2-sup-preview-label').textContent = '모든 상품 공통';
+  }
+}
+
+function wizSupAccomChange(val) {
+  const roomSel = document.getElementById('wiz2-room-sel');
+  const mealSel = document.getElementById('wiz2-meal-sel');
+  roomSel.style.display = val ? 'block' : 'none';
+  mealSel.style.display = val ? 'block' : 'none';
+  wizBuildSupKey();
+}
+
+function wizBuildSupKey() {
+  const scope = document.querySelector('input[name="sup-scope"]:checked')?.value;
+  let label = '';
+  if (scope === 'default') { label = '모든 상품 공통'; }
+  else if (scope === 'airline') { const v = document.getElementById('wiz2-airline-sel').options[document.getElementById('wiz2-airline-sel').selectedIndex]?.text; label = v && v !== '항공사 선택' ? v : ''; }
+  else if (scope === 'accom') {
+    const a = document.getElementById('wiz2-accom-sel'); const r = document.getElementById('wiz2-room-sel'); const m = document.getElementById('wiz2-meal-sel');
+    const an = a.options[a.selectedIndex]?.text; const rn = r.options[r.selectedIndex]?.text; const mn = m.options[m.selectedIndex]?.text;
+    label = [an, rn, mn].filter(v => v && !['숙소 선택','+ 특정 객실만 (선택)','+ 특정 식사만 (선택)'].includes(v)).join(' · ');
+  }
+  else if (scope === 'spot') { const v = document.getElementById('wiz2-spot-sel').options[document.getElementById('wiz2-spot-sel').selectedIndex]?.text; label = v && v !== '스팟/체험 선택' ? v : ''; }
+  else if (scope === 'place') { const v = document.getElementById('wiz2-place-sel').options[document.getElementById('wiz2-place-sel').selectedIndex]?.text; label = v && v !== '여행지 선택' ? v : ''; }
+  const prev = document.getElementById('wiz2-sup-preview');
+  if (label) { prev.style.display = 'block'; document.getElementById('wiz2-sup-preview-label').textContent = label; }
+}
+
+function wizProdScopeChange(scope) {
+  document.getElementById('wiz2-prod-room-sub').style.display = scope === 'room' ? 'flex' : 'none';
+  if (scope === 'all') {
+    document.getElementById('wiz2-prod-preview').style.display = 'block';
+    document.getElementById('wiz2-prod-preview-label').textContent = '이 숙박권 전체 공통';
+  }
+}
+
+function wizBuildProdKey() {
+  const r = document.getElementById('wiz2-prod-room-sel'); const m = document.getElementById('wiz2-prod-meal-sel');
+  const rn = r.options[r.selectedIndex]?.text; const mn = m.options[m.selectedIndex]?.text;
+  const label = [rn, mn].filter(v => v && !['객실 선택','+ 식사 선택 (선택)'].includes(v)).join(' · ');
+  if (label) { document.getElementById('wiz2-prod-preview').style.display = 'block'; document.getElementById('wiz2-prod-preview-label').textContent = label; }
+}
+
+const wizCatalogSearchData = {
+  '항공사': [{id:3,n:'대한항공(KE)'},{id:5,n:'비엣젯(VJ)'},{id:7,n:'아시아나(OZ)'}],
+  '공항': [{id:5,n:'인천국제공항(ICN)'},{id:12,n:'탄손냣(SGN)'},{id:18,n:'푸꾸옥(PQC)'}],
+  '숙소': [{id:45,n:'솔바이멜리아 푸꾸옥'},{id:220,n:'씨셀스 푸꾸옥'},{id:300,n:'멜리아빈펄'},{id:180,n:'소나가비치 리조트'}],
+  '객실': [{id:158,n:'엑스트라 솔 스위트'},{id:160,n:'더 레벨 스위트'}],
+  '여행지': [{id:23,n:'푸꾸옥'},{id:31,n:'나트랑'},{id:42,n:'호치민'},{id:55,n:'다낭'}],
+  '국가': [{id:1,n:'베트남'},{id:2,n:'태국'},{id:3,n:'일본'},{id:8,n:'괌'}],
+  '스팟/체험': [{id:12,n:'빈펄사파리'},{id:15,n:'빈원더스'},{id:23,n:'호핑투어'}],
+};
+function wizCatalogSearch(kw) {
+  const type = wizState.catalogType;
+  const items = (wizCatalogSearchData[type] || []).filter(i => !kw || i.n.includes(kw));
+  const dd = document.getElementById('wiz2-cat-dd');
+  dd.style.display = items.length ? 'block' : 'none';
+  dd.innerHTML = items.map(i => `<div style="padding:8px 12px;cursor:pointer;font-size:13px;" onmouseover="this.style.background='#f5f5f5'" onmouseout="this.style.background=''" onclick="wizCatalogSelect('${i.n}')">${i.n}</div>`).join('');
+}
+function wizCatalogSelect(name) {
+  document.getElementById('wiz2-cat-search').value = name;
+  document.getElementById('wiz2-cat-selected').textContent = name;
+  document.getElementById('wiz2-cat-dd').style.display = 'none';
+}
+
+const wizProdSearchData = {
+  '항공권': [{id:123,n:'항공권 #123 · 인천→푸꾸옥 비엣젯'},{id:124,n:'항공권 #124 · 인천→다낭 아시아나'}],
+  '숙박권': [{id:456,n:'숙박권 #456 · 솔바이멜리아 푸꾸옥'},{id:457,n:'숙박권 #457 · 씨셀스 푸꾸옥'}],
+  '투어/티켓': [{id:789,n:'투어/티켓 #789 · 빈원더스 풀패키지'},{id:790,n:'투어/티켓 #790 · 빈펄사파리'}],
+  '상품': [{id:200,n:'상품 #200 · 푸꾸옥 3박 5일'},{id:201,n:'상품 #201 · 나트랑 4박 6일'}],
+};
+function wizProdSearch(kw) {
+  const type = wizState.productType;
+  const items = (wizProdSearchData[type] || []).filter(i => !kw || i.n.includes(kw));
+  const dd = document.getElementById('wiz2-prod-dd');
+  dd.style.display = items.length ? 'block' : 'none';
+  dd.innerHTML = items.map(i => `<div style="padding:8px 12px;cursor:pointer;font-size:13px;" onmouseover="this.style.background='#f5f5f5'" onmouseout="this.style.background=''" onclick="wizProdSelect(${i.id},'${i.n}')">${i.n}</div>`).join('');
+}
+function wizProdSelect(id, name) {
+  document.getElementById('wiz2-prod-search').value = name;
+  document.getElementById('wiz2-prod-selected').textContent = name;
+  document.getElementById('wiz2-prod-dd').style.display = 'none';
+}
 
 function openProductLinkModal() {
   document.getElementById('product-link-modal').classList.remove('hidden');
