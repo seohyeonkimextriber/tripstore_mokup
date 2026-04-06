@@ -484,6 +484,8 @@ select.fc { height: 36px; padding: 0 32px 0 12px; appearance: none; background-i
           <div class="mega-col">
             <div class="mega-col-title" style="display:flex;align-items:center;gap:6px;">게시판 <span class="new-badge">NEW</span></div>
             <span class="mega-col-item active" onclick="event.stopPropagation();showView('list')">게시판 관리</span>
+            <span class="mega-col-item" onclick="event.stopPropagation();showView('create')" style="color:rgba(0,0,0,0.55);">POST 등록 (현행)</span>
+            <span class="mega-col-item" onclick="event.stopPropagation();showView('create-v2')" style="color:#722ed1;font-weight:500;">POST 등록 v2 ✦ 카테고리 중심</span>
           </div>
         </div>
         <!-- 하단 이미지/파일 -->
@@ -1433,6 +1435,396 @@ select.fc { height: 36px; padding: 0 32px 0 12px; appearance: none; background-i
     </div><!-- /wiz-s3-wrap -->
   </div>
 </div>
+
+<!-- ============================================================ -->
+<!-- VIEW: POST 등록 v2 — 카테고리 중심 위자드                     -->
+<!-- ============================================================ -->
+<div id="view-create-v2" class="view">
+  <div class="layout">
+    <div class="breadcrumb">
+      <span onclick="showView('list')">게시판 관리</span><span class="breadcrumb-sep">/</span>
+      <span style="color:rgba(0,0,0,0.88);font-weight:500;">POST 등록 <span style="color:#722ed1;font-size:11px;font-weight:600;background:#f9f0ff;border:1px solid #d3adf7;border-radius:4px;padding:1px 6px;margin-left:4px;">v2 카테고리 중심</span></span>
+    </div>
+
+    <!-- 상단 비교 배너 -->
+    <div style="background:#f9f0ff;border:1px solid #d3adf7;border-radius:8px;padding:12px 16px;margin-bottom:20px;display:flex;align-items:center;gap:12px;font-size:13px;">
+      <span style="font-size:18px;">✦</span>
+      <div>
+        <strong style="color:#531dab;">카테고리 중심 등록 방식</strong>
+        <span style="color:rgba(0,0,0,0.55);margin-left:8px;">무엇을 쓸지 먼저 결정 → 어디에 붙일지 선택. 게시판 구분 없이 카테고리가 등록 흐름을 이끕니다.</span>
+      </div>
+      <button class="btn btn-text btn-sm" style="margin-left:auto;color:#722ed1;" onclick="showView('create')">← 현행 방식 보기</button>
+    </div>
+
+    <!-- ① STEP 1: 카테고리 선택 -->
+    <div class="card" id="v2-s1" style="padding:28px;margin-bottom:0;">
+      <div class="wiz-section-tag" style="background:#f9f0ff;border-color:#d3adf7;color:#531dab;margin-bottom:16px;"><div class="wst-num" style="background:#722ed1;">1</div> 어떤 내용을 등록할 건가요?</div>
+      <div class="wiz-step-title" style="margin-bottom:4px;">카테고리를 먼저 선택해주세요</div>
+      <div class="wiz-step-sub" style="margin-bottom:20px;">카테고리에 따라 어디에 등록하면 좋을지 자동으로 안내합니다.</div>
+
+      <!-- 정보형 그룹 -->
+      <div style="margin-bottom:16px;">
+        <div style="font-size:11px;font-weight:700;color:#1677ff;letter-spacing:0.5px;margin-bottom:8px;display:flex;align-items:center;gap:6px;">
+          <span style="background:#e6f4ff;border:1px solid #91caff;border-radius:4px;padding:1px 7px;">📚 정보형</span>
+          <span style="color:rgba(0,0,0,0.35);font-weight:400;">공급사 무관 — 항상 카탈로그에 등록</span>
+        </div>
+        <div class="type-chips" style="gap:8px;">
+          <button class="type-chip v2-cat-chip" onclick="v2SelectCategory(this,'소개','info')" data-cat="소개">📖 소개</button>
+          <button class="type-chip v2-cat-chip" onclick="v2SelectCategory(this,'핵심포인트','info')" data-cat="핵심포인트">📌 핵심포인트</button>
+          <button class="type-chip v2-cat-chip" onclick="v2SelectCategory(this,'수하물 규정','info')" data-cat="수하물 규정">🧳 수하물 규정</button>
+        </div>
+      </div>
+
+      <!-- 조건형 그룹 -->
+      <div>
+        <div style="font-size:11px;font-weight:700;color:#d46b08;letter-spacing:0.5px;margin-bottom:8px;display:flex;align-items:center;gap:6px;">
+          <span style="background:#fff7e6;border:1px solid #ffd591;border-radius:4px;padding:1px 7px;">📋 조건형</span>
+          <span style="color:rgba(0,0,0,0.35);font-weight:400;">공급사·상품별로 달라질 수 있음 — 카탈로그 또는 공급사 중 선택</span>
+        </div>
+        <div class="type-chips" style="gap:8px;flex-wrap:wrap;">
+          <button class="type-chip v2-cat-chip" onclick="v2SelectCategory(this,'포함사항','cond')" data-cat="포함사항">✅ 포함사항</button>
+          <button class="type-chip v2-cat-chip" onclick="v2SelectCategory(this,'불포함사항','cond')" data-cat="불포함사항">❌ 불포함사항</button>
+          <button class="type-chip v2-cat-chip" onclick="v2SelectCategory(this,'유의사항','cond')" data-cat="유의사항">⚠️ 유의사항</button>
+          <button class="type-chip v2-cat-chip" onclick="v2SelectCategory(this,'안내사항','cond')" data-cat="안내사항">ℹ️ 안내사항</button>
+          <button class="type-chip v2-cat-chip" onclick="v2SelectCategory(this,'출발 전 안내','cond')" data-cat="출발 전 안내">✈️ 출발 전 안내</button>
+          <button class="type-chip v2-cat-chip" onclick="v2SelectCategory(this,'취소환불규정','cond')" data-cat="취소환불규정">🔄 취소환불규정</button>
+          <button class="type-chip v2-cat-chip" onclick="v2SelectCategory(this,'자주 묻는 질문','cond')" data-cat="자주 묻는 질문">❓ 자주 묻는 질문</button>
+          <button class="type-chip v2-cat-chip" onclick="v2SelectCategory(this,'스페셜 혜택','cond')" data-cat="스페셜 혜택">✨ 스페셜 혜택</button>
+        </div>
+      </div>
+
+      <!-- 선택 후 힌트 -->
+      <div id="v2-s1-hint" style="display:none;margin-top:16px;padding:10px 14px;border-radius:7px;font-size:13px;"></div>
+    </div>
+
+    <!-- ② STEP 2: 타겟 + 범위 -->
+    <div class="wiz-reveal-wrap" id="v2-s2-wrap" style="display:none;">
+      <div class="wiz-connector">↓</div>
+      <div class="card" id="v2-s2" style="padding:28px;">
+        <div class="wiz-section-tag" style="background:#f9f0ff;border-color:#d3adf7;color:#531dab;margin-bottom:16px;"><div class="wst-num" style="background:#722ed1;">2</div> 어떤 대상에 적용할 건가요?</div>
+
+        <!-- 타겟유형 칩 -->
+        <div style="margin-bottom:20px;">
+          <div class="wiz-step-title" style="margin-bottom:8px;">타겟 유형</div>
+          <div class="type-chips" id="v2-type-chips" style="gap:8px;flex-wrap:wrap;">
+            <button class="type-chip" onclick="v2SelectTargetType(this,'공통')">🌐 공통</button>
+            <button class="type-chip" onclick="v2SelectTargetType(this,'항공사')">✈️ 항공사</button>
+            <button class="type-chip" onclick="v2SelectTargetType(this,'공항')">🛫 공항</button>
+            <button class="type-chip" onclick="v2SelectTargetType(this,'숙소')">🏨 숙소</button>
+            <button class="type-chip" onclick="v2SelectTargetType(this,'객실')">🛏 객실</button>
+            <button class="type-chip" onclick="v2SelectTargetType(this,'식사')">🍽 식사</button>
+            <button class="type-chip" onclick="v2SelectTargetType(this,'여행지')">📍 여행지</button>
+            <button class="type-chip" onclick="v2SelectTargetType(this,'국가')">🌏 국가</button>
+            <button class="type-chip" onclick="v2SelectTargetType(this,'스팟/체험')">🎡 스팟/체험</button>
+          </div>
+        </div>
+
+        <!-- 타겟 ID 검색 (공통 선택 시 숨김) -->
+        <div id="v2-target-search-wrap" style="display:none;margin-bottom:20px;">
+          <div class="wiz-step-title" style="margin-bottom:8px;">타겟 <span id="v2-type-label" style="color:#1677ff;"></span> 선택</div>
+          <div style="position:relative;max-width:400px;">
+            <input class="fc" type="text" id="v2-target-input" placeholder="이름으로 검색" oninput="v2TargetSearch(this.value)" autocomplete="off">
+            <div id="v2-target-dd" style="display:none;position:absolute;top:calc(100%+3px);left:0;right:0;background:#fff;border:1px solid #d9d9d9;border-radius:6px;box-shadow:0 4px 12px rgba(0,0,0,.1);z-index:50;max-height:200px;overflow-y:auto;"></div>
+          </div>
+          <div style="margin-top:6px;font-size:13px;color:rgba(0,0,0,0.45);">선택됨: <strong id="v2-target-selected" style="color:#1677ff;">없음</strong></div>
+        </div>
+
+        <!-- 범위 (board_type 자동 결정) -->
+        <div id="v2-scope-wrap" style="display:none;">
+          <div class="wiz-step-title" style="margin-bottom:8px;">적용 범위 <span style="font-size:12px;font-weight:400;color:rgba(0,0,0,0.45);">— 게시판 유형이 자동으로 결정됩니다</span></div>
+          <div style="display:flex;flex-direction:column;gap:10px;">
+            <label style="display:flex;align-items:flex-start;gap:10px;padding:12px 14px;border:1.5px solid #d9d9d9;border-radius:8px;cursor:pointer;transition:border-color 0.15s;" id="v2-scope-common-lbl">
+              <input type="radio" name="v2-scope" value="common" onchange="v2ScopeChange('common')" style="margin-top:2px;">
+              <div>
+                <strong style="font-size:13px;">공통 (공급사 무관)</strong>
+                <div style="font-size:12px;color:rgba(0,0,0,0.45);margin-top:2px;">모든 공급사에 동일하게 적용 → <span style="color:#1677ff;font-weight:600;">📚 카탈로그 게시판</span></div>
+              </div>
+            </label>
+            <label style="display:flex;align-items:flex-start;gap:10px;padding:12px 14px;border:1.5px solid #d9d9d9;border-radius:8px;cursor:pointer;transition:border-color 0.15s;" id="v2-scope-supplier-lbl">
+              <input type="radio" name="v2-scope" value="supplier" onchange="v2ScopeChange('supplier')" style="margin-top:2px;">
+              <div style="flex:1;">
+                <strong style="font-size:13px;">특정 공급사</strong>
+                <div style="font-size:12px;color:rgba(0,0,0,0.45);margin-top:2px;">공급사마다 다른 조건 → <span style="color:#2f54eb;font-weight:600;">🏢 공급사 게시판</span></div>
+                <div id="v2-scope-supplier-detail" style="display:none;margin-top:10px;display:none;flex-direction:column;gap:8px;">
+                  <select class="fc" id="v2-supplier-sel" style="max-width:220px;" onchange="v2BuildSubKey()">
+                    <option value="">공급사 선택</option>
+                    <option value="sup1">피크타임</option>
+                    <option value="sup2">TMG</option>
+                    <option value="sup3">써니투어</option>
+                    <option value="sup4">직계약</option>
+                  </select>
+                  <div id="v2-subkey-detail" style="display:none;padding:10px 12px;background:#f5f0ff;border:1px solid #d3adf7;border-radius:6px;">
+                    <div style="font-size:12px;color:#531dab;font-weight:600;margin-bottom:6px;">세부 범위 (선택)</div>
+                    <div style="display:flex;flex-wrap:wrap;gap:6px;">
+                      <button class="type-chip selected" onclick="v2SetSubKey(this,'')" style="font-size:11px;padding:3px 10px;">전체 공통</button>
+                      <button class="type-chip" onclick="v2SetSubKey(this,'airline')" style="font-size:11px;padding:3px 10px;">항공사별</button>
+                      <button class="type-chip" onclick="v2SetSubKey(this,'accom')" style="font-size:11px;padding:3px 10px;">숙소별</button>
+                      <button class="type-chip" onclick="v2SetSubKey(this,'spot')" style="font-size:11px;padding:3px 10px;">스팟/체험별</button>
+                      <button class="type-chip" onclick="v2SetSubKey(this,'place')" style="font-size:11px;padding:3px 10px;">여행지별</button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </label>
+            <label style="display:flex;align-items:flex-start;gap:10px;padding:12px 14px;border:1.5px solid #d9d9d9;border-radius:8px;cursor:pointer;transition:border-color 0.15s;" id="v2-scope-product-lbl">
+              <input type="radio" name="v2-scope" value="product" onchange="v2ScopeChange('product')" style="margin-top:2px;">
+              <div style="flex:1;">
+                <strong style="font-size:13px;">특정 상품</strong>
+                <div style="font-size:12px;color:rgba(0,0,0,0.45);margin-top:2px;">특정 PB 상품 하나에만 → <span style="color:#d46b08;font-weight:600;">📦 상품단위 게시판</span></div>
+                <div id="v2-scope-product-detail" style="display:none;margin-top:10px;">
+                  <input class="fc" type="text" placeholder="상품 ID 또는 이름 검색" style="max-width:340px;">
+                </div>
+              </div>
+            </label>
+          </div>
+
+          <!-- 자동 결정된 게시판 미리보기 -->
+          <div id="v2-board-preview" style="display:none;margin-top:14px;padding:10px 14px;background:#f6ffed;border:1px solid #b7eb8f;border-radius:7px;font-size:13px;display:flex;align-items:center;gap:8px;">
+            <span>✅ 자동 결정된 등록 위치:</span>
+            <strong id="v2-board-label" style="color:#389e0d;"></strong>
+            <span id="v2-adminname-preview" style="font-size:12px;color:rgba(0,0,0,0.45);margin-left:4px;"></span>
+          </div>
+
+          <div style="margin-top:16px;">
+            <button class="btn btn-primary" onclick="v2ConfirmStep2()" style="height:36px;padding:0 24px;">다음 단계 →</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ③ STEP 3: 내용 작성 -->
+    <div class="wiz-reveal-wrap" id="v2-s3-wrap" style="display:none;">
+      <div class="wiz-connector">↓</div>
+      <div class="card" id="v2-s3" style="padding:28px;">
+        <div class="wiz-section-tag" style="background:#f9f0ff;border-color:#d3adf7;color:#531dab;margin-bottom:16px;"><div class="wst-num" style="background:#722ed1;">3</div> POST 내용 작성</div>
+
+        <!-- 등록 요약 뱃지 -->
+        <div id="v2-s3-summary" style="background:#f6ffed;border:1px solid #b7eb8f;border-radius:8px;padding:12px 16px;font-size:13px;display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:20px;">
+          <span>📌</span>
+          <span id="v2-sum-cat" style="font-weight:700;color:#389e0d;"></span>
+          <span style="color:rgba(0,0,0,0.3);">|</span>
+          <span id="v2-sum-board" style="color:#1677ff;font-weight:600;"></span>
+          <span style="color:rgba(0,0,0,0.3);">|</span>
+          <span id="v2-sum-target" style="color:rgba(0,0,0,0.65);"></span>
+          <span id="v2-sum-scope" style="color:rgba(0,0,0,0.4);font-size:12px;"></span>
+        </div>
+
+        <!-- 관리명 (자동생성) -->
+        <div class="form-item" style="margin-bottom:16px;">
+          <label class="form-label">관리명 <span style="font-size:11px;color:rgba(0,0,0,0.35);font-weight:400;">자동 생성됨</span></label>
+          <input class="fc" type="text" id="v2-adminname-input" style="background:#fafafa;" readonly>
+          <div class="form-hint">카테고리_타겟유형_타겟명 규칙으로 자동 생성됩니다. 직접 수정도 가능합니다.</div>
+        </div>
+
+        <!-- 제목 -->
+        <div class="form-item" style="margin-bottom:16px;">
+          <label class="form-label">제목 <span class="req">*</span></label>
+          <input class="fc" type="text" id="v2-title-input" placeholder="POST 제목을 입력해주세요">
+        </div>
+
+        <!-- 내용 -->
+        <div class="form-item" style="margin-bottom:20px;">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;">
+            <label class="form-label" style="margin-bottom:0;">내용 <span class="req">*</span></label>
+            <button class="btn btn-sm" style="background:#f9f0ff;border-color:#d3adf7;color:#531dab;font-size:12px;height:28px;" onclick="alert('AI 초안 생성 기능은 준비 중입니다.')">✨ AI 초안 생성</button>
+          </div>
+          <textarea class="fc" rows="8" id="v2-content-input" placeholder="내용을 입력해주세요. HTML 또는 Rich Text를 지원합니다." style="resize:vertical;"></textarea>
+        </div>
+
+        <!-- 등록 버튼 -->
+        <div style="display:flex;justify-content:space-between;align-items:center;padding-top:16px;border-top:1px solid #f0f0f0;">
+          <button class="btn btn-default" onclick="showView('list')">취소</button>
+          <button class="btn btn-primary" onclick="alert('POST가 등록되었습니다.')" style="padding:0 28px;height:38px;font-weight:600;">POST 등록</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+// ============================================================
+// POST 등록 v2 — 카테고리 중심 위자드 JS
+// ============================================================
+var v2State = { category: null, catType: null, targetType: null, targetId: null, targetName: null, scope: null, supplierName: null, subKey: '' };
+
+var v2CatalogData = {
+  '항공사': [['A3','대한항공(KE)'],['A5','비엣젯(VJ)'],['A7','아시아나(OZ)'],['A9','에어아시아(AK)']],
+  '공항': [['AP1','인천국제공항(ICN)'],['AP2','푸꾸옥국제공항(PQC)'],['AP3','나트랑캄란공항(CXR)'],['AP4','다낭국제공항(DAD)']],
+  '숙소': [['H45','솔바이멜리아 푸꾸옥'],['H220','씨셀스 푸꾸옥'],['H300','멜리아빈펄'],['H180','소나가비치 리조트']],
+  '객실': [['R158','엑스트라 솔 스위트'],['R160','더 레벨 스위트'],['R220','디럭스 씨뷰'],['R221','프리미어 풀빌라']],
+  '식사': [['M1','RO (식사 불포함)'],['M2','BB (조식 포함)'],['M3','HB (2끼 포함)'],['M4','FB (전식 포함)'],['M5','AI (올인클루시브)']],
+  '여행지': [['L23','푸꾸옥'],['L31','나트랑'],['L42','호치민'],['L55','다낭']],
+  '국가': [['C1','베트남'],['C2','태국'],['C3','필리핀'],['C4','일본']],
+  '스팟/체험': [['S12','빈펄사파리'],['S15','빈원더스'],['S23','호핑투어'],['S30','코코넛 프리즌']]
+};
+
+function v2SelectCategory(el, cat, type) {
+  document.querySelectorAll('.v2-cat-chip').forEach(function(c){ c.classList.remove('selected'); });
+  el.classList.add('selected');
+  v2State.category = cat;
+  v2State.catType = type;
+
+  var hint = document.getElementById('v2-s1-hint');
+  hint.style.display = 'block';
+  if (type === 'info') {
+    hint.style.background = '#e6f4ff'; hint.style.border = '1px solid #91caff'; hint.style.color = '#003a8c';
+    hint.innerHTML = '📚 <strong>' + cat + '</strong>는 정보형 카테고리입니다. 공급사와 무관한 내용으로, <strong>카탈로그 게시판</strong>에만 등록됩니다.';
+  } else {
+    hint.style.background = '#fff7e6'; hint.style.border = '1px solid #ffd591'; hint.style.color = '#874d00';
+    hint.innerHTML = '📋 <strong>' + cat + '</strong>는 조건형 카테고리입니다. 공급사에 따라 내용이 달라질 수 있어 <strong>카탈로그 또는 공급사 게시판</strong> 중 선택 가능합니다.';
+  }
+
+  // Step 2 열기
+  var s2 = document.getElementById('v2-s2-wrap');
+  s2.style.display = 'block';
+  // 정보형이면 공급사/상품 범위 라디오 비활성
+  var supLbl = document.getElementById('v2-scope-supplier-lbl');
+  var prodLbl = document.getElementById('v2-scope-product-lbl');
+  if (type === 'info') {
+    supLbl.style.opacity = '0.4'; supLbl.style.pointerEvents = 'none';
+    prodLbl.style.opacity = '0.4'; prodLbl.style.pointerEvents = 'none';
+  } else {
+    supLbl.style.opacity = '1'; supLbl.style.pointerEvents = '';
+    prodLbl.style.opacity = '1'; prodLbl.style.pointerEvents = '';
+  }
+  // 범위 초기화
+  document.querySelectorAll('input[name="v2-scope"]').forEach(function(r){ r.checked = false; });
+  document.getElementById('v2-board-preview').style.display = 'none';
+  document.getElementById('v2-s3-wrap').style.display = 'none';
+  s2.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+}
+
+function v2SelectTargetType(el, type) {
+  document.querySelectorAll('#v2-type-chips .type-chip').forEach(function(c){ c.classList.remove('selected'); });
+  el.classList.add('selected');
+  v2State.targetType = type;
+  v2State.targetId = null; v2State.targetName = null;
+
+  var searchWrap = document.getElementById('v2-target-search-wrap');
+  if (type === '공통') {
+    searchWrap.style.display = 'none';
+    v2State.targetName = '공통';
+  } else {
+    searchWrap.style.display = 'block';
+    document.getElementById('v2-type-label').textContent = type;
+    document.getElementById('v2-target-input').value = '';
+    document.getElementById('v2-target-selected').textContent = '없음';
+  }
+  // 범위 섹션 표시
+  document.getElementById('v2-scope-wrap').style.display = 'block';
+  v2UpdateBoardPreview();
+}
+
+function v2TargetSearch(val) {
+  var type = v2State.targetType;
+  var data = v2CatalogData[type] || [];
+  var dd = document.getElementById('v2-target-dd');
+  if (!val || val.length < 1) { dd.style.display = 'none'; return; }
+  var filtered = data.filter(function(d){ return d[1].toLowerCase().includes(val.toLowerCase()); });
+  if (!filtered.length) { dd.style.display = 'none'; return; }
+  dd.innerHTML = filtered.map(function(d){
+    return '<div style="padding:8px 12px;cursor:pointer;font-size:13px;border-bottom:1px solid #f0f0f0;" onmousedown="v2SelectTarget(\'' + d[0] + '\',\'' + d[1].replace(/'/g,"\\'") + '\')">' + d[1] + ' <span style="color:rgba(0,0,0,0.3);font-size:11px;">' + d[0] + '</span></div>';
+  }).join('');
+  dd.style.display = 'block';
+}
+
+function v2SelectTarget(id, name) {
+  v2State.targetId = id; v2State.targetName = name;
+  document.getElementById('v2-target-input').value = name;
+  document.getElementById('v2-target-selected').textContent = name;
+  document.getElementById('v2-target-dd').style.display = 'none';
+  v2UpdateBoardPreview();
+}
+
+function v2ScopeChange(scope) {
+  v2State.scope = scope;
+  var supDetail = document.getElementById('v2-scope-supplier-detail');
+  var prodDetail = document.getElementById('v2-scope-product-detail');
+  supDetail.style.display = scope === 'supplier' ? 'flex' : 'none';
+  prodDetail.style.display = scope === 'product' ? 'block' : 'none';
+  if (scope !== 'supplier') { v2State.supplierName = null; document.getElementById('v2-subkey-detail').style.display = 'none'; }
+  // 선택된 라디오 카드 강조
+  ['common','supplier','product'].forEach(function(s){
+    var lbl = document.getElementById('v2-scope-' + s + '-lbl');
+    if (lbl) lbl.style.borderColor = scope === s ? '#722ed1' : '#d9d9d9';
+  });
+  v2UpdateBoardPreview();
+}
+
+function v2BuildSubKey() {
+  var sel = document.getElementById('v2-supplier-sel');
+  v2State.supplierName = sel.options[sel.selectedIndex].text;
+  document.getElementById('v2-subkey-detail').style.display = sel.value ? 'block' : 'none';
+  v2UpdateBoardPreview();
+}
+
+function v2SetSubKey(el, key) {
+  document.querySelectorAll('#v2-subkey-detail .type-chip').forEach(function(c){ c.classList.remove('selected'); });
+  el.classList.add('selected');
+  v2State.subKey = key;
+  v2UpdateBoardPreview();
+}
+
+function v2UpdateBoardPreview() {
+  var preview = document.getElementById('v2-board-preview');
+  var boardLabel = document.getElementById('v2-board-label');
+  var adminPreview = document.getElementById('v2-adminname-preview');
+  if (!v2State.scope || !v2State.targetType) { preview.style.display = 'none'; return; }
+
+  var board = '', adminName = '';
+  var catLabel = v2State.category || '';
+  var targetLabel = v2State.targetName || v2State.targetType;
+
+  if (v2State.scope === 'common' || v2State.catType === 'info') {
+    board = '📚 카탈로그 게시판';
+    adminName = catLabel + '_' + v2State.targetType + (targetLabel !== v2State.targetType ? '_' + targetLabel : '');
+  } else if (v2State.scope === 'supplier') {
+    board = '🏢 공급사 게시판';
+    var sup = v2State.supplierName || '공급사 선택 전';
+    adminName = sup + '_' + v2State.targetType + (targetLabel !== v2State.targetType ? '_' + targetLabel : '') + '_' + catLabel;
+  } else {
+    board = '📦 상품단위 게시판';
+    adminName = '상품#___' + '_' + catLabel;
+  }
+
+  boardLabel.textContent = board;
+  adminPreview.textContent = '관리명: ' + adminName;
+  preview.style.display = 'flex';
+}
+
+function v2ConfirmStep2() {
+  if (!v2State.targetType) { alert('타겟 유형을 선택해주세요.'); return; }
+  if (v2State.targetType !== '공통' && !v2State.targetId) { alert('타겟을 검색해 선택해주세요.'); return; }
+  if (!v2State.scope) { alert('적용 범위를 선택해주세요.'); return; }
+  if (v2State.scope === 'supplier' && !v2State.supplierName) { alert('공급사를 선택해주세요.'); return; }
+
+  // Step 3 채우기
+  var catLabel = v2State.category || '';
+  var targetLabel = v2State.targetName || v2State.targetType;
+  var board = v2State.scope === 'common' || v2State.catType === 'info' ? '📚 카탈로그' : v2State.scope === 'supplier' ? '🏢 공급사' : '📦 상품단위';
+  var scopeStr = v2State.scope === 'supplier' ? '· ' + (v2State.supplierName || '') : '';
+
+  document.getElementById('v2-sum-cat').textContent = catLabel;
+  document.getElementById('v2-sum-board').textContent = board;
+  document.getElementById('v2-sum-target').textContent = v2State.targetType + (targetLabel !== v2State.targetType ? ' · ' + targetLabel : '');
+  document.getElementById('v2-sum-scope').textContent = scopeStr;
+
+  // 관리명 자동생성
+  var adminName = '';
+  if (v2State.scope === 'common' || v2State.catType === 'info') {
+    adminName = catLabel + '_' + v2State.targetType + (targetLabel !== v2State.targetType ? '_' + targetLabel : '');
+  } else if (v2State.scope === 'supplier') {
+    adminName = (v2State.supplierName || '') + '_' + v2State.targetType + (targetLabel !== v2State.targetType ? '_' + targetLabel : '') + '_' + catLabel;
+  } else {
+    adminName = '상품#___' + '_' + catLabel;
+  }
+  document.getElementById('v2-adminname-input').value = adminName;
+
+  var s3 = document.getElementById('v2-s3-wrap');
+  s3.style.display = 'block';
+  s3.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+}
+</script>
 
 <!-- ============================================================ -->
 <!-- 항공권 관리 뷰 -->
