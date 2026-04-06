@@ -483,9 +483,7 @@ select.fc { height: 36px; padding: 0 32px 0 12px; appearance: none; background-i
           </div>
           <div class="mega-col">
             <div class="mega-col-title" style="display:flex;align-items:center;gap:6px;">게시판 <span class="new-badge">NEW</span></div>
-            <span class="mega-col-item active" onclick="event.stopPropagation();showView('list')">카탈로그 게시판 관리</span>
-            <span class="mega-col-item" onclick="event.stopPropagation();showView('board-supplier')" style="color:#2f54eb;font-weight:500;">공급사 게시판 관리</span>
-            <span class="mega-col-item" onclick="event.stopPropagation();showView('board-product')" style="color:#d48806;">상품단위 게시판 관리</span>
+            <span class="mega-col-item active" onclick="event.stopPropagation();showView('list')">게시판 관리</span>
           </div>
         </div>
         <!-- 하단 이미지/파일 -->
@@ -526,40 +524,50 @@ select.fc { height: 36px; padding: 0 32px 0 12px; appearance: none; background-i
   <div class="layout">
     <div class="breadcrumb">
       <span>카탈로그</span><span class="breadcrumb-sep">/</span>
-      <span>게시판</span><span class="breadcrumb-sep">/</span>
-      <span style="color:rgba(0,0,0,0.88);font-weight:500;">카탈로그 게시판 관리</span>
+      <span style="color:rgba(0,0,0,0.88);font-weight:500;">게시판 관리</span>
     </div>
     <div class="page-header">
-      <div class="page-title">카탈로그 게시판 관리</div>
+      <div class="page-title">게시판 관리</div>
       <button class="btn btn-primary" onclick="showView('create')">+ 등록하기</button>
     </div>
-    <!-- 게시판 요약 카드 -->
+
+    <!-- 요약 카드 -->
     <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:20px;">
-      <div class="card" style="padding:16px;cursor:pointer;border:2px solid #1677ff;background:#f0f5ff;" onclick="showView('list')">
-        <div style="font-size:12px;color:#1677ff;font-weight:600;margin-bottom:4px;">카탈로그 게시판</div>
-        <div style="font-size:28px;font-weight:700;color:#1677ff;">2,430</div>
-        <div style="font-size:11px;color:rgba(0,0,0,0.45);margin-top:4px;">숙소·항공사·여행지 등 공급사 무관 콘텐츠</div>
-      </div>
-      <div class="card" style="padding:16px;cursor:pointer;" onclick="showView('board-supplier')">
-        <div style="font-size:12px;color:#2f54eb;font-weight:600;margin-bottom:4px;">공급사 게시판</div>
-        <div style="font-size:28px;font-weight:700;color:#2f54eb;">85</div>
-        <div style="font-size:11px;color:rgba(0,0,0,0.45);margin-top:4px;">공급사별 sub_key 조합 콘텐츠</div>
-      </div>
-      <div class="card" style="padding:16px;cursor:pointer;" onclick="showView('board-product')">
-        <div style="font-size:12px;color:#d48806;font-weight:600;margin-bottom:4px;">상품단위 게시판</div>
-        <div style="font-size:28px;font-weight:700;color:#d48806;">320</div>
-        <div style="font-size:11px;color:rgba(0,0,0,0.45);margin-top:4px;">항공권·숙박권·투어 전용 POST</div>
-      </div>
       <div class="card" style="padding:16px;">
         <div style="font-size:12px;color:rgba(0,0,0,0.45);font-weight:600;margin-bottom:4px;">전체 POST</div>
         <div style="font-size:28px;font-weight:700;color:rgba(0,0,0,0.88);">2,835</div>
         <div style="font-size:11px;color:rgba(0,0,0,0.45);margin-top:4px;">오늘 +3건 · 이번주 +24건</div>
       </div>
+      <div class="card" style="padding:16px;">
+        <div style="font-size:12px;color:#1677ff;font-weight:600;margin-bottom:4px;">카탈로그</div>
+        <div style="font-size:28px;font-weight:700;color:#1677ff;">2,430</div>
+        <div style="font-size:11px;color:rgba(0,0,0,0.45);margin-top:4px;">숙소·항공사·여행지 등 공용 콘텐츠</div>
+      </div>
+      <div class="card" style="padding:16px;">
+        <div style="font-size:12px;color:#2f54eb;font-weight:600;margin-bottom:4px;">공급사</div>
+        <div style="font-size:28px;font-weight:700;color:#2f54eb;">85</div>
+        <div style="font-size:11px;color:rgba(0,0,0,0.45);margin-top:4px;">공급사별 sub_key 조합 콘텐츠</div>
+      </div>
+      <div class="card" style="padding:16px;">
+        <div style="font-size:12px;color:#d48806;font-weight:600;margin-bottom:4px;">상품단위</div>
+        <div style="font-size:28px;font-weight:700;color:#d48806;">320</div>
+        <div style="font-size:11px;color:rgba(0,0,0,0.45);margin-top:4px;">항공권·숙박권·투어 전용 POST</div>
+      </div>
     </div>
+
     <div class="card">
-      <div class="filter-bar">
+      <!-- 게시판 타입 탭 -->
+      <div style="display:flex;gap:0;border-bottom:1px solid #f0f0f0;margin-bottom:0;" id="board-tabs">
+        <button id="btab-all"      onclick="switchBoardTab('all')"      style="padding:10px 22px;border:none;border-bottom:2px solid #1677ff;color:#1677ff;font-weight:600;background:transparent;cursor:pointer;font-family:inherit;font-size:13px;">전체 <span style="font-size:11px;color:rgba(0,0,0,0.35);font-weight:400;margin-left:3px;">2,835</span></button>
+        <button id="btab-catalog"  onclick="switchBoardTab('catalog')"  style="padding:10px 22px;border:none;border-bottom:2px solid transparent;color:rgba(0,0,0,0.55);font-weight:400;background:transparent;cursor:pointer;font-family:inherit;font-size:13px;">카탈로그 <span style="font-size:11px;color:rgba(0,0,0,0.35);font-weight:400;margin-left:3px;">2,430</span></button>
+        <button id="btab-supplier" onclick="switchBoardTab('supplier')" style="padding:10px 22px;border:none;border-bottom:2px solid transparent;color:rgba(0,0,0,0.55);font-weight:400;background:transparent;cursor:pointer;font-family:inherit;font-size:13px;">공급사 <span style="font-size:11px;color:rgba(0,0,0,0.35);font-weight:400;margin-left:3px;">85</span></button>
+        <button id="btab-product"  onclick="switchBoardTab('product')"  style="padding:10px 22px;border:none;border-bottom:2px solid transparent;color:rgba(0,0,0,0.55);font-weight:400;background:transparent;cursor:pointer;font-family:inherit;font-size:13px;">상품단위 <span style="font-size:11px;color:rgba(0,0,0,0.35);font-weight:400;margin-left:3px;">320</span></button>
+      </div>
+
+      <!-- 카탈로그 필터 -->
+      <div id="bfilter-catalog" class="filter-bar" style="display:none;">
         <input class="fi fi-sm" type="text" placeholder="ID">
-        <select class="fi fi-md" id="lf-cat">
+        <select class="fi fi-md">
           <option value="">카테고리</option>
           <option>소개</option><option>핵심포인트</option><option>스페셜 혜택</option>
           <option>포함사항</option><option>불포함사항</option><option>유의사항</option>
@@ -568,14 +576,9 @@ select.fc { height: 36px; padding: 0 32px 0 12px; appearance: none; background-i
         </select>
         <select class="fi fi-md" id="lf-type" onchange="syncListTargetId()">
           <option value="">타겟유형</option>
-          <option>공통</option>
-          <option>항공사</option>
-          <option>공항</option>
-          <option>숙소</option>
-          <option>객실</option>
-          <option>국가</option>
-          <option>여행지</option>
-          <option>스팟/체험</option>
+          <option>공통</option><option>항공사</option><option>공항</option>
+          <option>숙소</option><option>객실</option><option>국가</option>
+          <option>여행지</option><option>스팟/체험</option>
         </select>
         <select class="fi fi-md" id="lf-target"><option value="">타겟ID</option></select>
         <input class="fi fi-lg" type="text" placeholder="관리명 검색">
@@ -584,110 +587,167 @@ select.fc { height: 36px; padding: 0 32px 0 12px; appearance: none; background-i
           <button class="btn btn-default btn-sm">초기화</button>
         </div>
       </div>
+
+      <!-- 공급사 필터 -->
+      <div id="bfilter-supplier" class="filter-bar" style="display:none;">
+        <input class="fi fi-sm" type="text" placeholder="ID">
+        <select class="fi fi-md">
+          <option value="">공급사</option>
+          <option>피크타임</option><option>TMG</option><option>써니투어</option><option>직계약</option>
+        </select>
+        <select class="fi fi-md">
+          <option value="">카테고리</option>
+          <option>소개</option><option>핵심포인트</option><option>스페셜 혜택</option>
+          <option>포함사항</option><option>불포함사항</option><option>유의사항</option>
+          <option>자주 묻는 질문</option><option>취소환불규정</option><option>수하물 규정</option>
+        </select>
+        <select class="fi fi-md">
+          <option value="">적용 범위</option>
+          <option>전체 공통</option><option>항공사별</option><option>숙소별</option>
+          <option>객실별</option><option>스팟/체험별</option><option>여행지별</option>
+        </select>
+        <input class="fi fi-lg" type="text" placeholder="관리명 검색">
+        <div class="filter-actions">
+          <button class="btn btn-primary btn-sm">검색</button>
+          <button class="btn btn-default btn-sm">초기화</button>
+        </div>
+      </div>
+
+      <!-- 상품단위 필터 -->
+      <div id="bfilter-product" class="filter-bar" style="display:none;">
+        <input class="fi fi-sm" type="text" placeholder="ID">
+        <select class="fi fi-md">
+          <option value="">유형</option>
+          <option>항공권</option><option>숙박권</option><option>투어/티켓</option><option>상품</option>
+        </select>
+        <input class="fi fi-sm" type="text" placeholder="상품권 ID">
+        <select class="fi fi-md">
+          <option value="">카테고리</option>
+          <option>소개</option><option>핵심포인트</option><option>스페셜 혜택</option>
+          <option>포함사항</option><option>불포함사항</option><option>유의사항</option>
+          <option>자주 묻는 질문</option><option>취소환불규정</option>
+        </select>
+        <input class="fi fi-lg" type="text" placeholder="관리명 검색">
+        <div class="filter-actions">
+          <button class="btn btn-primary btn-sm">검색</button>
+          <button class="btn btn-default btn-sm">초기화</button>
+        </div>
+      </div>
+
+      <!-- 전체 필터 -->
+      <div id="bfilter-all" class="filter-bar">
+        <input class="fi fi-sm" type="text" placeholder="ID">
+        <select class="fi fi-md">
+          <option value="">게시판</option>
+          <option>카탈로그</option><option>공급사</option><option>상품단위</option>
+        </select>
+        <select class="fi fi-md">
+          <option value="">카테고리</option>
+          <option>소개</option><option>핵심포인트</option><option>스페셜 혜택</option>
+          <option>포함사항</option><option>불포함사항</option><option>유의사항</option>
+          <option>자주 묻는 질문</option><option>취소환불규정</option>
+          <option>안내사항</option><option>출발 전 안내</option><option>수하물 규정</option>
+        </select>
+        <input class="fi fi-lg" type="text" placeholder="관리명 검색">
+        <div class="filter-actions">
+          <button class="btn btn-primary btn-sm">검색</button>
+          <button class="btn btn-default btn-sm">초기화</button>
+        </div>
+      </div>
+
       <div class="table-wrap">
         <table>
           <thead>
             <tr>
               <th class="col-id">ID</th>
+              <th style="width:80px;">게시판</th>
               <th class="col-cat">카테고리</th>
               <th class="col-name">관리명</th>
-              <th class="col-type">타겟유형</th>
-              <th class="col-target">타겟ID</th>
-              <th class="col-stock" title="이 POST를 사용 중인 숙박권/항공권/투어티켓 등의 수">연결 상품권 수</th>
-              <th class="col-date">생성일시 ↓</th>
+              <th class="col-type" id="bth-target-type">타겟유형</th>
+              <th class="col-target" id="bth-target-id">타겟ID</th>
+              <th class="col-stock" title="연결된 상품권 수">연결</th>
+              <th class="col-date">수정일시 ↓</th>
               <th class="col-action">액션</th>
             </tr>
           </thead>
-          <tbody>
+          <tbody id="board-table-body">
+            <tr>
+              <td>2620</td>
+              <td><span class="tag" style="background:#eef2ff;color:#2f54eb;border:1px solid #adc6ff;font-size:11px;">공급사</span></td>
+              <td><span class="tag tag-purple">스페셜 혜택</span></td>
+              <td>피크타임_H45_M2_스페셜혜택</td>
+              <td><span style="font-size:12px;color:rgba(0,0,0,0.45);">피크타임</span></td>
+              <td><span style="font-size:12px;">솔바이멜리아 · <span style="color:#52c41a;">BB</span></span></td>
+              <td style="text-align:center;"><span class="stock-num">4</span></td>
+              <td style="color:rgba(0,0,0,0.4);font-size:12px;">2026-04-01 09:30</td>
+              <td style="text-align:center;"><button class="btn btn-text btn-sm" onclick="showView('create')">수정</button><button class="btn btn-text btn-sm">복제</button></td>
+            </tr>
+            <tr>
+              <td>2617</td>
+              <td><span class="tag" style="background:#fffbe6;color:#d48806;border:1px solid #ffe58f;font-size:11px;">상품단위</span></td>
+              <td><span class="tag tag-purple">포함사항</span></td>
+              <td>숙박권#456_R158_M2_포함사항</td>
+              <td><span style="font-size:12px;color:rgba(0,0,0,0.45);">숙박권 #456</span></td>
+              <td><span style="font-size:12px;">엑스트라 솔 스위트 · <span style="color:#52c41a;">BB</span></span></td>
+              <td style="text-align:center;"><span class="stock-num">1</span></td>
+              <td style="color:rgba(0,0,0,0.4);font-size:12px;">2026-03-31 17:20</td>
+              <td style="text-align:center;"><button class="btn btn-text btn-sm" onclick="showView('create')">수정</button><button class="btn btn-text btn-sm">복제</button></td>
+            </tr>
             <tr>
               <td>2516</td>
+              <td><span class="tag" style="background:#e6f4ff;color:#1677ff;border:1px solid #91caff;font-size:11px;">카탈로그</span></td>
               <td><span class="tag tag-purple">스페셜 혜택</span></td>
               <td>푸꾸옥_숙소_스페셜혜택_씨셀스 푸꾸옥</td>
               <td><span class="tag tag-blue">숙소</span></td>
               <td style="text-align:center;">220</td>
               <td style="text-align:center;"><span class="stock-num">3</span></td>
               <td style="color:rgba(0,0,0,0.4);font-size:12px;">2026-02-13 15:46</td>
-              <td style="text-align:center;">
-                <button class="btn btn-text btn-sm" onclick="showView('create')">수정</button>
-                <button class="btn btn-text btn-sm">복제</button>
-              </td>
+              <td style="text-align:center;"><button class="btn btn-text btn-sm" onclick="showView('create')">수정</button><button class="btn btn-text btn-sm">복제</button></td>
             </tr>
             <tr>
               <td>2515</td>
+              <td><span class="tag" style="background:#e6f4ff;color:#1677ff;border:1px solid #91caff;font-size:11px;">카탈로그</span></td>
               <td><span class="tag tag-gray">유의사항</span></td>
-              <td>객실_유의사항_소나가비치 리조트_3베드룸 비치프론트</td>
+              <td>객실_유의사항_소나가비치 리조트_3베드룸</td>
               <td><span class="tag tag-green">객실</span></td>
               <td style="text-align:center;">871</td>
               <td style="text-align:center;"><span class="stock-num">1</span></td>
               <td style="color:rgba(0,0,0,0.4);font-size:12px;">2026-02-13 13:07</td>
-              <td style="text-align:center;">
-                <button class="btn btn-text btn-sm" onclick="showView('create')">수정</button>
-                <button class="btn btn-text btn-sm">복제</button>
-              </td>
-            </tr>
-            <tr>
-              <td>1877</td>
-              <td><span class="tag tag-purple">스페셜 혜택</span></td>
-              <td>객실_스페셜혜택_솔바이멜리아_빌라 스위트</td>
-              <td><span class="tag tag-green">객실</span></td>
-              <td style="text-align:center;">159</td>
-              <td style="text-align:center;"><span class="stock-num">2</span></td>
-              <td style="color:rgba(0,0,0,0.4);font-size:12px;">2025-06-20 18:31</td>
-              <td style="text-align:center;">
-                <button class="btn btn-text btn-sm" onclick="showView('create')">수정</button>
-                <button class="btn btn-text btn-sm">복제</button>
-              </td>
+              <td style="text-align:center;"><button class="btn btn-text btn-sm" onclick="showView('create')">수정</button><button class="btn btn-text btn-sm">복제</button></td>
             </tr>
             <tr>
               <td>577</td>
+              <td><span class="tag" style="background:#e6f4ff;color:#1677ff;border:1px solid #91caff;font-size:11px;">카탈로그</span></td>
               <td><span class="tag tag-orange">수하물 규정</span></td>
               <td>항공_수하물규정_푸꾸옥_대한항공(KE)_일반석</td>
               <td><span class="tag tag-orange">항공사</span></td>
               <td style="text-align:center;">3</td>
               <td style="text-align:center;"><span class="stock-num">8</span></td>
               <td style="color:rgba(0,0,0,0.4);font-size:12px;">2024-12-12 13:52</td>
-              <td style="text-align:center;">
-                <button class="btn btn-text btn-sm" onclick="showView('create')">수정</button>
-                <button class="btn btn-text btn-sm">복제</button>
-              </td>
-            </tr>
-            <tr>
-              <td>439</td>
-              <td><span class="tag" style="background:#fff7e6;color:#d46b08;">핵심포인트</span></td>
-              <td>푸꾸옥_숙소_핵심포인트_솔바이멜리아 푸꾸옥</td>
-              <td><span class="tag tag-blue">숙소</span></td>
-              <td style="text-align:center;">45</td>
-              <td style="text-align:center;"><span class="stock-num">12</span></td>
-              <td style="color:rgba(0,0,0,0.4);font-size:12px;">2024-12-06 11:24</td>
-              <td style="text-align:center;">
-                <button class="btn btn-text btn-sm" onclick="showView('create')">수정</button>
-                <button class="btn btn-text btn-sm">복제</button>
-              </td>
+              <td style="text-align:center;"><button class="btn btn-text btn-sm" onclick="showView('create')">수정</button><button class="btn btn-text btn-sm">복제</button></td>
             </tr>
           </tbody>
         </table>
       </div>
       <div class="pagination">
-        <span class="pag-total">총 2,430건</span>
+        <span class="pag-total" id="board-pag-total">총 2,835건</span>
         <select class="pag-size"><option>10개</option><option>20개</option><option>50개</option></select>
-        <button class="pag-btn">«</button>
-        <button class="pag-btn">‹</button>
+        <button class="pag-btn">«</button><button class="pag-btn">‹</button>
         <button class="pag-btn active">1</button>
-        <button class="pag-btn">2</button>
-        <button class="pag-btn">3</button>
+        <button class="pag-btn">2</button><button class="pag-btn">3</button>
         <span style="font-size:13px;color:rgba(0,0,0,0.35);">...</span>
-        <button class="pag-btn">243</button>
-        <button class="pag-btn">›</button>
-        <button class="pag-btn">»</button>
+        <button class="pag-btn">284</button>
+        <button class="pag-btn">›</button><button class="pag-btn">»</button>
       </div>
     </div>
   </div>
 </div>
 
 <!-- ============================================================ -->
-<!-- VIEW: 공급사 게시판 관리 -->
+<!-- VIEW: 공급사 게시판 관리 (리다이렉트용 — 실제 컨텐츠는 view-list) -->
 <!-- ============================================================ -->
-<div id="view-board-supplier" class="view">
+<!-- view-board-supplier: 통합 게시판으로 합쳐짐, showView에서 supplier 탭으로 리다이렉트 -->
+<div id="view-board-supplier" class="view" style="display:none;">
   <div class="layout">
     <div class="breadcrumb">
       <span onclick="showView('list')">카탈로그</span><span class="breadcrumb-sep">/</span>
@@ -846,9 +906,9 @@ select.fc { height: 36px; padding: 0 32px 0 12px; appearance: none; background-i
 </div>
 
 <!-- ============================================================ -->
-<!-- VIEW: 상품단위 게시판 관리 -->
+<!-- view-board-product: 통합 게시판으로 합쳐짐 -->
 <!-- ============================================================ -->
-<div id="view-board-product" class="view">
+<div id="view-board-product" class="view" style="display:none;">
   <div class="layout">
     <div class="breadcrumb">
       <span onclick="showView('list')">카탈로그</span><span class="breadcrumb-sep">/</span>
@@ -2017,9 +2077,12 @@ select.fc { height: 36px; padding: 0 32px 0 12px; appearance: none; background-i
       </div>
     </div>
 
-    <div class="form-footer" style="background:#fff;border:none;justify-content:flex-end;padding:0 0 32px;">
-      <button class="btn btn-default" onclick="showView('flight')">등록 취소</button>
-      <button class="btn btn-primary" onclick="alert('항공권이 등록되었습니다.')">등록 완료</button>
+    <div class="form-footer" style="background:#fff;border:none;justify-content:space-between;padding:0 0 32px;">
+      <button class="btn" style="background:#f9f0ff;border-color:#d3adf7;color:#531dab;" onclick="openQuickPostModal('flight')">📝 POST 추가하기</button>
+      <div style="display:flex;gap:8px;">
+        <button class="btn btn-default" onclick="showView('flight')">등록 취소</button>
+        <button class="btn btn-primary" onclick="alert('항공권이 등록되었습니다.')">등록 완료</button>
+      </div>
     </div>
   </div>
 </div>
@@ -2175,9 +2238,12 @@ select.fc { height: 36px; padding: 0 32px 0 12px; appearance: none; background-i
       </div>
     </div>
 
-    <div class="form-footer" style="background:#fff;border:none;justify-content:flex-end;padding:0 0 32px;">
-      <button class="btn btn-default" onclick="showView('hotel-mgmt')">등록 취소</button>
-      <button class="btn btn-primary" onclick="alert('숙박권이 등록되었습니다.')">등록 완료</button>
+    <div class="form-footer" style="background:#fff;border:none;justify-content:space-between;padding:0 0 32px;">
+      <button class="btn" style="background:#f9f0ff;border-color:#d3adf7;color:#531dab;" onclick="openQuickPostModal('hotel')">📝 POST 추가하기</button>
+      <div style="display:flex;gap:8px;">
+        <button class="btn btn-default" onclick="showView('hotel-mgmt')">등록 취소</button>
+        <button class="btn btn-primary" onclick="alert('숙박권이 등록되었습니다.')">등록 완료</button>
+      </div>
     </div>
   </div>
 </div>
@@ -2423,9 +2489,12 @@ select.fc { height: 36px; padding: 0 32px 0 12px; appearance: none; background-i
       </div>
     </div>
 
-    <div class="form-footer" style="background:#fff;border:none;justify-content:flex-end;padding:0 0 32px;">
-      <button class="btn btn-default" onclick="showView('tour')">등록 취소</button>
-      <button class="btn btn-primary" onclick="alert('투어/티켓이 등록되었습니다.')">등록 완료</button>
+    <div class="form-footer" style="background:#fff;border:none;justify-content:space-between;padding:0 0 32px;">
+      <button class="btn" style="background:#f9f0ff;border-color:#d3adf7;color:#531dab;" onclick="openQuickPostModal('tour')">📝 POST 추가하기</button>
+      <div style="display:flex;gap:8px;">
+        <button class="btn btn-default" onclick="showView('tour')">등록 취소</button>
+        <button class="btn btn-primary" onclick="alert('투어/티켓이 등록되었습니다.')">등록 완료</button>
+      </div>
     </div>
   </div>
 </div>
@@ -3995,6 +4064,82 @@ flowchart LR
   </div>
 </div>
 
+<!-- POST 빠른 추가 모달 -->
+<!-- ============================================================ -->
+<div class="modal-overlay hidden" id="quick-post-modal" onclick="if(event.target===this)closeQuickPostModal()">
+  <div style="background:#fff;border-radius:12px;width:680px;max-height:88vh;display:flex;flex-direction:column;box-shadow:0 20px 60px rgba(0,0,0,0.2);" onclick="event.stopPropagation()">
+    <div style="padding:20px 24px 16px;border-bottom:1px solid #f0f0f0;display:flex;align-items:center;justify-content:space-between;">
+      <div>
+        <div style="font-size:16px;font-weight:700;">POST 추가하기</div>
+        <div style="font-size:12px;color:rgba(0,0,0,0.45);margin-top:2px;"><span id="qpm-context-label"></span> 등록과 함께 POST를 바로 작성합니다</div>
+      </div>
+      <button onclick="closeQuickPostModal()" style="background:none;border:none;font-size:18px;cursor:pointer;color:rgba(0,0,0,0.45);">✕</button>
+    </div>
+    <div style="flex:1;overflow-y:auto;padding:20px 24px;display:flex;flex-direction:column;gap:16px;">
+      <!-- 게시판 선택 -->
+      <div>
+        <label class="form-label">게시판 <span class="req">*</span></label>
+        <div style="display:flex;gap:8px;">
+          <button class="type-chip" id="qpm-board-catalog"  onclick="qpmSelectBoard('catalog')" >카탈로그</button>
+          <button class="type-chip" id="qpm-board-supplier" onclick="qpmSelectBoard('supplier')">공급사</button>
+          <button class="type-chip selected" id="qpm-board-product"  onclick="qpmSelectBoard('product')" >상품단위</button>
+        </div>
+      </div>
+      <!-- 카탈로그 선택 시 타겟 -->
+      <div id="qpm-catalog-wrap" style="display:none;padding:12px 14px;background:#f0f7ff;border:1px solid #91caff;border-radius:8px;">
+        <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:center;">
+          <select class="fc" style="width:160px;height:32px;padding:0 8px;">
+            <option value="">타겟 유형</option>
+            <option>공통</option><option>항공사</option><option>공항</option>
+            <option>숙소</option><option>객실</option><option>여행지</option><option>국가</option><option>스팟/체험</option>
+          </select>
+          <input class="fc" type="text" placeholder="이름으로 검색" style="width:200px;height:32px;padding:0 8px;">
+        </div>
+      </div>
+      <!-- 공급사 선택 시 -->
+      <div id="qpm-supplier-wrap" style="display:none;padding:12px 14px;background:#eef0ff;border:1px solid #adc6ff;border-radius:8px;">
+        <select class="fc" style="width:180px;height:32px;padding:0 8px;">
+          <option value="">공급사 선택</option>
+          <option>피크타임</option><option>TMG</option><option>써니투어</option><option>직계약</option>
+        </select>
+      </div>
+      <!-- 카테고리 -->
+      <div>
+        <label class="form-label">카테고리 <span class="req">*</span></label>
+        <select class="fc" id="qpm-cat" style="max-width:280px;">
+          <option value="">카테고리 선택</option>
+          <option>소개</option><option>핵심포인트</option><option>스페셜 혜택</option>
+          <option>포함사항</option><option>불포함사항</option><option>유의사항</option>
+          <option>자주 묻는 질문</option><option>취소환불규정</option>
+          <option>안내사항</option><option>출발 전 안내</option><option>수하물 규정</option>
+        </select>
+      </div>
+      <!-- 제목 -->
+      <div>
+        <label class="form-label">제목 <span class="req">*</span></label>
+        <input class="fc" type="text" id="qpm-title" placeholder="POST 제목을 입력하세요">
+      </div>
+      <!-- 내용 -->
+      <div>
+        <label class="form-label">내용</label>
+        <textarea class="fc" id="qpm-content" rows="6" placeholder="POST 내용을 입력하세요" style="padding:10px;font-family:inherit;resize:vertical;"></textarea>
+      </div>
+      <!-- AI 생성 버튼 -->
+      <div>
+        <button class="btn" style="background:#f9f0ff;border-color:#d3adf7;color:#531dab;" onclick="alert('AI 초안 생성 기능은 준비 중입니다.')">✨ AI 초안 생성</button>
+        <span style="font-size:12px;color:rgba(0,0,0,0.35);margin-left:8px;">등록 정보를 기반으로 초안을 자동 작성합니다</span>
+      </div>
+    </div>
+    <div style="padding:14px 24px;border-top:1px solid #f0f0f0;display:flex;justify-content:space-between;align-items:center;">
+      <button class="btn btn-default btn-sm" onclick="alert('POST를 하나 더 추가합니다.')">+ 항목 추가</button>
+      <div style="display:flex;gap:8px;">
+        <button class="btn btn-default" onclick="closeQuickPostModal()">취소</button>
+        <button class="btn btn-primary" onclick="alert('POST가 저장되었습니다.');closeQuickPostModal()">저장</button>
+      </div>
+    </div>
+  </div>
+</div>
+
 <!-- AI 자동생성 모달 -->
 <!-- ============================================================ -->
 <div class="modal-overlay hidden" id="ai-modal" onclick="handleOverlayClick(event)">
@@ -4660,11 +4805,14 @@ function handlePSOverlayClick(e) {
 }
 
 function showView(name) {
+  // board-supplier/board-product → 통합 게시판 탭으로 리다이렉트
+  if (name === 'board-supplier') { showView('list'); switchBoardTab('supplier'); return; }
+  if (name === 'board-product')  { showView('list'); switchBoardTab('product');  return; }
+
   document.querySelectorAll('.view').forEach(v => v.classList.remove('on'));
   document.getElementById('view-' + name).classList.add('on');
   document.querySelectorAll('.gnb-item.open').forEach(g => g.classList.remove('open'));
   window.scrollTo(0, 0);
-  // POST 슬롯 초기화 (등록 뷰 진입 시)
   if (name === 'flight-create' || name === 'hotel-create' || name === 'tour-create') initPostSlots();
   if (name === 'partner-product') { renderPartnerPosts(); }
   if (name === 'partner-flow' && !mermaidRendered) {
@@ -4674,7 +4822,6 @@ function showView(name) {
   // GNB 활성 상태
   document.querySelectorAll('.gnb-item').forEach(el => el.classList.remove('active'));
   const pbViews = ['flight','hotel-mgmt','tour','flight-create','hotel-create','tour-create'];
-  const catViews = ['list','create','board-supplier','board-product'];
   const partnerViews = ['partner-product', 'partner-flow'];
   const wizardViews = ['product-wizard'];
   if (pbViews.includes(name)) {
@@ -4688,7 +4835,35 @@ function showView(name) {
   }
 }
 
-// ===== 상품단위 게시판 탭 전환 =====
+// ===== 통합 게시판 탭 전환 =====
+function switchBoardTab(tab) {
+  const tabIds = ['all','catalog','supplier','product'];
+  const colors = { all:'#1677ff', catalog:'#1677ff', supplier:'#2f54eb', product:'#d48806' };
+  const totals = { all:'총 2,835건', catalog:'총 2,430건', supplier:'총 85건', product:'총 320건' };
+  tabIds.forEach(t => {
+    const btn = document.getElementById('btab-' + t);
+    if (!btn) return;
+    if (t === tab) {
+      btn.style.borderBottomColor = colors[tab];
+      btn.style.color = colors[tab];
+      btn.style.fontWeight = '600';
+    } else {
+      btn.style.borderBottomColor = 'transparent';
+      btn.style.color = 'rgba(0,0,0,0.55)';
+      btn.style.fontWeight = '400';
+    }
+  });
+  // 필터 표시
+  ['all','catalog','supplier','product'].forEach(t => {
+    const f = document.getElementById('bfilter-' + t);
+    if (f) f.style.display = (t === tab) ? 'flex' : 'none';
+  });
+  // 페이지네이션 건수
+  const totEl = document.getElementById('board-pag-total');
+  if (totEl) totEl.textContent = totals[tab] || '';
+}
+
+// ===== 상품단위 게시판 탭 전환 (레거시 — view-board-product 내부용) =====
 function switchBoardProductTab(btn, tab) {
   btn.parentElement.querySelectorAll('button').forEach(b => {
     b.style.borderBottomColor = 'transparent';
@@ -4698,6 +4873,33 @@ function switchBoardProductTab(btn, tab) {
   btn.style.borderBottomColor = '#d48806';
   btn.style.color = '#d48806';
   btn.style.fontWeight = '600';
+}
+
+// ===== 게시판 탭 기본값 초기화 =====
+document.addEventListener('DOMContentLoaded', () => switchBoardTab('all'));
+
+// ===== POST 빠른 추가 모달 =====
+function qpmSelectBoard(board) {
+  ['catalog','supplier','product'].forEach(b => {
+    document.getElementById('qpm-board-' + b)?.classList.remove('selected');
+  });
+  document.getElementById('qpm-board-' + board)?.classList.add('selected');
+  document.getElementById('qpm-catalog-wrap').style.display  = board === 'catalog'  ? 'block' : 'none';
+  document.getElementById('qpm-supplier-wrap').style.display = board === 'supplier' ? 'block' : 'none';
+}
+
+function openQuickPostModal(context) {
+  // context: 'flight' | 'hotel' | 'tour'
+  const labels = { flight:'항공권', hotel:'숙박권', tour:'투어/티켓' };
+  const modal = document.getElementById('quick-post-modal');
+  document.getElementById('qpm-context-label').textContent = labels[context] || '';
+  // 게시판 기본 선택: 상품단위
+  const sel = document.getElementById('qpm-board');
+  if (sel) sel.value = 'product';
+  modal.classList.remove('hidden');
+}
+function closeQuickPostModal() {
+  document.getElementById('quick-post-modal').classList.add('hidden');
 }
 
 // ===== 호텔 객실 데이터 =====
