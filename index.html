@@ -1872,7 +1872,7 @@ function v2ConfirmStep2() {
           <button class="type-chip" onclick="v3SelectType(this,'공항')">🛫 공항</button>
           <button class="type-chip" onclick="v3SelectType(this,'숙소')">🏨 숙소</button>
           <button class="type-chip" onclick="v3SelectType(this,'객실')">🛏 객실</button>
-          <button class="type-chip" onclick="v3SelectType(this,'식사')">🍽 식사</button>
+          <button class="type-chip" onclick="v3SelectType(this,'객실요금유형')">🍽 객실 요금유형</button>
           <button class="type-chip" onclick="v3SelectType(this,'여행지')">📍 여행지</button>
           <button class="type-chip" onclick="v3SelectType(this,'국가')">🌏 국가</button>
           <button class="type-chip" onclick="v3SelectType(this,'스팟/체험')">🎡 스팟/체험</button>
@@ -1898,6 +1898,54 @@ function v2ConfirmStep2() {
             <button class="type-chip" onclick="v3SetSeat(this,'Z3')">💼 비즈니스</button>
             <button class="type-chip" onclick="v3SetSeat(this,'Z4')">👑 퍼스트</button>
           </div>
+        </div>
+      </div>
+
+      <!-- 캐스케이딩 선택 (객실 / 객실 요금유형) -->
+      <div id="v3-cascade-wrap" style="display:none;margin-bottom:20px;">
+        <!-- 숙소 선택 -->
+        <div style="font-size:12px;font-weight:600;color:rgba(0,0,0,0.45);margin-bottom:8px;">
+          <span id="v3-cascade-title">타겟 선택</span>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:10px;max-width:440px;">
+          <!-- Step A: 숙소 -->
+          <div>
+            <div style="font-size:12px;color:rgba(0,0,0,0.55);margin-bottom:4px;">① 숙소 선택</div>
+            <select class="fc" id="v3-cas-accom" onchange="v3CasAccomChange(this.value)">
+              <option value="">숙소를 선택해주세요</option>
+              <option value="H45">솔바이멜리아 푸꾸옥</option>
+              <option value="H220">씨셀스 푸꾸옥</option>
+              <option value="H300">멜리아빈펄</option>
+              <option value="H180">소나가비치 리조트</option>
+            </select>
+          </div>
+          <!-- Step B: 객실 (숙소 선택 후 등장) -->
+          <div id="v3-cas-room-wrap" style="display:none;">
+            <div style="font-size:12px;color:rgba(0,0,0,0.55);margin-bottom:4px;">② 객실 선택</div>
+            <select class="fc" id="v3-cas-room" onchange="v3CasRoomChange(this.value)">
+              <option value="">객실을 선택해주세요</option>
+              <option value="R158">엑스트라 솔 스위트</option>
+              <option value="R160">더 레벨 스위트</option>
+              <option value="R220">디럭스 씨뷰</option>
+              <option value="R221">프리미어 풀빌라</option>
+            </select>
+          </div>
+          <!-- Step C: 요금유형 (객실 요금유형 타입 + 객실 선택 후 등장) -->
+          <div id="v3-cas-meal-wrap" style="display:none;">
+            <div style="font-size:12px;color:rgba(0,0,0,0.55);margin-bottom:6px;">③ 객실 요금유형 선택</div>
+            <div style="display:flex;gap:8px;flex-wrap:wrap;" id="v3-cas-meal-chips">
+              <button class="type-chip" onclick="v3CasMealSelect(this,'','전체 공통')">전체 공통</button>
+              <button class="type-chip" onclick="v3CasMealSelect(this,'M1','RO')">RO</button>
+              <button class="type-chip" onclick="v3CasMealSelect(this,'M2','BB')">BB (조식)</button>
+              <button class="type-chip" onclick="v3CasMealSelect(this,'M3','HB')">HB (2끼)</button>
+              <button class="type-chip" onclick="v3CasMealSelect(this,'M4','FB')">FB (전식)</button>
+              <button class="type-chip" onclick="v3CasMealSelect(this,'M5','AI')">AI (올인클루시브)</button>
+            </div>
+          </div>
+        </div>
+        <!-- 선택 결과 요약 -->
+        <div id="v3-cas-summary" style="display:none;margin-top:10px;font-size:13px;color:rgba(0,0,0,0.45);">
+          선택됨: <strong id="v3-cas-result" style="color:#1677ff;"></strong>
         </div>
       </div>
 
@@ -2013,7 +2061,7 @@ var V3_CATALOG_DATA = {
   '공항':   [['AP1','인천국제공항(ICN)'],['AP2','푸꾸옥국제공항(PQC)'],['AP3','나트랑캄란공항(CXR)'],['AP4','다낭국제공항(DAD)']],
   '숙소':   [['H45','솔바이멜리아 푸꾸옥'],['H220','씨셀스 푸꾸옥'],['H300','멜리아빈펄'],['H180','소나가비치 리조트']],
   '객실':   [['R158','엑스트라 솔 스위트'],['R160','더 레벨 스위트'],['R220','디럭스 씨뷰'],['R221','프리미어 풀빌라']],
-  '식사':   [['M1','RO'],['M2','BB (조식)'],['M3','HB (2끼)'],['M4','FB (전식)'],['M5','AI (올인클루시브)']],
+  '객실요금유형': [['M1','RO'],['M2','BB (조식)'],['M3','HB (2끼)'],['M4','FB (전식)'],['M5','AI (올인클루시브)']],
   '여행지': [['L23','푸꾸옥'],['L31','나트랑'],['L42','호치민'],['L55','다낭']],
   '국가':   [['C1','베트남'],['C2','태국'],['C3','필리핀'],['C4','일본']],
   '스팟/체험': [['S12','빈펄사파리'],['S15','빈원더스'],['S23','호핑투어'],['S30','코코넛 프리즌']]
@@ -2024,16 +2072,20 @@ var V3_PRODUCTS = [
   ['202','상품 #202 · 다낭 2박4일 (OZ + 소나가비치 HB)']
 ];
 
+var V3_CASCADE_TYPES = ['객실', '객실요금유형'];
+
 function v3SelectType(el, type) {
   document.querySelectorAll('#v3-type-chips .type-chip').forEach(c => c.classList.remove('selected'));
   el.classList.add('selected');
   v3.type = type; v3.targetId = null; v3.targetName = null; v3.scope = null;
   v3.seatClass = ''; v3.supplierName = null; v3.subKey = '';
 
-  var isProduct = type === '상품';
-  var isCommon  = type === '공통';
+  var isProduct  = type === '상품';
+  var isCommon   = type === '공통';
+  var isCascade  = V3_CASCADE_TYPES.includes(type);
 
-  el3('v3-search-wrap').style.display  = (!isProduct && !isCommon) ? 'block' : 'none';
+  el3('v3-search-wrap').style.display    = (!isProduct && !isCommon && !isCascade) ? 'block' : 'none';
+  el3('v3-cascade-wrap').style.display   = isCascade ? 'block' : 'none';
   el3('v3-product-section').style.display = isProduct ? 'block' : 'none';
   el3('v3-scope-section').style.display   = (!isProduct) ? 'block' : 'none';
   el3('v3-seatclass-wrap').style.display  = (type === '항공사') ? 'block' : 'none';
@@ -2046,6 +2098,16 @@ function v3SelectType(el, type) {
   el3('v3-subkey-wrap').style.display = 'none';
   ['v3-scope-common-lbl','v3-scope-supplier-lbl'].forEach(id => el3(id).style.borderColor = '#d9d9d9');
 
+  // 캐스케이딩 초기화
+  if (isCascade) {
+    el3('v3-cascade-title').textContent = type === '객실' ? '객실 선택 (숙소 → 객실)' : '객실 요금유형 선택 (숙소 → 객실 → 요금유형)';
+    el3('v3-cas-accom').value = '';
+    el3('v3-cas-room-wrap').style.display = 'none';
+    el3('v3-cas-meal-wrap').style.display = 'none';
+    el3('v3-cas-summary').style.display = 'none';
+    document.querySelectorAll('#v3-cas-meal-chips .type-chip').forEach(c => c.classList.remove('selected'));
+  }
+
   if (isCommon) {
     v3.scope = 'common'; v3.targetName = '공통';
     document.querySelector('input[name="v3-scope"][value="common"]').checked = true;
@@ -2056,6 +2118,63 @@ function v3SelectType(el, type) {
   } else {
     el3('v3-board-preview').style.display = 'none';
   }
+}
+
+// ── 캐스케이딩 함수 ──────────────────────────────
+function v3CasAccomChange(val) {
+  v3.targetId = null; v3.targetName = null;
+  el3('v3-cas-room-wrap').style.display = val ? 'block' : 'none';
+  el3('v3-cas-meal-wrap').style.display = 'none';
+  el3('v3-cas-room').value = '';
+  el3('v3-cas-summary').style.display = 'none';
+  document.querySelectorAll('#v3-cas-meal-chips .type-chip').forEach(c => c.classList.remove('selected'));
+  if (!val) { el3('v3-board-preview').style.display = 'none'; return; }
+  // 객실 타입이면 숙소 선택만으로 이미 유효 targetName 세팅 가능
+  var accomName = el3('v3-cas-accom').options[el3('v3-cas-accom').selectedIndex].text;
+  if (v3.type === '객실') {
+    v3.targetName = accomName + ' > (객실 선택 필요)';
+    v3UpdateCasSummary();
+  }
+}
+
+function v3CasRoomChange(val) {
+  var accomSel = el3('v3-cas-accom');
+  var roomSel  = el3('v3-cas-room');
+  var accomName = accomSel.options[accomSel.selectedIndex].text;
+  var roomName  = val ? roomSel.options[roomSel.selectedIndex].text : '';
+
+  if (v3.type === '객실') {
+    v3.targetId   = val;
+    v3.targetName = val ? accomName + ' · ' + roomName : accomName + ' > (객실 선택 필요)';
+    v3UpdateCasSummary();
+    v3UpdatePreview();
+  } else if (v3.type === '객실요금유형') {
+    // 객실 선택 후 요금유형 칩 표시
+    el3('v3-cas-meal-wrap').style.display = val ? 'block' : 'none';
+    document.querySelectorAll('#v3-cas-meal-chips .type-chip').forEach(c => c.classList.remove('selected'));
+    if (val) {
+      v3.targetName = accomName + ' · ' + roomName + ' > (요금유형 선택 필요)';
+      v3UpdateCasSummary();
+    }
+  }
+}
+
+function v3CasMealSelect(el, mealCode, mealName) {
+  document.querySelectorAll('#v3-cas-meal-chips .type-chip').forEach(c => c.classList.remove('selected'));
+  el.classList.add('selected');
+  var accomSel = el3('v3-cas-accom');
+  var roomSel  = el3('v3-cas-room');
+  var accomName = accomSel.options[accomSel.selectedIndex].text;
+  var roomName  = roomSel.value ? roomSel.options[roomSel.selectedIndex].text : '';
+  v3.targetId   = mealCode || 'default';
+  v3.targetName = accomName + (roomName ? ' · ' + roomName : '') + (mealName !== '전체 공통' ? ' · ' + mealName : '');
+  v3UpdateCasSummary();
+  v3UpdatePreview();
+}
+
+function v3UpdateCasSummary() {
+  el3('v3-cas-summary').style.display = 'block';
+  el3('v3-cas-result').textContent = v3.targetName || '';
 }
 
 function el3(id) { return document.getElementById(id); }
