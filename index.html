@@ -485,7 +485,8 @@ select.fc { height: 36px; padding: 0 32px 0 12px; appearance: none; background-i
             <div class="mega-col-title" style="display:flex;align-items:center;gap:6px;">게시판 <span class="new-badge">NEW</span></div>
             <span class="mega-col-item active" onclick="event.stopPropagation();showView('list')">게시판 관리</span>
             <span class="mega-col-item" onclick="event.stopPropagation();showView('create')" style="color:rgba(0,0,0,0.55);">POST 등록 (현행)</span>
-            <span class="mega-col-item" onclick="event.stopPropagation();showView('create-v2')" style="color:#722ed1;font-weight:500;">POST 등록 v2 ✦ 카테고리 중심</span>
+            <span class="mega-col-item" onclick="event.stopPropagation();showView('create-v2')" style="color:#722ed1;">POST 등록 v2 — 카테고리 중심</span>
+            <span class="mega-col-item" onclick="event.stopPropagation();showView('create-v3')" style="color:#389e0d;font-weight:600;">POST 등록 v3 ✦ 개선안</span>
           </div>
         </div>
         <!-- 하단 이미지/파일 -->
@@ -1823,6 +1824,497 @@ function v2ConfirmStep2() {
   var s3 = document.getElementById('v2-s3-wrap');
   s3.classList.add('shown');
   setTimeout(function(){ s3.scrollIntoView({ behavior: 'smooth', block: 'nearest' }); }, 100);
+}
+</script>
+
+<!-- ============================================================ -->
+<!-- VIEW: POST 등록 v3 — 타겟 중심 2단계 위자드 (개선안)           -->
+<!-- ============================================================ -->
+<div id="view-create-v3" class="view">
+  <div class="layout">
+    <div class="breadcrumb">
+      <span onclick="showView('list')">카탈로그</span><span class="breadcrumb-sep">/</span>
+      <span onclick="showView('list')">게시판</span><span class="breadcrumb-sep">/</span>
+      <span style="color:rgba(0,0,0,0.88);font-weight:500;">POST 등록 <span style="background:#f6ffed;border:1px solid #b7eb8f;color:#389e0d;font-size:11px;font-weight:600;border-radius:4px;padding:1px 7px;margin-left:4px;">v3 개선안</span></span>
+    </div>
+    <div class="page-header">
+      <div style="display:flex;align-items:center;gap:14px;">
+        <button class="btn-back" onclick="showView('list')">← 목록으로</button>
+        <div class="page-title">POST 등록하기</div>
+      </div>
+      <div style="display:flex;align-items:center;gap:8px;font-size:12px;color:rgba(0,0,0,0.45);">
+        <span>현행:</span><button class="btn btn-text btn-sm" onclick="showView('create')" style="color:rgba(0,0,0,0.4);">v1 (게시판 먼저)</button>
+        <span>|</span><button class="btn btn-text btn-sm" onclick="showView('create-v2')" style="color:#722ed1;">v2 (카테고리 먼저)</button>
+      </div>
+    </div>
+
+    <!-- AI 배너 -->
+    <div class="ai-banner">
+      <div class="ai-banner-info">
+        <h3>✨ AI로 POST 초안 자동 생성</h3>
+        <p>계약서 PDF 또는 요금표(Excel)를 업로드하면 AI가 카테고리별 POST 초안을 자동으로 만들어드립니다.</p>
+      </div>
+      <button class="btn btn-ai" onclick="openAiModal()">AI 자동 생성 →</button>
+    </div>
+
+    <!-- ① STEP 1: 타겟 + 범위 (통합) -->
+    <div id="v3-s1" class="card" style="padding:28px;">
+      <div class="wiz-section-tag" style="color:#389e0d;"><div class="wst-num" style="background:#52c41a;color:#fff;">1</div> 등록 위치 설정</div>
+      <div class="wiz-step-title">어디에 POST를 등록할까요?</div>
+      <div class="wiz-step-sub" style="margin-bottom:20px;">타겟 유형을 선택하면 범위에 따라 <strong>게시판이 자동으로 결정</strong>됩니다.</div>
+
+      <!-- 타겟 유형 칩 -->
+      <div style="margin-bottom:20px;">
+        <div style="font-size:12px;font-weight:600;color:rgba(0,0,0,0.45);margin-bottom:8px;">타겟 유형</div>
+        <div class="type-chips" id="v3-type-chips" style="flex-wrap:wrap;gap:8px;">
+          <button class="type-chip" onclick="v3SelectType(this,'공통')">🌐 공통</button>
+          <button class="type-chip" onclick="v3SelectType(this,'항공사')">✈️ 항공사</button>
+          <button class="type-chip" onclick="v3SelectType(this,'공항')">🛫 공항</button>
+          <button class="type-chip" onclick="v3SelectType(this,'숙소')">🏨 숙소</button>
+          <button class="type-chip" onclick="v3SelectType(this,'객실')">🛏 객실</button>
+          <button class="type-chip" onclick="v3SelectType(this,'식사')">🍽 식사</button>
+          <button class="type-chip" onclick="v3SelectType(this,'여행지')">📍 여행지</button>
+          <button class="type-chip" onclick="v3SelectType(this,'국가')">🌏 국가</button>
+          <button class="type-chip" onclick="v3SelectType(this,'스팟/체험')">🎡 스팟/체험</button>
+          <button class="type-chip" onclick="v3SelectType(this,'상품')" style="border-color:#ffd591;color:#d46b08;">📦 상품 (PB)</button>
+        </div>
+      </div>
+
+      <!-- 타겟 검색 (공통/상품 제외) -->
+      <div id="v3-search-wrap" style="display:none;margin-bottom:20px;">
+        <div style="font-size:12px;font-weight:600;color:rgba(0,0,0,0.45);margin-bottom:8px;">타겟 선택 <span id="v3-type-lbl" style="color:#1677ff;font-size:12px;"></span></div>
+        <div style="position:relative;max-width:400px;">
+          <input class="fc" type="text" id="v3-target-input" placeholder="이름으로 검색..." oninput="v3TargetSearch(this.value)" autocomplete="off">
+          <div id="v3-target-dd" style="display:none;position:absolute;top:calc(100%+3px);left:0;right:0;background:#fff;border:1px solid #d9d9d9;border-radius:6px;box-shadow:0 4px 12px rgba(0,0,0,.1);z-index:50;max-height:200px;overflow-y:auto;"></div>
+        </div>
+        <div style="margin-top:6px;font-size:13px;color:rgba(0,0,0,0.45);">선택됨: <strong id="v3-target-sel" style="color:#1677ff;">없음</strong></div>
+        <!-- 항공사 선택 시 좌석등급 -->
+        <div id="v3-seatclass-wrap" style="display:none;margin-top:14px;padding:14px 16px;background:#f0f7ff;border:1px solid #91caff;border-radius:8px;">
+          <div style="font-size:13px;font-weight:600;color:rgba(0,0,0,0.75);margin-bottom:10px;">좌석등급 <span style="font-size:11px;font-weight:400;color:rgba(0,0,0,0.4);">선택 안 하면 전 좌석 공통</span></div>
+          <div style="display:flex;gap:8px;flex-wrap:wrap;" id="v3-seat-chips">
+            <button class="type-chip selected" onclick="v3SetSeat(this,'')">전체 공통</button>
+            <button class="type-chip" onclick="v3SetSeat(this,'Z1')">🪑 이코노미</button>
+            <button class="type-chip" onclick="v3SetSeat(this,'Z2')">✨ 프레스티지</button>
+            <button class="type-chip" onclick="v3SetSeat(this,'Z3')">💼 비즈니스</button>
+            <button class="type-chip" onclick="v3SetSeat(this,'Z4')">👑 퍼스트</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- 범위 선택 (카탈로그 타겟용) -->
+      <div id="v3-scope-section" style="display:none;margin-bottom:20px;">
+        <div style="font-size:12px;font-weight:600;color:rgba(0,0,0,0.45);margin-bottom:8px;">적용 범위 <span style="font-weight:400;color:rgba(0,0,0,0.35);">→ 게시판이 자동 결정됩니다</span></div>
+        <div style="display:flex;flex-direction:column;gap:8px;">
+          <label id="v3-scope-common-lbl" style="display:flex;align-items:flex-start;gap:10px;padding:12px 14px;border:1.5px solid #d9d9d9;border-radius:8px;cursor:pointer;">
+            <input type="radio" name="v3-scope" value="common" onchange="v3ScopeChange('common')" style="margin-top:2px;">
+            <div>
+              <strong style="font-size:13px;">공통 <span style="font-size:11px;font-weight:400;">(공급사 무관)</span></strong>
+              <div style="font-size:12px;color:rgba(0,0,0,0.45);margin-top:1px;">모든 공급사에 동일 적용 → <span style="color:#1677ff;font-weight:600;">📚 카탈로그 게시판</span></div>
+            </div>
+          </label>
+          <label id="v3-scope-supplier-lbl" style="display:flex;align-items:flex-start;gap:10px;padding:12px 14px;border:1.5px solid #d9d9d9;border-radius:8px;cursor:pointer;">
+            <input type="radio" name="v3-scope" value="supplier" onchange="v3ScopeChange('supplier')" style="margin-top:2px;">
+            <div style="flex:1;">
+              <strong style="font-size:13px;">특정 공급사</strong>
+              <div style="font-size:12px;color:rgba(0,0,0,0.45);margin-top:1px;">공급사별 다른 조건 → <span style="color:#2f54eb;font-weight:600;">🏢 공급사 게시판</span></div>
+              <div id="v3-supplier-detail" style="display:none;margin-top:10px;display:none;flex-direction:column;gap:8px;">
+                <select class="fc" id="v3-supplier-sel" style="max-width:240px;" onchange="v3SupplierChange(this)">
+                  <option value="">공급사 선택</option>
+                  <option>피크타임</option><option>TMG</option><option>써니투어</option><option>직계약</option>
+                </select>
+                <!-- 공급사 sub_key 범위 -->
+                <div id="v3-subkey-wrap" style="display:none;padding:12px 14px;background:#f0f5ff;border:1px solid #adc6ff;border-radius:8px;">
+                  <div style="font-size:12px;font-weight:600;color:#1d39c4;margin-bottom:8px;">세부 적용 범위 <span style="font-weight:400;color:rgba(0,0,0,0.4);">(선택 안 하면 전체 공통)</span></div>
+                  <div id="v3-subkey-section">
+                    <!-- 항공사/숙소/스팟 선택에 따라 동적 표시 -->
+                  </div>
+                </div>
+              </div>
+            </div>
+          </label>
+        </div>
+      </div>
+
+      <!-- 상품 타겟용: 상품 검색 -->
+      <div id="v3-product-section" style="display:none;margin-bottom:20px;">
+        <div style="font-size:12px;font-weight:600;color:rgba(0,0,0,0.45);margin-bottom:8px;">상품 선택 → <span style="color:#d46b08;font-weight:600;">📦 상품단위 게시판</span></div>
+        <div style="position:relative;max-width:480px;">
+          <input class="fc" type="text" id="v3-product-input" placeholder="상품 ID 또는 이름 검색" oninput="v3ProductSearch(this.value)" autocomplete="off">
+          <div id="v3-product-dd" style="display:none;position:absolute;top:calc(100%+3px);left:0;right:0;background:#fff;border:1px solid #d9d9d9;border-radius:6px;box-shadow:0 4px 12px rgba(0,0,0,.1);z-index:50;max-height:200px;overflow-y:auto;"></div>
+        </div>
+        <div style="margin-top:6px;font-size:13px;color:rgba(0,0,0,0.45);">선택됨: <strong id="v3-product-sel" style="color:#d46b08;">없음</strong></div>
+      </div>
+
+      <!-- 자동 결정된 게시판 미리보기 -->
+      <div id="v3-board-preview" style="display:none;padding:12px 16px;background:#f6ffed;border:1px solid #b7eb8f;border-radius:8px;font-size:13px;display:none;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:20px;">
+        <span>✅ 자동 결정:</span>
+        <strong id="v3-board-lbl" style="color:#389e0d;"></strong>
+        <span style="color:rgba(0,0,0,0.3);">|</span>
+        <span id="v3-target-preview" style="color:rgba(0,0,0,0.65);"></span>
+        <span id="v3-scope-preview" style="color:rgba(0,0,0,0.4);font-size:12px;"></span>
+      </div>
+
+      <button class="btn btn-primary" onclick="v3ConfirmStep1()" style="height:38px;padding:0 28px;font-size:14px;font-weight:600;">POST 작성으로 →</button>
+    </div>
+
+    <!-- ② STEP 2: 일괄 POST 작성 -->
+    <div class="wiz-reveal-wrap" id="v3-s2-wrap">
+      <div class="wiz-connector">↓</div>
+      <div class="card">
+
+        <!-- 등록 위치 요약 배지 -->
+        <div style="padding:20px 28px 0;">
+          <div class="wiz-section-tag" style="color:#389e0d;margin-bottom:10px;"><div class="wst-num" style="background:#52c41a;color:#fff;">2</div> POST 내용 작성</div>
+          <div id="v3-s2-summary" style="background:#f6ffed;border:1px solid #b7eb8f;border-radius:8px;padding:12px 16px;font-size:13px;display:flex;align-items:center;gap:10px;flex-wrap:wrap;">
+            <span>📌 등록 위치:</span>
+            <strong id="v3-sum-board" style="color:#389e0d;"></strong>
+            <span style="color:rgba(0,0,0,0.3);">|</span>
+            <span id="v3-sum-target"></span>
+            <span id="v3-sum-scope" style="color:rgba(0,0,0,0.45);"></span>
+          </div>
+        </div>
+
+        <!-- 일괄 POST 항목 -->
+        <div class="bulk-section-header" style="margin-top:18px;">
+          <div style="display:flex;align-items:center;">
+            <span style="font-size:15px;font-weight:700;color:rgba(0,0,0,0.88);">POST 항목</span>
+            <span class="bulk-count-badge" id="v3-bulk-count">1</span>
+            <span style="font-size:12px;color:rgba(0,0,0,0.35);margin-left:8px;">카테고리별로 각각 작성 · 한 번에 일괄 등록</span>
+          </div>
+          <div style="display:flex;gap:8px;">
+            <button class="btn" style="background:#f9f0ff;border-color:#d3adf7;color:#531dab;font-size:12px;height:30px;" onclick="openAiModal()">✨ AI 초안 일괄 생성</button>
+            <button class="btn btn-primary" style="height:30px;font-size:12px;" onclick="v3AddPost()">+ 카테고리 추가</button>
+          </div>
+        </div>
+        <div class="bulk-body-wrap">
+          <div class="bulk-post-list" id="v3-post-list"></div>
+          <div class="bulk-add-btn" onclick="v3AddPost()">＋ POST 항목 추가하기 (카테고리 단위)</div>
+        </div>
+
+        <!-- 등록 버튼 -->
+        <div style="padding:16px 28px 24px;display:flex;justify-content:space-between;align-items:center;border-top:1px solid #f0f0f0;margin-top:4px;">
+          <button class="btn btn-default" onclick="showView('list')">취소</button>
+          <button class="btn btn-primary" onclick="alert('POST가 등록되었습니다.')" style="padding:0 28px;font-size:14px;height:38px;font-weight:600;">POST 등록</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+// ============================================================
+// POST 등록 v3 — 타겟 중심 2단계 위자드
+// ============================================================
+var v3 = { type: null, targetId: null, targetName: null, seatClass: '', scope: null, supplierName: null, subKey: '', productId: null, productName: null };
+var v3Posts = [], v3PostSeq = 1;
+
+var V3_CATALOG_DATA = {
+  '항공사': [['A3','대한항공(KE)'],['A5','비엣젯(VJ)'],['A7','아시아나(OZ)'],['A9','에어아시아(AK)']],
+  '공항':   [['AP1','인천국제공항(ICN)'],['AP2','푸꾸옥국제공항(PQC)'],['AP3','나트랑캄란공항(CXR)'],['AP4','다낭국제공항(DAD)']],
+  '숙소':   [['H45','솔바이멜리아 푸꾸옥'],['H220','씨셀스 푸꾸옥'],['H300','멜리아빈펄'],['H180','소나가비치 리조트']],
+  '객실':   [['R158','엑스트라 솔 스위트'],['R160','더 레벨 스위트'],['R220','디럭스 씨뷰'],['R221','프리미어 풀빌라']],
+  '식사':   [['M1','RO'],['M2','BB (조식)'],['M3','HB (2끼)'],['M4','FB (전식)'],['M5','AI (올인클루시브)']],
+  '여행지': [['L23','푸꾸옥'],['L31','나트랑'],['L42','호치민'],['L55','다낭']],
+  '국가':   [['C1','베트남'],['C2','태국'],['C3','필리핀'],['C4','일본']],
+  '스팟/체험': [['S12','빈펄사파리'],['S15','빈원더스'],['S23','호핑투어'],['S30','코코넛 프리즌']]
+};
+var V3_PRODUCTS = [
+  ['200','상품 #200 · 푸꾸옥 3박5일 (KE + 멜리아빈펄 BB)'],
+  ['201','상품 #201 · 나트랑 4박6일 (VJ + 씨셀스 RO)'],
+  ['202','상품 #202 · 다낭 2박4일 (OZ + 소나가비치 HB)']
+];
+
+function v3SelectType(el, type) {
+  document.querySelectorAll('#v3-type-chips .type-chip').forEach(c => c.classList.remove('selected'));
+  el.classList.add('selected');
+  v3.type = type; v3.targetId = null; v3.targetName = null; v3.scope = null;
+  v3.seatClass = ''; v3.supplierName = null; v3.subKey = '';
+
+  var isProduct = type === '상품';
+  var isCommon  = type === '공통';
+
+  el3('v3-search-wrap').style.display  = (!isProduct && !isCommon) ? 'block' : 'none';
+  el3('v3-product-section').style.display = isProduct ? 'block' : 'none';
+  el3('v3-scope-section').style.display   = (!isProduct) ? 'block' : 'none';
+  el3('v3-seatclass-wrap').style.display  = (type === '항공사') ? 'block' : 'none';
+  el3('v3-type-lbl').textContent = type;
+  el3('v3-target-input').value = '';
+  el3('v3-target-sel').textContent = '없음';
+  el3('v3-target-dd').style.display = 'none';
+  document.querySelectorAll('input[name="v3-scope"]').forEach(r => r.checked = false);
+  el3('v3-supplier-detail').style.display = 'none';
+  el3('v3-subkey-wrap').style.display = 'none';
+  ['v3-scope-common-lbl','v3-scope-supplier-lbl'].forEach(id => el3(id).style.borderColor = '#d9d9d9');
+
+  if (isCommon) {
+    v3.scope = 'common'; v3.targetName = '공통';
+    document.querySelector('input[name="v3-scope"][value="common"]').checked = true;
+    el3('v3-scope-common-lbl').style.borderColor = '#52c41a';
+    v3UpdatePreview();
+  } else if (isProduct) {
+    v3UpdatePreview();
+  } else {
+    el3('v3-board-preview').style.display = 'none';
+  }
+}
+
+function el3(id) { return document.getElementById(id); }
+
+function v3TargetSearch(val) {
+  var data = V3_CATALOG_DATA[v3.type] || [];
+  var dd = el3('v3-target-dd');
+  if (!val) { dd.style.display = 'none'; return; }
+  var hits = data.filter(d => d[1].toLowerCase().includes(val.toLowerCase()));
+  if (!hits.length) { dd.style.display = 'none'; return; }
+  dd.innerHTML = hits.map(d =>
+    `<div style="padding:8px 12px;cursor:pointer;font-size:13px;border-bottom:1px solid #f5f5f5;" onmousedown="v3SelectTarget('${d[0]}','${d[1].replace(/'/g,"\\'")}')">
+      ${d[1]} <span style="color:rgba(0,0,0,0.3);font-size:11px;">${d[0]}</span>
+    </div>`
+  ).join('');
+  dd.style.display = 'block';
+}
+
+function v3SelectTarget(id, name) {
+  v3.targetId = id; v3.targetName = name;
+  el3('v3-target-input').value = name;
+  el3('v3-target-sel').textContent = name;
+  el3('v3-target-dd').style.display = 'none';
+  v3UpdatePreview();
+  if (v3.type === '항공사') el3('v3-seatclass-wrap').style.display = 'block';
+}
+
+function v3SetSeat(el, code) {
+  document.querySelectorAll('#v3-seat-chips .type-chip').forEach(c => c.classList.remove('selected'));
+  el.classList.add('selected');
+  v3.seatClass = code;
+  v3UpdatePreview();
+}
+
+function v3ScopeChange(scope) {
+  v3.scope = scope;
+  ['common','supplier'].forEach(s => el3('v3-scope-' + s + '-lbl').style.borderColor = scope === s ? '#52c41a' : '#d9d9d9');
+  var supDetail = el3('v3-supplier-detail');
+  supDetail.style.display = scope === 'supplier' ? 'flex' : 'none';
+  if (scope !== 'supplier') { v3.supplierName = null; el3('v3-subkey-wrap').style.display = 'none'; }
+  v3UpdatePreview();
+}
+
+function v3SupplierChange(sel) {
+  v3.supplierName = sel.value;
+  el3('v3-subkey-wrap').style.display = sel.value ? 'block' : 'none';
+  if (sel.value) v3RenderSubKey();
+  v3UpdatePreview();
+}
+
+function v3RenderSubKey() {
+  var type = v3.type;
+  var opts = [];
+  if (type === '항공사' || type === '공항') {
+    opts = [
+      {k:'',    lbl:'전체 공통'},
+      {k:'airline', lbl:'특정 항공사별', sub: '<select class="fc" style="max-width:200px;margin-top:6px;" onchange="v3.subKey=\'airline_\'+this.value;v3UpdatePreview()"><option value="">항공사 선택</option><option value="KE">대한항공(KE)</option><option value="VJ">비엣젯(VJ)</option><option value="OZ">아시아나(OZ)</option></select>'}
+    ];
+  } else if (type === '숙소' || type === '객실' || type === '식사') {
+    opts = [
+      {k:'',     lbl:'전체 공통'},
+      {k:'accom',lbl:'특정 숙소별'},
+      {k:'room', lbl:'특정 객실별'},
+      {k:'meal', lbl:'특정 식사타입별'}
+    ];
+  } else if (type === '스팟/체험') {
+    opts = [{k:'',lbl:'전체 공통'},{k:'spot',lbl:'특정 스팟별'}];
+  } else {
+    opts = [{k:'',lbl:'전체 공통'},{k:'area',lbl:'특정 여행지별'}];
+  }
+  el3('v3-subkey-section').innerHTML = `
+    <div style="display:flex;flex-wrap:wrap;gap:6px;">
+      ${opts.map(o => `<button class="type-chip${o.k===''?' selected':''}" onclick="v3SetSubKey(this,'${o.k}')" style="font-size:12px;">${o.lbl}</button>`).join('')}
+    </div>
+    <div id="v3-subkey-detail-input" style="margin-top:8px;"></div>`;
+  v3.subKey = '';
+}
+
+function v3SetSubKey(el, key) {
+  document.querySelectorAll('#v3-subkey-section .type-chip').forEach(c => c.classList.remove('selected'));
+  el.classList.add('selected');
+  v3.subKey = key;
+  v3UpdatePreview();
+}
+
+function v3ProductSearch(val) {
+  var dd = el3('v3-product-dd');
+  if (!val) { dd.style.display = 'none'; return; }
+  var hits = V3_PRODUCTS.filter(d => d[1].toLowerCase().includes(val.toLowerCase()) || d[0].includes(val));
+  if (!hits.length) { dd.style.display = 'none'; return; }
+  dd.innerHTML = hits.map(d =>
+    `<div style="padding:8px 12px;cursor:pointer;font-size:13px;border-bottom:1px solid #f5f5f5;" onmousedown="v3SelectProduct('${d[0]}','${d[1].replace(/'/g,"\\'")}')">
+      ${d[1]}
+    </div>`
+  ).join('');
+  dd.style.display = 'block';
+}
+
+function v3SelectProduct(id, name) {
+  v3.productId = id; v3.productName = name;
+  el3('v3-product-input').value = name;
+  el3('v3-product-sel').textContent = name;
+  el3('v3-product-dd').style.display = 'none';
+  v3UpdatePreview();
+}
+
+function v3UpdatePreview() {
+  var preview = el3('v3-board-preview');
+  if (!v3.type) { preview.style.display = 'none'; return; }
+
+  var board = '', targetStr = '', scopeStr = '';
+  if (v3.type === '상품') {
+    board = '📦 상품단위 게시판';
+    targetStr = v3.productName || '상품 선택 전';
+  } else if (v3.scope === 'supplier' && v3.supplierName) {
+    board = '🏢 공급사 게시판';
+    targetStr = v3.type + (v3.targetName && v3.targetName !== v3.type ? ' · ' + v3.targetName : '');
+    scopeStr = '· 공급사: ' + v3.supplierName + (v3.subKey ? ' / ' + v3.subKey : '');
+  } else if (v3.scope === 'common' || v3.scope) {
+    board = '📚 카탈로그 게시판';
+    targetStr = v3.type + (v3.targetName && v3.targetName !== v3.type ? ' · ' + v3.targetName : '');
+    if (v3.type === '항공사' && v3.seatClass) scopeStr = '· ' + v3.seatClass;
+  } else {
+    preview.style.display = 'none'; return;
+  }
+
+  el3('v3-board-lbl').textContent = board;
+  el3('v3-target-preview').textContent = targetStr;
+  el3('v3-scope-preview').textContent = scopeStr;
+  preview.style.display = 'flex';
+}
+
+function v3ConfirmStep1() {
+  if (!v3.type) { alert('타겟 유형을 선택해주세요.'); return; }
+  if (v3.type !== '공통' && v3.type !== '상품' && !v3.targetId) { alert('타겟을 검색해 선택해주세요.'); return; }
+  if (v3.type === '상품' && !v3.productId) { alert('상품을 선택해주세요.'); return; }
+  if (v3.type !== '상품' && !v3.scope) { alert('적용 범위를 선택해주세요.'); return; }
+  if (v3.scope === 'supplier' && !v3.supplierName) { alert('공급사를 선택해주세요.'); return; }
+
+  // Step 2 요약 채우기
+  var boardText = el3('v3-board-lbl').textContent;
+  el3('v3-sum-board').textContent = boardText;
+  el3('v3-sum-target').textContent = el3('v3-target-preview').textContent;
+  el3('v3-sum-scope').textContent  = el3('v3-scope-preview').textContent;
+
+  // POST 목록 초기화
+  v3Posts = []; v3PostSeq = 1;
+  v3AddPost();
+
+  var s2 = el3('v3-s2-wrap');
+  s2.classList.add('shown');
+  setTimeout(() => s2.scrollIntoView({ behavior: 'smooth', block: 'nearest' }), 100);
+}
+
+// ── v3 POST 일괄 작성 ──────────────────────────
+var V3_CATS = ['소개','핵심포인트','스페셜 혜택','포함사항','불포함사항','유의사항','안내사항','출발 전 안내','수하물 규정','취소환불규정','자주 묻는 질문'];
+
+function v3AddPost() {
+  var id = v3PostSeq++;
+  v3Posts.forEach(p => p.expanded = false);
+  v3Posts.push({ id, category: '', title: '', expanded: true });
+  v3RenderPosts();
+}
+
+function v3RemovePost(id) {
+  if (v3Posts.length <= 1) { alert('최소 1개의 POST 항목이 필요합니다.'); return; }
+  v3SaveValues();
+  v3Posts = v3Posts.filter(p => p.id !== id);
+  if (!v3Posts.some(p => p.expanded)) v3Posts[v3Posts.length - 1].expanded = true;
+  v3RenderPosts();
+}
+
+function v3TogglePost(id) {
+  v3SaveValues();
+  var p = v3Posts.find(p => p.id === id);
+  if (p) { p.expanded = !p.expanded; v3RenderPosts(); }
+}
+
+function v3SaveValues() {
+  v3Posts.forEach(p => {
+    var catEl   = document.getElementById('v3pi-cat-' + p.id);
+    var titleEl = document.getElementById('v3pi-title-' + p.id);
+    if (catEl)   p.category = catEl.value;
+    if (titleEl) p.title    = titleEl.value;
+  });
+}
+
+function v3PostCatChange(id, val) {
+  var p = v3Posts.find(p => p.id === id);
+  if (p) p.category = val;
+  // 관리명 자동 생성
+  var mgmt = document.getElementById('v3pi-mgmt-' + id);
+  if (mgmt && val) {
+    var targetLabel = (v3.targetName && v3.targetName !== v3.type) ? v3.type + '_' + v3.targetName : v3.type;
+    var base = v3.scope === 'supplier' && v3.supplierName
+      ? v3.supplierName + '_' + targetLabel + '_' + val
+      : targetLabel + '_' + val;
+    mgmt.value = base;
+  }
+  v3RenderPosts();
+}
+
+function v3RenderPosts() {
+  var container = el3('v3-post-list');
+  if (!container) return;
+  el3('v3-bulk-count').textContent = v3Posts.length;
+  container.innerHTML = v3Posts.map((p, idx) => {
+    var catOpts = ['<option value="">카테고리 선택</option>',
+      ...V3_CATS.map(c => `<option value="${c}"${p.category===c?' selected':''}>${c}</option>`)
+    ].join('');
+    var hasCat = !!p.category;
+    var delBtn = v3Posts.length > 1
+      ? `<button class="bpi-del" onclick="event.stopPropagation();v3RemovePost(${p.id})">삭제</button>` : '';
+    return `
+    <div class="bulk-post-item${p.expanded?' expanded':''}" id="v3pi-${p.id}">
+      <div class="bpi-header" onclick="v3TogglePost(${p.id})">
+        <div class="bpi-num">${idx+1}</div>
+        ${hasCat ? `<span class="bpi-cat-tag">${p.category}</span>` : '<span style="font-size:12px;color:rgba(0,0,0,0.35);">카테고리 미선택</span>'}
+        <span class="bpi-title-preview${p.title?' has-title':''}">${p.title || '제목을 입력해주세요'}</span>
+        <span class="bpi-arrow">▼</span>${delBtn}
+      </div>
+      <div class="bpi-body">
+        <div class="form-row">
+          <div class="form-item half">
+            <label class="form-label">카테고리 <span class="req">*</span></label>
+            <select class="fc" id="v3pi-cat-${p.id}" onchange="v3PostCatChange(${p.id},this.value)">${catOpts}</select>
+          </div>
+          <div class="form-item half">
+            <label class="form-label">관리용 이름 <span style="font-size:11px;font-weight:400;color:rgba(0,0,0,0.35);">자동 생성</span></label>
+            <input class="fc" id="v3pi-mgmt-${p.id}" type="text" style="color:rgba(0,0,0,0.45);" readonly placeholder="카테고리 선택 시 자동 생성">
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-item full">
+            <label class="form-label">제목</label>
+            <div style="display:flex;gap:8px;">
+              <input class="fc" type="text" id="v3pi-title-${p.id}" placeholder="제목을 입력해주세요" value="${p.title||''}" oninput="v3Posts.find(x=>x.id===${p.id}).title=this.value">
+              <button class="btn btn-sm" style="background:#f9f0ff;border-color:#d3adf7;color:#531dab;white-space:nowrap;height:36px;" onclick="alert('AI 초안 생성')">✨ AI</button>
+            </div>
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-item full">
+            <label class="form-label">내용</label>
+            <div class="editor-wrap">
+              <div class="editor-toolbar">
+                <button class="etb"><b>B</b></button><button class="etb"><i>I</i></button><button class="etb"><u>U</u></button>
+                <div class="etb-sep"></div>
+                <button class="etb">☰</button><button class="etb">1≡</button>
+                <div class="etb-sep"></div>
+                <button class="etb">🖼</button><button class="etb">🔗</button>
+              </div>
+              <div class="editor-body" contenteditable="true" data-placeholder="내용을 입력해주세요"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>`;
+  }).join('');
 }
 </script>
 
