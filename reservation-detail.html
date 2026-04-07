@@ -1,0 +1,705 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>예약상세 - 신규 화면 설계 v2</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { font-family: -apple-system, 'Pretendard', sans-serif; background: #f5f5f5; color: #1a1a1a; font-size: 13px; }
+  .header { background: #fff; border-bottom: 1px solid #e0e0e0; padding: 0 24px; display: flex; align-items: center; height: 56px; position: sticky; top: 0; z-index: 100; }
+  .header .logo { font-weight: 700; font-size: 15px; color: #333; margin-right: 32px; }
+  .header nav a { color: #666; text-decoration: none; margin-right: 20px; font-size: 13px; }
+  .header nav a.active { color: #1a1a1a; font-weight: 600; }
+  .page { max-width: 1400px; margin: 0 auto; padding: 24px; }
+  .page-title { display: flex; align-items: center; gap: 12px; margin-bottom: 20px; }
+  .page-title h1 { font-size: 22px; font-weight: 700; }
+  .page-title .rsv-code { font-size: 14px; color: #666; }
+  .badge { display: inline-block; padding: 3px 10px; border-radius: 12px; font-size: 11px; font-weight: 600; }
+  .badge.green { background: #e8f5e9; color: #2e7d32; }
+  .badge.red { background: #ffeaea; color: #d32f2f; }
+  .badge.blue { background: #e3f2fd; color: #1565c0; }
+  .badge.gray { background: #f0f0f0; color: #666; }
+  .badge.orange { background: #fff3e0; color: #e65100; }
+  .badge.purple { background: #f3e5f5; color: #6a1b9a; }
+  .tabs { display: flex; gap: 0; margin-bottom: 24px; border-bottom: 2px solid #e0e0e0; }
+  .tab { padding: 12px 24px; font-size: 14px; font-weight: 500; color: #888; cursor: pointer; border-bottom: 2px solid transparent; margin-bottom: -2px; }
+  .tab.active { color: #1a1a1a; font-weight: 700; border-bottom-color: #1a1a1a; }
+  .section { background: #fff; border-radius: 12px; border: 1px solid #e8e8e8; margin-bottom: 16px; overflow: hidden; }
+  .section-header { display: flex; align-items: center; justify-content: space-between; padding: 16px 24px; border-bottom: 1px solid #f0f0f0; }
+  .section-header h2 { font-size: 15px; font-weight: 700; }
+  .section-header .actions { display: flex; gap: 8px; }
+  .section-body { padding: 20px 24px; }
+  .info-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 0; }
+  .info-row { display: flex; padding: 10px 0; border-bottom: 1px solid #f5f5f5; }
+  .info-label { width: 140px; color: #888; font-size: 12px; flex-shrink: 0; }
+  .info-value { font-size: 13px; font-weight: 500; }
+  .btn { padding: 6px 14px; border-radius: 6px; font-size: 12px; font-weight: 600; cursor: pointer; border: none; }
+  .btn-primary { background: #1a1a1a; color: #fff; }
+  .btn-outline { background: #fff; color: #333; border: 1px solid #d0d0d0; }
+  .btn-plus { background: #e3f2fd; color: #1565c0; border: 1px solid #bbdefb; }
+  .btn-minus { background: #fff3e0; color: #e65100; border: 1px solid #ffe0b2; }
+  .btn-coupon { background: #f3e5f5; color: #6a1b9a; border: 1px solid #e1bee7; }
+  .btn-danger { background: #fff; color: #d32f2f; border: 1px solid #ffcdd2; }
+  .btn-sm { padding: 4px 10px; font-size: 11px; }
+  .btn-icon { display: inline-flex; align-items: center; gap: 4px; }
+  table { width: 100%; border-collapse: collapse; font-size: 12px; }
+  thead th { background: #fafafa; padding: 10px 12px; text-align: left; font-weight: 600; color: #666; border-bottom: 1px solid #e8e8e8; font-size: 11px; }
+  tbody td { padding: 10px 12px; border-bottom: 1px solid #f5f5f5; }
+  tbody tr:hover { background: #fafafa; }
+  .text-right { text-align: right; }
+  .text-center { text-align: center; }
+  .text-mono { font-family: 'SF Mono', 'Menlo', monospace; font-size: 12px; }
+  .amount-summary { display: grid; grid-template-columns: repeat(5, 1fr); gap: 12px; margin-bottom: 20px; }
+  .amount-card { background: #fafafa; border-radius: 8px; padding: 16px; text-align: center; }
+  .amount-card .label { font-size: 11px; color: #888; margin-bottom: 6px; }
+  .amount-card .value { font-size: 18px; font-weight: 700; font-family: 'SF Mono', monospace; }
+  .amount-card .value.positive { color: #1565c0; }
+  .amount-card .value.negative { color: #d32f2f; }
+  .amount-card.highlight { border: 2px solid #e65100; background: #fff8e1; }
+  .party-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; }
+  .party-card { border-radius: 8px; padding: 16px; border: 1px solid #e8e8e8; }
+  .party-card .party-icon { font-size: 18px; margin-bottom: 4px; }
+  .party-card .party-name { font-size: 11px; color: #888; margin-bottom: 8px; }
+  .party-card .party-row { display: flex; justify-content: space-between; padding: 4px 0; font-size: 12px; }
+  .party-card .party-row .label { color: #888; }
+  .party-card .party-row .value { font-weight: 600; font-family: 'SF Mono', monospace; }
+  .ledger-item { display: flex; align-items: center; padding: 10px 0; border-bottom: 1px solid #f5f5f5; gap: 12px; }
+  .ledger-type { width: 60px; text-align: center; }
+  .ledger-type .code { font-size: 11px; font-weight: 700; font-family: monospace; padding: 2px 8px; border-radius: 4px; }
+  .ledger-type .code.charge { background: #e8eaf6; color: #283593; }
+  .ledger-type .code.discount { background: #fce4ec; color: #880e4f; }
+  .ledger-type .code.coupon { background: #f3e5f5; color: #6a1b9a; }
+  .ledger-type .code.payment { background: #e8f5e9; color: #2e7d32; }
+  .ledger-type .code.transfer { background: #fff3e0; color: #e65100; }
+  .ledger-type .code.fee { background: #efebe9; color: #4e342e; }
+  .ledger-type .code.refund { background: #ffebee; color: #c62828; }
+  .ledger-type .code.penalty { background: #fff3e0; color: #bf360c; }
+  .ledger-desc { flex: 1; }
+  .ledger-desc .name { font-weight: 600; font-size: 12px; }
+  .ledger-desc .sub { font-size: 11px; color: #888; }
+  .ledger-amount { text-align: right; font-family: 'SF Mono', monospace; font-weight: 600; min-width: 100px; }
+  .ledger-amount.plus { color: #1565c0; }
+  .ledger-amount.minus { color: #d32f2f; }
+  .ledger-party { width: 70px; text-align: center; font-size: 11px; }
+  .ledger-date { width: 90px; font-size: 11px; color: #888; text-align: right; }
+  .tab-content { display: none; }
+  .tab-content.active { display: block; }
+  .footer-actions { position: sticky; bottom: 0; background: #fff; border-top: 1px solid #e0e0e0; padding: 12px 24px; display: flex; justify-content: flex-end; gap: 8px; z-index: 50; }
+  .highlight-box { background: #fffde7; border: 1px solid #fff9c4; border-radius: 8px; padding: 12px 16px; font-size: 12px; color: #f57f17; display: flex; align-items: center; gap: 8px; margin-bottom: 16px; }
+  .design-note { background: #f3e5f5; border: 1px solid #e1bee7; border-radius: 6px; padding: 8px 12px; font-size: 11px; color: #7b1fa2; margin-top: 8px; }
+  .feature-tag { display: inline-block; background: #e8eaf6; color: #283593; font-size: 10px; font-weight: 700; padding: 2px 6px; border-radius: 4px; margin-right: 4px; }
+  .subsection { margin-top: 20px; padding-top: 16px; border-top: 1px solid #f0f0f0; }
+  .subsection-title { font-size: 12px; font-weight: 700; color: #666; margin-bottom: 10px; display: flex; align-items: center; gap: 8px; }
+  .coupon-card { display: flex; align-items: center; justify-content: space-between; background: #fafafa; border: 1px solid #e8e8e8; border-radius: 8px; padding: 12px 16px; margin-bottom: 8px; }
+  .coupon-card .coupon-info { flex: 1; }
+  .coupon-card .coupon-name { font-weight: 600; font-size: 12px; }
+  .coupon-card .coupon-detail { font-size: 11px; color: #888; margin-top: 2px; }
+  .coupon-card .coupon-amount { font-family: 'SF Mono', monospace; font-weight: 700; font-size: 14px; color: #6a1b9a; }
+  .event-history { background: #f5f5f5; border-radius: 8px; padding: 12px 16px; margin-top: 12px; }
+  .event-history .hist-title { font-size: 11px; font-weight: 600; color: #888; margin-bottom: 8px; }
+  .event-history .hist-item { display: flex; align-items: center; gap: 8px; font-size: 11px; padding: 4px 0; }
+  .event-history .hist-item .arrow { color: #bbb; }
+  .penalty-section { background: #fff8e1; border: 1px solid #ffe082; border-radius: 8px; padding: 16px; }
+  .penalty-section .penalty-title { font-size: 12px; font-weight: 700; color: #e65100; margin-bottom: 8px; display: flex; align-items: center; gap: 6px; }
+  .modal-overlay { display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.4); z-index: 200; align-items: center; justify-content: center; }
+  .modal-overlay.show { display: flex; }
+  .modal { background: #fff; border-radius: 12px; width: 560px; max-height: 80vh; overflow-y: auto; box-shadow: 0 20px 60px rgba(0,0,0,0.2); }
+  .modal-header { padding: 20px 24px; border-bottom: 1px solid #e8e8e8; display: flex; justify-content: space-between; align-items: center; }
+  .modal-header h3 { font-size: 16px; font-weight: 700; }
+  .modal-header .close { cursor: pointer; font-size: 18px; color: #888; background: none; border: none; }
+  .modal-body { padding: 24px; }
+  .modal-footer { padding: 16px 24px; border-top: 1px solid #e8e8e8; display: flex; justify-content: flex-end; gap: 8px; }
+  .form-group { margin-bottom: 16px; }
+  .form-group label { display: block; font-size: 12px; font-weight: 600; color: #666; margin-bottom: 6px; }
+  .form-group select, .form-group input { width: 100%; padding: 8px 12px; border: 1px solid #d0d0d0; border-radius: 6px; font-size: 13px; }
+  .form-group .help { font-size: 11px; color: #888; margin-top: 4px; }
+  .diff-preview { background: #f5f5f5; border-radius: 8px; padding: 12px; margin-top: 12px; }
+  .diff-row { display: flex; justify-content: space-between; padding: 4px 0; font-size: 12px; }
+  .diff-row .label { color: #888; }
+  .diff-row .value { font-weight: 600; font-family: 'SF Mono', monospace; }
+  .diff-row .value.plus { color: #1565c0; }
+  .diff-row .value.minus { color: #d32f2f; }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="logo">트립스토어 관리자</div>
+  <nav>
+    <a href="#">대시보드</a><a href="#">상품관리</a><a href="#" class="active">예약 관리</a><a href="#">정산</a><a href="#">PB 관리</a><a href="#">쿠폰</a><a href="#">파트너스관리</a>
+  </nav>
+</div>
+
+<div class="page">
+  <div class="page-title">
+    <h1>예약상세</h1>
+    <span class="rsv-code">26040708-4300101H</span>
+    <span class="badge green">예약완료</span>
+    <span class="badge blue">결제완료</span>
+  </div>
+
+  <div class="tabs">
+    <div class="tab active" onclick="switchTab('basic')">기본</div>
+    <div class="tab" onclick="switchTab('ledger')">원장</div>
+    <div class="tab" onclick="switchTab('settlement')">정산</div>
+    <div class="tab" onclick="switchTab('pb')">PB</div>
+    <div class="tab" onclick="switchTab('history')">이력</div>
+  </div>
+
+  <!-- ==================== 기본 탭 ==================== -->
+  <div id="tab-basic" class="tab-content active">
+
+    <!-- 1. 예약 기본 정보 -->
+    <div class="section">
+      <div class="section-header">
+        <h2>예약 기본 정보</h2>
+        <div class="actions"><button class="btn btn-outline btn-sm">예약복사</button></div>
+      </div>
+      <div class="section-body">
+        <div class="info-grid">
+          <div>
+            <div class="info-row"><span class="info-label">예약채널</span><span class="info-value">트립스토어</span></div>
+            <div class="info-row"><span class="info-label">트립 예약상태</span><span class="info-value"><span class="badge green">예약완료</span></span></div>
+            <div class="info-row"><span class="info-label">여행사 예약상태</span><span class="info-value">예약완료</span></div>
+            <div class="info-row"><span class="info-label">트립 결제상태</span><span class="info-value"><span class="badge blue">결제완료</span></span></div>
+            <div class="info-row"><span class="info-label">예약 생성 방식</span><span class="info-value">트립스토어 예약</span></div>
+          </div>
+          <div>
+            <div class="info-row"><span class="info-label">트립 예약번호</span><span class="info-value text-mono">26040708-4300101H</span></div>
+            <div class="info-row"><span class="info-label">여행사 예약번호</span><span class="info-value text-mono">HB2633517226</span></div>
+            <div class="info-row"><span class="info-label">채널사 주문번호</span><span class="info-value">-</span></div>
+            <div class="info-row"><span class="info-label">수수료율 (VAT포함)</span><span class="info-value">8.8%</span></div>
+            <div class="info-row"><span class="info-label">예약일시</span><span class="info-value">2026-04-07 08:43</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 2. 여행 상품 정보 + 행사 이동 -->
+    <div class="section">
+      <div class="section-header">
+        <h2>여행 상품 정보</h2>
+        <div class="actions">
+          <button class="btn btn-outline btn-sm btn-icon" onclick="document.getElementById('modal-event').classList.add('show')">
+            <span class="feature-tag">신규</span> 행사 이동
+          </button>
+        </div>
+      </div>
+      <div class="section-body">
+        <div class="info-grid">
+          <div>
+            <div class="info-row"><span class="info-label">여행사</span><span class="info-value">하나투어</span></div>
+            <div class="info-row"><span class="info-label">여행지</span><span class="info-value">상하이(상해)</span></div>
+            <div class="info-row"><span class="info-label">상품코드</span><span class="info-value text-mono">CCB1017B71284A0</span></div>
+            <div class="info-row"><span class="info-label">행사코드</span><span class="info-value text-mono">CCB101260606CZ2</span></div>
+            <div class="info-row"><span class="info-label">상품유형</span><span class="info-value">AIRTEL</span></div>
+          </div>
+          <div>
+            <div class="info-row"><span class="info-label">여행기간</span><span class="info-value">3박4일</span></div>
+            <div class="info-row"><span class="info-label">출도착일</span><span class="info-value">2026-06-06 → 2026-06-09</span></div>
+            <div class="info-row"><span class="info-label">항공사</span><span class="info-value">중국남방항공</span></div>
+            <div class="info-row"><span class="info-label">출발지</span><span class="info-value">인천</span></div>
+            <div class="info-row"><span class="info-label">행사명</span><span class="info-value" style="font-size:11px;">상하이 자유여행 4일 #하버플라자...</span></div>
+          </div>
+        </div>
+        <!-- 행사 이동 이력 -->
+        <div class="event-history" style="display:none;" id="event-history">
+          <div class="hist-title">행사 이동 이력</div>
+          <div class="hist-item">
+            <span class="text-mono" style="color:#888;">CCB101260601CZ1</span>
+            <span class="arrow">→</span>
+            <span class="text-mono" style="font-weight:600;">CCB101260606CZ2</span>
+            <span style="color:#888; margin-left: auto;">2026-04-07 · 김서현</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 3. 예약자 / 여행자 정보 -->
+    <div class="section">
+      <div class="section-header"><h2>예약자 / 여행자 정보</h2></div>
+      <div class="section-body">
+        <div class="info-grid" style="margin-bottom: 16px;">
+          <div>
+            <div class="info-row"><span class="info-label">예약자</span><span class="info-value">오기웅</span></div>
+            <div class="info-row"><span class="info-label">생년월일</span><span class="info-value">1975-12-17</span></div>
+          </div>
+          <div>
+            <div class="info-row"><span class="info-label">이메일</span><span class="info-value">kipoongman@hanmail.net</span></div>
+            <div class="info-row"><span class="info-label">연락처</span><span class="info-value">010-2374-8449</span></div>
+          </div>
+        </div>
+        <table>
+          <thead><tr>
+            <th>#</th><th>구분</th><th>여행자명</th><th>생년월일</th><th>성별</th>
+            <th class="text-right">1인 상품가</th><th class="text-right">특가</th><th class="text-right">1인 판매가</th>
+            <th class="text-right">취소위약금</th><th class="text-center">상태</th>
+          </tr></thead>
+          <tbody>
+            <tr><td>1</td><td>성인</td><td>오기웅</td><td>1975-12-17</td><td>남</td><td class="text-right text-mono">699,000</td><td class="text-right text-mono" style="color:#d32f2f;">-13,000</td><td class="text-right text-mono">686,000</td><td class="text-right text-mono">0</td><td class="text-center"><span class="badge green">승인</span></td></tr>
+            <tr><td>2</td><td>성인</td><td>오서연</td><td>2000-03-15</td><td>여</td><td class="text-right text-mono">699,000</td><td class="text-right text-mono" style="color:#d32f2f;">-13,000</td><td class="text-right text-mono">686,000</td><td class="text-right text-mono">0</td><td class="text-center"><span class="badge green">승인</span></td></tr>
+            <tr><td>3</td><td>성인</td><td>오민준</td><td>1977-08-22</td><td>남</td><td class="text-right text-mono">699,000</td><td class="text-right text-mono" style="color:#d32f2f;">-13,000</td><td class="text-right text-mono">686,000</td><td class="text-right text-mono">0</td><td class="text-center"><span class="badge green">승인</span></td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- 4. 금액 정보 (원장 기반) -->
+    <div class="section">
+      <div class="section-header">
+        <h2>금액 정보</h2>
+        <div class="actions">
+          <button class="btn btn-plus btn-sm btn-icon" onclick="document.getElementById('modal-add').classList.add('show')">+ 금액 추가</button>
+          <button class="btn btn-minus btn-sm btn-icon" onclick="document.getElementById('modal-sub').classList.add('show')">- 금액 차감</button>
+        </div>
+      </div>
+      <div class="section-body">
+        <div class="highlight-box">
+          <strong>금액 직접 수정 불가</strong> — 모든 변동은 [+금액 추가] 또는 [-금액 차감]으로만 처리되며 원장에 자동 기록됩니다.
+        </div>
+
+        <!-- 금액 요약 카드 - 5개로 확장 (취소위약금 포함) -->
+        <div class="amount-summary">
+          <div class="amount-card">
+            <div class="label">상품금액</div>
+            <div class="value">2,097,000</div>
+          </div>
+          <div class="amount-card">
+            <div class="label">할인금액</div>
+            <div class="value negative">-59,000</div>
+          </div>
+          <div class="amount-card">
+            <div class="label">판매금액 (=입금액)</div>
+            <div class="value positive">2,038,000</div>
+          </div>
+          <div class="amount-card highlight">
+            <div class="label" style="color:#e65100;"><span class="feature-tag" style="background:#fff3e0;color:#e65100;">신규</span> 취소위약금</div>
+            <div class="value">0</div>
+          </div>
+          <div class="amount-card">
+            <div class="label">결제 필요 금액</div>
+            <div class="value positive">2,038,000</div>
+          </div>
+        </div>
+
+        <!-- 취소위약금 관리 영역 (예약시스템으로 이관) -->
+        <div class="penalty-section" style="margin-bottom: 16px;">
+          <div class="penalty-title">
+            <span class="feature-tag" style="background:#fff3e0;color:#e65100;">신규</span>
+            취소위약금 관리 (예약금액 영역)
+          </div>
+          <div style="font-size: 11px; color: #666; margin-bottom: 8px;">
+            기존: 결제시스템에서 취소금액으로 관리 → <strong>변경: 예약시스템에서 판매금액(수익)으로 관리</strong>
+          </div>
+          <table>
+            <thead><tr><th>여행자</th><th class="text-right">1인 위약금</th><th>위약 사유</th><th class="text-center">상태</th></tr></thead>
+            <tbody>
+              <tr><td>오기웅 (성인)</td><td class="text-right text-mono">0</td><td>-</td><td class="text-center"><span class="badge gray">없음</span></td></tr>
+              <tr><td>오서연 (성인)</td><td class="text-right text-mono">0</td><td>-</td><td class="text-center"><span class="badge gray">없음</span></td></tr>
+              <tr><td>오민준 (성인)</td><td class="text-right text-mono">0</td><td>-</td><td class="text-center"><span class="badge gray">없음</span></td></tr>
+            </tbody>
+          </table>
+          <div style="font-size: 11px; color: #888; margin-top: 8px;">
+            취소위약금 = 결제받아야 하는 금액. 결제시스템에서는 실결제/환불만 관리.
+          </div>
+        </div>
+
+        <!-- 할인 내역 -->
+        <div class="subsection">
+          <div class="subsection-title">할인 내역</div>
+          <table>
+            <thead><tr><th>구분</th><th>항목</th><th class="text-right">금액</th><th>비고</th></tr></thead>
+            <tbody>
+              <tr><td>여행사 특가</td><td>상시특가 > 하나투어 > 동남아/일본/중국 2%</td><td class="text-right text-mono" style="color:#d32f2f;">-39,000</td><td>특가 ID: 1325</td></tr>
+              <tr><td><span class="badge purple">쿠폰</span></td><td>쿠폰 할인</td><td class="text-right text-mono" style="color:#d32f2f;">-20,000</td><td>836331bf...</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <!-- 쿠폰 관리 영역 (신규) -->
+        <div class="subsection">
+          <div class="subsection-title">
+            <span class="feature-tag">신규</span> 쿠폰 관리
+          </div>
+          <div style="font-size: 11px; color: #888; margin-bottom: 12px;">
+            행사이동/인원변경 시 쿠폰 조건이 변경될 수 있습니다. 사용자 보유 쿠폰을 조회하여 적용/조정할 수 있습니다.
+          </div>
+
+          <!-- 현재 적용된 쿠폰 -->
+          <div class="coupon-card">
+            <div class="coupon-info">
+              <div class="coupon-name">상해 자유여행 20,000원 할인</div>
+              <div class="coupon-detail">유효기간: 2026-03-01 ~ 2026-06-30 | 최소 결제금액: 500,000원 | 상태: <strong style="color:#2e7d32;">적용중</strong></div>
+            </div>
+            <div class="coupon-amount">-20,000</div>
+            <button class="btn btn-danger btn-sm" style="margin-left: 12px;">쿠폰 취소</button>
+          </div>
+
+          <!-- 쿠폰 조회/적용 버튼 -->
+          <div style="display: flex; gap: 8px; margin-top: 8px;">
+            <button class="btn btn-coupon btn-sm btn-icon" onclick="document.getElementById('modal-coupon').classList.add('show')">
+              사용자 쿠폰 조회 및 적용
+            </button>
+            <button class="btn btn-outline btn-sm btn-icon">
+              쿠폰 금액 조정
+            </button>
+          </div>
+          <div class="design-note">
+            <strong>[사용자 쿠폰 조회]</strong> 예약자의 보유 쿠폰 중 현재 예약 조건에 맞는 쿠폰 자동 필터링 → 선택 시 적용.<br>
+            <strong>[쿠폰 금액 조정]</strong> 행사이동 등으로 쿠폰 조건 불일치 시, 쿠폰 금액을 자동 재계산 또는 수동 조정. 원장에 쿠폰 조정 항목 생성.
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 5. 결제 정보 -->
+    <div class="section">
+      <div class="section-header">
+        <h2>결제 정보</h2>
+        <div class="actions">
+          <button class="btn btn-outline btn-sm btn-icon" onclick="document.getElementById('modal-payment-change').classList.add('show')">
+            <span class="feature-tag">신규</span> 결제수단 변경
+          </button>
+          <button class="btn btn-outline btn-sm btn-icon" onclick="document.getElementById('modal-transfer').classList.add('show')">
+            <span class="feature-tag">신규</span> 결제 이관
+          </button>
+        </div>
+      </div>
+      <div class="section-body">
+        <div class="amount-summary" style="grid-template-columns: repeat(3, 1fr);">
+          <div class="amount-card">
+            <div class="label">총 결제금액</div>
+            <div class="value positive">2,038,000</div>
+          </div>
+          <div class="amount-card">
+            <div class="label">총 환불금액</div>
+            <div class="value">0</div>
+          </div>
+          <div class="amount-card">
+            <div class="label">미수금액</div>
+            <div class="value">0</div>
+          </div>
+        </div>
+
+        <table>
+          <thead><tr>
+            <th>#</th><th>구분</th><th>PG사</th><th>결제수단</th><th>결제번호</th>
+            <th class="text-right">결제금액</th><th class="text-right">환불금액</th><th class="text-right">입금금액</th>
+            <th>결제일시</th><th class="text-center">상태</th>
+          </tr></thead>
+          <tbody>
+            <tr>
+              <td>1</td><td><span class="badge purple">쿠폰</span></td><td>-</td><td>쿠폰</td>
+              <td class="text-mono" style="font-size:11px;">836331bf...</td>
+              <td class="text-right text-mono">20,000</td><td class="text-right text-mono">-</td><td class="text-right text-mono">0</td>
+              <td style="font-size:11px;">04-07 08:43</td><td class="text-center"><span class="badge green">완료</span></td>
+            </tr>
+            <tr>
+              <td>2</td><td><span class="badge blue">PG</span></td><td>nice_v2</td><td>신용카드</td>
+              <td class="text-mono" style="font-size:11px;">26040708-4300101H-001</td>
+              <td class="text-right text-mono">2,038,000</td><td class="text-right text-mono">0</td><td class="text-right text-mono">2,038,000</td>
+              <td style="font-size:11px;">04-07 08:43</td><td class="text-center"><span class="badge green">완료</span></td>
+            </tr>
+          </tbody>
+        </table>
+
+        <div class="design-note">
+          <strong>[결제수단 변경]</strong> 예약금액 수정 없이 기존 결제 취소 → 새 결제수단으로 동일 금액 재결제. 고객에게 잘못된 금액 노출 방지.<br>
+          <strong>[결제 이관]</strong> 이 예약의 결제를 다른 예약번호로 이관. 양쪽 원장에 이관 기록 자동 생성. 개발실 수동 작업 제거.
+        </div>
+      </div>
+    </div>
+
+    <!-- 6. 원장 요약 -->
+    <div class="section">
+      <div class="section-header">
+        <h2>원장 요약</h2>
+        <div class="actions"><button class="btn btn-outline btn-sm" onclick="switchTab('ledger')">원장 상세 보기 →</button></div>
+      </div>
+      <div class="section-body">
+        <div class="party-grid">
+          <div class="party-card"><div class="party-icon">🙋</div><div class="party-name">고객</div><div class="party-row"><span class="label">손익</span><span class="value" style="color:#d32f2f;">-2,038,000</span></div><div class="party-row"><span class="label">자금</span><span class="value" style="color:#d32f2f;">-2,038,000</span></div></div>
+          <div class="party-card"><div class="party-icon">🔗</div><div class="party-name">채널사</div><div class="party-row"><span class="label">손익</span><span class="value">0</span></div><div class="party-row"><span class="label">자금</span><span class="value">0</span></div></div>
+          <div class="party-card"><div class="party-icon">🏢</div><div class="party-name">플랫폼</div><div class="party-row"><span class="label">손익</span><span class="value" style="color:#1565c0;">+159,344</span></div><div class="party-row"><span class="label">자금</span><span class="value" style="color:#1565c0;">+2,038,000</span></div></div>
+          <div class="party-card"><div class="party-icon">🚩</div><div class="party-name">여행사</div><div class="party-row"><span class="label">손익</span><span class="value" style="color:#1565c0;">+1,878,656</span></div><div class="party-row"><span class="label">자금</span><span class="value">0</span></div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ==================== 원장 탭 ==================== -->
+  <div id="tab-ledger" class="tab-content">
+    <div class="section">
+      <div class="section-header"><h2>파티별 잔액 현황</h2></div>
+      <div class="section-body">
+        <div class="party-grid">
+          <div class="party-card"><div class="party-icon">🙋</div><div class="party-name">고객</div><div class="party-row"><span class="label">손익</span><span class="value" style="color:#d32f2f;">-2,038,000</span></div><div class="party-row"><span class="label">자금</span><span class="value" style="color:#d32f2f;">-2,038,000</span></div></div>
+          <div class="party-card"><div class="party-icon">🔗</div><div class="party-name">채널사</div><div class="party-row"><span class="label">손익</span><span class="value">0</span></div><div class="party-row"><span class="label">자금</span><span class="value">0</span></div></div>
+          <div class="party-card"><div class="party-icon">🏢</div><div class="party-name">플랫폼</div><div class="party-row"><span class="label">손익</span><span class="value" style="color:#1565c0;">+159,344</span></div><div class="party-row"><span class="label">자금</span><span class="value" style="color:#1565c0;">+2,038,000</span></div></div>
+          <div class="party-card"><div class="party-icon">🚩</div><div class="party-name">여행사</div><div class="party-row"><span class="label">손익</span><span class="value" style="color:#1565c0;">+1,878,656</span></div><div class="party-row"><span class="label">자금</span><span class="value">0</span></div></div>
+        </div>
+      </div>
+    </div>
+    <div class="section">
+      <div class="section-header">
+        <h2>원장 항목</h2>
+        <div class="actions">
+          <select style="padding:4px 8px;border:1px solid #d0d0d0;border-radius:4px;font-size:11px;"><option>전체 항목</option><option>🙋 고객</option><option>🔗 채널사</option><option>🏢 플랫폼</option><option>🚩 여행사</option></select>
+        </div>
+      </div>
+      <div class="section-body" style="padding:12px 24px;">
+        <div class="ledger-item"><div class="ledger-type"><span class="code charge">100</span></div><div class="ledger-desc"><div class="name">예약금(CHARGE)</div><div class="sub">성인 699,000 x 3명</div></div><div class="ledger-party"><span class="badge gray">🙋 고객</span></div><div class="ledger-amount minus">-2,097,000</div><div class="ledger-date">04-07 08:43</div></div>
+        <div class="ledger-item"><div class="ledger-type"><span class="code discount">202</span></div><div class="ledger-desc"><div class="name">여행사특가할인</div><div class="sub">하나투어 2% · 13,000 x 3명</div></div><div class="ledger-party"><span class="badge gray">🙋 고객</span></div><div class="ledger-amount plus">+39,000</div><div class="ledger-date">04-07 08:43</div></div>
+        <div class="ledger-item"><div class="ledger-type"><span class="code coupon">301</span></div><div class="ledger-desc"><div class="name">쿠폰할인(플랫폼)</div><div class="sub">20,000원 쿠폰</div></div><div class="ledger-party"><span class="badge gray">🙋 고객</span></div><div class="ledger-amount plus">+20,000</div><div class="ledger-date">04-07 08:43</div></div>
+        <div class="ledger-item"><div class="ledger-type"><span class="code payment">401</span></div><div class="ledger-desc"><div class="name">고객결제(플랫폼)</div><div class="sub">nice_v2 · 신용카드</div></div><div class="ledger-party"><span class="badge gray">🏢 플랫폼</span></div><div class="ledger-amount plus">+2,038,000</div><div class="ledger-date">04-07 08:43</div></div>
+        <div class="ledger-item"><div class="ledger-type"><span class="code fee">601</span></div><div class="ledger-desc"><div class="name">PG수수료</div><div class="sub">PG수수료 차감</div></div><div class="ledger-party"><span class="badge gray">🏢 플랫폼</span></div><div class="ledger-amount minus">-59,100</div><div class="ledger-date">04-07 08:43</div></div>
+        <div class="ledger-item"><div class="ledger-type"><span class="code fee">602</span></div><div class="ledger-desc"><div class="name">플랫폼이용료</div><div class="sub">수수료율 8.8%</div></div><div class="ledger-party"><span class="badge gray">🏢 플랫폼</span></div><div class="ledger-amount plus">+179,344</div><div class="ledger-date">04-07 08:43</div></div>
+        <div class="ledger-item"><div class="ledger-type"><span class="code transfer">501</span></div><div class="ledger-desc"><div class="name">플랫폼대금이전</div><div class="sub">플랫폼 → 여행사</div></div><div class="ledger-party"><span class="badge gray">🚩 여행사</span></div><div class="ledger-amount plus">+1,878,656</div><div class="ledger-date">-</div></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 정산 탭 -->
+  <div id="tab-settlement" class="tab-content">
+    <div class="section">
+      <div class="section-header"><h2>정책정보</h2></div>
+      <div class="section-body">
+        <div class="info-grid">
+          <div>
+            <div class="info-row"><span class="info-label">여행사 정책 ID</span><span class="info-value">25</span></div>
+            <div class="info-row"><span class="info-label">과금유형</span><span class="info-value">후취</span></div>
+            <div class="info-row"><span class="info-label">계산방식</span><span class="info-value">정률/건당</span></div>
+          </div>
+          <div>
+            <div class="info-row"><span class="info-label">정산주기</span><span class="info-value">월4회</span></div>
+            <div class="info-row"><span class="info-label">대금지급일</span><span class="info-value">정산주기 기준 4영업일 이후</span></div>
+          </div>
+        </div>
+        <div class="subsection">
+          <div class="subsection-title">결제주체 별 수수료율</div>
+          <table>
+            <thead><tr><th>결제주체</th><th>수수료율</th><th>수수료율(VAT포함)</th><th>취소위약금 수수료율</th><th>취소위약금 수수료율(VAT포함)</th></tr></thead>
+            <tbody>
+              <tr><td>채널</td><td>8%</td><td>8.8%</td><td>3%</td><td>3.3%</td></tr>
+              <tr><td>여행사</td><td>5%</td><td>5.5%</td><td>0%</td><td>0%</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="subsection">
+          <div class="subsection-title">정산정보</div>
+          <div style="text-align:center;padding:24px;color:#888;font-size:12px;">정산 데이터 로딩 (ag-grid 테이블)</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- PB 탭 -->
+  <div id="tab-pb" class="tab-content">
+    <div class="section"><div class="section-body" style="text-align:center;padding:60px;"><div style="font-size:14px;color:#888;">항공권 / 숙박권 관리</div><div style="font-size:12px;color:#bbb;margin-top:8px;">(기존 PB 탭 내용 유지)</div></div></div>
+  </div>
+
+  <!-- 이력 탭 -->
+  <div id="tab-history" class="tab-content">
+    <div class="section">
+      <div class="section-header"><h2>예약 관리 이력</h2></div>
+      <div class="section-body">
+        <table>
+          <thead><tr><th>내용</th><th>담당자</th><th>예약상태</th><th>일시</th></tr></thead>
+          <tbody><tr><td>고객님이 전액결제(카드) '결제완료'(으)로 예약접수</td><td>-</td><td><span class="badge green">예약접수</span></td><td>2026-04-07 08:43:38</td></tr></tbody>
+        </table>
+      </div>
+    </div>
+    <div class="section">
+      <div class="section-header"><h2>메모</h2><div class="actions"><button class="btn btn-primary btn-sm">메모 추가</button></div></div>
+      <div class="section-body"><div style="text-align:center;padding:24px;color:#bbb;font-size:12px;">등록된 메모가 없습니다.</div></div>
+    </div>
+  </div>
+</div>
+
+<div class="footer-actions">
+  <button class="btn btn-outline">재예약</button>
+  <button class="btn btn-primary">수정하기</button>
+</div>
+
+<!-- ==================== 모달들 ==================== -->
+
+<!-- 행사 이동 모달 -->
+<div class="modal-overlay" id="modal-event">
+  <div class="modal">
+    <div class="modal-header"><h3>행사 이동</h3><button class="close" onclick="this.closest('.modal-overlay').classList.remove('show')">&times;</button></div>
+    <div class="modal-body">
+      <div style="background:#e3f2fd;border-radius:8px;padding:12px;font-size:12px;color:#1565c0;margin-bottom:16px;">
+        동일 여행사(하나투어) 상품 내에서만 이동 가능합니다. 마감된 행사도 이동 가능합니다.
+      </div>
+      <div class="form-group">
+        <label>현재 행사</label>
+        <input type="text" value="CCB101260606CZ2 | 2026-06-06 상하이 자유여행 4일" disabled style="background:#f5f5f5;">
+      </div>
+      <div class="form-group">
+        <label>이동할 행사 선택</label>
+        <select>
+          <option>행사를 선택하세요</option>
+          <option>CCB101260613CZ3 | 2026-06-13 상하이 자유여행 4일 (699,000원)</option>
+          <option>CCB101260620CZ4 | 2026-06-20 상하이 자유여행 4일 (719,000원)</option>
+          <option>CCB101260627CZ5 | 2026-06-27 상하이 자유여행 4일 (689,000원) [마감]</option>
+        </select>
+      </div>
+      <div class="diff-preview">
+        <div style="font-size:11px;font-weight:600;color:#888;margin-bottom:8px;">금액 변동 미리보기 (6/20 행사 선택 시)</div>
+        <div class="diff-row"><span class="label">기존 1인 상품가</span><span class="value">699,000</span></div>
+        <div class="diff-row"><span class="label">변경 1인 상품가</span><span class="value">719,000</span></div>
+        <div class="diff-row"><span class="label">차액 (3명)</span><span class="value minus">+60,000 추가결제 필요</span></div>
+        <div class="diff-row"><span class="label">특가 재적용</span><span class="value">하나투어 2% → -43,140</span></div>
+        <div class="diff-row"><span class="label">쿠폰 재검증</span><span class="value" style="color:#e65100;">조건 확인 필요</span></div>
+      </div>
+      <div class="form-group" style="margin-top:12px;">
+        <label>이동 사유</label>
+        <select><option>출발일 변경</option><option>일정 변경</option><option>상품 마감</option><option>가격 인상/인하</option><option>기타</option></select>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-outline" onclick="this.closest('.modal-overlay').classList.remove('show')">취소</button>
+      <button class="btn btn-primary">행사 이동 실행</button>
+    </div>
+  </div>
+</div>
+
+<!-- 금액 추가 모달 -->
+<div class="modal-overlay" id="modal-add">
+  <div class="modal">
+    <div class="modal-header"><h3>+ 금액 추가</h3><button class="close" onclick="this.closest('.modal-overlay').classList.remove('show')">&times;</button></div>
+    <div class="modal-body">
+      <div class="form-group"><label>대상 여행자</label><select><option>전체</option><option>오기웅 (성인)</option><option>오서연 (성인)</option><option>오민준 (성인)</option></select></div>
+      <div class="form-group"><label>추가 유형</label><select><option>추가할인</option><option>쿠폰 적용</option><option>금액 조정</option><option>기타</option></select></div>
+      <div class="form-group"><label>금액</label><input type="text" placeholder="금액을 입력하세요"></div>
+      <div class="form-group"><label>사유</label><input type="text" placeholder="변경 사유를 입력하세요"></div>
+      <div style="font-size:11px;color:#888;">확인 시 원장에 해당 항목이 자동 생성됩니다.</div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-outline" onclick="this.closest('.modal-overlay').classList.remove('show')">취소</button>
+      <button class="btn btn-plus">금액 추가</button>
+    </div>
+  </div>
+</div>
+
+<!-- 금액 차감 모달 -->
+<div class="modal-overlay" id="modal-sub">
+  <div class="modal">
+    <div class="modal-header"><h3>- 금액 차감</h3><button class="close" onclick="this.closest('.modal-overlay').classList.remove('show')">&times;</button></div>
+    <div class="modal-body">
+      <div class="form-group"><label>대상 여행자</label><select><option>전체</option><option>오기웅 (성인)</option><option>오서연 (성인)</option><option>오민준 (성인)</option></select></div>
+      <div class="form-group"><label>차감 유형</label><select><option>할인 취소</option><option>위약금 부과</option><option>쿠폰 취소</option><option>금액 조정</option><option>기타</option></select></div>
+      <div class="form-group"><label>금액</label><input type="text" placeholder="금액을 입력하세요"></div>
+      <div class="form-group"><label>사유</label><input type="text" placeholder="변경 사유를 입력하세요"></div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-outline" onclick="this.closest('.modal-overlay').classList.remove('show')">취소</button>
+      <button class="btn btn-minus">금액 차감</button>
+    </div>
+  </div>
+</div>
+
+<!-- 쿠폰 조회 모달 -->
+<div class="modal-overlay" id="modal-coupon">
+  <div class="modal">
+    <div class="modal-header"><h3>사용자 쿠폰 조회 및 적용</h3><button class="close" onclick="this.closest('.modal-overlay').classList.remove('show')">&times;</button></div>
+    <div class="modal-body">
+      <div style="font-size:12px;color:#888;margin-bottom:16px;">예약자 <strong>오기웅</strong>님이 보유한 쿠폰 중 현재 예약 조건에 적용 가능한 쿠폰입니다.</div>
+      <div class="coupon-card" style="border-color:#4caf50;">
+        <div class="coupon-info">
+          <div class="coupon-name" style="color:#2e7d32;">적용 가능</div>
+          <div class="coupon-detail">해외여행 30,000원 할인 | 유효: ~2026-07-31 | 최소 100만원</div>
+        </div>
+        <div class="coupon-amount">-30,000</div>
+        <button class="btn btn-coupon btn-sm" style="margin-left:12px;">적용</button>
+      </div>
+      <div class="coupon-card" style="opacity:0.5;">
+        <div class="coupon-info">
+          <div class="coupon-name" style="color:#d32f2f;">조건 미달</div>
+          <div class="coupon-detail">일본 전용 20,000원 할인 | 유효: ~2026-06-30 | 여행지: 일본만</div>
+        </div>
+        <div class="coupon-amount" style="color:#bbb;">-20,000</div>
+        <button class="btn btn-outline btn-sm" style="margin-left:12px;" disabled>적용불가</button>
+      </div>
+      <div class="coupon-card" style="opacity:0.5;">
+        <div class="coupon-info">
+          <div class="coupon-name" style="color:#d32f2f;">기간 만료</div>
+          <div class="coupon-detail">신규가입 10,000원 할인 | 유효: ~2026-03-31 (만료)</div>
+        </div>
+        <div class="coupon-amount" style="color:#bbb;">-10,000</div>
+        <button class="btn btn-outline btn-sm" style="margin-left:12px;" disabled>만료</button>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-outline" onclick="this.closest('.modal-overlay').classList.remove('show')">닫기</button>
+    </div>
+  </div>
+</div>
+
+<!-- 결제수단 변경 모달 -->
+<div class="modal-overlay" id="modal-payment-change">
+  <div class="modal">
+    <div class="modal-header"><h3>결제수단 변경</h3><button class="close" onclick="this.closest('.modal-overlay').classList.remove('show')">&times;</button></div>
+    <div class="modal-body">
+      <div style="background:#fff3e0;border-radius:8px;padding:12px;font-size:12px;color:#e65100;margin-bottom:16px;">
+        예약금액을 수정하지 않고 결제수단만 변경합니다. 기존 결제가 취소되고 새 결제수단으로 동일 금액이 재결제됩니다.
+      </div>
+      <div class="form-group">
+        <label>기존 결제</label>
+        <input type="text" value="nice_v2 · 신용카드 · 2,038,000원" disabled style="background:#f5f5f5;">
+      </div>
+      <div class="form-group">
+        <label>변경 처리 방식</label>
+        <div style="font-size:12px; color: #333; padding: 8px 0;">
+          1. 기존 결제 2,038,000원 취소<br>
+          2. 고객에게 새 결제 링크 발송<br>
+          3. 고객이 새 결제수단으로 동일 금액 결제
+        </div>
+      </div>
+      <div class="form-group"><label>변경 사유</label><select><option>고객 요청</option><option>카드 한도 초과</option><option>결제 오류</option><option>기타</option></select></div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-outline" onclick="this.closest('.modal-overlay').classList.remove('show')">취소</button>
+      <button class="btn btn-primary">결제수단 변경 실행</button>
+    </div>
+  </div>
+</div>
+
+<!-- 결제 이관 모달 -->
+<div class="modal-overlay" id="modal-transfer">
+  <div class="modal">
+    <div class="modal-header"><h3>결제 이관</h3><button class="close" onclick="this.closest('.modal-overlay').classList.remove('show')">&times;</button></div>
+    <div class="modal-body">
+      <div style="background:#e3f2fd;border-radius:8px;padding:12px;font-size:12px;color:#1565c0;margin-bottom:16px;">
+        이 예약의 결제 데이터를 다른 예약으로 이관합니다. 양쪽 원장에 이관 기록이 자동 생성됩니다.
+      </div>
+      <div class="form-group">
+        <label>현재 예약 (이관 출발)</label>
+        <input type="text" value="26040708-4300101H · 2,038,000원 결제완료" disabled style="background:#f5f5f5;">
+      </div>
+      <div class="form-group">
+        <label>이관 대상 예약번호</label>
+        <input type="text" placeholder="예약번호를 입력하세요 (예: 26040709-XXXXXXXX)">
+        <div class="help">동일 예약자의 다른 예약 건으로만 이관 가능합니다.</div>
+      </div>
+      <div class="form-group"><label>이관 사유</label><select><option>결제-예약 매칭 오류</option><option>중복 예약 정리</option><option>채널사 예약 건 핸들링</option><option>기타</option></select></div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-outline" onclick="this.closest('.modal-overlay').classList.remove('show')">취소</button>
+      <button class="btn btn-primary">결제 이관 실행</button>
+    </div>
+  </div>
+</div>
+
+<script>
+function switchTab(name) {
+  document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
+  document.querySelectorAll('.tab').forEach(el => el.classList.remove('active'));
+  document.getElementById('tab-' + name).classList.add('active');
+  const map = { basic:0, ledger:1, settlement:2, pb:3, history:4 };
+  document.querySelectorAll('.tab')[map[name]].classList.add('active');
+}
+</script>
+</body>
+</html>
