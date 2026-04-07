@@ -292,7 +292,7 @@
         <!-- 취소위약금 관리 (신규) -->
         <div class="penalty-section" style="margin-bottom:16px;">
           <div class="penalty-title">
-            <span class="feature-tag" style="background:#fff3e0;color:#e65100;">신규</span>
+            <span class="feature-tag">신규</span>
             취소위약금 관리
           </div>
 
@@ -451,13 +451,14 @@
             <div style="text-align:center;">
               <div style="font-size:10px;color:#888;margin-bottom:4px;">실 결제 금액</div>
               <div style="font-size:18px;font-weight:700;font-family:monospace;color:#2e7d32;" id="pay-actual">2,058,000</div>
-              <div style="font-size:9px;color:#aaa;">결제 20,000 + PG 2,038,000</div>
+              <div style="font-size:9px;color:#aaa;">쿠폰 20,000 + PG 2,038,000</div>
             </div>
             <div style="font-size:18px;color:#bbb;">=</div>
             <div style="text-align:center;">
               <div style="font-size:10px;color:#888;margin-bottom:4px;">차이 (과부족)</div>
-              <div style="font-size:18px;font-weight:700;font-family:monospace;" id="pay-diff" style="color:#2e7d32;">+20,000</div>
-              <div style="font-size:9px;color:#2e7d32;font-weight:600;" id="pay-diff-label">초과 결제 (환불 필요)</div>
+              <div style="font-size:18px;font-weight:700;font-family:monospace;color:#2e7d32;" id="pay-diff">+20,000</div>
+              <div style="font-size:9px;font-weight:600;color:#2e7d32;" id="pay-diff-label">초과 결제 (환불 필요)</div>
+              <div style="font-size:8px;color:#aaa;margin-top:2px;" id="pay-diff-reason">※ 쿠폰이 결제수단으로 포함되어 차이 발생</div>
             </div>
           </div>
         </div>
@@ -501,7 +502,7 @@
 
         <div class="design-note">
           <strong>결제 영역은 "얼마 결제했나 / 얼마 환불했나"만 관리합니다.</strong> 금액 계산(위약금·할인 등)은 모두 예약 금액 영역에서 처리.<br>
-          <strong>[결제수단 변경]</strong> 기존 결제 취소 → 새 결제수단으로 동일 금액 재결제.<br>
+          <strong>[결제수단 변경]</strong> 재결제 링크 SMS 발송 → 고객 재결제 완료 → 기존 결제 자동 취소 (결제 공백 없음).<br>
           <strong>[결제 이관 요청]</strong> 채널사 예약만 가능. 기존 결제 취소 → 대상 예약에 재결제.
         </div>
       </div>
@@ -808,7 +809,7 @@
     </div>
     <div class="modal-footer">
       <button class="btn btn-outline" onclick="this.closest('.modal-overlay').classList.remove('show')">취소</button>
-      <button class="btn btn-primary" id="btn-event-move" onclick="executeEventMove()" disabled style="opacity:0.5;">행사 이동 실행</button>
+      <button class="btn btn-primary" id="btn-event-move" onclick="executeEventMove()" disabled style="opacity:0.5;cursor:not-allowed;">행사 이동 실행</button>
     </div>
   </div>
 </div>
@@ -961,8 +962,8 @@
 
       <!-- 기존 결제 정보 -->
       <div class="form-group">
-        <label>기존 결제 (취소 대상)</label>
-        <div style="background:#ffebee;border:1px solid #ffcdd2;border-radius:8px;padding:12px;">
+        <label>기존 결제 (재결제 완료 후 취소 대상)</label>
+        <div style="background:#fff8e1;border:1px solid #ffe082;border-radius:8px;padding:12px;">
           <div style="display:flex;justify-content:space-between;align-items:center;">
             <div>
               <div style="font-size:11px;color:#888;">PG결제 #2</div>
@@ -970,8 +971,8 @@
               <div style="font-size:11px;color:#888;margin-top:2px;" class="text-mono">26040708-4300101H-001</div>
             </div>
             <div style="text-align:right;">
-              <div style="font-family:monospace;font-weight:700;font-size:18px;color:#d32f2f;" id="pc-cancel-amount">2,038,000원</div>
-              <div style="font-size:10px;color:#d32f2f;">← 전액 취소</div>
+              <div style="font-family:monospace;font-weight:700;font-size:18px;color:#e65100;" id="pc-cancel-amount">2,038,000원</div>
+              <div style="font-size:10px;color:#e65100;">← 재결제 확인 후 자동 취소</div>
             </div>
           </div>
         </div>
@@ -982,24 +983,25 @@
         <div style="font-size:11px;font-weight:700;color:#888;margin-bottom:8px;">처리 프로세스</div>
         <div style="display:flex;flex-direction:column;gap:6px;font-size:12px;">
           <div style="display:flex;align-items:center;gap:8px;">
-            <span style="background:#ffebee;color:#d32f2f;width:22px;height:22px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;flex-shrink:0;">1</span>
-            <span>기존 PG 결제 <strong style="color:#d32f2f;">전액 취소</strong> (nice_v2 취소 API 호출)</span>
-          </div>
-          <div style="display:flex;align-items:center;gap:8px;">
-            <span style="background:#e3f2fd;color:#1565c0;width:22px;height:22px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;flex-shrink:0;">2</span>
+            <span style="background:#e3f2fd;color:#1565c0;width:22px;height:22px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;flex-shrink:0;">1</span>
             <span>고객에게 <strong style="color:#1565c0;">재결제 링크 SMS 발송</strong></span>
           </div>
           <div style="display:flex;align-items:center;gap:8px;">
-            <span style="background:#e8f5e9;color:#2e7d32;width:22px;height:22px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;flex-shrink:0;">3</span>
-            <span>고객이 새 결제수단으로 <strong style="color:#2e7d32;">동일 금액 재결제</strong></span>
+            <span style="background:#e8f5e9;color:#2e7d32;width:22px;height:22px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;flex-shrink:0;">2</span>
+            <span>고객이 새 결제수단으로 <strong style="color:#2e7d32;">동일 금액 재결제 완료</strong></span>
+          </div>
+          <div style="display:flex;align-items:center;gap:8px;">
+            <span style="background:#ffebee;color:#d32f2f;width:22px;height:22px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;flex-shrink:0;">3</span>
+            <span>재결제 확인 후 기존 PG 결제 <strong style="color:#d32f2f;">전액 취소</strong> (자동 처리)</span>
           </div>
           <div style="display:flex;align-items:center;gap:8px;">
             <span style="background:#f5f5f5;color:#888;width:22px;height:22px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;flex-shrink:0;">4</span>
-            <span>원장에 결제취소 + 재결제 기록 자동 생성</span>
+            <span>원장에 재결제 + 기존결제취소 기록 자동 생성</span>
           </div>
         </div>
         <div style="margin-top:8px;font-size:10px;color:#999;border-top:1px solid #e8e8e8;padding-top:6px;">
-          ※ 재결제 링크 유효기간: 발송 후 24시간 | 미결제 시 자동 만료 → 재발송 가능
+          ※ 재결제 링크 유효기간: 발송 후 24시간 | 미결제 시 자동 만료 → 재발송 가능<br>
+          ※ 고객이 재결제 완료해야 기존 결제가 취소됩니다 (결제 공백 없음)
         </div>
       </div>
 
@@ -1045,7 +1047,7 @@
     </div>
     <div class="modal-footer">
       <button class="btn btn-outline" onclick="this.closest('.modal-overlay').classList.remove('show')">취소</button>
-      <button class="btn btn-primary" onclick="executePaymentChange()">결제 취소 & 재결제 링크 발송</button>
+      <button class="btn btn-primary" onclick="executePaymentChange()">재결제 링크 SMS 발송</button>
     </div>
   </div>
 </div>
@@ -1165,8 +1167,8 @@ const currentReservation = {
   arrival: '2026-06-09',
   pricePerPerson: 699000,
   travelers: 3,
-  discountPerPerson: 13000,  // 하나투어 특가 1인당 할인
-  discountRate: 0.02,  // 하나투어 2% (참고용)
+  discountPerPerson: 13000,  // 하나투어 특가 1인당 할인 (실제 적용 금액)
+  discountRate: 0.02,  // 하나투어 2% (행사이동 시 새 가격 기반 재계산용)
   discountName: '하나투어 2%',
   couponAmount: 20000,
   couponName: '상해 자유여행 20,000원 할인',
@@ -1271,7 +1273,7 @@ function selectEvent(code) {
   const discountDiff = newDiscount - oldDiscount;
 
   const oldSale = (currentReservation.pricePerPerson * currentReservation.travelers) - oldDiscount - currentReservation.couponAmount;
-  const newSale = newTotal - newDiscount; // 쿠폰은 재검증 필요
+  const newSale = newTotal - newDiscount; // 쿠폰은 재검증 필요로 제외
 
   // 테이블 업데이트
   document.getElementById('diff-new-price').textContent = event.price.toLocaleString();
@@ -1283,21 +1285,21 @@ function selectEvent(code) {
   document.getElementById('diff-total').style.color = totalDiff >= 0 ? '#d32f2f' : '#1565c0';
 
   document.getElementById('diff-new-discount').textContent = '-' + newDiscount.toLocaleString();
-  document.getElementById('diff-discount').textContent = formatDiff(-Math.abs(discountDiff));
+  document.getElementById('diff-discount').textContent = formatDiff(-(newDiscount - oldDiscount));
 
   document.getElementById('diff-new-sale').textContent = newSale.toLocaleString();
-  const saleDiff = newSale - oldSale - currentReservation.couponAmount; // 쿠폰 제외한 순변동
   document.getElementById('diff-sale').textContent = formatDiff(newSale - oldSale);
   document.getElementById('diff-sale').style.color = (newSale - oldSale) >= 0 ? '#d32f2f' : '#1565c0';
 
   // 원장 항목 업데이트
   document.getElementById('ledger-charge').textContent = formatDiff(totalDiff);
-  document.getElementById('ledger-discount').textContent = formatDiff(-Math.abs(discountDiff));
+  document.getElementById('ledger-discount').textContent = formatDiff(-(newDiscount - oldDiscount));
 
   // 실행 버튼 활성화
   const btn = document.getElementById('btn-event-move');
   btn.disabled = false;
   btn.style.opacity = '1';
+  btn.style.cursor = 'pointer';
 }
 
 function clearEventSelection() {
@@ -1342,6 +1344,9 @@ function executeEventMove() {
 
   // 화면 업데이트 - 여행 상품 정보
   updateProductInfo(newEvent);
+
+  // 전체 금액 재계산 (결제 영역 연동)
+  recalcAllAmounts();
 
   // 이력 표시
   renderEventHistory();
@@ -1391,14 +1396,7 @@ function updateProductInfo(event) {
     }
   });
 
-  // 금액 카드 업데이트
-  const amountCards = document.querySelectorAll('.amount-card .value');
-  if (amountCards.length >= 5) {
-    amountCards[0].textContent = newTotal.toLocaleString();  // 상품금액
-    amountCards[1].textContent = '-' + (newDiscount + currentReservation.couponAmount).toLocaleString(); // 할인금액
-    amountCards[2].textContent = newSaleAmount.toLocaleString(); // 판매금액
-    amountCards[4].textContent = newSaleAmount.toLocaleString(); // 결제필요금액
-  }
+  // 금액 카드는 recalcAllAmounts()에서 일괄 업데이트
 }
 
 function renderEventHistory() {
@@ -1784,6 +1782,16 @@ function applyCouponFromModal(couponId) {
   if (appliedCoupon) {
     const oldCoupon = userCoupons.find(c => c.id === appliedCoupon.id);
     if (oldCoupon) oldCoupon.status = 'available';
+    // 해제 이력 기록
+    couponHistory.push({
+      action: '쿠폰 교체(해제)',
+      couponName: appliedCoupon.name,
+      beforeAmount: appliedCoupon.amount,
+      afterAmount: 0,
+      date: '2026-04-07 ' + new Date().toLocaleTimeString('ko-KR', {hour:'2-digit', minute:'2-digit'}),
+      user: '김서현',
+      reason: '다른 쿠폰 적용으로 교체'
+    });
   }
 
   // 새 쿠폰 적용
@@ -1973,13 +1981,16 @@ function recalcAllAmounts() {
   const saleAmount = totalProduct - totalDiscount - couponAmount;
   const needPay = saleAmount + totalPenalty;
 
-  // 금액 카드 업데이트
-  const amountCards = document.querySelectorAll('.amount-summary:first-of-type .amount-card .value');
-  if (amountCards.length >= 4) {
-    amountCards[0].textContent = totalProduct.toLocaleString();
-    amountCards[1].textContent = `-${(totalDiscount + couponAmount).toLocaleString()}`;
-    // amountCards[2] = penalty (already managed by recalcPenalty)
-    amountCards[3].textContent = needPay.toLocaleString();
+  // 금액 카드 업데이트 (예약 금액 영역의 4칸: 상품금액, 할인금액, 취소위약금, 결제필요금액)
+  const reservationAmountSection = document.querySelector('.amount-summary[style*="repeat(4"]');
+  if (reservationAmountSection) {
+    const cards = reservationAmountSection.querySelectorAll('.amount-card .value');
+    if (cards.length >= 4) {
+      cards[0].textContent = totalProduct.toLocaleString();
+      cards[1].textContent = `-${(totalDiscount + couponAmount).toLocaleString()}`;
+      // cards[2] = penalty total (managed by recalcPenalty)
+      cards[3].textContent = needPay.toLocaleString();
+    }
   }
 
   // 결제 필요 금액
@@ -2018,32 +2029,30 @@ function executePaymentChange() {
     id: paymentChangeHistory.length + 1,
     cancelAmount: pgAmount,
     reason: reason,
-    status: '취소완료·링크발송',
+    status: '링크발송·재결제대기',
     requestDate: '2026-04-07 ' + new Date().toLocaleTimeString('ko-KR', {hour:'2-digit', minute:'2-digit'}),
     requestUser: '김서현',
     smsTarget: '오기웅 (010-2374-8449)',
     linkExpiry: '24시간',
-    repayStatus: '대기중'
+    repayStatus: '대기중 (재결제 완료 시 기존 결제 자동 취소)'
   });
 
   // 이력 렌더링
   renderPaymentChangeHistory();
 
-  // 결제 테이블 상태 업데이트 (PG행 상태를 "취소→재결제 대기"로)
+  // 결제 테이블 상태 업데이트 (PG행 상태를 "재결제 링크 발송"으로)
   const paymentRows = document.querySelectorAll('#tab-basic .section:nth-child(5) tbody tr');
   paymentRows.forEach(row => {
     const cells = row.querySelectorAll('td');
     if (cells.length >= 10 && cells[1].textContent.includes('PG')) {
-      cells[9].innerHTML = '<span class="badge orange">취소→재결제</span>';
-      cells[6].textContent = pgAmount.toLocaleString();
-      cells[6].style.color = '#d32f2f';
+      cells[9].innerHTML = '<span class="badge orange">재결제대기</span>';
     }
   });
 
   // 모달 닫기
   document.getElementById('modal-payment-change').classList.remove('show');
 
-  showToast(`결제수단 변경: PG ${pgAmount.toLocaleString()}원 취소 완료 → 재결제 링크 SMS 발송`);
+  showToast(`재결제 링크 SMS 발송 완료 → 고객 재결제 완료 시 기존 PG ${pgAmount.toLocaleString()}원 자동 취소`);
 }
 
 function renderPaymentChangeHistory() {
