@@ -5725,33 +5725,39 @@ flowchart LR
               <!-- 고급 펼치기 -->
               <div style="border-top:1px solid #f0f0f0;margin:4px -24px 4px;"></div>
               <div id="v4-adv-toggle" onclick="v4ToggleAdv()" style="cursor:pointer;padding:8px 4px;display:flex;align-items:center;gap:6px;color:rgba(0,0,0,0.45);font-size:12px;font-weight:500;user-select:none;">
-                <span id="v4-adv-arrow">▶</span> 고급 조건 직접 추가
+                <span id="v4-adv-arrow">▶</span> 직접 조건 만들기
               </div>
 
               <div id="v4-adv-wrap" style="display:none;">
-                <div class="preset-card" onclick="v4SelectPreset('operator_accom_airline',this)">
-                  <div class="preset-card-icon">🔀</div>
-                  <div>
-                    <div class="preset-card-name">공급사 + 숙소 + 항공사</div>
-                    <div class="preset-card-desc">여행지+숙소+항공 전체 조합</div>
+                <!-- 자유 조건 빌더 -->
+                <div style="background:#fafafa;border:1.5px dashed #d9d9d9;border-radius:10px;padding:14px 16px;">
+                  <div style="font-size:11px;font-weight:700;color:rgba(0,0,0,0.35);letter-spacing:0.4px;text-transform:uppercase;margin-bottom:12px;display:flex;align-items:center;gap:6px;">
+                    <span>🛠️</span> 조건 직접 구성
+                    <span style="font-size:10px;font-weight:400;color:rgba(0,0,0,0.25);">— 원하는 대상과 값을 자유롭게 조합</span>
                   </div>
-                  <span class="preset-card-count" id="pc-operator_accom_airline">—</span>
-                </div>
-                <div class="preset-card" onclick="v4SelectPreset('operator_place',this)">
-                  <div class="preset-card-icon">🗺️</div>
-                  <div>
-                    <div class="preset-card-name">공급사 + 여행지</div>
-                    <div class="preset-card-desc">여행지별 공급사 안내</div>
+
+                  <!-- 전체 op 선택 -->
+                  <div style="display:flex;align-items:center;gap:8px;margin-bottom:12px;font-size:12px;color:rgba(0,0,0,0.55);">
+                    아래 조건을
+                    <select class="fi" style="height:28px;font-size:12px;width:100px;" id="v4-custom-op">
+                      <option value="all">모두 만족</option>
+                      <option value="any">하나라도 만족</option>
+                    </select>
+                    하는 상품에 적용
                   </div>
-                  <span class="preset-card-count" id="pc-operator_place">—</span>
-                </div>
-                <div class="preset-card" onclick="v4SelectPreset('operator_accom_meal_airline',this)">
-                  <div class="preset-card-icon">🎯</div>
-                  <div>
-                    <div class="preset-card-name">공급사 + 숙소 + 식사 + 항공사</div>
-                    <div class="preset-card-desc">완전 특정 상품 조합</div>
-                  </div>
-                  <span class="preset-card-count" id="pc-operator_accom_meal_airline">—</span>
+
+                  <!-- 조건 행 목록 -->
+                  <div id="v4-custom-clues" style="display:flex;flex-direction:column;gap:8px;"></div>
+
+                  <!-- 조건 추가 버튼 -->
+                  <button onclick="v4AddCustomClue()" style="margin-top:10px;width:100%;padding:8px;border:1.5px dashed #91caff;border-radius:8px;background:#f0f7ff;color:#1677ff;font-size:12px;font-weight:600;cursor:pointer;font-family:inherit;transition:all 0.15s;" onmouseover="this.style.background='#e0efff'" onmouseout="this.style.background='#f0f7ff'">
+                    + 조건 추가
+                  </button>
+
+                  <!-- 적용 버튼 -->
+                  <button onclick="v4ApplyCustom()" style="margin-top:8px;width:100%;padding:9px;border:none;border-radius:8px;background:#1677ff;color:#fff;font-size:13px;font-weight:600;cursor:pointer;font-family:inherit;transition:all 0.15s;" onmouseover="this.style.background='#4096ff'" onmouseout="this.style.background='#1677ff'">
+                    이 조건으로 적용 →
+                  </button>
                 </div>
               </div>
 
@@ -9183,6 +9189,296 @@ function v4ToggleAdv() {
   const isOpen = wrap.style.display !== 'none';
   wrap.style.display = isOpen ? 'none' : '';
   arrow.textContent = isOpen ? '▶' : '▼';
+  // 처음 열 때 빈 조건 1개 자동 추가
+  if (!isOpen && v4CustomClues.length === 0) v4AddCustomClue();
+}
+
+// ---- 자유 조건 빌더 ----
+
+// 사용 가능한 전체 대상 목록
+const V4_SUBJECTS = [
+  { key: 'operatorId',      label: '공급사',       type: 'select',  options: () => V4_OPERATORS.map(o => ({val: String(o.id), label: o.name})) },
+  { key: 'accommodationId', label: '숙소',         type: 'select',  options: () => V4_ACCOMMODATIONS.map(a => ({val: String(a.id), label: `${a.name} (${a.place})`})) },
+  { key: 'accomMealPlan',   label: '식사',         type: 'select',  options: () => V4_MEALS.map(m => ({val: m.code, label: m.label})) },
+  { key: 'airlineId',       label: '항공사',       type: 'select',  options: () => V4_AIRLINES.map(a => ({val: String(a.id), label: `${a.name} (${a.iata})`})) },
+  { key: 'targetPlaceId',   label: '여행지',       type: 'select',  options: () => V4_PLACES.map(p => ({val: String(p.id), label: p.name})) },
+  { key: 'startAirportId',  label: '출발공항',     type: 'text',    placeholder: '공항 ID (예: 971)' },
+  { key: 'accomEarlyCheckIn',label: '얼리체크인',  type: 'bool' },
+  { key: 'accomPickup',     label: '픽업포함',     type: 'bool' },
+  { key: 'conductor',       label: '인솔자포함',   type: 'bool' },
+  { key: 'guide',           label: '가이드포함',   type: 'bool' },
+  { key: 'kind',            label: '상품종류',     type: 'select',  options: () => [{val:'AIRTEL', label:'AIRTEL (항공+숙박)'},{val:'TOUR', label:'TOUR (투어)'},{val:'HOTEL', label:'HOTEL (숙박만)'}] },
+];
+
+// 타입별 지원 연산자
+const V4_OPS_BY_TYPE = {
+  select: [
+    { val: 'eq',     label: '=  같음' },
+    { val: 'ne',     label: '≠  같지 않음' },
+    { val: 'anyOf',  label: '∈  목록 중 하나' },
+    { val: 'noneOf', label: '∉  목록 중 없음' },
+  ],
+  text: [
+    { val: 'eq',       label: '=  같음' },
+    { val: 'ne',       label: '≠  같지 않음' },
+    { val: 'contains', label: '∋  포함' },
+    { val: 'anyOf',    label: '∈  목록 중 하나' },
+  ],
+  bool: [
+    { val: 'isTrue',  label: '✓  참 (해당)' },
+    { val: 'isFalse', label: '✗  거짓 (미해당)' },
+  ],
+  number: [
+    { val: 'eq',  label: '=  같음' },
+    { val: 'ne',  label: '≠  다름' },
+    { val: 'gt',  label: '>  초과' },
+    { val: 'lt',  label: '<  미만' },
+    { val: 'goe', label: '≥  이상' },
+    { val: 'loe', label: '≤  이하' },
+    { val: 'between', label: '↔  사이' },
+  ],
+};
+
+let v4CustomClues = []; // [{id, sub, op, value}]
+let v4CustomIdSeq = 0;
+
+function v4AddCustomClue() {
+  const id = ++v4CustomIdSeq;
+  v4CustomClues.push({ id, sub: '', op: 'eq', value: '' });
+  v4RenderCustomClues();
+}
+
+function v4RemoveCustomClue(id) {
+  v4CustomClues = v4CustomClues.filter(c => c.id !== id);
+  v4RenderCustomClues();
+}
+
+function v4RenderCustomClues() {
+  const container = document.getElementById('v4-custom-clues');
+  if (!container) return;
+
+  if (v4CustomClues.length === 0) {
+    container.innerHTML = `<div style="text-align:center;padding:14px;color:rgba(0,0,0,0.25);font-size:12px;">조건을 추가해보세요</div>`;
+    return;
+  }
+
+  container.innerHTML = v4CustomClues.map((clue, idx) => {
+    const subj = V4_SUBJECTS.find(s => s.key === clue.sub);
+    const type = subj ? subj.type : 'text';
+    const ops  = V4_OPS_BY_TYPE[type] || V4_OPS_BY_TYPE.text;
+    const needsMulti = clue.op === 'anyOf' || clue.op === 'noneOf';
+    const needsBetween = clue.op === 'between';
+    const isBool = type === 'bool';
+
+    // 대상 select
+    const subOpts = V4_SUBJECTS.map(s =>
+      `<option value="${s.key}" ${clue.sub===s.key?'selected':''}>${s.label}</option>`
+    ).join('');
+
+    // 연산자 select
+    const opOpts = ops.map(o =>
+      `<option value="${o.val}" ${clue.op===o.val?'selected':''}>${o.label}</option>`
+    ).join('');
+
+    // 값 입력 UI
+    let valueUI = '';
+    if (!isBool) {
+      if (subj && subj.type === 'select' && !needsMulti) {
+        const valOpts = (subj.options ? subj.options() : []).map(o =>
+          `<option value="${o.val}" ${clue.value===o.val?'selected':''}>${o.label}</option>`
+        ).join('');
+        valueUI = `<select class="fi" style="height:32px;font-size:12px;flex:1;" onchange="v4SetCustomVal(${clue.id},'value',this.value)"><option value="">값 선택</option>${valOpts}</select>`;
+      } else if (subj && subj.type === 'select' && needsMulti) {
+        const opts = subj.options ? subj.options() : [];
+        const selected = clue.value ? clue.value.split(',') : [];
+        valueUI = `<div style="flex:1;display:flex;flex-wrap:wrap;gap:4px;">${opts.map(o =>
+          `<button onclick="v4ToggleMultiVal(${clue.id},'${o.val}')" style="padding:3px 8px;border-radius:12px;font-size:11px;cursor:pointer;font-family:inherit;border:1.5px solid ${selected.includes(o.val)?'#1677ff':'#d9d9d9'};background:${selected.includes(o.val)?'#e6f4ff':'#fff'};color:${selected.includes(o.val)?'#1677ff':'rgba(0,0,0,0.55)'};">${o.label}</button>`
+        ).join('')}</div>`;
+      } else if (needsBetween) {
+        const vals = clue.value ? clue.value.split(',') : ['',''];
+        valueUI = `<input class="fi" style="flex:1;height:32px;font-size:12px;" value="${vals[0]||''}" placeholder="시작" oninput="v4SetCustomBetween(${clue.id},'from',this.value)">
+          <span style="font-size:12px;color:rgba(0,0,0,0.35);">~</span>
+          <input class="fi" style="flex:1;height:32px;font-size:12px;" value="${vals[1]||''}" placeholder="끝" oninput="v4SetCustomBetween(${clue.id},'to',this.value)">`;
+      } else {
+        valueUI = `<input class="fi" type="text" style="flex:1;height:32px;font-size:12px;" value="${clue.value}" placeholder="${subj&&subj.placeholder||'값 입력'}" oninput="v4SetCustomVal(${clue.id},'value',this.value)">`;
+      }
+    }
+
+    return `<div style="display:flex;align-items:flex-start;gap:6px;padding:10px 12px;background:#fff;border:1px solid #e8e8e8;border-radius:8px;">
+      <div style="display:flex;flex-direction:column;gap:5px;flex:1;">
+        <div style="display:flex;align-items:center;gap:6px;">
+          <span style="font-size:10px;font-weight:700;color:rgba(0,0,0,0.25);width:16px;text-align:center;">${idx+1}</span>
+          <select class="fi" style="height:32px;font-size:12px;flex:1;" onchange="v4SetCustomSub(${clue.id},this.value)">
+            <option value="">대상 선택...</option>
+            ${subOpts}
+          </select>
+          ${!isBool ? `<select class="fi" style="height:32px;font-size:12px;width:130px;" onchange="v4SetCustomVal(${clue.id},'op',this.value)">${opOpts}</select>` : `<select class="fi" style="height:32px;font-size:12px;width:130px;" onchange="v4SetCustomVal(${clue.id},'op',this.value)">${opOpts}</select>`}
+        </div>
+        ${!isBool ? `<div style="display:flex;align-items:center;gap:6px;padding-left:22px;">${valueUI}</div>` : ''}
+      </div>
+      <button onclick="v4RemoveCustomClue(${clue.id})" style="background:none;border:none;color:rgba(0,0,0,0.25);cursor:pointer;font-size:16px;padding:4px;line-height:1;margin-top:3px;" onmouseover="this.style.color='#f5222d'" onmouseout="this.style.color='rgba(0,0,0,0.25)'">✕</button>
+    </div>`;
+  }).join('');
+}
+
+function v4SetCustomSub(id, sub) {
+  const clue = v4CustomClues.find(c => c.id === id);
+  if (!clue) return;
+  const oldSubj = V4_SUBJECTS.find(s => s.key === clue.sub);
+  const newSubj = V4_SUBJECTS.find(s => s.key === sub);
+  clue.sub = sub;
+  clue.value = '';
+  // 타입 바뀌면 op 초기화
+  if (!oldSubj || oldSubj.type !== (newSubj && newSubj.type)) {
+    const type = newSubj ? newSubj.type : 'text';
+    const ops = V4_OPS_BY_TYPE[type] || V4_OPS_BY_TYPE.text;
+    clue.op = ops[0]?.val || 'eq';
+  }
+  v4RenderCustomClues();
+}
+
+function v4SetCustomVal(id, field, val) {
+  const clue = v4CustomClues.find(c => c.id === id);
+  if (clue) {
+    clue[field] = val;
+    // op 바뀌면 value 초기화
+    if (field === 'op') { clue.value = ''; v4RenderCustomClues(); }
+  }
+}
+
+function v4ToggleMultiVal(id, val) {
+  const clue = v4CustomClues.find(c => c.id === id);
+  if (!clue) return;
+  let selected = clue.value ? clue.value.split(',').filter(Boolean) : [];
+  if (selected.includes(val)) selected = selected.filter(v => v !== val);
+  else selected.push(val);
+  clue.value = selected.join(',');
+  v4RenderCustomClues();
+}
+
+function v4SetCustomBetween(id, which, val) {
+  const clue = v4CustomClues.find(c => c.id === id);
+  if (!clue) return;
+  const parts = clue.value ? clue.value.split(',') : ['',''];
+  if (which === 'from') parts[0] = val;
+  else parts[1] = val;
+  clue.value = parts.join(',');
+}
+
+function v4ApplyCustom() {
+  const validClues = v4CustomClues.filter(c => c.sub && (c.op === 'isTrue' || c.op === 'isFalse' || c.value));
+  if (validClues.length === 0) {
+    alert('조건을 하나 이상 완성해주세요.\n대상과 값을 모두 입력해야 합니다.');
+    return;
+  }
+
+  // 커스텀 상태를 v4State에 반영 (직접 매칭)
+  v4State.preset = 'custom';
+  v4State.customClues = validClues;
+  v4State.operator = null; v4State.accom = null;
+  v4State.meal = null; v4State.airline = null; v4State.place = null;
+
+  // 프리셋 카드 선택 해제
+  document.querySelectorAll('#v4-preset-grid .preset-card').forEach(c => c.classList.remove('selected'));
+
+  // 조건 패널 업데이트
+  const panel = document.getElementById('v4-condition-panel');
+  panel.classList.add('shown');
+
+  const op = document.getElementById('v4-custom-op')?.value || 'all';
+  const cluesSummary = validClues.map(c => {
+    const s = V4_SUBJECTS.find(x => x.key === c.sub);
+    const label = s ? s.label : c.sub;
+    return `<span style="display:inline-flex;align-items:center;gap:3px;font-size:11px;font-weight:600;padding:2px 8px;border-radius:6px;background:#f0f5ff;color:#2f54eb;border:1px solid #adc6ff;">${label}</span>`;
+  }).join('<span style="font-size:10px;color:rgba(0,0,0,0.3);margin:0 2px;">${op==='all'?'AND':'OR'}</span>');
+
+  document.getElementById('v4-condition-fields').innerHTML = `
+    <div class="v4-condition-box">
+      <div class="v4-condition-title">🛠️ 직접 구성한 조건 <span style="font-size:10px;font-weight:400;color:rgba(0,0,0,0.35);">(${op === 'all' ? '모두 만족' : '하나라도 만족'})</span></div>
+      ${validClues.map((c,i) => {
+        const s = V4_SUBJECTS.find(x => x.key === c.sub);
+        const label = s ? s.label : c.sub;
+        const opLabel = Object.values(V4_OPS_BY_TYPE).flat().find(o => o.val === c.op)?.label || c.op;
+        const valLabel = (s && s.type === 'select' && s.options)
+          ? (c.value.includes(',')
+              ? c.value.split(',').map(v => s.options().find(o=>o.val===v)?.label||v).join(', ')
+              : s.options().find(o=>o.val===c.value)?.label || c.value)
+          : c.value;
+        return `<div style="display:flex;align-items:center;gap:6px;font-size:12px;padding:5px 0;border-bottom:1px solid #f0f0f0;">
+          ${i > 0 ? `<span style="font-size:10px;background:#f0f0f0;border-radius:4px;padding:1px 5px;color:rgba(0,0,0,0.45);flex-shrink:0;">${op==='all'?'AND':'OR'}</span>` : '<span style="width:34px;flex-shrink:0;"></span>'}
+          <span style="font-weight:600;color:rgba(0,0,0,0.75);min-width:64px;">${label}</span>
+          <span style="color:rgba(0,0,0,0.35);font-size:11px;">${opLabel}</span>
+          <span style="color:#1677ff;font-weight:600;">${c.op==='isTrue'?'예' : c.op==='isFalse'?'아니오' : valLabel}</span>
+        </div>`;
+      }).join('')}
+    </div>`;
+
+  // 커스텀 매칭 (단순화: sub 필드 직접 매핑)
+  v4RenderCustomMatchPreview(validClues, op);
+  v4UpdateCustomRuleTags(validClues);
+  v4AutoAdminNameFromCustom(validClues);
+
+  // 규칙 JSON
+  document.getElementById('v4-rule-preview').style.display = '';
+  document.getElementById('v4-rule-json').textContent = JSON.stringify({ op, clues: validClues.map(c => ({ sub: c.sub, op: c.op, value: c.value })) }, null, 2);
+}
+
+function v4RenderCustomMatchPreview(clues, op) {
+  const keyToField = {
+    operatorId: 'operatorId', accommodationId: 'accommodationId',
+    accomMealPlan: 'meal', airlineId: 'airlineId', targetPlaceId: 'placeId',
+  };
+  const matched = V4_PRODUCTS.filter(p => {
+    const results = clues.map(c => {
+      const field = keyToField[c.sub];
+      if (!field) return true; // 모르는 필드는 패스
+      const pval = String(p[field] || '');
+      if (c.op === 'eq')     return pval === c.value;
+      if (c.op === 'ne')     return pval !== c.value;
+      if (c.op === 'anyOf')  return c.value.split(',').includes(pval);
+      if (c.op === 'noneOf') return !c.value.split(',').includes(pval);
+      if (c.op === 'isTrue') return !!p[field];
+      if (c.op === 'isFalse') return !p[field];
+      return true;
+    });
+    return op === 'all' ? results.every(Boolean) : results.some(Boolean);
+  });
+
+  const box = document.getElementById('v4-match-preview');
+  if (matched.length === 0) {
+    box.innerHTML = `<div class="v4-match-empty"><div style="font-size:28px;margin-bottom:8px;">🔍</div><div style="font-size:13px;font-weight:500;color:rgba(0,0,0,0.35);">조건에 맞는 상품이 없습니다</div><div style="font-size:11px;color:rgba(0,0,0,0.25);margin-top:4px;">조건을 변경해보세요</div></div>`;
+    return;
+  }
+  const previewItems = matched.slice(0,5).map(p =>
+    `<div class="v4-match-product-row"><span style="font-size:10px;background:#e6f4ff;color:#1677ff;border-radius:4px;padding:1px 5px;font-weight:700;flex-shrink:0;">#${p.id}</span><span style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${p.title}</span></div>`
+  ).join('');
+  const more = matched.length > 5 ? `<div style="font-size:11px;color:rgba(0,0,0,0.35);text-align:right;margin-top:4px;">+${matched.length-5}개 더...</div>` : '';
+  box.innerHTML = `<div class="v4-match-box"><div style="display:flex;align-items:center;gap:12px;margin-bottom:8px;"><div><div class="v4-match-count">${matched.length}</div><div class="v4-match-label">개 상품에 적용됩니다</div></div><div style="flex:1;font-size:11px;color:rgba(0,0,0,0.45);line-height:1.6;">이 POST를 등록하면 아래 상품들에<br>자동으로 연결됩니다</div></div><div class="v4-match-products">${previewItems}${more}</div></div>`;
+}
+
+function v4UpdateCustomRuleTags(clues) {
+  const tags = clues.map(c => {
+    const s = V4_SUBJECTS.find(x => x.key === c.sub);
+    const label = s ? s.label : c.sub;
+    return `<span class="rule-tag">🛠️ ${label}</span>`;
+  });
+  document.getElementById('v4-rule-tags').innerHTML = tags.join('');
+}
+
+function v4AutoAdminNameFromCustom(clues) {
+  const keyToMaster = {
+    operatorId: (v) => V4_OPERATORS.find(x=>x.id===Number(v))?.name,
+    accommodationId: (v) => V4_ACCOMMODATIONS.find(x=>x.id===Number(v))?.name,
+    accomMealPlan: (v) => v,
+    airlineId: (v) => V4_AIRLINES.find(x=>x.id===Number(v))?.name,
+    targetPlaceId: (v) => V4_PLACES.find(x=>x.id===Number(v))?.name,
+  };
+  const parts = clues.map(c => {
+    const fn = keyToMaster[c.sub];
+    return fn ? fn(c.value) : null;
+  }).filter(Boolean);
+  const base = parts.length ? parts.join('_') : '직접조건';
+  document.getElementById('v4-admin-name').value = base;
 }
 
 function initV4() {
