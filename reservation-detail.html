@@ -362,7 +362,7 @@
             <span class="feature-tag">신규</span> 결제수단 변경
           </button>
           <button class="btn btn-outline btn-sm btn-icon" onclick="document.getElementById('modal-transfer').classList.add('show')">
-            <span class="feature-tag">신규</span> 결제 이관
+            <span class="feature-tag">신규</span> 결제 이관 요청
           </button>
         </div>
       </div>
@@ -406,7 +406,7 @@
 
         <div class="design-note">
           <strong>[결제수단 변경]</strong> 예약금액 수정 없이 기존 결제 취소 → 새 결제수단으로 동일 금액 재결제. 고객에게 잘못된 금액 노출 방지.<br>
-          <strong>[결제 이관]</strong> 이 예약의 결제를 다른 예약번호로 이관. 양쪽 원장에 이관 기록 자동 생성. 개발실 수동 작업 제거.
+          <strong>[결제 이관 요청]</strong> 이 예약의 결제를 다른 예약으로 이관 요청. 개발실에서 처리 후 양쪽 원장에 이관 기록 생성. 요청/처리 이력 시스템 기록.
         </div>
       </div>
     </div>
@@ -820,133 +820,88 @@
 
 <!-- 결제 이관 모달 -->
 <div class="modal-overlay" id="modal-transfer">
-  <div class="modal" style="width:720px;">
-    <div class="modal-header"><h3>결제 이관</h3><button class="close" onclick="this.closest('.modal-overlay').classList.remove('show')">&times;</button></div>
+  <div class="modal" style="width:560px;">
+    <div class="modal-header"><h3>결제 이관 요청</h3><button class="close" onclick="this.closest('.modal-overlay').classList.remove('show')">&times;</button></div>
     <div class="modal-body">
 
       <!-- 안내 -->
-      <div style="background:#e3f2fd;border-radius:8px;padding:12px;font-size:12px;color:#1565c0;margin-bottom:16px;">
-        <strong>이 예약의 결제 데이터를 다른 예약으로 이관합니다.</strong><br>
-        <span style="font-size:11px;opacity:0.8;">양쪽 원장에 이관 기록이 자동 생성됩니다. 현재 개발실에서 수동으로 처리하던 작업을 시스템화합니다.</span>
+      <div style="background:#fff3e0;border:1px solid #ffe082;border-radius:8px;padding:12px;font-size:12px;color:#e65100;margin-bottom:16px;">
+        <strong>결제 이관은 개발실에서 처리합니다.</strong><br>
+        <span style="font-size:11px;">이관 요청을 등록하면 개발실에서 확인 후 처리하며, 처리 이력이 시스템에 기록됩니다.</span>
       </div>
 
-      <!-- STEP 1: 현재 예약 결제 정보 -->
-      <div style="margin-bottom:16px;">
-        <label style="display:block;font-size:12px;font-weight:600;color:#666;margin-bottom:8px;">STEP 1. 이관 출발 — 현재 예약 결제 내역</label>
-        <div style="background:#f5f5f5;border-radius:8px;padding:12px;border:1px solid #e0e0e0;">
-          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">
-            <div>
-              <span class="text-mono" style="font-weight:700;font-size:13px;">26040708-4300101H</span>
-              <span class="badge green" style="margin-left:6px;">결제완료</span>
-            </div>
-            <div style="font-size:11px;color:#888;">예약자: 오기웅 | 하나투어 상하이 자유여행 4일</div>
+      <!-- 현재 예약 정보 -->
+      <div style="background:#f5f5f5;border-radius:8px;padding:12px;border:1px solid #e0e0e0;margin-bottom:16px;">
+        <div style="font-size:11px;font-weight:600;color:#888;margin-bottom:6px;">현재 예약 (이관 출발)</div>
+        <div style="display:flex;justify-content:space-between;align-items:center;">
+          <div>
+            <span class="text-mono" style="font-weight:700;font-size:13px;">26040708-4300101H</span>
+            <span class="badge green" style="margin-left:6px;">결제완료</span>
           </div>
-          <!-- 결제 건 리스트 (체크박스) -->
-          <table style="font-size:11px;">
-            <thead><tr>
-              <th style="width:30px;"><input type="checkbox" id="transfer-check-all" checked onchange="toggleTransferAll(this)"></th>
-              <th>구분</th><th>PG사</th><th>결제수단</th><th>결제번호</th><th class="text-right">결제금액</th><th class="text-right">환불금액</th><th class="text-right">이관 금액</th>
-            </tr></thead>
-            <tbody>
-              <tr>
-                <td><input type="checkbox" class="transfer-check" data-amount="20000" data-type="coupon" checked onchange="updateTransferAmount()"></td>
-                <td><span class="badge purple" style="font-size:10px;">쿠폰</span></td>
-                <td>-</td><td>쿠폰</td>
-                <td class="text-mono" style="font-size:10px;">836331bf...</td>
-                <td class="text-right text-mono">20,000</td>
-                <td class="text-right text-mono">0</td>
-                <td class="text-right text-mono" style="font-weight:600;">20,000</td>
-              </tr>
-              <tr>
-                <td><input type="checkbox" class="transfer-check" data-amount="2038000" data-type="pg" checked onchange="updateTransferAmount()"></td>
-                <td><span class="badge blue" style="font-size:10px;">PG</span></td>
-                <td>nice_v2</td><td>신용카드</td>
-                <td class="text-mono" style="font-size:10px;">26040708-4300101H-001</td>
-                <td class="text-right text-mono">2,038,000</td>
-                <td class="text-right text-mono">0</td>
-                <td class="text-right text-mono" style="font-weight:600;">2,038,000</td>
-              </tr>
-            </tbody>
-            <tfoot>
-              <tr style="font-weight:700;border-top:2px solid #333;">
-                <td colspan="5">이관 합계</td>
-                <td class="text-right text-mono" id="transfer-total-pay">2,058,000</td>
-                <td class="text-right text-mono">0</td>
-                <td class="text-right text-mono" style="color:#1565c0;font-size:13px;" id="transfer-total-amount">2,058,000</td>
-              </tr>
-            </tfoot>
-          </table>
+          <span style="font-weight:700;font-family:monospace;font-size:13px;">2,058,000원</span>
         </div>
+        <div style="font-size:11px;color:#888;margin-top:4px;">오기웅 | 하나투어 상하이 자유여행 4일 | 쿠폰 20,000 + PG 2,038,000</div>
       </div>
 
-      <!-- STEP 2: 대상 예약 조회 -->
-      <div style="margin-bottom:16px;">
-        <label style="display:block;font-size:12px;font-weight:600;color:#666;margin-bottom:8px;">STEP 2. 이관 대상 예약 조회</label>
-        <div style="display:flex;gap:8px;">
-          <input type="text" id="transfer-target-input" placeholder="예약번호 입력 (예: 26040709-XXXXXXXX)" style="flex:1;">
-          <button class="btn btn-outline" onclick="searchTransferTarget()" style="white-space:nowrap;">조회</button>
-        </div>
+      <!-- 이관 대상 예약번호 -->
+      <div class="form-group">
+        <label>이관 대상 예약번호</label>
+        <input type="text" id="transfer-target-input" placeholder="예약번호 입력 (예: 26040709-XXXXXXXX)">
         <div class="help">동일 예약자의 다른 예약 건으로만 이관 가능합니다.</div>
-      </div>
-
-      <!-- 대상 예약 조회 결과 -->
-      <div id="transfer-target-result" style="display:none;margin-bottom:16px;">
-        <!-- 동적으로 채워짐 -->
-      </div>
-
-      <!-- STEP 3: 원장 변동 미리보기 (대상 확인 후 표시) -->
-      <div id="transfer-ledger-preview" style="display:none;margin-bottom:16px;">
-        <label style="display:block;font-size:12px;font-weight:600;color:#666;margin-bottom:8px;">STEP 3. 원장 변동 미리보기</label>
-        <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
-          <!-- 출발 예약 원장 -->
-          <div style="background:#fff5f5;border:1px solid #ffcdd2;border-radius:8px;padding:12px;">
-            <div style="font-size:11px;font-weight:700;color:#d32f2f;margin-bottom:8px;">출발 예약 (현재)</div>
-            <div style="font-size:11px;display:flex;flex-direction:column;gap:4px;">
-              <div style="display:flex;align-items:center;gap:6px;">
-                <span style="background:#ffebee;color:#c62828;padding:1px 6px;border-radius:3px;font-family:monospace;font-size:10px;font-weight:700;">810</span>
-                <span>결제이관 출발</span>
-                <span style="margin-left:auto;font-family:monospace;color:#d32f2f;font-weight:600;" id="ledger-from-amount">-2,058,000</span>
-              </div>
-              <div style="font-size:10px;color:#888;margin-left:36px;">결제 데이터가 대상 예약으로 이동</div>
-            </div>
-          </div>
-          <!-- 도착 예약 원장 -->
-          <div style="background:#f1f8e9;border:1px solid #c5e1a5;border-radius:8px;padding:12px;">
-            <div style="font-size:11px;font-weight:700;color:#2e7d32;margin-bottom:8px;">도착 예약 (대상)</div>
-            <div style="font-size:11px;display:flex;flex-direction:column;gap:4px;">
-              <div style="display:flex;align-items:center;gap:6px;">
-                <span style="background:#e8f5e9;color:#2e7d32;padding:1px 6px;border-radius:3px;font-family:monospace;font-size:10px;font-weight:700;">811</span>
-                <span>결제이관 도착</span>
-                <span style="margin-left:auto;font-family:monospace;color:#2e7d32;font-weight:600;" id="ledger-to-amount">+2,058,000</span>
-              </div>
-              <div style="font-size:10px;color:#888;margin-left:36px;">출발 예약에서 결제 데이터 수신</div>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <!-- 경고 -->
-      <div id="transfer-warning" style="display:none;background:#fff3e0;border:1px solid #ffe082;border-radius:8px;padding:10px 14px;margin-bottom:16px;font-size:11px;color:#e65100;display:none;align-items:center;gap:8px;">
-        <span style="font-size:14px;">&#x26A0;</span>
-        <div>
-          <strong>주의:</strong> 결제 이관 후 현재 예약의 결제 상태가 <strong>미결제</strong>로 변경됩니다.
-          추가 결제가 필요하면 고객에게 별도 결제 링크를 발송해야 합니다.
-        </div>
       </div>
 
       <!-- 이관 사유 -->
       <div class="form-group">
         <label>이관 사유</label>
-        <select id="transfer-reason"><option>결제-예약 매칭 오류</option><option>중복 예약 정리</option><option>채널사 예약 건 핸들링</option><option>예약 분할/통합</option><option>기타</option></select>
+        <select id="transfer-reason">
+          <option>결제-예약 매칭 오류</option>
+          <option>중복 예약 정리</option>
+          <option>채널사 예약 건 핸들링</option>
+          <option>예약 분할/통합</option>
+          <option>기타</option>
+        </select>
       </div>
+
+      <!-- 상세 설명 -->
       <div class="form-group">
-        <label>비고 (선택)</label>
-        <input type="text" id="transfer-memo" placeholder="추가 메모를 입력하세요">
+        <label>상세 설명</label>
+        <textarea style="width:100%;padding:8px 12px;border:1px solid #d0d0d0;border-radius:6px;font-size:13px;min-height:80px;resize:vertical;" placeholder="이관이 필요한 사유를 상세히 작성해주세요.&#10;(예: 고객이 A예약 결제 후 B예약으로 변경 요청, 결제 데이터 이관 필요)"></textarea>
+      </div>
+
+      <!-- 처리 프로세스 안내 -->
+      <div style="background:#f5f5f5;border-radius:8px;padding:12px;font-size:11px;color:#666;">
+        <div style="font-weight:700;margin-bottom:6px;">처리 프로세스</div>
+        <div style="display:flex;flex-direction:column;gap:4px;">
+          <div style="display:flex;align-items:center;gap:6px;">
+            <span style="background:#e8eaf6;color:#283593;width:18px;height:18px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;flex-shrink:0;">1</span>
+            <span>PM이 이관 요청 등록 (이력 탭에 기록)</span>
+          </div>
+          <div style="display:flex;align-items:center;gap:6px;">
+            <span style="background:#e8eaf6;color:#283593;width:18px;height:18px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;flex-shrink:0;">2</span>
+            <span>개발실 슬랙 알림 → 확인 및 처리</span>
+          </div>
+          <div style="display:flex;align-items:center;gap:6px;">
+            <span style="background:#e8eaf6;color:#283593;width:18px;height:18px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;flex-shrink:0;">3</span>
+            <span>처리 완료 시 양쪽 원장에 이관 기록 생성</span>
+          </div>
+          <div style="display:flex;align-items:center;gap:6px;">
+            <span style="background:#e8eaf6;color:#283593;width:18px;height:18px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;flex-shrink:0;">4</span>
+            <span>PM에게 처리 완료 알림</span>
+          </div>
+        </div>
+        <div style="margin-top:8px;font-size:10px;color:#999;">※ 추후 원장 시스템 안정화 이후 자동 이관 기능으로 전환 예정</div>
+      </div>
+
+      <!-- 요청 이력 -->
+      <div style="margin-top:16px;" id="transfer-request-history">
+        <div style="font-size:11px;font-weight:600;color:#888;margin-bottom:6px;">이관 요청 이력</div>
+        <div style="font-size:11px;color:#bbb;text-align:center;padding:12px;background:#fafafa;border-radius:6px;" id="transfer-history-empty">요청 이력 없음</div>
+        <div id="transfer-history-list" style="display:none;"></div>
       </div>
     </div>
     <div class="modal-footer">
-      <button class="btn btn-outline" onclick="closeTransferModal()">취소</button>
-      <button class="btn btn-primary" id="btn-transfer-exec" onclick="executeTransfer()" disabled style="opacity:0.5;">결제 이관 실행</button>
+      <button class="btn btn-outline" onclick="this.closest('.modal-overlay').classList.remove('show')">취소</button>
+      <button class="btn btn-primary" onclick="submitTransferRequest()">이관 요청 등록</button>
     </div>
   </div>
 </div>
@@ -1261,212 +1216,83 @@ function resetEventModal() {
   }
 }
 
-// ==================== 결제 이관 기능 ====================
+// ==================== 결제 이관 요청 기능 ====================
 
-// 대상 예약 시뮬레이션 데이터
-const transferTargetDB = {
-  '26040709-4300102H': {
-    code: '26040709-4300102H',
-    booker: '오기웅',
-    bookerId: 'USR-20250101-001',
-    agency: '하나투어',
-    product: '상하이 핵심 관광 5일',
-    departure: '2026-06-20',
-    status: '예약완료',
-    payStatus: '미결제',
-    amount: 1798000,
-    paidAmount: 0,
-    sameBooker: true
-  },
-  '26040710-2100201S': {
-    code: '26040710-2100201S',
-    booker: '오기웅',
-    bookerId: 'USR-20250101-001',
-    agency: '모두투어',
-    product: '다낭 자유여행 3박5일',
-    departure: '2026-07-10',
-    status: '예약완료',
-    payStatus: '미결제',
-    amount: 2580000,
-    paidAmount: 0,
-    sameBooker: true
-  },
-  '26040711-3300101Q': {
-    code: '26040711-3300101Q',
-    booker: '김민수',
-    bookerId: 'USR-20250320-055',
-    agency: '하나투어',
-    product: '오사카 자유여행 3일',
-    departure: '2026-06-15',
-    status: '예약완료',
-    payStatus: '미결제',
-    amount: 899000,
-    paidAmount: 0,
-    sameBooker: false
-  }
-};
+let transferRequests = [];
 
-let transferTargetSelected = null;
+function submitTransferRequest() {
+  const targetCode = document.getElementById('transfer-target-input').value.trim();
+  const reason = document.getElementById('transfer-reason').value;
+  const memo = document.getElementById('transfer-memo')?.value || '';
+  const desc = document.querySelector('#modal-transfer textarea')?.value || '';
 
-function toggleTransferAll(el) {
-  document.querySelectorAll('.transfer-check').forEach(cb => { cb.checked = el.checked; });
-  updateTransferAmount();
-}
-
-function updateTransferAmount() {
-  let total = 0;
-  document.querySelectorAll('.transfer-check:checked').forEach(cb => {
-    total += parseInt(cb.dataset.amount);
-  });
-  document.getElementById('transfer-total-amount').textContent = total.toLocaleString();
-  document.getElementById('transfer-total-pay').textContent = total.toLocaleString();
-
-  // 원장 미리보기도 업데이트
-  const fromEl = document.getElementById('ledger-from-amount');
-  const toEl = document.getElementById('ledger-to-amount');
-  if (fromEl) fromEl.textContent = '-' + total.toLocaleString();
-  if (toEl) toEl.textContent = '+' + total.toLocaleString();
-
-  updateTransferButton();
-}
-
-function searchTransferTarget() {
-  const input = document.getElementById('transfer-target-input').value.trim();
-  const resultDiv = document.getElementById('transfer-target-result');
-
-  if (!input || input.length < 10) {
-    resultDiv.innerHTML = '<div style="background:#ffebee;border-radius:8px;padding:12px;font-size:12px;color:#d32f2f;">예약번호를 정확히 입력해주세요. (예: 26040709-4300102H)</div>';
-    resultDiv.style.display = 'block';
+  if (!targetCode) {
+    showToast('이관 대상 예약번호를 입력해주세요.');
     return;
   }
 
-  const target = transferTargetDB[input];
+  // 요청 등록
+  const request = {
+    id: transferRequests.length + 1,
+    fromCode: '26040708-4300101H',
+    toCode: targetCode,
+    amount: '2,058,000',
+    reason: reason,
+    description: desc,
+    status: '요청',
+    requestDate: '2026-04-07 ' + new Date().toLocaleTimeString('ko-KR', {hour:'2-digit', minute:'2-digit'}),
+    requestUser: '김서현',
+    processDate: null,
+    processUser: null
+  };
+  transferRequests.push(request);
 
-  if (!target) {
-    resultDiv.innerHTML = `
-      <div style="background:#ffebee;border-radius:8px;padding:12px;font-size:12px;color:#d32f2f;">
-        <strong>조회 실패:</strong> "${input}" 예약을 찾을 수 없습니다.<br>
-        <span style="font-size:11px;">예약번호를 다시 확인해주세요.</span>
-      </div>`;
-    resultDiv.style.display = 'block';
-    transferTargetSelected = null;
-    updateTransferButton();
-    return;
-  }
-
-  // 동일 예약자 검증
-  if (!target.sameBooker) {
-    resultDiv.innerHTML = `
-      <div style="background:#ffebee;border:2px solid #ef9a9a;border-radius:8px;padding:14px;">
-        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
-          <span class="text-mono" style="font-weight:700;font-size:13px;">${target.code}</span>
-          <span class="badge red">이관 불가</span>
-        </div>
-        <div style="font-size:12px;margin-bottom:8px;">
-          <span style="color:#888;">예약자:</span> <strong style="color:#d32f2f;">${target.booker}</strong>
-          <span style="margin-left:8px;color:#888;">|</span>
-          <span style="margin-left:8px;color:#888;">${target.agency} ${target.product}</span>
-        </div>
-        <div style="background:#fff;border-radius:6px;padding:10px;font-size:11px;color:#d32f2f;display:flex;align-items:center;gap:6px;">
-          <span style="font-size:14px;">&#x26D4;</span>
-          <strong>예약자 불일치:</strong> 현재 예약(오기웅)과 대상 예약(${target.booker})의 예약자가 다릅니다. 동일 예약자 건으로만 이관 가능합니다.
-        </div>
-      </div>`;
-    resultDiv.style.display = 'block';
-    transferTargetSelected = null;
-    updateTransferButton();
-    return;
-  }
-
-  // 조회 성공 - 동일 예약자
-  transferTargetSelected = target;
-  const amountDiff = target.amount - parseInt(document.getElementById('transfer-total-amount').textContent.replace(/,/g, ''));
-
-  resultDiv.innerHTML = `
-    <div style="background:#e8f5e9;border:2px solid #4caf50;border-radius:8px;padding:14px;">
-      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">
-        <div>
-          <span class="text-mono" style="font-weight:700;font-size:13px;">${target.code}</span>
-          <span class="badge green" style="margin-left:6px;">${target.status}</span>
-          <span class="badge ${target.payStatus === '미결제' ? 'orange' : 'blue'}" style="margin-left:4px;">${target.payStatus}</span>
-        </div>
-        <span style="font-size:11px;color:#2e7d32;font-weight:600;">&#x2713; 예약자 일치</span>
-      </div>
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;font-size:12px;">
-        <div>
-          <div style="display:flex;padding:4px 0;"><span style="color:#888;width:70px;">예약자</span><span style="font-weight:600;">${target.booker}</span></div>
-          <div style="display:flex;padding:4px 0;"><span style="color:#888;width:70px;">여행사</span><span>${target.agency}</span></div>
-          <div style="display:flex;padding:4px 0;"><span style="color:#888;width:70px;">상품</span><span>${target.product}</span></div>
-        </div>
-        <div>
-          <div style="display:flex;padding:4px 0;"><span style="color:#888;width:70px;">출발일</span><span>${target.departure}</span></div>
-          <div style="display:flex;padding:4px 0;"><span style="color:#888;width:70px;">판매금액</span><span style="font-weight:600;font-family:monospace;">${target.amount.toLocaleString()}원</span></div>
-          <div style="display:flex;padding:4px 0;"><span style="color:#888;width:70px;">결제금액</span><span style="font-weight:600;font-family:monospace;color:${target.paidAmount > 0 ? '#1565c0' : '#e65100'};">${target.paidAmount.toLocaleString()}원</span></div>
-        </div>
-      </div>
-    </div>`;
-  resultDiv.style.display = 'block';
-
-  // 원장 미리보기 & 경고 표시
-  document.getElementById('transfer-ledger-preview').style.display = 'block';
-  document.getElementById('transfer-warning').style.display = 'flex';
-
-  updateTransferButton();
-}
-
-function updateTransferButton() {
-  const btn = document.getElementById('btn-transfer-exec');
-  const hasChecked = document.querySelectorAll('.transfer-check:checked').length > 0;
-  const enabled = transferTargetSelected && hasChecked;
-  btn.disabled = !enabled;
-  btn.style.opacity = enabled ? '1' : '0.5';
-}
-
-function executeTransfer() {
-  if (!transferTargetSelected) return;
-
-  const checkedItems = [];
-  let totalAmount = 0;
-  document.querySelectorAll('.transfer-check:checked').forEach(cb => {
-    checkedItems.push(cb.dataset.type);
-    totalAmount += parseInt(cb.dataset.amount);
-  });
-
-  // 결제 테이블 업데이트 - 이관된 건에 [이관완료] 표시
-  const paymentRows = document.querySelectorAll('#tab-basic .section:nth-child(6) tbody tr');
-  paymentRows.forEach(row => {
-    const cells = row.querySelectorAll('td');
-    if (cells.length >= 7) {
-      const typeCell = cells[1];
-      const amountCell = cells[5];
-      // 간단하게 이관 표시
-      const lastCell = cells[cells.length - 1];
-      if (!lastCell.textContent.includes('이관')) {
-        lastCell.insertAdjacentHTML('beforeend', `<br><span style="color:#e65100;font-size:10px;font-weight:600;">→ 이관완료</span>`);
-      }
-    }
-  });
-
-  // 결제 금액 카드 업데이트
-  const payCards = document.querySelectorAll('#tab-basic .section:nth-child(6) .amount-card');
-  // 결제 카드들은 구조가 다를 수 있으므로 직접 찾기
+  // 이력 렌더링
+  renderTransferHistory();
 
   // 모달 닫기
-  closeTransferModal();
-
-  // 토스트
-  showToast(`결제 이관 완료: ${totalAmount.toLocaleString()}원 → ${transferTargetSelected.code}`);
-}
-
-function closeTransferModal() {
   document.getElementById('modal-transfer').classList.remove('show');
+
   // 초기화
   document.getElementById('transfer-target-input').value = '';
-  document.getElementById('transfer-target-result').style.display = 'none';
-  document.getElementById('transfer-ledger-preview').style.display = 'none';
-  document.getElementById('transfer-warning').style.display = 'none';
-  transferTargetSelected = null;
-  updateTransferButton();
+  if (document.getElementById('transfer-memo')) document.getElementById('transfer-memo').value = '';
+  const textarea = document.querySelector('#modal-transfer textarea');
+  if (textarea) textarea.value = '';
+
+  showToast(`결제 이관 요청 등록 완료 → 개발실 슬랙 알림 발송`);
+}
+
+function renderTransferHistory() {
+  const emptyEl = document.getElementById('transfer-history-empty');
+  const listEl = document.getElementById('transfer-history-list');
+
+  if (transferRequests.length === 0) {
+    emptyEl.style.display = 'block';
+    listEl.style.display = 'none';
+    return;
+  }
+
+  emptyEl.style.display = 'none';
+  listEl.style.display = 'block';
+
+  const statusColors = { '요청': '#e65100', '처리중': '#1565c0', '완료': '#2e7d32', '반려': '#d32f2f' };
+  const statusBg = { '요청': '#fff3e0', '처리중': '#e3f2fd', '완료': '#e8f5e9', '반려': '#ffebee' };
+
+  listEl.innerHTML = transferRequests.map(r => `
+    <div style="background:#fafafa;border:1px solid #e8e8e8;border-radius:6px;padding:10px 12px;margin-bottom:6px;font-size:11px;">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px;">
+        <div style="display:flex;align-items:center;gap:6px;">
+          <span style="background:${statusBg[r.status]};color:${statusColors[r.status]};padding:1px 6px;border-radius:3px;font-size:10px;font-weight:700;">${r.status}</span>
+          <span style="font-family:monospace;color:#888;">${r.fromCode}</span>
+          <span style="color:#1565c0;font-weight:700;">→</span>
+          <span style="font-family:monospace;font-weight:600;">${r.toCode}</span>
+          <span style="font-family:monospace;font-weight:600;color:#1565c0;">${r.amount}원</span>
+        </div>
+        <span style="color:#aaa;font-size:10px;">${r.requestDate} · ${r.requestUser}</span>
+      </div>
+      <div style="color:#888;font-size:10px;">사유: ${r.reason}${r.description ? ' — ' + r.description.substring(0, 50) : ''}</div>
+    </div>
+  `).join('');
 }
 
 // 토스트 알림
