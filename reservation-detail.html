@@ -388,13 +388,24 @@
           </div>
 
           <!-- 현재 적용된 쿠폰 -->
-          <div class="coupon-card">
-            <div class="coupon-info">
-              <div class="coupon-name">상해 자유여행 20,000원 할인</div>
-              <div class="coupon-detail">유효기간: 2026-03-01 ~ 2026-06-30 | 최소 결제금액: 500,000원 | 상태: <strong style="color:#2e7d32;">적용중</strong></div>
+          <div id="applied-coupon-area">
+            <div class="coupon-card" id="applied-coupon-card">
+              <div class="coupon-info">
+                <div class="coupon-name" id="applied-coupon-name">상해 자유여행 20,000원 할인</div>
+                <div class="coupon-detail" id="applied-coupon-detail">유효기간: 2026-03-01 ~ 2026-06-30 | 최소 결제금액: 500,000원 | 상태: <strong style="color:#2e7d32;">적용중</strong></div>
+              </div>
+              <div class="coupon-amount" id="applied-coupon-amount">-20,000</div>
+              <button class="btn btn-danger btn-sm" style="margin-left: 12px;" onclick="cancelCoupon()">쿠폰 취소</button>
             </div>
-            <div class="coupon-amount">-20,000</div>
-            <button class="btn btn-danger btn-sm" style="margin-left: 12px;">쿠폰 취소</button>
+          </div>
+          <div id="no-coupon-area" style="display:none;background:#fafafa;border:1px dashed #d0d0d0;border-radius:8px;padding:16px;text-align:center;font-size:12px;color:#888;">
+            적용된 쿠폰이 없습니다. 아래에서 쿠폰을 조회하여 적용할 수 있습니다.
+          </div>
+
+          <!-- 쿠폰 변경 이력 -->
+          <div id="coupon-history-area" style="display:none;margin-top:8px;">
+            <div style="font-size:10px;font-weight:600;color:#888;margin-bottom:4px;">쿠폰 변경 이력</div>
+            <div id="coupon-history-list" style="font-size:11px;"></div>
           </div>
 
           <!-- 쿠폰 조회/적용 버튼 -->
@@ -402,7 +413,7 @@
             <button class="btn btn-coupon btn-sm btn-icon" onclick="document.getElementById('modal-coupon').classList.add('show')">
               사용자 쿠폰 조회 및 적용
             </button>
-            <button class="btn btn-outline btn-sm btn-icon">
+            <button class="btn btn-outline btn-sm btn-icon" onclick="document.getElementById('modal-coupon-adjust').classList.add('show')" id="btn-coupon-adjust">
               쿠폰 금액 조정
             </button>
           </div>
@@ -842,31 +853,22 @@
   <div class="modal">
     <div class="modal-header"><h3>사용자 쿠폰 조회 및 적용</h3><button class="close" onclick="this.closest('.modal-overlay').classList.remove('show')">&times;</button></div>
     <div class="modal-body">
-      <div style="font-size:12px;color:#888;margin-bottom:16px;">예약자 <strong>오기웅</strong>님이 보유한 쿠폰 중 현재 예약 조건에 적용 가능한 쿠폰입니다.</div>
-      <div class="coupon-card" style="border-color:#4caf50;">
-        <div class="coupon-info">
-          <div class="coupon-name" style="color:#2e7d32;">적용 가능</div>
-          <div class="coupon-detail">해외여행 30,000원 할인 | 유효: ~2026-07-31 | 최소 100만원</div>
+      <div style="font-size:12px;color:#888;margin-bottom:12px;">예약자 <strong>오기웅</strong>님이 보유한 쿠폰 중 현재 예약 조건에 적용 가능한 쿠폰입니다.</div>
+
+      <!-- 현재 적용 상태 표시 -->
+      <div id="coupon-modal-current" style="background:#e8f5e9;border:1px solid #c8e6c9;border-radius:8px;padding:10px 14px;margin-bottom:16px;font-size:12px;">
+        <div style="display:flex;align-items:center;gap:6px;">
+          <span style="color:#2e7d32;font-weight:700;">현재 적용:</span>
+          <span id="coupon-modal-current-name">상해 자유여행 20,000원 할인</span>
+          <span style="font-family:monospace;font-weight:700;color:#6a1b9a;" id="coupon-modal-current-amount">-20,000원</span>
         </div>
-        <div class="coupon-amount">-30,000</div>
-        <button class="btn btn-coupon btn-sm" style="margin-left:12px;">적용</button>
       </div>
-      <div class="coupon-card" style="opacity:0.5;">
-        <div class="coupon-info">
-          <div class="coupon-name" style="color:#d32f2f;">조건 미달</div>
-          <div class="coupon-detail">일본 전용 20,000원 할인 | 유효: ~2026-06-30 | 여행지: 일본만</div>
-        </div>
-        <div class="coupon-amount" style="color:#bbb;">-20,000</div>
-        <button class="btn btn-outline btn-sm" style="margin-left:12px;" disabled>적용불가</button>
+      <div id="coupon-modal-none" style="display:none;background:#fff3e0;border:1px solid #ffe082;border-radius:8px;padding:10px 14px;margin-bottom:16px;font-size:12px;color:#e65100;">
+        현재 적용된 쿠폰이 없습니다. 아래에서 쿠폰을 선택하여 적용하세요.
       </div>
-      <div class="coupon-card" style="opacity:0.5;">
-        <div class="coupon-info">
-          <div class="coupon-name" style="color:#d32f2f;">기간 만료</div>
-          <div class="coupon-detail">신규가입 10,000원 할인 | 유효: ~2026-03-31 (만료)</div>
-        </div>
-        <div class="coupon-amount" style="color:#bbb;">-10,000</div>
-        <button class="btn btn-outline btn-sm" style="margin-left:12px;" disabled>만료</button>
-      </div>
+
+      <!-- 쿠폰 리스트 (동적 렌더링) -->
+      <div id="coupon-list-container"></div>
     </div>
     <div class="modal-footer">
       <button class="btn btn-outline" onclick="this.closest('.modal-overlay').classList.remove('show')">닫기</button>
@@ -874,31 +876,176 @@
   </div>
 </div>
 
-<!-- 결제수단 변경 모달 -->
-<div class="modal-overlay" id="modal-payment-change">
+<!-- 쿠폰 금액 조정 모달 -->
+<div class="modal-overlay" id="modal-coupon-adjust">
   <div class="modal">
-    <div class="modal-header"><h3>결제수단 변경</h3><button class="close" onclick="this.closest('.modal-overlay').classList.remove('show')">&times;</button></div>
+    <div class="modal-header"><h3>쿠폰 금액 조정</h3><button class="close" onclick="this.closest('.modal-overlay').classList.remove('show')">&times;</button></div>
     <div class="modal-body">
       <div style="background:#fff3e0;border-radius:8px;padding:12px;font-size:12px;color:#e65100;margin-bottom:16px;">
-        예약금액을 수정하지 않고 결제수단만 변경합니다. 기존 결제가 취소되고 새 결제수단으로 동일 금액이 재결제됩니다.
+        행사이동/인원변경 등으로 쿠폰 적용 조건이 달라진 경우 금액을 조정합니다.<br>
+        <span style="font-size:11px;">조정된 금액은 원장에 <strong>쿠폰 조정(301)</strong> 항목으로 자동 기록됩니다.</span>
       </div>
+
+      <!-- 현재 쿠폰 정보 -->
       <div class="form-group">
-        <label>기존 결제</label>
-        <input type="text" value="nice_v2 · 신용카드 · 2,038,000원" disabled style="background:#f5f5f5;">
-      </div>
-      <div class="form-group">
-        <label>변경 처리 방식</label>
-        <div style="font-size:12px; color: #333; padding: 8px 0;">
-          1. 기존 결제 2,038,000원 취소<br>
-          2. 고객에게 새 결제 링크 발송<br>
-          3. 고객이 새 결제수단으로 동일 금액 결제
+        <label>현재 적용 쿠폰</label>
+        <div id="adjust-coupon-info" style="background:#f5f5f5;border-radius:8px;padding:12px;border:1px solid #e0e0e0;">
+          <div style="display:flex;justify-content:space-between;align-items:center;">
+            <div>
+              <div style="font-weight:600;font-size:12px;" id="adjust-coupon-name">상해 자유여행 20,000원 할인</div>
+              <div style="font-size:11px;color:#888;margin-top:2px;" id="adjust-coupon-detail">유효기간: 2026-03-01 ~ 2026-06-30</div>
+            </div>
+            <div style="font-family:monospace;font-weight:700;font-size:16px;color:#6a1b9a;" id="adjust-coupon-current-amount">-20,000</div>
+          </div>
+        </div>
+        <div id="adjust-no-coupon" style="display:none;background:#fafafa;border-radius:8px;padding:12px;text-align:center;font-size:12px;color:#888;">
+          적용된 쿠폰이 없습니다. 먼저 쿠폰을 적용해주세요.
         </div>
       </div>
-      <div class="form-group"><label>변경 사유</label><select><option>고객 요청</option><option>카드 한도 초과</option><option>결제 오류</option><option>기타</option></select></div>
+
+      <!-- 조정 금액 입력 -->
+      <div class="form-group" id="adjust-input-area">
+        <label>조정할 금액 (원)</label>
+        <input type="number" id="adjust-amount-input" placeholder="새 쿠폰 할인 금액 (예: 15000)" style="font-size:14px;">
+        <div class="help">현재 적용 금액에서 변경할 금액을 입력합니다. 0을 입력하면 쿠폰이 해제됩니다.</div>
+      </div>
+
+      <!-- 변경 미리보기 -->
+      <div id="adjust-preview" style="display:none;background:#f8f9fa;border-radius:8px;padding:12px;margin-top:8px;border:1px solid #e0e0e0;">
+        <div style="font-size:11px;font-weight:700;color:#888;margin-bottom:6px;">변경 미리보기</div>
+        <div style="display:flex;justify-content:space-between;font-size:12px;margin-bottom:4px;">
+          <span style="color:#888;">기존 쿠폰 금액</span>
+          <span style="font-family:monospace;font-weight:600;" id="adjust-preview-old">-20,000</span>
+        </div>
+        <div style="display:flex;justify-content:space-between;font-size:12px;margin-bottom:4px;">
+          <span style="color:#888;">변경 쿠폰 금액</span>
+          <span style="font-family:monospace;font-weight:700;color:#6a1b9a;" id="adjust-preview-new">-20,000</span>
+        </div>
+        <div style="display:flex;justify-content:space-between;font-size:12px;border-top:1px solid #e0e0e0;padding-top:4px;margin-top:4px;">
+          <span style="font-weight:600;">결제 필요 금액 변동</span>
+          <span style="font-family:monospace;font-weight:700;" id="adjust-preview-diff" style="color:#d32f2f;">0</span>
+        </div>
+      </div>
+
+      <!-- 조정 사유 -->
+      <div class="form-group" style="margin-top:12px;">
+        <label>조정 사유</label>
+        <select id="adjust-reason">
+          <option>행사이동으로 인한 쿠폰 조건 변경</option>
+          <option>인원 변경으로 인한 쿠폰 조건 변경</option>
+          <option>쿠폰 최소 금액 미달</option>
+          <option>쿠폰 여행지 조건 불일치</option>
+          <option>고객 요청</option>
+          <option>기타</option>
+        </select>
+      </div>
     </div>
     <div class="modal-footer">
       <button class="btn btn-outline" onclick="this.closest('.modal-overlay').classList.remove('show')">취소</button>
-      <button class="btn btn-primary">결제수단 변경 실행</button>
+      <button class="btn btn-coupon" id="btn-adjust-coupon" onclick="executeAdjustCoupon()">쿠폰 금액 조정</button>
+    </div>
+  </div>
+</div>
+
+<!-- 결제수단 변경 모달 -->
+<div class="modal-overlay" id="modal-payment-change">
+  <div class="modal" style="width:600px;">
+    <div class="modal-header"><h3>결제수단 변경</h3><button class="close" onclick="this.closest('.modal-overlay').classList.remove('show')">&times;</button></div>
+    <div class="modal-body">
+
+      <!-- 트립스토어 직접 예약 전용 안내 -->
+      <div style="background:#e3f2fd;border:1px solid #bbdefb;border-radius:8px;padding:12px;font-size:12px;color:#1565c0;margin-bottom:16px;">
+        <strong>트립스토어 직접 예약 전용 기능</strong> — 우리 PG(nice_v2)로 결제된 건만 변경 가능합니다.<br>
+        <span style="font-size:11px;opacity:0.8;">채널사(SSG/11번가/더현대) 예약은 [결제 이관 요청]을 사용하세요.</span>
+      </div>
+
+      <!-- 기존 결제 정보 -->
+      <div class="form-group">
+        <label>기존 결제 (취소 대상)</label>
+        <div style="background:#ffebee;border:1px solid #ffcdd2;border-radius:8px;padding:12px;">
+          <div style="display:flex;justify-content:space-between;align-items:center;">
+            <div>
+              <div style="font-size:11px;color:#888;">PG결제 #2</div>
+              <div style="font-weight:600;font-size:13px;">nice_v2 · 신용카드</div>
+              <div style="font-size:11px;color:#888;margin-top:2px;" class="text-mono">26040708-4300101H-001</div>
+            </div>
+            <div style="text-align:right;">
+              <div style="font-family:monospace;font-weight:700;font-size:18px;color:#d32f2f;" id="pc-cancel-amount">2,038,000원</div>
+              <div style="font-size:10px;color:#d32f2f;">← 전액 취소</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 처리 프로세스 -->
+      <div style="background:#f8f9fa;border-radius:8px;padding:14px;margin-bottom:16px;border:1px solid #e0e0e0;">
+        <div style="font-size:11px;font-weight:700;color:#888;margin-bottom:8px;">처리 프로세스</div>
+        <div style="display:flex;flex-direction:column;gap:6px;font-size:12px;">
+          <div style="display:flex;align-items:center;gap:8px;">
+            <span style="background:#ffebee;color:#d32f2f;width:22px;height:22px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;flex-shrink:0;">1</span>
+            <span>기존 PG 결제 <strong style="color:#d32f2f;">전액 취소</strong> (nice_v2 취소 API 호출)</span>
+          </div>
+          <div style="display:flex;align-items:center;gap:8px;">
+            <span style="background:#e3f2fd;color:#1565c0;width:22px;height:22px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;flex-shrink:0;">2</span>
+            <span>고객에게 <strong style="color:#1565c0;">재결제 링크 SMS 발송</strong></span>
+          </div>
+          <div style="display:flex;align-items:center;gap:8px;">
+            <span style="background:#e8f5e9;color:#2e7d32;width:22px;height:22px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;flex-shrink:0;">3</span>
+            <span>고객이 새 결제수단으로 <strong style="color:#2e7d32;">동일 금액 재결제</strong></span>
+          </div>
+          <div style="display:flex;align-items:center;gap:8px;">
+            <span style="background:#f5f5f5;color:#888;width:22px;height:22px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;flex-shrink:0;">4</span>
+            <span>원장에 결제취소 + 재결제 기록 자동 생성</span>
+          </div>
+        </div>
+        <div style="margin-top:8px;font-size:10px;color:#999;border-top:1px solid #e8e8e8;padding-top:6px;">
+          ※ 재결제 링크 유효기간: 발송 후 24시간 | 미결제 시 자동 만료 → 재발송 가능
+        </div>
+      </div>
+
+      <!-- 재결제 금액 (결제 필요 금액 기준) -->
+      <div class="form-group">
+        <label>재결제 금액</label>
+        <div style="background:#e8f5e9;border:1px solid #c8e6c9;border-radius:8px;padding:12px;display:flex;justify-content:space-between;align-items:center;">
+          <div>
+            <div style="font-size:11px;color:#888;">결제 필요 금액 - 쿠폰</div>
+            <div style="font-size:11px;color:#888;margin-top:2px;" id="pc-calc-formula">2,038,000 - 0 (쿠폰은 별도)</div>
+          </div>
+          <div style="font-family:monospace;font-weight:700;font-size:18px;color:#2e7d32;" id="pc-repay-amount">2,038,000원</div>
+        </div>
+      </div>
+
+      <!-- 사유 / 알림 설정 -->
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+        <div class="form-group">
+          <label>변경 사유</label>
+          <select id="pc-reason">
+            <option>고객 요청</option>
+            <option>카드 한도 초과</option>
+            <option>결제 오류 (승인 실패)</option>
+            <option>카드 분실/교체</option>
+            <option>결제수단 변경 (체크카드↔신용카드)</option>
+            <option>기타</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>SMS 발송 대상</label>
+          <div style="background:#f5f5f5;border-radius:6px;padding:8px 12px;font-size:13px;">
+            오기웅 · 010-2374-8449
+          </div>
+        </div>
+      </div>
+
+      <!-- 변경 이력 -->
+      <div id="pc-history-area" style="margin-top:8px;">
+        <div style="font-size:11px;font-weight:600;color:#888;margin-bottom:6px;">결제수단 변경 이력</div>
+        <div style="font-size:11px;color:#bbb;text-align:center;padding:12px;background:#fafafa;border-radius:6px;" id="pc-history-empty">변경 이력 없음</div>
+        <div id="pc-history-list" style="display:none;"></div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-outline" onclick="this.closest('.modal-overlay').classList.remove('show')">취소</button>
+      <button class="btn btn-primary" onclick="executePaymentChange()">결제 취소 & 재결제 링크 발송</button>
     </div>
   </div>
 </div>
@@ -1018,7 +1165,8 @@ const currentReservation = {
   arrival: '2026-06-09',
   pricePerPerson: 699000,
   travelers: 3,
-  discountRate: 0.02,  // 하나투어 2%
+  discountPerPerson: 13000,  // 하나투어 특가 1인당 할인
+  discountRate: 0.02,  // 하나투어 2% (참고용)
   discountName: '하나투어 2%',
   couponAmount: 20000,
   couponName: '상해 자유여행 20,000원 할인',
@@ -1117,8 +1265,9 @@ function selectEvent(code) {
   const priceDiff = event.price - currentReservation.pricePerPerson;
   const totalDiff = priceDiff * currentReservation.travelers;
   const newTotal = event.price * currentReservation.travelers;
-  const oldDiscount = Math.round(currentReservation.pricePerPerson * currentReservation.discountRate) * currentReservation.travelers;
-  const newDiscount = Math.round(event.price * currentReservation.discountRate) * currentReservation.travelers;
+  const oldDiscount = currentReservation.discountPerPerson * currentReservation.travelers;
+  const newDiscountPerPerson = Math.round(event.price * currentReservation.discountRate);
+  const newDiscount = newDiscountPerPerson * currentReservation.travelers;
   const discountDiff = newDiscount - oldDiscount;
 
   const oldSale = (currentReservation.pricePerPerson * currentReservation.travelers) - oldDiscount - currentReservation.couponAmount;
@@ -1226,7 +1375,9 @@ function updateProductInfo(event) {
 
   // 금액 정보 업데이트
   const newTotal = event.price * currentReservation.travelers;
-  const newDiscount = Math.round(event.price * currentReservation.discountRate) * currentReservation.travelers;
+  const newDiscountPP = Math.round(event.price * currentReservation.discountRate);
+  const newDiscount = newDiscountPP * currentReservation.travelers;
+  currentReservation.discountPerPerson = newDiscountPP;
   const newSaleAmount = newTotal - newDiscount - currentReservation.couponAmount;
 
   // 여행자 테이블 1인 상품가 업데이트
@@ -1234,7 +1385,7 @@ function updateProductInfo(event) {
     const cells = row.querySelectorAll('td');
     if (cells.length >= 7) {
       cells[5].textContent = event.price.toLocaleString(); // 1인 상품가
-      const discount = Math.round(event.price * currentReservation.discountRate);
+      const discount = newDiscountPP;
       cells[6].textContent = '-' + discount.toLocaleString(); // 특가
       cells[7].textContent = (event.price - discount).toLocaleString(); // 1인 판매가
     }
@@ -1354,7 +1505,7 @@ function recalcPenalty() {
   // 결제 필요 금액 = 판매금액 + 위약금
   // (판매금액은 상품금액 - 할인)
   const saleAmount = currentReservation.pricePerPerson * currentReservation.travelers
-    - Math.round(currentReservation.pricePerPerson * currentReservation.discountRate) * currentReservation.travelers
+    - currentReservation.discountPerPerson * currentReservation.travelers
     - currentReservation.couponAmount;
   const needPay = saleAmount + totalPenalty;
 
@@ -1464,6 +1615,466 @@ function renderTransferHistory() {
         <span style="color:#aaa;font-size:10px;">${r.requestDate} · ${r.requestUser}</span>
       </div>
       <div style="color:#888;font-size:10px;">사유: ${r.reason}${r.description ? ' — ' + r.description.substring(0, 50) : ''}</div>
+    </div>
+  `).join('');
+}
+
+// ==================== 쿠폰 관리 기능 ====================
+
+// 사용자 보유 쿠폰 데이터
+const userCoupons = [
+  {
+    id: '836331bf',
+    name: '상해 자유여행 20,000원 할인',
+    amount: 20000,
+    validFrom: '2026-03-01',
+    validTo: '2026-06-30',
+    minAmount: 500000,
+    destination: '상하이',
+    status: 'applied',  // applied, available, unavailable, expired
+    reason: null
+  },
+  {
+    id: 'c29a87d1',
+    name: '해외여행 30,000원 할인',
+    amount: 30000,
+    validFrom: '2026-01-01',
+    validTo: '2026-07-31',
+    minAmount: 1000000,
+    destination: null,  // 전체 여행지
+    status: 'available',
+    reason: null
+  },
+  {
+    id: 'e5f12cc3',
+    name: '일본 전용 20,000원 할인',
+    amount: 20000,
+    validFrom: '2026-01-01',
+    validTo: '2026-06-30',
+    minAmount: 300000,
+    destination: '일본',
+    status: 'unavailable',
+    reason: '여행지 조건 불일치 (일본 전용)'
+  },
+  {
+    id: 'a1b2c3d4',
+    name: '신규가입 10,000원 할인',
+    amount: 10000,
+    validFrom: '2025-12-01',
+    validTo: '2026-03-31',
+    minAmount: 0,
+    destination: null,
+    status: 'expired',
+    reason: '유효기간 만료'
+  }
+];
+
+let appliedCoupon = userCoupons[0]; // 현재 적용된 쿠폰
+let couponHistory = [];
+
+function renderCouponList() {
+  const container = document.getElementById('coupon-list-container');
+  const currentStatus = document.getElementById('coupon-modal-current');
+  const noneStatus = document.getElementById('coupon-modal-none');
+
+  // 현재 적용 상태 표시
+  if (appliedCoupon) {
+    currentStatus.style.display = 'block';
+    noneStatus.style.display = 'none';
+    document.getElementById('coupon-modal-current-name').textContent = appliedCoupon.name;
+    document.getElementById('coupon-modal-current-amount').textContent = `-${appliedCoupon.amount.toLocaleString()}원`;
+  } else {
+    currentStatus.style.display = 'none';
+    noneStatus.style.display = 'block';
+  }
+
+  // 쿠폰 리스트 렌더링
+  container.innerHTML = userCoupons.map(c => {
+    const isApplied = appliedCoupon && c.id === appliedCoupon.id;
+    const isAvailable = c.status === 'available';
+    const isUnavailable = c.status === 'unavailable';
+    const isExpired = c.status === 'expired';
+
+    let borderColor = '#e8e8e8';
+    let opacity = '1';
+    let statusLabel = '';
+    let statusColor = '';
+    let btnHTML = '';
+
+    if (isApplied) {
+      borderColor = '#4caf50';
+      statusLabel = '✓ 적용중';
+      statusColor = '#2e7d32';
+      btnHTML = `<button class="btn btn-danger btn-sm" style="margin-left:12px;" onclick="cancelCouponFromModal('${c.id}')">해제</button>`;
+    } else if (isAvailable) {
+      borderColor = '#1565c0';
+      statusLabel = '적용 가능';
+      statusColor = '#1565c0';
+      btnHTML = `<button class="btn btn-coupon btn-sm" style="margin-left:12px;" onclick="applyCouponFromModal('${c.id}')">적용</button>`;
+    } else if (isUnavailable) {
+      opacity = '0.5';
+      statusLabel = '조건 미달';
+      statusColor = '#d32f2f';
+      btnHTML = `<button class="btn btn-outline btn-sm" style="margin-left:12px;" disabled>적용불가</button>`;
+    } else if (isExpired) {
+      opacity = '0.5';
+      statusLabel = '기간 만료';
+      statusColor = '#888';
+      btnHTML = `<button class="btn btn-outline btn-sm" style="margin-left:12px;" disabled>만료</button>`;
+    }
+
+    return `
+    <div class="coupon-card" style="border-color:${borderColor};opacity:${opacity};">
+      <div class="coupon-info">
+        <div class="coupon-name" style="color:${statusColor};">${statusLabel}</div>
+        <div style="font-weight:600;font-size:12px;margin-top:2px;">${c.name}</div>
+        <div class="coupon-detail">
+          유효: ${c.validFrom} ~ ${c.validTo}
+          ${c.minAmount > 0 ? ` | 최소 ${c.minAmount.toLocaleString()}원` : ''}
+          ${c.destination ? ` | 여행지: ${c.destination}` : ' | 전체 여행지'}
+          ${c.reason ? `<br><span style="color:#d32f2f;font-size:10px;">사유: ${c.reason}</span>` : ''}
+        </div>
+      </div>
+      <div class="coupon-amount" style="color:${isAvailable || isApplied ? '#6a1b9a' : '#bbb'};">-${c.amount.toLocaleString()}</div>
+      ${btnHTML}
+    </div>`;
+  }).join('');
+}
+
+function cancelCoupon() {
+  if (!appliedCoupon) return;
+
+  const prev = { ...appliedCoupon };
+
+  // 이력 기록
+  couponHistory.push({
+    action: '쿠폰 취소',
+    couponName: prev.name,
+    beforeAmount: prev.amount,
+    afterAmount: 0,
+    date: '2026-04-07 ' + new Date().toLocaleTimeString('ko-KR', {hour:'2-digit', minute:'2-digit'}),
+    user: '김서현',
+    reason: '수동 취소'
+  });
+
+  // 쿠폰 상태 변경
+  const coupon = userCoupons.find(c => c.id === prev.id);
+  if (coupon) coupon.status = 'available';
+  appliedCoupon = null;
+  currentReservation.couponAmount = 0;
+
+  // 화면 업데이트
+  updateCouponDisplay();
+  recalcAllAmounts();
+  renderCouponHistory();
+
+  showToast(`쿠폰 취소: ${prev.name} (-${prev.amount.toLocaleString()}원)`);
+}
+
+function cancelCouponFromModal(couponId) {
+  cancelCoupon();
+  renderCouponList();
+}
+
+function applyCouponFromModal(couponId) {
+  const coupon = userCoupons.find(c => c.id === couponId);
+  if (!coupon) return;
+
+  // 기존 쿠폰 해제
+  if (appliedCoupon) {
+    const oldCoupon = userCoupons.find(c => c.id === appliedCoupon.id);
+    if (oldCoupon) oldCoupon.status = 'available';
+  }
+
+  // 새 쿠폰 적용
+  coupon.status = 'applied';
+  appliedCoupon = coupon;
+  currentReservation.couponAmount = coupon.amount;
+
+  // 이력
+  couponHistory.push({
+    action: '쿠폰 적용',
+    couponName: coupon.name,
+    beforeAmount: 0,
+    afterAmount: coupon.amount,
+    date: '2026-04-07 ' + new Date().toLocaleTimeString('ko-KR', {hour:'2-digit', minute:'2-digit'}),
+    user: '김서현',
+    reason: '수동 적용'
+  });
+
+  // 화면 업데이트
+  updateCouponDisplay();
+  recalcAllAmounts();
+  renderCouponList();
+  renderCouponHistory();
+
+  showToast(`쿠폰 적용: ${coupon.name} (-${coupon.amount.toLocaleString()}원)`);
+}
+
+function updateCouponDisplay() {
+  const appliedArea = document.getElementById('applied-coupon-area');
+  const noCouponArea = document.getElementById('no-coupon-area');
+  const adjustInfo = document.getElementById('adjust-coupon-info');
+  const adjustNone = document.getElementById('adjust-no-coupon');
+
+  if (appliedCoupon) {
+    appliedArea.style.display = 'block';
+    noCouponArea.style.display = 'none';
+    document.getElementById('applied-coupon-name').textContent = appliedCoupon.name;
+    document.getElementById('applied-coupon-detail').innerHTML = `유효기간: ${appliedCoupon.validFrom} ~ ${appliedCoupon.validTo} | 최소 결제금액: ${appliedCoupon.minAmount.toLocaleString()}원 | 상태: <strong style="color:#2e7d32;">적용중</strong>`;
+    document.getElementById('applied-coupon-amount').textContent = `-${appliedCoupon.amount.toLocaleString()}`;
+
+    // 조정 모달 업데이트
+    adjustInfo.style.display = 'block';
+    adjustNone.style.display = 'none';
+    document.getElementById('adjust-coupon-name').textContent = appliedCoupon.name;
+    document.getElementById('adjust-coupon-current-amount').textContent = `-${appliedCoupon.amount.toLocaleString()}`;
+    document.getElementById('adjust-preview-old').textContent = `-${appliedCoupon.amount.toLocaleString()}`;
+    document.getElementById('adjust-input-area').style.display = 'block';
+  } else {
+    appliedArea.style.display = 'none';
+    noCouponArea.style.display = 'block';
+    adjustInfo.style.display = 'none';
+    adjustNone.style.display = 'block';
+    document.getElementById('adjust-input-area').style.display = 'none';
+  }
+
+  // 할인 내역 테이블 - 쿠폰 행 업데이트
+  const discountRows = document.querySelectorAll('.subsection table tbody tr');
+  discountRows.forEach(row => {
+    const firstCell = row.querySelector('td');
+    if (firstCell && firstCell.innerHTML.includes('쿠폰')) {
+      if (appliedCoupon) {
+        row.style.display = '';
+        const cells = row.querySelectorAll('td');
+        cells[2].textContent = `-${appliedCoupon.amount.toLocaleString()}`;
+        cells[3].textContent = appliedCoupon.id + '...';
+      } else {
+        row.style.display = 'none';
+      }
+    }
+  });
+}
+
+// 쿠폰 금액 조정 input 이벤트
+document.addEventListener('DOMContentLoaded', function() {
+  const adjustInput = document.getElementById('adjust-amount-input');
+  if (adjustInput) {
+    adjustInput.addEventListener('input', function() {
+      const preview = document.getElementById('adjust-preview');
+      if (!appliedCoupon) { preview.style.display = 'none'; return; }
+
+      const newAmount = parseInt(this.value) || 0;
+      const diff = newAmount - appliedCoupon.amount;
+
+      preview.style.display = 'block';
+      document.getElementById('adjust-preview-new').textContent = `-${newAmount.toLocaleString()}`;
+      const diffEl = document.getElementById('adjust-preview-diff');
+      if (diff > 0) {
+        diffEl.textContent = `-${diff.toLocaleString()} (결제 필요 금액 감소)`;
+        diffEl.style.color = '#1565c0';
+      } else if (diff < 0) {
+        diffEl.textContent = `+${Math.abs(diff).toLocaleString()} (결제 필요 금액 증가)`;
+        diffEl.style.color = '#d32f2f';
+      } else {
+        diffEl.textContent = '변동 없음';
+        diffEl.style.color = '#888';
+      }
+    });
+  }
+  // 초기 쿠폰 리스트 렌더링
+  renderCouponList();
+});
+
+function executeAdjustCoupon() {
+  if (!appliedCoupon) {
+    showToast('적용된 쿠폰이 없습니다.');
+    return;
+  }
+
+  const newAmount = parseInt(document.getElementById('adjust-amount-input').value) || 0;
+  const oldAmount = appliedCoupon.amount;
+  const reason = document.getElementById('adjust-reason').value;
+
+  if (newAmount === oldAmount) {
+    showToast('금액 변동이 없습니다.');
+    return;
+  }
+
+  // 이력
+  couponHistory.push({
+    action: newAmount === 0 ? '쿠폰 해제 (조정)' : '쿠폰 금액 조정',
+    couponName: appliedCoupon.name,
+    beforeAmount: oldAmount,
+    afterAmount: newAmount,
+    date: '2026-04-07 ' + new Date().toLocaleTimeString('ko-KR', {hour:'2-digit', minute:'2-digit'}),
+    user: '김서현',
+    reason: reason
+  });
+
+  if (newAmount === 0) {
+    // 쿠폰 해제
+    const coupon = userCoupons.find(c => c.id === appliedCoupon.id);
+    if (coupon) coupon.status = 'available';
+    appliedCoupon = null;
+    currentReservation.couponAmount = 0;
+  } else {
+    // 금액 조정
+    appliedCoupon.amount = newAmount;
+    const coupon = userCoupons.find(c => c.id === appliedCoupon.id);
+    if (coupon) coupon.amount = newAmount;
+    currentReservation.couponAmount = newAmount;
+  }
+
+  // 화면 업데이트
+  updateCouponDisplay();
+  recalcAllAmounts();
+  renderCouponHistory();
+
+  // 모달 닫기
+  document.getElementById('modal-coupon-adjust').classList.remove('show');
+  document.getElementById('adjust-amount-input').value = '';
+  document.getElementById('adjust-preview').style.display = 'none';
+
+  showToast(`쿠폰 금액 조정: ${oldAmount.toLocaleString()}원 → ${newAmount.toLocaleString()}원 (차이: ${formatDiff(newAmount - oldAmount)}원)`);
+}
+
+function renderCouponHistory() {
+  const area = document.getElementById('coupon-history-area');
+  const list = document.getElementById('coupon-history-list');
+
+  if (couponHistory.length === 0) {
+    area.style.display = 'none';
+    return;
+  }
+
+  area.style.display = 'block';
+  list.innerHTML = couponHistory.map(h => {
+    const actionColor = h.action.includes('취소') || h.action.includes('해제') ? '#d32f2f' : h.action.includes('조정') ? '#e65100' : '#2e7d32';
+    return `
+    <div style="display:flex;align-items:center;gap:8px;padding:4px 0;border-bottom:1px solid #f0f0f0;">
+      <span style="background:${actionColor}22;color:${actionColor};font-size:9px;padding:2px 6px;border-radius:3px;font-weight:700;white-space:nowrap;">${h.action}</span>
+      <span style="font-size:10px;color:#555;flex:1;">${h.couponName}</span>
+      <span style="font-family:monospace;font-size:10px;color:#888;">${h.beforeAmount.toLocaleString()}</span>
+      <span style="font-size:10px;color:#bbb;">→</span>
+      <span style="font-family:monospace;font-size:10px;font-weight:600;color:${actionColor};">${h.afterAmount.toLocaleString()}</span>
+      <span style="font-size:9px;color:#aaa;white-space:nowrap;">${h.date}</span>
+    </div>`;
+  }).join('');
+}
+
+// 전체 금액 재계산 함수
+function recalcAllAmounts() {
+  const totalProduct = currentReservation.pricePerPerson * currentReservation.travelers;
+  const totalDiscount = currentReservation.discountPerPerson * currentReservation.travelers;
+  const couponAmount = currentReservation.couponAmount;
+  const totalPenalty = penalties.reduce((a, b) => a + b, 0);
+
+  const saleAmount = totalProduct - totalDiscount - couponAmount;
+  const needPay = saleAmount + totalPenalty;
+
+  // 금액 카드 업데이트
+  const amountCards = document.querySelectorAll('.amount-summary:first-of-type .amount-card .value');
+  if (amountCards.length >= 4) {
+    amountCards[0].textContent = totalProduct.toLocaleString();
+    amountCards[1].textContent = `-${(totalDiscount + couponAmount).toLocaleString()}`;
+    // amountCards[2] = penalty (already managed by recalcPenalty)
+    amountCards[3].textContent = needPay.toLocaleString();
+  }
+
+  // 결제 필요 금액
+  document.getElementById('amount-need-pay').textContent = needPay.toLocaleString();
+
+  // 결제 영역 비교
+  const payNeed = document.getElementById('pay-need');
+  if (payNeed) payNeed.textContent = needPay.toLocaleString();
+
+  // 차이 계산
+  const actualPaid = 2058000;
+  const diff = actualPaid - needPay;
+  const diffEl = document.getElementById('pay-diff');
+  const diffLabel = document.getElementById('pay-diff-label');
+  if (diffEl) {
+    diffEl.textContent = (diff >= 0 ? '+' : '') + diff.toLocaleString();
+    diffEl.style.color = diff >= 0 ? '#2e7d32' : '#d32f2f';
+  }
+  if (diffLabel) {
+    if (diff > 0) { diffLabel.textContent = '초과 결제 (환불 필요)'; diffLabel.style.color = '#2e7d32'; }
+    else if (diff < 0) { diffLabel.textContent = '추가 결제 필요'; diffLabel.style.color = '#d32f2f'; }
+    else { diffLabel.textContent = '정산 완료'; diffLabel.style.color = '#888'; }
+  }
+}
+
+// ==================== 결제수단 변경 기능 ====================
+
+let paymentChangeHistory = [];
+
+function executePaymentChange() {
+  const reason = document.getElementById('pc-reason').value;
+  const pgAmount = 2038000; // PG 결제 금액
+
+  // 이력 추가
+  paymentChangeHistory.push({
+    id: paymentChangeHistory.length + 1,
+    cancelAmount: pgAmount,
+    reason: reason,
+    status: '취소완료·링크발송',
+    requestDate: '2026-04-07 ' + new Date().toLocaleTimeString('ko-KR', {hour:'2-digit', minute:'2-digit'}),
+    requestUser: '김서현',
+    smsTarget: '오기웅 (010-2374-8449)',
+    linkExpiry: '24시간',
+    repayStatus: '대기중'
+  });
+
+  // 이력 렌더링
+  renderPaymentChangeHistory();
+
+  // 결제 테이블 상태 업데이트 (PG행 상태를 "취소→재결제 대기"로)
+  const paymentRows = document.querySelectorAll('#tab-basic .section:nth-child(5) tbody tr');
+  paymentRows.forEach(row => {
+    const cells = row.querySelectorAll('td');
+    if (cells.length >= 10 && cells[1].textContent.includes('PG')) {
+      cells[9].innerHTML = '<span class="badge orange">취소→재결제</span>';
+      cells[6].textContent = pgAmount.toLocaleString();
+      cells[6].style.color = '#d32f2f';
+    }
+  });
+
+  // 모달 닫기
+  document.getElementById('modal-payment-change').classList.remove('show');
+
+  showToast(`결제수단 변경: PG ${pgAmount.toLocaleString()}원 취소 완료 → 재결제 링크 SMS 발송`);
+}
+
+function renderPaymentChangeHistory() {
+  const emptyEl = document.getElementById('pc-history-empty');
+  const listEl = document.getElementById('pc-history-list');
+
+  if (paymentChangeHistory.length === 0) {
+    emptyEl.style.display = 'block';
+    listEl.style.display = 'none';
+    return;
+  }
+
+  emptyEl.style.display = 'none';
+  listEl.style.display = 'block';
+
+  listEl.innerHTML = paymentChangeHistory.map(h => `
+    <div style="background:#fafafa;border:1px solid #e8e8e8;border-radius:6px;padding:10px 12px;margin-bottom:6px;font-size:11px;">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px;">
+        <div style="display:flex;align-items:center;gap:6px;">
+          <span style="background:#fff3e0;color:#e65100;padding:1px 6px;border-radius:3px;font-size:10px;font-weight:700;">${h.status}</span>
+          <span style="font-family:monospace;font-weight:600;">취소 ${h.cancelAmount.toLocaleString()}원</span>
+        </div>
+        <span style="color:#aaa;font-size:10px;">${h.requestDate} · ${h.requestUser}</span>
+      </div>
+      <div style="display:flex;gap:12px;color:#888;font-size:10px;">
+        <span>사유: ${h.reason}</span>
+        <span>|</span>
+        <span>SMS: ${h.smsTarget}</span>
+        <span>|</span>
+        <span>재결제: <strong style="color:#e65100;">${h.repayStatus}</strong></span>
+      </div>
     </div>
   `).join('');
 }
