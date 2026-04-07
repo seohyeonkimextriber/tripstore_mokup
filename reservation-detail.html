@@ -204,13 +204,13 @@
           </div>
         </div>
         <!-- 행사 이동 이력 -->
-        <div class="event-history" style="display:none;" id="event-history">
-          <div class="hist-title">행사 이동 이력</div>
-          <div class="hist-item">
-            <span class="text-mono" style="color:#888;">CCB101260601CZ1</span>
-            <span class="arrow">→</span>
-            <span class="text-mono" style="font-weight:600;">CCB101260606CZ2</span>
-            <span style="color:#888; margin-left: auto;">2026-04-07 · 김서현</span>
+        <div class="event-history" id="event-history" style="display:none;">
+          <div class="hist-title" style="display:flex;align-items:center;gap:6px;">
+            행사 이동 이력
+            <span style="background:#e8eaf6;color:#283593;font-size:10px;padding:1px 5px;border-radius:3px;font-weight:700;" id="hist-count">0회</span>
+          </div>
+          <div id="event-history-list">
+            <!-- 동적으로 추가됨 -->
           </div>
         </div>
       </div>
@@ -526,41 +526,193 @@
 
 <!-- 행사 이동 모달 -->
 <div class="modal-overlay" id="modal-event">
-  <div class="modal">
+  <div class="modal" style="width:680px;">
     <div class="modal-header"><h3>행사 이동</h3><button class="close" onclick="this.closest('.modal-overlay').classList.remove('show')">&times;</button></div>
     <div class="modal-body">
+
+      <!-- 안내 -->
       <div style="background:#e3f2fd;border-radius:8px;padding:12px;font-size:12px;color:#1565c0;margin-bottom:16px;">
-        동일 여행사(하나투어) 상품 내에서만 이동 가능합니다. 마감된 행사도 이동 가능합니다.
+        <strong>동일 여행사(하나투어)</strong> 상품의 행사로만 이동 가능합니다. 마감된 행사도 이동 가능합니다.<br>
+        <span style="font-size:11px;opacity:0.8;">행사 이동 시 금액 차이가 발생하며, 원장에 자동 기록됩니다.</span>
       </div>
+
+      <!-- 현재 행사 정보 -->
       <div class="form-group">
         <label>현재 행사</label>
-        <input type="text" value="CCB101260606CZ2 | 2026-06-06 상하이 자유여행 4일" disabled style="background:#f5f5f5;">
+        <div style="background:#f5f5f5;border-radius:8px;padding:12px;border:1px solid #e0e0e0;">
+          <div style="display:flex;justify-content:space-between;align-items:center;">
+            <div>
+              <div style="font-weight:700;font-size:13px;" class="text-mono">CCB101260606CZ2</div>
+              <div style="font-size:11px;color:#888;margin-top:2px;">상하이 자유여행 4일 #하버플라자...</div>
+            </div>
+            <div style="text-align:right;">
+              <div style="font-size:11px;color:#888;">출발</div>
+              <div style="font-weight:600;">2026-06-06</div>
+            </div>
+            <div style="text-align:right;">
+              <div style="font-size:11px;color:#888;">1인 상품가</div>
+              <div style="font-weight:700;font-family:monospace;">699,000</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 행사코드 검색 -->
+      <div class="form-group">
+        <label>이동할 행사 검색</label>
+        <div style="display:flex;gap:8px;">
+          <input type="text" id="event-search-input" placeholder="행사코드 입력 (예: CCB10126)" style="flex:1;" oninput="searchEvents(this.value)">
+          <button class="btn btn-outline" onclick="searchEvents(document.getElementById('event-search-input').value)" style="white-space:nowrap;">검색</button>
+        </div>
+        <div class="help">행사코드 일부를 입력하면 동일 여행사(하나투어) 행사만 조회됩니다.</div>
+      </div>
+
+      <!-- 검색 결과 -->
+      <div id="event-search-results" style="display:none;">
+        <label style="display:block;font-size:12px;font-weight:600;color:#666;margin-bottom:8px;">검색 결과 <span id="result-count" style="color:#1565c0;"></span></label>
+        <div style="max-height:200px;overflow-y:auto;border:1px solid #e0e0e0;border-radius:8px;">
+          <div class="event-result-item" data-idx="0" onclick="selectEvent(0)" style="padding:10px 14px;border-bottom:1px solid #f0f0f0;cursor:pointer;display:flex;justify-content:space-between;align-items:center;">
+            <div>
+              <div style="font-weight:600;font-size:12px;" class="text-mono">CCB101260613CZ3</div>
+              <div style="font-size:11px;color:#888;">상하이 자유여행 4일 | 중국남방항공 | 인천</div>
+            </div>
+            <div style="text-align:right;">
+              <div style="font-size:11px;color:#888;">2026-06-13 출발</div>
+              <div style="font-weight:700;font-family:monospace;font-size:12px;">699,000원</div>
+              <div style="font-size:10px;color:#2e7d32;">잔여 12석</div>
+            </div>
+          </div>
+          <div class="event-result-item" data-idx="1" onclick="selectEvent(1)" style="padding:10px 14px;border-bottom:1px solid #f0f0f0;cursor:pointer;display:flex;justify-content:space-between;align-items:center;">
+            <div>
+              <div style="font-weight:600;font-size:12px;" class="text-mono">CCB101260620CZ4</div>
+              <div style="font-size:11px;color:#888;">상하이 자유여행 4일 | 중국남방항공 | 인천</div>
+            </div>
+            <div style="text-align:right;">
+              <div style="font-size:11px;color:#888;">2026-06-20 출발</div>
+              <div style="font-weight:700;font-family:monospace;font-size:12px;">719,000원</div>
+              <div style="font-size:10px;color:#2e7d32;">잔여 8석</div>
+            </div>
+          </div>
+          <div class="event-result-item" data-idx="2" onclick="selectEvent(2)" style="padding:10px 14px;cursor:pointer;display:flex;justify-content:space-between;align-items:center;">
+            <div>
+              <div style="font-weight:600;font-size:12px;" class="text-mono">CCB101260627CZ5</div>
+              <div style="font-size:11px;color:#888;">상하이 자유여행 4일 | 중국남방항공 | 인천</div>
+            </div>
+            <div style="text-align:right;">
+              <div style="font-size:11px;color:#888;">2026-06-27 출발</div>
+              <div style="font-weight:700;font-family:monospace;font-size:12px;">689,000원</div>
+              <div style="font-size:10px;color:#d32f2f;font-weight:600;">마감</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 선택된 행사 & 금액 비교 -->
+      <div id="event-selected" style="display:none;margin-top:16px;">
+        <label style="display:block;font-size:12px;font-weight:600;color:#666;margin-bottom:8px;">선택된 행사</label>
+        <div style="background:#e8f5e9;border:2px solid #4caf50;border-radius:8px;padding:12px;display:flex;justify-content:space-between;align-items:center;">
+          <div>
+            <div style="font-weight:700;font-size:13px;" class="text-mono" id="selected-event-code">CCB101260620CZ4</div>
+            <div style="font-size:11px;color:#555;margin-top:2px;" id="selected-event-name">상하이 자유여행 4일 | 2026-06-20 출발</div>
+          </div>
+          <div style="display:flex;align-items:center;gap:8px;">
+            <span style="font-weight:700;font-family:monospace;font-size:14px;" id="selected-event-price">719,000원</span>
+            <button class="btn btn-outline btn-sm" onclick="clearEventSelection()" style="font-size:10px;">변경</button>
+          </div>
+        </div>
+
+        <!-- 금액 변동 상세 -->
+        <div style="background:#f8f9fa;border-radius:8px;padding:16px;margin-top:12px;border:1px solid #e0e0e0;">
+          <div style="font-size:12px;font-weight:700;color:#333;margin-bottom:10px;">금액 변동 상세</div>
+          <table style="font-size:12px;">
+            <thead><tr>
+              <th style="text-align:left;">항목</th>
+              <th class="text-right">기존</th>
+              <th class="text-right">변경</th>
+              <th class="text-right">차이</th>
+            </tr></thead>
+            <tbody>
+              <tr>
+                <td>1인 상품가</td>
+                <td class="text-right text-mono">699,000</td>
+                <td class="text-right text-mono" id="diff-new-price">719,000</td>
+                <td class="text-right text-mono" style="color:#d32f2f;" id="diff-unit">+20,000</td>
+              </tr>
+              <tr>
+                <td>상품가 합계 (3명)</td>
+                <td class="text-right text-mono">2,097,000</td>
+                <td class="text-right text-mono" id="diff-new-total">2,157,000</td>
+                <td class="text-right text-mono" style="color:#d32f2f;" id="diff-total">+60,000</td>
+              </tr>
+              <tr>
+                <td>특가 재적용 (하나투어 2%)</td>
+                <td class="text-right text-mono" style="color:#d32f2f;">-39,000</td>
+                <td class="text-right text-mono" style="color:#d32f2f;" id="diff-new-discount">-43,140</td>
+                <td class="text-right text-mono" style="color:#d32f2f;" id="diff-discount">-4,140</td>
+              </tr>
+              <tr style="background:#fff8e1;">
+                <td>쿠폰 (상해 자유여행 20,000원)</td>
+                <td class="text-right text-mono" style="color:#6a1b9a;">-20,000</td>
+                <td class="text-right text-mono" id="diff-new-coupon" style="color:#e65100;">확인 필요</td>
+                <td class="text-right text-mono" id="diff-coupon" style="color:#e65100;">-</td>
+              </tr>
+            </tbody>
+            <tfoot>
+              <tr style="font-weight:700;border-top:2px solid #333;">
+                <td>판매금액 변동</td>
+                <td class="text-right text-mono">2,038,000</td>
+                <td class="text-right text-mono" id="diff-new-sale">2,093,860</td>
+                <td class="text-right text-mono" style="color:#d32f2f;font-size:14px;" id="diff-sale">+55,860</td>
+              </tr>
+            </tfoot>
+          </table>
+        </div>
+
+        <!-- 쿠폰 알림 -->
+        <div style="background:#fff3e0;border:1px solid #ffe082;border-radius:8px;padding:10px 14px;margin-top:10px;font-size:11px;color:#e65100;display:flex;align-items:center;gap:8px;" id="coupon-warning">
+          <span style="font-size:14px;">&#x26A0;</span>
+          <div>
+            <strong>쿠폰 조건 재검증 필요:</strong> 현재 적용된 쿠폰 "상해 자유여행 20,000원 할인"의 적용 조건이 변경된 행사에서도 유효한지 확인이 필요합니다.
+            <br>쿠폰이 유효하지 않으면 자동 해제되며, 금액이 재계산됩니다.
+          </div>
+        </div>
+
+        <!-- 원장 자동 생성 예정 항목 -->
+        <div style="background:#f5f5f5;border-radius:8px;padding:14px;margin-top:12px;">
+          <div style="font-size:11px;font-weight:700;color:#888;margin-bottom:8px;">행사 이동 시 원장 자동 생성 항목</div>
+          <div style="display:flex;flex-direction:column;gap:4px;font-size:11px;">
+            <div style="display:flex;align-items:center;gap:8px;">
+              <span style="background:#e8eaf6;color:#283593;padding:1px 6px;border-radius:3px;font-family:monospace;font-size:10px;font-weight:700;">100</span>
+              <span>예약금 변경 (CHARGE) — 행사이동 차액</span>
+              <span style="margin-left:auto;font-family:monospace;color:#d32f2f;font-weight:600;" id="ledger-charge">+60,000</span>
+            </div>
+            <div style="display:flex;align-items:center;gap:8px;">
+              <span style="background:#fce4ec;color:#880e4f;padding:1px 6px;border-radius:3px;font-family:monospace;font-size:10px;font-weight:700;">202</span>
+              <span>여행사특가할인 변경 — 재계산</span>
+              <span style="margin-left:auto;font-family:monospace;color:#d32f2f;font-weight:600;" id="ledger-discount">-4,140</span>
+            </div>
+            <div style="display:flex;align-items:center;gap:8px;">
+              <span style="background:#f3e5f5;color:#6a1b9a;padding:1px 6px;border-radius:3px;font-family:monospace;font-size:10px;font-weight:700;">301</span>
+              <span>쿠폰 재검증 — 조건 확인 후 반영</span>
+              <span style="margin-left:auto;font-family:monospace;color:#e65100;font-weight:600;">확인 후</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 이동 사유 -->
+      <div class="form-group" style="margin-top:16px;">
+        <label>이동 사유</label>
+        <select><option>출발일 변경</option><option>일정 변경</option><option>상품 마감</option><option>가격 인상/인하</option><option>고객 요청</option><option>기타</option></select>
       </div>
       <div class="form-group">
-        <label>이동할 행사 선택</label>
-        <select>
-          <option>행사를 선택하세요</option>
-          <option>CCB101260613CZ3 | 2026-06-13 상하이 자유여행 4일 (699,000원)</option>
-          <option>CCB101260620CZ4 | 2026-06-20 상하이 자유여행 4일 (719,000원)</option>
-          <option>CCB101260627CZ5 | 2026-06-27 상하이 자유여행 4일 (689,000원) [마감]</option>
-        </select>
-      </div>
-      <div class="diff-preview">
-        <div style="font-size:11px;font-weight:600;color:#888;margin-bottom:8px;">금액 변동 미리보기 (6/20 행사 선택 시)</div>
-        <div class="diff-row"><span class="label">기존 1인 상품가</span><span class="value">699,000</span></div>
-        <div class="diff-row"><span class="label">변경 1인 상품가</span><span class="value">719,000</span></div>
-        <div class="diff-row"><span class="label">차액 (3명)</span><span class="value minus">+60,000 추가결제 필요</span></div>
-        <div class="diff-row"><span class="label">특가 재적용</span><span class="value">하나투어 2% → -43,140</span></div>
-        <div class="diff-row"><span class="label">쿠폰 재검증</span><span class="value" style="color:#e65100;">조건 확인 필요</span></div>
-      </div>
-      <div class="form-group" style="margin-top:12px;">
-        <label>이동 사유</label>
-        <select><option>출발일 변경</option><option>일정 변경</option><option>상품 마감</option><option>가격 인상/인하</option><option>기타</option></select>
+        <label>비고 (선택)</label>
+        <input type="text" placeholder="추가 메모를 입력하세요">
       </div>
     </div>
     <div class="modal-footer">
       <button class="btn btn-outline" onclick="this.closest('.modal-overlay').classList.remove('show')">취소</button>
-      <button class="btn btn-primary">행사 이동 실행</button>
+      <button class="btn btn-primary" id="btn-event-move" onclick="executeEventMove()" disabled style="opacity:0.5;">행사 이동 실행</button>
     </div>
   </div>
 </div>
@@ -699,6 +851,317 @@ function switchTab(name) {
   document.getElementById('tab-' + name).classList.add('active');
   const map = { basic:0, ledger:1, settlement:2, pb:3, history:4 };
   document.querySelectorAll('.tab')[map[name]].classList.add('active');
+}
+
+// ==================== 행사 이동 기능 ====================
+
+// 현재 예약 상태
+const currentReservation = {
+  eventCode: 'CCB101260606CZ2',
+  eventName: '상하이 자유여행 4일 #하버플라자...',
+  departure: '2026-06-06',
+  arrival: '2026-06-09',
+  pricePerPerson: 699000,
+  travelers: 3,
+  discountRate: 0.02,  // 하나투어 2%
+  discountName: '하나투어 2%',
+  couponAmount: 20000,
+  couponName: '상해 자유여행 20,000원 할인',
+  agency: '하나투어'
+};
+
+// 행사 이동 이력
+let eventMoveHistory = [];
+
+// 동일 여행사 행사 목록 (API 조회 시뮬레이션)
+const availableEvents = [
+  { code: 'CCB101260601CZ1', name: '상하이 자유여행 4일', departure: '2026-06-01', airline: '중국남방항공', origin: '인천', price: 689000, seats: 0, status: 'closed' },
+  { code: 'CCB101260606CZ2', name: '상하이 자유여행 4일', departure: '2026-06-06', airline: '중국남방항공', origin: '인천', price: 699000, seats: 5, status: 'current' },
+  { code: 'CCB101260613CZ3', name: '상하이 자유여행 4일', departure: '2026-06-13', airline: '중국남방항공', origin: '인천', price: 699000, seats: 12, status: 'available' },
+  { code: 'CCB101260620CZ4', name: '상하이 자유여행 4일', departure: '2026-06-20', airline: '중국남방항공', origin: '인천', price: 719000, seats: 8, status: 'available' },
+  { code: 'CCB101260627CZ5', name: '상하이 자유여행 4일', departure: '2026-06-27', airline: '중국남방항공', origin: '인천', price: 689000, seats: 0, status: 'closed' },
+  { code: 'CCB101260704CZ6', name: '상하이 자유여행 4일', departure: '2026-07-04', airline: '중국남방항공', origin: '인천', price: 729000, seats: 15, status: 'available' },
+  { code: 'CCB101260711CZ7', name: '상하이 자유여행 4일', departure: '2026-07-11', airline: '중국남방항공', origin: '인천', price: 749000, seats: 20, status: 'available' },
+  { code: 'CCB2017B260606A1', name: '상하이 핵심 관광 5일', departure: '2026-06-06', airline: '대한항공', origin: '인천', price: 899000, seats: 6, status: 'available' },
+  { code: 'CCB2017B260620A2', name: '상하이 핵심 관광 5일', departure: '2026-06-20', airline: '대한항공', origin: '인천', price: 919000, seats: 3, status: 'available' },
+];
+
+let selectedEventIdx = -1;
+
+function searchEvents(query) {
+  const resultsContainer = document.getElementById('event-search-results');
+  const resultCount = document.getElementById('result-count');
+
+  if (!query || query.length < 3) {
+    resultsContainer.style.display = 'none';
+    return;
+  }
+
+  const q = query.toUpperCase();
+  const filtered = availableEvents.filter(e =>
+    e.status !== 'current' && e.code.toUpperCase().includes(q)
+  );
+
+  // 결과 렌더링
+  const listHTML = filtered.map((e, i) => {
+    const seatColor = e.seats > 0 ? '#2e7d32' : '#d32f2f';
+    const seatText = e.seats > 0 ? `잔여 ${e.seats}석` : '마감';
+    const priceDiff = e.price - currentReservation.pricePerPerson;
+    const diffText = priceDiff > 0 ? `<span style="color:#d32f2f;">+${priceDiff.toLocaleString()}</span>`
+                   : priceDiff < 0 ? `<span style="color:#1565c0;">${priceDiff.toLocaleString()}</span>`
+                   : '<span style="color:#888;">동일</span>';
+
+    return `<div class="event-result-item" data-code="${e.code}" onclick="selectEvent('${e.code}')"
+      style="padding:10px 14px;border-bottom:1px solid #f0f0f0;cursor:pointer;display:flex;justify-content:space-between;align-items:center;transition:background 0.15s;"
+      onmouseover="this.style.background='#f0f7ff'" onmouseout="this.style.background=''">
+      <div style="flex:1;">
+        <div style="display:flex;align-items:center;gap:6px;">
+          <span style="font-weight:600;font-size:12px;font-family:monospace;">${e.code}</span>
+          ${e.status === 'closed' ? '<span style="background:#ffebee;color:#d32f2f;font-size:9px;padding:1px 4px;border-radius:2px;font-weight:600;">마감</span>' : ''}
+        </div>
+        <div style="font-size:11px;color:#888;margin-top:2px;">${e.name} | ${e.airline} | ${e.origin}</div>
+      </div>
+      <div style="text-align:right;min-width:120px;">
+        <div style="font-size:11px;color:#888;">${e.departure} 출발</div>
+        <div style="display:flex;align-items:center;gap:6px;justify-content:flex-end;">
+          <span style="font-weight:700;font-family:monospace;font-size:12px;">${e.price.toLocaleString()}원</span>
+          <span style="font-size:10px;">(${diffText})</span>
+        </div>
+        <div style="font-size:10px;color:${seatColor};font-weight:600;">${seatText}</div>
+      </div>
+    </div>`;
+  }).join('');
+
+  resultsContainer.innerHTML = `
+    <label style="display:block;font-size:12px;font-weight:600;color:#666;margin-bottom:8px;">검색 결과 <span style="color:#1565c0;">${filtered.length}건</span></label>
+    <div style="max-height:240px;overflow-y:auto;border:1px solid #e0e0e0;border-radius:8px;">
+      ${filtered.length > 0 ? listHTML : '<div style="padding:20px;text-align:center;color:#888;font-size:12px;">검색 결과가 없습니다. 행사코드를 확인해주세요.</div>'}
+    </div>`;
+  resultsContainer.style.display = 'block';
+}
+
+function selectEvent(code) {
+  const event = availableEvents.find(e => e.code === code);
+  if (!event) return;
+
+  selectedEventIdx = availableEvents.indexOf(event);
+
+  // 검색 결과 숨기기
+  document.getElementById('event-search-results').style.display = 'none';
+
+  // 선택 영역 보이기
+  const selectedDiv = document.getElementById('event-selected');
+  selectedDiv.style.display = 'block';
+
+  // 선택 정보 업데이트
+  document.getElementById('selected-event-code').textContent = event.code;
+  document.getElementById('selected-event-name').textContent = `${event.name} | ${event.departure} 출발`;
+  document.getElementById('selected-event-price').textContent = `${event.price.toLocaleString()}원`;
+
+  // 금액 계산
+  const priceDiff = event.price - currentReservation.pricePerPerson;
+  const totalDiff = priceDiff * currentReservation.travelers;
+  const newTotal = event.price * currentReservation.travelers;
+  const oldDiscount = Math.round(currentReservation.pricePerPerson * currentReservation.discountRate) * currentReservation.travelers;
+  const newDiscount = Math.round(event.price * currentReservation.discountRate) * currentReservation.travelers;
+  const discountDiff = newDiscount - oldDiscount;
+
+  const oldSale = (currentReservation.pricePerPerson * currentReservation.travelers) - oldDiscount - currentReservation.couponAmount;
+  const newSale = newTotal - newDiscount; // 쿠폰은 재검증 필요
+
+  // 테이블 업데이트
+  document.getElementById('diff-new-price').textContent = event.price.toLocaleString();
+  document.getElementById('diff-unit').textContent = formatDiff(priceDiff);
+  document.getElementById('diff-unit').style.color = priceDiff >= 0 ? '#d32f2f' : '#1565c0';
+
+  document.getElementById('diff-new-total').textContent = newTotal.toLocaleString();
+  document.getElementById('diff-total').textContent = formatDiff(totalDiff);
+  document.getElementById('diff-total').style.color = totalDiff >= 0 ? '#d32f2f' : '#1565c0';
+
+  document.getElementById('diff-new-discount').textContent = '-' + newDiscount.toLocaleString();
+  document.getElementById('diff-discount').textContent = formatDiff(-Math.abs(discountDiff));
+
+  document.getElementById('diff-new-sale').textContent = newSale.toLocaleString();
+  const saleDiff = newSale - oldSale - currentReservation.couponAmount; // 쿠폰 제외한 순변동
+  document.getElementById('diff-sale').textContent = formatDiff(newSale - oldSale);
+  document.getElementById('diff-sale').style.color = (newSale - oldSale) >= 0 ? '#d32f2f' : '#1565c0';
+
+  // 원장 항목 업데이트
+  document.getElementById('ledger-charge').textContent = formatDiff(totalDiff);
+  document.getElementById('ledger-discount').textContent = formatDiff(-Math.abs(discountDiff));
+
+  // 실행 버튼 활성화
+  const btn = document.getElementById('btn-event-move');
+  btn.disabled = false;
+  btn.style.opacity = '1';
+}
+
+function clearEventSelection() {
+  selectedEventIdx = -1;
+  document.getElementById('event-selected').style.display = 'none';
+  document.getElementById('event-search-results').style.display = 'block';
+  document.getElementById('btn-event-move').disabled = true;
+  document.getElementById('btn-event-move').style.opacity = '0.5';
+}
+
+function formatDiff(val) {
+  if (val === 0) return '0';
+  return (val > 0 ? '+' : '') + val.toLocaleString();
+}
+
+function executeEventMove() {
+  if (selectedEventIdx < 0) return;
+
+  const newEvent = availableEvents[selectedEventIdx];
+  const oldCode = currentReservation.eventCode;
+  const oldDeparture = currentReservation.departure;
+  const oldPrice = currentReservation.pricePerPerson;
+
+  // 이력 추가
+  eventMoveHistory.push({
+    fromCode: oldCode,
+    fromDeparture: oldDeparture,
+    fromPrice: oldPrice,
+    toCode: newEvent.code,
+    toDeparture: newEvent.departure,
+    toPrice: newEvent.price,
+    date: '2026-04-07 ' + new Date().toLocaleTimeString('ko-KR', {hour:'2-digit', minute:'2-digit'}),
+    user: '김서현',
+    reason: document.querySelector('#modal-event select').value
+  });
+
+  // 현재 예약 정보 업데이트
+  currentReservation.eventCode = newEvent.code;
+  currentReservation.eventName = newEvent.name;
+  currentReservation.departure = newEvent.departure;
+  currentReservation.pricePerPerson = newEvent.price;
+
+  // 화면 업데이트 - 여행 상품 정보
+  updateProductInfo(newEvent);
+
+  // 이력 표시
+  renderEventHistory();
+
+  // 모달 닫기
+  document.getElementById('modal-event').classList.remove('show');
+
+  // 모달 초기화
+  resetEventModal();
+
+  // 성공 알림
+  showToast(`행사 이동 완료: ${oldCode} → ${newEvent.code}`);
+}
+
+function updateProductInfo(event) {
+  // 행사코드 업데이트
+  const infoRows = document.querySelectorAll('#tab-basic .section:nth-child(2) .info-value');
+  // 행사코드 찾아서 업데이트
+  document.querySelectorAll('#tab-basic .section:nth-child(2) .info-row').forEach(row => {
+    const label = row.querySelector('.info-label');
+    const value = row.querySelector('.info-value');
+    if (!label || !value) return;
+    if (label.textContent.includes('행사코드')) value.textContent = event.code;
+    if (label.textContent.includes('출도착일')) {
+      const dep = event.departure;
+      const arr = new Date(dep);
+      arr.setDate(arr.getDate() + 3);
+      value.textContent = `${dep} → ${arr.toISOString().split('T')[0]}`;
+    }
+  });
+
+  // 금액 정보 업데이트
+  const newTotal = event.price * currentReservation.travelers;
+  const newDiscount = Math.round(event.price * currentReservation.discountRate) * currentReservation.travelers;
+  const newSaleAmount = newTotal - newDiscount - currentReservation.couponAmount;
+
+  // 여행자 테이블 1인 상품가 업데이트
+  document.querySelectorAll('#tab-basic tbody tr').forEach(row => {
+    const cells = row.querySelectorAll('td');
+    if (cells.length >= 7) {
+      cells[5].textContent = event.price.toLocaleString(); // 1인 상품가
+      const discount = Math.round(event.price * currentReservation.discountRate);
+      cells[6].textContent = '-' + discount.toLocaleString(); // 특가
+      cells[7].textContent = (event.price - discount).toLocaleString(); // 1인 판매가
+    }
+  });
+
+  // 금액 카드 업데이트
+  const amountCards = document.querySelectorAll('.amount-card .value');
+  if (amountCards.length >= 5) {
+    amountCards[0].textContent = newTotal.toLocaleString();  // 상품금액
+    amountCards[1].textContent = '-' + (newDiscount + currentReservation.couponAmount).toLocaleString(); // 할인금액
+    amountCards[2].textContent = newSaleAmount.toLocaleString(); // 판매금액
+    amountCards[4].textContent = newSaleAmount.toLocaleString(); // 결제필요금액
+  }
+}
+
+function renderEventHistory() {
+  const container = document.getElementById('event-history');
+  const list = document.getElementById('event-history-list');
+  const count = document.getElementById('hist-count');
+
+  if (eventMoveHistory.length === 0) {
+    container.style.display = 'none';
+    return;
+  }
+
+  container.style.display = 'block';
+  count.textContent = `${eventMoveHistory.length}회`;
+
+  list.innerHTML = eventMoveHistory.map((h, i) => {
+    const priceDiff = (h.toPrice - h.fromPrice) * currentReservation.travelers;
+    const diffColor = priceDiff >= 0 ? '#d32f2f' : '#1565c0';
+    return `
+    <div style="padding:8px 0;${i > 0 ? 'border-top:1px dashed #ddd;margin-top:4px;' : ''}">
+      <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;">
+        <span style="background:#e8eaf6;color:#283593;font-size:9px;padding:2px 6px;border-radius:3px;font-weight:700;flex-shrink:0;">${i+1}차</span>
+        <span style="font-family:monospace;font-size:11px;color:#888;">${h.fromCode}</span>
+        <span style="font-size:10px;color:#888;">${h.fromDeparture}</span>
+        <span style="color:#1565c0;font-weight:700;">→</span>
+        <span style="font-family:monospace;font-size:11px;font-weight:700;color:#333;">${h.toCode}</span>
+        <span style="font-size:10px;color:#333;">${h.toDeparture}</span>
+      </div>
+      <div style="display:flex;align-items:center;gap:12px;margin-top:4px;margin-left:36px;font-size:10px;">
+        <span style="color:${diffColor};font-weight:600;font-family:monospace;">${formatDiff(priceDiff)}원</span>
+        <span style="color:#aaa;">|</span>
+        <span style="color:#888;">사유: ${h.reason}</span>
+        <span style="color:#aaa;">|</span>
+        <span style="color:#aaa;">${h.date} · ${h.user}</span>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function resetEventModal() {
+  document.getElementById('event-search-input').value = '';
+  document.getElementById('event-search-results').style.display = 'none';
+  document.getElementById('event-selected').style.display = 'none';
+  document.getElementById('btn-event-move').disabled = true;
+  document.getElementById('btn-event-move').style.opacity = '0.5';
+  selectedEventIdx = -1;
+
+  // 현재 행사 정보 업데이트
+  const currentEventInput = document.querySelector('#modal-event .form-group:first-of-type div[style*="background:#f5f5f5"]');
+  if (currentEventInput) {
+    const codeEl = currentEventInput.querySelector('.text-mono');
+    const nameEl = currentEventInput.querySelector('div[style*="color:#888"]');
+    const depEl = currentEventInput.querySelectorAll('div[style*="font-weight:600"]')[0];
+    const priceEl = currentEventInput.querySelector('div[style*="font-family:monospace"]');
+    if (codeEl) codeEl.textContent = currentReservation.eventCode;
+    if (nameEl) nameEl.textContent = currentReservation.eventName;
+    if (depEl) depEl.textContent = currentReservation.departure;
+    if (priceEl) priceEl.textContent = currentReservation.pricePerPerson.toLocaleString();
+  }
+}
+
+// 토스트 알림
+function showToast(message) {
+  const toast = document.createElement('div');
+  toast.style.cssText = 'position:fixed;bottom:80px;left:50%;transform:translateX(-50%);background:#1a1a1a;color:#fff;padding:12px 24px;border-radius:8px;font-size:13px;z-index:999;box-shadow:0 4px 20px rgba(0,0,0,0.3);display:flex;align-items:center;gap:8px;';
+  toast.innerHTML = `<span style="color:#4caf50;font-size:16px;">&#x2713;</span> ${message}`;
+  document.body.appendChild(toast);
+  setTimeout(() => { toast.style.opacity = '0'; toast.style.transition = 'opacity 0.3s'; }, 2000);
+  setTimeout(() => toast.remove(), 2500);
 }
 </script>
 </body>
