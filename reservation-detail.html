@@ -259,8 +259,9 @@
           <strong>금액 직접 수정 불가</strong> — 모든 변동은 [+금액 추가] 또는 [-금액 차감]으로만 처리되며 원장에 자동 기록됩니다.
         </div>
 
-        <!-- 금액 요약 카드 - 5개로 확장 (취소위약금 포함) -->
-        <div class="amount-summary">
+        <!-- ===== 예약 금액 영역 ===== -->
+        <div style="font-size:11px;font-weight:700;color:#888;margin-bottom:8px;">예약 금액 (판매 기준)</div>
+        <div class="amount-summary" style="grid-template-columns:repeat(4,1fr);">
           <div class="amount-card">
             <div class="label">상품금액</div>
             <div class="value">2,097,000</div>
@@ -270,38 +271,98 @@
             <div class="value negative">-59,000</div>
           </div>
           <div class="amount-card">
-            <div class="label">판매금액 (=입금액)</div>
-            <div class="value positive">2,038,000</div>
+            <div class="label">취소위약금</div>
+            <div class="value" id="penalty-total">0</div>
           </div>
-          <div class="amount-card highlight">
-            <div class="label" style="color:#e65100;"><span class="feature-tag" style="background:#fff3e0;color:#e65100;">신규</span> 취소위약금</div>
-            <div class="value">0</div>
-          </div>
-          <div class="amount-card">
-            <div class="label">결제 필요 금액</div>
-            <div class="value positive">2,038,000</div>
+          <div class="amount-card" style="border:2px solid #1565c0;background:#e3f2fd;">
+            <div class="label" style="color:#1565c0;font-weight:700;">결제 필요 금액</div>
+            <div class="value positive" style="font-size:20px;" id="amount-need-pay">2,038,000</div>
           </div>
         </div>
 
-        <!-- 취소위약금 관리 영역 (예약시스템으로 이관) -->
-        <div class="penalty-section" style="margin-bottom: 16px;">
+        <!-- 결제 필요 금액 계산식 -->
+        <div style="background:#f8f9fa;border-radius:6px;padding:8px 12px;font-size:11px;color:#888;margin-bottom:16px;display:flex;align-items:center;gap:4px;flex-wrap:wrap;">
+          <span>결제 필요 금액 =</span>
+          <span style="font-weight:600;color:#333;">상품금액</span> <span>-</span>
+          <span style="font-weight:600;color:#d32f2f;">할인금액</span> <span>+</span>
+          <span style="font-weight:600;color:#e65100;">취소위약금</span>
+          <span style="margin-left:8px;color:#1565c0;">※ 취소위약금이 발생하면 결제 필요 금액이 증가</span>
+        </div>
+
+        <!-- 취소위약금 관리 (신규) -->
+        <div class="penalty-section" style="margin-bottom:16px;">
           <div class="penalty-title">
             <span class="feature-tag" style="background:#fff3e0;color:#e65100;">신규</span>
-            취소위약금 관리 (예약금액 영역)
+            취소위약금 관리
           </div>
-          <div style="font-size: 11px; color: #666; margin-bottom: 8px;">
-            기존: 결제시스템에서 취소금액으로 관리 → <strong>변경: 예약시스템에서 판매금액(수익)으로 관리</strong>
+
+          <!-- AS-IS / TO-BE 비교 -->
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px;">
+            <div style="background:#fff5f5;border-radius:6px;padding:10px;border:1px solid #ffcdd2;">
+              <div style="font-size:10px;font-weight:700;color:#d32f2f;margin-bottom:4px;">AS-IS (기존)</div>
+              <div style="font-size:10px;color:#888;line-height:1.5;">
+                ① 예약에 인원별 취소위약금 설정<br>
+                ② <strong style="color:#d32f2f;">결제 금액에서</strong> 취소위약금 금액을 따로 잡음<br>
+                ③ 취소 시 결제금액 - 위약금 = 환불금액 계산<br>
+                <span style="color:#d32f2f;">→ 결제와 예약 금액이 섞여서 관리 복잡</span>
+              </div>
+            </div>
+            <div style="background:#f1f8e9;border-radius:6px;padding:10px;border:1px solid #c5e1a5;">
+              <div style="font-size:10px;font-weight:700;color:#2e7d32;margin-bottom:4px;">TO-BE (변경)</div>
+              <div style="font-size:10px;color:#888;line-height:1.5;">
+                ① 예약금액은 예약대로 관리 (위약금 포함)<br>
+                ② <strong style="color:#2e7d32;">결제는 결제한 금액만</strong> 관리<br>
+                ③ <strong style="color:#2e7d32;">결제 필요 금액 vs 결제된 금액</strong> 비교<br>
+                <span style="color:#2e7d32;">→ "얼마 내야 해?" / "얼마 냈어?" 만 보면 됨</span>
+              </div>
+            </div>
           </div>
+
+          <!-- 인원별 취소위약금 테이블 -->
           <table>
-            <thead><tr><th>여행자</th><th class="text-right">1인 위약금</th><th>위약 사유</th><th class="text-center">상태</th></tr></thead>
+            <thead><tr>
+              <th>여행자</th>
+              <th class="text-right">1인 판매가</th>
+              <th class="text-right">1인 위약금</th>
+              <th>위약 사유</th>
+              <th class="text-center">상태</th>
+              <th class="text-center">조작</th>
+            </tr></thead>
             <tbody>
-              <tr><td>오기웅 (성인)</td><td class="text-right text-mono">0</td><td>-</td><td class="text-center"><span class="badge gray">없음</span></td></tr>
-              <tr><td>오서연 (성인)</td><td class="text-right text-mono">0</td><td>-</td><td class="text-center"><span class="badge gray">없음</span></td></tr>
-              <tr><td>오민준 (성인)</td><td class="text-right text-mono">0</td><td>-</td><td class="text-center"><span class="badge gray">없음</span></td></tr>
+              <tr>
+                <td>오기웅 (성인)</td>
+                <td class="text-right text-mono">686,000</td>
+                <td class="text-right text-mono" id="penalty-1">0</td>
+                <td>-</td>
+                <td class="text-center"><span class="badge gray">없음</span></td>
+                <td class="text-center"><button class="btn btn-outline btn-sm" style="font-size:10px;" onclick="openPenaltyInput(0)">위약금 설정</button></td>
+              </tr>
+              <tr>
+                <td>오서연 (성인)</td>
+                <td class="text-right text-mono">686,000</td>
+                <td class="text-right text-mono" id="penalty-2">0</td>
+                <td>-</td>
+                <td class="text-center"><span class="badge gray">없음</span></td>
+                <td class="text-center"><button class="btn btn-outline btn-sm" style="font-size:10px;" onclick="openPenaltyInput(1)">위약금 설정</button></td>
+              </tr>
+              <tr>
+                <td>오민준 (성인)</td>
+                <td class="text-right text-mono">686,000</td>
+                <td class="text-right text-mono" id="penalty-3">0</td>
+                <td>-</td>
+                <td class="text-center"><span class="badge gray">없음</span></td>
+                <td class="text-center"><button class="btn btn-outline btn-sm" style="font-size:10px;" onclick="openPenaltyInput(2)">위약금 설정</button></td>
+              </tr>
             </tbody>
           </table>
-          <div style="font-size: 11px; color: #888; margin-top: 8px;">
-            취소위약금 = 결제받아야 하는 금액. 결제시스템에서는 실결제/환불만 관리.
+
+          <!-- 핵심 개념 안내 -->
+          <div style="background:#fff;border-radius:6px;padding:10px 12px;margin-top:10px;font-size:11px;border:1px solid #ffe082;">
+            <div style="display:flex;flex-direction:column;gap:3px;">
+              <div><strong style="color:#e65100;">취소위약금</strong> = 고객이 취소해도 <strong>우리가 받아야 하는 금액</strong></div>
+              <div><strong style="color:#1565c0;">결제 필요 금액</strong> = 판매금액 + 취소위약금 (고객이 총 결제해야 하는 금액)</div>
+              <div style="color:#888;">→ 결제 영역에서는 "얼마 결제했나 / 얼마 환불했나" 만 관리</div>
+            </div>
           </div>
         </div>
 
@@ -367,10 +428,33 @@
         </div>
       </div>
       <div class="section-body">
+        <!-- 핵심 비교: 결제 필요 금액 vs 결제된 금액 -->
+        <div style="background:#f8f9fa;border-radius:8px;padding:16px;margin-bottom:16px;border:1px solid #e0e0e0;">
+          <div style="display:grid;grid-template-columns:1fr auto 1fr auto 1fr;gap:12px;align-items:center;">
+            <div style="text-align:center;">
+              <div style="font-size:10px;color:#888;margin-bottom:4px;">결제 필요 금액</div>
+              <div style="font-size:18px;font-weight:700;font-family:monospace;color:#1565c0;" id="pay-need">2,038,000</div>
+              <div style="font-size:9px;color:#aaa;">예약 영역에서 계산</div>
+            </div>
+            <div style="font-size:18px;color:#bbb;">vs</div>
+            <div style="text-align:center;">
+              <div style="font-size:10px;color:#888;margin-bottom:4px;">실 결제 금액</div>
+              <div style="font-size:18px;font-weight:700;font-family:monospace;color:#2e7d32;" id="pay-actual">2,058,000</div>
+              <div style="font-size:9px;color:#aaa;">결제 20,000 + PG 2,038,000</div>
+            </div>
+            <div style="font-size:18px;color:#bbb;">=</div>
+            <div style="text-align:center;">
+              <div style="font-size:10px;color:#888;margin-bottom:4px;">차이 (과부족)</div>
+              <div style="font-size:18px;font-weight:700;font-family:monospace;" id="pay-diff" style="color:#2e7d32;">+20,000</div>
+              <div style="font-size:9px;color:#2e7d32;font-weight:600;" id="pay-diff-label">초과 결제 (환불 필요)</div>
+            </div>
+          </div>
+        </div>
+
         <div class="amount-summary" style="grid-template-columns: repeat(3, 1fr);">
           <div class="amount-card">
             <div class="label">총 결제금액</div>
-            <div class="value positive">2,038,000</div>
+            <div class="value positive">2,058,000</div>
           </div>
           <div class="amount-card">
             <div class="label">총 환불금액</div>
@@ -405,8 +489,9 @@
         </table>
 
         <div class="design-note">
-          <strong>[결제수단 변경]</strong> 예약금액 수정 없이 기존 결제 취소 → 새 결제수단으로 동일 금액 재결제. 고객에게 잘못된 금액 노출 방지.<br>
-          <strong>[결제 이관 요청]</strong> 이 예약의 결제를 다른 예약으로 이관 요청. 개발실에서 처리 후 양쪽 원장에 이관 기록 생성. 요청/처리 이력 시스템 기록.
+          <strong>결제 영역은 "얼마 결제했나 / 얼마 환불했나"만 관리합니다.</strong> 금액 계산(위약금·할인 등)은 모두 예약 금액 영역에서 처리.<br>
+          <strong>[결제수단 변경]</strong> 기존 결제 취소 → 새 결제수단으로 동일 금액 재결제.<br>
+          <strong>[결제 이관 요청]</strong> 채널사 예약만 가능. 기존 결제 취소 → 대상 예약에 재결제.
         </div>
       </div>
     </div>
@@ -826,8 +911,13 @@
 
       <!-- 안내 -->
       <div style="background:#fff3e0;border:1px solid #ffe082;border-radius:8px;padding:12px;font-size:12px;color:#e65100;margin-bottom:16px;">
-        <strong>결제 이관은 개발실에서 처리합니다.</strong><br>
-        <span style="font-size:11px;">이관 요청을 등록하면 개발실에서 확인 후 처리하며, 처리 이력이 시스템에 기록됩니다.</span>
+        <strong>결제 이관은 채널사 예약 건에서만 요청 가능합니다.</strong><br>
+        <span style="font-size:11px;">채널사 결제 건의 경우 기존 결제 취소 → 새 예약으로 재결제 프로세스로 처리됩니다. 개발실에서 확인 후 처리하며, 이력이 시스템에 기록됩니다.</span>
+      </div>
+
+      <!-- 채널사 전용 안내 -->
+      <div style="background:#f5f5f5;border-radius:8px;padding:10px 14px;margin-bottom:16px;font-size:11px;color:#666;border-left:3px solid #e65100;">
+        <strong style="color:#e65100;">왜 채널사만?</strong> 트립스토어 직접 예약은 결제 취소 후 재결제로 해결 가능. 채널사 결제는 채널사 자체 결제 시스템이라 우리가 직접 취소/재결제가 불가하여 개발실 처리 필요.
       </div>
 
       <!-- 현재 예약 정보 -->
@@ -854,10 +944,9 @@
       <div class="form-group">
         <label>이관 사유</label>
         <select id="transfer-reason">
-          <option>결제-예약 매칭 오류</option>
-          <option>중복 예약 정리</option>
-          <option>채널사 예약 건 핸들링</option>
-          <option>예약 분할/통합</option>
+          <option>채널사 결제-예약 매칭 오류</option>
+          <option>채널사 중복 예약 정리</option>
+          <option>채널사 주문번호 변경</option>
           <option>기타</option>
         </select>
       </div>
@@ -865,12 +954,12 @@
       <!-- 상세 설명 -->
       <div class="form-group">
         <label>상세 설명</label>
-        <textarea style="width:100%;padding:8px 12px;border:1px solid #d0d0d0;border-radius:6px;font-size:13px;min-height:80px;resize:vertical;" placeholder="이관이 필요한 사유를 상세히 작성해주세요.&#10;(예: 고객이 A예약 결제 후 B예약으로 변경 요청, 결제 데이터 이관 필요)"></textarea>
+        <textarea style="width:100%;padding:8px 12px;border:1px solid #d0d0d0;border-radius:6px;font-size:13px;min-height:80px;resize:vertical;" placeholder="이관이 필요한 사유를 상세히 작성해주세요.&#10;(예: SSG 주문번호 변경으로 기존 결제 취소 후 새 예약에 재결제 필요)"></textarea>
       </div>
 
       <!-- 처리 프로세스 안내 -->
       <div style="background:#f5f5f5;border-radius:8px;padding:12px;font-size:11px;color:#666;">
-        <div style="font-weight:700;margin-bottom:6px;">처리 프로세스</div>
+        <div style="font-weight:700;margin-bottom:6px;">처리 프로세스 (기존 결제 취소 → 재결제)</div>
         <div style="display:flex;flex-direction:column;gap:4px;">
           <div style="display:flex;align-items:center;gap:6px;">
             <span style="background:#e8eaf6;color:#283593;width:18px;height:18px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;flex-shrink:0;">1</span>
@@ -878,18 +967,22 @@
           </div>
           <div style="display:flex;align-items:center;gap:6px;">
             <span style="background:#e8eaf6;color:#283593;width:18px;height:18px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;flex-shrink:0;">2</span>
-            <span>개발실 슬랙 알림 → 확인 및 처리</span>
+            <span>개발실 슬랙 알림 → 확인</span>
           </div>
           <div style="display:flex;align-items:center;gap:6px;">
-            <span style="background:#e8eaf6;color:#283593;width:18px;height:18px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;flex-shrink:0;">3</span>
-            <span>처리 완료 시 양쪽 원장에 이관 기록 생성</span>
+            <span style="background:#ffebee;color:#d32f2f;width:18px;height:18px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;flex-shrink:0;">3</span>
+            <span><strong style="color:#d32f2f;">기존 예약 결제 취소</strong> (채널사 측 취소 처리)</span>
           </div>
           <div style="display:flex;align-items:center;gap:6px;">
-            <span style="background:#e8eaf6;color:#283593;width:18px;height:18px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;flex-shrink:0;">4</span>
-            <span>PM에게 처리 완료 알림</span>
+            <span style="background:#e8f5e9;color:#2e7d32;width:18px;height:18px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;flex-shrink:0;">4</span>
+            <span><strong style="color:#2e7d32;">대상 예약에 재결제</strong> (채널사 측 결제 재연동)</span>
+          </div>
+          <div style="display:flex;align-items:center;gap:6px;">
+            <span style="background:#e8eaf6;color:#283593;width:18px;height:18px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;flex-shrink:0;">5</span>
+            <span>양쪽 원장에 이관 기록 생성 → PM 완료 알림</span>
           </div>
         </div>
-        <div style="margin-top:8px;font-size:10px;color:#999;">※ 추후 원장 시스템 안정화 이후 자동 이관 기능으로 전환 예정</div>
+        <div style="margin-top:8px;font-size:10px;color:#999;">※ 트립스토어 직접 예약은 결제수단 변경(취소→재결제) 기능으로 처리하세요.</div>
       </div>
 
       <!-- 요청 이력 -->
@@ -1214,6 +1307,86 @@ function resetEventModal() {
     if (depEl) depEl.textContent = currentReservation.departure;
     if (priceEl) priceEl.textContent = currentReservation.pricePerPerson.toLocaleString();
   }
+}
+
+// ==================== 취소위약금 기능 ====================
+
+const penalties = [0, 0, 0]; // 인원별 위약금
+
+function openPenaltyInput(idx) {
+  const names = ['오기웅', '오서연', '오민준'];
+  const amount = prompt(`${names[idx]} 취소위약금을 입력하세요 (원):`, penalties[idx]);
+  if (amount === null) return;
+
+  const val = parseInt(amount) || 0;
+  penalties[idx] = val;
+
+  // 테이블 업데이트
+  const cell = document.getElementById(`penalty-${idx+1}`);
+  cell.textContent = val.toLocaleString();
+  cell.style.color = val > 0 ? '#e65100' : '';
+  cell.style.fontWeight = val > 0 ? '700' : '';
+
+  // 상태 배지 업데이트
+  const row = cell.closest('tr');
+  const statusCell = row.querySelectorAll('td')[4];
+  const reasonCell = row.querySelectorAll('td')[3];
+  if (val > 0) {
+    statusCell.innerHTML = '<span class="badge orange">위약금</span>';
+    if (reasonCell.textContent === '-') reasonCell.textContent = '고객 취소';
+  } else {
+    statusCell.innerHTML = '<span class="badge gray">없음</span>';
+    reasonCell.textContent = '-';
+  }
+
+  // 합계 & 결제필요금액 재계산
+  recalcPenalty();
+}
+
+function recalcPenalty() {
+  const totalPenalty = penalties.reduce((a, b) => a + b, 0);
+
+  // 취소위약금 합계
+  document.getElementById('penalty-total').textContent = totalPenalty.toLocaleString();
+  document.getElementById('penalty-total').style.color = totalPenalty > 0 ? '#e65100' : '';
+  document.getElementById('penalty-total').style.fontWeight = totalPenalty > 0 ? '700' : '';
+
+  // 결제 필요 금액 = 판매금액 + 위약금
+  // (판매금액은 상품금액 - 할인)
+  const saleAmount = currentReservation.pricePerPerson * currentReservation.travelers
+    - Math.round(currentReservation.pricePerPerson * currentReservation.discountRate) * currentReservation.travelers
+    - currentReservation.couponAmount;
+  const needPay = saleAmount + totalPenalty;
+
+  document.getElementById('amount-need-pay').textContent = needPay.toLocaleString();
+
+  // 결제 영역 - 결제 필요 금액 업데이트
+  const payNeed = document.getElementById('pay-need');
+  if (payNeed) payNeed.textContent = needPay.toLocaleString();
+
+  // 차이 계산
+  const actualPaid = 2058000; // 쿠폰 + PG
+  const diff = actualPaid - needPay;
+  const diffEl = document.getElementById('pay-diff');
+  const diffLabel = document.getElementById('pay-diff-label');
+  if (diffEl) {
+    diffEl.textContent = (diff >= 0 ? '+' : '') + diff.toLocaleString();
+    diffEl.style.color = diff >= 0 ? '#2e7d32' : '#d32f2f';
+  }
+  if (diffLabel) {
+    if (diff > 0) {
+      diffLabel.textContent = '초과 결제 (환불 필요)';
+      diffLabel.style.color = '#2e7d32';
+    } else if (diff < 0) {
+      diffLabel.textContent = '추가 결제 필요';
+      diffLabel.style.color = '#d32f2f';
+    } else {
+      diffLabel.textContent = '정산 완료';
+      diffLabel.style.color = '#888';
+    }
+  }
+
+  showToast(`취소위약금 설정: 합계 ${totalPenalty.toLocaleString()}원 → 결제 필요 금액 ${needPay.toLocaleString()}원`);
 }
 
 // ==================== 결제 이관 요청 기능 ====================
