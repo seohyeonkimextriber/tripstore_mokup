@@ -368,10 +368,10 @@
 
         <!-- 할인 내역 -->
         <div class="subsection">
-          <div class="subsection-title">할인 내역</div>
-          <table>
+          <div class="subsection-title">할인/조정 내역</div>
+          <table id="discount-table">
             <thead><tr><th>구분</th><th>항목</th><th class="text-right">금액</th><th>비고</th></tr></thead>
-            <tbody>
+            <tbody id="discount-tbody">
               <tr><td>여행사 특가</td><td>상시특가 > 하나투어 > 동남아/일본/중국 2%</td><td class="text-right text-mono" style="color:#d32f2f;">-39,000</td><td>특가 ID: 1325</td></tr>
               <tr><td><span class="badge purple">쿠폰</span></td><td>쿠폰 할인</td><td class="text-right text-mono" style="color:#d32f2f;">-20,000</td><td>836331bf...</td></tr>
             </tbody>
@@ -817,17 +817,70 @@
 <!-- 금액 추가 모달 -->
 <div class="modal-overlay" id="modal-add">
   <div class="modal">
-    <div class="modal-header"><h3>+ 금액 추가</h3><button class="close" onclick="this.closest('.modal-overlay').classList.remove('show')">&times;</button></div>
+    <div class="modal-header"><h3>+ 금액 추가 (할인/조정)</h3><button class="close" onclick="this.closest('.modal-overlay').classList.remove('show')">&times;</button></div>
     <div class="modal-body">
-      <div class="form-group"><label>대상 여행자</label><select><option>전체</option><option>오기웅 (성인)</option><option>오서연 (성인)</option><option>오민준 (성인)</option></select></div>
-      <div class="form-group"><label>추가 유형</label><select><option>추가할인</option><option>쿠폰 적용</option><option>금액 조정</option><option>기타</option></select></div>
-      <div class="form-group"><label>금액</label><input type="text" placeholder="금액을 입력하세요"></div>
-      <div class="form-group"><label>사유</label><input type="text" placeholder="변경 사유를 입력하세요"></div>
-      <div style="font-size:11px;color:#888;">확인 시 원장에 해당 항목이 자동 생성됩니다.</div>
+      <div style="background:#e3f2fd;border-radius:8px;padding:10px 14px;font-size:12px;color:#1565c0;margin-bottom:16px;">
+        고객에게 유리한 금액 변동 시 사용합니다. <strong>결제 필요 금액이 감소</strong>합니다.<br>
+        <span style="font-size:11px;opacity:0.8;">확인 시 원장에 해당 항목이 자동 생성됩니다.</span>
+      </div>
+      <div class="form-group">
+        <label>대상 여행자</label>
+        <select id="add-target">
+          <option value="all">전체 (3명)</option>
+          <option value="0">오기웅 (성인)</option>
+          <option value="1">오서연 (성인)</option>
+          <option value="2">오민준 (성인)</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>추가 유형</label>
+        <select id="add-type" onchange="updateAddLedgerCode()">
+          <option value="discount" data-code="202">추가할인</option>
+          <option value="adjust" data-code="100">금액 조정 (감액)</option>
+          <option value="compensation" data-code="203">보상 할인</option>
+          <option value="etc" data-code="299">기타</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>금액 (원)</label>
+        <input type="number" id="add-amount" placeholder="할인/조정할 금액 입력" oninput="previewAddAmount()">
+        <div class="help">입력한 금액만큼 결제 필요 금액이 <strong style="color:#1565c0;">감소</strong>합니다.</div>
+      </div>
+      <div class="form-group">
+        <label>사유</label>
+        <input type="text" id="add-reason" placeholder="변경 사유를 입력하세요 (필수)">
+      </div>
+
+      <!-- 변경 미리보기 -->
+      <div id="add-preview" style="display:none;background:#f8f9fa;border-radius:8px;padding:12px;border:1px solid #e0e0e0;">
+        <div style="font-size:11px;font-weight:700;color:#888;margin-bottom:6px;">변경 미리보기</div>
+        <div style="display:flex;justify-content:space-between;font-size:12px;margin-bottom:4px;">
+          <span style="color:#888;">현재 결제 필요 금액</span>
+          <span style="font-family:monospace;font-weight:600;" id="add-preview-before">2,038,000</span>
+        </div>
+        <div style="display:flex;justify-content:space-between;font-size:12px;margin-bottom:4px;">
+          <span style="color:#1565c0;font-weight:600;">금액 추가 (할인)</span>
+          <span style="font-family:monospace;font-weight:700;color:#1565c0;" id="add-preview-amount">-0</span>
+        </div>
+        <div style="display:flex;justify-content:space-between;font-size:12px;border-top:1px solid #e0e0e0;padding-top:4px;margin-top:4px;">
+          <span style="font-weight:700;">변경 후 결제 필요 금액</span>
+          <span style="font-family:monospace;font-weight:700;font-size:14px;" id="add-preview-after">2,038,000</span>
+        </div>
+      </div>
+
+      <!-- 원장 생성 예정 -->
+      <div id="add-ledger-preview" style="display:none;background:#f5f5f5;border-radius:8px;padding:10px 12px;margin-top:10px;">
+        <div style="font-size:10px;font-weight:600;color:#888;margin-bottom:4px;">원장 자동 생성 항목</div>
+        <div style="display:flex;align-items:center;gap:8px;font-size:11px;">
+          <span style="background:#fce4ec;color:#880e4f;padding:1px 6px;border-radius:3px;font-family:monospace;font-size:10px;font-weight:700;" id="add-ledger-code">202</span>
+          <span id="add-ledger-desc">추가할인</span>
+          <span style="margin-left:auto;font-family:monospace;color:#1565c0;font-weight:600;" id="add-ledger-amount">+0</span>
+        </div>
+      </div>
     </div>
     <div class="modal-footer">
       <button class="btn btn-outline" onclick="this.closest('.modal-overlay').classList.remove('show')">취소</button>
-      <button class="btn btn-plus">금액 추가</button>
+      <button class="btn btn-plus" id="btn-add-execute" onclick="executeAddAmount()" style="opacity:0.5;cursor:not-allowed;" disabled>금액 추가</button>
     </div>
   </div>
 </div>
@@ -835,16 +888,70 @@
 <!-- 금액 차감 모달 -->
 <div class="modal-overlay" id="modal-sub">
   <div class="modal">
-    <div class="modal-header"><h3>- 금액 차감</h3><button class="close" onclick="this.closest('.modal-overlay').classList.remove('show')">&times;</button></div>
+    <div class="modal-header"><h3>- 금액 차감 (추가 청구)</h3><button class="close" onclick="this.closest('.modal-overlay').classList.remove('show')">&times;</button></div>
     <div class="modal-body">
-      <div class="form-group"><label>대상 여행자</label><select><option>전체</option><option>오기웅 (성인)</option><option>오서연 (성인)</option><option>오민준 (성인)</option></select></div>
-      <div class="form-group"><label>차감 유형</label><select><option>할인 취소</option><option>위약금 부과</option><option>쿠폰 취소</option><option>금액 조정</option><option>기타</option></select></div>
-      <div class="form-group"><label>금액</label><input type="text" placeholder="금액을 입력하세요"></div>
-      <div class="form-group"><label>사유</label><input type="text" placeholder="변경 사유를 입력하세요"></div>
+      <div style="background:#fff3e0;border-radius:8px;padding:10px 14px;font-size:12px;color:#e65100;margin-bottom:16px;">
+        고객에게 추가 청구가 필요한 금액 변동 시 사용합니다. <strong>결제 필요 금액이 증가</strong>합니다.<br>
+        <span style="font-size:11px;opacity:0.8;">확인 시 원장에 해당 항목이 자동 생성됩니다.</span>
+      </div>
+      <div class="form-group">
+        <label>대상 여행자</label>
+        <select id="sub-target">
+          <option value="all">전체 (3명)</option>
+          <option value="0">오기웅 (성인)</option>
+          <option value="1">오서연 (성인)</option>
+          <option value="2">오민준 (성인)</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>차감 유형</label>
+        <select id="sub-type" onchange="updateSubLedgerCode()">
+          <option value="discount-cancel" data-code="202">할인 취소 (환수)</option>
+          <option value="surcharge" data-code="100">추가 요금</option>
+          <option value="adjust" data-code="100">금액 조정 (증액)</option>
+          <option value="etc" data-code="299">기타</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>금액 (원)</label>
+        <input type="number" id="sub-amount" placeholder="차감/추가 청구할 금액 입력" oninput="previewSubAmount()">
+        <div class="help">입력한 금액만큼 결제 필요 금액이 <strong style="color:#d32f2f;">증가</strong>합니다.</div>
+      </div>
+      <div class="form-group">
+        <label>사유</label>
+        <input type="text" id="sub-reason" placeholder="변경 사유를 입력하세요 (필수)">
+      </div>
+
+      <!-- 변경 미리보기 -->
+      <div id="sub-preview" style="display:none;background:#f8f9fa;border-radius:8px;padding:12px;border:1px solid #e0e0e0;">
+        <div style="font-size:11px;font-weight:700;color:#888;margin-bottom:6px;">변경 미리보기</div>
+        <div style="display:flex;justify-content:space-between;font-size:12px;margin-bottom:4px;">
+          <span style="color:#888;">현재 결제 필요 금액</span>
+          <span style="font-family:monospace;font-weight:600;" id="sub-preview-before">2,038,000</span>
+        </div>
+        <div style="display:flex;justify-content:space-between;font-size:12px;margin-bottom:4px;">
+          <span style="color:#d32f2f;font-weight:600;">금액 차감 (추가 청구)</span>
+          <span style="font-family:monospace;font-weight:700;color:#d32f2f;" id="sub-preview-amount">+0</span>
+        </div>
+        <div style="display:flex;justify-content:space-between;font-size:12px;border-top:1px solid #e0e0e0;padding-top:4px;margin-top:4px;">
+          <span style="font-weight:700;">변경 후 결제 필요 금액</span>
+          <span style="font-family:monospace;font-weight:700;font-size:14px;" id="sub-preview-after">2,038,000</span>
+        </div>
+      </div>
+
+      <!-- 원장 생성 예정 -->
+      <div id="sub-ledger-preview" style="display:none;background:#f5f5f5;border-radius:8px;padding:10px 12px;margin-top:10px;">
+        <div style="font-size:10px;font-weight:600;color:#888;margin-bottom:4px;">원장 자동 생성 항목</div>
+        <div style="display:flex;align-items:center;gap:8px;font-size:11px;">
+          <span style="background:#e8eaf6;color:#283593;padding:1px 6px;border-radius:3px;font-family:monospace;font-size:10px;font-weight:700;" id="sub-ledger-code">202</span>
+          <span id="sub-ledger-desc">할인 취소 (환수)</span>
+          <span style="margin-left:auto;font-family:monospace;color:#d32f2f;font-weight:600;" id="sub-ledger-amount">-0</span>
+        </div>
+      </div>
     </div>
     <div class="modal-footer">
       <button class="btn btn-outline" onclick="this.closest('.modal-overlay').classList.remove('show')">취소</button>
-      <button class="btn btn-minus">금액 차감</button>
+      <button class="btn btn-minus" id="btn-sub-execute" onclick="executeSubAmount()" style="opacity:0.5;cursor:not-allowed;" disabled>금액 차감</button>
     </div>
   </div>
 </div>
@@ -1617,6 +1724,238 @@ function renderTransferHistory() {
   `).join('');
 }
 
+// ==================== 금액 추가/차감 기능 ====================
+
+// 금액 변동 이력
+let amountAdjustments = [];
+
+// --- 금액 추가 ---
+function getCurrentNeedPay() {
+  const totalProduct = currentReservation.pricePerPerson * currentReservation.travelers;
+  const totalDiscount = currentReservation.discountPerPerson * currentReservation.travelers;
+  const couponAmount = currentReservation.couponAmount;
+  const totalPenalty = penalties.reduce((a, b) => a + b, 0);
+  const extraDiscount = amountAdjustments.reduce((sum, a) => sum + (a.direction === 'add' ? a.amount : -a.amount), 0);
+  return totalProduct - totalDiscount - couponAmount + totalPenalty - extraDiscount;
+}
+
+function previewAddAmount() {
+  const val = parseInt(document.getElementById('add-amount').value) || 0;
+  const preview = document.getElementById('add-preview');
+  const ledgerPreview = document.getElementById('add-ledger-preview');
+  const btn = document.getElementById('btn-add-execute');
+
+  if (val > 0) {
+    const before = getCurrentNeedPay();
+    const after = before - val;
+
+    preview.style.display = 'block';
+    ledgerPreview.style.display = 'block';
+    document.getElementById('add-preview-before').textContent = before.toLocaleString();
+    document.getElementById('add-preview-amount').textContent = `-${val.toLocaleString()}`;
+    document.getElementById('add-preview-after').textContent = after.toLocaleString();
+    document.getElementById('add-ledger-amount').textContent = `+${val.toLocaleString()}`;
+
+    btn.disabled = false;
+    btn.style.opacity = '1';
+    btn.style.cursor = 'pointer';
+  } else {
+    preview.style.display = 'none';
+    ledgerPreview.style.display = 'none';
+    btn.disabled = true;
+    btn.style.opacity = '0.5';
+    btn.style.cursor = 'not-allowed';
+  }
+}
+
+function updateAddLedgerCode() {
+  const sel = document.getElementById('add-type');
+  const opt = sel.options[sel.selectedIndex];
+  const code = opt.getAttribute('data-code');
+  document.getElementById('add-ledger-code').textContent = code;
+  document.getElementById('add-ledger-desc').textContent = opt.textContent;
+}
+
+function executeAddAmount() {
+  const amount = parseInt(document.getElementById('add-amount').value) || 0;
+  const reason = document.getElementById('add-reason').value.trim();
+  const target = document.getElementById('add-target');
+  const type = document.getElementById('add-type');
+  const typeName = type.options[type.selectedIndex].textContent;
+  const targetName = target.options[target.selectedIndex].textContent;
+  const ledgerCode = type.options[type.selectedIndex].getAttribute('data-code');
+
+  if (amount <= 0) { showToast('금액을 입력하세요.'); return; }
+  if (!reason) { showToast('사유를 입력하세요.'); return; }
+
+  // 이력 추가
+  amountAdjustments.push({
+    id: amountAdjustments.length + 1,
+    direction: 'add',
+    amount: amount,
+    type: typeName,
+    target: targetName,
+    reason: reason,
+    ledgerCode: ledgerCode,
+    date: '2026-04-07 ' + new Date().toLocaleTimeString('ko-KR', {hour:'2-digit', minute:'2-digit'}),
+    user: '김서현'
+  });
+
+  // 할인 내역 테이블에 행 추가
+  const tbody = document.getElementById('discount-tbody');
+  const tr = document.createElement('tr');
+  tr.innerHTML = `<td><span class="badge blue">추가</span></td><td>${typeName} — ${targetName}</td><td class="text-right text-mono" style="color:#1565c0;">-${amount.toLocaleString()}</td><td>${reason} (${amountAdjustments[amountAdjustments.length-1].date})</td>`;
+  tbody.appendChild(tr);
+
+  // 금액 재계산
+  recalcAllAmountsWithAdjustments();
+
+  // 모달 닫기 & 초기화
+  document.getElementById('modal-add').classList.remove('show');
+  document.getElementById('add-amount').value = '';
+  document.getElementById('add-reason').value = '';
+  document.getElementById('add-preview').style.display = 'none';
+  document.getElementById('add-ledger-preview').style.display = 'none';
+  document.getElementById('btn-add-execute').disabled = true;
+  document.getElementById('btn-add-execute').style.opacity = '0.5';
+  document.getElementById('btn-add-execute').style.cursor = 'not-allowed';
+
+  showToast(`금액 추가: ${typeName} -${amount.toLocaleString()}원 → 결제 필요 금액 감소`);
+}
+
+// --- 금액 차감 ---
+function previewSubAmount() {
+  const val = parseInt(document.getElementById('sub-amount').value) || 0;
+  const preview = document.getElementById('sub-preview');
+  const ledgerPreview = document.getElementById('sub-ledger-preview');
+  const btn = document.getElementById('btn-sub-execute');
+
+  if (val > 0) {
+    const before = getCurrentNeedPay();
+    const after = before + val;
+
+    preview.style.display = 'block';
+    ledgerPreview.style.display = 'block';
+    document.getElementById('sub-preview-before').textContent = before.toLocaleString();
+    document.getElementById('sub-preview-amount').textContent = `+${val.toLocaleString()}`;
+    document.getElementById('sub-preview-after').textContent = after.toLocaleString();
+    document.getElementById('sub-ledger-amount').textContent = `-${val.toLocaleString()}`;
+
+    btn.disabled = false;
+    btn.style.opacity = '1';
+    btn.style.cursor = 'pointer';
+  } else {
+    preview.style.display = 'none';
+    ledgerPreview.style.display = 'none';
+    btn.disabled = true;
+    btn.style.opacity = '0.5';
+    btn.style.cursor = 'not-allowed';
+  }
+}
+
+function updateSubLedgerCode() {
+  const sel = document.getElementById('sub-type');
+  const opt = sel.options[sel.selectedIndex];
+  const code = opt.getAttribute('data-code');
+  document.getElementById('sub-ledger-code').textContent = code;
+  document.getElementById('sub-ledger-desc').textContent = opt.textContent;
+}
+
+function executeSubAmount() {
+  const amount = parseInt(document.getElementById('sub-amount').value) || 0;
+  const reason = document.getElementById('sub-reason').value.trim();
+  const target = document.getElementById('sub-target');
+  const type = document.getElementById('sub-type');
+  const typeName = type.options[type.selectedIndex].textContent;
+  const targetName = target.options[target.selectedIndex].textContent;
+  const ledgerCode = type.options[type.selectedIndex].getAttribute('data-code');
+
+  if (amount <= 0) { showToast('금액을 입력하세요.'); return; }
+  if (!reason) { showToast('사유를 입력하세요.'); return; }
+
+  // 이력 추가
+  amountAdjustments.push({
+    id: amountAdjustments.length + 1,
+    direction: 'sub',
+    amount: amount,
+    type: typeName,
+    target: targetName,
+    reason: reason,
+    ledgerCode: ledgerCode,
+    date: '2026-04-07 ' + new Date().toLocaleTimeString('ko-KR', {hour:'2-digit', minute:'2-digit'}),
+    user: '김서현'
+  });
+
+  // 할인 내역 테이블에 행 추가
+  const tbody = document.getElementById('discount-tbody');
+  const tr = document.createElement('tr');
+  tr.innerHTML = `<td><span class="badge orange">차감</span></td><td>${typeName} — ${targetName}</td><td class="text-right text-mono" style="color:#d32f2f;">+${amount.toLocaleString()}</td><td>${reason} (${amountAdjustments[amountAdjustments.length-1].date})</td>`;
+  tbody.appendChild(tr);
+
+  // 금액 재계산
+  recalcAllAmountsWithAdjustments();
+
+  // 모달 닫기 & 초기화
+  document.getElementById('modal-sub').classList.remove('show');
+  document.getElementById('sub-amount').value = '';
+  document.getElementById('sub-reason').value = '';
+  document.getElementById('sub-preview').style.display = 'none';
+  document.getElementById('sub-ledger-preview').style.display = 'none';
+  document.getElementById('btn-sub-execute').disabled = true;
+  document.getElementById('btn-sub-execute').style.opacity = '0.5';
+  document.getElementById('btn-sub-execute').style.cursor = 'not-allowed';
+
+  showToast(`금액 차감: ${typeName} +${amount.toLocaleString()}원 → 결제 필요 금액 증가`);
+}
+
+// 조정 반영된 전체 재계산
+function recalcAllAmountsWithAdjustments() {
+  const totalProduct = currentReservation.pricePerPerson * currentReservation.travelers;
+  const totalDiscount = currentReservation.discountPerPerson * currentReservation.travelers;
+  const couponAmount = currentReservation.couponAmount;
+  const totalPenalty = penalties.reduce((a, b) => a + b, 0);
+  const extraDiscount = amountAdjustments.reduce((sum, a) => sum + (a.direction === 'add' ? a.amount : -a.amount), 0);
+
+  const needPay = totalProduct - totalDiscount - couponAmount + totalPenalty - extraDiscount;
+
+  // 금액 카드 업데이트
+  const reservationAmountSection = document.querySelector('.amount-summary[style*="repeat(4"]');
+  if (reservationAmountSection) {
+    const cards = reservationAmountSection.querySelectorAll('.amount-card .value');
+    if (cards.length >= 4) {
+      cards[0].textContent = totalProduct.toLocaleString();
+      cards[1].textContent = `-${(totalDiscount + couponAmount + extraDiscount).toLocaleString()}`;
+      cards[3].textContent = needPay.toLocaleString();
+    }
+  }
+
+  // 결제 필요 금액
+  document.getElementById('amount-need-pay').textContent = needPay.toLocaleString();
+
+  // 결제 영역 비교
+  const payNeed = document.getElementById('pay-need');
+  if (payNeed) payNeed.textContent = needPay.toLocaleString();
+
+  // 차이 계산
+  const actualPaid = 2058000;
+  const diff = actualPaid - needPay;
+  const diffEl = document.getElementById('pay-diff');
+  const diffLabel = document.getElementById('pay-diff-label');
+  const diffReason = document.getElementById('pay-diff-reason');
+  if (diffEl) {
+    diffEl.textContent = (diff >= 0 ? '+' : '') + diff.toLocaleString();
+    diffEl.style.color = diff >= 0 ? '#2e7d32' : '#d32f2f';
+  }
+  if (diffLabel) {
+    if (diff > 0) { diffLabel.textContent = '초과 결제 (환불 필요)'; diffLabel.style.color = '#2e7d32'; }
+    else if (diff < 0) { diffLabel.textContent = '추가 결제 필요'; diffLabel.style.color = '#d32f2f'; }
+    else { diffLabel.textContent = '정산 완료'; diffLabel.style.color = '#888'; }
+  }
+  if (diffReason) {
+    diffReason.textContent = diff === 0 ? '' : '※ 쿠폰이 결제수단으로 포함되어 차이 발생';
+  }
+}
+
 // ==================== 쿠폰 관리 기능 ====================
 
 // 사용자 보유 쿠폰 데이터
@@ -1971,49 +2310,9 @@ function renderCouponHistory() {
   }).join('');
 }
 
-// 전체 금액 재계산 함수
+// 전체 금액 재계산 함수 → 조정 포함 버전으로 위임
 function recalcAllAmounts() {
-  const totalProduct = currentReservation.pricePerPerson * currentReservation.travelers;
-  const totalDiscount = currentReservation.discountPerPerson * currentReservation.travelers;
-  const couponAmount = currentReservation.couponAmount;
-  const totalPenalty = penalties.reduce((a, b) => a + b, 0);
-
-  const saleAmount = totalProduct - totalDiscount - couponAmount;
-  const needPay = saleAmount + totalPenalty;
-
-  // 금액 카드 업데이트 (예약 금액 영역의 4칸: 상품금액, 할인금액, 취소위약금, 결제필요금액)
-  const reservationAmountSection = document.querySelector('.amount-summary[style*="repeat(4"]');
-  if (reservationAmountSection) {
-    const cards = reservationAmountSection.querySelectorAll('.amount-card .value');
-    if (cards.length >= 4) {
-      cards[0].textContent = totalProduct.toLocaleString();
-      cards[1].textContent = `-${(totalDiscount + couponAmount).toLocaleString()}`;
-      // cards[2] = penalty total (managed by recalcPenalty)
-      cards[3].textContent = needPay.toLocaleString();
-    }
-  }
-
-  // 결제 필요 금액
-  document.getElementById('amount-need-pay').textContent = needPay.toLocaleString();
-
-  // 결제 영역 비교
-  const payNeed = document.getElementById('pay-need');
-  if (payNeed) payNeed.textContent = needPay.toLocaleString();
-
-  // 차이 계산
-  const actualPaid = 2058000;
-  const diff = actualPaid - needPay;
-  const diffEl = document.getElementById('pay-diff');
-  const diffLabel = document.getElementById('pay-diff-label');
-  if (diffEl) {
-    diffEl.textContent = (diff >= 0 ? '+' : '') + diff.toLocaleString();
-    diffEl.style.color = diff >= 0 ? '#2e7d32' : '#d32f2f';
-  }
-  if (diffLabel) {
-    if (diff > 0) { diffLabel.textContent = '초과 결제 (환불 필요)'; diffLabel.style.color = '#2e7d32'; }
-    else if (diff < 0) { diffLabel.textContent = '추가 결제 필요'; diffLabel.style.color = '#d32f2f'; }
-    else { diffLabel.textContent = '정산 완료'; diffLabel.style.color = '#888'; }
-  }
+  recalcAllAmountsWithAdjustments();
 }
 
 // ==================== 결제수단 변경 기능 ====================
