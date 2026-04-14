@@ -506,16 +506,86 @@
           </div>
         </div>
 
-        <!-- 할인 내역 -->
+        <!-- 원장 기반 예약금액 항목 (100/200/300) -->
         <div class="subsection">
-          <div class="subsection-title">할인/조정 내역</div>
-          <table id="discount-table">
-            <thead><tr><th>구분</th><th>항목</th><th class="text-right">금액</th><th>비고</th></tr></thead>
-            <tbody id="discount-tbody">
-              <tr><td>여행사 특가</td><td>상시특가 > 하나투어 > 동남아/일본/중국 2%</td><td class="text-right text-mono" style="color:#d32f2f;">-39,000</td><td>특가 ID: 1325</td></tr>
-              <tr><td><span class="badge purple">쿠폰</span></td><td>쿠폰 할인</td><td class="text-right text-mono" style="color:#d32f2f;">-20,000</td><td>836331bf...</td></tr>
-            </tbody>
-          </table>
+          <div class="subsection-title" style="display:flex;align-items:center;justify-content:space-between;">
+            <span>예약금액 원장 항목</span>
+            <label style="display:flex;align-items:center;gap:4px;font-size:11px;font-weight:400;cursor:pointer;background:#f5f5f5;padding:3px 8px;border-radius:4px;border:1px solid #e0e0e0;">
+              <input type="checkbox" onchange="toggleBasicPerPerson(this.checked)" id="basic-per-person-toggle"> 인원별
+            </label>
+          </div>
+          <!-- 합산 보기 -->
+          <div id="basic-rsv-summary">
+            <table id="discount-table">
+              <thead><tr><th style="width:50px;">코드</th><th>항목</th><th>상세</th><th class="text-right">1인</th><th class="text-center">인원</th><th class="text-right">합계</th></tr></thead>
+              <tbody id="discount-tbody">
+                <tr>
+                  <td><span class="code charge" style="padding:1px 6px;border-radius:3px;font-family:monospace;font-size:10px;font-weight:700;">100</span></td>
+                  <td style="font-weight:600;">상품정가</td><td style="font-size:11px;color:#888;">성인 699,000 x 3명</td>
+                  <td class="text-right text-mono">699,000</td><td class="text-center">3</td><td class="text-right text-mono" style="font-weight:700;">2,097,000</td>
+                </tr>
+                <tr>
+                  <td><span class="code discount" style="padding:1px 6px;border-radius:3px;font-family:monospace;font-size:10px;font-weight:700;">202</span></td>
+                  <td style="font-weight:600;">여행사특가할인</td><td style="font-size:11px;color:#888;">하나투어 2% · 특가 ID: 1325</td>
+                  <td class="text-right text-mono" style="color:#d32f2f;">-13,000</td><td class="text-center">3</td><td class="text-right text-mono" style="font-weight:700;color:#d32f2f;">-39,000</td>
+                </tr>
+                <tr>
+                  <td><span class="code coupon" style="padding:1px 6px;border-radius:3px;font-family:monospace;font-size:10px;font-weight:700;">301</span></td>
+                  <td style="font-weight:600;">쿠폰할인(플랫폼)</td><td style="font-size:11px;color:#888;">상해 자유여행 20,000원 · 836331bf</td>
+                  <td class="text-right text-mono" style="color:#6a1b9a;">-</td><td class="text-center">-</td><td class="text-right text-mono" style="font-weight:700;color:#6a1b9a;">-20,000</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr style="background:#fff8e1;font-weight:700;border-top:2px solid #333;">
+                  <td colspan="5" class="text-right">판매금액 (결제 필요 금액)</td>
+                  <td class="text-right text-mono" style="font-size:14px;color:#e65100;">2,038,000</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div>
+          <!-- 인원별 보기 -->
+          <div id="basic-rsv-per-person" style="display:none;">
+            <div style="margin-bottom:12px;">
+              <div style="display:flex;align-items:center;gap:6px;padding:6px 0;border-bottom:2px solid #1565c0;">
+                <span class="badge blue">성인</span><span style="font-weight:600;font-size:12px;">오기웅 (예약자)</span>
+                <span style="margin-left:auto;font-family:monospace;font-weight:700;color:#e65100;">686,000</span>
+              </div>
+              <table style="font-size:11px;"><tbody>
+                <tr><td><span class="code charge" style="padding:1px 4px;border-radius:2px;font-family:monospace;font-size:9px;font-weight:700;">100</span></td><td>상품정가</td><td class="text-right text-mono">699,000</td></tr>
+                <tr><td><span class="code discount" style="padding:1px 4px;border-radius:2px;font-family:monospace;font-size:9px;font-weight:700;">202</span></td><td>여행사특가할인</td><td class="text-right text-mono" style="color:#d32f2f;">-13,000</td></tr>
+              </tbody></table>
+            </div>
+            <div style="margin-bottom:12px;">
+              <div style="display:flex;align-items:center;gap:6px;padding:6px 0;border-bottom:2px solid #1565c0;">
+                <span class="badge blue">성인</span><span style="font-weight:600;font-size:12px;">동행 2</span>
+                <span style="margin-left:auto;font-family:monospace;font-weight:700;color:#e65100;">686,000</span>
+              </div>
+              <table style="font-size:11px;"><tbody>
+                <tr><td><span class="code charge" style="padding:1px 4px;border-radius:2px;font-family:monospace;font-size:9px;font-weight:700;">100</span></td><td>상품정가</td><td class="text-right text-mono">699,000</td></tr>
+                <tr><td><span class="code discount" style="padding:1px 4px;border-radius:2px;font-family:monospace;font-size:9px;font-weight:700;">202</span></td><td>여행사특가할인</td><td class="text-right text-mono" style="color:#d32f2f;">-13,000</td></tr>
+              </tbody></table>
+            </div>
+            <div style="margin-bottom:12px;">
+              <div style="display:flex;align-items:center;gap:6px;padding:6px 0;border-bottom:2px solid #1565c0;">
+                <span class="badge blue">성인</span><span style="font-weight:600;font-size:12px;">동행 3</span>
+                <span style="margin-left:auto;font-family:monospace;font-weight:700;color:#e65100;">686,000</span>
+              </div>
+              <table style="font-size:11px;"><tbody>
+                <tr><td><span class="code charge" style="padding:1px 4px;border-radius:2px;font-family:monospace;font-size:9px;font-weight:700;">100</span></td><td>상품정가</td><td class="text-right text-mono">699,000</td></tr>
+                <tr><td><span class="code discount" style="padding:1px 4px;border-radius:2px;font-family:monospace;font-size:9px;font-weight:700;">202</span></td><td>여행사특가할인</td><td class="text-right text-mono" style="color:#d32f2f;">-13,000</td></tr>
+              </tbody></table>
+            </div>
+            <div style="background:#f3e5f5;border-radius:6px;padding:8px 12px;margin-bottom:8px;">
+              <div style="font-size:10px;font-weight:600;color:#6a1b9a;margin-bottom:4px;">예약 전체 (인원 미배분)</div>
+              <table style="font-size:11px;"><tbody>
+                <tr><td><span class="code coupon" style="padding:1px 4px;border-radius:2px;font-family:monospace;font-size:9px;font-weight:700;">301</span></td><td>쿠폰할인(플랫폼)</td><td class="text-right text-mono" style="color:#6a1b9a;">-20,000</td></tr>
+              </tbody></table>
+            </div>
+            <div style="background:#fff8e1;border:1px solid #e65100;border-radius:6px;padding:8px 12px;display:flex;justify-content:space-between;align-items:center;">
+              <span style="font-weight:700;font-size:12px;">전체 판매금액</span>
+              <span style="font-family:monospace;font-weight:700;font-size:15px;color:#e65100;">2,038,000</span>
+            </div>
+          </div>
         </div>
 
         <!-- 쿠폰 관리 영역 (신규) -->
@@ -642,6 +712,32 @@
             </tr>
           </tbody>
         </table>
+
+        <!-- 원장 기반 결제 항목 (400/700) -->
+        <div class="subsection" style="margin-top:16px;">
+          <div class="subsection-title">결제 원장 항목</div>
+          <table>
+            <thead><tr><th style="width:50px;">코드</th><th>항목명</th><th>결제수단</th><th>결제번호</th><th class="text-right">금액</th><th class="text-center">상태</th><th style="width:80px;">일시</th></tr></thead>
+            <tbody>
+              <tr>
+                <td><span class="code coupon" style="padding:1px 6px;border-radius:3px;font-family:monospace;font-size:10px;font-weight:700;">400</span></td>
+                <td style="font-weight:600;">쿠폰결제</td><td>쿠폰</td><td class="text-mono" style="font-size:10px;">836331bf...</td>
+                <td class="text-right text-mono" style="font-weight:700;">20,000</td><td class="text-center"><span class="badge green">완료</span></td><td style="font-size:10px;color:#888;">04-07</td>
+              </tr>
+              <tr>
+                <td><span class="code payment" style="padding:1px 6px;border-radius:3px;font-family:monospace;font-size:10px;font-weight:700;">401</span></td>
+                <td style="font-weight:600;">고객결제(플랫폼)</td><td>신용카드</td><td class="text-mono" style="font-size:10px;">26040708-4300101H-001</td>
+                <td class="text-right text-mono" style="font-weight:700;">2,038,000</td><td class="text-center"><span class="badge green">완료</span></td><td style="font-size:10px;color:#888;">04-07</td>
+              </tr>
+            </tbody>
+            <tfoot>
+              <tr style="background:#f0f7ff;font-weight:700;border-top:2px solid #333;">
+                <td colspan="4" class="text-right">총 결제 / 총 환불 / 순 결제</td>
+                <td class="text-right text-mono" style="color:#2e7d32;">2,058,000 / 0 / 2,058,000</td><td colspan="2"></td>
+              </tr>
+            </tfoot>
+          </table>
+        </div>
 
         <div class="design-note">
           <strong>결제 영역은 "얼마 결제했나 / 얼마 환불했나"만 관리합니다.</strong> 금액 계산(위약금·할인 등)은 모두 예약 금액 영역에서 처리.<br>
@@ -2544,6 +2640,11 @@ function filterAllLedger() {
 function togglePerPerson(checked) {
   document.getElementById('rsv-amount-summary').style.display = checked ? 'none' : 'block';
   document.getElementById('rsv-amount-per-person').style.display = checked ? 'block' : 'none';
+}
+
+function toggleBasicPerPerson(checked) {
+  document.getElementById('basic-rsv-summary').style.display = checked ? 'none' : 'block';
+  document.getElementById('basic-rsv-per-person').style.display = checked ? 'block' : 'none';
 }
 
 // ==================== 예약 복사 ====================
