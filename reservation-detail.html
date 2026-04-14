@@ -88,6 +88,25 @@
   .footer-actions { position: sticky; bottom: 0; background: #fff; border-top: 1px solid #e0e0e0; padding: 12px 24px; display: flex; justify-content: flex-end; gap: 8px; z-index: 50; }
   .highlight-box { background: #fffde7; border: 1px solid #fff9c4; border-radius: 8px; padding: 12px 16px; font-size: 12px; color: #f57f17; display: flex; align-items: center; gap: 8px; margin-bottom: 16px; }
   .design-note { background: #f3e5f5; border: 1px solid #e1bee7; border-radius: 6px; padding: 8px 12px; font-size: 11px; color: #7b1fa2; margin-top: 8px; }
+  .timeline { position: relative; padding-left: 28px; }
+  .timeline::before { content: ''; position: absolute; left: 9px; top: 4px; bottom: 4px; width: 2px; background: #e8e8e8; }
+  .tl-item { position: relative; padding: 10px 0 14px; }
+  .tl-item::before { content: ''; position: absolute; left: -24px; top: 14px; width: 12px; height: 12px; border-radius: 50%; background: #fff; border: 2px solid #bbb; }
+  .tl-item.charge::before { border-color: #283593; background: #e8eaf6; }
+  .tl-item.payment::before { border-color: #2e7d32; background: #e8f5e9; }
+  .tl-item.discount::before, .tl-item.coupon::before { border-color: #6a1b9a; background: #f3e5f5; }
+  .tl-item.transfer::before { border-color: #e65100; background: #fff3e0; }
+  .tl-item.event::before { border-color: #1565c0; background: #e3f2fd; }
+  .tl-item.refund::before { border-color: #c62828; background: #ffebee; }
+  .tl-item.memo::before { border-color: #888; background: #f5f5f5; }
+  .tl-head { display: flex; align-items: center; gap: 8px; font-size: 12px; }
+  .tl-head .tl-title { font-weight: 700; color: #1a1a1a; }
+  .tl-head .tl-amount { font-family: monospace; font-weight: 700; }
+  .tl-head .tl-amount.plus { color: #2e7d32; }
+  .tl-head .tl-amount.minus { color: #d32f2f; }
+  .tl-head .tl-time { margin-left: auto; font-size: 11px; color: #888; }
+  .tl-sub { font-size: 11px; color: #666; margin-top: 4px; padding-left: 0; }
+  .tl-sub .tl-actor { color: #1565c0; font-weight: 600; }
   .feature-tag { display: inline-block; background: #e8eaf6; color: #283593; font-size: 10px; font-weight: 700; padding: 2px 6px; border-radius: 4px; margin-right: 4px; }
   .subsection { margin-top: 20px; padding-top: 16px; border-top: 1px solid #f0f0f0; }
   .subsection-title { font-size: 12px; font-weight: 700; color: #666; margin-bottom: 10px; display: flex; align-items: center; gap: 8px; }
@@ -137,6 +156,9 @@
     <span class="rsv-code">26040708-4300101H</span>
     <span class="badge green">예약완료</span>
     <span class="badge blue">결제완료</span>
+    <span class="badge gray">💳 신용카드</span>
+    <span class="badge purple">🎟 쿠폰사용</span>
+    <span class="badge orange">D-54 출발</span>
   </div>
 
   <div class="tabs">
@@ -154,7 +176,10 @@
     <div class="section">
       <div class="section-header">
         <h2>예약 기본 정보</h2>
-        <div class="actions"><button class="btn btn-outline btn-sm">예약복사</button></div>
+        <div class="actions">
+          <button class="btn btn-plus btn-sm btn-icon" onclick="document.getElementById('modal-customer-view').classList.add('show')">👤 고객 화면 조회</button>
+          <button class="btn btn-outline btn-sm" onclick="copyReservationInfo()">예약복사</button>
+        </div>
       </div>
       <div class="section-body">
         <div class="info-grid">
@@ -181,6 +206,9 @@
       <div class="section-header">
         <h2>여행 상품 정보</h2>
         <div class="actions">
+          <button class="btn btn-outline btn-sm btn-icon" onclick="document.getElementById('modal-manual-edit').classList.add('show')">
+            <span class="feature-tag">신규</span> 정보 수정
+          </button>
           <button class="btn btn-outline btn-sm btn-icon" onclick="document.getElementById('modal-event').classList.add('show')">
             <span class="feature-tag">신규</span> 행사 이동
           </button>
@@ -192,15 +220,15 @@
             <div class="info-row"><span class="info-label">여행사</span><span class="info-value">하나투어</span></div>
             <div class="info-row"><span class="info-label">여행지</span><span class="info-value">상하이(상해)</span></div>
             <div class="info-row"><span class="info-label">상품코드</span><span class="info-value text-mono">CCB1017B71284A0</span></div>
-            <div class="info-row"><span class="info-label">행사코드</span><span class="info-value text-mono">CCB101260606CZ2</span></div>
+            <div class="info-row"><span class="info-label">행사코드</span><span class="info-value text-mono" id="info-event-code">CCB101260606CZ2</span></div>
             <div class="info-row"><span class="info-label">상품유형</span><span class="info-value">AIRTEL</span></div>
           </div>
           <div>
-            <div class="info-row"><span class="info-label">여행기간</span><span class="info-value">3박4일</span></div>
-            <div class="info-row"><span class="info-label">출도착일</span><span class="info-value">2026-06-06 → 2026-06-09</span></div>
+            <div class="info-row"><span class="info-label">여행기간</span><span class="info-value" id="info-travel-days">3박4일</span></div>
+            <div class="info-row"><span class="info-label">출도착일</span><span class="info-value" id="info-dep-arr">2026-06-06 → 2026-06-09</span></div>
             <div class="info-row"><span class="info-label">항공사</span><span class="info-value">중국남방항공</span></div>
             <div class="info-row"><span class="info-label">출발지</span><span class="info-value">인천</span></div>
-            <div class="info-row"><span class="info-label">행사명</span><span class="info-value" style="font-size:11px;">상하이 자유여행 4일 #하버플라자...</span></div>
+            <div class="info-row"><span class="info-label">행사명</span><span class="info-value" style="font-size:11px;" id="info-event-name">상하이 자유여행 4일 #하버플라자...</span></div>
           </div>
         </div>
         <!-- 행사 이동 이력 -->
@@ -216,9 +244,14 @@
       </div>
     </div>
 
-    <!-- 3. 예약자 / 여행자 정보 -->
-    <div class="section">
-      <div class="section-header"><h2>예약자 / 여행자 정보</h2></div>
+    <!-- 3. 예약자 / 인원 구성 (취소위약금은 토글) -->
+    <div class="section" id="section-traveler">
+      <div class="section-header">
+        <h2>예약자 정보</h2>
+        <div class="actions">
+          <button class="btn btn-outline btn-sm" id="btn-toggle-penalty" onclick="togglePenaltyMode()">+ 취소위약금 관리</button>
+        </div>
+      </div>
       <div class="section-body">
         <div class="info-grid" style="margin-bottom: 16px;">
           <div>
@@ -230,18 +263,120 @@
             <div class="info-row"><span class="info-label">연락처</span><span class="info-value">010-2374-8449</span></div>
           </div>
         </div>
-        <table>
-          <thead><tr>
-            <th>#</th><th>구분</th><th>여행자명</th><th>생년월일</th><th>성별</th>
-            <th class="text-right">1인 상품가</th><th class="text-right">특가</th><th class="text-right">1인 판매가</th>
-            <th class="text-right">취소위약금</th><th class="text-center">상태</th>
-          </tr></thead>
-          <tbody>
-            <tr><td>1</td><td>성인</td><td>오기웅</td><td>1975-12-17</td><td>남</td><td class="text-right text-mono">699,000</td><td class="text-right text-mono" style="color:#d32f2f;">-13,000</td><td class="text-right text-mono">686,000</td><td class="text-right text-mono">0</td><td class="text-center"><span class="badge green">승인</span></td></tr>
-            <tr><td>2</td><td>성인</td><td>오서연</td><td>2000-03-15</td><td>여</td><td class="text-right text-mono">699,000</td><td class="text-right text-mono" style="color:#d32f2f;">-13,000</td><td class="text-right text-mono">686,000</td><td class="text-right text-mono">0</td><td class="text-center"><span class="badge green">승인</span></td></tr>
-            <tr><td>3</td><td>성인</td><td>오민준</td><td>1977-08-22</td><td>남</td><td class="text-right text-mono">699,000</td><td class="text-right text-mono" style="color:#d32f2f;">-13,000</td><td class="text-right text-mono">686,000</td><td class="text-right text-mono">0</td><td class="text-center"><span class="badge green">승인</span></td></tr>
-          </tbody>
-        </table>
+        <!-- 인원 구성 (여행자 개인정보는 수집하지 않음) -->
+        <div style="background:#f8f9fa;border:1px solid #e8e8e8;border-radius:8px;padding:14px 16px;margin-bottom:8px;">
+          <div style="display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap;">
+            <div>
+              <div style="font-size:11px;color:#888;margin-bottom:4px;">인원 구성</div>
+              <div style="display:flex;gap:8px;align-items:center;font-size:13px;font-weight:600;">
+                <span class="badge blue">성인 3</span>
+                <span class="badge gray">아동 0</span>
+                <span class="badge gray">유아 0</span>
+                <span style="color:#888;font-weight:400;font-size:12px;">총 3명 · 1인 판매가 686,000</span>
+              </div>
+            </div>
+            <div style="font-size:11px;color:#888;text-align:right;line-height:1.5;">
+              ※ 트립스토어는 <b>예약자 정보만</b> 보관합니다.<br>동행 여행자 명단은 여행사(하나투어)가 별도 관리.
+            </div>
+          </div>
+        </div>
+
+        <!-- 인원 단위 부분취소 / 위약금 (취소위약금 모드에서만) -->
+        <div class="penalty-only" style="background:#fff8e1;border:1px solid #ffe0b2;border-radius:8px;padding:14px 16px;margin-bottom:8px;">
+          <div style="font-size:12px;font-weight:700;color:#e65100;margin-bottom:10px;">취소 인원 / 위약금 산정</div>
+          <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px;align-items:end;">
+            <div>
+              <label style="font-size:11px;color:#888;display:block;margin-bottom:4px;">취소 인원 (성인)</label>
+              <select id="cancel-cnt" onchange="recalcPenalty()" style="width:100%;padding:6px;border:1px solid #d0d0d0;border-radius:6px;font-size:13px;">
+                <option value="0">0명 (전원 유지)</option>
+                <option value="1">1명 취소</option>
+                <option value="2">2명 취소</option>
+                <option value="3">3명 전원 취소</option>
+              </select>
+            </div>
+            <div>
+              <label style="font-size:11px;color:#888;display:block;margin-bottom:4px;">취소 환불 기준 금액</label>
+              <div style="padding:7px 8px;background:#fff;border:1px solid #e0e0e0;border-radius:6px;font-family:monospace;font-size:13px;font-weight:700;" id="cancel-base">0</div>
+            </div>
+            <div>
+              <label style="font-size:11px;color:#888;display:block;margin-bottom:4px;">취소위약금 (수기 입력)</label>
+              <input type="text" id="cancel-penalty" value="0" oninput="recalcPenalty()" style="width:100%;padding:6px;border:1px solid #d0d0d0;border-radius:6px;font-family:monospace;font-size:13px;font-weight:700;text-align:right;color:#d32f2f;">
+            </div>
+            <div>
+              <button class="btn btn-danger" style="width:100%;padding:8px;" onclick="alert('부분취소 처리\\n· 취소인원: '+document.getElementById('cancel-cnt').value+'명\\n· 위약금: '+document.getElementById('cancel-penalty').value+'원\\n→ 원장에 PENALTY(800) 기록')">부분취소 실행</button>
+            </div>
+          </div>
+          <div style="font-size:11px;color:#888;margin-top:10px;">
+            ※ 트립스토어는 여행자 개인정보가 없으므로 <b>인원 단위</b>로 처리합니다. 누구를 취소할지는 여행사와 별도 협의.
+          </div>
+        </div>
+
+        <!-- 위약금 정책 미리보기 (위약금 모드에서만) -->
+        <div id="penalty-policy" class="penalty-only" style="margin-top:12px;background:#fff8e1;border:1px solid #ffe0b2;border-radius:8px;padding:12px;">
+          <div style="font-size:12px;font-weight:700;color:#e65100;margin-bottom:8px;">취소위약금 정책 (하나투어 정책 #25)</div>
+          <table>
+            <thead><tr><th>D-day</th><th>위약금율</th><th class="text-right">1인당 위약금</th><th class="text-right">전원(3명) 위약금</th></tr></thead>
+            <tbody>
+              <tr><td>출발 30일 전까지</td><td>0%</td><td class="text-right text-mono">0</td><td class="text-right text-mono">0</td></tr>
+              <tr><td>출발 29~21일 전</td><td>10%</td><td class="text-right text-mono">68,600</td><td class="text-right text-mono">205,800</td></tr>
+              <tr><td>출발 20~14일 전</td><td>20%</td><td class="text-right text-mono">137,200</td><td class="text-right text-mono">411,600</td></tr>
+              <tr><td>출발 13~7일 전</td><td>30%</td><td class="text-right text-mono">205,800</td><td class="text-right text-mono">617,400</td></tr>
+              <tr style="background:#ffebee;"><td>출발 6~3일 전</td><td>50%</td><td class="text-right text-mono">343,000</td><td class="text-right text-mono">1,029,000</td></tr>
+              <tr style="background:#ffebee;"><td>출발 2일 전~당일</td><td>100%</td><td class="text-right text-mono">686,000</td><td class="text-right text-mono">2,058,000</td></tr>
+            </tbody>
+          </table>
+          <div style="font-size:11px;color:#888;margin-top:8px;">
+            ※ 오늘 기준 D-54 → 위약금 0% 구간. 산정 시 출발일과 현재 일자를 다시 계산합니다.
+          </div>
+        </div>
+
+        <style>
+          /* 평소엔 위약금 관련 영역 숨김 */
+          #section-traveler .penalty-only { display: none; }
+          #section-traveler.penalty-mode div.penalty-only { display: block; }
+        </style>
+
+        <div class="penalty-only note" style="font-size:11px;color:#888;margin-top:8px;">
+          ※ 위약금/취소 처리 시 원장에 <b>PENALTY(800)</b> 항목으로 기록되고 <b>결제 필요 금액</b>이 즉시 재계산됩니다.
+        </div>
+
+        <script>
+          function togglePenaltyMode(){
+            const sec=document.getElementById('section-traveler');
+            const btn=document.getElementById('btn-toggle-penalty');
+            const on=sec.classList.toggle('penalty-mode');
+            btn.textContent = on ? '− 취소위약금 관리 닫기' : '+ 취소위약금 관리';
+            btn.classList.toggle('btn-danger', on);
+            btn.classList.toggle('btn-outline', !on);
+          }
+        </script>
+
+        <script>
+          const FARE_PER_PAX = 686000;
+          function recalcPenalty(){
+            const cnt=parseInt(document.getElementById('cancel-cnt').value)||0;
+            const base=cnt*FARE_PER_PAX;
+            document.getElementById('cancel-base').textContent=base.toLocaleString();
+            const p=parseInt(String(document.getElementById('cancel-penalty').value).replace(/[^0-9]/g,''))||0;
+            // 금액 정보 카드 동기화
+            const ptotal=document.getElementById('penalty-total');
+            if(ptotal){
+              ptotal.textContent=p.toLocaleString();
+              const card=document.getElementById('penalty-card');
+              if(p>0){
+                card.style.opacity='1'; card.style.background='#fff8e1';
+                card.querySelector('.label').style.color='#e65100';
+                ptotal.style.color='#e65100';
+                card.querySelector('div:last-child').textContent='취소위약금 관리 영역에서 산정';
+              } else {
+                card.style.opacity='0.5'; card.style.background='#f5f5f5';
+                card.querySelector('.label').style.color='#bbb';
+                ptotal.style.color='#bbb';
+                card.querySelector('div:last-child').textContent='여행자 영역에서 관리';
+              }
+            }
+          }
+        </script>
       </div>
     </div>
 
@@ -266,13 +401,18 @@
             <div class="label">상품금액</div>
             <div class="value">2,097,000</div>
           </div>
-          <div class="amount-card">
-            <div class="label">할인금액</div>
+          <div class="amount-card" style="position:relative;cursor:help;" title="여행사특가 -39,000 / 쿠폰할인 -20,000">
+            <div class="label">할인금액 <span style="font-size:9px;color:#bbb;">▾</span></div>
             <div class="value negative">-59,000</div>
+            <div style="font-size:10px;color:#888;margin-top:4px;line-height:1.4;">
+              <div>· 특가 <span style="font-family:monospace;color:#d32f2f;">-39,000</span></div>
+              <div>· 쿠폰 <span style="font-family:monospace;color:#6a1b9a;">-20,000</span></div>
+            </div>
           </div>
-          <div class="amount-card">
-            <div class="label">취소위약금</div>
-            <div class="value" id="penalty-total">0</div>
+          <div class="amount-card" id="penalty-card" style="opacity:0.5;background:#f5f5f5;cursor:pointer;" onclick="document.getElementById('section-traveler').scrollIntoView({behavior:'smooth',block:'start'})" title="여행자 영역에서 관리">
+            <div class="label" style="color:#bbb;">취소위약금 ↗</div>
+            <div class="value" id="penalty-total" style="color:#bbb;">0</div>
+            <div style="font-size:10px;color:#bbb;margin-top:2px;">여행자 영역에서 관리</div>
           </div>
           <div class="amount-card" style="border:2px solid #1565c0;background:#e3f2fd;">
             <div class="label" style="color:#1565c0;font-weight:700;">결제 필요 금액</div>
@@ -430,6 +570,9 @@
       <div class="section-header">
         <h2>결제 정보</h2>
         <div class="actions">
+          <button class="btn btn-primary btn-sm btn-icon" onclick="document.getElementById('modal-payurl').classList.add('show')">
+            🔗 결제 URL 전송
+          </button>
           <button class="btn btn-outline btn-sm btn-icon" onclick="document.getElementById('modal-payment-change').classList.add('show')">
             <span class="feature-tag">신규</span> 결제수단 변경
           </button>
@@ -508,18 +651,18 @@
       </div>
     </div>
 
-    <!-- 6. 원장 요약 -->
+    <!-- 6. 원장 요약 (축약 - 손익만, 자금/상세는 원장 탭에서) -->
     <div class="section">
       <div class="section-header">
-        <h2>원장 요약</h2>
+        <h2>원장 요약 <span style="font-size:11px;font-weight:400;color:#888;margin-left:6px;">파티별 손익 한눈에</span></h2>
         <div class="actions"><button class="btn btn-outline btn-sm" onclick="switchTab('ledger')">원장 상세 보기 →</button></div>
       </div>
       <div class="section-body">
         <div class="party-grid">
-          <div class="party-card"><div class="party-icon">🙋</div><div class="party-name">고객</div><div class="party-row"><span class="label">손익</span><span class="value" style="color:#d32f2f;">-2,038,000</span></div><div class="party-row"><span class="label">자금</span><span class="value" style="color:#d32f2f;">-2,038,000</span></div></div>
-          <div class="party-card"><div class="party-icon">🔗</div><div class="party-name">채널사</div><div class="party-row"><span class="label">손익</span><span class="value">0</span></div><div class="party-row"><span class="label">자금</span><span class="value">0</span></div></div>
-          <div class="party-card"><div class="party-icon">🏢</div><div class="party-name">플랫폼</div><div class="party-row"><span class="label">손익</span><span class="value" style="color:#1565c0;">+159,344</span></div><div class="party-row"><span class="label">자금</span><span class="value" style="color:#1565c0;">+2,038,000</span></div></div>
-          <div class="party-card"><div class="party-icon">🚩</div><div class="party-name">여행사</div><div class="party-row"><span class="label">손익</span><span class="value" style="color:#1565c0;">+1,878,656</span></div><div class="party-row"><span class="label">자금</span><span class="value">0</span></div></div>
+          <div class="party-card"><div class="party-icon">🙋</div><div class="party-name">고객</div><div class="party-row"><span class="label">손익</span><span class="value" style="color:#d32f2f;">-2,038,000</span></div></div>
+          <div class="party-card"><div class="party-icon">🔗</div><div class="party-name">채널사</div><div class="party-row"><span class="label">손익</span><span class="value">0</span></div></div>
+          <div class="party-card"><div class="party-icon">🏢</div><div class="party-name">플랫폼</div><div class="party-row"><span class="label">손익</span><span class="value" style="color:#1565c0;">+159,344</span></div></div>
+          <div class="party-card"><div class="party-icon">🚩</div><div class="party-name">여행사</div><div class="party-row"><span class="label">손익</span><span class="value" style="color:#1565c0;">+1,878,656</span></div></div>
         </div>
       </div>
     </div>
@@ -541,8 +684,25 @@
     <div class="section">
       <div class="section-header">
         <h2>원장 항목</h2>
-        <div class="actions">
-          <select style="padding:4px 8px;border:1px solid #d0d0d0;border-radius:4px;font-size:11px;"><option>전체 항목</option><option>🙋 고객</option><option>🔗 채널사</option><option>🏢 플랫폼</option><option>🚩 여행사</option></select>
+        <div class="actions" style="display:flex;gap:6px;flex-wrap:wrap;align-items:center;">
+          <select style="padding:4px 8px;border:1px solid #d0d0d0;border-radius:4px;font-size:11px;">
+            <option>파티: 전체</option><option>🙋 고객</option><option>🔗 채널사</option><option>🏢 플랫폼</option><option>🚩 여행사</option>
+          </select>
+          <select style="padding:4px 8px;border:1px solid #d0d0d0;border-radius:4px;font-size:11px;">
+            <option>타입: 전체</option>
+            <option>100 CHARGE (청구)</option>
+            <option>200 DISCOUNT (할인)</option>
+            <option>300 COUPON (쿠폰)</option>
+            <option>400 PAYMENT (결제)</option>
+            <option>500 TRANSFER (이체)</option>
+            <option>600 FEE (수수료)</option>
+            <option>700 REFUND (환불)</option>
+            <option>800 PENALTY (위약금)</option>
+          </select>
+          <input type="date" value="2026-04-01" style="padding:3px 6px;border:1px solid #d0d0d0;border-radius:4px;font-size:11px;">
+          <span style="font-size:11px;color:#888;">~</span>
+          <input type="date" value="2026-06-30" style="padding:3px 6px;border:1px solid #d0d0d0;border-radius:4px;font-size:11px;">
+          <button class="btn btn-outline btn-sm">CSV</button>
         </div>
       </div>
       <div class="section-body" style="padding:12px 24px;">
@@ -552,7 +712,7 @@
         <div class="ledger-item"><div class="ledger-type"><span class="code payment">401</span></div><div class="ledger-desc"><div class="name">고객결제(플랫폼)</div><div class="sub">nice_v2 · 신용카드</div></div><div class="ledger-party"><span class="badge gray">🏢 플랫폼</span></div><div class="ledger-amount plus">+2,038,000</div><div class="ledger-date">04-07 08:43</div></div>
         <div class="ledger-item"><div class="ledger-type"><span class="code fee">601</span></div><div class="ledger-desc"><div class="name">PG수수료</div><div class="sub">PG수수료 차감</div></div><div class="ledger-party"><span class="badge gray">🏢 플랫폼</span></div><div class="ledger-amount minus">-59,100</div><div class="ledger-date">04-07 08:43</div></div>
         <div class="ledger-item"><div class="ledger-type"><span class="code fee">602</span></div><div class="ledger-desc"><div class="name">플랫폼이용료</div><div class="sub">수수료율 8.8%</div></div><div class="ledger-party"><span class="badge gray">🏢 플랫폼</span></div><div class="ledger-amount plus">+179,344</div><div class="ledger-date">04-07 08:43</div></div>
-        <div class="ledger-item"><div class="ledger-type"><span class="code transfer">501</span></div><div class="ledger-desc"><div class="name">플랫폼대금이전</div><div class="sub">플랫폼 → 여행사</div></div><div class="ledger-party"><span class="badge gray">🚩 여행사</span></div><div class="ledger-amount plus">+1,878,656</div><div class="ledger-date">-</div></div>
+        <div class="ledger-item"><div class="ledger-type"><span class="code transfer">501</span></div><div class="ledger-desc"><div class="name">플랫폼대금이전 <span class="badge orange" style="margin-left:4px;">정산예정</span></div><div class="sub">플랫폼 → 여행사 · 지급예정 2026-06-19</div></div><div class="ledger-party"><span class="badge gray">🚩 여행사</span></div><div class="ledger-amount plus">+1,878,656</div><div class="ledger-date" style="color:#e65100;font-weight:600;">06-19 예정</div></div>
       </div>
     </div>
   </div>
@@ -584,8 +744,51 @@
           </table>
         </div>
         <div class="subsection">
-          <div class="subsection-title">정산정보</div>
-          <div style="text-align:center;padding:24px;color:#888;font-size:12px;">정산 데이터 로딩 (ag-grid 테이블)</div>
+          <div class="subsection-title">정산 일정</div>
+          <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:16px;">
+            <div class="amount-card"><div class="label">정산 기준일</div><div class="value" style="font-size:14px;">2026-06-09</div><div style="font-size:10px;color:#aaa;margin-top:2px;">출발일 기준</div></div>
+            <div class="amount-card"><div class="label">정산 마감</div><div class="value" style="font-size:14px;">2026-06-15</div><div style="font-size:10px;color:#aaa;margin-top:2px;">월4회 마감</div></div>
+            <div class="amount-card"><div class="label">대금 지급예정일</div><div class="value" style="font-size:14px;color:#1565c0;">2026-06-19</div><div style="font-size:10px;color:#aaa;margin-top:2px;">마감+4영업일</div></div>
+            <div class="amount-card highlight"><div class="label">정산 상태</div><div class="value" style="font-size:14px;"><span class="badge orange">정산예정</span></div><div style="font-size:10px;color:#aaa;margin-top:2px;">출발 D-54</div></div>
+          </div>
+        </div>
+
+        <div class="subsection">
+          <div class="subsection-title">정산 내역 (여행사 ↔ 플랫폼)</div>
+          <table>
+            <thead><tr>
+              <th>#</th><th>항목</th><th>구분</th>
+              <th class="text-right">기준금액</th><th class="text-right">수수료율</th><th class="text-right">수수료(VAT포함)</th>
+              <th class="text-right">대금이전액</th><th class="text-center">상태</th>
+            </tr></thead>
+            <tbody>
+              <tr>
+                <td>1</td><td>본예약 (CHARGE)</td><td><span class="badge blue">채널결제</span></td>
+                <td class="text-right text-mono">2,038,000</td><td class="text-right">8.8%</td>
+                <td class="text-right text-mono" style="color:#d32f2f;">-179,344</td>
+                <td class="text-right text-mono" style="color:#1565c0;">+1,858,656</td>
+                <td class="text-center"><span class="badge orange">정산예정</span></td>
+              </tr>
+              <tr>
+                <td>2</td><td>쿠폰부담 (플랫폼)</td><td><span class="badge purple">쿠폰</span></td>
+                <td class="text-right text-mono">20,000</td><td class="text-right">-</td>
+                <td class="text-right text-mono">-</td>
+                <td class="text-right text-mono" style="color:#1565c0;">+20,000</td>
+                <td class="text-center"><span class="badge orange">정산예정</span></td>
+              </tr>
+              <tr style="background:#fafafa;font-weight:700;">
+                <td colspan="3">합계</td>
+                <td class="text-right text-mono">2,058,000</td>
+                <td class="text-right">-</td>
+                <td class="text-right text-mono" style="color:#d32f2f;">-179,344</td>
+                <td class="text-right text-mono" style="color:#1565c0;">+1,878,656</td>
+                <td class="text-center">-</td>
+              </tr>
+            </tbody>
+          </table>
+          <div class="design-note" style="margin-top:12px;">
+            <strong>정산내역 = 원장의 TRANSFER 항목과 1:1 매칭</strong>됩니다. 취소/위약금 발생 시 별도 row가 추가되며, 정산예정 → 정산완료 전환 시 지급일이 기록됩니다.
+          </div>
         </div>
       </div>
     </div>
@@ -593,18 +796,142 @@
 
   <!-- PB 탭 -->
   <div id="tab-pb" class="tab-content">
-    <div class="section"><div class="section-body" style="text-align:center;padding:60px;"><div style="font-size:14px;color:#888;">항공권 / 숙박권 관리</div><div style="font-size:12px;color:#bbb;margin-top:8px;">(기존 PB 탭 내용 유지)</div></div></div>
+    <!-- 항공권 -->
+    <div class="section">
+      <div class="section-header">
+        <h2>✈️ 항공권 (PB)</h2>
+        <div class="actions">
+          <button class="btn btn-outline btn-sm">PNR 동기화</button>
+          <button class="btn btn-outline btn-sm">발권 처리</button>
+        </div>
+      </div>
+      <div class="section-body">
+        <div class="info-grid" style="margin-bottom:16px;">
+          <div>
+            <div class="info-row"><span class="info-label">PNR</span><span class="info-value text-mono">XYZ123</span></div>
+            <div class="info-row"><span class="info-label">발권상태</span><span class="info-value"><span class="badge blue">발권대기</span></span></div>
+            <div class="info-row"><span class="info-label">항공사</span><span class="info-value">중국남방항공 (CZ)</span></div>
+            <div class="info-row"><span class="info-label">예약등급</span><span class="info-value">Y (이코노미)</span></div>
+          </div>
+          <div>
+            <div class="info-row"><span class="info-label">발권 마감</span><span class="info-value" style="color:#d32f2f;font-weight:600;">2026-05-07 23:59 (D-30)</span></div>
+            <div class="info-row"><span class="info-label">발권 정책</span><span class="info-value">출발 30일 전 자동 발권</span></div>
+            <div class="info-row"><span class="info-label">위탁수하물</span><span class="info-value">23kg × 1</span></div>
+            <div class="info-row"><span class="info-label">기내수하물</span><span class="info-value">7kg</span></div>
+          </div>
+        </div>
+        <table>
+          <thead><tr>
+            <th>구간</th><th>편명</th><th>출발</th><th>도착</th><th>출발일시</th><th>도착일시</th><th class="text-center">상태</th>
+          </tr></thead>
+          <tbody>
+            <tr><td>왕복</td><td class="text-mono">CZ8418</td><td>인천(ICN)</td><td>상하이푸동(PVG)</td><td>2026-06-06 09:50</td><td>2026-06-06 11:00</td><td class="text-center"><span class="badge green">확정</span></td></tr>
+            <tr><td>왕복</td><td class="text-mono">CZ8417</td><td>상하이푸동(PVG)</td><td>인천(ICN)</td><td>2026-06-09 08:30</td><td>2026-06-09 11:30</td><td class="text-center"><span class="badge green">확정</span></td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- 숙박권 -->
+    <div class="section">
+      <div class="section-header">
+        <h2>🏨 숙박권 (PB)</h2>
+        <div class="actions"><button class="btn btn-outline btn-sm">바우처 발송</button></div>
+      </div>
+      <div class="section-body">
+        <div class="info-grid" style="margin-bottom:16px;">
+          <div>
+            <div class="info-row"><span class="info-label">호텔명</span><span class="info-value">하버 플라자 상하이</span></div>
+            <div class="info-row"><span class="info-label">객실타입</span><span class="info-value">디럭스 트윈 (1실)</span></div>
+            <div class="info-row"><span class="info-label">조식</span><span class="info-value">불포함</span></div>
+          </div>
+          <div>
+            <div class="info-row"><span class="info-label">체크인</span><span class="info-value">2026-06-06 (3박)</span></div>
+            <div class="info-row"><span class="info-label">체크아웃</span><span class="info-value">2026-06-09</span></div>
+            <div class="info-row"><span class="info-label">바우처 상태</span><span class="info-value"><span class="badge gray">미발송</span></span></div>
+          </div>
+        </div>
+        <div class="design-note">
+          <strong>PB(Private Brand) 영역</strong>은 항공/숙박 각각의 PNR/바우처 상태를 관리하며, 발권/발송 시 원장에는 별도 항목이 추가되지 않고 상태만 변경됩니다.
+        </div>
+      </div>
+    </div>
   </div>
 
   <!-- 이력 탭 -->
   <div id="tab-history" class="tab-content">
     <div class="section">
-      <div class="section-header"><h2>예약 관리 이력</h2></div>
+      <div class="section-header">
+        <h2>이벤트 타임라인</h2>
+        <div class="actions">
+          <select style="padding:4px 8px;border:1px solid #d0d0d0;border-radius:4px;font-size:11px;">
+            <option>전체 이벤트</option><option>예약/금액</option><option>결제/환불</option><option>쿠폰</option><option>행사이동</option><option>메모</option>
+          </select>
+        </div>
+      </div>
       <div class="section-body">
-        <table>
-          <thead><tr><th>내용</th><th>담당자</th><th>예약상태</th><th>일시</th></tr></thead>
-          <tbody><tr><td>고객님이 전액결제(카드) '결제완료'(으)로 예약접수</td><td>-</td><td><span class="badge green">예약접수</span></td><td>2026-04-07 08:43:38</td></tr></tbody>
-        </table>
+        <div class="timeline">
+          <div class="tl-item charge">
+            <div class="tl-head">
+              <span class="tl-title">예약 접수</span>
+              <span class="badge green">예약완료</span>
+              <span class="tl-amount minus">-2,097,000</span>
+              <span class="tl-time">2026-04-07 08:43:38</span>
+            </div>
+            <div class="tl-sub"><span class="tl-actor">고객</span> · 트립스토어 채널 · 성인 3명 · 상품금액 청구 (CHARGE 100)</div>
+          </div>
+          <div class="tl-item discount">
+            <div class="tl-head">
+              <span class="tl-title">여행사 특가 할인</span>
+              <span class="tl-amount plus">+39,000</span>
+              <span class="tl-time">2026-04-07 08:43:38</span>
+            </div>
+            <div class="tl-sub"><span class="tl-actor">시스템</span> · 하나투어 2% · 13,000 × 3명 (DISCOUNT 202)</div>
+          </div>
+          <div class="tl-item coupon">
+            <div class="tl-head">
+              <span class="tl-title">쿠폰 할인 적용</span>
+              <span class="badge purple">쿠폰</span>
+              <span class="tl-amount plus">+20,000</span>
+              <span class="tl-time">2026-04-07 08:43:38</span>
+            </div>
+            <div class="tl-sub"><span class="tl-actor">고객</span> · 20,000원 쿠폰 (836331bf...) · 플랫폼 부담 (COUPON 301)</div>
+          </div>
+          <div class="tl-item payment">
+            <div class="tl-head">
+              <span class="tl-title">고객 결제 완료</span>
+              <span class="badge blue">신용카드</span>
+              <span class="tl-amount plus">+2,038,000</span>
+              <span class="tl-time">2026-04-07 08:43:38</span>
+            </div>
+            <div class="tl-sub"><span class="tl-actor">고객</span> · NICE PAY v2 · 결제번호 26040708-4300101H-001 (PAYMENT 401)</div>
+          </div>
+          <div class="tl-item event">
+            <div class="tl-head">
+              <span class="tl-title">PG 수수료 / 플랫폼 이용료 산정</span>
+              <span class="tl-amount minus">-59,100</span>
+              <span class="tl-amount plus">+179,344</span>
+              <span class="tl-time">2026-04-07 08:43:40</span>
+            </div>
+            <div class="tl-sub"><span class="tl-actor">시스템</span> · PG수수료(FEE 601) + 플랫폼 이용료 8.8% (FEE 602)</div>
+          </div>
+          <div class="tl-item transfer">
+            <div class="tl-head">
+              <span class="tl-title">대금 정산 예정</span>
+              <span class="badge orange">정산예정</span>
+              <span class="tl-amount plus">+1,878,656</span>
+              <span class="tl-time">2026-06-19 (예정)</span>
+            </div>
+            <div class="tl-sub"><span class="tl-actor">시스템</span> · 플랫폼 → 여행사 대금이전 (TRANSFER 501)</div>
+          </div>
+          <div class="tl-item memo" style="opacity:0.6;">
+            <div class="tl-head">
+              <span class="tl-title">— 이후 이벤트 없음 —</span>
+              <span class="tl-time">D-54</span>
+            </div>
+            <div class="tl-sub" style="color:#aaa;">행사이동/금액조정/취소 등 발생 시 자동 기록됩니다.</div>
+          </div>
+        </div>
       </div>
     </div>
     <div class="section">
@@ -620,6 +947,177 @@
 </div>
 
 <!-- ==================== 모달들 ==================== -->
+
+<!-- 고객 "내 예약" 화면 조회 모달 -->
+<div class="modal-overlay" id="modal-customer-view">
+  <div class="modal" style="width:440px;max-height:90vh;overflow:hidden;border-radius:16px;box-shadow:0 20px 60px rgba(0,0,0,0.3);">
+    <div class="modal-header" style="background:#1a1a1a;padding:12px 20px;border-bottom:none;">
+      <div style="display:flex;align-items:center;gap:8px;">
+        <span style="color:#fff;font-size:14px;">👤</span>
+        <h3 style="color:#fff;font-size:14px;">고객 "내 예약" 화면 미리보기</h3>
+      </div>
+      <button class="close" onclick="this.closest('.modal-overlay').classList.remove('show')" style="color:#fff;">&times;</button>
+    </div>
+
+    <!-- 디바이스 프레임 시뮬레이션 -->
+    <div style="background:#f5f5f5;padding:8px 12px;border-bottom:1px solid #e0e0e0;display:flex;align-items:center;justify-content:space-between;font-size:10px;color:#888;">
+      <div style="display:flex;align-items:center;gap:6px;">
+        <span style="width:8px;height:8px;border-radius:50%;background:#4caf50;"></span>
+        <span>tripstore.kr/my/reservation/detail</span>
+      </div>
+      <div style="display:flex;gap:4px;">
+        <span style="cursor:pointer;padding:2px 6px;border-radius:3px;background:#e8e8e8;" onclick="toggleCustomerDevice('mobile')" id="device-mobile">Mobile</span>
+        <span style="cursor:pointer;padding:2px 6px;border-radius:3px;" onclick="toggleCustomerDevice('desktop')" id="device-desktop">Desktop</span>
+      </div>
+    </div>
+
+    <div class="modal-body" style="padding:0;max-height:70vh;overflow-y:auto;background:#f8f9fa;" id="customer-view-body">
+      <!-- 고객 화면 콘텐츠 -->
+      <div style="max-width:400px;margin:0 auto;padding:16px;">
+
+        <!-- 상단 예약 상태 -->
+        <div style="background:#fff;border-radius:12px;padding:20px;margin-bottom:12px;box-shadow:0 1px 3px rgba(0,0,0,0.08);">
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;">
+            <span style="font-size:11px;color:#888;">예약번호</span>
+            <span style="font-size:12px;font-family:monospace;font-weight:600;">26040708-4300101H</span>
+          </div>
+          <div style="text-align:center;padding:12px 0;">
+            <div style="display:inline-block;background:#e8f5e9;color:#2e7d32;padding:6px 20px;border-radius:20px;font-size:14px;font-weight:700;">예약 확정</div>
+          </div>
+          <div style="text-align:center;font-size:11px;color:#888;margin-top:8px;">
+            2026.04.07 예약 · 결제완료
+          </div>
+        </div>
+
+        <!-- 행사 변경 알림 (이동 이력 있을 때) -->
+        <div id="cv-change-alert" style="display:none;background:#e3f2fd;border:1px solid #90caf9;border-radius:12px;padding:14px 16px;margin-bottom:12px;">
+          <div style="display:flex;align-items:center;gap:6px;margin-bottom:8px;">
+            <span style="font-size:14px;">ℹ️</span>
+            <span style="font-weight:700;font-size:13px;color:#1565c0;">여행 일정이 변경되었습니다</span>
+          </div>
+          <div style="font-size:12px;color:#555;line-height:1.8;">
+            <div style="display:flex;align-items:center;gap:4px;">
+              <span style="color:#999;">출발일:</span>
+              <span style="text-decoration:line-through;color:#bbb;" id="cv-old-dep">2026-06-06</span>
+              <span style="color:#1565c0;">→</span>
+              <strong id="cv-new-dep">2026-06-20</strong>
+            </div>
+            <div style="display:flex;align-items:center;gap:4px;">
+              <span style="color:#999;">상품가:</span>
+              <span style="text-decoration:line-through;color:#bbb;" id="cv-old-price">699,000원</span>
+              <span style="color:#1565c0;">→</span>
+              <strong id="cv-new-price">719,000원</strong>
+              <span style="color:#d32f2f;font-size:11px;font-weight:600;" id="cv-price-diff">(+20,000)</span>
+            </div>
+          </div>
+          <div style="margin-top:8px;font-size:10px;color:#888;">
+            변경일: <span id="cv-change-date">2026-04-14</span> · 사유: <span id="cv-change-reason">출발일 변경</span>
+          </div>
+        </div>
+
+        <!-- 상품 정보 카드 -->
+        <div style="background:#fff;border-radius:12px;overflow:hidden;margin-bottom:12px;box-shadow:0 1px 3px rgba(0,0,0,0.08);">
+          <!-- 상품 이미지 (시뮬레이션) -->
+          <div style="height:140px;background:linear-gradient(135deg,#667eea,#764ba2);display:flex;align-items:flex-end;padding:16px;position:relative;">
+            <div style="color:#fff;">
+              <div style="font-size:16px;font-weight:700;" id="cv-product-name">상하이 자유여행 4일</div>
+              <div style="font-size:11px;opacity:0.8;margin-top:2px;">하나투어 · 중국남방항공</div>
+            </div>
+            <div style="position:absolute;top:12px;right:12px;background:rgba(255,255,255,0.2);backdrop-filter:blur(4px);padding:4px 10px;border-radius:8px;color:#fff;font-size:10px;">AIRTEL</div>
+          </div>
+          <!-- 상품 상세 -->
+          <div style="padding:16px;">
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;font-size:12px;">
+              <div>
+                <div style="color:#888;font-size:10px;margin-bottom:2px;">출발</div>
+                <div style="font-weight:600;" id="cv-dep-date">2026-06-06 (토)</div>
+              </div>
+              <div>
+                <div style="color:#888;font-size:10px;margin-bottom:2px;">도착</div>
+                <div style="font-weight:600;" id="cv-arr-date">2026-06-09 (화)</div>
+              </div>
+              <div>
+                <div style="color:#888;font-size:10px;margin-bottom:2px;">여행기간</div>
+                <div style="font-weight:600;" id="cv-days">3박 4일</div>
+              </div>
+              <div>
+                <div style="color:#888;font-size:10px;margin-bottom:2px;">인원</div>
+                <div style="font-weight:600;">성인 3명</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 결제 정보 카드 -->
+        <div style="background:#fff;border-radius:12px;padding:16px;margin-bottom:12px;box-shadow:0 1px 3px rgba(0,0,0,0.08);">
+          <div style="font-size:13px;font-weight:700;margin-bottom:12px;">결제 정보</div>
+          <div style="display:flex;flex-direction:column;gap:8px;font-size:12px;">
+            <div style="display:flex;justify-content:space-between;">
+              <span style="color:#888;">상품가 (3명)</span>
+              <span style="font-family:monospace;" id="cv-total-product">2,097,000원</span>
+            </div>
+            <div style="display:flex;justify-content:space-between;">
+              <span style="color:#888;">특가 할인</span>
+              <span style="font-family:monospace;color:#d32f2f;" id="cv-discount">-39,000원</span>
+            </div>
+            <div style="display:flex;justify-content:space-between;">
+              <span style="color:#888;">쿠폰 할인</span>
+              <span style="font-family:monospace;color:#6a1b9a;" id="cv-coupon">-20,000원</span>
+            </div>
+            <div style="border-top:2px solid #1a1a1a;padding-top:8px;display:flex;justify-content:space-between;">
+              <span style="font-weight:700;font-size:13px;">총 결제금액</span>
+              <span style="font-weight:700;font-size:16px;font-family:monospace;" id="cv-total-pay">2,038,000원</span>
+            </div>
+          </div>
+          <div style="margin-top:12px;background:#f8f9fa;border-radius:8px;padding:10px 12px;font-size:11px;">
+            <div style="display:flex;justify-content:space-between;color:#888;">
+              <span>결제수단</span>
+              <span>신용카드 (KB국민 ****1234)</span>
+            </div>
+            <div style="display:flex;justify-content:space-between;color:#888;margin-top:4px;">
+              <span>결제일시</span>
+              <span>2026-04-07 08:43</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- 예약자 정보 -->
+        <div style="background:#fff;border-radius:12px;padding:16px;margin-bottom:12px;box-shadow:0 1px 3px rgba(0,0,0,0.08);">
+          <div style="font-size:13px;font-weight:700;margin-bottom:12px;">예약자 정보</div>
+          <div style="display:flex;flex-direction:column;gap:6px;font-size:12px;">
+            <div style="display:flex;justify-content:space-between;">
+              <span style="color:#888;">이름</span><span>오기웅</span>
+            </div>
+            <div style="display:flex;justify-content:space-between;">
+              <span style="color:#888;">연락처</span><span>010-2374-8449</span>
+            </div>
+            <div style="display:flex;justify-content:space-between;">
+              <span style="color:#888;">이메일</span><span>kipoongman@hanmail.net</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- 변경 이력 (이동 이력 있을 때) -->
+        <div id="cv-history-section" style="display:none;background:#fff;border-radius:12px;padding:16px;margin-bottom:12px;box-shadow:0 1px 3px rgba(0,0,0,0.08);">
+          <div style="font-size:13px;font-weight:700;margin-bottom:12px;">변경 이력</div>
+          <div id="cv-history-list" style="font-size:12px;"></div>
+        </div>
+
+        <!-- 하단 버튼 -->
+        <div style="display:flex;gap:8px;margin-bottom:20px;">
+          <button style="flex:1;padding:12px;border-radius:8px;border:1px solid #e0e0e0;background:#fff;font-size:13px;font-weight:600;cursor:pointer;">예약 취소</button>
+          <button style="flex:1;padding:12px;border-radius:8px;border:none;background:#1a1a1a;color:#fff;font-size:13px;font-weight:600;cursor:pointer;">1:1 문의</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- 하단 설명 -->
+    <div style="background:#fff;border-top:1px solid #e0e0e0;padding:10px 16px;font-size:10px;color:#888;display:flex;align-items:center;gap:8px;">
+      <span style="background:#fff3e0;color:#e65100;padding:2px 6px;border-radius:3px;font-weight:600;">PM 참고</span>
+      행사 이동 실행 후 고객에게 이렇게 보입니다. 변경 알림 배너 표시 여부는 정책 결정 필요.
+    </div>
+  </div>
+</div>
 
 <!-- 행사 이동 모달 -->
 <div class="modal-overlay" id="modal-event">
@@ -765,12 +1263,55 @@
           </table>
         </div>
 
-        <!-- 쿠폰 알림 -->
-        <div style="background:#fff3e0;border:1px solid #ffe082;border-radius:8px;padding:10px 14px;margin-top:10px;font-size:11px;color:#e65100;display:flex;align-items:center;gap:8px;" id="coupon-warning">
-          <span style="font-size:14px;">&#x26A0;</span>
-          <div>
-            <strong>쿠폰 조건 재검증 필요:</strong> 현재 적용된 쿠폰 "상해 자유여행 20,000원 할인"의 적용 조건이 변경된 행사에서도 유효한지 확인이 필요합니다.
-            <br>쿠폰이 유효하지 않으면 자동 해제되며, 금액이 재계산됩니다.
+        <!-- 쿠폰 처리 플로우 -->
+        <div style="background:#f3e5f5;border:2px solid #ce93d8;border-radius:8px;padding:14px;margin-top:10px;" id="coupon-handling">
+          <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px;">
+            <span style="font-size:14px;">🎟</span>
+            <div style="font-size:12px;font-weight:700;color:#6a1b9a;">쿠폰 처리</div>
+            <span style="font-size:10px;color:#888;margin-left:auto;">현재 적용: "상해 자유여행 20,000원 할인"</span>
+          </div>
+          <!-- 자동 검증 결과 -->
+          <div style="background:#fff;border-radius:6px;padding:10px 12px;margin-bottom:10px;border:1px solid #e1bee7;">
+            <div style="font-size:11px;color:#888;margin-bottom:6px;">자동 검증 결과</div>
+            <div id="coupon-verify-result" style="display:flex;align-items:center;gap:8px;font-size:12px;">
+              <span style="background:#fff3e0;color:#e65100;padding:2px 8px;border-radius:4px;font-size:10px;font-weight:700;">조건 확인 필요</span>
+              <span style="color:#666;">변경된 행사에서 쿠폰 적용 조건(최소금액, 상품범위) 재확인 필요</span>
+            </div>
+          </div>
+          <!-- 처리 옵션 -->
+          <div style="display:flex;flex-direction:column;gap:6px;">
+            <label style="display:flex;align-items:center;gap:8px;padding:8px 10px;background:#fff;border:1px solid #e0e0e0;border-radius:6px;cursor:pointer;font-size:12px;" onclick="selectCouponOption('keep')">
+              <input type="radio" name="coupon-action" value="keep" checked>
+              <div>
+                <div style="font-weight:600;">유지 (조건 충족 시)</div>
+                <div style="font-size:10px;color:#888;">쿠폰 조건이 유효하면 현재 금액(-20,000) 그대로 유지</div>
+              </div>
+              <span style="margin-left:auto;font-family:monospace;font-weight:600;color:#6a1b9a;" id="coupon-opt-keep">-20,000</span>
+            </label>
+            <label style="display:flex;align-items:center;gap:8px;padding:8px 10px;background:#fff;border:1px solid #e0e0e0;border-radius:6px;cursor:pointer;font-size:12px;" onclick="selectCouponOption('recalc')">
+              <input type="radio" name="coupon-action" value="recalc">
+              <div>
+                <div style="font-weight:600;">금액 재계산</div>
+                <div style="font-size:10px;color:#888;">변경된 상품가 기준으로 쿠폰 금액 자동 재계산</div>
+              </div>
+              <span style="margin-left:auto;font-family:monospace;font-weight:600;color:#6a1b9a;" id="coupon-opt-recalc">재계산</span>
+            </label>
+            <label style="display:flex;align-items:center;gap:8px;padding:8px 10px;background:#fff;border:1px solid #e0e0e0;border-radius:6px;cursor:pointer;font-size:12px;" onclick="selectCouponOption('release')">
+              <input type="radio" name="coupon-action" value="release">
+              <div>
+                <div style="font-weight:600;">해제 (쿠폰 원복)</div>
+                <div style="font-size:10px;color:#888;">쿠폰을 해제하고 사용자 쿠폰함으로 원복 (유효기간 내)</div>
+              </div>
+              <span style="margin-left:auto;font-family:monospace;font-weight:600;color:#d32f2f;">+20,000</span>
+            </label>
+            <label style="display:flex;align-items:center;gap:8px;padding:8px 10px;background:#fff;border:1px solid #e0e0e0;border-radius:6px;cursor:pointer;font-size:12px;" onclick="selectCouponOption('manual')">
+              <input type="radio" name="coupon-action" value="manual">
+              <div style="flex:1;">
+                <div style="font-weight:600;">수동 조정</div>
+                <div style="font-size:10px;color:#888;">쿠폰 금액을 직접 입력하여 조정</div>
+              </div>
+              <input type="number" id="coupon-manual-amount" placeholder="금액" style="width:100px;padding:4px 8px;border:1px solid #ce93d8;border-radius:4px;font-size:11px;font-family:monospace;text-align:right;" disabled onclick="event.stopPropagation()">
+            </label>
           </div>
         </div>
 
@@ -788,28 +1329,119 @@
               <span>여행사특가할인 변경 — 재계산</span>
               <span style="margin-left:auto;font-family:monospace;color:#d32f2f;font-weight:600;" id="ledger-discount">-4,140</span>
             </div>
-            <div style="display:flex;align-items:center;gap:8px;">
+            <div style="display:flex;align-items:center;gap:8px;" id="ledger-coupon-row">
               <span style="background:#f3e5f5;color:#6a1b9a;padding:1px 6px;border-radius:3px;font-family:monospace;font-size:10px;font-weight:700;">301</span>
-              <span>쿠폰 재검증 — 조건 확인 후 반영</span>
-              <span style="margin-left:auto;font-family:monospace;color:#e65100;font-weight:600;">확인 후</span>
+              <span id="ledger-coupon-desc">쿠폰 — 유지 (조건 충족 시)</span>
+              <span style="margin-left:auto;font-family:monospace;color:#6a1b9a;font-weight:600;" id="ledger-coupon-amount">0</span>
             </div>
           </div>
+        </div>
+
+        <!-- 고객 뷰 안내 -->
+        <div style="margin-top:12px;background:#e3f2fd;border-radius:6px;padding:8px 12px;font-size:11px;color:#1565c0;display:flex;align-items:center;gap:8px;">
+          <span>👤</span>
+          <span>행사 이동 후 고객에게 어떻게 보이는지 확인하려면 상단 <strong>"고객 화면 조회"</strong> 버튼을 사용하세요.</span>
+        </div>
+      </div>
+
+      <!-- 여행사 예약번호 -->
+      <div class="form-group" style="margin-top:16px;">
+        <label>여행사 예약번호</label>
+        <div style="display:flex;gap:8px;align-items:center;">
+          <div style="flex:1;background:#f5f5f5;border:1px solid #e0e0e0;border-radius:6px;padding:8px 12px;font-size:12px;" id="current-agency-code-display">
+            <span style="color:#888;font-size:10px;">현재:</span> <span class="text-mono" style="font-weight:600;">HB2633517226</span>
+          </div>
+          <span style="color:#1565c0;font-weight:700;" id="agency-code-arrow" style="display:none;">→</span>
+          <input type="text" id="new-agency-rsv-code" placeholder="새 예약번호 입력" style="flex:1;display:none;">
+        </div>
+        <div style="display:flex;gap:8px;margin-top:6px;">
+          <label style="display:flex;align-items:center;gap:4px;font-size:11px;cursor:pointer;padding:4px 8px;background:#f5f5f5;border-radius:4px;border:1px solid #e0e0e0;">
+            <input type="radio" name="agency-code-option" value="keep" checked onchange="toggleAgencyCodeInput('keep')"> 동일 (변경 없음)
+          </label>
+          <label style="display:flex;align-items:center;gap:4px;font-size:11px;cursor:pointer;padding:4px 8px;background:#f5f5f5;border-radius:4px;border:1px solid #e0e0e0;">
+            <input type="radio" name="agency-code-option" value="new" onchange="toggleAgencyCodeInput('new')"> 새 예약번호 발급
+          </label>
         </div>
       </div>
 
       <!-- 이동 사유 -->
-      <div class="form-group" style="margin-top:16px;">
+      <div class="form-group" style="margin-top:12px;">
         <label>이동 사유</label>
-        <select><option>출발일 변경</option><option>일정 변경</option><option>상품 마감</option><option>가격 인상/인하</option><option>고객 요청</option><option>기타</option></select>
+        <select id="move-reason"><option>출발일 변경</option><option>일정 변경</option><option>상품 마감</option><option>가격 인상/인하</option><option>고객 요청</option><option>여행사 요청</option><option>기타</option></select>
       </div>
       <div class="form-group">
         <label>비고 (선택)</label>
-        <input type="text" placeholder="추가 메모를 입력하세요">
+        <input type="text" id="move-memo" placeholder="추가 메모를 입력하세요">
       </div>
     </div>
     <div class="modal-footer">
       <button class="btn btn-outline" onclick="this.closest('.modal-overlay').classList.remove('show')">취소</button>
       <button class="btn btn-primary" id="btn-event-move" onclick="executeEventMove()" disabled style="opacity:0.5;cursor:not-allowed;">행사 이동 실행</button>
+    </div>
+  </div>
+</div>
+
+<!-- 행사 정보 수동 수정 모달 -->
+<div class="modal-overlay" id="modal-manual-edit">
+  <div class="modal" style="width:520px;">
+    <div class="modal-header"><h3>행사 정보 수동 수정</h3><button class="close" onclick="this.closest('.modal-overlay').classList.remove('show')">&times;</button></div>
+    <div class="modal-body">
+      <div style="background:#fff3e0;border-radius:8px;padding:10px 14px;font-size:12px;color:#e65100;margin-bottom:16px;">
+        <strong>주의:</strong> 행사 검색/선택 없이 데이터를 직접 수정합니다.<br>
+        <span style="font-size:11px;opacity:0.8;">출발일 변경, 행사코드 오류 수정 등 수동 보정이 필요한 경우에만 사용하세요.</span>
+      </div>
+
+      <div class="form-group">
+        <label>행사코드</label>
+        <div style="display:flex;gap:8px;align-items:center;">
+          <div style="background:#f5f5f5;border:1px solid #e0e0e0;border-radius:6px;padding:8px 12px;font-family:monospace;font-size:12px;color:#888;" id="manual-old-code">CCB101260606CZ2</div>
+          <span style="color:#1565c0;font-weight:700;">→</span>
+          <input type="text" id="manual-new-code" placeholder="새 행사코드" style="flex:1;font-family:monospace;">
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label>출발일</label>
+        <div style="display:flex;gap:8px;align-items:center;">
+          <div style="background:#f5f5f5;border:1px solid #e0e0e0;border-radius:6px;padding:8px 12px;font-size:12px;color:#888;" id="manual-old-dep">2026-06-06</div>
+          <span style="color:#1565c0;font-weight:700;">→</span>
+          <input type="date" id="manual-new-dep" style="flex:1;">
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label>도착일</label>
+        <div style="display:flex;gap:8px;align-items:center;">
+          <div style="background:#f5f5f5;border:1px solid #e0e0e0;border-radius:6px;padding:8px 12px;font-size:12px;color:#888;" id="manual-old-arr">2026-06-09</div>
+          <span style="color:#1565c0;font-weight:700;">→</span>
+          <input type="date" id="manual-new-arr" style="flex:1;">
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label>수정 사유</label>
+        <select id="manual-edit-reason">
+          <option>행사코드 오류 수정</option>
+          <option>출발일 변경 (여행사 통보)</option>
+          <option>일정 변경</option>
+          <option>기타</option>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label>비고 (선택)</label>
+        <input type="text" id="manual-edit-memo" placeholder="수정 사유를 입력하세요">
+      </div>
+
+      <div style="background:#f8f9fa;border-radius:6px;padding:10px 12px;font-size:11px;color:#888;border:1px solid #e8e8e8;">
+        <strong style="color:#333;">안내</strong><br>
+        · 수동 수정은 금액에 영향을 주지 않습니다. 금액 변동이 필요하면 "행사 이동" 기능을 사용하세요.<br>
+        · 변경 이력은 타임라인에 자동 기록됩니다.
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-outline" onclick="this.closest('.modal-overlay').classList.remove('show')">취소</button>
+      <button class="btn btn-primary" onclick="executeManualEdit()">수정 저장</button>
     </div>
   </div>
 </div>
@@ -1255,7 +1887,155 @@
   </div>
 </div>
 
+<!-- 결제 URL 전송 모달 -->
+<div class="modal-overlay" id="modal-payurl">
+  <div class="modal" style="width:560px;">
+    <div class="modal-header">
+      <h3>🔗 결제 URL 전송</h3>
+      <button class="close" onclick="this.closest('.modal-overlay').classList.remove('show')">&times;</button>
+    </div>
+    <div class="modal-body">
+      <div style="background:#e3f2fd;border-radius:8px;padding:12px;font-size:12px;color:#1565c0;margin-bottom:16px;">
+        <strong>결제 URL을 고객에게 발송</strong>합니다. 고객이 링크 접속 → 결제 완료 시 원장에 PAYMENT(401) 항목으로 자동 기록됩니다.<br>
+        <span style="font-size:11px;opacity:0.8;">URL은 1회용이며 만료시간 이후 자동 폐기됩니다.</span>
+      </div>
+
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+        <div class="form-group">
+          <label>결제 사유 (고객 노출)</label>
+          <select style="width:100%;padding:8px;border:1px solid #d0d0d0;border-radius:6px;font-size:13px;">
+            <option>잔금 결제</option>
+            <option>추가 옵션 결제</option>
+            <option>위약금 결제</option>
+            <option>금액 변동 재결제</option>
+            <option>기타 (직접입력)</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>URL 만료시간</label>
+          <select style="width:100%;padding:8px;border:1px solid #d0d0d0;border-radius:6px;font-size:13px;">
+            <option>1시간</option><option>3시간</option><option selected>24시간</option><option>72시간</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label style="display:flex;align-items:center;justify-content:space-between;">
+          <span>수신자 (다중 발송 가능)</span>
+          <span style="display:flex;gap:6px;">
+            <button class="btn btn-outline btn-sm" onclick="fillReserver()" type="button">예약자 정보 불러오기</button>
+            <button class="btn btn-plus btn-sm" onclick="addPayUrlRow()" type="button">+ 수신자 추가</button>
+          </span>
+        </label>
+        <table id="payurl-table" style="margin-top:6px;">
+          <thead><tr>
+            <th style="width:130px;">휴대폰 번호</th>
+            <th style="width:160px;">발송 채널</th>
+            <th class="text-right" style="width:140px;">결제금액(원)</th>
+            <th class="text-center" style="width:40px;"></th>
+          </tr></thead>
+          <tbody id="payurl-tbody">
+            <tr>
+              <td><input type="text" value="010-2374-8449" placeholder="010-" style="width:100%;padding:5px;border:1px solid #d0d0d0;border-radius:4px;font-size:12px;font-family:monospace;"></td>
+              <td>
+                <label style="font-size:11px;margin-right:6px;"><input type="checkbox" checked> SMS</label>
+                <label style="font-size:11px;"><input type="checkbox"> 알림톡</label>
+              </td>
+              <td><input type="text" value="2,038,000" oninput="recalcPayUrlSum()" class="payurl-amount" style="width:100%;padding:5px;border:1px solid #d0d0d0;border-radius:4px;font-size:12px;font-family:monospace;text-align:right;font-weight:700;"></td>
+              <td class="text-center"><button class="btn btn-danger btn-sm" onclick="this.closest('tr').remove();recalcPayUrlSum()" type="button">×</button></td>
+            </tr>
+          </tbody>
+          <tfoot>
+            <tr style="background:#fafafa;font-weight:700;">
+              <td colspan="2" class="text-right">합계 <span id="payurl-count" style="font-weight:400;color:#888;font-size:11px;">(1건)</span></td>
+              <td class="text-right text-mono" id="payurl-sum" style="color:#1565c0;">2,038,000</td>
+              <td></td>
+            </tr>
+            <tr>
+              <td colspan="2" class="text-right" style="font-size:11px;color:#888;">결제 필요 금액 대비 차이</td>
+              <td class="text-right text-mono" id="payurl-diff" style="font-size:11px;color:#2e7d32;">0</td>
+              <td></td>
+            </tr>
+          </tfoot>
+        </table>
+        <div style="font-size:11px;color:#888;margin-top:6px;line-height:1.5;">
+          ※ 트립스토어는 예약자만 보관하므로 동행 여행자에게 발송하려면 운영자가 <b>휴대폰 번호와 분담 금액을 직접 입력</b>합니다.<br>
+          ※ 각 수신자는 별도 결제 토큰을 받으며, 본인 금액만 결제 가능.
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label>메시지 미리보기 (수신자별 금액 자동 치환)</label>
+        <div style="background:#fff8e1;border:1px solid #ffe0b2;border-radius:6px;padding:10px;font-size:12px;color:#5d4037;line-height:1.6;">
+          [트립스토어] 예약(26040708-4300101H) 결제 안내드립니다.<br>
+          ▶ 결제금액: <b>{금액}원</b><br>
+          ▶ 결제링크: https://trip.store/pay/{토큰}<br>
+          ▶ 만료: 2026-04-14 19:30
+        </div>
+      </div>
+
+      <!-- 발송 이력 -->
+      <div style="margin-top:16px;border-top:1px dashed #e0e0e0;padding-top:12px;">
+        <div style="font-size:11px;font-weight:600;color:#888;margin-bottom:6px;">발송 이력</div>
+        <div style="text-align:center;padding:12px;color:#bbb;font-size:11px;">발송 이력 없음</div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-outline" onclick="this.closest('.modal-overlay').classList.remove('show')">취소</button>
+      <button class="btn btn-primary" onclick="sendPayUrls()">결제 URL 일괄 발송</button>
+    </div>
+  </div>
+</div>
+
 <script>
+function recalcPayUrlSum(){
+  let sum=0,cnt=0;
+  document.querySelectorAll('#payurl-tbody .payurl-amount').forEach(i=>{
+    const v=parseInt(String(i.value).replace(/[^0-9]/g,''))||0;
+    sum+=v;cnt++;
+  });
+  document.getElementById('payurl-sum').textContent=sum.toLocaleString();
+  document.getElementById('payurl-count').textContent=`(${cnt}건)`;
+  const need=2038000;
+  const diff=sum-need;
+  const el=document.getElementById('payurl-diff');
+  el.textContent=(diff>=0?'+':'')+diff.toLocaleString();
+  el.style.color=diff===0?'#2e7d32':(diff>0?'#1565c0':'#d32f2f');
+}
+function addPayUrlRow(){
+  const tb=document.getElementById('payurl-tbody');
+  const tr=document.createElement('tr');
+  tr.innerHTML=`<td><input type="text" placeholder="010-" style="width:100%;padding:5px;border:1px solid #d0d0d0;border-radius:4px;font-size:12px;font-family:monospace;"></td>
+    <td><label style="font-size:11px;margin-right:6px;"><input type="checkbox" checked> SMS</label><label style="font-size:11px;"><input type="checkbox"> 알림톡</label></td>
+    <td><input type="text" value="0" oninput="recalcPayUrlSum()" class="payurl-amount" style="width:100%;padding:5px;border:1px solid #d0d0d0;border-radius:4px;font-size:12px;font-family:monospace;text-align:right;font-weight:700;"></td>
+    <td class="text-center"><button type="button" class="btn btn-danger btn-sm" onclick="this.closest('tr').remove();recalcPayUrlSum()">×</button></td>`;
+  tb.appendChild(tr);
+  recalcPayUrlSum();
+}
+function fillReserver(){
+  const tb=document.getElementById('payurl-tbody');
+  // 첫 행에 예약자 정보 채우기
+  const first=tb.querySelector('tr');
+  if(first){
+    const inputs=first.querySelectorAll('input[type="text"]');
+    inputs[0].value='010-2374-8449';
+    if(!first.querySelector('.payurl-amount').value || first.querySelector('.payurl-amount').value==='0')
+      first.querySelector('.payurl-amount').value='2,038,000';
+    recalcPayUrlSum();
+  }
+}
+function sendPayUrls(){
+  const rows=document.querySelectorAll('#payurl-tbody tr');
+  const list=[];
+  rows.forEach(tr=>{
+    const phone=tr.querySelector('input[type="text"]').value.trim();
+    const amount=tr.querySelector('.payurl-amount').value;
+    if(phone) list.push(`· ${phone} → ${amount}원`);
+  });
+  if(list.length===0){ alert('수신자가 없습니다'); return; }
+  alert(`결제 URL 발송 완료 (${list.length}건)\n\n${list.join('\n')}\n\n만료: 2026-04-14 19:30`);
+  document.getElementById('modal-payurl').classList.remove('show');
+}
 function switchTab(name) {
   document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
   document.querySelectorAll('.tab').forEach(el => el.classList.remove('active'));
@@ -1274,12 +2054,13 @@ const currentReservation = {
   arrival: '2026-06-09',
   pricePerPerson: 699000,
   travelers: 3,
-  discountPerPerson: 13000,  // 하나투어 특가 1인당 할인 (실제 적용 금액)
-  discountRate: 0.02,  // 하나투어 2% (행사이동 시 새 가격 기반 재계산용)
+  discountPerPerson: 13000,
+  discountRate: 0.02,
   discountName: '하나투어 2%',
   couponAmount: 20000,
   couponName: '상해 자유여행 20,000원 할인',
-  agency: '하나투어'
+  agency: '하나투어',
+  agencyRsvCode: 'HB2633517226'
 };
 
 // 행사 이동 이력
@@ -1422,31 +2203,285 @@ function formatDiff(val) {
   return (val > 0 ? '+' : '') + val.toLocaleString();
 }
 
+// ==================== 예약 복사 ====================
+function copyReservationInfo() {
+  // 화면에서 현재 값 읽기
+  const bookerName = document.querySelector('#tab-basic .section:nth-child(3) .info-value')?.textContent || '오기웅';
+  const rsvCode = document.querySelector('#tab-basic .section:nth-child(1) .info-row:nth-child(1) .info-value')?.textContent || '';
+
+  // 예약 기본 정보에서 트립 예약번호 찾기
+  let tripCode = '';
+  document.querySelectorAll('#tab-basic .section:nth-child(1) .info-row').forEach(row => {
+    const label = row.querySelector('.info-label');
+    if (label && label.textContent.includes('트립 예약번호')) {
+      tripCode = row.querySelector('.info-value')?.textContent?.trim() || '';
+    }
+  });
+
+  const eventCode = currentReservation.eventCode;
+  const eventName = currentReservation.eventName;
+
+  const text = `예약자명 : ${bookerName}\n예약번호 : ${tripCode}\n행사코드 : ${eventCode}\n상품명 : ${eventName}`;
+
+  navigator.clipboard.writeText(text).then(() => {
+    showToast('복사완료됨');
+  }).catch(() => {
+    // fallback
+    const ta = document.createElement('textarea');
+    ta.value = text;
+    document.body.appendChild(ta);
+    ta.select();
+    document.execCommand('copy');
+    document.body.removeChild(ta);
+    showToast('복사완료됨');
+  });
+}
+
+// ==================== 고객 "내 예약" 화면 ====================
+
+function toggleCustomerDevice(mode) {
+  const body = document.getElementById('customer-view-body');
+  const mobileBtn = document.getElementById('device-mobile');
+  const desktopBtn = document.getElementById('device-desktop');
+  if (mode === 'mobile') {
+    body.querySelector('div').style.maxWidth = '400px';
+    mobileBtn.style.background = '#e8e8e8';
+    desktopBtn.style.background = '';
+  } else {
+    body.querySelector('div').style.maxWidth = '600px';
+    desktopBtn.style.background = '#e8e8e8';
+    mobileBtn.style.background = '';
+  }
+}
+
+function updateCustomerView() {
+  const r = currentReservation;
+  const totalProduct = r.pricePerPerson * r.travelers;
+  const totalDiscount = r.discountPerPerson * r.travelers;
+  const totalPay = totalProduct - totalDiscount - r.couponAmount;
+
+  // 상품 정보
+  document.getElementById('cv-product-name').textContent = r.eventName;
+  document.getElementById('cv-dep-date').textContent = formatDateWithDay(r.departure);
+  document.getElementById('cv-arr-date').textContent = formatDateWithDay(r.arrival);
+
+  const d1 = new Date(r.departure), d2 = new Date(r.arrival);
+  const nights = Math.round((d2 - d1) / 86400000);
+  document.getElementById('cv-days').textContent = `${nights}박 ${nights+1}일`;
+
+  // 결제 정보
+  document.getElementById('cv-total-product').textContent = totalProduct.toLocaleString() + '원';
+  document.getElementById('cv-discount').textContent = '-' + totalDiscount.toLocaleString() + '원';
+  document.getElementById('cv-coupon').textContent = '-' + r.couponAmount.toLocaleString() + '원';
+  document.getElementById('cv-total-pay').textContent = totalPay.toLocaleString() + '원';
+
+  // 변경 알림 (이력이 있으면 표시)
+  if (eventMoveHistory.length > 0) {
+    const last = eventMoveHistory[eventMoveHistory.length - 1];
+    document.getElementById('cv-change-alert').style.display = 'block';
+    document.getElementById('cv-old-dep').textContent = last.fromDeparture;
+    document.getElementById('cv-new-dep').textContent = last.toDeparture;
+    document.getElementById('cv-old-price').textContent = last.fromPrice.toLocaleString() + '원';
+    document.getElementById('cv-new-price').textContent = last.toPrice.toLocaleString() + '원';
+    const pDiff = last.toPrice - last.fromPrice;
+    document.getElementById('cv-price-diff').textContent = `(${pDiff >= 0 ? '+' : ''}${pDiff.toLocaleString()})`;
+    document.getElementById('cv-price-diff').style.color = pDiff >= 0 ? '#d32f2f' : '#1565c0';
+    document.getElementById('cv-change-date').textContent = last.date.split(' ')[0];
+    document.getElementById('cv-change-reason').textContent = last.reason;
+
+    // 변경 이력
+    document.getElementById('cv-history-section').style.display = 'block';
+    document.getElementById('cv-history-list').innerHTML = eventMoveHistory.map((h, i) => `
+      <div style="padding:8px 0;${i > 0 ? 'border-top:1px solid #f0f0f0;' : ''}">
+        <div style="display:flex;align-items:center;gap:6px;">
+          <span style="background:#e8eaf6;color:#283593;font-size:9px;padding:1px 5px;border-radius:3px;font-weight:700;">${i+1}차</span>
+          <span style="font-size:11px;color:#888;">${h.date}</span>
+        </div>
+        <div style="margin-top:4px;font-size:11px;color:#555;">
+          출발일 ${h.fromDeparture} → <strong>${h.toDeparture}</strong>
+          <span style="color:${(h.toPrice - h.fromPrice) >= 0 ? '#d32f2f' : '#1565c0'};font-family:monospace;margin-left:4px;">
+            (1인 ${h.toPrice >= h.fromPrice ? '+' : ''}${(h.toPrice - h.fromPrice).toLocaleString()}원)
+          </span>
+        </div>
+        <div style="font-size:10px;color:#aaa;margin-top:2px;">사유: ${h.reason}</div>
+      </div>
+    `).join('');
+  } else {
+    document.getElementById('cv-change-alert').style.display = 'none';
+    document.getElementById('cv-history-section').style.display = 'none';
+  }
+}
+
+function formatDateWithDay(dateStr) {
+  const d = new Date(dateStr);
+  const days = ['일','월','화','수','목','금','토'];
+  return `${dateStr} (${days[d.getDay()]})`;
+}
+
+// 모달 열 때 최신 상태로 업데이트
+const customerModalEl = document.getElementById('modal-customer-view');
+if (customerModalEl) {
+  const observer = new MutationObserver((mutations) => {
+    mutations.forEach(m => {
+      if (m.target.classList.contains('show')) updateCustomerView();
+    });
+  });
+  observer.observe(customerModalEl, { attributes: true, attributeFilter: ['class'] });
+}
+
+// ==================== 쿠폰 처리 옵션 ====================
+let selectedCouponAction = 'keep';
+
+function selectCouponOption(action) {
+  selectedCouponAction = action;
+  const manualInput = document.getElementById('coupon-manual-amount');
+  manualInput.disabled = (action !== 'manual');
+  if (action === 'manual') manualInput.focus();
+
+  // 원장 쿠폰 항목 업데이트
+  const descEl = document.getElementById('ledger-coupon-desc');
+  const amountEl = document.getElementById('ledger-coupon-amount');
+  switch(action) {
+    case 'keep':
+      descEl.textContent = '쿠폰 — 유지 (조건 충족 시)';
+      amountEl.textContent = '0';
+      amountEl.style.color = '#888';
+      break;
+    case 'recalc':
+      descEl.textContent = '쿠폰 금액 재계산 (301)';
+      amountEl.textContent = '재계산';
+      amountEl.style.color = '#6a1b9a';
+      break;
+    case 'release':
+      descEl.textContent = '쿠폰 해제 · 원복 (302)';
+      amountEl.textContent = '+20,000';
+      amountEl.style.color = '#d32f2f';
+      break;
+    case 'manual':
+      descEl.textContent = '쿠폰 금액 수동 조정 (301)';
+      amountEl.textContent = '직접 입력';
+      amountEl.style.color = '#e65100';
+      break;
+  }
+}
+
+// ==================== 여행사 예약번호 옵션 ====================
+function toggleAgencyCodeInput(mode) {
+  const arrow = document.getElementById('agency-code-arrow');
+  const input = document.getElementById('new-agency-rsv-code');
+  if (mode === 'new') {
+    arrow.style.display = '';
+    input.style.display = '';
+    input.focus();
+  } else {
+    arrow.style.display = 'none';
+    input.style.display = 'none';
+    input.value = '';
+  }
+}
+
+// ==================== 행사 정보 수동 수정 ====================
+function executeManualEdit() {
+  const newCode = document.getElementById('manual-new-code').value.trim();
+  const newDep = document.getElementById('manual-new-dep').value;
+  const newArr = document.getElementById('manual-new-arr').value;
+  const reason = document.getElementById('manual-edit-reason').value;
+
+  if (!newCode && !newDep && !newArr) {
+    alert('변경할 항목을 하나 이상 입력하세요.');
+    return;
+  }
+
+  const changes = [];
+  if (newCode && newCode !== currentReservation.eventCode) {
+    document.getElementById('info-event-code').textContent = newCode;
+    changes.push(`행사코드: ${currentReservation.eventCode} → ${newCode}`);
+    currentReservation.eventCode = newCode;
+  }
+  if (newDep) {
+    changes.push(`출발일: ${currentReservation.departure} → ${newDep}`);
+    currentReservation.departure = newDep;
+    if (newArr) {
+      currentReservation.arrival = newArr;
+      document.getElementById('info-dep-arr').textContent = `${newDep} → ${newArr}`;
+      const d1 = new Date(newDep), d2 = new Date(newArr);
+      const nights = Math.round((d2 - d1) / 86400000);
+      document.getElementById('info-travel-days').textContent = `${nights}박${nights+1}일`;
+    } else {
+      document.getElementById('info-dep-arr').textContent = `${newDep} → ${currentReservation.arrival}`;
+    }
+  }
+
+  // 모달 닫기 & 초기화
+  document.getElementById('modal-manual-edit').classList.remove('show');
+  document.getElementById('manual-new-code').value = '';
+  document.getElementById('manual-new-dep').value = '';
+  document.getElementById('manual-new-arr').value = '';
+
+  showToast(`행사 정보 수동 수정 완료: ${changes.join(', ')}`);
+}
+
 function executeEventMove() {
   if (selectedEventIdx < 0) return;
 
   const newEvent = availableEvents[selectedEventIdx];
   const oldCode = currentReservation.eventCode;
   const oldDeparture = currentReservation.departure;
+  const oldArrival = currentReservation.arrival;
   const oldPrice = currentReservation.pricePerPerson;
+  const oldAgencyCode = currentReservation.agencyRsvCode;
+  const agencyOption = document.querySelector('input[name="agency-code-option"]:checked')?.value || 'keep';
+  const newAgencyCode = agencyOption === 'new' ? document.getElementById('new-agency-rsv-code').value.trim() : '';
+  const couponAction = selectedCouponAction;
+  const couponManualAmt = parseInt(document.getElementById('coupon-manual-amount').value) || 0;
 
   // 이력 추가
   eventMoveHistory.push({
     fromCode: oldCode,
     fromDeparture: oldDeparture,
+    fromArrival: oldArrival,
     fromPrice: oldPrice,
+    fromEventName: currentReservation.eventName,
+    fromAgencyRsvCode: oldAgencyCode,
     toCode: newEvent.code,
     toDeparture: newEvent.departure,
     toPrice: newEvent.price,
-    date: '2026-04-07 ' + new Date().toLocaleTimeString('ko-KR', {hour:'2-digit', minute:'2-digit'}),
+    toEventName: newEvent.name,
+    toAgencyRsvCode: agencyOption === 'keep' ? oldAgencyCode + ' (동일)' : (newAgencyCode || '(미입력)'),
+    couponAction: couponAction,
+    date: '2026-04-14 ' + new Date().toLocaleTimeString('ko-KR', {hour:'2-digit', minute:'2-digit'}),
     user: '김서현',
-    reason: document.querySelector('#modal-event select').value
+    reason: document.getElementById('move-reason')?.value || '출발일 변경',
+    memo: document.getElementById('move-memo')?.value || ''
+  });
+
+  // 여행사 예약번호 업데이트
+  if (agencyOption === 'new' && newAgencyCode) {
+    currentReservation.agencyRsvCode = newAgencyCode;
+  }
+  // 모달 내 현재 표시 업데이트
+  const codeDisplay = document.getElementById('current-agency-code-display');
+  if (codeDisplay) {
+    codeDisplay.innerHTML = `<span style="color:#888;font-size:10px;">현재:</span> <span class="text-mono" style="font-weight:600;">${currentReservation.agencyRsvCode}</span>`;
+  }
+
+  // 도착일 계산
+  const depDate = new Date(newEvent.departure);
+  const arrDate = new Date(depDate);
+  arrDate.setDate(arrDate.getDate() + 3);
+  const newArrival = arrDate.toISOString().split('T')[0];
+
+  // availableEvents에서 current 상태 갱신
+  availableEvents.forEach(e => {
+    if (e.code === oldCode) e.status = 'available';
+    if (e.code === newEvent.code) e.status = 'current';
   });
 
   // 현재 예약 정보 업데이트
   currentReservation.eventCode = newEvent.code;
   currentReservation.eventName = newEvent.name;
   currentReservation.departure = newEvent.departure;
+  currentReservation.arrival = newArrival;
   currentReservation.pricePerPerson = newEvent.price;
 
   // 화면 업데이트 - 여행 상품 정보
@@ -1464,25 +2499,36 @@ function executeEventMove() {
   // 모달 초기화
   resetEventModal();
 
+  // 고객 뷰 업데이트
+  updateCustomerView();
+
   // 성공 알림
-  showToast(`행사 이동 완료: ${oldCode} → ${newEvent.code}`);
+  const agencyNote = newAgencyCode ? ` | 여행사번호: ${newAgencyCode}` : '';
+  showToast(`행사 이동 완료: ${oldCode} → ${newEvent.code}${agencyNote}`);
 }
 
 function updateProductInfo(event) {
-  // 행사코드 업데이트
-  const infoRows = document.querySelectorAll('#tab-basic .section:nth-child(2) .info-value');
-  // 행사코드 찾아서 업데이트
-  document.querySelectorAll('#tab-basic .section:nth-child(2) .info-row').forEach(row => {
+  // ID 기반 업데이트
+  document.getElementById('info-event-code').textContent = event.code;
+  document.getElementById('info-event-name').textContent = event.name;
+
+  const dep = event.departure;
+  const arr = new Date(dep);
+  arr.setDate(arr.getDate() + 3);
+  const arrStr = arr.toISOString().split('T')[0];
+  document.getElementById('info-dep-arr').textContent = `${dep} → ${arrStr}`;
+
+  const d1 = new Date(dep), d2 = new Date(arrStr);
+  const nights = Math.round((d2 - d1) / 86400000);
+  document.getElementById('info-travel-days').textContent = `${nights}박${nights+1}일`;
+
+  // 기존 방식도 유지 (fallback)
+  document.querySelectorAll('#tab-basic .section:nth-child(3) .info-row').forEach(row => {
     const label = row.querySelector('.info-label');
     const value = row.querySelector('.info-value');
     if (!label || !value) return;
     if (label.textContent.includes('행사코드')) value.textContent = event.code;
-    if (label.textContent.includes('출도착일')) {
-      const dep = event.departure;
-      const arr = new Date(dep);
-      arr.setDate(arr.getDate() + 3);
-      value.textContent = `${dep} → ${arr.toISOString().split('T')[0]}`;
-    }
+    if (label.textContent.includes('출도착일')) value.textContent = `${dep} → ${arrStr}`;
   });
 
   // 금액 정보 업데이트
@@ -1522,22 +2568,47 @@ function renderEventHistory() {
   list.innerHTML = eventMoveHistory.map((h, i) => {
     const priceDiff = (h.toPrice - h.fromPrice) * currentReservation.travelers;
     const diffColor = priceDiff >= 0 ? '#d32f2f' : '#1565c0';
+    const couponLabel = {keep:'유지', recalc:'재계산', release:'해제(원복)', manual:'수동조정'}[h.couponAction] || '-';
     return `
-    <div style="padding:8px 0;${i > 0 ? 'border-top:1px dashed #ddd;margin-top:4px;' : ''}">
+    <div style="padding:10px 0;${i > 0 ? 'border-top:1px dashed #ddd;margin-top:6px;' : ''}">
       <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;">
         <span style="background:#e8eaf6;color:#283593;font-size:9px;padding:2px 6px;border-radius:3px;font-weight:700;flex-shrink:0;">${i+1}차</span>
-        <span style="font-family:monospace;font-size:11px;color:#888;">${h.fromCode}</span>
-        <span style="font-size:10px;color:#888;">${h.fromDeparture}</span>
-        <span style="color:#1565c0;font-weight:700;">→</span>
-        <span style="font-family:monospace;font-size:11px;font-weight:700;color:#333;">${h.toCode}</span>
-        <span style="font-size:10px;color:#333;">${h.toDeparture}</span>
+        <span style="font-size:10px;color:#aaa;">${h.date} · ${h.user}</span>
+        <span style="margin-left:auto;font-size:9px;background:#f5f5f5;padding:1px 5px;border-radius:3px;color:#888;">${h.reason}</span>
       </div>
-      <div style="display:flex;align-items:center;gap:12px;margin-top:4px;margin-left:36px;font-size:10px;">
-        <span style="color:${diffColor};font-weight:600;font-family:monospace;">${formatDiff(priceDiff)}원</span>
+      <!-- 상세 비교 -->
+      <div style="display:grid;grid-template-columns:1fr auto 1fr;gap:8px;margin-top:8px;margin-left:36px;font-size:11px;">
+        <!-- FROM -->
+        <div style="background:#ffebee;border-radius:6px;padding:8px 10px;border:1px solid #ffcdd2;">
+          <div style="font-size:9px;color:#c62828;font-weight:700;margin-bottom:4px;">이전</div>
+          <div style="font-family:monospace;font-weight:600;font-size:11px;">${h.fromCode}</div>
+          <div style="color:#888;font-size:10px;margin-top:2px;">${h.fromEventName || ''}</div>
+          <div style="display:flex;justify-content:space-between;margin-top:4px;font-size:10px;">
+            <span>출발: ${h.fromDeparture}</span>
+            <span style="font-family:monospace;font-weight:600;">${h.fromPrice.toLocaleString()}원</span>
+          </div>
+          <div style="font-size:10px;color:#888;margin-top:2px;">여행사번호: ${h.fromAgencyRsvCode || '-'}</div>
+        </div>
+        <!-- ARROW -->
+        <div style="display:flex;align-items:center;color:#1565c0;font-weight:700;font-size:16px;">→</div>
+        <!-- TO -->
+        <div style="background:#e8f5e9;border-radius:6px;padding:8px 10px;border:1px solid #c8e6c9;">
+          <div style="font-size:9px;color:#2e7d32;font-weight:700;margin-bottom:4px;">변경</div>
+          <div style="font-family:monospace;font-weight:600;font-size:11px;">${h.toCode}</div>
+          <div style="color:#888;font-size:10px;margin-top:2px;">${h.toEventName || ''}</div>
+          <div style="display:flex;justify-content:space-between;margin-top:4px;font-size:10px;">
+            <span>출발: ${h.toDeparture}</span>
+            <span style="font-family:monospace;font-weight:600;">${h.toPrice.toLocaleString()}원</span>
+          </div>
+          <div style="font-size:10px;color:#888;margin-top:2px;">여행사번호: ${h.toAgencyRsvCode || '-'}</div>
+        </div>
+      </div>
+      <!-- 금액 요약 -->
+      <div style="display:flex;align-items:center;gap:12px;margin-top:6px;margin-left:36px;font-size:10px;">
+        <span style="color:${diffColor};font-weight:600;font-family:monospace;">총 차액: ${formatDiff(priceDiff)}원 (${currentReservation.travelers}명)</span>
         <span style="color:#aaa;">|</span>
-        <span style="color:#888;">사유: ${h.reason}</span>
-        <span style="color:#aaa;">|</span>
-        <span style="color:#aaa;">${h.date} · ${h.user}</span>
+        <span style="color:#6a1b9a;">쿠폰: ${couponLabel}</span>
+        ${h.memo ? `<span style="color:#aaa;">|</span><span style="color:#888;">메모: ${h.memo}</span>` : ''}
       </div>
     </div>`;
   }).join('');
@@ -1550,6 +2621,22 @@ function resetEventModal() {
   document.getElementById('btn-event-move').disabled = true;
   document.getElementById('btn-event-move').style.opacity = '0.5';
   selectedEventIdx = -1;
+
+  // 여행사 예약번호 초기화
+  document.getElementById('new-agency-rsv-code').value = '';
+  document.getElementById('new-agency-rsv-code').style.display = 'none';
+  document.getElementById('agency-code-arrow').style.display = 'none';
+  const keepRadio = document.querySelector('input[name="agency-code-option"][value="keep"]');
+  if (keepRadio) keepRadio.checked = true;
+  // 쿠폰 옵션 초기화
+  selectedCouponAction = 'keep';
+  document.querySelector('input[name="coupon-action"][value="keep"]').checked = true;
+  document.getElementById('coupon-manual-amount').value = '';
+  document.getElementById('coupon-manual-amount').disabled = true;
+  // 내 예약 미리보기 접기
+  document.getElementById('customer-preview').style.display = 'none';
+  // 메모 초기화
+  document.getElementById('move-memo').value = '';
 
   // 현재 행사 정보 업데이트
   const currentEventInput = document.querySelector('#modal-event .form-group:first-of-type div[style*="background:#f5f5f5"]');
