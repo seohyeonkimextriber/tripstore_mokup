@@ -529,6 +529,35 @@ tr:hover .cov-td-prod { background: #fafafa; }
 .rule-tag { display: inline-flex; align-items: center; gap: 3px; font-size: 11px; font-weight: 600; padding: 2px 8px; border-radius: 6px; background: #f0f5ff; color: #2f54eb; border: 1px solid #adc6ff; white-space: nowrap; }
 .v4-adv-row { display: flex; align-items: center; gap: 8px; margin-bottom: 10px; padding: 10px 14px; background: #fafafa; border: 1px solid #f0f0f0; border-radius: 8px; }
 .v4-adv-label { font-size: 12px; color: rgba(0,0,0,0.55); width: 72px; flex-shrink: 0; font-weight: 500; }
+/* --- v4 개선: 자연어 요약, 매칭 그룹, 카테고리 추천, AI --- */
+.v4-rule-summary { font-size: 13px; color: rgba(0,0,0,0.75); line-height: 1.8; padding: 14px 18px; background: #f0f7ff; border-radius: 10px; border: 1px solid #d3e8ff; margin-bottom: 12px; }
+.v4-rule-summary strong { color: #1677ff; font-weight: 700; }
+.v4-rule-detail-toggle { font-size: 11px; color: rgba(0,0,0,0.3); cursor: pointer; margin-top: 8px; user-select: none; display: inline-flex; align-items: center; gap: 4px; }
+.v4-rule-detail-toggle:hover { color: #1677ff; }
+.v4-match-group { margin-bottom: 6px; }
+.v4-match-group-header { font-size: 11px; font-weight: 700; color: rgba(0,0,0,0.55); padding: 5px 0 3px; display: flex; align-items: center; gap: 5px; }
+.v4-match-expand-btn { font-size: 11px; color: #1677ff; cursor: pointer; padding: 6px 0; text-align: center; font-weight: 600; border: none; background: none; width: 100%; }
+.v4-match-expand-btn:hover { text-decoration: underline; }
+.v4-match-warning { background: #fffbe6; border: 1px solid #ffe58f; border-radius: 10px; padding: 20px 18px; margin-bottom: 16px; text-align: center; }
+.v4-chip.recommended { border-color: #faad14; background: #fffbe6; }
+.v4-chip.recommended::after { content: ' \2605'; font-size: 10px; color: #faad14; }
+.v4-chip.recommended.on { border-color: #1677ff; background: #e6f4ff; }
+.v4-chip.recommended.on::after { color: #1677ff; }
+.v4-ai-row { display: flex; align-items: center; gap: 10px; margin-bottom: 16px; }
+#view-create-v4 .btn-ai { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: #fff; border: none; border-radius: 8px; padding: 9px 18px; font-size: 13px; font-weight: 600; cursor: pointer; font-family: inherit; transition: all 0.2s; display: inline-flex; align-items: center; gap: 6px; height: auto; letter-spacing: 0; }
+#view-create-v4 .btn-ai:hover { opacity: 0.9; transform: translateY(-1px); box-shadow: 0 4px 12px rgba(102,126,234,0.3); background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border-color: transparent; }
+#view-create-v4 .btn-ai:disabled { opacity: 0.5; cursor: not-allowed; transform: none; box-shadow: none; }
+@keyframes v4-spin { to { transform: rotate(360deg); } }
+.btn-ai.loading .ai-icon { display: inline-block; animation: v4-spin 1s linear infinite; }
+.v4-ai-hint { font-size: 11px; color: rgba(0,0,0,0.35); }
+.v4-bulk-progress { display: flex; align-items: center; gap: 10px; margin-bottom: 14px; padding: 0 2px; }
+.v4-bulk-progress-bar { flex: 1; height: 6px; background: #f0f0f0; border-radius: 3px; overflow: hidden; }
+.v4-bulk-progress-fill { height: 100%; border-radius: 3px; transition: width 0.3s; }
+.v4-bulk-progress-text { font-size: 12px; font-weight: 600; color: rgba(0,0,0,0.55); white-space: nowrap; }
+.v4-status-badge { display: inline-flex; align-items: center; gap: 4px; padding: 2px 10px; border-radius: 10px; font-weight: 600; }
+.v4-status-badge.st-pending { background: #fffbe6; color: #ad6800; border: 1px solid #ffe58f; }
+.v4-status-badge.st-active { background: #f6ffed; color: #389e0d; border: 1px solid #b7eb8f; }
+.v4-status-badge.st-stopped { background: #fff1f0; color: #cf1322; border: 1px solid #ffa39e; }
 .v4-adv-op { font-size: 11px; color: rgba(0,0,0,0.35); background: #f0f0f0; border-radius: 4px; padding: 2px 6px; flex-shrink: 0; }
 </style>
 </head>
@@ -590,15 +619,10 @@ tr:hover .cov-td-prod { background: #fafafa; }
           <div class="mega-col">
             <div class="mega-col-title" style="display:flex;align-items:center;gap:6px;">게시판 <span class="new-badge">NEW</span></div>
             <span class="mega-col-item active" onclick="event.stopPropagation();showView('list')">게시판 관리</span>
-            <span class="mega-col-item" onclick="event.stopPropagation();showView('create')" style="color:rgba(0,0,0,0.55);">POST 등록 (현행)</span>
-            <span class="mega-col-item" onclick="event.stopPropagation();showView('create-v2')" style="color:#722ed1;">POST 등록 v2 — 카테고리 중심</span>
-            <span class="mega-col-item" onclick="event.stopPropagation();showView('create-v3')" style="color:#389e0d;">POST 등록 v3 — 타겟+범위</span>
-            <span class="mega-col-item" onclick="event.stopPropagation();showView('create-v4')" style="color:#d46b08;font-weight:700;">POST 등록 v4 ✦ 규칙기반 <span class="new-badge" style="background:#d46b08;">NEW</span></span>
+            <span class="mega-col-item" onclick="event.stopPropagation();showView('create-v4')" style="color:#1677ff;font-weight:700;">POST 등록</span>
             <div style="height:1px;background:#f0f0f0;margin:6px 0;"></div>
-            <span class="mega-col-item" onclick="event.stopPropagation();showView('coverage')" style="color:#d46b08;font-weight:600;">📊 콘텐츠 커버리지 <span class="new-badge" style="background:#d46b08;">OPS</span></span>
-            <span class="mega-col-item" onclick="event.stopPropagation();showView('impact')" style="color:#d46b08;">🔗 POST 영향 범위</span>
-            <span class="mega-col-item" onclick="event.stopPropagation();showView('batch')" style="color:#d46b08;">⚡ 배치 업데이트</span>
-            <span class="mega-col-item" onclick="event.stopPropagation();showView('tree')" style="color:#d46b08;">🌳 콘텐츠 상속 트리</span>
+            <!-- 커버리지 매트릭스 메뉴 제거 -->
+            <span class="mega-col-item" onclick="event.stopPropagation();showView('impact')" style="color:#1677ff;font-weight:600;">POST 관리</span>
           </div>
         </div>
         <!-- 하단 이미지/파일 -->
@@ -643,44 +667,15 @@ tr:hover .cov-td-prod { background: #fafafa; }
     </div>
     <div class="page-header">
       <div class="page-title">게시판 관리</div>
-      <button class="btn btn-primary" onclick="showView('create')">+ 등록하기</button>
+      <button class="btn btn-primary" onclick="showView('create-v4')">+ 등록하기</button>
     </div>
 
-    <!-- 요약 카드 -->
-    <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:20px;">
-      <div class="card" style="padding:16px;">
-        <div style="font-size:12px;color:rgba(0,0,0,0.45);font-weight:600;margin-bottom:4px;">전체 POST</div>
-        <div style="font-size:28px;font-weight:700;color:rgba(0,0,0,0.88);">2,835</div>
-        <div style="font-size:11px;color:rgba(0,0,0,0.45);margin-top:4px;">오늘 +3건 · 이번주 +24건</div>
-      </div>
-      <div class="card" style="padding:16px;">
-        <div style="font-size:12px;color:#1677ff;font-weight:600;margin-bottom:4px;">카탈로그</div>
-        <div style="font-size:28px;font-weight:700;color:#1677ff;">2,430</div>
-        <div style="font-size:11px;color:rgba(0,0,0,0.45);margin-top:4px;">숙소·항공사·여행지 등 공용 콘텐츠</div>
-      </div>
-      <div class="card" style="padding:16px;">
-        <div style="font-size:12px;color:#2f54eb;font-weight:600;margin-bottom:4px;">공급사</div>
-        <div style="font-size:28px;font-weight:700;color:#2f54eb;">85</div>
-        <div style="font-size:11px;color:rgba(0,0,0,0.45);margin-top:4px;">공급사별 sub_key 조합 콘텐츠</div>
-      </div>
-      <div class="card" style="padding:16px;">
-        <div style="font-size:12px;color:#d48806;font-weight:600;margin-bottom:4px;">상품단위</div>
-        <div style="font-size:28px;font-weight:700;color:#d48806;">320</div>
-        <div style="font-size:11px;color:rgba(0,0,0,0.45);margin-top:4px;">PB 상품 전용 POST</div>
-      </div>
+    <div style="display:flex;align-items:center;gap:8px;padding:8px 14px;margin-bottom:10px;background:#f0f7ff;border:1px solid #d3e8ff;border-radius:6px;font-size:11px;color:#0958d9;">
+      <span>📌</span> POST는 <strong>상품코드 단위</strong>로 관리됩니다. 같은 상품코드의 행사는 동일한 POST를 공유합니다.
     </div>
-
     <div class="card">
-      <!-- 게시판 타입 탭 -->
-      <div style="display:flex;gap:0;border-bottom:1px solid #f0f0f0;margin-bottom:0;" id="board-tabs">
-        <button id="btab-all"      onclick="switchBoardTab('all')"      style="padding:10px 22px;border:none;border-bottom:2px solid #1677ff;color:#1677ff;font-weight:600;background:transparent;cursor:pointer;font-family:inherit;font-size:13px;">전체 <span style="font-size:11px;color:rgba(0,0,0,0.35);font-weight:400;margin-left:3px;">2,835</span></button>
-        <button id="btab-catalog"  onclick="switchBoardTab('catalog')"  style="padding:10px 22px;border:none;border-bottom:2px solid transparent;color:rgba(0,0,0,0.55);font-weight:400;background:transparent;cursor:pointer;font-family:inherit;font-size:13px;">카탈로그 <span style="font-size:11px;color:rgba(0,0,0,0.35);font-weight:400;margin-left:3px;">2,430</span></button>
-        <button id="btab-supplier" onclick="switchBoardTab('supplier')" style="padding:10px 22px;border:none;border-bottom:2px solid transparent;color:rgba(0,0,0,0.55);font-weight:400;background:transparent;cursor:pointer;font-family:inherit;font-size:13px;">공급사 <span style="font-size:11px;color:rgba(0,0,0,0.35);font-weight:400;margin-left:3px;">85</span></button>
-        <button id="btab-product"  onclick="switchBoardTab('product')"  style="padding:10px 22px;border:none;border-bottom:2px solid transparent;color:rgba(0,0,0,0.55);font-weight:400;background:transparent;cursor:pointer;font-family:inherit;font-size:13px;">상품단위 <span style="font-size:11px;color:rgba(0,0,0,0.35);font-weight:400;margin-left:3px;">320</span></button>
-      </div>
-
-      <!-- 카탈로그 필터 -->
-      <div id="bfilter-catalog" class="filter-bar" style="display:none;">
+      <!-- 통합 필터 -->
+      <div class="filter-bar" id="bfilter-all">
         <input class="fi fi-sm" type="text" placeholder="ID">
         <select class="fi fi-md">
           <option value="">카테고리</option>
@@ -689,78 +684,18 @@ tr:hover .cov-td-prod { background: #fafafa; }
           <option>자주 묻는 질문</option><option>취소환불규정</option>
           <option>안내사항</option><option>출발 전 안내</option><option>수하물 규정</option>
         </select>
-        <select class="fi fi-md" id="lf-type" onchange="syncListTargetId()">
+        <select class="fi fi-md">
           <option value="">타겟유형</option>
           <option>공통</option><option>항공사</option><option>공항</option>
           <option>숙소</option><option>객실</option><option>국가</option>
           <option>여행지</option><option>스팟/체험</option><option>식사</option>
-        </select>
-        <select class="fi fi-md" id="lf-target"><option value="">타겟ID</option></select>
-        <input class="fi fi-lg" type="text" placeholder="관리명 검색">
-        <div class="filter-actions">
-          <button class="btn btn-primary btn-sm">검색</button>
-          <button class="btn btn-default btn-sm">초기화</button>
-        </div>
-      </div>
-
-      <!-- 공급사 필터 -->
-      <div id="bfilter-supplier" class="filter-bar" style="display:none;">
-        <input class="fi fi-sm" type="text" placeholder="ID">
-        <select class="fi fi-md">
-          <option value="">공급사</option>
-          <option>피크타임</option><option>TMG</option><option>써니투어</option><option>직계약</option>
+          <option>공급사</option>
         </select>
         <select class="fi fi-md">
-          <option value="">카테고리</option>
-          <option>소개</option><option>핵심포인트</option><option>스페셜 혜택</option>
-          <option>포함사항</option><option>불포함사항</option><option>유의사항</option>
-          <option>자주 묻는 질문</option><option>취소환불규정</option>
-          <option>안내사항</option><option>출발 전 안내</option><option>수하물 규정</option>
+          <option value="">상태</option>
+          <option>🟢 운영중</option><option>⏳ 대기</option><option>🔴 중단</option>
         </select>
-        <select class="fi fi-md">
-          <option value="">적용 범위</option>
-          <option>전체 공통</option><option>항공사별</option><option>숙소별</option>
-          <option>객실별</option><option>식사별</option><option>스팟/체험별</option><option>여행지별</option>
-        </select>
-        <input class="fi fi-lg" type="text" placeholder="관리명 검색">
-        <div class="filter-actions">
-          <button class="btn btn-primary btn-sm">검색</button>
-          <button class="btn btn-default btn-sm">초기화</button>
-        </div>
-      </div>
-
-      <!-- 상품단위 필터 -->
-      <div id="bfilter-product" class="filter-bar" style="display:none;">
-        <input class="fi fi-sm" type="text" placeholder="ID">
-        <input class="fi fi-sm" type="text" placeholder="상품 ID">
-        <select class="fi fi-md">
-          <option value="">카테고리</option>
-          <option>소개</option><option>핵심포인트</option><option>스페셜 혜택</option>
-          <option>포함사항</option><option>불포함사항</option><option>유의사항</option>
-          <option>자주 묻는 질문</option><option>취소환불규정</option>
-        </select>
-        <input class="fi fi-lg" type="text" placeholder="관리명 검색">
-        <div class="filter-actions">
-          <button class="btn btn-primary btn-sm">검색</button>
-          <button class="btn btn-default btn-sm">초기화</button>
-        </div>
-      </div>
-
-      <!-- 전체 필터 -->
-      <div id="bfilter-all" class="filter-bar">
-        <input class="fi fi-sm" type="text" placeholder="ID">
-        <select class="fi fi-md">
-          <option value="">게시판</option>
-          <option>카탈로그</option><option>공급사</option><option>상품단위</option>
-        </select>
-        <select class="fi fi-md">
-          <option value="">카테고리</option>
-          <option>소개</option><option>핵심포인트</option><option>스페셜 혜택</option>
-          <option>포함사항</option><option>불포함사항</option><option>유의사항</option>
-          <option>자주 묻는 질문</option><option>취소환불규정</option>
-          <option>안내사항</option><option>출발 전 안내</option><option>수하물 규정</option>
-        </select>
-        <input class="fi fi-lg" type="text" placeholder="관리명 검색">
+        <input class="fi fi-lg" type="text" placeholder="관리명 · 타겟 정보 검색">
         <div class="filter-actions">
           <button class="btn btn-primary btn-sm">검색</button>
           <button class="btn btn-default btn-sm">초기화</button>
@@ -772,12 +707,11 @@ tr:hover .cov-td-prod { background: #fafafa; }
           <thead>
             <tr>
               <th class="col-id">ID</th>
-              <th style="width:80px;">게시판</th>
               <th class="col-cat">카테고리</th>
               <th class="col-name">관리명</th>
-              <th class="col-type" id="bth-target-type">타겟유형</th>
-              <th class="col-target" id="bth-target-id">타겟ID</th>
-              <th class="col-stock" title="연결된 상품권 수">연결</th>
+              <th style="width:200px;">규칙 조건</th>
+              <th style="width:70px;text-align:center;">상태</th>
+              <th style="width:80px;text-align:center;">연결 행사</th>
               <th class="col-date">수정일시 ↓</th>
               <th class="col-action">액션</th>
             </tr>
@@ -785,57 +719,116 @@ tr:hover .cov-td-prod { background: #fafafa; }
           <tbody id="board-table-body">
             <tr>
               <td>2620</td>
-              <td><span class="tag" style="background:#eef2ff;color:#2f54eb;border:1px solid #adc6ff;font-size:11px;">공급사</span></td>
               <td><span class="tag tag-purple">스페셜 혜택</span></td>
-              <td>피크타임_H45_M2_스페셜혜택</td>
-              <td><span style="font-size:12px;color:rgba(0,0,0,0.45);">피크타임</span></td>
-              <td><span style="font-size:12px;">솔바이멜리아 · <span style="color:#52c41a;">BB</span></span></td>
+              <td style="max-width:220px;">
+                <div style="font-weight:600;color:rgba(0,0,0,0.85);margin-bottom:2px;">얼리체크인 특전</div>
+                <div style="font-size:11px;color:rgba(0,0,0,0.4);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">트립스토어_솔바이멜리아_BB_스페셜혜택_얼리체크인 특전</div>
+              </td>
+              <td>
+                <div style="display:flex;flex-wrap:wrap;gap:3px;margin-bottom:4px;">
+                  <span class="rule-tag" style="font-size:10px;padding:1px 6px;">🏢 트립스토어</span>
+                  <span class="rule-tag" style="font-size:10px;padding:1px 6px;">🏨 솔바이멜리아</span>
+                  <span class="rule-tag" style="font-size:10px;padding:1px 6px;">🍽️ BB</span>
+                </div>
+                <div style="font-size:11px;color:rgba(0,0,0,0.45);line-height:1.5;"><strong style="color:rgba(0,0,0,0.55);">트립스토어</strong>의 <strong style="color:rgba(0,0,0,0.55);">솔 바이 멜리아</strong> · <strong style="color:rgba(0,0,0,0.55);">BB(조식)</strong> 상품에 적용</div>
+              </td>
+              <td style="text-align:center;"><span class="v4-status-badge st-active" style="font-size:10px;padding:1px 8px;">운영중</span></td>
               <td style="text-align:center;"><span class="stock-num">4</span></td>
               <td style="color:rgba(0,0,0,0.4);font-size:12px;">2026-04-01 09:30</td>
               <td style="text-align:center;"><button class="btn btn-text btn-sm" onclick="showView('create')">수정</button><button class="btn btn-text btn-sm">복제</button></td>
             </tr>
             <tr>
               <td>2617</td>
-              <td><span class="tag" style="background:#fffbe6;color:#d48806;border:1px solid #ffe58f;font-size:11px;">상품단위</span></td>
               <td><span class="tag tag-purple">포함사항</span></td>
-              <td>숙박권#456_R158_M2_포함사항</td>
-              <td><span style="font-size:12px;color:rgba(0,0,0,0.45);">숙박권 #456</span></td>
-              <td><span style="font-size:12px;">엑스트라 솔 스위트 · <span style="color:#52c41a;">BB</span></span></td>
+              <td style="max-width:220px;">
+                <div style="font-weight:600;color:rgba(0,0,0,0.85);margin-bottom:2px;">객실 포함 안내</div>
+                <div style="font-size:11px;color:rgba(0,0,0,0.4);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">트립스토어_윙크호텔_슈페리어_HB_포함사항_객실 포함 안내</div>
+              </td>
+              <td>
+                <div style="display:flex;flex-wrap:wrap;gap:3px;margin-bottom:4px;">
+                  <span class="rule-tag" style="font-size:10px;padding:1px 6px;">🏢 트립스토어</span>
+                  <span class="rule-tag" style="font-size:10px;padding:1px 6px;">🏨 윙크호텔</span>
+                  <span class="rule-tag" style="font-size:10px;padding:1px 6px;">🛏️ 슈페리어</span>
+                  <span class="rule-tag" style="font-size:10px;padding:1px 6px;">🍽️ HB</span>
+                </div>
+                <div style="font-size:11px;color:rgba(0,0,0,0.45);line-height:1.5;"><strong style="color:rgba(0,0,0,0.55);">트립스토어</strong>의 <strong style="color:rgba(0,0,0,0.55);">윙크호텔</strong> · <strong style="color:rgba(0,0,0,0.55);">슈페리어</strong> 객실 · <strong style="color:rgba(0,0,0,0.55);">HB(조+석식)</strong> 상품에 적용</div>
+              </td>
+              <td style="text-align:center;"><span class="v4-status-badge st-active" style="font-size:10px;padding:1px 8px;">운영중</span></td>
               <td style="text-align:center;"><span class="stock-num">1</span></td>
               <td style="color:rgba(0,0,0,0.4);font-size:12px;">2026-03-31 17:20</td>
               <td style="text-align:center;"><button class="btn btn-text btn-sm" onclick="showView('create')">수정</button><button class="btn btn-text btn-sm">복제</button></td>
             </tr>
             <tr>
               <td>2516</td>
-              <td><span class="tag" style="background:#e6f4ff;color:#1677ff;border:1px solid #91caff;font-size:11px;">카탈로그</span></td>
               <td><span class="tag tag-purple">스페셜 혜택</span></td>
-              <td>푸꾸옥_숙소_스페셜혜택_씨셀스 푸꾸옥</td>
-              <td><span class="tag tag-blue">숙소</span></td>
-              <td style="text-align:center;">220</td>
-              <td style="text-align:center;"><span class="stock-num">3</span></td>
+              <td style="max-width:220px;">
+                <div style="font-weight:600;color:rgba(0,0,0,0.85);margin-bottom:2px;">프라이빗 풀빌라 혜택</div>
+                <div style="font-size:11px;color:rgba(0,0,0,0.4);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">고헤드투어_래디슨블루_스페셜혜택_프라이빗 풀빌라 혜택</div>
+              </td>
+              <td>
+                <div style="display:flex;flex-wrap:wrap;gap:3px;margin-bottom:4px;">
+                  <span class="rule-tag" style="font-size:10px;padding:1px 6px;">🏢 고헤드투어</span>
+                  <span class="rule-tag" style="font-size:10px;padding:1px 6px;">🏨 래디슨블루</span>
+                </div>
+                <div style="font-size:11px;color:rgba(0,0,0,0.45);line-height:1.5;"><strong style="color:rgba(0,0,0,0.55);">고헤드투어</strong>의 <strong style="color:rgba(0,0,0,0.55);">래디슨 블루</strong> 숙소 상품에 적용</div>
+              </td>
+              <td style="text-align:center;"><span class="v4-status-badge st-pending" style="font-size:10px;padding:1px 8px;">대기</span></td>
+              <td style="text-align:center;"><span style="font-size:11px;color:rgba(0,0,0,0.25);">—</span></td>
               <td style="color:rgba(0,0,0,0.4);font-size:12px;">2026-02-13 15:46</td>
               <td style="text-align:center;"><button class="btn btn-text btn-sm" onclick="showView('create')">수정</button><button class="btn btn-text btn-sm">복제</button></td>
             </tr>
             <tr>
               <td>2515</td>
-              <td><span class="tag" style="background:#e6f4ff;color:#1677ff;border:1px solid #91caff;font-size:11px;">카탈로그</span></td>
               <td><span class="tag tag-gray">유의사항</span></td>
-              <td>객실_유의사항_소나가비치 리조트_3베드룸</td>
-              <td><span class="tag tag-green">객실</span></td>
-              <td style="text-align:center;">871</td>
-              <td style="text-align:center;"><span class="stock-num">1</span></td>
+              <td style="max-width:220px;">
+                <div style="font-weight:600;color:rgba(0,0,0,0.85);margin-bottom:2px;">체크인 안내</div>
+                <div style="font-size:11px;color:rgba(0,0,0,0.4);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">다낭_유의사항_체크인 안내</div>
+              </td>
+              <td>
+                <div style="display:flex;flex-wrap:wrap;gap:3px;margin-bottom:4px;">
+                  <span class="rule-tag" style="font-size:10px;padding:1px 6px;">📍 다낭</span>
+                </div>
+                <div style="font-size:11px;color:rgba(0,0,0,0.45);line-height:1.5;">여행지가 <strong style="color:rgba(0,0,0,0.55);">다낭</strong>인 모든 상품에 적용</div>
+              </td>
+              <td style="text-align:center;"><span class="v4-status-badge st-active" style="font-size:10px;padding:1px 8px;">운영중</span></td>
+              <td style="text-align:center;"><span class="stock-num">5</span></td>
               <td style="color:rgba(0,0,0,0.4);font-size:12px;">2026-02-13 13:07</td>
               <td style="text-align:center;"><button class="btn btn-text btn-sm" onclick="showView('create')">수정</button><button class="btn btn-text btn-sm">복제</button></td>
             </tr>
             <tr>
               <td>577</td>
-              <td><span class="tag" style="background:#e6f4ff;color:#1677ff;border:1px solid #91caff;font-size:11px;">카탈로그</span></td>
               <td><span class="tag tag-orange">수하물 규정</span></td>
-              <td>항공_수하물규정_푸꾸옥_대한항공(KE)_일반석</td>
-              <td><span class="tag tag-orange">항공사</span></td>
-              <td style="text-align:center;">3</td>
-              <td style="text-align:center;"><span class="stock-num">8</span></td>
+              <td style="max-width:220px;">
+                <div style="font-weight:600;color:rgba(0,0,0,0.85);margin-bottom:2px;">일반석 위탁수하물 안내</div>
+                <div style="font-size:11px;color:rgba(0,0,0,0.4);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">비엣젯항공_수하물규정_일반석 위탁수하물 안내</div>
+              </td>
+              <td>
+                <div style="display:flex;flex-wrap:wrap;gap:3px;margin-bottom:4px;">
+                  <span class="rule-tag" style="font-size:10px;padding:1px 6px;">✈️ 비엣젯항공</span>
+                </div>
+                <div style="font-size:11px;color:rgba(0,0,0,0.45);line-height:1.5;">항공사가 <strong style="color:rgba(0,0,0,0.55);">비엣젯항공</strong>인 상품에 적용</div>
+              </td>
+              <td style="text-align:center;"><span class="v4-status-badge st-stopped" style="font-size:10px;padding:1px 8px;">중단</span></td>
+              <td style="text-align:center;"><span style="font-size:11px;color:#cf1322;text-decoration:line-through;">8</span></td>
               <td style="color:rgba(0,0,0,0.4);font-size:12px;">2024-12-12 13:52</td>
+              <td style="text-align:center;"><button class="btn btn-text btn-sm" onclick="showView('create')">수정</button><button class="btn btn-text btn-sm">복제</button></td>
+            </tr>
+            <tr>
+              <td>2621</td>
+              <td><span class="tag tag-gray">취소환불규정</span></td>
+              <td style="max-width:220px;">
+                <div style="font-weight:600;color:rgba(0,0,0,0.85);margin-bottom:2px;">전체 취소/환불 규정</div>
+                <div style="font-size:11px;color:rgba(0,0,0,0.4);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">공통_취소환불규정_전체 취소/환불 규정</div>
+              </td>
+              <td>
+                <div style="display:flex;flex-wrap:wrap;gap:3px;margin-bottom:4px;">
+                  <span class="rule-tag" style="font-size:10px;padding:1px 6px;background:#f5f5f5;color:rgba(0,0,0,0.45);border-color:#d9d9d9;">🌐 전체 공통</span>
+                </div>
+                <div style="font-size:11px;color:rgba(0,0,0,0.45);line-height:1.5;">조건 없음 — <strong style="color:rgba(0,0,0,0.55);">모든 상품</strong>에 적용</div>
+              </td>
+              <td style="text-align:center;"><span class="v4-status-badge st-active" style="font-size:10px;padding:1px 8px;">운영중</span></td>
+              <td style="text-align:center;"><span class="stock-num">12</span></td>
+              <td style="color:rgba(0,0,0,0.4);font-size:12px;">2026-04-10 11:00</td>
               <td style="text-align:center;"><button class="btn btn-text btn-sm" onclick="showView('create')">수정</button><button class="btn btn-text btn-sm">복제</button></td>
             </tr>
           </tbody>
@@ -868,7 +861,7 @@ tr:hover .cov-td-prod { background: #fafafa; }
     </div>
     <div class="page-header">
       <div class="page-title" style="color:#2f54eb;">공급사 게시판 관리</div>
-      <button class="btn btn-primary" onclick="showView('create')">+ 등록하기</button>
+      <button class="btn btn-primary" onclick="showView('create-v4')">+ 등록하기</button>
     </div>
     <!-- 공급사 선택 카드 -->
     <div class="card" style="margin-bottom:16px;padding:16px 20px;">
@@ -5644,7 +5637,7 @@ flowchart LR
     <div class="breadcrumb">
       <span onclick="showView('list')">카탈로그 관리</span>
       <span class="breadcrumb-sep">›</span><span>게시판</span>
-      <span class="breadcrumb-sep">›</span><span style="color:#d46b08;font-weight:600;">POST 등록 v4</span>
+      <span class="breadcrumb-sep">›</span><span style="color:rgba(0,0,0,0.88);font-weight:600;">POST 등록</span>
     </div>
     <div class="page-header">
       <div>
@@ -5674,58 +5667,94 @@ flowchart LR
                   <div class="preset-card-name">전체 공통</div>
                   <div class="preset-card-desc">조건 없음 — 모든 상품에 적용</div>
                 </div>
-                <span class="preset-card-count" id="pc-all">50개</span>
+                <span class="preset-card-count" id="pc-all">—</span>
+              </div>
+
+              <div class="preset-card" onclick="v4SelectPreset('product_code',this)">
+                <div class="preset-card-icon">📦</div>
+                <div>
+                  <div class="preset-card-name">상품코드</div>
+                  <div class="preset-card-desc">상품코드 직접 입력 · 여러 개 가능</div>
+                </div>
+                <span class="preset-card-count" id="pc-product_code">—</span>
               </div>
 
               <div class="preset-card" onclick="v4SelectPreset('operator',this)">
                 <div class="preset-card-icon">🏢</div>
                 <div>
-                  <div class="preset-card-name">공급사별</div>
-                  <div class="preset-card-desc">취소환불규정, 유의사항 등 공급사 정책</div>
+                  <div class="preset-card-name">공급사</div>
+                  <div class="preset-card-desc">공급사 정책 · 취소환불, 유의사항</div>
                 </div>
                 <span class="preset-card-count" id="pc-operator">—</span>
               </div>
 
-              <div class="preset-card" onclick="v4SelectPreset('operator_accom',this)">
+              <div class="preset-card" onclick="v4SelectPreset('hotel_voucher',this)">
                 <div class="preset-card-icon">🏨</div>
                 <div>
-                  <div class="preset-card-name">공급사 + 숙소</div>
-                  <div class="preset-card-desc">소개, 포함사항, 스페셜 혜택</div>
+                  <div class="preset-card-name">숙박권</div>
+                  <div class="preset-card-desc">등록된 숙박권 ID 선택 · 공급사→숙소→객실→객실요금</div>
                 </div>
-                <span class="preset-card-count" id="pc-operator_accom">—</span>
+                <span class="preset-card-count" id="pc-hotel_voucher">—</span>
               </div>
 
-              <div class="preset-card" onclick="v4SelectPreset('operator_accom_meal',this)">
-                <div class="preset-card-icon">🍽️</div>
-                <div>
-                  <div class="preset-card-name">공급사 + 숙소 + 식사</div>
-                  <div class="preset-card-desc">식사 옵션별 포함사항, 요금표</div>
-                </div>
-                <span class="preset-card-count" id="pc-operator_accom_meal">—</span>
-              </div>
-
-              <div class="preset-card" onclick="v4SelectPreset('operator_airline',this)">
+              <div class="preset-card" onclick="v4SelectPreset('flight_voucher',this)">
                 <div class="preset-card-icon">✈️</div>
                 <div>
-                  <div class="preset-card-name">공급사 + 항공사</div>
-                  <div class="preset-card-desc">수하물 규정, 출발 전 안내</div>
+                  <div class="preset-card-name">항공권</div>
+                  <div class="preset-card-desc">등록된 항공권 ID 선택 · 공급사→항공사</div>
                 </div>
-                <span class="preset-card-count" id="pc-operator_airline">—</span>
+                <span class="preset-card-count" id="pc-flight_voucher">—</span>
+              </div>
+
+              <div class="preset-card" onclick="v4SelectPreset('tour',this)">
+                <div class="preset-card-icon">🎫</div>
+                <div>
+                  <div class="preset-card-name">투어/티켓</div>
+                  <div class="preset-card-desc">등록된 투어/티켓 ID 선택 · 포함/불포함사항</div>
+                </div>
+                <span class="preset-card-count" id="pc-tour">—</span>
               </div>
 
               <div class="preset-card" onclick="v4SelectPreset('place',this)">
                 <div class="preset-card-icon">📍</div>
                 <div>
-                  <div class="preset-card-name">여행지별</div>
-                  <div class="preset-card-desc">여행지 소개, 안내사항</div>
+                  <div class="preset-card-name">여행지 <span style="font-size:9px;background:#f0f5ff;color:#2f54eb;border:1px solid #adc6ff;border-radius:8px;padding:0 5px;margin-left:3px;font-weight:700;">카탈로그</span></div>
+                  <div class="preset-card-desc">여행지 소개 · 비자/여권/입국 안내</div>
                 </div>
                 <span class="preset-card-count" id="pc-place">—</span>
               </div>
 
-              <!-- 고급 펼치기 -->
+              <div class="preset-card" onclick="v4SelectPreset('accom',this)">
+                <div class="preset-card-icon">🏠</div>
+                <div>
+                  <div class="preset-card-name">숙소 <span style="font-size:9px;background:#f0f5ff;color:#2f54eb;border:1px solid #adc6ff;border-radius:8px;padding:0 5px;margin-left:3px;font-weight:700;">카탈로그</span></div>
+                  <div class="preset-card-desc">숙소 단위 소개, 스페셜 혜택</div>
+                </div>
+                <span class="preset-card-count" id="pc-accom">—</span>
+              </div>
+
+              <div class="preset-card" onclick="v4SelectPreset('room',this)">
+                <div class="preset-card-icon">🛏️</div>
+                <div>
+                  <div class="preset-card-name">객실 <span style="font-size:9px;background:#f0f5ff;color:#2f54eb;border:1px solid #adc6ff;border-radius:8px;padding:0 5px;margin-left:3px;font-weight:700;">카탈로그</span></div>
+                  <div class="preset-card-desc">객실 타입 단위 소개, 유의사항</div>
+                </div>
+                <span class="preset-card-count" id="pc-room">—</span>
+              </div>
+
+              <div class="preset-card" onclick="v4SelectPreset('spot',this)">
+                <div class="preset-card-icon">🎯</div>
+                <div>
+                  <div class="preset-card-name">스팟/체험 <span style="font-size:9px;background:#f0f5ff;color:#2f54eb;border:1px solid #adc6ff;border-radius:8px;padding:0 5px;margin-left:3px;font-weight:700;">카탈로그</span></div>
+                  <div class="preset-card-desc">스팟·체험 소개, 핵심포인트</div>
+                </div>
+                <span class="preset-card-count" id="pc-spot">—</span>
+              </div>
+
+              <!-- 직접 조건 만들기 -->
               <div style="border-top:1px solid #f0f0f0;margin:4px -24px 4px;"></div>
               <div id="v4-adv-toggle" onclick="v4ToggleAdv()" style="cursor:pointer;padding:8px 4px;display:flex;align-items:center;gap:6px;color:rgba(0,0,0,0.45);font-size:12px;font-weight:500;user-select:none;">
-                <span id="v4-adv-arrow">▶</span> 직접 조건 만들기
+                <span id="v4-adv-arrow">▶</span> 직접 조건 만들기 <span style="font-size:10px;color:rgba(0,0,0,0.25);margin-left:4px;">자유 조합</span>
               </div>
 
               <div id="v4-adv-wrap" style="display:none;">
@@ -5782,10 +5811,15 @@ flowchart LR
               </div>
             </div>
 
-            <!-- 생성될 규칙 JSON 미리보기 -->
+            <!-- 규칙 요약 + JSON 상세 -->
             <div id="v4-rule-preview" style="display:none;">
-              <div style="font-size:11px;font-weight:700;color:rgba(0,0,0,0.35);letter-spacing:0.4px;text-transform:uppercase;margin-bottom:6px;">생성될 규칙</div>
-              <div style="background:#f5f5f5;border-radius:6px;padding:10px 12px;font-size:11px;font-family:monospace;color:rgba(0,0,0,0.6);line-height:1.6;white-space:pre-wrap;" id="v4-rule-json"></div>
+              <div class="v4-rule-summary" id="v4-rule-summary"></div>
+              <div class="v4-rule-detail-toggle" onclick="this.nextElementSibling.style.display=this.nextElementSibling.style.display==='none'?'':'none'; this.querySelector('span').textContent=this.nextElementSibling.style.display==='none'?'▶':'▼';">
+                <span>▶</span> 규칙 JSON 상세
+              </div>
+              <div style="display:none;margin-top:6px;">
+                <div style="background:#f5f5f5;border-radius:6px;padding:10px 12px;font-size:11px;font-family:monospace;color:rgba(0,0,0,0.5);line-height:1.6;white-space:pre-wrap;" id="v4-rule-json"></div>
+              </div>
             </div>
           </div>
         </div>
@@ -5804,12 +5838,6 @@ flowchart LR
           </div>
           <div class="v4-panel-body">
 
-            <!-- 관리명 자동생성 -->
-            <div class="form-item" style="margin-bottom:16px;">
-              <div class="form-label">관리명 <span style="font-size:11px;color:rgba(0,0,0,0.35);font-weight:400;">(자동 생성, 수정 가능)</span></div>
-              <input type="text" class="fc" id="v4-admin-name" placeholder="조건 선택 시 자동 생성됩니다" style="background:#fafafa;">
-            </div>
-
             <!-- 카테고리 선택 -->
             <div class="form-item" style="margin-bottom:20px;">
               <div class="form-label">카테고리 <span class="req">*</span></div>
@@ -5819,9 +5847,15 @@ flowchart LR
             </div>
 
             <!-- 제목 -->
-            <div class="form-item" style="margin-bottom:16px;">
+            <div class="form-item" style="margin-bottom:12px;">
               <div class="form-label">제목 <span class="req">*</span></div>
               <input type="text" class="fc" id="v4-title" placeholder="POST 제목을 입력하세요" oninput="v4UpdateAdminName()">
+            </div>
+
+            <!-- 관리명 자동생성 (제목 뒤에 자동 연결) -->
+            <div class="form-item" style="margin-bottom:16px;">
+              <div class="form-label" style="font-size:11px;color:rgba(0,0,0,0.4);">관리명 <span style="font-weight:400;">(자동 생성)</span></div>
+              <input type="text" class="fc" id="v4-admin-name" placeholder="조건 + 카테고리 + 제목으로 자동 생성" style="background:#f8f8f8;color:rgba(0,0,0,0.5);font-size:12px;" readonly>
             </div>
 
             <!-- 본문 에디터 -->
@@ -5840,6 +5874,17 @@ flowchart LR
               </div>
             </div>
 
+            <!-- AI 기능 -->
+            <div class="v4-ai-row" id="v4-ai-row">
+              <button class="btn-ai" id="v4-ai-btn" onclick="v4GenerateAIDraft()">
+                <span class="ai-icon">✨</span> AI 초안 생성
+              </button>
+              <button class="btn-ai" onclick="openAiModal()" style="background:linear-gradient(135deg, #722ed1 0%, #531dab 100%);">
+                <span class="ai-icon">🤖</span> AI 정보 분석
+              </button>
+              <span class="v4-ai-hint">초안: 템플릿 기반 / 분석: PDF·숙박권·투어 데이터 기반</span>
+            </div>
+
             <!-- 일괄 카테고리 등록 배너 -->
             <div style="background:#fffbe6;border:1px solid #ffe58f;border-radius:8px;padding:12px 16px;margin-bottom:20px;display:flex;align-items:center;gap:10px;">
               <span style="font-size:18px;">💡</span>
@@ -5848,9 +5893,13 @@ flowchart LR
             </div>
 
             <!-- 저장 버튼 -->
-            <div style="display:flex;gap:10px;justify-content:flex-end;padding-top:4px;border-top:1px solid #f0f0f0;">
-              <button class="btn btn-default">임시저장</button>
-              <button class="btn btn-primary" style="height:36px;font-size:14px;font-weight:600;padding:0 24px;" onclick="v4Save()">저장하기</button>
+            <div style="display:flex;gap:10px;align-items:center;padding-top:12px;border-top:1px solid #f0f0f0;">
+              <div style="flex:1;display:flex;align-items:center;gap:8px;">
+                <span style="font-size:11px;color:rgba(0,0,0,0.4);">저장 시 상태:</span>
+                <span class="v4-status-badge" id="v4-save-status-badge" style="font-size:11px;"></span>
+              </div>
+              <button class="btn btn-default" onclick="v4Save('대기')" style="border-color:#faad14;color:#ad6800;">임시저장 (대기)</button>
+              <button class="btn btn-primary" style="height:36px;font-size:14px;font-weight:600;padding:0 24px;" onclick="v4Save('운영중')">저장 (운영중)</button>
             </div>
           </div>
         </div>
@@ -5866,11 +5915,15 @@ flowchart LR
               <button class="btn btn-text" onclick="v4SwitchSingle()">단일 등록으로</button>
             </div>
             <div class="v4-panel-body">
+              <div id="v4-bulk-progress" class="v4-bulk-progress"></div>
               <div class="bulk-post-list" id="v4-bulk-list"></div>
               <div class="bulk-add-btn" onclick="v4BulkAddPost()">+ 카테고리 추가</div>
-              <div style="display:flex;gap:10px;justify-content:flex-end;margin-top:20px;padding-top:16px;border-top:1px solid #f0f0f0;">
-                <button class="btn btn-default">임시저장</button>
-                <button class="btn btn-primary" style="height:36px;font-size:14px;font-weight:600;padding:0 24px;" onclick="v4BulkSave()">전체 저장</button>
+              <div style="display:flex;gap:10px;justify-content:flex-end;margin-top:20px;padding-top:16px;border-top:1px solid #f0f0f0;align-items:center;">
+                <button class="btn-ai" onclick="v4BulkGenerateAll()" id="v4-bulk-ai-btn" style="margin-right:auto;">
+                  <span class="ai-icon">✨</span> 전체 AI 초안 생성
+                </button>
+                <button class="btn btn-default" onclick="v4BulkSave('대기')" style="border-color:#faad14;color:#ad6800;">임시저장 (대기)</button>
+                <button class="btn btn-primary" style="height:36px;font-size:14px;font-weight:600;padding:0 24px;" onclick="v4BulkSave('운영중')">전체 저장 (운영중)</button>
               </div>
             </div>
           </div>
@@ -5942,33 +5995,82 @@ flowchart LR
 <!-- ============================================================ -->
 <div class="view" id="view-impact">
   <div class="layout">
-    <div class="breadcrumb"><span onclick="showView('list')">카탈로그 관리</span><span class="breadcrumb-sep">›</span><span>게시판</span><span class="breadcrumb-sep">›</span><span>POST 영향 범위</span></div>
+    <div class="breadcrumb"><span onclick="showView('list')">카탈로그 관리</span><span class="breadcrumb-sep">›</span><span>게시판</span><span class="breadcrumb-sep">›</span><span style="font-weight:600;">POST 관리</span></div>
     <div class="page-header">
       <div>
-        <div class="page-title">🔗 POST 수정 영향 범위</div>
-        <div style="font-size:13px;color:rgba(0,0,0,0.45);margin-top:4px;">POST 수정 전 영향받는 상품과 진행 예약을 미리 확인하세요</div>
+        <div class="page-title">POST 관리</div>
+        <div style="font-size:13px;color:rgba(0,0,0,0.45);margin-top:4px;">행사코드로 연결된 POST를 조회하거나, POST를 선택해 연결 행사 확인 및 내용을 수정합니다</div>
       </div>
     </div>
 
-    <div class="impact-layout">
-      <!-- 좌측: POST 선택 -->
-      <div>
-        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">
-          <div style="font-size:13px;font-weight:600;color:rgba(0,0,0,0.65);">POST 선택</div>
+    <!-- 그라운드 룰 -->
+    <div style="display:flex;align-items:center;gap:10px;padding:10px 16px;margin-bottom:12px;background:#f0f7ff;border:1px solid #d3e8ff;border-radius:8px;">
+      <span style="font-size:16px;">📌</span>
+      <div style="font-size:12px;color:#0958d9;line-height:1.6;"><strong>상품코드 단위 관리 원칙</strong> — 같은 상품코드의 행사는 무조건 동일한 POST를 갖습니다. 행사코드 단위로 POST를 다르게 설정할 수 없습니다.</div>
+    </div>
+
+    <!-- 검색 영역: 양방향 -->
+    <div class="card" style="margin-bottom:16px;">
+      <div style="padding:16px 20px;">
+        <div style="display:flex;gap:8px;align-items:flex-end;">
+          <div style="flex:1;">
+            <div style="font-size:11px;font-weight:600;color:rgba(0,0,0,0.45);margin-bottom:6px;">행사코드 · 상품코드로 연결된 POST 조회</div>
+            <input class="fi" id="pm-product-search" style="width:100%;" placeholder="행사코드 또는 상품코드 입력 (예: 184, PK-PQ-001)" value="">
+          </div>
+          <button class="btn btn-primary btn-sm" style="height:32px;white-space:nowrap;" onclick="pmSearchByProduct()">조회</button>
+          <button class="btn btn-default btn-sm" style="height:32px;white-space:nowrap;" onclick="pmClearSearch()">초기화</button>
         </div>
-        <div style="margin-bottom:10px;">
-          <input class="fi" style="width:100%;" placeholder="🔍 관리명 검색..." oninput="filterImpactPosts(this.value)">
+      </div>
+    </div>
+
+    <!-- 결과 영역 -->
+    <div id="pm-result-area">
+
+      <!-- 기본 상태: POST 목록 -->
+      <div id="pm-default-view">
+        <div class="impact-layout">
+          <div>
+            <div style="font-size:13px;font-weight:600;color:rgba(0,0,0,0.65);margin-bottom:8px;">POST 목록</div>
+            <div style="display:flex;gap:6px;margin-bottom:10px;flex-wrap:wrap;">
+              <input class="fi" id="pm-post-search" style="width:80px;height:28px;font-size:11px;" placeholder="POST ID" oninput="filterImpactPosts(this.value)">
+              <input class="fi" style="flex:1;height:28px;font-size:11px;" placeholder="관리명 검색" oninput="filterImpactPosts(this.value)">
+              <select class="fi" style="width:90px;height:28px;font-size:11px;" onchange="filterImpactPosts(this.value)">
+                <option value="">카테고리</option>
+                <option>소개</option><option>핵심포인트</option><option>스페셜 혜택</option>
+                <option>포함사항</option><option>불포함사항</option><option>유의사항</option>
+                <option>취소환불규정</option><option>안내사항</option><option>출발 전 안내</option>
+                <option>수하물 규정</option><option>자주 묻는 질문</option>
+              </select>
+            </div>
+            <div id="impact-post-list"></div>
+          </div>
+          <div id="impact-result-panel">
+            <div class="card impact-result-empty">
+              <div style="font-size:40px;margin-bottom:12px;">👈</div>
+              <div style="font-weight:500;color:rgba(0,0,0,0.35);line-height:1.7;">왼쪽에서 POST를 선택하면<br>연결 행사 및 상세 정보가 표시됩니다</div>
+            </div>
+          </div>
         </div>
-        <div id="impact-post-list"></div>
       </div>
 
-      <!-- 우측: 영향 범위 결과 -->
-      <div id="impact-result-panel">
-        <div class="card impact-result-empty">
-          <div style="font-size:40px;margin-bottom:12px;">👈</div>
-          <div style="font-weight:500;color:rgba(0,0,0,0.35);line-height:1.7;">왼쪽에서 POST를 선택하면<br>영향받는 상품 목록이 표시됩니다</div>
+      <!-- 행사코드 조회 결과 -->
+      <div id="pm-product-result" style="display:none;">
+        <div class="card" style="margin-bottom:16px;">
+          <div style="padding:16px 20px;border-bottom:1px solid #f0f0f0;display:flex;align-items:center;gap:12px;">
+            <span style="font-size:20px;">📦</span>
+            <div style="flex:1;">
+              <div style="font-size:15px;font-weight:700;color:rgba(0,0,0,0.88);" id="pm-prod-title"></div>
+              <div style="font-size:12px;color:rgba(0,0,0,0.45);margin-top:2px;" id="pm-prod-meta"></div>
+            </div>
+            <span class="v4-status-badge st-active" style="font-size:11px;">운영중</span>
+          </div>
+          <div style="padding:16px 20px;">
+            <div style="font-size:12px;font-weight:600;color:rgba(0,0,0,0.55);margin-bottom:12px;">이 행사에 연결된 POST <span id="pm-prod-post-count" style="color:#1677ff;"></span></div>
+            <div id="pm-prod-post-list"></div>
+          </div>
         </div>
       </div>
+
     </div>
   </div>
 </div>
@@ -8806,6 +8908,56 @@ const V4_PLACES = [
   { id: 485,  name: '하롱베이' },
   { id: 74,   name: '방콕' },
 ];
+const V4_ROOMS = [
+  { id: 'R001', name: '스탠다드', accomId: 1513 },
+  { id: 'R002', name: '스탠다드 오션뷰', accomId: 1513 },
+  { id: 'R003', name: '슈페리어', accomId: 3415 },
+  { id: 'R004', name: '슈페리어 리버뷰', accomId: 147805 },
+  { id: 'R005', name: '디럭스', accomId: 10013 },
+  { id: 'R006', name: '딜럭스 오션뷰', accomId: 10013 },
+  { id: 'R007', name: '프리미엄', accomId: 175637 },
+  { id: 'R008', name: '클럽 인터컨티넨탈', accomId: 181606 },
+];
+const V4_SPOTS = [
+  { id: 'SP01', name: '선셋 크루즈' },
+  { id: 'SP02', name: '빈펄 사파리' },
+  { id: 'SP03', name: '스노클링 투어' },
+  { id: 'SP04', name: '빈원더스 푸꾸옥' },
+];
+const V4_TOURS = [
+  { id: 'T01', name: '푸꾸옥 남부 투어', operator: 58 },
+  { id: 'T02', name: '선셋 크루즈 패키지', operator: 58 },
+  { id: 'T03', name: '빈펄 사파리 입장권', operator: 75 },
+  { id: 'T04', name: '다낭 바나힐 투어', operator: 58 },
+  { id: 'T05', name: '하롱베이 크루즈', operator: 75 },
+];
+// 등록된 숙박권 (Stock)
+const V4_HOTEL_VOUCHERS = [
+  { id: 'HV-001', name: '솔바이멜리아 푸꾸옥 · 트립스토어', accomId: 1513, operatorId: 58 },
+  { id: 'HV-002', name: '윙크호텔 다낭 · 트립스토어', accomId: 3415, operatorId: 58 },
+  { id: 'HV-003', name: '래디슨블루 깜란 · 고헤드투어', accomId: 10013, operatorId: 75 },
+  { id: 'HV-004', name: '빅토리아호이안 · 트립스토어', accomId: 147805, operatorId: 58 },
+  { id: 'HV-005', name: '문라이트 나트랑 · 트립스토어', accomId: 175637, operatorId: 58 },
+];
+// 객실요금표 (숙박권 하위)
+const V4_ROOM_RATES = [
+  { id: 'RR-001', name: '스탠다드 · BB', hotelVoucherId: 'HV-001', roomId: 'R001', meal: 'BB' },
+  { id: 'RR-002', name: '스탠다드 오션뷰 · BB', hotelVoucherId: 'HV-001', roomId: 'R002', meal: 'BB' },
+  { id: 'RR-003', name: '슈페리어 · BB', hotelVoucherId: 'HV-002', roomId: 'R003', meal: 'BB' },
+  { id: 'RR-004', name: '슈페리어 · HB', hotelVoucherId: 'HV-002', roomId: 'R003', meal: 'HB' },
+  { id: 'RR-005', name: '슈페리어 · RO', hotelVoucherId: 'HV-002', roomId: 'R003', meal: 'RO' },
+  { id: 'RR-006', name: '디럭스 · BB', hotelVoucherId: 'HV-003', roomId: 'R005', meal: 'BB' },
+  { id: 'RR-007', name: '딜럭스 오션뷰 · BB', hotelVoucherId: 'HV-003', roomId: 'R006', meal: 'BB' },
+  { id: 'RR-008', name: '슈페리어 리버뷰 · BB', hotelVoucherId: 'HV-004', roomId: 'R004', meal: 'BB' },
+  { id: 'RR-009', name: '프리미엄 · BB', hotelVoucherId: 'HV-005', roomId: 'R007', meal: 'BB' },
+];
+// 등록된 항공권 (Stock)
+const V4_FLIGHT_VOUCHERS = [
+  { id: 'FV-001', name: '비엣젯 ICN→PQC · 트립스토어', airlineId: 71, operatorId: 58 },
+  { id: 'FV-002', name: '이스타 ICN→DAD · 트립스토어', airlineId: 77, operatorId: 58 },
+  { id: 'FV-003', name: '에어서울 ICN→CXR · 고헤드투어', airlineId: 59, operatorId: 75 },
+  { id: 'FV-004', name: '에어프레미아 ICN→DAD · 트립스토어', airlineId: 175, operatorId: 58 },
+];
 const V4_MEALS = [
   { code: 'RO', label: 'RO (식사없음)' },
   { code: 'BB', label: 'BB (조식)' },
@@ -8816,42 +8968,65 @@ const V4_MEALS = [
 
 // 실제 상품 데이터 (DB 기반)
 const V4_PRODUCTS = [
-  { id:184, title:'푸꾸옥 4박5일 · 솔바이멜리아 · 스탠다드 오션뷰 · BB', operatorId:58, accommodationId:1513, airlineId:71, placeId:3935, meal:'BB' },
-  { id:183, title:'푸꾸옥 4박5일 · 솔바이멜리아 · 스탠다드 · BB',          operatorId:58, accommodationId:1513, airlineId:71, placeId:3935, meal:'BB' },
-  { id:182, title:'다낭 3박5일 · 빅토리아호이안 · 슈페리어 리버뷰 · BB',   operatorId:58, accommodationId:147805, airlineId:77, placeId:479, meal:'BB' },
-  { id:181, title:'다낭 3박5일 · 빅토리아호이안 · 슈페리어 리버뷰 · BB',   operatorId:58, accommodationId:147805, airlineId:77, placeId:479, meal:'BB' },
-  { id:178, title:'다낭 3박5일 · 윙크호텔 · 슈페리어 · BB',               operatorId:58, accommodationId:3415, airlineId:77, placeId:479, meal:'BB' },
-  { id:177, title:'다낭 3박5일 · 윙크호텔 · 슈페리어 · HB',               operatorId:58, accommodationId:3415, airlineId:77, placeId:479, meal:'HB' },
-  { id:176, title:'다낭 3박5일 · 윙크호텔 · 슈페리어 · RO',               operatorId:58, accommodationId:3415, airlineId:77, placeId:479, meal:'RO' },
-  { id:165, title:'나트랑 3박5일 · 래디슨블루 · 디럭스 · BB',              operatorId:75, accommodationId:10013, airlineId:1000, placeId:477, meal:'BB' },
-  { id:164, title:'나트랑 3박5일 · 래디슨블루 · 딜럭스 오션뷰 · BB',       operatorId:75, accommodationId:10013, airlineId:59, placeId:477, meal:'BB' },
-  { id:160, title:'나트랑 4박5일 · 문라이트 나트랑 · BB',                  operatorId:58, accommodationId:175637, airlineId:71, placeId:477, meal:'BB' },
-  { id:159, title:'나트랑 4박5일 · 문라이트 나트랑 · BB',                  operatorId:75, accommodationId:175637, airlineId:1000, placeId:477, meal:'BB' },
-  { id:155, title:'하롱베이 3박5일 · 인터컨티넨탈 · BB',                   operatorId:58, accommodationId:181606, airlineId:71, placeId:485, meal:'BB' },
+  { id:184, productCode:'PK-PQ-001', kind:'AIRTEL', title:'푸꾸옥 4박5일 · 솔바이멜리아 · 스탠다드 오션뷰 · BB', operatorId:58, accommodationId:1513, roomId:'R002', airlineId:71, placeId:3935, meal:'BB', spotId:'SP01', tourId:'T01' },
+  { id:183, productCode:'PK-PQ-002', kind:'AIRTEL', title:'푸꾸옥 4박5일 · 솔바이멜리아 · 스탠다드 · BB',          operatorId:58, accommodationId:1513, roomId:'R001', airlineId:71, placeId:3935, meal:'BB', spotId:'SP02', tourId:'T02' },
+  { id:182, productCode:'PK-DN-001', kind:'AIRTEL', title:'다낭 3박5일 · 빅토리아호이안 · 슈페리어 리버뷰 · BB',   operatorId:58, accommodationId:147805, roomId:'R004', airlineId:77, placeId:479, meal:'BB', spotId:null, tourId:'T04' },
+  { id:181, productCode:'PK-DN-002', kind:'AIRTEL', title:'다낭 3박5일 · 빅토리아호이안 · 슈페리어 리버뷰 · BB',   operatorId:58, accommodationId:147805, roomId:'R004', airlineId:77, placeId:479, meal:'BB', spotId:null, tourId:null },
+  { id:178, productCode:'PK-DN-003', kind:'AIRTEL', title:'다낭 3박5일 · 윙크호텔 · 슈페리어 · BB',               operatorId:58, accommodationId:3415, roomId:'R003', airlineId:77, placeId:479, meal:'BB', spotId:null, tourId:'T04' },
+  { id:177, productCode:'PK-DN-004', kind:'AIRTEL', title:'다낭 3박5일 · 윙크호텔 · 슈페리어 · HB',               operatorId:58, accommodationId:3415, roomId:'R003', airlineId:77, placeId:479, meal:'HB', spotId:null, tourId:null },
+  { id:176, productCode:'PK-DN-005', kind:'HOTEL',  title:'다낭 3박5일 · 윙크호텔 · 슈페리어 · RO',               operatorId:58, accommodationId:3415, roomId:'R003', airlineId:0,  placeId:479, meal:'RO', spotId:null, tourId:null },
+  { id:165, productCode:'GH-NT-001', kind:'AIRTEL', title:'나트랑 3박5일 · 래디슨블루 · 디럭스 · BB',              operatorId:75, accommodationId:10013, roomId:'R005', airlineId:1000, placeId:477, meal:'BB', spotId:'SP03', tourId:'T05' },
+  { id:164, productCode:'GH-NT-002', kind:'AIRTEL', title:'나트랑 3박5일 · 래디슨블루 · 딜럭스 오션뷰 · BB',       operatorId:75, accommodationId:10013, roomId:'R006', airlineId:59, placeId:477, meal:'BB', spotId:null, tourId:'T03' },
+  { id:160, productCode:'PK-NT-001', kind:'HOTEL',  title:'나트랑 4박5일 · 문라이트 나트랑 · BB',                  operatorId:58, accommodationId:175637, roomId:'R007', airlineId:71, placeId:477, meal:'BB', spotId:'SP03', tourId:null },
+  { id:159, productCode:'GH-NT-003', kind:'HOTEL',  title:'나트랑 4박5일 · 문라이트 나트랑 · BB',                  operatorId:75, accommodationId:175637, roomId:'R007', airlineId:1000, placeId:477, meal:'BB', spotId:null, tourId:'T05' },
+  { id:155, productCode:'PK-HL-001', kind:'AIRTEL', title:'하롱베이 3박5일 · 인터컨티넨탈 · BB',                   operatorId:58, accommodationId:181606, roomId:'R008', airlineId:71, placeId:485, meal:'BB', spotId:null, tourId:'T05' },
 ];
 
 const V4_CATS = ['소개','핵심포인트','스페셜 혜택','포함사항','불포함사항','유의사항','안내사항','출발 전 안내','수하물 규정','취소환불규정','자주 묻는 질문'];
 
+const V4_CATEGORY_RECOMMENDATIONS = {
+  all:             [],
+  product_code:    ['소개','포함사항','유의사항'],
+  operator:        ['스페셜 혜택','출발 전 안내','안내사항','취소환불규정'],
+  accom:           ['소개','스페셜 혜택','핵심포인트'],
+  room:            ['소개','스페셜 혜택','유의사항'],
+  hotel_voucher:   ['소개','포함사항','불포함사항','스페셜 혜택','취소환불규정'],
+  flight_voucher:  ['수하물 규정','출발 전 안내','유의사항','자주 묻는 질문'],
+  tour:            ['소개','포함사항','불포함사항','유의사항'],
+  place:           ['소개','안내사항'],
+  accom:           ['소개','스페셜 혜택','핵심포인트'],
+  room:            ['소개','스페셜 혜택','유의사항'],
+  spot:            ['소개','핵심포인트','안내사항'],
+  custom:          [],
+};
+
 // ---- 프리셋 정의 ----
 const V4_PRESETS = {
-  all:                     { fields: [] },
-  operator:                { fields: ['operator'] },
-  operator_accom:          { fields: ['operator','accom'] },
-  operator_accom_meal:     { fields: ['operator','accom','meal'] },
-  operator_airline:        { fields: ['operator','airline'] },
-  place:                   { fields: ['place'] },
-  operator_accom_airline:  { fields: ['operator','accom','airline'] },
-  operator_place:          { fields: ['operator','place'] },
-  operator_accom_meal_airline: { fields: ['operator','accom','meal','airline'] },
+  all:             { fields: [] },
+  product_code:    { fields: ['productCodes'] },         // 여러 상품코드 입력
+  operator:        { fields: ['operator'] },
+  accom:           { fields: ['accom'] },
+  room:            { fields: ['accom','room'] },
+  hotel_voucher:   { fields: ['hotelVoucher','roomRate'] },  // 숙박권 ID → 객실요금표 ID (선택)
+  flight_voucher:  { fields: ['flightVoucher'] },           // 항공권 ID 선택
+  tour:            { fields: ['tour'] },
+  place:           { fields: ['place'] },
+  accom:           { fields: ['accom'] },
+  room:            { fields: ['accom','room'] },
+  spot:            { fields: ['spot'] },
 };
 
 let v4State = {
   preset: null,
   operator: null,
   accom: null,
+  room: null,
   meal: null,
   airline: null,
   place: null,
+  productCode: null,
+  spot: null,
+  tour: null,
   category: null,
   bulkMode: false,
   bulkPosts: [],
@@ -8861,11 +9036,18 @@ let v4State = {
 function v4MatchProducts() {
   return V4_PRODUCTS.filter(p => {
     const s = v4State;
-    if (s.operator && p.operatorId !== s.operator) return false;
-    if (s.accom    && p.accommodationId !== s.accom) return false;
-    if (s.meal     && p.meal !== s.meal) return false;
-    if (s.airline  && p.airlineId !== s.airline) return false;
-    if (s.place    && p.placeId !== s.place) return false;
+    if (s.operator    && p.operatorId !== s.operator) return false;
+    if (s.accom       && p.accommodationId !== s.accom) return false;
+    if (s.room        && p.roomId !== s.room) return false;
+    if (s.meal        && p.meal !== s.meal) return false;
+    if (s.airline     && p.airlineId !== s.airline) return false;
+    if (s.place       && p.placeId !== s.place) return false;
+    if (s.productCode  && p.productCode !== s.productCode) return false;
+    if (s._parsedCodes && s._parsedCodes.length > 0 && !s._parsedCodes.includes(p.productCode)) return false;
+    if (s.spot         && p.spotId !== s.spot) return false;
+    if (s.tour         && p.tourId !== s.tour) return false;
+    if (s.hotelVoucher && p.accommodationId != s.hotelVoucher) return false;
+    if (s.flightVoucher && p.airlineId != s.flightVoucher) return false;
     return true;
   });
 }
@@ -8875,7 +9057,7 @@ function v4PresetCount(presetKey) {
   const backup = { ...v4State };
   const preset = V4_PRESETS[presetKey];
   // 해당 프리셋에 없는 조건 초기화
-  ['operator','accom','meal','airline','place'].forEach(f => {
+  ['operator','accom','room','meal','airline','place','productCode','spot','tour','hotelVoucher','roomRate','flightVoucher'].forEach(f => {
     if (!preset.fields.includes(f)) v4State[f] = null;
   });
   const cnt = v4MatchProducts().length;
@@ -8887,10 +9069,9 @@ function v4UpdatePresetCounts() {
   Object.keys(V4_PRESETS).forEach(key => {
     const el = document.getElementById('pc-' + key);
     if (!el) return;
-    // 전체 상품 수 기반 표시
-    const total = V4_PRODUCTS.length;
-    el.textContent = key === 'all' ? total + '개' : '—';
-    el.className = 'preset-card-count';
+    const cnt = v4PresetCount(key);
+    el.textContent = cnt + '개';
+    el.className = cnt > 0 ? 'preset-card-count' : 'preset-card-count zero';
   });
 }
 
@@ -8902,11 +9083,21 @@ function v4SelectPreset(key, el) {
   v4State.preset = key;
   v4State.operator = null;
   v4State.accom = null;
+  v4State.room = null;
   v4State.meal = null;
   v4State.airline = null;
   v4State.place = null;
+  v4State.productCode = null;
+  v4State.spot = null;
+  v4State.tour = null;
+  v4State.hotelVoucher = null;
+  v4State.roomRate = null;
+  v4State.flightVoucher = null;
 
   const preset = V4_PRESETS[key];
+
+  // 카테고리 추천 업데이트
+  v4RenderCatChips();
 
   // 조건 패널 보이기
   const panel = document.getElementById('v4-condition-panel');
@@ -8922,31 +9113,81 @@ function v4SelectPreset(key, el) {
   }
 }
 
+function v4GetFilteredOptions(field) {
+  const fieldMap = { operator:'operatorId', accom:'accommodationId', room:'roomId', airline:'airlineId', place:'placeId', meal:'meal', productCode:'productCode', spot:'spotId', tour:'tourId', hotelVoucher:'_hotelVoucher', roomRate:'_roomRate', flightVoucher:'_flightVoucher' };
+  let products = V4_PRODUCTS;
+  // 현재 설정된 다른 조건들로 필터
+  ['operator','accom','room','airline','place','meal','productCode','spot','tour'].forEach(f => {
+    if (f !== field && v4State[f]) {
+      const pf = fieldMap[f];
+      products = products.filter(p => p[pf] == v4State[f]);
+    }
+  });
+  const ids = new Set(products.map(p => p[fieldMap[field]]));
+  if (field === 'operator')  return V4_OPERATORS.filter(o => ids.has(o.id));
+  if (field === 'accom')     return V4_ACCOMMODATIONS.filter(a => ids.has(a.id));
+  if (field === 'room')        return V4_ROOMS.filter(r => ids.has(r.id));
+  if (field === 'airline')     return V4_AIRLINES.filter(a => ids.has(a.id));
+  if (field === 'place')       return V4_PLACES.filter(p => ids.has(p.id));
+  if (field === 'meal')        return V4_MEALS.filter(m => ids.has(m.code));
+  if (field === 'productCode') return [...ids].filter(Boolean).map(c => ({id:c, name:c}));
+  if (field === 'spot')         return V4_SPOTS.filter(s => ids.has(s.id));
+  if (field === 'tour')         return V4_TOURS.filter(t => ids.has(t.id));
+  if (field === 'hotelVoucher') return V4_HOTEL_VOUCHERS;
+  if (field === 'roomRate') {
+    if (v4State.hotelVoucher) return V4_ROOM_RATES.filter(r => r.hotelVoucherId === v4State.hotelVoucher);
+    return V4_ROOM_RATES;
+  }
+  if (field === 'flightVoucher') return V4_FLIGHT_VOUCHERS;
+  return [];
+}
+
 function v4RenderConditionFields(fields) {
-  const subLabels = { operator:'공급사', accom:'숙소', meal:'식사', airline:'항공사', place:'여행지' };
-  const subDescs  = { operator:'취소환불규정/유의사항 등 공급사 정책에 적용', accom:'해당 숙소가 포함된 상품에 적용', meal:'식사 옵션별로 다른 포함사항에 적용', airline:'해당 항공사 상품에 적용', place:'해당 여행지의 모든 상품에 적용' };
+  const subLabels = { operator:'공급사', accom:'숙소', room:'객실', meal:'식사(객실요금)', airline:'항공사', place:'여행지', productCode:'상품코드', productCodes:'상품코드', spot:'스팟/체험', tour:'투어/티켓', hotelVoucher:'숙박권', roomRate:'객실요금표', flightVoucher:'항공권' };
 
   const html = fields.map(f => {
     const label = subLabels[f];
+    const filtered = v4GetFilteredOptions(f);
+    if (f === 'productCodes') {
+      return `<div class="v4-field-row" style="align-items:flex-start;">
+        <div class="v4-field-label" style="padding-top:6px;">${label}</div>
+        <div class="v4-field-val" style="flex:1;">
+          <textarea class="fc" rows="3" style="font-size:12px;resize:vertical;" placeholder="상품코드를 입력하세요 (쉼표 또는 줄바꿈으로 구분)&#10;예: PK-PQ-001, PK-DN-003" oninput="v4SetProductCodes(this.value)">${v4State.productCodes||''}</textarea>
+          <div style="font-size:10px;color:rgba(0,0,0,0.3);margin-top:4px;">같은 상품코드의 행사는 동일한 POST를 공유합니다</div>
+        </div>
+      </div>`;
+    }
     if (f === 'meal') {
       return `<div class="v4-field-row">
         <div class="v4-field-label">${label}</div>
         <div class="v4-chip-group">
-          ${V4_MEALS.map(m => `<button class="v4-chip" onclick="v4SetMeal('${m.code}',this)">${m.label}</button>`).join('')}
+          ${filtered.map(m => `<button class="v4-chip${v4State.meal===m.code?' on':''}" onclick="v4SetMeal('${m.code}',this)">${m.label}</button>`).join('')}
+          ${filtered.length===0?'<span style="font-size:11px;color:rgba(0,0,0,0.25);">선택 가능한 옵션 없음</span>':''}
         </div>
       </div>`;
     }
-    const options = f === 'operator' ? V4_OPERATORS.map(o => `<option value="${o.id}">${o.name}</option>`).join('')
-                  : f === 'accom'    ? V4_ACCOMMODATIONS.map(a => `<option value="${a.id}">${a.name} (${a.place})</option>`).join('')
-                  : f === 'airline'  ? V4_AIRLINES.map(a => `<option value="${a.id}">${a.name} (${a.iata})</option>`).join('')
-                  : V4_PLACES.map(p => `<option value="${p.id}">${p.name}</option>`).join('');
+    const options = f === 'operator' ? filtered.map(o => `<option value="${o.id}"${v4State.operator==o.id?' selected':''}>${o.name}</option>`).join('')
+                  : f === 'accom'    ? filtered.map(a => `<option value="${a.id}"${v4State.accom==a.id?' selected':''}>${a.name} (${a.place})</option>`).join('')
+                  : f === 'room'        ? filtered.map(r => `<option value="${r.id}"${v4State.room==r.id?' selected':''}>${r.name}</option>`).join('')
+                  : f === 'airline'     ? filtered.map(a => `<option value="${a.id}"${v4State.airline==a.id?' selected':''}>${a.name} (${a.iata})</option>`).join('')
+                  : f === 'productCode' ? filtered.map(p => `<option value="${p.id}"${v4State.productCode==p.id?' selected':''}>${p.name}</option>`).join('')
+                  : f === 'spot'        ? filtered.map(s => `<option value="${s.id}"${v4State.spot==s.id?' selected':''}>${s.name}</option>`).join('')
+                  : f === 'tour'         ? filtered.map(t => `<option value="${t.id}"${v4State.tour==t.id?' selected':''}>${t.name}</option>`).join('')
+                  : f === 'hotelVoucher' ? filtered.map(h => `<option value="${h.id}"${v4State.hotelVoucher==h.id?' selected':''}>${h.id} · ${h.name}</option>`).join('')
+                  : f === 'roomRate'     ? filtered.map(r => `<option value="${r.id}"${v4State.roomRate==r.id?' selected':''}>${r.id} · ${r.name}</option>`).join('')
+                  : f === 'flightVoucher'? filtered.map(f2 => `<option value="${f2.id}"${v4State.flightVoucher==f2.id?' selected':''}>${f2.id} · ${f2.name}</option>`).join('')
+                  : filtered.map(p => `<option value="${p.id}"${v4State.place==p.id?' selected':''}>${p.name}</option>`).join('');
+    const count = filtered.length;
+    const placeholder = f === 'roomRate' ? `전체 적용 (선택 시 특정 객실요금표만 · ${count}개)` : `선택해주세요 (${count}개)`;
+    const hint = f === 'roomRate' ? `<div style="font-size:10px;color:rgba(0,0,0,0.3);margin-top:4px;">선택 안 하면 이 숙박권의 모든 객실요금표에 적용됩니다</div>` : '';
     return `<div class="v4-field-row">
       <div class="v4-field-label">${label}</div>
       <div class="v4-field-val">
         <select class="fc" onchange="v4SetField('${f}',this.value)">
-          <option value="">선택해주세요</option>
+          <option value="">${placeholder}</option>
           ${options}
         </select>
+        ${hint}
       </div>
     </div>`;
   }).join('');
@@ -8961,11 +9202,42 @@ function v4RenderConditionFields(fields) {
   v4RenderMatchPreview();
 }
 
-function v4SetField(field, val) {
-  v4State[field] = val ? Number(val) || val : null;
+function v4SetProductCodes(val) {
+  v4State.productCodes = val;
+  // 쉼표/줄바꿈으로 분리해서 매칭
+  const codes = val.split(/[,\n\r]+/).map(c => c.trim()).filter(Boolean);
+  v4State._parsedCodes = codes;
   v4RenderMatchPreview();
   v4UpdateRuleTags();
   v4AutoAdminName();
+  v4UpdatePresetCounts();
+}
+
+function v4SetField(field, val) {
+  v4State[field] = val ? Number(val) || val : null;
+  // 캐스케이딩: 하위 필드 값이 필터된 옵션에 없으면 초기화
+  const preset = V4_PRESETS[v4State.preset];
+  if (preset) {
+    const fields = preset.fields;
+    const idx = fields.indexOf(field);
+    if (idx >= 0) {
+      for (let i = idx + 1; i < fields.length; i++) {
+        const df = fields[i];
+        if (v4State[df]) {
+          const avail = v4GetFilteredOptions(df);
+          const match = df === 'meal' ? avail.some(m => m.code === v4State[df]) :
+                        df === 'room' ? avail.some(r => r.id === v4State[df]) :
+                        avail.some(o => o.id == v4State[df]);
+          if (!match) v4State[df] = null;
+        }
+      }
+    }
+    v4RenderConditionFields(fields);
+  }
+  v4RenderMatchPreview();
+  v4UpdateRuleTags();
+  v4AutoAdminName();
+  v4UpdatePresetCounts();
 }
 
 function v4SetMeal(code, el) {
@@ -8982,52 +9254,135 @@ function v4SetMeal(code, el) {
   v4RenderMatchPreview();
   v4UpdateRuleTags();
   v4AutoAdminName();
+  v4UpdatePresetCounts();
 }
 
 function v4RenderMatchPreview() {
   const matched = v4MatchProducts();
   const box = document.getElementById('v4-match-preview');
   if (matched.length === 0) {
-    box.innerHTML = `<div class="v4-match-empty">
-      <div style="font-size:28px;margin-bottom:8px;">🔍</div>
-      <div style="font-size:13px;font-weight:500;color:rgba(0,0,0,0.35);">조건에 맞는 상품이 없습니다</div>
-      <div style="font-size:11px;color:rgba(0,0,0,0.25);margin-top:4px;">조건을 변경해보세요</div>
-    </div>`;
+    // 조건이 설정된 상태에서 0건 → 경고
+    const hasCondition = v4State.operator || v4State.accom || v4State.room || v4State.meal || v4State.airline || v4State.place;
+    if (hasCondition) {
+      let hint = '조건을 변경하거나 줄여보세요.';
+      if (v4State.operator && v4State.accom) {
+        const avail = V4_PRODUCTS.filter(p => p.operatorId === v4State.operator).map(p => p.accommodationId);
+        const names = V4_ACCOMMODATIONS.filter(a => avail.includes(a.id)).map(a => a.name);
+        if (names.length) hint = `이 공급사에는 ${names.join(', ')} 숙소 상품이 있습니다.`;
+      }
+      box.innerHTML = `<div class="v4-match-warning">
+        <div style="font-size:28px;margin-bottom:8px;">⚠️</div>
+        <div style="font-size:13px;font-weight:600;color:#ad6800;">조건에 맞는 상품이 없습니다</div>
+        <div style="font-size:11px;color:#ad8b00;margin-top:6px;line-height:1.6;">${hint}</div>
+      </div>`;
+    } else {
+      box.innerHTML = `<div class="v4-match-empty">
+        <div style="font-size:28px;margin-bottom:8px;">🔍</div>
+        <div style="font-size:13px;font-weight:500;color:rgba(0,0,0,0.35);">조건을 선택하면<br>매칭 상품이 표시됩니다</div>
+      </div>`;
+    }
     return;
   }
 
-  const previewItems = matched.slice(0,5).map(p =>
-    `<div class="v4-match-product-row">
-      <span style="font-size:10px;background:#e6f4ff;color:#1677ff;border-radius:4px;padding:1px 5px;font-weight:700;flex-shrink:0;">#${p.id}</span>
-      <span style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${p.title}</span>
-    </div>`).join('');
-  const moreText = matched.length > 5 ? `<div style="font-size:11px;color:rgba(0,0,0,0.35);text-align:right;margin-top:4px;">+${matched.length-5}개 더...</div>` : '';
+  // 여행지별 그룹핑
+  const groups = {};
+  matched.forEach(p => {
+    const place = V4_PLACES.find(x => x.id === p.placeId);
+    const key = place ? place.name : '기타';
+    if (!groups[key]) groups[key] = [];
+    groups[key].push(p);
+  });
+
+  const collapsed = matched.length > 8;
+  const groupKeys = Object.keys(groups);
+  const groupHtml = groupKeys.map(gk => {
+    const items = groups[gk];
+    const rows = items.map(p =>
+      `<div class="v4-match-product-row">
+        <span style="font-size:10px;background:#e6f4ff;color:#1677ff;border-radius:4px;padding:1px 5px;font-weight:700;flex-shrink:0;">#${p.id}</span>
+        <span style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${p.title}</span>
+      </div>`).join('');
+    return `<div class="v4-match-group">
+      <div class="v4-match-group-header">📍 ${gk} <span style="color:#1677ff;font-size:10px;">${items.length}개</span></div>
+      ${rows}
+    </div>`;
+  }).join('');
+
+  const previewHtml = collapsed
+    ? groupKeys.slice(0,2).map(gk => {
+        const items = groups[gk].slice(0,2);
+        return `<div class="v4-match-group">
+          <div class="v4-match-group-header">📍 ${gk} <span style="color:#1677ff;font-size:10px;">${groups[gk].length}개</span></div>
+          ${items.map(p => `<div class="v4-match-product-row"><span style="font-size:10px;background:#e6f4ff;color:#1677ff;border-radius:4px;padding:1px 5px;font-weight:700;flex-shrink:0;">#${p.id}</span><span style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${p.title}</span></div>`).join('')}
+        </div>`;
+      }).join('') + `<button class="v4-match-expand-btn" onclick="this.parentElement.innerHTML=v4FullMatchHtml()">전체 ${matched.length}개 상품 보기 ▾</button>`
+    : groupHtml;
 
   box.innerHTML = `<div class="v4-match-box">
-    <div style="display:flex;align-items:center;gap:12px;margin-bottom:8px;">
-      <div><div class="v4-match-count">${matched.length}</div><div class="v4-match-label">개 상품에 적용됩니다</div></div>
+    <div style="display:flex;align-items:center;gap:12px;margin-bottom:10px;">
+      <div><div class="v4-match-count">${matched.length}</div><div class="v4-match-label">개 상품에 적용</div></div>
       <div style="flex:1;font-size:11px;color:rgba(0,0,0,0.45);line-height:1.6;">이 POST를 등록하면 아래 상품들에<br>자동으로 연결됩니다</div>
     </div>
-    <div class="v4-match-products">${previewItems}${moreText}</div>
+    <div class="v4-match-products" style="max-height:200px;overflow-y:auto;">${previewHtml}</div>
   </div>`;
 
-  // 규칙 JSON 미리보기
+  // 규칙 요약 + JSON
   const rule = v4BuildRule();
   document.getElementById('v4-rule-preview').style.display = '';
+  document.getElementById('v4-rule-summary').innerHTML = v4BuildRuleSummary();
   document.getElementById('v4-rule-json').textContent = JSON.stringify(rule, null, 2);
+}
+
+function v4FullMatchHtml() {
+  const matched = v4MatchProducts();
+  const groups = {};
+  matched.forEach(p => {
+    const place = V4_PLACES.find(x => x.id === p.placeId);
+    const key = place ? place.name : '기타';
+    if (!groups[key]) groups[key] = [];
+    groups[key].push(p);
+  });
+  return Object.keys(groups).map(gk => {
+    const items = groups[gk];
+    return `<div class="v4-match-group">
+      <div class="v4-match-group-header">📍 ${gk} <span style="color:#1677ff;font-size:10px;">${items.length}개</span></div>
+      ${items.map(p => `<div class="v4-match-product-row"><span style="font-size:10px;background:#e6f4ff;color:#1677ff;border-radius:4px;padding:1px 5px;font-weight:700;flex-shrink:0;">#${p.id}</span><span style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${p.title}</span></div>`).join('')}
+    </div>`;
+  }).join('');
 }
 
 function v4BuildRule() {
   const clues = [];
-  const fieldMap = { operator: 'operatorId', accom: 'accommodationId', meal: 'accomMealPlan', airline: 'airlineId', place: 'targetPlaceId' };
-  const opMap   = { operator: 'eq', accom: 'eq', meal: 'eq', airline: 'eq', place: 'eq' };
-  ['operator','accom','meal','airline','place'].forEach(f => {
+  const fieldMap = { operator: 'operatorId', accom: 'accommodationId', room: 'roomId', meal: 'accomMealPlan', airline: 'airlineId', place: 'targetPlaceId', productCode: 'productCode', spot: 'spotActivityId', tour: 'tourTicketId' };
+  const opMap   = { operator: 'eq', accom: 'eq', room: 'eq', meal: 'eq', airline: 'eq', place: 'eq', productCode: 'eq', spot: 'eq', tour: 'eq' };
+  ['operator','accom','room','meal','airline','place','productCode','spot','tour'].forEach(f => {
     if (v4State[f] !== null && v4State[f] !== undefined) {
       clues.push({ sub: fieldMap[f], op: opMap[f], value: String(v4State[f]) });
     }
   });
   if (clues.length === 0) return { op: 'all', clues: [] };
   return { op: 'all', clues };
+}
+
+function v4BuildRuleSummary() {
+  const parts = [];
+  if (v4State.operator) { const o = V4_OPERATORS.find(x=>x.id===v4State.operator); if(o) parts.push(`<strong>${o.name}</strong>`); }
+  if (v4State.accom) { const a = V4_ACCOMMODATIONS.find(x=>x.id===v4State.accom); if(a) parts.push(`<strong>${a.name}</strong>`); }
+  if (v4State.room) { const r = V4_ROOMS.find(x=>x.id===v4State.room); if(r) parts.push(`<strong>${r.name}</strong>`); }
+  if (v4State.meal) { const m = V4_MEALS.find(x=>x.code===v4State.meal); parts.push(`<strong>${m ? m.label : v4State.meal}</strong>`); }
+  if (v4State.airline) { const a = V4_AIRLINES.find(x=>x.id===v4State.airline); if(a) parts.push(`<strong>${a.name}</strong>`); }
+  if (v4State.place) { const p = V4_PLACES.find(x=>x.id===v4State.place); if(p) parts.push(`<strong>${p.name}</strong>`); }
+  if (v4State.productCode) parts.push(`<strong>${v4State.productCode}</strong>`);
+  if (v4State._parsedCodes && v4State._parsedCodes.length > 0) parts.push(`<strong>${v4State._parsedCodes.join(', ')}</strong>`);
+  if (v4State.spot) { const s = V4_SPOTS.find(x=>x.id===v4State.spot); if(s) parts.push(`<strong>${s.name}</strong>`); }
+  if (v4State.tour) { const t = V4_TOURS.find(x=>x.id===v4State.tour); if(t) parts.push(`<strong>${t.name}</strong>`); }
+  if (v4State.hotelVoucher) { const h = V4_HOTEL_VOUCHERS.find(x=>x.id===v4State.hotelVoucher); if(h) parts.push(`<strong>${h.id}</strong>`); }
+  if (v4State.roomRate) { const r = V4_ROOM_RATES.find(x=>x.id===v4State.roomRate); if(r) parts.push(`<strong>${r.name}</strong>`); }
+  if (v4State.flightVoucher) { const f = V4_FLIGHT_VOUCHERS.find(x=>x.id===v4State.flightVoucher); if(f) parts.push(`<strong>${f.id}</strong>`); }
+  const matched = v4MatchProducts();
+  const cnt = `<strong style="color:#389e0d;font-size:15px;">${matched.length}</strong>`;
+  if (parts.length === 0) return `전체 상품 ${cnt}개에 적용됩니다`;
+  return `${parts.join(' <span style="color:rgba(0,0,0,0.25);">·</span> ')} 조건의 상품 ${cnt}개에 적용됩니다`;
 }
 
 function v4UpdateRuleTags() {
@@ -9042,6 +9397,10 @@ function v4UpdateRuleTags() {
     const a = V4_ACCOMMODATIONS.find(x => x.id === v4State.accom);
     if (a) tags.push(`<span class="rule-tag">🏨 ${a.name}</span>`);
   }
+  if (v4State.room) {
+    const r = V4_ROOMS.find(x => x.id === v4State.room);
+    if (r) tags.push(`<span class="rule-tag">🛏️ ${r.name}</span>`);
+  }
   if (v4State.meal) tags.push(`<span class="rule-tag">🍽️ ${v4State.meal}</span>`);
   if (v4State.airline) {
     const a = V4_AIRLINES.find(x => x.id === v4State.airline);
@@ -9051,6 +9410,30 @@ function v4UpdateRuleTags() {
     const p = V4_PLACES.find(x => x.id === v4State.place);
     if (p) tags.push(`<span class="rule-tag">📍 ${p.name}</span>`);
   }
+  if (v4State.productCode) tags.push(`<span class="rule-tag">📦 ${v4State.productCode}</span>`);
+  if (v4State._parsedCodes && v4State._parsedCodes.length > 0) {
+    v4State._parsedCodes.forEach(c => tags.push(`<span class="rule-tag" style="font-size:10px;padding:1px 6px;">📦 ${c}</span>`));
+  }
+  if (v4State.spot) {
+    const s = V4_SPOTS.find(x => x.id === v4State.spot);
+    if (s) tags.push(`<span class="rule-tag">🎯 ${s.name}</span>`);
+  }
+  if (v4State.tour) {
+    const t = V4_TOURS.find(x => x.id === v4State.tour);
+    if (t) tags.push(`<span class="rule-tag">🎫 ${t.name}</span>`);
+  }
+  if (v4State.hotelVoucher) {
+    const h = V4_HOTEL_VOUCHERS.find(x => x.id === v4State.hotelVoucher);
+    if (h) tags.push(`<span class="rule-tag">🏨 ${h.id} · ${h.name}</span>`);
+  }
+  if (v4State.roomRate) {
+    const r = V4_ROOM_RATES.find(x => x.id === v4State.roomRate);
+    if (r) tags.push(`<span class="rule-tag">🛏️ ${r.id} · ${r.name}</span>`);
+  }
+  if (v4State.flightVoucher) {
+    const f = V4_FLIGHT_VOUCHERS.find(x => x.id === v4State.flightVoucher);
+    if (f) tags.push(`<span class="rule-tag">✈️ ${f.id} · ${f.name}</span>`);
+  }
   container.innerHTML = tags.join('');
 }
 
@@ -9058,14 +9441,24 @@ function v4AutoAdminName() {
   const parts = [];
   if (v4State.operator) { const o = V4_OPERATORS.find(x=>x.id===v4State.operator); if(o) parts.push(o.name); }
   if (v4State.accom)    { const a = V4_ACCOMMODATIONS.find(x=>x.id===v4State.accom); if(a) parts.push(a.name); }
+  if (v4State.room)     { const r = V4_ROOMS.find(x=>x.id===v4State.room); if(r) parts.push(r.name); }
   if (v4State.meal)     parts.push(v4State.meal);
   if (v4State.airline)  { const a = V4_AIRLINES.find(x=>x.id===v4State.airline); if(a) parts.push(a.name); }
-  if (v4State.place)    { const p = V4_PLACES.find(x=>x.id===v4State.place); if(p) parts.push(p.name); }
+  if (v4State.place)       { const p = V4_PLACES.find(x=>x.id===v4State.place); if(p) parts.push(p.name); }
+  if (v4State.productCode) parts.push(v4State.productCode);
+  if (v4State.spot)        { const s = V4_SPOTS.find(x=>x.id===v4State.spot); if(s) parts.push(s.name); }
+  if (v4State.tour)          { const t = V4_TOURS.find(x=>x.id===v4State.tour); if(t) parts.push(t.name); }
+  if (v4State.hotelVoucher)  { const h = V4_HOTEL_VOUCHERS.find(x=>x.id===v4State.hotelVoucher); if(h) parts.push(h.id); }
+  if (v4State.roomRate)      { const r = V4_ROOM_RATES.find(x=>x.id===v4State.roomRate); if(r) parts.push(r.name); }
+  if (v4State.flightVoucher) { const f = V4_FLIGHT_VOUCHERS.find(x=>x.id===v4State.flightVoucher); if(f) parts.push(f.id); }
   const cat = v4State.category || '';
   const base = parts.length ? parts.join('_') : '공통';
-  const titleEl = document.getElementById('v4-title');
+  const titleVal = (document.getElementById('v4-title')?.value || '').trim();
   const adminEl = document.getElementById('v4-admin-name');
-  if (adminEl) adminEl.value = cat ? `${base}_${cat}` : base;
+  let name = base;
+  if (cat) name += `_${cat}`;
+  if (titleVal) name += `_${titleVal}`;
+  if (adminEl) adminEl.value = name;
 }
 
 function v4SetCategory(cat, el) {
@@ -9079,14 +9472,23 @@ function v4UpdateAdminName() {
   v4AutoAdminName();
 }
 
-function v4Save() {
+function v4Save(status) {
+  status = status || '운영중';
   const title = document.getElementById('v4-title').value.trim();
   const cat   = v4State.category;
-  if (!cat)   { alert('카테고리를 선택해주세요.'); return; }
-  if (!title) { alert('제목을 입력해주세요.'); return; }
+  if (status === '운영중') {
+    if (!cat)   { alert('카테고리를 선택해주세요.'); return; }
+    if (!title) { alert('제목을 입력해주세요.'); return; }
+  }
   const matched = v4MatchProducts();
-  if (confirm(`"${title}" POST를 저장하고\n${matched.length}개 상품에 연결할까요?`)) {
-    alert('✅ POST가 저장되었습니다.\n→ ' + matched.length + '개 상품에 자동 연결됩니다.');
+  const statusLabel = { '대기':'⏳ 대기', '운영중':'🟢 운영중', '중단':'🔴 중단' }[status];
+  const msg = status === '대기'
+    ? `POST를 임시저장할까요?\n상태: ${statusLabel}\n\n※ 대기 상태에서는 상품에 연결되지 않습니다.`
+    : `"${title}" POST를 저장하고\n${matched.length}개 상품에 연결할까요?\n상태: ${statusLabel}`;
+  if (confirm(msg)) {
+    alert(status === '대기'
+      ? '⏳ POST가 임시저장되었습니다. (대기 상태)'
+      : `🟢 POST가 저장되었습니다.\n→ ${matched.length}개 상품에 자동 연결됩니다.`);
     showView('list');
   }
 }
@@ -9094,7 +9496,24 @@ function v4Save() {
 // ---- 일괄 모드 ----
 function v4SwitchBulk() {
   document.getElementById('v4-bulk-panel').style.display = '';
-  if (v4State.bulkPosts.length === 0) v4BulkAddPost();
+  // 추천 카테고리로 카드 자동 생성
+  if (v4State.bulkPosts.length === 0) {
+    const recs = V4_CATEGORY_RECOMMENDATIONS[v4State.preset] || [];
+    if (recs.length > 0) {
+      recs.forEach((cat, i) => {
+        const parts = [];
+        if (v4State.operator) { const o = V4_OPERATORS.find(x=>x.id===v4State.operator); if(o) parts.push(o.name); }
+        if (v4State.accom) { const a = V4_ACCOMMODATIONS.find(x=>x.id===v4State.accom); if(a) parts.push(a.name); }
+        if (v4State.room) { const r = V4_ROOMS.find(x=>x.id===v4State.room); if(r) parts.push(r.name); }
+        if (v4State.meal) parts.push(v4State.meal);
+        if (v4State.airline) { const a = V4_AIRLINES.find(x=>x.id===v4State.airline); if(a) parts.push(a.name); }
+        const base = parts.length ? parts.join('_') : '공통';
+        v4State.bulkPosts.push({ id: Date.now()+i, cat, title: '', content: '', adminName: `${base}_${cat}`, open: i === 0 });
+      });
+    } else {
+      v4BulkAddPost();
+    }
+  }
   v4RenderBulkList();
   const sub = document.getElementById('v4-bulk-sub');
   if (sub) {
@@ -9113,6 +9532,7 @@ function v4BulkAddPost() {
 }
 
 function v4RenderBulkList() {
+  v4BulkUpdateProgress();
   const container = document.getElementById('v4-bulk-list');
   container.innerHTML = v4State.bulkPosts.map((p, i) => {
     const catOpts = V4_CATS.map(c => `<option value="${c}" ${p.cat===c?'selected':''}>${c}</option>`).join('');
@@ -9153,7 +9573,13 @@ function v4RenderBulkList() {
 
 function v4BulkToggle(i) {
   v4State.bulkPosts[i].open = !v4State.bulkPosts[i].open;
-  v4RenderBulkList();
+  // 개별 항목만 토글 (포커스 보존)
+  const items = document.querySelectorAll('#v4-bulk-list .bulk-post-item');
+  if (items[i]) {
+    items[i].classList.toggle('expanded', v4State.bulkPosts[i].open);
+  } else {
+    v4RenderBulkList();
+  }
 }
 function v4BulkRemove(i) {
   v4State.bulkPosts.splice(i,1);
@@ -9164,6 +9590,7 @@ function v4BulkSetCat(i, val) {
   const parts = [];
   if (v4State.operator) { const o = V4_OPERATORS.find(x=>x.id===v4State.operator); if(o) parts.push(o.name); }
   if (v4State.accom)    { const a = V4_ACCOMMODATIONS.find(x=>x.id===v4State.accom); if(a) parts.push(a.name); }
+  if (v4State.room)     { const r = V4_ROOMS.find(x=>x.id===v4State.room); if(r) parts.push(r.name); }
   if (v4State.meal)     parts.push(v4State.meal);
   if (v4State.airline)  { const a = V4_AIRLINES.find(x=>x.id===v4State.airline); if(a) parts.push(a.name); }
   const base = parts.length ? parts.join('_') : '공통';
@@ -9172,15 +9599,142 @@ function v4BulkSetCat(i, val) {
 }
 function v4BulkSetTitle(i, val) {
   v4State.bulkPosts[i].title = val;
+  v4BulkUpdateProgress();
 }
-function v4BulkSave() {
+function v4BulkUpdateProgress() {
+  const el = document.getElementById('v4-bulk-progress');
+  if (!el) return;
+  const total = v4State.bulkPosts.length;
+  const filled = v4State.bulkPosts.filter(p => p.cat && p.title).length;
+  const pct = total > 0 ? Math.round(filled / total * 100) : 0;
+  const color = pct >= 100 ? '#52c41a' : pct >= 50 ? '#1677ff' : '#faad14';
+  el.innerHTML = `
+    <span class="v4-bulk-progress-text">${filled}/${total} 작성 완료</span>
+    <div class="v4-bulk-progress-bar"><div class="v4-bulk-progress-fill" style="width:${pct}%;background:${color};"></div></div>
+    <span class="v4-bulk-progress-text" style="color:${color};">${pct}%</span>`;
+}
+
+function v4BulkGenerateAll() {
+  const btn = document.getElementById('v4-bulk-ai-btn');
+  if (!btn) return;
+  btn.disabled = true;
+  btn.classList.add('loading');
+  btn.innerHTML = '<span class="ai-icon">⏳</span> 생성 중...';
+
+  let idx = 0;
+  function genNext() {
+    if (idx >= v4State.bulkPosts.length) {
+      btn.disabled = false;
+      btn.classList.remove('loading');
+      btn.innerHTML = '<span class="ai-icon">✨</span> 전체 AI 초안 생성';
+      v4RenderBulkList();
+      return;
+    }
+    const post = v4State.bulkPosts[idx];
+    if (post.cat && V4_AI_TEMPLATES[post.cat]) {
+      const tmpl = V4_AI_TEMPLATES[post.cat];
+      const resolvers = {
+        '{target}': () => {
+          if (v4State.accom) { const a = V4_ACCOMMODATIONS.find(x=>x.id===v4State.accom); if (a) return a.name; }
+          if (v4State.airline) { const a = V4_AIRLINES.find(x=>x.id===v4State.airline); if (a) return a.name; }
+          if (v4State.operator) { const o = V4_OPERATORS.find(x=>x.id===v4State.operator); if (o) return o.name; }
+          if (v4State.place) { const p = V4_PLACES.find(x=>x.id===v4State.place); if (p) return p.name; }
+          return '상품';
+        },
+        '{place}': () => { if (v4State.place) { const p = V4_PLACES.find(x=>x.id===v4State.place); if (p) return p.name; } if (v4State.accom) { const a = V4_ACCOMMODATIONS.find(x=>x.id===v4State.accom); if (a) return a.place; } return '현지'; },
+        '{airline}': () => { if (v4State.airline) { const a = V4_AIRLINES.find(x=>x.id===v4State.airline); if (a) return a.name; } return '항공사'; },
+        '{meal}': () => v4State.meal || 'BB (조식)',
+        '{nights}': () => '4',
+      };
+      let title = tmpl.title;
+      let body = tmpl.body;
+      Object.entries(resolvers).forEach(([k, fn]) => { title = title.replaceAll(k, fn()); body = body.replaceAll(k, fn()); });
+      post.title = title;
+      post.content = body.replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim().substring(0, 200);
+    }
+    idx++;
+    setTimeout(genNext, 400);
+  }
+  genNext();
+}
+
+function v4BulkSave(status) {
+  status = status || '운영중';
   const filled = v4State.bulkPosts.filter(p => p.cat && p.title);
-  if (filled.length === 0) { alert('카테고리와 제목을 하나 이상 입력해주세요.'); return; }
+  if (status === '운영중' && filled.length === 0) { alert('카테고리와 제목을 하나 이상 입력해주세요.'); return; }
   const matched = v4MatchProducts();
-  if (confirm(`${filled.length}개 POST를 저장하고\n${matched.length}개 상품에 연결할까요?`)) {
-    alert(`✅ ${filled.length}개 POST가 저장되었습니다.\n→ ${matched.length}개 상품에 자동 연결됩니다.`);
+  const statusLabel = { '대기':'⏳ 대기', '운영중':'🟢 운영중', '중단':'🔴 중단' }[status];
+  const cnt = status === '대기' ? v4State.bulkPosts.length : filled.length;
+  const msg = status === '대기'
+    ? `${cnt}개 POST를 임시저장할까요?\n상태: ${statusLabel}`
+    : `${filled.length}개 POST를 저장하고\n${matched.length}개 상품에 연결할까요?\n상태: ${statusLabel}`;
+  if (confirm(msg)) {
+    alert(status === '대기'
+      ? `⏳ ${cnt}개 POST가 임시저장되었습니다. (대기 상태)`
+      : `🟢 ${filled.length}개 POST가 저장되었습니다.\n→ ${matched.length}개 상품에 자동 연결됩니다.`);
     showView('list');
   }
+}
+
+// ---- AI 초안 생성 ----
+const V4_AI_TEMPLATES = {
+  '소개': { title: '{target} 소개', body: '<h3>{target} 소개</h3><p>{target}은(는) {place}에 위치한 리조트로, 아름다운 자연환경과 최신 시설을 갖추고 있습니다.</p><p>도심에서 가까운 접근성과 함께 다양한 부대시설을 이용하실 수 있습니다.</p>' },
+  '핵심포인트': { title: '{target} 핵심 포인트', body: '<h3>핵심 포인트</h3><ul><li>공항에서 차량 약 30분 거리</li><li>전 객실 오션뷰 / 풀액세스</li><li>키즈클럽 및 워터파크 무료 이용</li><li>조식 뷔페 포함</li></ul>' },
+  '스페셜 혜택': { title: '{target} 스페셜 혜택', body: '<h3>트립스토어 전용 혜택</h3><ul><li>얼리체크인 (14:00 → 12:00)</li><li>레이트체크아웃 (12:00 → 14:00, 가용시)</li><li>웰컴 드링크 2잔 제공</li><li>스파 10% 할인</li></ul>' },
+  '포함사항': { title: '{target} 포함사항', body: '<h3>포함사항</h3><ul><li>왕복 항공권 (위탁수하물 포함)</li><li>숙소 {nights}박</li><li>{meal} 포함</li><li>공항-호텔 왕복 픽업/샌딩</li><li>여행자보험</li></ul>' },
+  '불포함사항': { title: '{target} 불포함사항', body: '<h3>불포함사항</h3><ul><li>개인 경비 (미니바, 룸서비스 등)</li><li>선택 투어 비용</li><li>여권 발급 비용</li><li>PCR 검사 비용 (필요 시)</li></ul>' },
+  '유의사항': { title: '{target} 유의사항', body: '<h3>유의사항</h3><ul><li>여권 잔여 유효기간 6개월 이상 필수</li><li>예약 후 탑승자 정보 변경 불가</li><li>출발일 기준 만 2세 미만 유아는 별도 문의</li><li>항공 좌석 사전 배정 불가 (공항 체크인 시 배정)</li></ul>' },
+  '안내사항': { title: '{place} 안내사항', body: '<h3>{place} 현지 안내</h3><ul><li>시차: 한국 대비 -2시간</li><li>전압: 220V (한국과 동일)</li><li>화폐: 베트남 동 (VND)</li><li>긴급 연락처: +84-xxx-xxxx</li></ul>' },
+  '출발 전 안내': { title: '출발 전 체크리스트', body: '<h3>출발 전 안내</h3><ol><li>여권 유효기간 확인 (6개월 이상)</li><li>e-Visa 또는 무비자 입국 확인</li><li>항공권 모바일 탑승권 다운로드</li><li>여행자보험 가입 확인</li><li>현지 날씨 확인 및 짐 준비</li></ol>' },
+  '수하물 규정': { title: '{airline} 수하물 규정', body: '<h3>수하물 규정</h3><table style="width:100%;border-collapse:collapse;font-size:13px;"><tr style="background:#f5f5f5;"><th style="padding:8px;border:1px solid #e8e8e8;">구분</th><th style="padding:8px;border:1px solid #e8e8e8;">무게</th><th style="padding:8px;border:1px solid #e8e8e8;">크기</th></tr><tr><td style="padding:8px;border:1px solid #e8e8e8;">위탁수하물</td><td style="padding:8px;border:1px solid #e8e8e8;">20kg</td><td style="padding:8px;border:1px solid #e8e8e8;">3변 합 158cm 이내</td></tr><tr><td style="padding:8px;border:1px solid #e8e8e8;">기내수하물</td><td style="padding:8px;border:1px solid #e8e8e8;">7kg</td><td style="padding:8px;border:1px solid #e8e8e8;">56x36x23cm 이내</td></tr></table>' },
+  '취소환불규정': { title: '{target} 취소/환불 규정', body: '<h3>취소 및 환불 규정</h3><table style="width:100%;border-collapse:collapse;font-size:13px;"><tr style="background:#f5f5f5;"><th style="padding:8px;border:1px solid #e8e8e8;">시점</th><th style="padding:8px;border:1px solid #e8e8e8;">환불율</th></tr><tr><td style="padding:8px;border:1px solid #e8e8e8;">출발 30일 전</td><td style="padding:8px;border:1px solid #e8e8e8;">전액 환불</td></tr><tr><td style="padding:8px;border:1px solid #e8e8e8;">출발 15~29일 전</td><td style="padding:8px;border:1px solid #e8e8e8;">70% 환불</td></tr><tr><td style="padding:8px;border:1px solid #e8e8e8;">출발 7~14일 전</td><td style="padding:8px;border:1px solid #e8e8e8;">50% 환불</td></tr><tr><td style="padding:8px;border:1px solid #e8e8e8;">출발 6일 이내</td><td style="padding:8px;border:1px solid #e8e8e8;">환불 불가</td></tr></table>' },
+  '자주 묻는 질문': { title: '{target} FAQ', body: '<h3>자주 묻는 질문</h3><details style="margin-bottom:8px;"><summary style="font-weight:600;cursor:pointer;padding:8px 0;">Q. 체크인/체크아웃 시간은?</summary><p style="padding:8px 0 8px 16px;color:#555;">체크인 15:00 / 체크아웃 12:00</p></details><details style="margin-bottom:8px;"><summary style="font-weight:600;cursor:pointer;padding:8px 0;">Q. 공항 픽업은 어떻게 진행되나요?</summary><p style="padding:8px 0 8px 16px;color:#555;">도착 게이트 앞에서 이름표를 들고 대기합니다.</p></details><details><summary style="font-weight:600;cursor:pointer;padding:8px 0;">Q. 객실 업그레이드가 가능한가요?</summary><p style="padding:8px 0 8px 16px;color:#555;">현장 가용 상황에 따라 추가 요금으로 가능합니다.</p></details>' },
+};
+
+function v4GenerateAIDraft() {
+  const cat = v4State.category;
+  if (!cat) { alert('카테고리를 먼저 선택해주세요.'); return; }
+
+  const btn = document.getElementById('v4-ai-btn');
+  if (!btn) return;
+  btn.disabled = true;
+  btn.classList.add('loading');
+  btn.innerHTML = '<span class="ai-icon">⏳</span> 생성 중...';
+
+  setTimeout(() => {
+    const tmpl = V4_AI_TEMPLATES[cat];
+    if (!tmpl) { btn.disabled = false; btn.classList.remove('loading'); btn.innerHTML = '<span class="ai-icon">✨</span> AI 초안 생성'; alert('이 카테고리는 아직 템플릿이 없습니다.'); return; }
+
+    // 플레이스홀더 치환
+    const resolvers = {
+      '{target}': () => {
+        if (v4State.accom) { const a = V4_ACCOMMODATIONS.find(x=>x.id===v4State.accom); if (a) return a.name; }
+        if (v4State.airline) { const a = V4_AIRLINES.find(x=>x.id===v4State.airline); if (a) return a.name; }
+        if (v4State.operator) { const o = V4_OPERATORS.find(x=>x.id===v4State.operator); if (o) return o.name; }
+        if (v4State.place) { const p = V4_PLACES.find(x=>x.id===v4State.place); if (p) return p.name; }
+        return '상품';
+      },
+      '{place}': () => {
+        if (v4State.place) { const p = V4_PLACES.find(x=>x.id===v4State.place); if (p) return p.name; }
+        if (v4State.accom) { const a = V4_ACCOMMODATIONS.find(x=>x.id===v4State.accom); if (a) return a.place; }
+        return '현지';
+      },
+      '{airline}': () => { if (v4State.airline) { const a = V4_AIRLINES.find(x=>x.id===v4State.airline); if (a) return a.name; } return '항공사'; },
+      '{meal}': () => v4State.meal || 'BB (조식)',
+      '{nights}': () => '4',
+    };
+    let title = tmpl.title;
+    let body = tmpl.body;
+    Object.entries(resolvers).forEach(([k, fn]) => { title = title.replaceAll(k, fn()); body = body.replaceAll(k, fn()); });
+
+    document.getElementById('v4-title').value = title;
+    document.getElementById('v4-content').innerHTML = body;
+    v4AutoAdminName();
+
+    btn.disabled = false;
+    btn.classList.remove('loading');
+    btn.innerHTML = '<span class="ai-icon">✨</span> AI 초안 생성';
+  }, 1800);
 }
 
 function v4ToggleAdv() {
@@ -9199,6 +9753,7 @@ function v4ToggleAdv() {
 const V4_SUBJECTS = [
   { key: 'operatorId',      label: '공급사',       type: 'select',  options: () => V4_OPERATORS.map(o => ({val: String(o.id), label: o.name})) },
   { key: 'accommodationId', label: '숙소',         type: 'select',  options: () => V4_ACCOMMODATIONS.map(a => ({val: String(a.id), label: `${a.name} (${a.place})`})) },
+  { key: 'roomId',          label: '객실',         type: 'select',  options: () => V4_ROOMS.map(r => ({val: r.id, label: r.name})) },
   { key: 'accomMealPlan',   label: '식사',         type: 'select',  options: () => V4_MEALS.map(m => ({val: m.code, label: m.label})) },
   { key: 'airlineId',       label: '항공사',       type: 'select',  options: () => V4_AIRLINES.map(a => ({val: String(a.id), label: `${a.name} (${a.iata})`})) },
   { key: 'targetPlaceId',   label: '여행지',       type: 'select',  options: () => V4_PLACES.map(p => ({val: String(p.id), label: p.name})) },
@@ -9207,6 +9762,11 @@ const V4_SUBJECTS = [
   { key: 'accomPickup',     label: '픽업포함',     type: 'bool' },
   { key: 'conductor',       label: '인솔자포함',   type: 'bool' },
   { key: 'guide',           label: '가이드포함',   type: 'bool' },
+  { key: 'spotActivityId',  label: '스팟/체험',    type: 'select',  options: () => V4_SPOTS.map(s => ({val: s.id, label: s.name})) },
+  { key: 'hotelVoucherId',  label: '숙박권 ID',   type: 'select',  options: () => V4_HOTEL_VOUCHERS.map(h => ({val: h.id, label: `${h.id} · ${h.name}`})) },
+  { key: 'roomRateId',      label: '객실요금표 ID',type: 'select',  options: () => V4_ROOM_RATES.map(r => ({val: r.id, label: `${r.id} · ${r.name}`})) },
+  { key: 'flightVoucherId', label: '항공권 ID',   type: 'select',  options: () => V4_FLIGHT_VOUCHERS.map(f => ({val: f.id, label: `${f.id} · ${f.name}`})) },
+  { key: 'tourTicketId',    label: '투어/티켓 ID', type: 'select',  options: () => V4_TOURS.map(t => ({val: t.id, label: `${t.id} · ${t.name}`})) },
   { key: 'kind',            label: '상품종류',     type: 'select',  options: () => [{val:'AIRTEL', label:'AIRTEL (항공+숙박)'},{val:'TOUR', label:'TOUR (투어)'},{val:'HOTEL', label:'HOTEL (숙박만)'}] },
 ];
 
@@ -9481,16 +10041,22 @@ function v4AutoAdminNameFromCustom(clues) {
   document.getElementById('v4-admin-name').value = base;
 }
 
-function initV4() {
-  // 카테고리 칩 렌더링
+function v4RenderCatChips() {
   const catContainer = document.getElementById('v4-cat-chips');
-  if (catContainer) {
-    catContainer.innerHTML = V4_CATS.map(c =>
-      `<button class="v4-chip" onclick="v4SetCategory('${c}',this)">${c}</button>`
-    ).join('');
-  }
-  // 상태 초기화
-  v4State = { preset:null, operator:null, accom:null, meal:null, airline:null, place:null, category:null, bulkMode:false, bulkPosts:[] };
+  if (!catContainer) return;
+  const recs = V4_CATEGORY_RECOMMENDATIONS[v4State.preset] || [];
+  catContainer.innerHTML = V4_CATS.map(c => {
+    const isRec = recs.includes(c);
+    const isOn = v4State.category === c;
+    return `<button class="v4-chip${isRec ? ' recommended' : ''}${isOn ? ' on' : ''}" onclick="v4SetCategory('${c}',this)">${c}</button>`;
+  }).join('');
+}
+
+function initV4() {
+  // 상태 초기화 먼저
+  v4State = { preset:null, operator:null, accom:null, room:null, meal:null, airline:null, place:null, productCode:null, productCodes:'', _parsedCodes:[], spot:null, tour:null, hotelVoucher:null, roomRate:null, flightVoucher:null, category:null, bulkMode:false, bulkPosts:[] };
+  // 카테고리 칩 렌더링 (초기화된 상태 기준)
+  v4RenderCatChips();
   document.querySelectorAll('#v4-preset-grid .preset-card').forEach(c => c.classList.remove('selected'));
   document.getElementById('v4-condition-panel').classList.remove('shown');
   document.getElementById('v4-rule-tags').innerHTML = '';
@@ -9499,6 +10065,7 @@ function initV4() {
   document.getElementById('v4-bulk-panel').style.display = 'none';
   const matchBox = document.getElementById('v4-match-preview');
   if (matchBox) matchBox.innerHTML = `<div class="v4-match-empty"><div style="font-size:28px;margin-bottom:8px;">🔍</div><div style="font-size:13px;font-weight:500;color:rgba(0,0,0,0.35);">조건을 선택하면 매칭 상품이 표시됩니다</div></div>`;
+  v4UpdatePresetCounts();
 }
 
 // ================================================================
@@ -9685,9 +10252,210 @@ function selectImpactPost(id) {
     </div>
     <div style="padding:14px 24px;border-top:1px solid #f0f0f0;display:flex;gap:8px;justify-content:flex-end;background:#fafafa;border-radius:0 0 8px 8px;">
       <button class="btn btn-default" onclick="showView('list')">목록으로</button>
-      <button class="btn btn-primary" onclick="alert('POST 수정 화면으로 이동합니다.')">이 POST 수정하기 →</button>
+      <button class="btn btn-primary" onclick="pmShowEditPanel(${selectedImpactPost.id})">이 POST 수정하기 →</button>
     </div>
   </div>`;
+}
+
+// ---- POST 관리: 행사코드 조회 ----
+function pmSearchByProduct() {
+  const code = document.getElementById('pm-product-search').value.trim();
+  if (!code) { alert('행사코드 또는 상품코드를 입력해주세요.'); return; }
+  const product = V4_PRODUCTS.find(p => p.productCode === code || String(p.id) === code);
+  if (!product) { alert(`"${code}"에 해당하는 행사/상품을 찾을 수 없습니다.`); return; }
+
+  document.getElementById('pm-default-view').style.display = 'none';
+  const result = document.getElementById('pm-product-result');
+  result.style.display = '';
+
+  document.getElementById('pm-prod-title').textContent = product.title;
+  document.getElementById('pm-prod-meta').textContent = `상품코드: ${product.productCode} · ID: ${product.id}`;
+
+  // 이 상품에 매칭되는 POST 찾기 (IMPACT_POSTS의 affected에서)
+  const matchedPosts = IMPACT_POSTS.filter(p => p.affected.some(a => a.pid === product.id));
+  // + 전체 공통 POST도 포함
+  const allPosts = [...matchedPosts];
+  if (!allPosts.find(p => p.name.includes('공통'))) {
+    allPosts.push({ id:9999, name:'공통_취소환불규정_전체', cat:'취소환불규정', updated:'2026-04-10', affected: V4_PRODUCTS.map(p=>({pid:p.id, name:p.title, type:'상품', reservations:0, departure:'-'})) });
+  }
+
+  document.getElementById('pm-prod-post-count').textContent = `(${allPosts.length}개)`;
+  document.getElementById('pm-prod-post-list').innerHTML = allPosts.length === 0
+    ? '<div style="text-align:center;padding:20px;color:rgba(0,0,0,0.25);font-size:13px;">연결된 POST가 없습니다</div>'
+    : allPosts.map((p, idx) => `
+      <div style="border:1px solid #f0f0f0;border-radius:8px;margin-bottom:8px;overflow:hidden;" id="pm-prod-post-${p.id}">
+        <div style="display:flex;align-items:center;gap:10px;padding:12px 16px;cursor:pointer;background:#fff;" onclick="pmToggleProdPost(${p.id})">
+          <span style="font-size:10px;background:#e6f4ff;color:#1677ff;border-radius:4px;padding:2px 6px;font-weight:700;">#${p.id}</span>
+          <span style="font-size:10px;padding:2px 8px;border-radius:10px;background:#f5f5f5;color:rgba(0,0,0,0.55);">${p.cat}</span>
+          <div style="flex:1;font-size:13px;font-weight:500;color:rgba(0,0,0,0.85);">${p.name}</div>
+          <span class="v4-status-badge st-active" style="font-size:9px;padding:1px 6px;">운영중</span>
+          <span style="font-size:11px;color:rgba(0,0,0,0.35);">${p.updated}</span>
+          <span style="font-size:11px;color:rgba(0,0,0,0.25);transition:transform 0.2s;" id="pm-prod-arrow-${p.id}">▼</span>
+        </div>
+        <div style="display:none;border-top:1px solid #f0f0f0;background:#fafafa;" id="pm-prod-detail-${p.id}">
+          <div style="padding:14px 16px;">
+            <div style="font-size:11px;font-weight:600;color:rgba(0,0,0,0.4);margin-bottom:6px;">본문 내용</div>
+            <div style="background:#fff;border:1px solid #e8e8e8;border-radius:6px;padding:12px;font-size:13px;color:rgba(0,0,0,0.7);line-height:1.7;min-height:60px;">
+              ${p.cat === '취소환불규정' ? '<p>출발 30일 전: 전액 환불<br>출발 15~29일 전: 70% 환불<br>출발 7~14일 전: 50% 환불<br>출발 6일 이내: 환불 불가</p>'
+              : p.cat === '스페셜 혜택' ? '<p>얼리체크인 (14:00→12:00)<br>레이트체크아웃 (12:00→14:00, 가용시)<br>웰컴 드링크 2잔 제공</p>'
+              : p.cat === '포함사항' ? '<p>왕복 항공권 (위탁수하물 포함)<br>숙소 4박<br>BB (조식) 포함<br>공항-호텔 왕복 픽업/샌딩</p>'
+              : '<p>이 POST의 상세 내용이 여기에 표시됩니다.</p>'}
+            </div>
+            <div style="display:flex;align-items:center;gap:8px;margin-top:10px;">
+              <span style="font-size:11px;color:rgba(0,0,0,0.35);">연결 행사 ${p.affected.length}개 · 수정일 ${p.updated}</span>
+              <div style="margin-left:auto;display:flex;gap:6px;">
+                <button class="btn btn-default btn-sm" onclick="pmProdEditInline(${p.id})">수정</button>
+              </div>
+            </div>
+          </div>
+          <div id="pm-prod-edit-${p.id}" style="display:none;"></div>
+        </div>
+      </div>`).join('');
+}
+
+function pmToggleProdPost(postId) {
+  const detail = document.getElementById('pm-prod-detail-' + postId);
+  const arrow = document.getElementById('pm-prod-arrow-' + postId);
+  const isOpen = detail.style.display !== 'none';
+  detail.style.display = isOpen ? 'none' : '';
+  arrow.style.transform = isOpen ? '' : 'rotate(180deg)';
+}
+
+function pmProdEditInline(postId) {
+  const post = IMPACT_POSTS.find(p => p.id === postId);
+  if (!post) return;
+  const el = document.getElementById('pm-prod-edit-' + postId);
+  if (el.style.display !== 'none') { el.style.display = 'none'; return; }
+  const totalRes = post.affected.reduce((s,a) => s+a.reservations, 0);
+  const currentContent = post.cat === '취소환불규정' ? '출발 30일 전: 전액 환불\n출발 15~29일 전: 70% 환불\n출발 7~14일 전: 50% 환불\n출발 6일 이내: 환불 불가'
+    : post.cat === '스페셜 혜택' ? '얼리체크인 (14:00→12:00)\n레이트체크아웃 (12:00→14:00, 가용시)\n웰컴 드링크 2잔 제공'
+    : post.cat === '포함사항' ? '왕복 항공권 (위탁수하물 포함)\n숙소 4박\nBB (조식) 포함\n공항-호텔 왕복 픽업/샌딩'
+    : '이 POST의 상세 내용';
+
+  el.style.display = '';
+  el.innerHTML = `
+    <div style="padding:14px 16px;border-top:1px solid #e8e8e8;background:#fff;">
+      <div style="font-size:12px;font-weight:600;color:#1677ff;margin-bottom:10px;">POST 수정</div>
+      <div class="form-item" style="margin-bottom:10px;">
+        <div class="form-label" style="font-size:11px;">제목</div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
+          <input type="text" class="fc" value="${post.name}" disabled style="background:#fafafa;color:rgba(0,0,0,0.45);font-size:12px;">
+          <input type="text" class="fc" value="${post.name}" style="border-color:#1677ff;font-size:12px;">
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:2px;">
+          <span style="font-size:10px;color:rgba(0,0,0,0.2);">현재</span>
+          <span style="font-size:10px;color:#1677ff;">수정</span>
+        </div>
+      </div>
+      <div class="form-item" style="margin-bottom:10px;">
+        <div class="form-label" style="font-size:11px;">본문</div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
+          <div style="background:#fafafa;border:1px solid #f0f0f0;border-radius:6px;padding:10px;font-size:12px;color:rgba(0,0,0,0.4);line-height:1.7;min-height:100px;white-space:pre-wrap;">${currentContent}</div>
+          <textarea class="fc" rows="5" style="font-size:12px;border-color:#1677ff;line-height:1.7;resize:vertical;">${currentContent}</textarea>
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:2px;">
+          <span style="font-size:10px;color:rgba(0,0,0,0.2);">현재 내용</span>
+          <span style="font-size:10px;color:#1677ff;">수정할 내용</span>
+        </div>
+      </div>
+      ${totalRes > 0 ? '<div class="impact-warn-box" style="font-size:12px;">⚠️ <div>진행 중인 예약 <strong>' + totalRes + '건</strong>이 있습니다. 수정 시 즉시 반영됩니다.</div></div>' : ''}
+      <div style="display:flex;gap:6px;justify-content:flex-end;padding-top:8px;border-top:1px solid #f0f0f0;">
+        <button class="btn btn-default btn-sm" onclick="document.getElementById('pm-prod-edit-${postId}').style.display='none'">취소</button>
+        <button class="btn btn-primary btn-sm" onclick="alert('✅ POST #${postId} 수정 완료.\\n→ ${post.affected.length}개 행사에 즉시 반영.');document.getElementById('pm-prod-edit-${postId}').style.display='none';">저장</button>
+      </div>
+    </div>`;
+}
+
+function pmClearSearch() {
+  document.getElementById('pm-product-search').value = '';
+  document.getElementById('pm-post-search').value = '';
+  document.getElementById('pm-default-view').style.display = '';
+  document.getElementById('pm-product-result').style.display = 'none';
+  renderImpactPosts('');
+}
+
+function pmShowEditPanel(postId) {
+  const post = IMPACT_POSTS.find(p => p.id === postId);
+  if (!post) { alert('POST 수정 모달 (준비 중)'); return; }
+  const panel = document.getElementById('impact-result-panel');
+  const totalRes = post.affected.reduce((s,a) => s+a.reservations, 0);
+
+  panel.innerHTML = `<div class="card">
+    <div style="padding:16px 20px;border-bottom:1px solid #f0f0f0;display:flex;align-items:center;gap:8px;">
+      <span style="font-size:10px;background:#e6f4ff;color:#1677ff;border-radius:4px;padding:2px 6px;font-weight:700;">#${post.id}</span>
+      <span style="font-size:10px;padding:2px 8px;border-radius:10px;background:#f5f5f5;color:rgba(0,0,0,0.55);">${post.cat}</span>
+      <div style="flex:1;font-size:15px;font-weight:700;">${post.name}</div>
+      <span class="v4-status-badge st-active" style="font-size:10px;padding:1px 8px;">운영중</span>
+    </div>
+
+    <!-- 연결 행사 -->
+    <div style="padding:14px 20px;border-bottom:1px solid #f0f0f0;background:#fafafa;">
+      <div style="font-size:11px;font-weight:600;color:rgba(0,0,0,0.45);margin-bottom:8px;">연결된 행사 (${post.affected.length}개) · 예약 ${totalRes}건</div>
+      <div style="display:flex;flex-wrap:wrap;gap:6px;">
+        ${post.affected.map(a => `<span style="font-size:11px;padding:3px 10px;border-radius:14px;background:#fff;border:1px solid #e8e8e8;color:rgba(0,0,0,0.65);">${a.name}${a.reservations>0?' <span style=color:#d48806;font-weight:600>'+a.reservations+'건</span>':''}</span>`).join('')}
+      </div>
+    </div>
+
+    <!-- 내용 수정: 좌=기존 / 우=수정 -->
+    <div style="padding:16px 20px;">
+      <div style="font-size:12px;font-weight:600;color:rgba(0,0,0,0.55);margin-bottom:10px;">POST 내용 수정</div>
+      <div class="form-item" style="margin-bottom:14px;">
+        <div class="form-label">제목</div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
+          <input type="text" class="fc" value="${post.name}" disabled style="background:#fafafa;color:rgba(0,0,0,0.45);font-size:12px;">
+          <input type="text" class="fc" value="${post.name}" id="pm-edit-title" style="border-color:#1677ff;">
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:2px;">
+          <span style="font-size:10px;color:rgba(0,0,0,0.25);">현재</span>
+          <span style="font-size:10px;color:#1677ff;">수정</span>
+        </div>
+      </div>
+      <div class="form-item" style="margin-bottom:14px;">
+        <div class="form-label">본문</div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
+          <div style="background:#fafafa;border:1px solid #f0f0f0;border-radius:6px;padding:12px;font-size:13px;color:rgba(0,0,0,0.45);line-height:1.7;min-height:140px;">
+            <p>이 POST의 현재 내용이 여기에 표시됩니다.</p>
+            <p>수정 전 원본을 비교하면서 새 내용을 작성할 수 있습니다.</p>
+          </div>
+          <div class="editor-wrap" style="border-color:#1677ff;">
+            <div class="editor-toolbar">
+              <button class="etb" title="굵게"><b>B</b></button>
+              <button class="etb" title="기울임"><i>I</i></button>
+              <button class="etb" title="밑줄"><u>U</u></button>
+              <div class="etb-sep"></div>
+              <button class="etb" title="목록">≡</button>
+              <button class="etb" title="링크">🔗</button>
+            </div>
+            <div class="editor-body" contenteditable="true" style="min-height:120px;" data-placeholder="수정할 내용을 작성하세요...">
+              <p>이 POST의 현재 내용이 여기에 표시됩니다.</p>
+              <p>수정 전 원본을 비교하면서 새 내용을 작성할 수 있습니다.</p>
+            </div>
+          </div>
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:2px;">
+          <span style="font-size:10px;color:rgba(0,0,0,0.25);">현재 내용</span>
+          <span style="font-size:10px;color:#1677ff;">수정할 내용</span>
+        </div>
+      </div>
+      ${totalRes > 0 ? `<div class="impact-warn-box">⚠️ <div>진행 중인 예약 <strong>${totalRes}건</strong>이 있습니다. 수정 내용이 즉시 반영됩니다.</div></div>` : ''}
+    </div>
+
+    <div style="padding:14px 20px;border-top:1px solid #f0f0f0;display:flex;gap:8px;justify-content:flex-end;background:#fafafa;border-radius:0 0 8px 8px;">
+      <button class="btn btn-default" onclick="selectImpactPost(${post.id})">취소</button>
+      <button class="btn btn-default" onclick="pmChangeStatus(${post.id},'중단')" style="border-color:#ff4d4f;color:#cf1322;">중단</button>
+      <button class="btn btn-primary" onclick="alert('✅ POST가 수정되었습니다.\\n→ ${post.affected.length}개 행사에 즉시 반영됩니다.');selectImpactPost(${post.id})">저장</button>
+    </div>
+  </div>`;
+
+  // 기본 뷰로 전환
+  document.getElementById('pm-default-view').style.display = '';
+  document.getElementById('pm-product-result').style.display = 'none';
+}
+
+function pmChangeStatus(postId, status) {
+  if (confirm('이 POST를 "' + status + '" 상태로 변경할까요?\\n연결된 행사에서 즉시 해제됩니다.')) {
+    alert('🔴 POST가 중단되었습니다.');
+  }
 }
 
 // ================================================================
