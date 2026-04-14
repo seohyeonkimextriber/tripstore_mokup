@@ -1563,65 +1563,60 @@
   </div>
 </div>
 
-<!-- 인원추가 모달 -->
+<!-- 인원추가 모달 (다중 행) -->
 <div class="modal-overlay" id="modal-add-pax">
-  <div class="modal" style="width:520px;">
+  <div class="modal" style="width:580px;">
     <div class="modal-header"><h3>+ 인원 추가</h3><button class="close" onclick="this.closest('.modal-overlay').classList.remove('show')">&times;</button></div>
     <div class="modal-body">
       <div style="background:#e3f2fd;border-radius:8px;padding:10px 14px;font-size:12px;color:#1565c0;margin-bottom:16px;">
-        인원 추가 시 해당 인원의 <strong>상품정가(100)</strong>와 <strong>특가할인(202)</strong>이 원장에 자동 생성됩니다.
+        연령 구분 + 인원 수 조합을 여러 개 추가할 수 있습니다. 각 인원별 <strong>상품정가(100)</strong>와 <strong>특가할인(202)</strong>이 원장에 자동 생성됩니다.
       </div>
 
-      <div class="form-group">
-        <label>연령 구분</label>
-        <select id="add-pax-age">
-          <option value="adult">성인</option>
-          <option value="child">아동</option>
-          <option value="infant">유아</option>
-        </select>
-      </div>
-      <div class="form-group">
-        <label>추가 인원 수</label>
-        <select id="add-pax-count">
-          <option value="1">1명</option>
-          <option value="2">2명</option>
-          <option value="3">3명</option>
-        </select>
-      </div>
-
-      <!-- 금액 미리보기 -->
-      <div style="background:#f8f9fa;border-radius:8px;padding:14px;margin-top:12px;border:1px solid #e0e0e0;">
-        <div style="font-size:12px;font-weight:700;margin-bottom:8px;">원장 자동 생성 항목</div>
-        <div style="display:flex;flex-direction:column;gap:6px;font-size:12px;">
-          <div style="display:flex;justify-content:space-between;align-items:center;">
-            <div style="display:flex;align-items:center;gap:6px;">
-              <span class="code charge" style="padding:1px 6px;border-radius:3px;font-family:monospace;font-size:10px;font-weight:700;">100</span>
-              <span>상품정가 (추가 1명)</span>
-            </div>
-            <span style="font-family:monospace;font-weight:700;">+699,000</span>
-          </div>
-          <div style="display:flex;justify-content:space-between;align-items:center;">
-            <div style="display:flex;align-items:center;gap:6px;">
-              <span class="code discount" style="padding:1px 6px;border-radius:3px;font-family:monospace;font-size:10px;font-weight:700;">202</span>
-              <span>여행사특가할인 (하나투어 2%)</span>
-            </div>
-            <span style="font-family:monospace;font-weight:700;color:#d32f2f;">-13,980</span>
-          </div>
-          <div style="border-top:1px solid #ddd;padding-top:6px;display:flex;justify-content:space-between;font-weight:700;">
-            <span>결제 필요 금액 변동</span>
-            <span style="font-family:monospace;color:#d32f2f;">+685,020</span>
-          </div>
-        </div>
-      </div>
+      <!-- 추가 행 테이블 -->
+      <table style="font-size:12px;" id="add-pax-table">
+        <thead><tr>
+          <th>연령 구분</th><th class="text-center">인원 수</th><th class="text-right">1인 상품가</th><th class="text-right">1인 특가</th><th class="text-right">소계</th><th style="width:40px;"></th>
+        </tr></thead>
+        <tbody id="add-pax-tbody">
+          <tr>
+            <td>
+              <select onchange="recalcAddPaxRow(this)" style="padding:4px 8px;border:1px solid #d0d0d0;border-radius:4px;font-size:12px;width:100%;">
+                <option value="adult" data-price="699000" data-discount="13000">성인 (699,000)</option>
+                <option value="child" data-price="559200" data-discount="10400">아동 (559,200)</option>
+                <option value="infant" data-price="0" data-discount="0">유아 (0)</option>
+              </select>
+            </td>
+            <td class="text-center">
+              <select onchange="recalcAddPaxRow(this)" style="padding:4px 8px;border:1px solid #d0d0d0;border-radius:4px;font-size:12px;width:60px;text-align:center;">
+                <option>1</option><option>2</option><option>3</option><option>4</option><option>5</option>
+              </select>
+            </td>
+            <td class="text-right text-mono" data-field="price">699,000</td>
+            <td class="text-right text-mono" style="color:#d32f2f;" data-field="discount">-13,000</td>
+            <td class="text-right text-mono" style="font-weight:700;" data-field="subtotal">686,000</td>
+            <td class="text-center"><button class="btn btn-danger btn-sm" style="font-size:10px;padding:2px 6px;" onclick="this.closest('tr').remove();recalcAddPaxTotal()">×</button></td>
+          </tr>
+        </tbody>
+        <tfoot>
+          <tr><td colspan="6" style="padding:6px;">
+            <button class="btn btn-outline btn-sm" onclick="addPaxRow()" style="width:100%;font-size:11px;">+ 연령/인원 조합 추가</button>
+          </td></tr>
+          <tr style="background:#fff8e1;font-weight:700;border-top:2px solid #333;">
+            <td colspan="4" class="text-right">총 추가 인원 / 결제필요금액 변동</td>
+            <td class="text-right text-mono" style="color:#e65100;font-size:14px;" id="add-pax-total-amount">+686,000</td>
+            <td class="text-center" id="add-pax-total-count" style="font-size:11px;color:#888;">1명</td>
+          </tr>
+        </tfoot>
+      </table>
 
       <!-- 쿠폰 영향 -->
-      <div style="background:#e8f5e9;border:1px solid #c8e6c9;border-radius:8px;padding:10px 14px;margin-top:10px;font-size:11px;color:#2e7d32;">
+      <div style="background:#e8f5e9;border:1px solid #c8e6c9;border-radius:8px;padding:10px 14px;margin-top:12px;font-size:11px;color:#2e7d32;">
         <strong>쿠폰 영향 없음</strong> — 인원 추가 시 판매금액이 증가하므로 쿠폰 최소주문금액 조건은 계속 충족됩니다.
       </div>
 
       <div class="form-group" style="margin-top:12px;">
         <label>추가 사유</label>
-        <select><option>동행 추가</option><option>인원 변경 (여행사 요청)</option><option>기타</option></select>
+        <select id="add-pax-reason"><option>동행 추가</option><option>인원 변경 (여행사 요청)</option><option>기타</option></select>
       </div>
     </div>
     <div class="modal-footer">
@@ -1631,46 +1626,69 @@
   </div>
 </div>
 
-<!-- 인원삭제 모달 -->
+<!-- 인원삭제 모달 (체크박스 선택) -->
 <div class="modal-overlay" id="modal-remove-pax">
-  <div class="modal" style="width:560px;">
+  <div class="modal" style="width:600px;">
     <div class="modal-header"><h3>- 인원 삭제</h3><button class="close" onclick="this.closest('.modal-overlay').classList.remove('show')">&times;</button></div>
     <div class="modal-body">
       <div style="background:#ffebee;border-radius:8px;padding:10px 14px;font-size:12px;color:#d32f2f;margin-bottom:16px;">
-        인원 삭제 시 해당 인원의 모든 원장 항목이 <strong>역분개(취소)</strong> 처리됩니다.<br>
+        삭제할 인원을 선택하세요. 선택된 인원의 모든 원장 항목이 <strong>역분개(취소)</strong> 처리됩니다.<br>
         <span style="font-size:11px;opacity:0.8;">취소위약금이 필요하면 삭제 완료 후 [+금액 추가(추가 청구)]로 위약금을 추가하세요.</span>
       </div>
 
-      <div class="form-group">
-        <label>삭제 대상</label>
-        <select id="remove-pax-target">
-          <option value="adult-1">성인 — 동행 2 (1인 판매가 686,000)</option>
-          <option value="adult-2">성인 — 동행 3 (1인 판매가 686,000)</option>
-        </select>
-        <div class="help" style="margin-top:4px;">※ 예약자(오기웅)는 삭제할 수 없습니다. 예약 전체 취소는 취소 프로세스를 이용하세요.</div>
+      <!-- 현재 인원 목록 -->
+      <div style="font-size:12px;font-weight:700;margin-bottom:8px;">현재 인원 목록</div>
+      <div id="remove-pax-list" style="display:flex;flex-direction:column;gap:6px;">
+        <!-- 예약자 (삭제 불가) -->
+        <div style="display:flex;align-items:center;gap:10px;padding:10px 12px;background:#f5f5f5;border:1px solid #e0e0e0;border-radius:8px;opacity:0.6;">
+          <input type="checkbox" disabled>
+          <span class="badge blue">성인</span>
+          <span style="font-weight:600;font-size:12px;flex:1;">오기웅 (예약자)</span>
+          <span style="font-family:monospace;font-size:12px;">판매가 686,000</span>
+          <span style="font-size:10px;color:#888;">삭제 불가</span>
+        </div>
+        <!-- 동행 2 -->
+        <label style="display:flex;align-items:center;gap:10px;padding:10px 12px;background:#fff;border:1px solid #e0e0e0;border-radius:8px;cursor:pointer;transition:all 0.15s;" onmouseover="this.style.borderColor='#d32f2f';this.style.background='#fff5f5'" onmouseout="if(!this.querySelector('input').checked){this.style.borderColor='#e0e0e0';this.style.background='#fff'}">
+          <input type="checkbox" name="remove-pax" value="adult-1" onchange="recalcRemovePax()">
+          <span class="badge blue">성인</span>
+          <span style="font-weight:600;font-size:12px;flex:1;">동행 2</span>
+          <div style="text-align:right;">
+            <div style="font-family:monospace;font-size:12px;">판매가 686,000</div>
+            <div style="font-size:9px;color:#888;">상품가 699,000 - 특가 13,000</div>
+          </div>
+        </label>
+        <!-- 동행 3 -->
+        <label style="display:flex;align-items:center;gap:10px;padding:10px 12px;background:#fff;border:1px solid #e0e0e0;border-radius:8px;cursor:pointer;transition:all 0.15s;" onmouseover="this.style.borderColor='#d32f2f';this.style.background='#fff5f5'" onmouseout="if(!this.querySelector('input').checked){this.style.borderColor='#e0e0e0';this.style.background='#fff'}">
+          <input type="checkbox" name="remove-pax" value="adult-2" onchange="recalcRemovePax()">
+          <span class="badge blue">성인</span>
+          <span style="font-weight:600;font-size:12px;flex:1;">동행 3</span>
+          <div style="text-align:right;">
+            <div style="font-family:monospace;font-size:12px;">판매가 686,000</div>
+            <div style="font-size:9px;color:#888;">상품가 699,000 - 특가 13,000</div>
+          </div>
+        </label>
       </div>
 
-      <!-- 역분개 항목 미리보기 -->
-      <div style="background:#fff5f5;border-radius:8px;padding:14px;margin-top:12px;border:1px solid #ffcdd2;">
-        <div style="font-size:12px;font-weight:700;color:#d32f2f;margin-bottom:8px;">역분개(취소) 처리 항목</div>
-        <div style="display:flex;flex-direction:column;gap:6px;font-size:12px;">
-          <div style="display:flex;justify-content:space-between;align-items:center;">
-            <div style="display:flex;align-items:center;gap:6px;">
-              <span class="code charge" style="padding:1px 6px;border-radius:3px;font-family:monospace;font-size:10px;font-weight:700;">100</span>
-              <span>상품정가 취소</span>
-            </div>
-            <span style="font-family:monospace;font-weight:700;color:#d32f2f;">-699,000</span>
+      <!-- 역분개 요약 -->
+      <div style="background:#fff5f5;border-radius:8px;padding:14px;margin-top:12px;border:1px solid #ffcdd2;" id="remove-pax-summary">
+        <div style="font-size:12px;font-weight:700;color:#d32f2f;margin-bottom:6px;">역분개(취소) 요약</div>
+        <div style="text-align:center;color:#bbb;font-size:12px;padding:8px;" id="remove-pax-empty">삭제할 인원을 선택하세요</div>
+        <div id="remove-pax-detail" style="display:none;">
+          <div style="display:flex;justify-content:space-between;font-size:12px;margin-bottom:4px;">
+            <span>삭제 인원</span>
+            <span style="font-weight:700;" id="remove-sum-count">0명</span>
           </div>
-          <div style="display:flex;justify-content:space-between;align-items:center;">
-            <div style="display:flex;align-items:center;gap:6px;">
-              <span class="code discount" style="padding:1px 6px;border-radius:3px;font-family:monospace;font-size:10px;font-weight:700;">202</span>
-              <span>여행사특가할인 취소</span>
-            </div>
-            <span style="font-family:monospace;font-weight:700;color:#1565c0;">+13,000</span>
+          <div style="display:flex;justify-content:space-between;font-size:12px;margin-bottom:4px;">
+            <span>상품정가(100) 취소</span>
+            <span style="font-family:monospace;font-weight:700;color:#d32f2f;" id="remove-sum-charge">0</span>
           </div>
-          <div style="border-top:1px solid #ffcdd2;padding-top:6px;display:flex;justify-content:space-between;font-weight:700;">
-            <span>결제 필요 금액 변동</span>
-            <span style="font-family:monospace;color:#1565c0;">-686,000</span>
+          <div style="display:flex;justify-content:space-between;font-size:12px;margin-bottom:4px;">
+            <span>여행사특가(202) 취소</span>
+            <span style="font-family:monospace;font-weight:700;color:#1565c0;" id="remove-sum-discount">0</span>
+          </div>
+          <div style="border-top:1px solid #ffcdd2;padding-top:6px;display:flex;justify-content:space-between;font-weight:700;font-size:13px;">
+            <span>결제필요금액 변동</span>
+            <span style="font-family:monospace;color:#1565c0;" id="remove-sum-total">0</span>
           </div>
         </div>
       </div>
@@ -1681,11 +1699,7 @@
           <span style="font-size:14px;">🎟</span>
           <strong style="color:#e65100;">쿠폰 자동 재검증</strong>
         </div>
-        <div style="color:#666;">
-          삭제 후 판매금액: <strong style="font-family:monospace;">1,372,000</strong> (686,000 x 2명)<br>
-          쿠폰 최소주문금액: <strong style="font-family:monospace;">500,000</strong><br>
-          <span style="color:#2e7d32;font-weight:600;">→ 조건 충족: 쿠폰 유지됨</span>
-        </div>
+        <div style="color:#666;" id="remove-coupon-detail">삭제할 인원 선택 시 쿠폰 조건이 자동 재검증됩니다.</div>
       </div>
 
       <!-- 취소위약금 안내 -->
@@ -1693,8 +1707,7 @@
         <span style="font-size:14px;">💡</span>
         <div>
           <strong>취소위약금이 필요한 경우:</strong><br>
-          인원 삭제 완료 후 → [<strong>+금액 추가(추가 청구)</strong>] 버튼 → 유형 "취소위약금(800)" 선택 → 금액 입력<br>
-          위약금은 결제 필요 금액을 증가시키며, 원장에 800 ADJUSTMENT로 기록됩니다.
+          인원 삭제 완료 후 → [<strong>+금액 추가(추가 청구)</strong>] 버튼 → 유형 "취소위약금(800)" 선택 → 금액 입력
         </div>
       </div>
 
@@ -1705,7 +1718,7 @@
     </div>
     <div class="modal-footer">
       <button class="btn btn-outline" onclick="this.closest('.modal-overlay').classList.remove('show')">취소</button>
-      <button class="btn btn-danger" onclick="executeRemovePax()">인원 삭제 실행</button>
+      <button class="btn btn-danger" id="btn-remove-pax" onclick="executeRemovePax()" disabled style="opacity:0.5;cursor:not-allowed;">인원 삭제 실행</button>
     </div>
   </div>
 </div>
@@ -2536,41 +2549,145 @@ function formatDiff(val) {
 
 // ==================== 인원 추가/삭제 ====================
 const paxState = { adult: 3, child: 0, infant: 0 };
+const paxPrices = { adult: 699000, child: 559200, infant: 0 };
+const paxDiscounts = { adult: 13000, child: 10400, infant: 0 };
 
-function executeAddPax() {
-  const age = document.getElementById('add-pax-age').value;
-  const cnt = parseInt(document.getElementById('add-pax-count').value) || 1;
-
-  paxState[age] += cnt;
-  updatePaxDisplay();
-
-  document.getElementById('modal-add-pax').classList.remove('show');
-
-  const ageLabel = {adult:'성인', child:'아동', infant:'유아'}[age];
-  showToast(`인원 추가 완료: ${ageLabel} ${cnt}명 → 원장에 상품정가(100) + 특가(202) 자동 생성`);
+// --- 인원 추가 ---
+function addPaxRow() {
+  const tbody = document.getElementById('add-pax-tbody');
+  const row = document.createElement('tr');
+  row.innerHTML = `
+    <td><select onchange="recalcAddPaxRow(this)" style="padding:4px 8px;border:1px solid #d0d0d0;border-radius:4px;font-size:12px;width:100%;">
+      <option value="adult" data-price="699000" data-discount="13000">성인 (699,000)</option>
+      <option value="child" data-price="559200" data-discount="10400">아동 (559,200)</option>
+      <option value="infant" data-price="0" data-discount="0">유아 (0)</option>
+    </select></td>
+    <td class="text-center"><select onchange="recalcAddPaxRow(this)" style="padding:4px 8px;border:1px solid #d0d0d0;border-radius:4px;font-size:12px;width:60px;text-align:center;">
+      <option>1</option><option>2</option><option>3</option><option>4</option><option>5</option>
+    </select></td>
+    <td class="text-right text-mono" data-field="price">699,000</td>
+    <td class="text-right text-mono" style="color:#d32f2f;" data-field="discount">-13,000</td>
+    <td class="text-right text-mono" style="font-weight:700;" data-field="subtotal">686,000</td>
+    <td class="text-center"><button class="btn btn-danger btn-sm" style="font-size:10px;padding:2px 6px;" onclick="this.closest('tr').remove();recalcAddPaxTotal()">×</button></td>`;
+  tbody.appendChild(row);
+  recalcAddPaxTotal();
 }
 
-function executeRemovePax() {
-  // 삭제 대상에서 연령 추출
-  const target = document.getElementById('remove-pax-target').value;
-  const age = target.startsWith('adult') ? 'adult' : target.startsWith('child') ? 'child' : 'infant';
+function recalcAddPaxRow(el) {
+  const row = el.closest('tr');
+  const sel = row.querySelector('select');
+  const opt = sel.options[sel.selectedIndex];
+  const price = parseInt(opt.dataset.price) || 0;
+  const discount = parseInt(opt.dataset.discount) || 0;
+  const cnt = parseInt(row.querySelectorAll('select')[1].value) || 1;
+  row.querySelector('[data-field="price"]').textContent = price.toLocaleString();
+  row.querySelector('[data-field="discount"]').textContent = '-' + discount.toLocaleString();
+  row.querySelector('[data-field="subtotal"]').textContent = ((price - discount) * cnt).toLocaleString();
+  recalcAddPaxTotal();
+}
 
-  if (paxState[age] <= 1 && age === 'adult') {
-    alert('예약자를 포함한 최소 1명의 성인이 필요합니다.');
+function recalcAddPaxTotal() {
+  let total = 0, count = 0;
+  document.querySelectorAll('#add-pax-tbody tr').forEach(row => {
+    const sub = parseInt(row.querySelector('[data-field="subtotal"]').textContent.replace(/[^0-9]/g, '')) || 0;
+    const cnt = parseInt(row.querySelectorAll('select')[1]?.value) || 1;
+    total += sub;
+    count += cnt;
+  });
+  document.getElementById('add-pax-total-amount').textContent = '+' + total.toLocaleString();
+  document.getElementById('add-pax-total-count').textContent = count + '명';
+}
+
+function executeAddPax() {
+  let totalAdded = { adult: 0, child: 0, infant: 0 };
+  document.querySelectorAll('#add-pax-tbody tr').forEach(row => {
+    const age = row.querySelector('select').value;
+    const cnt = parseInt(row.querySelectorAll('select')[1].value) || 1;
+    totalAdded[age] += cnt;
+  });
+
+  const msgs = [];
+  Object.entries(totalAdded).forEach(([age, cnt]) => {
+    if (cnt > 0) {
+      paxState[age] += cnt;
+      const label = {adult:'성인', child:'아동', infant:'유아'}[age];
+      msgs.push(`${label} ${cnt}명`);
+    }
+  });
+
+  if (msgs.length === 0) { alert('추가할 인원이 없습니다.'); return; }
+
+  updatePaxDisplay();
+  document.getElementById('modal-add-pax').classList.remove('show');
+  // 테이블 초기화 (첫 행만 남기기)
+  const tbody = document.getElementById('add-pax-tbody');
+  while (tbody.children.length > 1) tbody.removeChild(tbody.lastChild);
+
+  showToast(`인원 추가 완료: ${msgs.join(', ')} → 원장에 상품정가(100) + 특가(202) 자동 생성`);
+}
+
+// --- 인원 삭제 ---
+function recalcRemovePax() {
+  const checked = document.querySelectorAll('input[name="remove-pax"]:checked');
+  const cnt = checked.length;
+  const btn = document.getElementById('btn-remove-pax');
+  const empty = document.getElementById('remove-pax-empty');
+  const detail = document.getElementById('remove-pax-detail');
+
+  if (cnt === 0) {
+    btn.disabled = true; btn.style.opacity = '0.5'; btn.style.cursor = 'not-allowed';
+    empty.style.display = 'block'; detail.style.display = 'none';
+    document.getElementById('remove-coupon-detail').textContent = '삭제할 인원 선택 시 쿠폰 조건이 자동 재검증됩니다.';
     return;
   }
 
-  paxState[age] -= 1;
-  updatePaxDisplay();
+  btn.disabled = false; btn.style.opacity = '1'; btn.style.cursor = 'pointer';
+  empty.style.display = 'none'; detail.style.display = 'block';
 
+  const chargeTotal = cnt * currentReservation.pricePerPerson;
+  const discountTotal = cnt * currentReservation.discountPerPerson;
+  const saleTotal = cnt * (currentReservation.pricePerPerson - currentReservation.discountPerPerson);
+
+  document.getElementById('remove-sum-count').textContent = cnt + '명';
+  document.getElementById('remove-sum-charge').textContent = '-' + chargeTotal.toLocaleString();
+  document.getElementById('remove-sum-discount').textContent = '+' + discountTotal.toLocaleString();
+  document.getElementById('remove-sum-total').textContent = '-' + saleTotal.toLocaleString();
+
+  // 쿠폰 재검증
+  const remainPax = currentReservation.travelers - cnt;
+  const remainSale = remainPax * (currentReservation.pricePerPerson - currentReservation.discountPerPerson);
+  const minOrder = 500000;
+  const couponEl = document.getElementById('remove-coupon-detail');
+  if (remainSale < minOrder && currentReservation.couponAmount > 0) {
+    couponEl.innerHTML = `삭제 후 판매금액: <strong style="font-family:monospace;color:#d32f2f;">${remainSale.toLocaleString()}</strong> (${(currentReservation.pricePerPerson - currentReservation.discountPerPerson).toLocaleString()} x ${remainPax}명)<br>
+      쿠폰 최소주문금액: <strong style="font-family:monospace;">500,000</strong><br>
+      <span style="color:#d32f2f;font-weight:600;">→ 조건 미달: 쿠폰 자동 해제 (302) + 유효기간 내 원복</span>`;
+  } else {
+    couponEl.innerHTML = `삭제 후 판매금액: <strong style="font-family:monospace;">${remainSale.toLocaleString()}</strong> (${(currentReservation.pricePerPerson - currentReservation.discountPerPerson).toLocaleString()} x ${remainPax}명)<br>
+      쿠폰 최소주문금액: <strong style="font-family:monospace;">500,000</strong><br>
+      <span style="color:#2e7d32;font-weight:600;">→ 조건 충족: 쿠폰 유지됨</span>`;
+  }
+}
+
+function executeRemovePax() {
+  const checked = document.querySelectorAll('input[name="remove-pax"]:checked');
+  if (checked.length === 0) return;
+
+  checked.forEach(cb => {
+    const age = cb.value.startsWith('adult') ? 'adult' : cb.value.startsWith('child') ? 'child' : 'infant';
+    paxState[age] -= 1;
+  });
+
+  updatePaxDisplay();
   document.getElementById('modal-remove-pax').classList.remove('show');
 
-  const ageLabel = {adult:'성인', child:'아동', infant:'유아'}[age];
+  // 체크박스 초기화
+  document.querySelectorAll('input[name="remove-pax"]').forEach(cb => cb.checked = false);
+  recalcRemovePax();
+
   const reason = document.getElementById('remove-pax-reason').value;
+  showToast(`인원 삭제 완료: ${checked.length}명 역분개 처리 · 사유: ${reason}`);
 
-  showToast(`인원 삭제 완료: ${ageLabel} 1명 역분개 처리 · 사유: ${reason}`);
-
-  // 취소위약금 안내
   setTimeout(() => {
     const addPenalty = confirm('취소위약금을 추가하시겠습니까?\n\n[확인] → +금액 추가(추가 청구) 모달에서 위약금 입력\n[취소] → 위약금 없이 완료');
     if (addPenalty) {
