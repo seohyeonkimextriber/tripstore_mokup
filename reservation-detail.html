@@ -3439,6 +3439,73 @@ function executePaymentChange() {
   document.getElementById('modal-payment-change').classList.remove('show');
 
   showToast(`재결제 링크 SMS 발송 완료 → 고객 재결제 완료 시 기존 PG ${pgAmount.toLocaleString()}원 자동 취소`);
+
+  // 3초 후 "고객 재결제 완료" 시뮬레이션 버튼 표시
+  setTimeout(() => {
+    const simBar = document.createElement('div');
+    simBar.id = 'repay-sim-bar';
+    simBar.style.cssText = 'position:fixed;bottom:0;left:0;right:0;background:linear-gradient(135deg,#1565c0,#0d47a1);color:#fff;padding:14px 24px;z-index:200;display:flex;align-items:center;justify-content:center;gap:16px;box-shadow:0 -4px 20px rgba(0,0,0,0.2);';
+    simBar.innerHTML = `
+      <span style="font-size:14px;">🧪</span>
+      <span style="font-size:13px;">테스트 시뮬레이션: 고객이 재결제 링크로 결제를 완료했다고 가정</span>
+      <button onclick="simulateRepayComplete()" style="background:#fff;color:#1565c0;border:none;padding:8px 20px;border-radius:6px;font-size:13px;font-weight:700;cursor:pointer;">고객 재결제 완료 처리</button>
+      <button onclick="this.parentElement.remove()" style="background:transparent;color:rgba(255,255,255,0.7);border:1px solid rgba(255,255,255,0.3);padding:6px 12px;border-radius:6px;font-size:11px;cursor:pointer;">닫기</button>
+    `;
+    document.body.appendChild(simBar);
+  }, 1500);
+}
+
+function simulateRepayComplete() {
+  const pgAmount = 2038000;
+  const now = new Date().toLocaleTimeString('ko-KR', {hour:'2-digit', minute:'2-digit'});
+
+  // 1. 이력 상태 업데이트
+  if (paymentChangeHistory.length > 0) {
+    const last = paymentChangeHistory[paymentChangeHistory.length - 1];
+    last.status = '완료';
+    last.repayStatus = `재결제 완료 (${now}) → 기존 결제 자동 취소`;
+  }
+  renderPaymentChangeHistory();
+
+  // 2. 결제 테이블 업데이트 — 기존 PG행 취소 + 새 PG행 추가
+  const paymentTbody = document.querySelector('#tab-basic .section:nth-child(5) tbody');
+  if (paymentTbody) {
+    // 기존 PG행 상태를 "취소"로
+    paymentTbody.querySelectorAll('tr').forEach(row => {
+      const cells = row.querySelectorAll('td');
+      if (cells.length >= 10 && cells[1]?.textContent?.includes('PG')) {
+        cells[6].textContent = cells[5].textContent; // 환불금액 = 결제금액
+        cells[7].textContent = '0'; // 입금금액 0
+        cells[9].innerHTML = '<span class="badge red">취소</span>';
+        row.style.opacity = '0.5';
+        row.style.textDecoration = 'line-through';
+      }
+    });
+
+    // 새 PG행 추가
+    const newRow = document.createElement('tr');
+    newRow.style.background = '#f0f7ff';
+    newRow.innerHTML = `
+      <td>3</td>
+      <td><span class="badge blue">PG</span></td>
+      <td>nice_v2</td>
+      <td>신용카드 (변경)</td>
+      <td class="text-mono" style="font-size:11px;">26041408-REPAY-001</td>
+      <td class="text-right text-mono">${pgAmount.toLocaleString()}</td>
+      <td class="text-right text-mono">0</td>
+      <td class="text-right text-mono">${pgAmount.toLocaleString()}</td>
+      <td style="font-size:11px;">04-14 ${now}</td>
+      <td class="text-center"><span class="badge green">완료</span></td>
+    `;
+    paymentTbody.appendChild(newRow);
+  }
+
+  // 3. 시뮬레이션 바 제거
+  const simBar = document.getElementById('repay-sim-bar');
+  if (simBar) simBar.remove();
+
+  // 4. 토스트
+  showToast(`고객 재결제 완료 (${pgAmount.toLocaleString()}원) → 기존 PG 결제 자동 취소 완료`);
 }
 
 function renderPaymentChangeHistory() {
@@ -3454,24 +3521,29 @@ function renderPaymentChangeHistory() {
   emptyEl.style.display = 'none';
   listEl.style.display = 'block';
 
-  listEl.innerHTML = paymentChangeHistory.map(h => `
-    <div style="background:#fafafa;border:1px solid #e8e8e8;border-radius:6px;padding:10px 12px;margin-bottom:6px;font-size:11px;">
+  listEl.innerHTML = paymentChangeHistory.map(h => {
+    const isComplete = h.status === '완료';
+    const badgeBg = isComplete ? '#e8f5e9' : '#fff3e0';
+    const badgeColor = isComplete ? '#2e7d32' : '#e65100';
+    const statusColor = isComplete ? '#2e7d32' : '#e65100';
+    return `
+    <div style="background:${isComplete ? '#f0f7ff' : '#fafafa'};border:1px solid ${isComplete ? '#bbdefb' : '#e8e8e8'};border-radius:6px;padding:10px 12px;margin-bottom:6px;font-size:11px;">
       <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px;">
         <div style="display:flex;align-items:center;gap:6px;">
-          <span style="background:#fff3e0;color:#e65100;padding:1px 6px;border-radius:3px;font-size:10px;font-weight:700;">${h.status}</span>
-          <span style="font-family:monospace;font-weight:600;">취소 ${h.cancelAmount.toLocaleString()}원</span>
+          <span style="background:${badgeBg};color:${badgeColor};padding:1px 6px;border-radius:3px;font-size:10px;font-weight:700;">${h.status}</span>
+          <span style="font-family:monospace;font-weight:600;">${isComplete ? '결제수단 변경' : '취소'} ${h.cancelAmount.toLocaleString()}원</span>
         </div>
         <span style="color:#aaa;font-size:10px;">${h.requestDate} · ${h.requestUser}</span>
       </div>
-      <div style="display:flex;gap:12px;color:#888;font-size:10px;">
+      <div style="display:flex;gap:12px;color:#888;font-size:10px;flex-wrap:wrap;">
         <span>사유: ${h.reason}</span>
         <span>|</span>
         <span>SMS: ${h.smsTarget}</span>
         <span>|</span>
-        <span>재결제: <strong style="color:#e65100;">${h.repayStatus}</strong></span>
+        <span>재결제: <strong style="color:${statusColor};">${h.repayStatus}</strong></span>
       </div>
-    </div>
-  `).join('');
+    </div>`;
+  }).join('');
 }
 
 // 토스트 알림
