@@ -1,0 +1,1258 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>상품 생성 규칙 관리 — TripStore AutoGen Admin</title>
+<link href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.6/dist/web/static/pretendard.css" rel="stylesheet">
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: 'Pretendard', -apple-system, sans-serif; font-size: 14px; color: rgba(0,0,0,0.88); background: #f0f2f5; display: flex; min-height: 100vh; }
+
+.sidebar { width: 220px; background: #1b1f3b; color: #fff; padding: 20px 0; position: fixed; top: 0; left: 0; bottom: 0; overflow-y: auto; z-index: 100; }
+.sidebar-logo { padding: 0 20px 24px; font-size: 14px; font-weight: 700; display: flex; align-items: center; gap: 8px; }
+.sidebar-logo .dot { width: 8px; height: 8px; background: #52c41a; border-radius: 50%; }
+.sidebar-logo span { color: #4096ff; }
+.sidebar-group { padding: 16px 20px 6px; font-size: 11px; color: rgba(255,255,255,0.35); font-weight: 600; letter-spacing: 0.5px; text-transform: uppercase; }
+.sidebar-item { display: flex; align-items: center; gap: 10px; padding: 10px 20px; font-size: 13px; color: rgba(255,255,255,0.65); cursor: pointer; transition: all 0.15s; border-left: 3px solid transparent; }
+.sidebar-item:hover { color: #fff; background: rgba(255,255,255,0.06); }
+.sidebar-item.active { color: #fff; background: rgba(64,150,255,0.15); border-left-color: #4096ff; }
+.sidebar-item .icon { width: 18px; text-align: center; font-size: 14px; }
+.sidebar-badge { background: #f5222d; color: #fff; font-size: 10px; font-weight: 700; padding: 1px 6px; border-radius: 10px; margin-left: auto; }
+
+.main { margin-left: 220px; flex: 1; padding: 24px 28px; }
+.top-bar { display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px; }
+.page-title { font-size: 20px; font-weight: 700; }
+.user-info { display: flex; align-items: center; gap: 10px; font-size: 13px; color: rgba(0,0,0,0.65); }
+.avatar { width: 32px; height: 32px; background: #1677ff; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: #fff; font-size: 12px; font-weight: 700; }
+
+.card { background: #fff; border-radius: 10px; box-shadow: 0 1px 3px rgba(0,0,0,0.08); margin-bottom: 20px; }
+.card-header { padding: 16px 20px; border-bottom: 1px solid #f0f0f0; display: flex; align-items: center; justify-content: space-between; }
+.card-header h3 { font-size: 15px; font-weight: 600; }
+.card-header .subtitle { font-size: 12px; color: rgba(0,0,0,0.45); margin-left: 8px; }
+.card-body { padding: 20px; }
+
+.section-num { display: inline-flex; align-items: center; justify-content: center; width: 22px; height: 22px; background: #1677ff; color: #fff; border-radius: 6px; font-size: 11px; font-weight: 700; margin-right: 8px; }
+
+.toggle-row { display: flex; align-items: center; justify-content: space-between; padding: 12px 0; border-bottom: 1px solid #f5f5f5; }
+.toggle-row:last-child { border-bottom: none; }
+.toggle-label .name { font-size: 14px; font-weight: 500; }
+.toggle-label .desc { font-size: 12px; color: rgba(0,0,0,0.45); }
+.toggle { width: 40px; height: 22px; background: #d9d9d9; border-radius: 11px; position: relative; cursor: pointer; transition: background 0.2s; flex-shrink: 0; }
+.toggle.on { background: #1677ff; }
+.toggle::after { content: ''; width: 18px; height: 18px; background: #fff; border-radius: 50%; position: absolute; top: 2px; left: 2px; transition: transform 0.2s; box-shadow: 0 1px 3px rgba(0,0,0,0.15); }
+.toggle.on::after { transform: translateX(18px); }
+
+.tag { padding: 6px 14px; border-radius: 6px; font-size: 12px; font-weight: 500; cursor: pointer; border: 1px solid #d9d9d9; background: #fff; color: rgba(0,0,0,0.65); transition: all 0.15s; display: inline-flex; align-items: center; gap: 4px; }
+.tag:hover { border-color: #1677ff; color: #1677ff; }
+.tag.active { background: #e6f4ff; border-color: #1677ff; color: #1677ff; }
+
+.group-card { border: 1px solid #f0f0f0; border-radius: 8px; padding: 16px; margin-bottom: 12px; transition: box-shadow 0.2s; }
+.group-card:hover { box-shadow: 0 2px 8px rgba(0,0,0,0.08); }
+.group-card .group-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; }
+.group-type { font-size: 13px; font-weight: 700; color: #1677ff; background: #e6f4ff; padding: 4px 12px; border-radius: 4px; }
+.group-items { display: flex; gap: 6px; flex-wrap: wrap; }
+.group-item { padding: 4px 10px; background: #fafafa; border: 1px solid #e8e8e8; border-radius: 4px; font-size: 12px; color: rgba(0,0,0,0.75); }
+
+.form-row { display: flex; align-items: center; gap: 12px; margin-bottom: 14px; }
+.form-row:last-child { margin-bottom: 0; }
+.form-label { width: 160px; font-size: 13px; font-weight: 500; color: rgba(0,0,0,0.65); flex-shrink: 0; }
+.form-input { height: 36px; border: 1px solid #d9d9d9; border-radius: 6px; padding: 0 12px; font-size: 13px; font-family: inherit; outline: none; transition: border 0.2s; background: #fff; }
+.form-input:focus { border-color: #1677ff; box-shadow: 0 0 0 2px rgba(22,119,255,0.1); }
+.form-input-sm { width: 80px; }
+.form-input-md { width: 140px; }
+.form-suffix { font-size: 13px; color: rgba(0,0,0,0.45); }
+select.form-input { appearance: none; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='%23bbb'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 10px center; padding-right: 28px; cursor: pointer; }
+
+.btn { height: 34px; padding: 0 16px; border-radius: 6px; font-size: 13px; font-family: inherit; cursor: pointer; border: 1px solid transparent; display: inline-flex; align-items: center; gap: 5px; transition: all 0.15s; font-weight: 500; }
+.btn-primary { background: #1677ff; color: #fff; }
+.btn-primary:hover { background: #4096ff; }
+.btn-default { background: #fff; color: rgba(0,0,0,0.88); border-color: #d9d9d9; }
+.btn-default:hover { color: #1677ff; border-color: #1677ff; }
+.btn-success { background: #52c41a; color: #fff; }
+.btn-sm { height: 28px; padding: 0 10px; font-size: 12px; }
+.btn-danger { background: #fff; color: #f5222d; border-color: #f5222d; }
+
+table { width: 100%; border-collapse: collapse; }
+th { padding: 10px 14px; text-align: left; font-weight: 500; font-size: 12px; color: rgba(0,0,0,0.55); background: #fafafa; border-bottom: 1px solid #f0f0f0; }
+td { padding: 10px 14px; font-size: 13px; border-bottom: 1px solid #f5f5f5; }
+tr:hover td { background: #fafafa; }
+
+.season-bar { display: flex; gap: 0; border-radius: 6px; overflow: hidden; height: 32px; margin-top: 8px; }
+.season-seg { display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 600; color: #fff; cursor: pointer; transition: opacity 0.15s; }
+.season-seg:hover { opacity: 0.85; }
+.season-peak { background: #f5222d; }
+.season-off { background: #1677ff; }
+
+/* OPT CARDS */
+.opt-card { transition: all 0.15s; }
+.opt-card:hover { box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+.opt-card.active { border-color: #1677ff !important; background: #f0f7ff !important; }
+
+/* SEASON CELLS */
+.season-cell { border-radius: 6px; padding: 8px 4px; text-align: center; cursor: pointer; transition: all 0.15s; user-select: none; }
+.season-cell.peak { background: #fff1f0; border: 2px solid #ffa39e; }
+.season-cell.off { background: #e6f4ff; border: 2px solid #91caff; }
+.season-cell:hover { transform: scale(1.05); box-shadow: 0 2px 8px rgba(0,0,0,0.12); }
+.sc-month { font-size: 12px; font-weight: 600; color: rgba(0,0,0,0.75); }
+.season-cell.peak .sc-label { font-size: 10px; color: #f5222d; font-weight: 500; }
+.season-cell.off .sc-label { font-size: 10px; color: #1677ff; font-weight: 500; }
+
+.comp-row { display: flex; align-items: center; gap: 8px; padding: 8px 0; border-bottom: 1px solid #f5f5f5; }
+.comp-rank { width: 28px; height: 28px; background: #f0f0f0; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 700; flex-shrink: 0; }
+.comp-rank.r1 { background: #e6f4ff; color: #1677ff; }
+.comp-rank.r2 { background: #f6ffed; color: #52c41a; }
+.comp-rank.r3 { background: #fff7e6; color: #fa8c16; }
+
+/* DEST TABS */
+.dest-tabs { display: flex; gap: 0; border-bottom: 2px solid #f0f0f0; margin-bottom: 20px; }
+.dest-tab { padding: 10px 20px; font-size: 13px; font-weight: 500; color: rgba(0,0,0,0.45); cursor: pointer; border-bottom: 2px solid transparent; margin-bottom: -2px; transition: all 0.15s; }
+.dest-tab:hover { color: rgba(0,0,0,0.88); }
+.dest-tab.active { color: #1677ff; border-bottom-color: #1677ff; font-weight: 600; }
+
+/* TOAST */
+.toast { position: fixed; bottom: 30px; right: 30px; background: #52c41a; color: #fff; padding: 12px 24px; border-radius: 8px; font-size: 14px; font-weight: 500; box-shadow: 0 4px 16px rgba(0,0,0,0.15); display: none; z-index: 999; animation: slideUp 0.3s ease; }
+@keyframes slideUp { from { transform: translateY(20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+
+/* MODAL */
+.modal-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.45); z-index: 500; display: none; align-items: center; justify-content: center; }
+.modal-overlay.show { display: flex; }
+.modal { background: #fff; border-radius: 12px; width: 480px; max-height: 80vh; overflow-y: auto; box-shadow: 0 12px 40px rgba(0,0,0,0.2); }
+.modal-header { padding: 18px 24px; border-bottom: 1px solid #f0f0f0; font-size: 16px; font-weight: 600; display: flex; align-items: center; justify-content: space-between; }
+.modal-body { padding: 24px; }
+.modal-footer { padding: 14px 24px; border-top: 1px solid #f0f0f0; display: flex; justify-content: flex-end; gap: 8px; }
+.modal-close { width: 28px; height: 28px; border-radius: 50%; border: none; background: #f5f5f5; cursor: pointer; font-size: 16px; display: flex; align-items: center; justify-content: center; }
+
+/* VIEW TABS */
+.view-tabs { display: flex; gap: 0; margin-bottom: 20px; background: #fff; border-radius: 10px; overflow: hidden; box-shadow: 0 1px 3px rgba(0,0,0,0.08); }
+.view-tab { flex: 1; padding: 14px 20px; font-size: 14px; font-weight: 500; color: rgba(0,0,0,0.45); cursor: pointer; text-align: center; border-bottom: 2px solid transparent; transition: all 0.15s; }
+.view-tab:hover { color: rgba(0,0,0,0.88); background: #fafafa; }
+.view-tab.active { color: #1677ff; border-bottom-color: #1677ff; font-weight: 600; background: #fff; }
+.view-panel { display: none; }
+.view-panel.active { display: block; }
+
+/* RULE LIST */
+.rule-list-card { background: #fff; border-radius: 10px; box-shadow: 0 1px 3px rgba(0,0,0,0.08); overflow: hidden; }
+.rule-list-header { padding: 16px 20px; border-bottom: 1px solid #f0f0f0; display: flex; align-items: center; justify-content: space-between; }
+.rule-list-filter { display: flex; gap: 8px; align-items: center; }
+.rule-row { display: flex; align-items: center; padding: 14px 20px; border-bottom: 1px solid #f5f5f5; transition: background 0.1s; cursor: pointer; }
+.rule-row:hover { background: #fafafa; }
+.rule-row:last-child { border-bottom: none; }
+.rule-dest { width: 100px; font-size: 13px; font-weight: 600; }
+.rule-name { flex: 1; font-size: 13px; }
+.rule-detail { display: flex; gap: 16px; align-items: center; }
+.rule-stat { font-size: 12px; color: rgba(0,0,0,0.45); text-align: center; min-width: 70px; }
+.rule-stat strong { display: block; font-size: 15px; color: rgba(0,0,0,0.88); }
+.rule-badge { padding: 3px 10px; border-radius: 12px; font-size: 11px; font-weight: 600; }
+.rule-badge.live { background: #f6ffed; color: #52c41a; }
+.rule-badge.draft { background: #fff7e6; color: #fa8c16; }
+.rule-badge.paused { background: #f5f5f5; color: rgba(0,0,0,0.45); }
+.rule-actions { display: flex; gap: 6px; margin-left: 16px; }
+.rule-expand { font-size: 12px; color: rgba(0,0,0,0.25); transition: transform 0.2s; }
+.rule-expand.open { transform: rotate(90deg); }
+
+/* EXPANDED */
+.rule-expanded { background: #fafafa; padding: 16px 20px 16px 120px; border-bottom: 1px solid #f0f0f0; display: none; }
+.rule-expanded.show { display: block; }
+.rule-expanded-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 16px; }
+.rule-expanded-item { font-size: 12px; }
+.rule-expanded-item .label { color: rgba(0,0,0,0.45); margin-bottom: 4px; }
+.rule-expanded-item .value { font-weight: 500; }
+
+.grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+@media (max-width: 1200px) { .grid-2 { grid-template-columns: 1fr; } }
+</style>
+</head>
+<body>
+
+<!-- SIDEBAR -->
+<nav class="sidebar">
+  <div class="sidebar-logo"><div class="dot"></div> <span>Tripstore</span> AutoGen Admin</div>
+  <div class="sidebar-group">상품 생성</div>
+  <a href="autogen-rule.html" class="sidebar-item active" style="text-decoration:none;color:#fff;"><span class="icon">⚙️</span> 생성 규칙 관리</a>
+  <a href="autogen-monitoring.html" class="sidebar-item" style="text-decoration:none;color:rgba(255,255,255,0.65);"><span class="icon">📊</span> 모니터링 대시보드</a>
+  <div class="sidebar-group">예약 관리</div>
+  <a href="autogen-reservation.html" class="sidebar-item" style="text-decoration:none;color:rgba(255,255,255,0.65);"><span class="icon">📋</span> 예약 리스트 <span class="sidebar-badge">3</span></a>
+  <div class="sidebar-item"><span class="icon">🔴</span> 운영 대응 필요 <span class="sidebar-badge">2</span></div>
+  <div class="sidebar-item"><span class="icon">✅</span> 확정 완료</div>
+  <div class="sidebar-item"><span class="icon">❌</span> 취소/환불</div>
+  <div class="sidebar-group">사용자 화면</div>
+  <a href="autogen-booking.html" class="sidebar-item" style="text-decoration:none;color:rgba(255,255,255,0.65);"><span class="icon">📱</span> 결제 플로우 (모바일)</a>
+
+  <div class="sidebar-group">설정</div>
+  <div class="sidebar-item"><span class="icon">🏨</span> 숙소 매핑</div>
+  <div class="sidebar-item"><span class="icon">📑</span> 리포트</div>
+  <div class="sidebar-item"><span class="icon">⚡</span> 설정</div>
+</nav>
+
+<!-- MAIN -->
+<div class="main">
+  <div class="top-bar">
+    <div class="page-title">상품 생성 규칙 관리</div>
+    <div class="user-info">김서현 (PM) <div class="avatar">SH</div></div>
+  </div>
+
+  <!-- VIEW TABS: 목록 / 규칙 설정 -->
+  <div class="view-tabs">
+    <div class="view-tab active" onclick="switchView('list',this)">📋 규칙 목록</div>
+    <div class="view-tab" onclick="switchView('edit',this)">⚙️ 규칙 설정</div>
+  </div>
+
+  <!-- ===== VIEW 1: 규칙 목록 ===== -->
+  <div class="view-panel active" id="viewList">
+    <div class="rule-list-card">
+      <div class="rule-list-header">
+        <h3 style="font-size:15px;font-weight:600;">생성 규칙 목록</h3>
+        <div class="rule-list-filter">
+          <input type="text" class="form-input" style="height:30px;width:180px;margin-left:8px;" placeholder="🔍 여행지 검색...">
+          <button class="btn btn-primary btn-sm" onclick="switchView('edit',document.querySelectorAll('.view-tab')[1])">+ 새 규칙</button>
+        </div>
+      </div>
+
+      <!-- ===== 푸꾸옥 (여행지 그룹) ===== -->
+      <div class="rule-row" data-status="live" onclick="toggleRuleExpand('dest1')" style="background:#f8faff;">
+        <span class="rule-expand" id="dest1Arrow">▶</span>
+        <span class="rule-dest" style="margin-left:10px;font-size:14px;">🇻🇳 푸꾸옥</span>
+        <span class="rule-name" style="color:rgba(0,0,0,0.45);">에어텔 · 패키지</span>
+        <div class="rule-detail">
+          <div class="rule-stat"><strong>253</strong>노출 중</div>
+          <div class="rule-stat"><strong>124</strong>탈락</div>
+          <div class="rule-stat"><strong>5%</strong>고정마진</div>
+        </div>
+        <div class="rule-actions">
+          <button class="btn btn-default btn-sm" onclick="event.stopPropagation();editRule('phuquoc')">수정</button>
+        </div>
+      </div>
+      <div class="rule-expanded" id="dest1Expand">
+        <div class="rule-expanded-grid">
+          <div class="rule-expanded-item"><div class="label">디폴트 구성</div><div class="value">왕복픽업 · 패스트트랙 · 니트킷</div></div>
+          <div class="rule-expanded-item"><div class="label">마진</div><div class="value">고정 5% · 추가마진 자동산출 · 성수기 5% · 비수기 12%</div></div>
+          <div class="rule-expanded-item"><div class="label">경쟁가 기준</div><div class="value">1순위: 동일스펙 · 2순위: 숙소+출발일 · 3순위: 여행지+타입</div></div>
+          <div class="rule-expanded-item"><div class="label">그루핑</div><div class="value">A: 빈펄+호핑 / B: 사파리+야시장 / C: 에어텔only</div></div>
+          <div class="rule-expanded-item"><div class="label">조합 제한</div><div class="value">투어 1개 · 티켓 1개 · 객실 3개</div></div>
+          <div class="rule-expanded-item"><div class="label">마지막 배치</div><div class="value">04/14 06:00 — 247개 생성, 83개 탈락</div></div>
+        </div>
+      </div>
+
+      <!-- ===== 나트랑 (여행지 그룹) ===== -->
+      <div class="rule-row" data-status="live" onclick="toggleRuleExpand('dest2')" style="background:#f8faff;">
+        <span class="rule-expand" id="dest2Arrow">▶</span>
+        <span class="rule-dest" style="margin-left:10px;font-size:14px;">🇻🇳 나트랑</span>
+        <span class="rule-name" style="color:rgba(0,0,0,0.45);">에어텔</span>
+        <div class="rule-detail">
+          <div class="rule-stat"><strong>76</strong>노출 중</div>
+          <div class="rule-stat"><strong>31</strong>탈락</div>
+          <div class="rule-stat"><strong>5%</strong>고정마진</div>
+        </div>
+        <div class="rule-actions">
+          <button class="btn btn-default btn-sm" onclick="event.stopPropagation();editRule('nhatrang')">수정</button>
+        </div>
+      </div>
+      <div class="rule-expanded" id="dest2Expand">
+        <div class="rule-expanded-grid">
+          <div class="rule-expanded-item"><div class="label">디폴트 구성</div><div class="value">왕복픽업 · 패스트트랙 · 니트킷</div></div>
+          <div class="rule-expanded-item"><div class="label">마진</div><div class="value">고정 5% · 추가마진 자동산출 · 성수기 5% · 비수기 10%</div></div>
+          <div class="rule-expanded-item"><div class="label">그루핑</div><div class="value">A: 빈원더스+머드온천 / B: 에어텔only</div></div>
+          <div class="rule-expanded-item"><div class="label">조합 제한</div><div class="value">투어 1개 · 티켓 1개 · 객실 3개</div></div>
+          <div class="rule-expanded-item"><div class="label">경쟁가 기준</div><div class="value">1순위: 동일스펙 · 2순위: 숙소+출발일 · 3순위: 여행지+타입</div></div>
+          <div class="rule-expanded-item"><div class="label">마지막 배치</div><div class="value">04/14 06:00 — 107개 생성, 31개 탈락</div></div>
+        </div>
+      </div>
+
+      <!-- ===== 다낭 (설정 중) ===== -->
+      <div class="rule-row" data-status="draft" onclick="toggleRuleExpand('dest3')" style="background:#fffbe6;">
+        <span class="rule-expand" id="dest3Arrow">▶</span>
+        <span class="rule-dest" style="margin-left:10px;font-size:14px;">🇻🇳 다낭</span>
+        <span class="rule-name" style="color:rgba(0,0,0,0.45);">규칙 설정 중</span>
+        <div class="rule-detail">
+          <div class="rule-stat"><strong>—</strong>노출 중</div>
+          <div class="rule-stat"><strong>—</strong>탈락</div>
+          <div class="rule-stat"><strong>5%</strong>기본 마진</div>
+        </div>
+        <div class="rule-actions">
+          <button class="btn btn-primary btn-sm" onclick="event.stopPropagation();editRule('danang')">설정 시작</button>
+        </div>
+      </div>
+      <div class="rule-expanded" id="dest3Expand">
+        <div style="text-align:center;padding:20px;color:rgba(0,0,0,0.35);">
+          <div style="font-size:32px;margin-bottom:8px;">🏗️</div>
+          <div>아직 규칙이 설정되지 않았습니다</div>
+          <button class="btn btn-primary btn-sm" style="margin-top:12px;" onclick="event.stopPropagation();editRule('danang')">규칙 설정 시작</button>
+        </div>
+      </div>
+
+      <!-- ===== 방콕 (중지) ===== -->
+      <div class="rule-row" data-status="paused" onclick="toggleRuleExpand('dest4')">
+        <span class="rule-expand" id="dest4Arrow">▶</span>
+        <span class="rule-dest" style="margin-left:10px;font-size:14px;">🇹🇭 방콕</span>
+        <span class="rule-name" style="color:rgba(0,0,0,0.45);">에어텔 · 일시 중지</span>
+        <div class="rule-detail">
+          <div class="rule-stat"><strong>0</strong>노출 중</div>
+          <div class="rule-stat"><strong>—</strong>탈락</div>
+          <div class="rule-stat"><strong>7%</strong>기본 마진</div>
+        </div>
+        <div class="rule-actions">
+          <button class="btn btn-default btn-sm" onclick="event.stopPropagation();editRule('bangkok')">수정</button>
+        </div>
+      </div>
+      <div class="rule-expanded" id="dest4Expand">
+        <div style="padding:10px 16px;background:#fff1f0;border-radius:6px;margin-bottom:10px;font-size:12px;color:#cf1322;">
+          ⚠️ 중지 사유: TMG 요금표 갱신 대기 (04/10~)
+        </div>
+        <div class="rule-expanded-grid">
+          <div class="rule-expanded-item"><div class="label">디폴트 구성</div><div class="value">왕복픽업 · 패스트트랙 · 니트킷</div></div>
+          <div class="rule-expanded-item"><div class="label">마진</div><div class="value">고정 5% · 추가마진 자동산출 · 성수기 5% · 비수기 15%</div></div>
+          <div class="rule-expanded-item"><div class="label">그루핑</div><div class="value">A: 왓아룬+아시아티크 / B: 에어텔only</div></div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- ===== VIEW 2: 규칙 설정 (기존 내용) ===== -->
+  <div class="view-panel" id="viewEdit">
+
+  <!-- 여행지 탭 -->
+  <div class="dest-tabs" id="destTabs">
+    <div class="dest-tab active" data-dest="phuquoc">🇻🇳 푸꾸옥</div>
+    <div class="dest-tab" data-dest="nhatrang">🇻🇳 나트랑</div>
+    <div class="dest-tab" data-dest="danang">🇻🇳 다낭</div>
+    <div class="dest-tab" data-dest="bangkok">🇹🇭 방콕</div>
+    <div class="dest-tab" data-dest="add" style="color:#1677ff;">+ 여행지 추가</div>
+  </div>
+
+  <!-- 1. 변수 그루핑 -->
+  <div class="card">
+    <div class="card-header">
+      <h3><span class="section-num">1</span> 변수 그루핑 관리 (투어·티켓)</h3>
+      <button class="btn btn-primary btn-sm" onclick="openAddGroupModal()">+ 타입 추가</button>
+    </div>
+    <div class="card-body" id="groupContainer">
+      <div class="group-card" id="groupA">
+        <div class="group-header">
+          <div style="display:flex;align-items:center;gap:10px;">
+            <span class="group-type">A 타입</span>
+            <span style="font-size:13px;font-weight:500;">프리미엄 액티비티</span>
+          </div>
+          <div style="display:flex;gap:6px;">
+            <button class="btn btn-default btn-sm" onclick="openEditGroupModal('A', '프리미엄 액티비티', ['빈펄랜드 입장권', '호핑투어 (4섬)'])">수정</button>
+            <button class="btn btn-danger btn-sm" onclick="deleteGroup(this)">삭제</button>
+          </div>
+        </div>
+        <div class="group-items">
+          <span class="group-item">🎢 빈펄랜드 입장권</span>
+          <span class="group-item">🚤 호핑투어 (4섬)</span>
+        </div>
+      </div>
+      <div class="group-card" id="groupB">
+        <div class="group-header">
+          <div style="display:flex;align-items:center;gap:10px;">
+            <span class="group-type">B 타입</span>
+            <span style="font-size:13px;font-weight:500;">자연 탐험</span>
+          </div>
+          <div style="display:flex;gap:6px;">
+            <button class="btn btn-default btn-sm" onclick="openEditGroupModal('B', '자연 탐험', ['빈펄 사파리', '야시장 투어'])">수정</button>
+            <button class="btn btn-danger btn-sm" onclick="deleteGroup(this)">삭제</button>
+          </div>
+        </div>
+        <div class="group-items">
+          <span class="group-item">🦁 빈펄 사파리</span>
+          <span class="group-item">🌙 야시장 투어</span>
+        </div>
+      </div>
+      <!-- 기본(투어없음)은 항상 고정 -->
+      <div style="padding:10px 14px;background:#f5f5f5;border-radius:8px;border:1px dashed #d9d9d9;display:flex;align-items:center;justify-content:space-between;">
+        <div style="display:flex;align-items:center;gap:10px;">
+          <span style="font-size:12px;font-weight:600;color:rgba(0,0,0,0.45);background:#e8e8e8;padding:3px 10px;border-radius:4px;">기본</span>
+          <span style="font-size:13px;color:rgba(0,0,0,0.45);">투어/티켓 없음 — 에어텔 only</span>
+        </div>
+        <span style="font-size:11px;color:rgba(0,0,0,0.25);">항상 생성 (삭제 불가)</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- 2. 조합 제한 설정 (풀사이즈) -->
+  <div class="card">
+    <div class="card-header"><h3><span class="section-num">2</span> 조합 제한 설정</h3></div>
+    <div class="card-body">
+
+      <!-- 2-A. 상품 생성 여행기간 & 그루핑 배치 -->
+      <div style="margin-bottom:20px;">
+        <div style="font-size:13px;font-weight:600;color:rgba(0,0,0,0.65);margin-bottom:4px;">📅 상품 생성 여행기간 & 그루핑 배치</div>
+        <div style="font-size:11px;color:rgba(0,0,0,0.35);margin-bottom:12px;">ON인 여행기간만 상품 생성 대상. 해당 기간에 맞는 항공편만 조합됨.</div>
+
+        <table style="margin-bottom:12px;" id="durationTable">
+          <thead>
+            <tr>
+              <th style="width:50px;">생성</th>
+              <th>여행기간</th>
+              <th>활동 가능 일수</th>
+              <th>그루핑 최대 배치</th>
+              <th>생성 예시</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><div class="toggle on" onclick="this.classList.toggle('on');updateCombPreview()" style="width:34px;height:18px;"></div></td>
+              <td><strong>2박3일</strong></td>
+              <td>1일 <span style="font-size:11px;color:rgba(0,0,0,0.35);">(Day 2)</span></td>
+              <td><input type="number" class="form-input form-input-sm" value="1" min="0" max="3" style="width:50px;height:26px;" onchange="updateCombPreview()"> 개</td>
+              <td style="font-size:11px;color:rgba(0,0,0,0.55);">A만 / B만 / C(없음)</td>
+            </tr>
+            <tr>
+              <td><div class="toggle on" onclick="this.classList.toggle('on');updateCombPreview()" style="width:34px;height:18px;"></div></td>
+              <td><strong>3박5일</strong></td>
+              <td>3일 <span style="font-size:11px;color:rgba(0,0,0,0.35);">(Day 2~4)</span></td>
+              <td><input type="number" class="form-input form-input-sm" value="2" min="0" max="5" style="width:50px;height:26px;" onchange="updateCombPreview()"> 개</td>
+              <td style="font-size:11px;color:rgba(0,0,0,0.55);">A만 / A+B / B만 / C(없음)</td>
+            </tr>
+            <tr>
+              <td><div class="toggle on" onclick="this.classList.toggle('on');updateCombPreview()" style="width:34px;height:18px;"></div></td>
+              <td><strong>4박6일</strong></td>
+              <td>4일 <span style="font-size:11px;color:rgba(0,0,0,0.35);">(Day 2~5)</span></td>
+              <td><input type="number" class="form-input form-input-sm" value="2" min="0" max="5" style="width:50px;height:26px;" onchange="updateCombPreview()"> 개</td>
+              <td style="font-size:11px;color:rgba(0,0,0,0.55);">A만 / A+B / B만 / C(없음)</td>
+            </tr>
+            <tr style="opacity:0.5;">
+              <td><div class="toggle" onclick="this.classList.toggle('on');this.closest('tr').style.opacity=this.classList.contains('on')?'1':'0.5';updateCombPreview()" style="width:34px;height:18px;"></div></td>
+              <td><strong>5박7일</strong></td>
+              <td>5일 <span style="font-size:11px;color:rgba(0,0,0,0.35);">(Day 2~6)</span></td>
+              <td><input type="number" class="form-input form-input-sm" value="3" min="0" max="5" style="width:50px;height:26px;" onchange="updateCombPreview()"> 개</td>
+              <td style="font-size:11px;color:rgba(0,0,0,0.55);">A만 / A+B / A+B+C / C(없음)</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <div style="display:flex;justify-content:space-between;align-items:center;">
+          <div style="font-size:11px;color:rgba(0,0,0,0.35);">* OFF인 여행기간의 항공편은 상품 생성하지 않음. C타입(투어없음)은 항상 포함.</div>
+          <button class="btn btn-default btn-sm" onclick="addDurationRow()">+ 여행기간 추가</button>
+        </div>
+      </div>
+
+      <!-- 2-B. 숙박권 옵션 -->
+      <div style="margin-bottom:20px;padding-top:16px;border-top:1px solid #f0f0f0;">
+        <div style="font-size:13px;font-weight:600;color:rgba(0,0,0,0.65);margin-bottom:12px;">🏨 숙박권 옵션 설정</div>
+
+        <!-- 픽업/샌딩 -->
+        <div style="border:1px solid #e8e8e8;border-radius:8px;padding:14px 16px;margin-bottom:10px;display:flex;align-items:center;justify-content:space-between;cursor:pointer;" class="opt-card active" onclick="toggleOpt(this)">
+          <div style="display:flex;align-items:center;gap:12px;">
+            <span style="font-size:20px;">🚐</span>
+            <div>
+              <div style="font-size:13px;font-weight:600;">픽업/샌딩</div>
+              <div style="font-size:11px;color:rgba(0,0,0,0.45);">공항 ↔ 호텔</div>
+            </div>
+          </div>
+          <div style="display:flex;align-items:center;gap:10px;">
+            <select class="form-input" style="height:28px;font-size:11px;width:130px;" onclick="event.stopPropagation();">
+              <option>왕복</option>
+              <option>편도 (픽업만)</option>
+              <option>편도 (샌딩만)</option>
+            </select>
+            <div style="font-size:11px;color:#1677ff;font-weight:500;width:40px;text-align:center;">✅ 포함</div>
+          </div>
+        </div>
+
+        <!-- 얼리체크인 (자동) -->
+        <div style="border:1px solid #d3adf7;border-radius:8px;padding:14px 16px;margin-bottom:10px;background:#faf5ff;">
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">
+            <div style="display:flex;align-items:center;gap:12px;">
+              <span style="font-size:20px;">🌅</span>
+              <div>
+                <div style="font-size:13px;font-weight:600;">얼리체크인</div>
+                <div style="font-size:11px;color:rgba(0,0,0,0.45);">항공편 도착시간 기준 자동 판단</div>
+              </div>
+            </div>
+            <span style="background:#f9f0ff;color:#722ed1;padding:3px 10px;border-radius:10px;font-size:11px;font-weight:600;">⚡ 자동</span>
+          </div>
+          <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;">
+            <span style="font-size:12px;color:rgba(0,0,0,0.55);width:80px;">조건</span>
+            <span style="font-size:12px;">현지 도착시간</span>
+            <select class="form-input" style="height:26px;font-size:11px;width:60px;">
+              <option>&lt;</option>
+              <option>≤</option>
+            </select>
+            <input type="time" class="form-input" style="height:26px;font-size:11px;width:100px;" value="12:00">
+            <span style="font-size:11px;color:rgba(0,0,0,0.35);">(오전 12시 이전 도착 시 자동 포함)</span>
+          </div>
+          <div style="display:flex;align-items:center;gap:8px;">
+            <span style="font-size:12px;color:rgba(0,0,0,0.55);width:80px;">생성 규칙</span>
+            <span style="font-size:12px;color:#722ed1;font-weight:500;">단독 생성만 — 다른 그루핑(A·B타입)과 묶이지 않음</span>
+          </div>
+          <div style="margin-top:8px;background:#fff;border-radius:6px;padding:8px 12px;font-size:11px;color:rgba(0,0,0,0.45);line-height:1.6;">
+            예) VJ871 도착 09:30 → 얼리체크인 포함 상품 <strong>별도 생성</strong><br>
+            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;KE463 도착 14:00 → 얼리체크인 <strong>미포함</strong> (기준 초과)
+          </div>
+        </div>
+
+        <!-- 레이트체크아웃 (자동) -->
+        <div style="border:1px solid #d3adf7;border-radius:8px;padding:14px 16px;background:#faf5ff;">
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">
+            <div style="display:flex;align-items:center;gap:12px;">
+              <span style="font-size:20px;">🌙</span>
+              <div>
+                <div style="font-size:13px;font-weight:600;">레이트체크아웃</div>
+                <div style="font-size:11px;color:rgba(0,0,0,0.45);">항공편 출발시간 기준 자동 판단</div>
+              </div>
+            </div>
+            <span style="background:#f9f0ff;color:#722ed1;padding:3px 10px;border-radius:10px;font-size:11px;font-weight:600;">⚡ 자동</span>
+          </div>
+          <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;">
+            <span style="font-size:12px;color:rgba(0,0,0,0.55);width:80px;">조건</span>
+            <span style="font-size:12px;">현지 출발시간</span>
+            <select class="form-input" style="height:26px;font-size:11px;width:60px;">
+              <option>≥</option>
+              <option>&gt;</option>
+            </select>
+            <input type="time" class="form-input" style="height:26px;font-size:11px;width:100px;" value="18:00">
+            <span style="font-size:11px;color:rgba(0,0,0,0.35);">(오후 6시 이후 출발 시 자동 포함)</span>
+          </div>
+          <div style="display:flex;align-items:center;gap:8px;">
+            <span style="font-size:12px;color:rgba(0,0,0,0.55);width:80px;">생성 규칙</span>
+            <span style="font-size:12px;color:#722ed1;font-weight:500;">단독 생성만 — 다른 그루핑(A·B타입)과 묶이지 않음</span>
+          </div>
+          <div style="margin-top:8px;background:#fff;border-radius:6px;padding:8px 12px;font-size:11px;color:rgba(0,0,0,0.45);line-height:1.6;">
+            예) VJ872 출발 22:00 → 레이트체크아웃 포함 상품 <strong>별도 생성</strong><br>
+            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;KE464 출발 15:00 → 레이트체크아웃 <strong>미포함</strong> (기준 미달)
+          </div>
+        </div>
+
+        <div style="font-size:11px;color:rgba(0,0,0,0.35);margin-top:10px;">* 얼체/레체는 항공편 시간 기준으로 자동 판단. 투어 그루핑(A·B타입)과 별도로 단독 상품만 생성됨.</div>
+      </div>
+
+      <!-- 2-C. 자동 조합 대상 (안내) -->
+      <div style="padding-top:16px;border-top:1px solid #f0f0f0;">
+        <div style="font-size:13px;font-weight:600;color:rgba(0,0,0,0.65);margin-bottom:10px;">🛏️ 객실 · 요금표 조합</div>
+        <div style="background:#f5f5f5;border-radius:8px;padding:12px 16px;font-size:12px;color:rgba(0,0,0,0.55);line-height:1.8;">
+          숙박권에 등록된 <strong>전체 객실타입 × 전체 요금표(RO, BB, HB, FB, AI)</strong>를 자동 조합하여 상품 생성<br>
+          <span style="color:rgba(0,0,0,0.35);">예) Sol by Melia: 스탠다드(RO, BB) + 오션뷰(RO, BB) + 풀빌라(BB, AI) = 6개 조합</span>
+        </div>
+      </div>
+
+      <!-- 예상 조합 수 -->
+      <div style="margin-top:16px;padding-top:14px;border-top:1px solid #f0f0f0;display:flex;justify-content:space-between;align-items:center;">
+        <div style="font-size:12px;color:rgba(0,0,0,0.45);">
+          예상 조합 수: <strong id="estCombinations" style="color:#1677ff;font-size:14px;">~432개</strong>
+        </div>
+        <div style="font-size:11px;color:rgba(0,0,0,0.35);" id="combFormula">6 객실요금 × 6 그루핑 × 2 옵션 × 12 항공편 × 3 여행기간</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 3. 가격/마진 정책 (여행지별) -->
+    <div class="card">
+      <div class="card-header">
+        <h3><span class="section-num">3</span> 가격/마진 정책</h3>
+        <span style="font-size:12px;color:#1677ff;font-weight:500;" id="destLabel">🇻🇳 푸꾸옥</span>
+      </div>
+      <div class="card-body">
+
+        <!-- 4-A. 마진 구조 & 고정마진 -->
+        <div style="margin-bottom:20px;">
+          <div style="background:#f5f5f5;border-radius:8px;padding:10px 14px;margin-bottom:14px;font-size:12px;color:rgba(0,0,0,0.55);">
+            <strong style="color:rgba(0,0,0,0.75);">마진 구조:</strong> 원가 → ÷(1-<span style="color:#722ed1;font-weight:600;">고정마진 5%</span> 고정) → 기준원가 → ÷(1-<span style="color:#1677ff;font-weight:600;">추가마진 조합별</span>) → 판매가 → ÷(1-<span style="color:#f5222d;font-weight:600;">정가마진 시즌별</span>) → 상품가(표시가)
+          </div>
+          <div class="form-row">
+            <span class="form-label" style="width:auto;margin-right:8px;">고정마진</span>
+            <input type="number" class="form-input form-input-sm" value="5" disabled style="background:#f5f5f5;color:rgba(0,0,0,0.45);">
+            <span class="form-suffix">% <span style="color:#722ed1;font-size:11px;">(결제수수료+운영비, 전체 고정)</span></span>
+          </div>
+        </div>
+
+        <!-- 4-B. 추가마진 자동 산출 결과 -->
+        <div style="padding-top:16px;border-top:1px solid #f0f0f0;">
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px;">
+            <div style="font-size:13px;font-weight:600;color:rgba(0,0,0,0.65);">📊 추가마진 자동 산출 결과 <span style="font-size:11px;color:rgba(0,0,0,0.35);font-weight:400;">— 경쟁가 비교 기반, 마지막 배치 시점 산출</span></div>
+            <div style="display:flex;gap:6px;">
+              <button class="btn btn-default btn-sm" onclick="showToast('시뮬레이션 재실행 중...')">🔄 재산출</button>
+            </div>
+          </div>
+
+          <!-- 마진 범위 설정 -->
+          <div style="display:flex;gap:20px;align-items:center;margin-bottom:14px;padding:10px 14px;background:#f9f0ff;border:1px solid #d3adf7;border-radius:6px;">
+            <span style="font-size:12px;color:#722ed1;font-weight:500;">추가마진 허용 범위:</span>
+            <div style="display:flex;align-items:center;gap:6px;">
+              <span style="font-size:12px;">최소</span>
+              <input type="number" class="form-input form-input-sm" value="0" min="0" max="30" style="width:55px;height:26px;font-size:12px;" id="minMargin">
+              <span style="font-size:12px;">%</span>
+            </div>
+            <div style="display:flex;align-items:center;gap:6px;">
+              <span style="font-size:12px;">최대</span>
+              <input type="number" class="form-input form-input-sm" value="20" min="0" max="50" style="width:55px;height:26px;font-size:12px;" id="maxMargin">
+              <span style="font-size:12px;">%</span>
+            </div>
+            <span style="font-size:11px;color:rgba(0,0,0,0.35);">범위 밖 → 생성 안 함(역마진) 또는 최대값 적용</span>
+          </div>
+
+          <div style="overflow-x:auto;">
+            <table id="marginTable">
+              <thead>
+                <tr>
+                  <th style="width:40px;">#</th>
+                  <th>🏨 숙소</th>
+                  <th>✈️ 항공사</th>
+                  <th>📦 타입</th>
+                  <th>경쟁 순위</th>
+                  <th>경쟁 평균가</th>
+                  <th>기준원가</th>
+                  <th style="width:100px;">자동 추가마진</th>
+                  <th>판매가</th>
+                  <th>경쟁 대비</th>
+                  <th style="width:60px;">상태</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>1</td>
+                  <td><strong>Sol by Melia</strong><br><span style="font-size:10px;color:rgba(0,0,0,0.35);">자동(TMG)</span></td>
+                  <td>비엣젯</td>
+                  <td><span style="background:#e6f4ff;color:#1677ff;padding:2px 6px;border-radius:3px;font-size:10px;font-weight:600;">에어텔</span></td>
+                  <td><span style="background:#e6f4ff;color:#1677ff;padding:2px 8px;border-radius:10px;font-size:11px;font-weight:600;">1순위</span></td>
+                  <td>1,520,000</td>
+                  <td style="color:rgba(0,0,0,0.45);">1,052,632</td>
+                  <td><strong style="color:#1677ff;font-size:15px;">12.3%</strong></td>
+                  <td><strong>1,444,000</strong></td>
+                  <td style="color:#52c41a;font-weight:600;">-5.0% ✅</td>
+                  <td><span class="rule-badge live" style="font-size:10px;">생성</span></td>
+                </tr>
+                <tr>
+                  <td>2</td>
+                  <td><strong>Sol by Melia</strong><br><span style="font-size:10px;color:rgba(0,0,0,0.35);">자동(TMG)</span></td>
+                  <td>대한항공</td>
+                  <td><span style="background:#e6f4ff;color:#1677ff;padding:2px 6px;border-radius:3px;font-size:10px;font-weight:600;">에어텔</span></td>
+                  <td><span style="background:#e6f4ff;color:#1677ff;padding:2px 8px;border-radius:10px;font-size:11px;font-weight:600;">1순위</span></td>
+                  <td>1,780,000</td>
+                  <td style="color:rgba(0,0,0,0.45);">1,352,632</td>
+                  <td><strong style="color:#1677ff;font-size:15px;">8.7%</strong></td>
+                  <td><strong>1,691,000</strong></td>
+                  <td style="color:#52c41a;font-weight:600;">-5.0% ✅</td>
+                  <td><span class="rule-badge live" style="font-size:10px;">생성</span></td>
+                </tr>
+                <tr>
+                  <td>3</td>
+                  <td><strong>Sol by Melia</strong><br><span style="font-size:10px;color:rgba(0,0,0,0.35);">자동(TMG)</span></td>
+                  <td>티웨이</td>
+                  <td><span style="background:#e6f4ff;color:#1677ff;padding:2px 6px;border-radius:3px;font-size:10px;font-weight:600;">에어텔</span></td>
+                  <td><span style="background:#f6ffed;color:#52c41a;padding:2px 8px;border-radius:10px;font-size:11px;font-weight:600;">2순위</span></td>
+                  <td>1,380,000</td>
+                  <td style="color:rgba(0,0,0,0.45);">982,632</td>
+                  <td><strong style="color:#1677ff;font-size:15px;">15.1%</strong></td>
+                  <td><strong>1,311,000</strong></td>
+                  <td style="color:#52c41a;font-weight:600;">-5.0% ✅</td>
+                  <td><span class="rule-badge live" style="font-size:10px;">생성</span></td>
+                </tr>
+                <tr style="background:#f6ffed;">
+                  <td>4</td>
+                  <td><strong>Sol by Melia</strong><br><span style="font-size:10px;color:rgba(0,0,0,0.35);">자동(TMG)</span></td>
+                  <td>비엣젯</td>
+                  <td><span style="background:#f6ffed;color:#52c41a;padding:2px 6px;border-radius:3px;font-size:10px;font-weight:600;">패키지</span></td>
+                  <td><span style="background:#fff7e6;color:#fa8c16;padding:2px 8px;border-radius:10px;font-size:11px;font-weight:600;">3순위</span></td>
+                  <td style="color:rgba(0,0,0,0.35);">비교대상 없음</td>
+                  <td style="color:rgba(0,0,0,0.45);">1,452,632</td>
+                  <td><strong style="color:#fa8c16;font-size:15px;">9.0%</strong><br><span style="font-size:10px;color:rgba(0,0,0,0.35);">기본값</span></td>
+                  <td><strong>1,596,299</strong></td>
+                  <td style="color:rgba(0,0,0,0.35);">— (비교불가)</td>
+                  <td><span class="rule-badge" style="font-size:10px;background:#fff7e6;color:#fa8c16;">주의</span></td>
+                </tr>
+                <tr>
+                  <td>5</td>
+                  <td><strong>Melia Vinpearl</strong><br><span style="font-size:10px;color:#fa8c16;">수동</span></td>
+                  <td>비엣젯</td>
+                  <td><span style="background:#e6f4ff;color:#1677ff;padding:2px 6px;border-radius:3px;font-size:10px;font-weight:600;">에어텔</span></td>
+                  <td><span style="background:#e6f4ff;color:#1677ff;padding:2px 8px;border-radius:10px;font-size:11px;font-weight:600;">1순위</span></td>
+                  <td>1,620,000</td>
+                  <td style="color:rgba(0,0,0,0.45);">1,152,632</td>
+                  <td><strong style="color:#1677ff;font-size:15px;">10.2%</strong></td>
+                  <td><strong>1,539,000</strong></td>
+                  <td style="color:#52c41a;font-weight:600;">-5.0% ✅</td>
+                  <td><span class="rule-badge live" style="font-size:10px;">생성</span></td>
+                </tr>
+                <tr style="background:#fff1f0;">
+                  <td>6</td>
+                  <td><strong>Melia Vinpearl</strong><br><span style="font-size:10px;color:#fa8c16;">수동</span></td>
+                  <td>대한항공</td>
+                  <td><span style="background:#e6f4ff;color:#1677ff;padding:2px 6px;border-radius:3px;font-size:10px;font-weight:600;">에어텔</span></td>
+                  <td><span style="background:#e6f4ff;color:#1677ff;padding:2px 8px;border-radius:10px;font-size:11px;font-weight:600;">1순위</span></td>
+                  <td>1,780,000</td>
+                  <td style="color:rgba(0,0,0,0.45);">1,752,632</td>
+                  <td><strong style="color:#f5222d;font-size:15px;">-3.5%</strong><br><span style="font-size:10px;color:#f5222d;">역마진</span></td>
+                  <td style="color:#f5222d;text-decoration:line-through;">1,691,000</td>
+                  <td style="color:#f5222d;font-weight:600;">원가 초과 ❌</td>
+                  <td><span class="rule-badge" style="font-size:10px;background:#fff1f0;color:#f5222d;">탈락</span></td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+          <div style="margin-top:10px;display:flex;justify-content:space-between;align-items:center;">
+            <div style="font-size:11px;color:rgba(0,0,0,0.35);">
+              💡 추가마진은 경쟁가 비교 기준(1→2→3순위)에 따라 자동 산출. 3순위(비교대상 없음)는 기본값 9% 적용. 역마진 조합은 자동 탈락.
+            </div>
+            <div style="display:flex;gap:8px;">
+              <span style="font-size:12px;padding:4px 10px;background:#f6ffed;border-radius:4px;color:#52c41a;font-weight:500;">생성 5개</span>
+              <span style="font-size:12px;padding:4px 10px;background:#fff7e6;border-radius:4px;color:#fa8c16;font-weight:500;">주의 1개</span>
+              <span style="font-size:12px;padding:4px 10px;background:#fff1f0;border-radius:4px;color:#f5222d;font-weight:500;">탈락 1개</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- 4-C. 정가마진 & 시즌 -->
+        <div style="margin-top:20px;padding-top:16px;border-top:1px solid #f0f0f0;">
+          <div style="font-size:13px;font-weight:600;color:rgba(0,0,0,0.65);margin-bottom:12px;">🏷️ 정가마진 & 시즌 설정 <span style="font-size:11px;color:rgba(0,0,0,0.35);font-weight:400;">— 상품가(표시가) 할인감 결정</span></div>
+
+          <div style="display:flex;gap:24px;flex-wrap:wrap;">
+            <div class="form-row" style="margin-bottom:0;">
+              <span class="form-label" style="width:auto;margin-right:8px;">정가마진 성수기</span>
+              <input type="number" class="form-input form-input-sm" value="5" min="1" max="30" id="peakMargin" onchange="updateSeasonPreview()">
+              <span class="form-suffix">%</span>
+            </div>
+            <div class="form-row" style="margin-bottom:0;">
+              <span class="form-label" style="width:auto;margin-right:8px;">정가마진 비수기</span>
+              <input type="number" class="form-input form-input-sm" value="12" min="1" max="30" id="offMargin" onchange="updateSeasonPreview()">
+              <span class="form-suffix">%</span>
+            </div>
+          </div>
+
+          <div style="margin-top:10px;background:#fff7e6;border:1px solid #ffe58f;border-radius:6px;padding:8px 14px;font-size:12px;">
+            <span style="color:rgba(0,0,0,0.45);">판매가 100만원 기준 →</span>
+            <strong>성수기:</strong> 상품가 <strong id="previewPeakPrice">1,052,632</strong>원 (할인 <span id="previewPeakDisc" style="color:#f5222d;">52,632</span>원)
+            &nbsp;·&nbsp;
+            <strong>비수기:</strong> 상품가 <strong id="previewOffPrice">1,136,364</strong>원 (할인 <span id="previewOffDisc" style="color:#f5222d;">136,364</span>원)
+          </div>
+
+          <div style="margin-top:14px;">
+            <div style="font-size:12px;font-weight:500;color:rgba(0,0,0,0.55);margin-bottom:8px;">시즌 구간 (2026) — 클릭하여 성수기/비수기 전환</div>
+            <div style="display:grid;grid-template-columns:repeat(12,1fr);gap:4px;" id="seasonGrid">
+              <div class="season-cell off" data-month="1" onclick="toggleSeason(this)"><div class="sc-month">1월</div><div class="sc-label">비수기</div></div>
+              <div class="season-cell off" data-month="2" onclick="toggleSeason(this)"><div class="sc-month">2월</div><div class="sc-label">비수기</div></div>
+              <div class="season-cell off" data-month="3" onclick="toggleSeason(this)"><div class="sc-month">3월</div><div class="sc-label">비수기</div></div>
+              <div class="season-cell peak" data-month="4" onclick="toggleSeason(this)"><div class="sc-month">4월</div><div class="sc-label">성수기</div></div>
+              <div class="season-cell off" data-month="5" onclick="toggleSeason(this)"><div class="sc-month">5월</div><div class="sc-label">비수기</div></div>
+              <div class="season-cell peak" data-month="6" onclick="toggleSeason(this)"><div class="sc-month">6월</div><div class="sc-label">성수기</div></div>
+              <div class="season-cell peak" data-month="7" onclick="toggleSeason(this)"><div class="sc-month">7월</div><div class="sc-label">성수기</div></div>
+              <div class="season-cell peak" data-month="8" onclick="toggleSeason(this)"><div class="sc-month">8월</div><div class="sc-label">성수기</div></div>
+              <div class="season-cell off" data-month="9" onclick="toggleSeason(this)"><div class="sc-month">9월</div><div class="sc-label">비수기</div></div>
+              <div class="season-cell off" data-month="10" onclick="toggleSeason(this)"><div class="sc-month">10월</div><div class="sc-label">비수기</div></div>
+              <div class="season-cell peak" data-month="11" onclick="toggleSeason(this)"><div class="sc-month">11월</div><div class="sc-label">성수기</div></div>
+              <div class="season-cell peak" data-month="12" onclick="toggleSeason(this)"><div class="sc-month">12월</div><div class="sc-label">성수기</div></div>
+            </div>
+            <div style="margin-top:6px;display:flex;gap:12px;align-items:center;">
+              <span style="display:inline-block;width:10px;height:10px;background:#f5222d;border-radius:2px;"></span><span style="font-size:11px;color:rgba(0,0,0,0.35);">성수기 (정가마진 <span id="peakLabel">5</span>%)</span>
+              <span style="display:inline-block;width:10px;height:10px;background:#1677ff;border-radius:2px;"></span><span style="font-size:11px;color:rgba(0,0,0,0.35);">비수기 (정가마진 <span id="offLabel">12</span>%)</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- 4-D. 경쟁가 비교 기준 -->
+        <div style="margin-top:20px;padding-top:16px;border-top:1px solid #f0f0f0;">
+          <div class="form-label" style="width:auto;margin-bottom:10px;">📊 추가마진 경쟁가 비교 기준</div>
+          <div class="comp-row">
+            <span class="comp-rank r1">1</span>
+            <div style="flex:1;">
+              <div style="font-size:13px;">동일 여행지 + 동일 상품타입 + 동일 항공사 + 동일 숙소 + 동일 출발일 + 동일 투어/티켓 + 옵션(얼리체크인/레이트체크아웃)</div>
+              <div style="font-size:11px;color:rgba(0,0,0,0.35);margin-top:2px;">완전 동일 스펙 상품 비교</div>
+            </div>
+            <span style="font-size:12px;color:rgba(0,0,0,0.45);">평균가 × 0.95</span>
+          </div>
+          <div class="comp-row">
+            <span class="comp-rank r2">2</span>
+            <div style="flex:1;">
+              <div style="font-size:13px;">동일 숙소 + 동일 출발일 + 동일 상품타입 + 동일 여행지</div>
+              <div style="font-size:11px;color:rgba(0,0,0,0.35);margin-top:2px;">같은 숙소·날짜, 항공사/투어 다를 수 있음</div>
+            </div>
+            <span style="font-size:12px;color:rgba(0,0,0,0.45);">평균가 × 0.95</span>
+          </div>
+          <div class="comp-row">
+            <span class="comp-rank r3">3</span>
+            <div style="flex:1;">
+              <div style="font-size:13px;">동일 여행지 + 동일 상품타입</div>
+              <div style="font-size:11px;color:rgba(0,0,0,0.35);margin-top:2px;">같은 여행지 내 동일 타입 전체 평균</div>
+            </div>
+            <span style="font-size:12px;color:rgba(0,0,0,0.45);">평균가 × 0.95</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  <!-- 4. 탈락 로그 -->
+  <div class="card">
+    <div class="card-header">
+      <h3><span class="section-num">4</span> 역마진 / 미생성 모니터링</h3>
+      <div id="logFilter" style="display:flex;gap:6px;">
+        <span class="tag active" onclick="filterLog('all',this)">전체</span>
+        <span class="tag" onclick="filterLog('comp',this)">경쟁가 탈락</span>
+        <span class="tag" onclick="filterLog('neg',this)">역마진</span>
+        <span class="tag" onclick="filterLog('stock',this)">재고 없음</span>
+      </div>
+    </div>
+    <div class="card-body" style="padding:0;">
+      <table>
+        <thead><tr><th>#</th><th>조합</th><th>여행지</th><th>기준원가</th><th>경쟁 평균가</th><th>차이</th><th>탈락 사유</th><th>일시</th></tr></thead>
+        <tbody id="logTable">
+          <tr data-type="comp"><td>1</td><td><strong>비엣젯 + Sol 스탠다드</strong><br><span style="font-size:11px;color:rgba(0,0,0,0.45);">A타입 (빈펄+호핑)</span></td><td>푸꾸옥</td><td>1,250,000</td><td>1,180,000</td><td style="color:#f5222d;font-weight:600;">+5.9%</td><td><span style="background:#fff1f0;color:#f5222d;padding:2px 8px;border-radius:4px;font-size:11px;font-weight:500;">경쟁가 탈락</span></td><td style="font-size:12px;color:rgba(0,0,0,0.45);">04/14 06:30</td></tr>
+          <tr data-type="neg"><td>2</td><td><strong>대한항공 + Sol 프리미어</strong><br><span style="font-size:11px;color:rgba(0,0,0,0.45);">B타입 (사파리)</span></td><td>푸꾸옥</td><td>1,890,000</td><td>—</td><td style="color:#f5222d;font-weight:600;">-2.3%</td><td><span style="background:#fff1f0;color:#f5222d;padding:2px 8px;border-radius:4px;font-size:11px;font-weight:500;">역마진</span></td><td style="font-size:12px;color:rgba(0,0,0,0.45);">04/14 06:30</td></tr>
+          <tr data-type="stock"><td>3</td><td><strong>티웨이 + Sol 오션뷰</strong><br><span style="font-size:11px;color:rgba(0,0,0,0.45);">C타입 (에어텔)</span></td><td>푸꾸옥</td><td>980,000</td><td>—</td><td>—</td><td><span style="background:#fff7e6;color:#fa8c16;padding:2px 8px;border-radius:4px;font-size:11px;font-weight:500;">재고 없음</span></td><td style="font-size:12px;color:rgba(0,0,0,0.45);">04/14 06:30</td></tr>
+          <tr data-type="comp"><td>4</td><td><strong>비엣젯 + Sol 풀빌라</strong><br><span style="font-size:11px;color:rgba(0,0,0,0.45);">A타입 (빈펄+호핑)</span></td><td>푸꾸옥</td><td>2,100,000</td><td>1,950,000</td><td style="color:#f5222d;font-weight:600;">+7.7%</td><td><span style="background:#fff1f0;color:#f5222d;padding:2px 8px;border-radius:4px;font-size:11px;font-weight:500;">경쟁가 탈락</span></td><td style="font-size:12px;color:rgba(0,0,0,0.45);">04/14 06:30</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- 저장 -->
+  <div style="display:flex;justify-content:flex-end;gap:10px;margin-top:8px;">
+    <button class="btn btn-default" onclick="switchView('list',document.querySelectorAll('.view-tab')[0])">← 목록으로</button>
+    <button class="btn btn-default" onclick="if(confirm('모든 설정을 초기값으로 되돌리시겠습니까?')) showToast('초기화 완료')">초기화</button>
+    <button class="btn btn-success" style="font-size:14px;height:40px;padding:0 28px;" onclick="saveRules()">💾 규칙 저장</button>
+  </div>
+
+  </div><!-- /viewEdit -->
+</div>
+
+<!-- MODAL: 구성요소 추가 -->
+<div class="modal-overlay" id="addComponentModal">
+  <div class="modal">
+    <div class="modal-header">구성요소 추가 <button class="modal-close" onclick="closeModal('addComponentModal')">×</button></div>
+    <div class="modal-body">
+      <div class="form-row"><span class="form-label">이름</span><input class="form-input" style="flex:1;" placeholder="예: 공항 라운지" id="newCompName"></div>
+      <div class="form-row" style="margin-top:12px;"><span class="form-label">설명</span><input class="form-input" style="flex:1;" placeholder="예: 출발 전 라운지 이용" id="newCompDesc"></div>
+      <div class="form-row" style="margin-top:12px;"><span class="form-label">아이콘</span><input class="form-input form-input-sm" value="🎫" id="newCompIcon"></div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-default" onclick="closeModal('addComponentModal')">취소</button>
+      <button class="btn btn-primary" onclick="addComponent()">추가</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL: 그루핑 추가 -->
+<div class="modal-overlay" id="addGroupModal">
+  <div class="modal">
+    <div class="modal-header"><span id="groupModalTitle">타입 추가</span> <button class="modal-close" onclick="closeModal('addGroupModal')">×</button></div>
+    <div class="modal-body">
+      <div class="form-row"><span class="form-label">타입 이름</span><input class="form-input" style="flex:1;" placeholder="예: 문화 체험" id="newGroupName"></div>
+      <div style="margin-top:16px;">
+        <div class="form-label" style="width:auto;margin-bottom:8px;">포함 투어/티켓 <span style="font-size:11px;color:rgba(0,0,0,0.35);font-weight:400;">— 등록된 인벤토리에서 선택</span></div>
+        <div id="groupItemList" style="display:flex;flex-direction:column;gap:8px;">
+          <div style="display:flex;gap:8px;align-items:center;">
+            <select class="form-input" style="flex:1;">
+              <option value="">투어/티켓 선택...</option>
+              <optgroup label="🎢 투어">
+                <option>호핑투어 (4섬)</option>
+                <option>빈펄 사파리</option>
+                <option>야시장 투어</option>
+                <option>선셋 세일링</option>
+                <option>시내투어 (반나절)</option>
+                <option>낚시 투어</option>
+                <option>스쿠버 다이빙</option>
+                <option>머드 온천</option>
+              </optgroup>
+              <optgroup label="🎫 티켓">
+                <option>빈펄랜드 입장권</option>
+                <option>빈원더스 입장권</option>
+                <option>워터파크 입장권</option>
+                <option>마사지 바우처 (60분)</option>
+                <option>패스트트랙 (공항)</option>
+              </optgroup>
+            </select>
+            <button class="btn btn-danger btn-sm" onclick="this.parentElement.remove()">×</button>
+          </div>
+        </div>
+        <button class="btn btn-default btn-sm" style="margin-top:8px;" onclick="addGroupItemSelect()">+ 항목 추가</button>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-default" onclick="closeModal('addGroupModal')">취소</button>
+      <button class="btn btn-primary" onclick="addGroup()">저장</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL: 여행기간 추가 -->
+<div class="modal-overlay" id="addDurationModal">
+  <div class="modal" style="width:380px;">
+    <div class="modal-header">여행기간 추가 <button class="modal-close" onclick="closeModal('addDurationModal')">×</button></div>
+    <div class="modal-body">
+      <div style="display:flex;gap:12px;align-items:center;">
+        <div style="flex:1;">
+          <div class="form-label">박 수</div>
+          <input type="number" class="form-input" style="width:100%;height:42px;font-size:16px;font-weight:600;text-align:center;" value="5" min="1" max="14" id="newNights" oninput="previewDuration()">
+        </div>
+        <div style="font-size:18px;font-weight:600;color:rgba(0,0,0,0.25);padding-top:20px;">박</div>
+        <div style="flex:1;">
+          <div class="form-label">일 수</div>
+          <input type="number" class="form-input" style="width:100%;height:42px;font-size:16px;font-weight:600;text-align:center;" value="7" min="2" max="16" id="newDays" oninput="previewDuration()">
+        </div>
+        <div style="font-size:18px;font-weight:600;color:rgba(0,0,0,0.25);padding-top:20px;">일</div>
+      </div>
+      <div style="margin-top:14px;background:#fafafa;border-radius:8px;padding:10px 14px;" id="durationPreview">
+        <div style="font-size:13px;font-weight:600;">5박7일</div>
+        <div style="font-size:12px;color:rgba(0,0,0,0.45);margin-top:4px;">활동 가능: 5일 (Day 2~6) · 추천 그루핑: 3개</div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-default" onclick="closeModal('addDurationModal')">취소</button>
+      <button class="btn btn-primary" onclick="confirmAddDuration()">추가</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL: 조합 추가 -->
+<div class="modal-overlay" id="addMarginModal">
+  <div class="modal">
+    <div class="modal-header">마진 조합 추가 <button class="modal-close" onclick="closeModal('addMarginModal')">×</button></div>
+    <div class="modal-body">
+      <div class="form-row">
+        <span class="form-label">🏨 숙소</span>
+        <select class="form-input" style="flex:1;" id="newMarginHotel">
+          <option>Sol by Melia Phu Quoc</option>
+          <option>Melia Vinpearl Phu Quoc</option>
+        </select>
+      </div>
+      <div class="form-row" style="margin-top:12px;">
+        <span class="form-label">✈️ 항공사</span>
+        <select class="form-input" style="flex:1;" id="newMarginAirline">
+          <option>비엣젯 (VJ)</option>
+          <option>대한항공 (KE)</option>
+          <option>티웨이 (TW)</option>
+          <option>아시아나 (OZ)</option>
+          <option>전체 (기본값)</option>
+        </select>
+      </div>
+      <div class="form-row" style="margin-top:12px;">
+        <span class="form-label">📦 여행타입</span>
+        <select class="form-input" style="flex:1;" id="newMarginType">
+          <option value="airtel">에어텔</option>
+          <option value="package">패키지</option>
+        </select>
+      </div>
+      <div class="form-row" style="margin-top:12px;">
+        <span class="form-label">추가마진율</span>
+        <input type="number" class="form-input form-input-sm" value="10" min="0" max="30" id="newMarginRate" onchange="updateNewMarginPreview()">
+        <span class="form-suffix">% <span style="font-size:11px;color:rgba(0,0,0,0.35);">(고정마진 5% 위에 추가)</span></span>
+      </div>
+      <div style="margin-top:16px;background:#f6ffed;border:1px solid #b7eb8f;border-radius:8px;padding:10px 14px;">
+        <div style="font-size:11px;color:rgba(0,0,0,0.45);">미리보기 (원가 100만원 기준)</div>
+        <div style="font-size:13px;margin-top:4px;">
+          기준원가 <span style="color:rgba(0,0,0,0.45);">(고정5%)</span>: 1,052,632원 →
+          판매가 <span style="color:rgba(0,0,0,0.45);">(추가마진)</span>: <strong style="color:#1677ff;" id="newMarginPreview">1,169,591</strong>원
+        </div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-default" onclick="closeModal('addMarginModal')">취소</button>
+      <button class="btn btn-primary" onclick="addMarginRow()">추가</button>
+    </div>
+  </div>
+</div>
+
+<!-- TOAST -->
+<div class="toast" id="toast"></div>
+
+<script>
+// ===== 뷰 전환 =====
+function switchView(view, tabEl) {
+  document.querySelectorAll('.view-tab').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('.view-panel').forEach(p => p.classList.remove('active'));
+  tabEl.classList.add('active');
+  document.getElementById(view === 'list' ? 'viewList' : 'viewEdit').classList.add('active');
+}
+
+// ===== 규칙 목록: 펼치기 =====
+function toggleRuleExpand(id) {
+  const expand = document.getElementById(id + 'Expand');
+  const arrow = document.getElementById(id + 'Arrow');
+  if (expand.classList.contains('show')) {
+    expand.classList.remove('show');
+    arrow.classList.remove('open');
+  } else {
+    expand.classList.add('show');
+    arrow.classList.add('open');
+  }
+}
+
+// ===== 규칙 목록: 필터 =====
+function filterRuleList(status, el) {
+  document.querySelectorAll('.rule-list-filter .tag').forEach(t => t.classList.remove('active'));
+  el.classList.add('active');
+  document.querySelectorAll('.rule-row').forEach(row => {
+    row.style.display = (status === 'all' || row.dataset.status === status) ? '' : 'none';
+  });
+}
+
+// ===== 규칙 수정: 여행지로 이동 =====
+function editRule(dest) {
+  switchView('edit', document.querySelectorAll('.view-tab')[1]);
+  const tab = document.querySelector(`.dest-tab[data-dest="${dest}"]`);
+  if (tab) tab.click();
+  showToast('규칙 편집 모드');
+}
+
+// ===== 일시 중지/재개 =====
+function togglePause(btn) {
+  const row = btn.closest('.rule-row');
+  const badge = row.querySelector('.rule-badge');
+  badge.textContent = '중지';
+  badge.className = 'rule-badge paused';
+  row.dataset.status = 'paused';
+  btn.textContent = '▶️';
+  btn.onclick = function(e) { e.stopPropagation(); toggleResume(btn); };
+  showToast('규칙 일시 중지');
+}
+function toggleResume(btn) {
+  const row = btn.closest('.rule-row');
+  const badge = row.querySelector('.rule-badge');
+  badge.textContent = '운영중';
+  badge.className = 'rule-badge live';
+  row.dataset.status = 'live';
+  btn.textContent = '⏸️';
+  btn.onclick = function(e) { e.stopPropagation(); togglePause(btn); };
+  showToast('규칙 재개됨');
+}
+
+// ===== 여행지 탭 =====
+const destData = {
+  phuquoc: { name: '🇻🇳 푸꾸옥', fixed: 5, peak: 5, off: 12 },
+  nhatrang: { name: '🇻🇳 나트랑', fixed: 6, peak: 5, off: 10 },
+  danang: { name: '🇻🇳 다낭', fixed: 5, peak: 4, off: 10 },
+  bangkok: { name: '🇹🇭 방콕', fixed: 7, peak: 5, off: 15 }
+};
+
+document.querySelectorAll('.dest-tab').forEach(tab => {
+  tab.addEventListener('click', function() {
+    if (this.dataset.dest === 'add') { alert('여행지 추가 기능 (개발 예정)'); return; }
+    document.querySelectorAll('.dest-tab').forEach(t => t.classList.remove('active'));
+    this.classList.add('active');
+    const d = destData[this.dataset.dest];
+    if (d) {
+      document.getElementById('destLabel').textContent = d.name;
+      document.getElementById('fixedMargin').value = d.fixed;
+      document.getElementById('peakMargin').value = d.peak;
+      document.getElementById('offMargin').value = d.off;
+      updateMarginPreview();
+      showToast(d.name + ' 마진 정책 로드됨');
+    }
+  });
+});
+
+// ===== 여행기간 추가 =====
+function addDurationRow() {
+  document.getElementById('addDurationModal').classList.add('show');
+}
+function previewDuration() {
+  const n = parseInt(document.getElementById('newNights').value) || 0;
+  const d = parseInt(document.getElementById('newDays').value) || 0;
+  const active = Math.max(d - 2, 0);
+  const rec = Math.min(Math.max(Math.floor(active/2), 1), 5);
+  document.getElementById('durationPreview').innerHTML =
+    '<div style="font-size:13px;font-weight:600;">'+n+'박'+d+'일</div>' +
+    '<div style="font-size:12px;color:rgba(0,0,0,0.45);margin-top:4px;">활동 가능: '+active+'일 (Day 2~'+(d-1)+') · 추천 그루핑: '+rec+'개</div>';
+}
+function confirmAddDuration() {
+  const n = parseInt(document.getElementById('newNights').value);
+  const d = parseInt(document.getElementById('newDays').value);
+  if (!n || !d || n < 1 || d < 2) { alert('박수와 일수를 올바르게 입력해주세요'); return; }
+  const activeDays = d - 2; // Day 1 도착, Day N 출발 제외
+  const maxGroup = Math.min(Math.max(Math.floor(activeDays/2), 1), 5);
+  const tbody = document.querySelector('#durationTable tbody');
+  const tr = document.createElement('tr');
+  tr.innerHTML = '<td><div class="toggle on" onclick="this.classList.toggle(\'on\');this.closest(\'tr\').style.opacity=this.classList.contains(\'on\')?\'1\':\'0.5\';updateCombPreview()" style="width:34px;height:18px;"></div></td><td><strong>'+n+'박'+d+'일</strong></td><td>'+activeDays+'일 <span style="font-size:11px;color:rgba(0,0,0,0.35);">(Day 2~'+(d-1)+')</span></td><td><input type="number" class="form-input form-input-sm" value="'+maxGroup+'" min="0" max="5" style="width:50px;height:26px;" onchange="updateCombPreview()"> 개</td><td style="font-size:11px;color:#52c41a;font-weight:500;">신규 ✅</td>';
+  tbody.appendChild(tr);
+  closeModal('addDurationModal');
+  showToast(n+'박'+d+'일 여행기간 추가됨');
+  updateCombPreview();
+}
+
+// ===== 숙박권 옵션 토글 =====
+function toggleOpt(card) {
+  card.classList.toggle('active');
+  const label = card.querySelector('div:last-child');
+  if (card.classList.contains('active')) {
+    label.innerHTML = '<span style="color:#1677ff;font-weight:500;">✅ 포함</span>';
+    card.style.borderColor = '#1677ff';
+    card.style.background = '#f0f7ff';
+  } else {
+    label.innerHTML = '<span style="color:rgba(0,0,0,0.25);">미포함</span>';
+    card.style.borderColor = '#e8e8e8';
+    card.style.background = '#fff';
+  }
+  updateCombPreview();
+}
+
+function updateCombPreview() {
+  const roomRates = 6; // 전체 객실×요금표 (숙박권 기반)
+  const groups = 6; // 그루핑 조합 수
+  const opts = document.querySelectorAll('.opt-card.active').length + 1;
+  const flights = 12;
+  const activeDurations = document.querySelectorAll('#durationTable .toggle.on').length || 1;
+  const total = roomRates * groups * opts * flights * activeDurations;
+  document.getElementById('estCombinations').textContent = '~' + total.toLocaleString() + '개';
+  document.getElementById('combFormula').textContent = roomRates + ' 객실요금 × ' + groups + ' 그루핑 × ' + opts + ' 옵션 × ' + flights + ' 항공편 × ' + activeDurations + ' 여행기간';
+}
+
+// ===== 시즌 토글 =====
+function toggleSeason(cell) {
+  if (cell.classList.contains('peak')) {
+    cell.classList.remove('peak');
+    cell.classList.add('off');
+    cell.querySelector('.sc-label').textContent = '비수기';
+  } else {
+    cell.classList.remove('off');
+    cell.classList.add('peak');
+    cell.querySelector('.sc-label').textContent = '성수기';
+  }
+  const peakCount = document.querySelectorAll('.season-cell.peak').length;
+  const offCount = 12 - peakCount;
+  showToast('성수기 ' + peakCount + '개월 · 비수기 ' + offCount + '개월');
+}
+
+// ===== 정가마진 미리보기 =====
+function updateSeasonPreview() {
+  const sell = 1000000;
+  const peak = parseFloat(document.getElementById('peakMargin').value) / 100;
+  const off = parseFloat(document.getElementById('offMargin').value) / 100;
+  const peakPrice = Math.round(sell / (1 - peak));
+  const offPrice = Math.round(sell / (1 - off));
+  document.getElementById('previewPeakPrice').textContent = peakPrice.toLocaleString();
+  document.getElementById('previewPeakDisc').textContent = (peakPrice - sell).toLocaleString();
+  document.getElementById('previewOffPrice').textContent = offPrice.toLocaleString();
+  document.getElementById('previewOffDisc').textContent = (offPrice - sell).toLocaleString();
+  document.getElementById('peakLabel').textContent = document.getElementById('peakMargin').value;
+  document.getElementById('offLabel').textContent = document.getElementById('offMargin').value;
+}
+
+// ===== 마진 미리보기 (조합 테이블) =====
+function updateMarginPreview() {
+  updateSeasonPreview();
+}
+
+// ===== 조합별 마진 =====
+function openAddMarginModal() {
+  document.getElementById('addMarginModal').classList.add('show');
+  document.getElementById('newMarginRate').value = 5;
+  updateNewMarginPreview();
+}
+document.getElementById('newMarginRate')?.addEventListener('change', updateNewMarginPreview);
+function updateNewMarginPreview() {
+  const addRate = parseFloat(document.getElementById('newMarginRate').value) / 100;
+  const baseCost = Math.round(1000000 / (1 - 0.05)); // 고정5%
+  const sellPrice = Math.round(baseCost / (1 - addRate));
+  document.getElementById('newMarginPreview').textContent = sellPrice.toLocaleString();
+}
+function updateRowPreview(input) {
+  const addRate = parseFloat(input.value) / 100;
+  const baseCost = Math.round(1000000 / (1 - 0.05)); // 고정5%
+  const sellPrice = Math.round(baseCost / (1 - addRate));
+  const td = input.closest('tr').querySelector('td:nth-child(6)');
+  td.innerHTML = '기준원가 1,052,632 → 판매가 <strong>' + sellPrice.toLocaleString() + '</strong>';
+}
+function addMarginRow() {
+  const hotel = document.getElementById('newMarginHotel').value;
+  const airline = document.getElementById('newMarginAirline').value;
+  const type = document.getElementById('newMarginType').value;
+  const rate = document.getElementById('newMarginRate').value;
+  const baseCost = Math.round(1000000 / (1 - 0.05));
+  const sellPrice = Math.round(baseCost / (1 - rate/100));
+  const typeBadge = type === 'airtel'
+    ? '<span style="background:#e6f4ff;color:#1677ff;padding:2px 8px;border-radius:4px;font-size:11px;font-weight:600;">에어텔</span>'
+    : '<span style="background:#f6ffed;color:#52c41a;padding:2px 8px;border-radius:4px;font-size:11px;font-weight:600;">패키지</span>';
+  const tbody = document.querySelector('#marginTable tbody');
+  const rowNum = tbody.children.length + 1;
+  const tr = document.createElement('tr');
+  tr.style.background = '#fffbe6';
+  tr.innerHTML = '<td>'+rowNum+'</td><td><strong>'+hotel.split(' ').slice(0,3).join(' ')+'</strong></td><td>'+airline+'</td><td>'+typeBadge+'</td><td><input type="number" class="form-input form-input-sm" value="'+rate+'" min="0" max="30" style="width:60px;height:28px;" onchange="updateRowPreview(this)"></td><td style="font-size:12px;color:rgba(0,0,0,0.55);">기준원가 1,052,632 → 판매가 <strong>'+sellPrice.toLocaleString()+'</strong></td><td><span class="rule-badge draft" style="font-size:10px;">신규</span></td><td><button class="btn btn-danger btn-sm" style="height:24px;font-size:11px;" onclick="this.closest(\'tr\').remove();showToast(\'조합 삭제됨\')">삭제</button></td>';
+  tbody.appendChild(tr);
+  closeModal('addMarginModal');
+  showToast('조합 추가됨: ' + hotel.split(' ')[0] + ' × ' + airline + ' × ' + (type==='airtel'?'에어텔':'패키지'));
+}
+
+// ===== 토글 =====
+document.addEventListener('click', e => {
+  if (e.target.classList.contains('toggle')) e.target.classList.toggle('on');
+});
+
+// ===== 탈락 로그 필터 =====
+function filterLog(type, el) {
+  document.querySelectorAll('#logFilter .tag').forEach(t => t.classList.remove('active'));
+  el.classList.add('active');
+  document.querySelectorAll('#logTable tr').forEach(row => {
+    row.style.display = (type === 'all' || row.dataset.type === type) ? '' : 'none';
+  });
+}
+
+// ===== 모달 =====
+function openAddComponentModal() { document.getElementById('addComponentModal').classList.add('show'); }
+function openAddGroupModal() {
+  document.getElementById('groupModalTitle').textContent = '타입 추가';
+  document.getElementById('newGroupName').value = '';
+  document.getElementById('addGroupModal').classList.add('show');
+}
+function openEditGroupModal(code, name, items) {
+  document.getElementById('groupModalTitle').textContent = code + ' 타입 수정';
+  document.getElementById('newGroupName').value = name;
+  document.getElementById('addGroupModal').classList.add('show');
+}
+function closeModal(id) { document.getElementById(id).classList.remove('show'); }
+
+// ===== 구성요소 추가 =====
+function addComponent() {
+  const name = document.getElementById('newCompName').value;
+  const desc = document.getElementById('newCompDesc').value;
+  const icon = document.getElementById('newCompIcon').value;
+  if (!name) { alert('이름을 입력해주세요'); return; }
+  const container = document.getElementById('defaultComponents');
+  const btn = container.querySelector('div:last-child');
+  const row = document.createElement('div');
+  row.className = 'toggle-row';
+  row.innerHTML = `<div class="toggle-label"><div><div class="name">${icon} ${name}</div><div class="desc">${desc}</div></div></div><div class="toggle" onclick="this.classList.toggle('on')"></div>`;
+  container.insertBefore(row, btn);
+  closeModal('addComponentModal');
+  showToast(name + ' 추가됨');
+}
+
+// ===== 그루핑 =====
+function addGroupItemSelect() {
+  const list = document.getElementById('groupItemList');
+  const div = document.createElement('div');
+  div.style.cssText = 'display:flex;gap:8px;align-items:center;';
+  div.innerHTML = '<select class="form-input" style="flex:1;"><option value="">투어/티켓 선택...</option><optgroup label="🎢 투어"><option>호핑투어 (4섬)</option><option>빈펄 사파리</option><option>야시장 투어</option><option>선셋 세일링</option><option>시내투어 (반나절)</option><option>낚시 투어</option><option>스쿠버 다이빙</option><option>머드 온천</option></optgroup><optgroup label="🎫 티켓"><option>빈펄랜드 입장권</option><option>빈원더스 입장권</option><option>워터파크 입장권</option><option>마사지 바우처 (60분)</option><option>패스트트랙 (공항)</option></optgroup></select><button class="btn btn-danger btn-sm" onclick="this.parentElement.remove()">×</button>';
+  list.appendChild(div);
+}
+let groupCounter = 3; // A,B,C 이미 있으므로
+function addGroup() {
+  groupCounter++;
+  const code = String.fromCharCode(64 + groupCounter); // D, E, F...
+  const name = document.getElementById('newGroupName').value;
+  if (!name) { alert('타입 이름을 입력해주세요'); return; }
+  const items = [];
+  document.querySelectorAll('#groupItemList select').forEach(s => { if (s.value) items.push(s.value); });
+  const card = document.createElement('div');
+  card.className = 'group-card';
+  card.innerHTML = `<div class="group-header"><div style="display:flex;align-items:center;gap:10px;"><span class="group-type">${code} 타입</span><span style="font-size:13px;font-weight:500;">${name}</span></div><div style="display:flex;gap:6px;"><button class="btn btn-default btn-sm">수정</button><button class="btn btn-danger btn-sm" onclick="deleteGroup(this)">삭제</button></div></div><div class="group-items">${items.map(i => '<span class="group-item">'+i+'</span>').join('')}</div>`;
+  document.getElementById('groupContainer').appendChild(card);
+  closeModal('addGroupModal');
+  showToast(code + ' 타입 추가됨');
+}
+function deleteGroup(btn) {
+  if (confirm('이 타입을 삭제하시겠습니까?')) {
+    btn.closest('.group-card').remove();
+    showToast('타입 삭제됨');
+  }
+}
+
+// ===== 저장 =====
+function saveRules() {
+  const activeDest = document.querySelector('.dest-tab.active').textContent;
+  showToast('✅ ' + activeDest + ' 규칙 저장 완료!');
+}
+
+// ===== 토스트 =====
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.style.display = 'block';
+  setTimeout(() => { t.style.display = 'none'; }, 2500);
+}
+
+// 초기 미리보기
+updateMarginPreview();
+</script>
+</body>
+</html>

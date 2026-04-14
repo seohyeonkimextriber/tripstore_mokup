@@ -1,0 +1,386 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>예약/결제 — TripStore</title>
+<link href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.6/dist/web/static/pretendard.css" rel="stylesheet">
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: 'Pretendard', -apple-system, sans-serif; font-size: 14px; color: rgba(0,0,0,0.88); background: #f5f5f5; }
+.app { max-width: 480px; margin: 0 auto; background: #fff; min-height: 100vh; position: relative; }
+
+/* HEADER */
+.app-header { height: 52px; display: flex; align-items: center; padding: 0 16px; border-bottom: 1px solid #f0f0f0; position: sticky; top: 0; background: #fff; z-index: 10; }
+.app-header .back { font-size: 20px; cursor: pointer; margin-right: 12px; color: rgba(0,0,0,0.55); }
+.app-header h1 { font-size: 16px; font-weight: 600; }
+.app-header .badge-instant { background: #722ed1; color: #fff; font-size: 10px; font-weight: 700; padding: 2px 8px; border-radius: 10px; margin-left: 8px; }
+
+/* SECTIONS */
+.section { padding: 20px 16px; border-bottom: 8px solid #f5f5f5; }
+.section-title { font-size: 15px; font-weight: 600; margin-bottom: 14px; }
+.section-subtitle { font-size: 12px; color: rgba(0,0,0,0.45); margin-bottom: 14px; }
+
+/* PRODUCT SUMMARY */
+.product-card { background: #fafafa; border-radius: 10px; padding: 14px; display: flex; gap: 12px; }
+.product-img { width: 80px; height: 80px; background: linear-gradient(135deg, #e6f4ff, #bae0ff); border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 28px; flex-shrink: 0; }
+.product-info { flex: 1; }
+.product-name { font-size: 14px; font-weight: 600; margin-bottom: 4px; }
+.product-detail { font-size: 12px; color: rgba(0,0,0,0.55); line-height: 1.6; }
+.product-price { display: flex; align-items: baseline; gap: 6px; margin-top: 6px; }
+.price-original { font-size: 13px; color: rgba(0,0,0,0.35); text-decoration: line-through; }
+.price-sale { font-size: 18px; font-weight: 800; color: #f5222d; }
+.price-discount { font-size: 12px; color: #f5222d; font-weight: 600; }
+
+/* PASSENGER FORM */
+.pax-card { background: #fafafa; border-radius: 10px; padding: 14px; margin-bottom: 10px; }
+.pax-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; }
+.pax-num { font-size: 13px; font-weight: 600; }
+.pax-type { font-size: 11px; color: rgba(0,0,0,0.45); }
+.form-group { margin-bottom: 10px; }
+.form-group:last-child { margin-bottom: 0; }
+.form-label { font-size: 12px; color: rgba(0,0,0,0.55); margin-bottom: 4px; font-weight: 500; }
+.form-label .required { color: #f5222d; }
+.form-control { width: 100%; height: 42px; border: 1px solid #e8e8e8; border-radius: 8px; padding: 0 12px; font-size: 14px; font-family: inherit; outline: none; background: #fff; }
+.form-control:focus { border-color: #1677ff; box-shadow: 0 0 0 2px rgba(22,119,255,0.1); }
+.form-row-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+select.form-control { appearance: none; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='%23bbb'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 12px center; }
+
+/* NOTICE */
+.notice { background: #fffbe6; border: 1px solid #ffe58f; border-radius: 8px; padding: 10px 14px; font-size: 12px; color: #ad8b00; line-height: 1.6; }
+.notice strong { color: #d48806; }
+.notice-purple { background: #f9f0ff; border-color: #d3adf7; color: #531dab; }
+.notice-purple strong { color: #722ed1; }
+
+/* CANCEL POLICY */
+.cancel-policy { background: #fff1f0; border-radius: 8px; padding: 12px 14px; }
+.cancel-title { font-size: 13px; font-weight: 600; color: #cf1322; margin-bottom: 8px; }
+.cancel-row { display: flex; justify-content: space-between; padding: 4px 0; font-size: 12px; }
+.cancel-row .period { color: rgba(0,0,0,0.55); }
+.cancel-row .fee { font-weight: 500; }
+
+/* BOTTOM BAR */
+.bottom-bar { position: sticky; bottom: 0; background: #fff; border-top: 1px solid #f0f0f0; padding: 12px 16px; box-shadow: 0 -4px 12px rgba(0,0,0,0.06); }
+.btn-pay { width: 100%; height: 52px; background: #1677ff; color: #fff; border: none; border-radius: 10px; font-size: 16px; font-weight: 700; font-family: inherit; cursor: pointer; transition: background 0.15s; }
+.btn-pay:hover { background: #4096ff; }
+.btn-pay:disabled { background: #d9d9d9; cursor: not-allowed; }
+.pay-info { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
+.pay-total-label { font-size: 13px; color: rgba(0,0,0,0.55); }
+.pay-total { font-size: 22px; font-weight: 800; color: #f5222d; }
+
+/* LOADING OVERLAY */
+.loading-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(255,255,255,0.95); z-index: 100; display: none; flex-direction: column; align-items: center; justify-content: center; }
+.loading-overlay.show { display: flex; }
+.loading-title { font-size: 18px; font-weight: 700; margin-bottom: 6px; }
+.loading-subtitle { font-size: 13px; color: rgba(0,0,0,0.45); margin-bottom: 32px; }
+
+/* PROGRESS STEPS */
+.progress-steps { width: 320px; }
+.progress-step { display: flex; align-items: center; gap: 14px; padding: 14px 0; position: relative; }
+.progress-step::before { content: ''; position: absolute; left: 17px; top: 42px; width: 2px; height: calc(100% - 28px); background: #e8e8e8; }
+.progress-step:last-child::before { display: none; }
+.progress-step.done::before { background: #52c41a; }
+.progress-step.active::before { background: linear-gradient(to bottom, #1677ff 50%, #e8e8e8 50%); }
+.ps-icon { width: 36px; height: 36px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 16px; z-index: 1; flex-shrink: 0; }
+.ps-icon.done { background: #52c41a; color: #fff; }
+.ps-icon.active { background: #1677ff; color: #fff; animation: pulse 1.5s infinite; }
+.ps-icon.pending { background: #f0f0f0; color: rgba(0,0,0,0.25); }
+@keyframes pulse { 0%,100% { opacity: 1; box-shadow: 0 0 0 0 rgba(22,119,255,0.3); } 50% { opacity: 0.9; box-shadow: 0 0 0 8px rgba(22,119,255,0); } }
+.ps-content { flex: 1; }
+.ps-title { font-size: 14px; font-weight: 500; }
+.ps-title.done { color: #52c41a; }
+.ps-title.active { color: #1677ff; font-weight: 600; }
+.ps-title.pending { color: rgba(0,0,0,0.25); }
+.ps-desc { font-size: 12px; color: rgba(0,0,0,0.35); margin-top: 2px; }
+.ps-time { font-size: 11px; color: rgba(0,0,0,0.25); }
+
+/* SUCCESS */
+.success-screen { display: none; flex-direction: column; align-items: center; justify-content: center; padding: 60px 20px; text-align: center; }
+.success-screen.show { display: flex; }
+.success-icon { font-size: 64px; margin-bottom: 16px; }
+.success-title { font-size: 22px; font-weight: 800; margin-bottom: 8px; }
+.success-subtitle { font-size: 14px; color: rgba(0,0,0,0.45); margin-bottom: 24px; line-height: 1.6; }
+.success-card { background: #f6ffed; border: 1px solid #b7eb8f; border-radius: 12px; padding: 20px; width: 100%; text-align: left; margin-bottom: 16px; }
+.success-row { display: flex; justify-content: space-between; padding: 6px 0; font-size: 13px; }
+.success-row .label { color: rgba(0,0,0,0.45); }
+.success-row .value { font-weight: 500; }
+.success-badge { display: inline-flex; align-items: center; gap: 4px; background: #f9f0ff; color: #722ed1; padding: 6px 14px; border-radius: 20px; font-size: 13px; font-weight: 600; margin-bottom: 20px; }
+.btn-outline { width: 100%; height: 46px; background: #fff; border: 1px solid #d9d9d9; border-radius: 10px; font-size: 14px; font-weight: 500; font-family: inherit; cursor: pointer; margin-bottom: 8px; }
+</style>
+</head>
+<body>
+
+<div class="app" id="mainView">
+  <!-- HEADER -->
+  <div class="app-header">
+    <span class="back" onclick="history.back()">←</span>
+    <h1>예약/결제</h1>
+    <span class="badge-instant">즉시확정</span>
+  </div>
+
+  <!-- PRODUCT SUMMARY -->
+  <div class="section">
+    <div class="product-card">
+      <div class="product-img">🏨</div>
+      <div class="product-info">
+        <div class="product-name">푸꾸옥 · 4박6일 · 5성급 · Sol by Melia · 오션뷰 · 전 일정 조식</div>
+        <div class="product-detail">
+          ✈️ 비엣젯 VJ871 · 04/28(월) 06:30 출발<br>
+          🏨 Sol by Melia Phu Quoc · 오션뷰 4박<br>
+          🎢 A타입: 빈펄랜드 + 호핑투어
+        </div>
+        <div class="product-price">
+          <span class="price-original">1,522,000원</span>
+          <span class="price-sale">1,446,000원</span>
+          <span class="price-discount">5% ↓</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- PASSENGER INFO -->
+  <div class="section">
+    <div class="section-title">탑승자 정보 <span style="font-size:12px;color:#f5222d;font-weight:400;">(필수)</span></div>
+    <div class="section-subtitle">항공권 예약을 위해 모든 탑승자의 기본정보가 필요합니다</div>
+
+    <div class="pax-card">
+      <div class="pax-header">
+        <span class="pax-num">탑승자 1 (대표)</span>
+        <span class="pax-type">성인</span>
+      </div>
+      <div class="form-row-2">
+        <div class="form-group">
+          <div class="form-label">성 (영문) <span class="required">*</span></div>
+          <input class="form-control" placeholder="HONG" value="CHOI">
+        </div>
+        <div class="form-group">
+          <div class="form-label">이름 (영문) <span class="required">*</span></div>
+          <input class="form-control" placeholder="GILDONG" value="YUNA">
+        </div>
+      </div>
+      <div class="form-row-2">
+        <div class="form-group">
+          <div class="form-label">생년월일 <span class="required">*</span></div>
+          <input class="form-control" type="date" value="1995-03-15">
+        </div>
+        <div class="form-group">
+          <div class="form-label">성별 <span class="required">*</span></div>
+          <select class="form-control">
+            <option>여성</option>
+            <option>남성</option>
+          </select>
+        </div>
+      </div>
+      <div class="form-group">
+        <div class="form-label">연락처</div>
+        <input class="form-control" placeholder="010-0000-0000" value="010-1234-5678">
+      </div>
+    </div>
+
+    <div class="pax-card">
+      <div class="pax-header">
+        <span class="pax-num">탑승자 2</span>
+        <span class="pax-type">성인</span>
+      </div>
+      <div class="form-row-2">
+        <div class="form-group">
+          <div class="form-label">성 (영문) <span class="required">*</span></div>
+          <input class="form-control" placeholder="HONG" value="KIM">
+        </div>
+        <div class="form-group">
+          <div class="form-label">이름 (영문) <span class="required">*</span></div>
+          <input class="form-control" placeholder="GILDONG" value="MINJUN">
+        </div>
+      </div>
+      <div class="form-row-2">
+        <div class="form-group">
+          <div class="form-label">생년월일 <span class="required">*</span></div>
+          <input class="form-control" type="date" value="1994-07-22">
+        </div>
+        <div class="form-group">
+          <div class="form-label">성별 <span class="required">*</span></div>
+          <select class="form-control">
+            <option>남성</option>
+            <option>여성</option>
+          </select>
+        </div>
+      </div>
+    </div>
+
+    <div class="notice-purple notice">
+      <strong>📝 여권정보는 결제 후 입력</strong><br>
+      여권번호·만료일은 결제 완료 후 24시간 내에 입력해주세요. 미입력 시 예약이 자동 취소됩니다.
+    </div>
+  </div>
+
+  <!-- CANCEL POLICY -->
+  <div class="section">
+    <div class="section-title">취소 규정</div>
+    <div class="cancel-policy">
+      <div class="cancel-title">⚠️ 즉시 확정 상품 — 결제 즉시 예약이 진행됩니다</div>
+      <div class="cancel-row"><span class="period">결제 후 ~ 출발 15일 전</span><span class="fee" style="color:#52c41a;">무료 취소</span></div>
+      <div class="cancel-row"><span class="period">출발 14~8일 전</span><span class="fee">숙소 위약금 30%</span></div>
+      <div class="cancel-row"><span class="period">출발 7일 이내</span><span class="fee" style="color:#f5222d;">환불 불가</span></div>
+      <div style="font-size:11px;color:rgba(0,0,0,0.35);margin-top:8px;">* 항공권 취소 수수료는 항공사 정책에 따라 별도 부과됩니다</div>
+    </div>
+  </div>
+
+  <!-- BOTTOM BAR -->
+  <div class="bottom-bar">
+    <div class="pay-info">
+      <span class="pay-total-label">총 결제금액 (2인)</span>
+      <span class="pay-total">2,892,000원</span>
+    </div>
+    <button class="btn-pay" onclick="startBooking()">결제하기 · 전액결제</button>
+  </div>
+</div>
+
+<!-- LOADING OVERLAY (동기 구간) -->
+<div class="loading-overlay" id="loadingOverlay">
+  <div class="loading-title">예약을 확인하고 있어요</div>
+  <div class="loading-subtitle">잠시만 기다려주세요, 곧 완료됩니다</div>
+
+  <div class="progress-steps" id="progressSteps">
+    <div class="progress-step" id="step1">
+      <div class="ps-icon pending" id="step1Icon">1</div>
+      <div class="ps-content">
+        <div class="ps-title pending" id="step1Title">재고 확인</div>
+        <div class="ps-desc">항공편 · 숙소 · 투어 재고를 확인합니다</div>
+      </div>
+      <span class="ps-time" id="step1Time"></span>
+    </div>
+    <div class="progress-step" id="step2">
+      <div class="ps-icon pending" id="step2Icon">2</div>
+      <div class="ps-content">
+        <div class="ps-title pending" id="step2Title">가격 확인</div>
+        <div class="ps-desc">최종 가격을 확인합니다</div>
+      </div>
+      <span class="ps-time" id="step2Time"></span>
+    </div>
+    <div class="progress-step" id="step3">
+      <div class="ps-icon pending" id="step3Icon">3</div>
+      <div class="ps-content">
+        <div class="ps-title pending" id="step3Title">결제 처리</div>
+        <div class="ps-desc">안전하게 결제를 진행합니다</div>
+      </div>
+      <span class="ps-time" id="step3Time"></span>
+    </div>
+  </div>
+
+  <div style="margin-top:24px;font-size:12px;color:rgba(0,0,0,0.25);">화면을 닫지 마세요</div>
+</div>
+
+<!-- SUCCESS SCREEN -->
+<div class="app" style="display:none;" id="successView">
+  <div class="app-header">
+    <h1 style="margin:0 auto;">예약 접수 완료</h1>
+  </div>
+  <div class="success-screen show">
+    <div class="success-icon">🎉</div>
+    <div class="success-title">예약이 접수되었습니다!</div>
+    <div class="success-badge">⚡ 자동 확정 처리 중</div>
+    <div class="success-subtitle">
+      항공권 주문 · 숙소 예약 · 확정 작업이 자동으로 진행됩니다.<br>
+      완료되면 알림톡으로 안내드릴게요.
+    </div>
+
+    <div class="success-card">
+      <div style="font-size:13px;font-weight:600;margin-bottom:10px;">예약 정보</div>
+      <div class="success-row"><span class="label">예약번호</span><span class="value">#RES-20260414-003</span></div>
+      <div class="success-row"><span class="label">상품</span><span class="value">푸꾸옥 4박6일 Sol by Melia</span></div>
+      <div class="success-row"><span class="label">출발일</span><span class="value">2026. 04. 28 (월)</span></div>
+      <div class="success-row"><span class="label">탑승자</span><span class="value">CHOI YUNA 외 1명</span></div>
+      <div class="success-row"><span class="label">결제금액</span><span class="value" style="color:#f5222d;font-weight:700;">2,892,000원</span></div>
+    </div>
+
+    <div class="notice-purple notice" style="width:100%;margin-bottom:20px;">
+      <strong>📝 여권정보를 입력해주세요</strong><br>
+      24시간 내 여권정보 미입력 시 예약이 자동 취소됩니다.<br>
+      마감: <strong>04/15 11:03</strong>
+    </div>
+
+    <button class="btn-pay" style="margin-bottom:8px;" onclick="alert('여권정보 입력 화면으로 이동')">여권정보 입력하기</button>
+    <button class="btn-outline" onclick="alert('예약 상세 화면으로 이동')">예약 상세 보기</button>
+
+    <!-- 처리 현황 (실시간) -->
+    <div style="width:100%;margin-top:24px;padding:16px;background:#fafafa;border-radius:10px;">
+      <div style="font-size:13px;font-weight:600;margin-bottom:12px;">처리 현황 <span style="font-size:11px;color:rgba(0,0,0,0.35);font-weight:400;">실시간 업데이트</span></div>
+      <div style="display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid #f0f0f0;">
+        <span style="color:#52c41a;">✅</span>
+        <span style="font-size:13px;flex:1;">결제 완료</span>
+        <span style="font-size:11px;color:rgba(0,0,0,0.35);">11:03</span>
+      </div>
+      <div style="display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid #f0f0f0;">
+        <span style="color:#722ed1;animation:pulse 1.5s infinite;">⏳</span>
+        <span style="font-size:13px;flex:1;color:#722ed1;font-weight:500;">항공권 주문 처리중...</span>
+        <span style="font-size:11px;color:rgba(0,0,0,0.35);">진행중</span>
+      </div>
+      <div style="display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid #f0f0f0;">
+        <span style="color:rgba(0,0,0,0.15);">⏸</span>
+        <span style="font-size:13px;flex:1;color:rgba(0,0,0,0.25);">숙소 예약</span>
+        <span style="font-size:11px;color:rgba(0,0,0,0.25);">대기</span>
+      </div>
+      <div style="display:flex;align-items:center;gap:10px;padding:8px 0;">
+        <span style="color:rgba(0,0,0,0.15);">⏸</span>
+        <span style="font-size:13px;flex:1;color:rgba(0,0,0,0.25);">예약 확정</span>
+        <span style="font-size:11px;color:rgba(0,0,0,0.25);">대기</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+function startBooking() {
+  document.getElementById('loadingOverlay').classList.add('show');
+
+  // Step 1: 재고확인 (동기, ~6초)
+  setTimeout(() => {
+    activateStep(1);
+  }, 300);
+
+  setTimeout(() => {
+    completeStep(1, '6.2초');
+    activateStep(2);
+  }, 3000);
+
+  // Step 2: 가격확인 (동기, ~2초)
+  setTimeout(() => {
+    completeStep(2, '가격 동일');
+    activateStep(3);
+  }, 4500);
+
+  // Step 3: 결제 (동기, ~2초)
+  setTimeout(() => {
+    completeStep(3, '완료');
+  }, 6000);
+
+  // → 성공 화면
+  setTimeout(() => {
+    document.getElementById('loadingOverlay').classList.remove('show');
+    document.getElementById('mainView').style.display = 'none';
+    document.getElementById('successView').style.display = 'block';
+  }, 7000);
+}
+
+function activateStep(n) {
+  const icon = document.getElementById('step'+n+'Icon');
+  const title = document.getElementById('step'+n+'Title');
+  icon.className = 'ps-icon active';
+  icon.textContent = '⏳';
+  title.className = 'ps-title active';
+}
+
+function completeStep(n, time) {
+  const icon = document.getElementById('step'+n+'Icon');
+  const title = document.getElementById('step'+n+'Title');
+  const timeEl = document.getElementById('step'+n+'Time');
+  const step = document.getElementById('step'+n);
+  icon.className = 'ps-icon done';
+  icon.textContent = '✓';
+  title.className = 'ps-title done';
+  if (timeEl) timeEl.textContent = time;
+  step.classList.add('done');
+}
+</script>
+</body>
+</html>

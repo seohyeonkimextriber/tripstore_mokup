@@ -1,0 +1,431 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>모니터링 대시보드 — TripStore AutoGen Admin</title>
+<link href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.6/dist/web/static/pretendard.css" rel="stylesheet">
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: 'Pretendard', -apple-system, sans-serif; font-size: 14px; color: rgba(0,0,0,0.88); background: #f0f2f5; display: flex; min-height: 100vh; }
+
+/* ===== SIDEBAR ===== */
+.sidebar { width: 220px; background: #1b1f3b; color: #fff; padding: 20px 0; position: fixed; top: 0; left: 0; bottom: 0; overflow-y: auto; z-index: 100; }
+.sidebar-logo { padding: 0 20px 24px; font-size: 14px; font-weight: 700; display: flex; align-items: center; gap: 8px; }
+.sidebar-logo .dot { width: 8px; height: 8px; background: #52c41a; border-radius: 50%; }
+.sidebar-logo span { color: #4096ff; }
+.sidebar-group { padding: 16px 20px 6px; font-size: 11px; color: rgba(255,255,255,0.35); font-weight: 600; letter-spacing: 0.5px; text-transform: uppercase; }
+.sidebar-item { display: flex; align-items: center; gap: 10px; padding: 10px 20px; font-size: 13px; color: rgba(255,255,255,0.65); cursor: pointer; transition: all 0.15s; border-left: 3px solid transparent; }
+.sidebar-item:hover { color: #fff; background: rgba(255,255,255,0.06); }
+.sidebar-item.active { color: #fff; background: rgba(64,150,255,0.15); border-left-color: #4096ff; }
+.sidebar-item .icon { width: 18px; text-align: center; font-size: 14px; }
+.sidebar-badge { background: #f5222d; color: #fff; font-size: 10px; font-weight: 700; padding: 1px 6px; border-radius: 10px; margin-left: auto; }
+
+/* ===== MAIN ===== */
+.main { margin-left: 220px; flex: 1; padding: 24px 28px; }
+.top-bar { display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px; }
+.page-title { font-size: 20px; font-weight: 700; }
+.user-info { display: flex; align-items: center; gap: 10px; font-size: 13px; color: rgba(0,0,0,0.65); }
+.avatar { width: 32px; height: 32px; background: #1677ff; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: #fff; font-size: 12px; font-weight: 700; }
+
+/* ===== KPI CARDS ===== */
+.kpi-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-bottom: 20px; }
+.kpi-card { background: #fff; border-radius: 10px; padding: 18px 20px; box-shadow: 0 1px 3px rgba(0,0,0,0.08); position: relative; overflow: hidden; }
+.kpi-card::before { content: ''; position: absolute; top: 0; left: 0; width: 4px; height: 100%; }
+.kpi-card.blue::before { background: #1677ff; }
+.kpi-card.green::before { background: #52c41a; }
+.kpi-card.red::before { background: #f5222d; }
+.kpi-card.orange::before { background: #fa8c16; }
+.kpi-label { font-size: 12px; color: rgba(0,0,0,0.45); font-weight: 500; text-transform: uppercase; letter-spacing: 0.3px; margin-bottom: 8px; }
+.kpi-value { font-size: 32px; font-weight: 800; letter-spacing: -1px; }
+.kpi-card.blue .kpi-value { color: #1677ff; }
+.kpi-card.green .kpi-value { color: #52c41a; }
+.kpi-card.red .kpi-value { color: #f5222d; }
+.kpi-card.orange .kpi-value { color: #fa8c16; }
+.kpi-sub { font-size: 11px; color: rgba(0,0,0,0.35); margin-top: 4px; }
+
+/* ===== CARD ===== */
+.card { background: #fff; border-radius: 10px; box-shadow: 0 1px 3px rgba(0,0,0,0.08); margin-bottom: 20px; }
+.card-header { padding: 16px 20px; border-bottom: 1px solid #f0f0f0; display: flex; align-items: center; justify-content: space-between; }
+.card-header h3 { font-size: 15px; font-weight: 600; }
+.card-body { padding: 20px; }
+
+/* ===== TABLE ===== */
+table { width: 100%; border-collapse: collapse; }
+th { padding: 10px 14px; text-align: left; font-weight: 500; font-size: 12px; color: rgba(0,0,0,0.55); background: #fafafa; border-bottom: 1px solid #f0f0f0; }
+td { padding: 10px 14px; font-size: 13px; border-bottom: 1px solid #f5f5f5; }
+tr:hover td { background: #fafafa; }
+
+/* ===== BADGE ===== */
+.badge { display: inline-flex; align-items: center; gap: 4px; padding: 3px 10px; border-radius: 4px; font-size: 11px; font-weight: 600; }
+.badge-success { background: #f6ffed; color: #52c41a; }
+.badge-error { background: #fff1f0; color: #f5222d; }
+.badge-warning { background: #fff7e6; color: #fa8c16; }
+.badge-info { background: #e6f4ff; color: #1677ff; }
+.badge-default { background: #f5f5f5; color: rgba(0,0,0,0.45); }
+
+/* ===== TAG SELECT ===== */
+.tag-select { display: flex; gap: 8px; }
+.tag { padding: 5px 12px; border-radius: 6px; font-size: 12px; font-weight: 500; cursor: pointer; border: 1px solid #d9d9d9; background: #fff; color: rgba(0,0,0,0.65); transition: all 0.15s; }
+.tag:hover { border-color: #1677ff; color: #1677ff; }
+.tag.active { background: #e6f4ff; border-color: #1677ff; color: #1677ff; }
+
+/* ===== BUTTONS ===== */
+.btn { height: 34px; padding: 0 16px; border-radius: 6px; font-size: 13px; font-family: inherit; cursor: pointer; border: 1px solid transparent; display: inline-flex; align-items: center; gap: 5px; transition: all 0.15s; font-weight: 500; }
+.btn-primary { background: #1677ff; color: #fff; }
+.btn-primary:hover { background: #4096ff; }
+.btn-default { background: #fff; color: rgba(0,0,0,0.88); border-color: #d9d9d9; }
+.btn-default:hover { color: #1677ff; border-color: #1677ff; }
+.btn-sm { height: 28px; padding: 0 10px; font-size: 12px; }
+
+/* ===== LOG ===== */
+.log-item { display: flex; align-items: center; gap: 12px; padding: 10px 0; border-bottom: 1px solid #f5f5f5; }
+.log-item:last-child { border-bottom: none; }
+.log-time { font-size: 12px; color: rgba(0,0,0,0.35); width: 110px; flex-shrink: 0; }
+.log-status { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+.log-status.ok { background: #52c41a; }
+.log-status.fail { background: #f5222d; }
+.log-status.running { background: #1677ff; animation: pulse 1.5s infinite; }
+@keyframes pulse { 0%,100% { opacity: 1; } 50% { opacity: 0.4; } }
+.log-text { font-size: 13px; flex: 1; }
+.log-duration { font-size: 12px; color: rgba(0,0,0,0.45); }
+
+/* ===== SIMULATION ===== */
+.sim-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+.sim-input { display: flex; align-items: center; gap: 8px; margin-bottom: 10px; }
+.sim-input label { font-size: 13px; width: 80px; flex-shrink: 0; color: rgba(0,0,0,0.65); }
+.sim-input select, .sim-input input { height: 32px; border: 1px solid #d9d9d9; border-radius: 6px; padding: 0 10px; font-size: 13px; font-family: inherit; outline: none; }
+.sim-input select { width: 200px; appearance: none; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='%23bbb'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 10px center; padding-right: 28px; }
+.sim-input input { width: 100px; }
+.sim-result { background: #f6ffed; border: 1px solid #b7eb8f; border-radius: 8px; padding: 16px; }
+.sim-result-row { display: flex; justify-content: space-between; align-items: center; padding: 6px 0; }
+.sim-result-label { font-size: 13px; color: rgba(0,0,0,0.55); }
+.sim-result-value { font-size: 15px; font-weight: 700; }
+.sim-result-value.highlight { color: #52c41a; font-size: 18px; }
+
+.grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+@media (max-width: 1200px) { .grid-2 { grid-template-columns: 1fr; } .kpi-grid { grid-template-columns: repeat(2, 1fr); } .sim-grid { grid-template-columns: 1fr; } }
+</style>
+</head>
+<body>
+
+<!-- SIDEBAR -->
+<nav class="sidebar">
+  <div class="sidebar-logo"><div class="dot"></div> <span>Tripstore</span> AutoGen Admin</div>
+
+  <div class="sidebar-group">상품 생성</div>
+  <a href="autogen-rule.html" class="sidebar-item" style="text-decoration:none;color:rgba(255,255,255,0.65);"><span class="icon">⚙️</span> 생성 규칙 관리</a>
+  <a href="autogen-monitoring.html" class="sidebar-item active" style="text-decoration:none;color:#fff;"><span class="icon">📊</span> 모니터링 대시보드</a>
+
+  <div class="sidebar-group">예약 관리</div>
+  <a href="autogen-reservation.html" class="sidebar-item" style="text-decoration:none;color:rgba(255,255,255,0.65);"><span class="icon">📋</span> 예약 리스트 <span class="sidebar-badge">3</span></a>
+  <div class="sidebar-item"><span class="icon">🔴</span> 운영 대응 필요 <span class="sidebar-badge">2</span></div>
+  <div class="sidebar-item"><span class="icon">✅</span> 확정 완료</div>
+  <div class="sidebar-item"><span class="icon">❌</span> 취소/환불</div>
+
+  <div class="sidebar-group">사용자 화면</div>
+  <a href="autogen-booking.html" class="sidebar-item" style="text-decoration:none;color:rgba(255,255,255,0.65);"><span class="icon">📱</span> 결제 플로우 (모바일)</a>
+
+  <div class="sidebar-group">설정</div>
+  <div class="sidebar-item"><span class="icon">🏨</span> 숙소 매핑</div>
+  <div class="sidebar-item"><span class="icon">📑</span> 리포트</div>
+  <div class="sidebar-item"><span class="icon">⚡</span> 설정</div>
+</nav>
+
+<!-- MAIN -->
+<div class="main">
+  <div class="top-bar">
+    <div class="page-title">모니터링 대시보드</div>
+    <div class="user-info">김서현 (PM) <div class="avatar">SH</div></div>
+  </div>
+
+  <!-- A. KPI -->
+  <div class="kpi-grid">
+    <div class="kpi-card blue">
+      <div class="kpi-label">오늘 생성</div>
+      <div class="kpi-value">247</div>
+      <div class="kpi-sub">전일 대비 +12%</div>
+    </div>
+    <div class="kpi-card red">
+      <div class="kpi-label">탈락</div>
+      <div class="kpi-value">83</div>
+      <div class="kpi-sub">경쟁가 52 · 역마진 18 · 재고 13</div>
+    </div>
+    <div class="kpi-card green">
+      <div class="kpi-label">노출 중</div>
+      <div class="kpi-value">1,842</div>
+      <div class="kpi-sub">즉시확정관 활성 상품</div>
+    </div>
+    <div class="kpi-card orange">
+      <div class="kpi-label">예약 전환</div>
+      <div class="kpi-value">3.2%</div>
+      <div class="kpi-sub">노출 → 예약 (이번 주)</div>
+    </div>
+  </div>
+
+  <div class="grid-2">
+    <!-- B. 배치 실행 로그 -->
+    <div class="card">
+      <div class="card-header">
+        <h3>📦 배치 실행 로그</h3>
+        <button class="btn btn-primary btn-sm">▶ 수동 실행</button>
+      </div>
+      <div class="card-body">
+        <div class="log-item">
+          <span class="log-time">04/14 06:00</span>
+          <span class="log-status ok"></span>
+          <span class="log-text">소싱 배치 — <strong>푸꾸옥</strong> 완료</span>
+          <span class="log-duration">2m 34s</span>
+          <span class="badge badge-success">247개 생성</span>
+        </div>
+        <div class="log-item">
+          <span class="log-time">04/14 06:03</span>
+          <span class="log-status ok"></span>
+          <span class="log-text">경쟁가 비교 — <strong>탈락 처리</strong></span>
+          <span class="log-duration">1m 12s</span>
+          <span class="badge badge-error">83개 탈락</span>
+        </div>
+        <div class="log-item">
+          <span class="log-time">04/13 06:00</span>
+          <span class="log-status ok"></span>
+          <span class="log-text">소싱 배치 — <strong>푸꾸옥</strong> 완료</span>
+          <span class="log-duration">2m 48s</span>
+          <span class="badge badge-success">231개 생성</span>
+        </div>
+        <div class="log-item">
+          <span class="log-time">04/13 06:03</span>
+          <span class="log-status ok"></span>
+          <span class="log-text">경쟁가 비교 — <strong>탈락 처리</strong></span>
+          <span class="log-duration">1m 08s</span>
+          <span class="badge badge-error">76개 탈락</span>
+        </div>
+        <div class="log-item">
+          <span class="log-time">04/12 06:00</span>
+          <span class="log-status fail"></span>
+          <span class="log-text">소싱 배치 — <strong>TMG API 타임아웃</strong></span>
+          <span class="log-duration">5m 00s</span>
+          <span class="badge badge-error">실패</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- D. 역마진/경고 모니터링 -->
+    <div class="card">
+      <div class="card-header">
+        <h3>⚠️ 역마진 / 경고</h3>
+        <span style="font-size:12px;color:rgba(0,0,0,0.35);">최근 7일</span>
+      </div>
+      <div class="card-body">
+        <div style="margin-bottom:14px;">
+          <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px;">
+            <span style="font-size:13px;font-weight:600;">역마진 발생</span>
+            <span class="badge badge-error">18건</span>
+          </div>
+          <table>
+            <thead><tr><th>조합</th><th>마진율</th><th>원가</th></tr></thead>
+            <tbody>
+              <tr><td>대한항공 + Sol 프리미어</td><td style="color:#f5222d;font-weight:600;">-2.3%</td><td>1,890,000</td></tr>
+              <tr><td>아시아나 + Sol 풀빌라</td><td style="color:#f5222d;font-weight:600;">-1.8%</td><td>2,340,000</td></tr>
+              <tr><td>비엣젯 + Sol 디럭스</td><td style="color:#f5222d;font-weight:600;">-0.5%</td><td>1,120,000</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <div style="padding-top:14px;border-top:1px solid #f0f0f0;">
+          <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px;">
+            <span style="font-size:13px;font-weight:600;">가격 급변동</span>
+            <span class="badge badge-warning">3건</span>
+          </div>
+          <table>
+            <thead><tr><th>호텔</th><th>변동</th><th>시점</th></tr></thead>
+            <tbody>
+              <tr><td>Sol by Melia 스탠다드</td><td style="color:#fa8c16;font-weight:600;">+23% ↑</td><td>04/13 14:00</td></tr>
+              <tr><td>Sol by Melia 오션뷰</td><td style="color:#fa8c16;font-weight:600;">+15% ↑</td><td>04/13 14:00</td></tr>
+              <tr><td>Sol by Melia 풀빌라</td><td style="color:#52c41a;font-weight:600;">-8% ↓</td><td>04/12 06:00</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- C. 탈락 상품 로그 -->
+  <div class="card">
+    <div class="card-header">
+      <h3>🚫 탈락 상품 로그</h3>
+      <div style="display:flex;gap:8px;">
+        <div class="tag-select">
+          <span class="tag active">전체 (83)</span>
+          <span class="tag">경쟁가 탈락 (52)</span>
+          <span class="tag">역마진 (18)</span>
+          <span class="tag">재고 없음 (13)</span>
+        </div>
+      </div>
+    </div>
+    <div class="card-body" style="padding:0;">
+      <table>
+        <thead>
+          <tr>
+            <th style="width:40px;">#</th>
+            <th>조합</th>
+            <th>여행지</th>
+            <th>출발일</th>
+            <th>기준원가</th>
+            <th>경쟁 평균가</th>
+            <th>차이</th>
+            <th>탈락 사유</th>
+            <th>배치</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>1</td>
+            <td><strong>비엣젯 VJ871</strong> + Sol 스탠다드<br><span style="font-size:11px;color:rgba(0,0,0,0.45);">A타입 (빈펄+호핑)</span></td>
+            <td>푸꾸옥</td>
+            <td>04/20</td>
+            <td>1,250,000</td>
+            <td>1,180,000</td>
+            <td style="color:#f5222d;">+5.9%</td>
+            <td><span class="badge badge-error">경쟁가 초과</span></td>
+            <td style="font-size:11px;color:rgba(0,0,0,0.35);">06:00</td>
+          </tr>
+          <tr>
+            <td>2</td>
+            <td><strong>대한항공 KE463</strong> + Sol 프리미어<br><span style="font-size:11px;color:rgba(0,0,0,0.45);">B타입 (사파리+야시장)</span></td>
+            <td>푸꾸옥</td>
+            <td>04/22</td>
+            <td>1,890,000</td>
+            <td>—</td>
+            <td style="color:#f5222d;">-2.3%</td>
+            <td><span class="badge badge-error">역마진</span></td>
+            <td style="font-size:11px;color:rgba(0,0,0,0.35);">06:00</td>
+          </tr>
+          <tr>
+            <td>3</td>
+            <td><strong>티웨이 TW361</strong> + Sol 오션뷰<br><span style="font-size:11px;color:rgba(0,0,0,0.45);">C타입 (에어텔 only)</span></td>
+            <td>푸꾸옥</td>
+            <td>04/25</td>
+            <td>980,000</td>
+            <td>—</td>
+            <td>—</td>
+            <td><span class="badge badge-warning">재고 없음</span></td>
+            <td style="font-size:11px;color:rgba(0,0,0,0.35);">06:00</td>
+          </tr>
+          <tr>
+            <td>4</td>
+            <td><strong>비엣젯 VJ873</strong> + Sol 스탠다드<br><span style="font-size:11px;color:rgba(0,0,0,0.45);">A타입 (빈펄+호핑)</span></td>
+            <td>푸꾸옥</td>
+            <td>04/28</td>
+            <td>1,180,000</td>
+            <td>1,120,000</td>
+            <td style="color:#f5222d;">+5.4%</td>
+            <td><span class="badge badge-error">경쟁가 초과</span></td>
+            <td style="font-size:11px;color:rgba(0,0,0,0.35);">06:00</td>
+          </tr>
+          <tr>
+            <td>5</td>
+            <td><strong>아시아나 OZ753</strong> + Sol 풀빌라<br><span style="font-size:11px;color:rgba(0,0,0,0.45);">A타입 (빈펄+호핑)</span></td>
+            <td>푸꾸옥</td>
+            <td>05/01</td>
+            <td>2,340,000</td>
+            <td>2,100,000</td>
+            <td style="color:#f5222d;">+11.4%</td>
+            <td><span class="badge badge-error">경쟁가 초과</span></td>
+            <td style="font-size:11px;color:rgba(0,0,0,0.35);">06:00</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- E. 가격 시뮬레이션 -->
+  <div class="card">
+    <div class="card-header">
+      <h3>🧮 가격 시뮬레이션</h3>
+    </div>
+    <div class="card-body">
+      <div class="sim-grid">
+        <div>
+          <div class="sim-input">
+            <label>항공</label>
+            <select><option>비엣젯 VJ871 (ICN→PQC)</option><option>대한항공 KE463</option><option>티웨이 TW361</option></select>
+          </div>
+          <div class="sim-input">
+            <label>숙소</label>
+            <select><option>Sol by Melia — 스탠다드</option><option>Sol by Melia — 오션뷰</option><option>Sol by Melia — 풀빌라</option></select>
+          </div>
+          <div class="sim-input">
+            <label>출발일</label>
+            <input type="date" value="2026-04-20">
+          </div>
+          <div class="sim-input">
+            <label>여행기간</label>
+            <select><option>3박5일</option><option>4박6일</option><option>5박7일</option></select>
+          </div>
+          <div class="sim-input">
+            <label>그루핑</label>
+            <select><option>A타입 (빈펄+호핑)</option><option>B타입 (사파리+야시장)</option><option>C타입 (에어텔 only)</option></select>
+          </div>
+          <div class="sim-input">
+            <label>고정마진</label>
+            <input type="number" value="5" style="width:60px;"> <span style="font-size:13px;color:rgba(0,0,0,0.45);">%</span>
+          </div>
+          <div style="margin-top:12px;">
+            <button class="btn btn-primary">시뮬레이션 실행</button>
+          </div>
+        </div>
+        <div>
+          <div class="sim-result">
+            <div style="font-size:13px;font-weight:600;margin-bottom:12px;color:rgba(0,0,0,0.65);">시뮬레이션 결과</div>
+            <div class="sim-result-row">
+              <span class="sim-result-label">항공 원가</span>
+              <span class="sim-result-value">620,000</span>
+            </div>
+            <div class="sim-result-row">
+              <span class="sim-result-label">숙소 원가 (3박)</span>
+              <span class="sim-result-value">450,000</span>
+            </div>
+            <div class="sim-result-row">
+              <span class="sim-result-label">편의서비스 (픽업+패스트트랙+니트킷)</span>
+              <span class="sim-result-value">85,000</span>
+            </div>
+            <div class="sim-result-row">
+              <span class="sim-result-label">투어/티켓 (A타입)</span>
+              <span class="sim-result-value">120,000</span>
+            </div>
+            <div class="sim-result-row" style="border-top:1px solid #b7eb8f;padding-top:10px;margin-top:6px;">
+              <span class="sim-result-label">총 원가</span>
+              <span class="sim-result-value">1,275,000</span>
+            </div>
+            <div class="sim-result-row">
+              <span class="sim-result-label">기준원가 (고정마진 5%)</span>
+              <span class="sim-result-value">1,342,000</span>
+            </div>
+            <div class="sim-result-row">
+              <span class="sim-result-label">추가마진 (1순위, 7.2%)</span>
+              <span class="sim-result-value" style="color:#1677ff;">1,446,000</span>
+            </div>
+            <div class="sim-result-row" style="border-top:2px solid #52c41a;padding-top:12px;margin-top:8px;">
+              <span class="sim-result-label" style="font-weight:600;font-size:14px;">판매가</span>
+              <span class="sim-result-value highlight">1,446,000원</span>
+            </div>
+            <div class="sim-result-row">
+              <span class="sim-result-label">상품가 (정가마진 5%)</span>
+              <span class="sim-result-value">1,522,000원</span>
+            </div>
+            <div class="sim-result-row">
+              <span class="sim-result-label">경쟁 평균가</span>
+              <span class="sim-result-value" style="color:rgba(0,0,0,0.45);">1,520,000원</span>
+            </div>
+            <div class="sim-result-row">
+              <span class="sim-result-label">경쟁 대비</span>
+              <span class="sim-result-value" style="color:#52c41a;">-4.9% ✅</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+</body>
+</html>
