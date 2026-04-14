@@ -244,16 +244,13 @@
       </div>
     </div>
 
-    <!-- 3. 예약자 / 인원 구성 (취소위약금은 토글) -->
+    <!-- 3. 예약자 정보 (개인정보만) -->
     <div class="section" id="section-traveler">
       <div class="section-header">
         <h2>예약자 정보</h2>
-        <div class="actions">
-          <button class="btn btn-outline btn-sm" id="btn-toggle-penalty" onclick="togglePenaltyMode()">+ 취소위약금 관리</button>
-        </div>
       </div>
       <div class="section-body">
-        <div class="info-grid" style="margin-bottom: 16px;">
+        <div class="info-grid">
           <div>
             <div class="info-row"><span class="info-label">예약자</span><span class="info-value">오기웅</span></div>
             <div class="info-row"><span class="info-label">생년월일</span><span class="info-value">1975-12-17</span></div>
@@ -263,156 +260,65 @@
             <div class="info-row"><span class="info-label">연락처</span><span class="info-value">010-2374-8449</span></div>
           </div>
         </div>
-        <!-- 인원 구성 (여행자 개인정보는 수집하지 않음) -->
-        <div style="background:#f8f9fa;border:1px solid #e8e8e8;border-radius:8px;padding:14px 16px;margin-bottom:8px;">
-          <div style="display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap;">
-            <div>
-              <div style="font-size:11px;color:#888;margin-bottom:4px;">인원 구성</div>
-              <div style="display:flex;gap:8px;align-items:center;font-size:13px;font-weight:600;">
-                <span class="badge blue">성인 3</span>
-                <span class="badge gray">아동 0</span>
-                <span class="badge gray">유아 0</span>
-                <span style="color:#888;font-weight:400;font-size:12px;">총 3명 · 1인 판매가 686,000</span>
-              </div>
-            </div>
-            <div style="font-size:11px;color:#888;text-align:right;line-height:1.5;">
-              ※ 트립스토어는 <b>예약자 정보만</b> 보관합니다.<br>동행 여행자 명단은 여행사(하나투어)가 별도 관리.
-            </div>
-          </div>
+        <div style="font-size:11px;color:#888;margin-top:8px;">
+          ※ 트립스토어는 <b>예약자 정보만</b> 보관합니다. 동행 여행자 명단은 여행사(하나투어)가 별도 관리.
         </div>
-
-        <!-- 인원 단위 부분취소 / 위약금 (취소위약금 모드에서만) -->
-        <div class="penalty-only" style="background:#fff8e1;border:1px solid #ffe0b2;border-radius:8px;padding:14px 16px;margin-bottom:8px;">
-          <div style="font-size:12px;font-weight:700;color:#e65100;margin-bottom:10px;">취소 인원 / 위약금 산정</div>
-          <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px;align-items:end;">
-            <div>
-              <label style="font-size:11px;color:#888;display:block;margin-bottom:4px;">취소 인원 (성인)</label>
-              <select id="cancel-cnt" onchange="recalcPenalty()" style="width:100%;padding:6px;border:1px solid #d0d0d0;border-radius:6px;font-size:13px;">
-                <option value="0">0명 (전원 유지)</option>
-                <option value="1">1명 취소</option>
-                <option value="2">2명 취소</option>
-                <option value="3">3명 전원 취소</option>
-              </select>
-            </div>
-            <div>
-              <label style="font-size:11px;color:#888;display:block;margin-bottom:4px;">취소 환불 기준 금액</label>
-              <div style="padding:7px 8px;background:#fff;border:1px solid #e0e0e0;border-radius:6px;font-family:monospace;font-size:13px;font-weight:700;" id="cancel-base">0</div>
-            </div>
-            <div>
-              <label style="font-size:11px;color:#888;display:block;margin-bottom:4px;">취소위약금 (수기 입력)</label>
-              <input type="text" id="cancel-penalty" value="0" oninput="recalcPenalty()" style="width:100%;padding:6px;border:1px solid #d0d0d0;border-radius:6px;font-family:monospace;font-size:13px;font-weight:700;text-align:right;color:#d32f2f;">
-            </div>
-            <div>
-              <button class="btn btn-danger" style="width:100%;padding:8px;" onclick="alert('부분취소 처리\\n· 취소인원: '+document.getElementById('cancel-cnt').value+'명\\n· 위약금: '+document.getElementById('cancel-penalty').value+'원\\n→ 원장에 PENALTY(800) 기록')">부분취소 실행</button>
-            </div>
-          </div>
-          <div style="font-size:11px;color:#888;margin-top:10px;">
-            ※ 트립스토어는 여행자 개인정보가 없으므로 <b>인원 단위</b>로 처리합니다. 누구를 취소할지는 여행사와 별도 협의.
-          </div>
-        </div>
-
-        <!-- 위약금 정책 미리보기 (위약금 모드에서만) -->
-        <div id="penalty-policy" class="penalty-only" style="margin-top:12px;background:#fff8e1;border:1px solid #ffe0b2;border-radius:8px;padding:12px;">
-          <div style="font-size:12px;font-weight:700;color:#e65100;margin-bottom:8px;">취소위약금 정책 (하나투어 정책 #25)</div>
-          <table>
-            <thead><tr><th>D-day</th><th>위약금율</th><th class="text-right">1인당 위약금</th><th class="text-right">전원(3명) 위약금</th></tr></thead>
-            <tbody>
-              <tr><td>출발 30일 전까지</td><td>0%</td><td class="text-right text-mono">0</td><td class="text-right text-mono">0</td></tr>
-              <tr><td>출발 29~21일 전</td><td>10%</td><td class="text-right text-mono">68,600</td><td class="text-right text-mono">205,800</td></tr>
-              <tr><td>출발 20~14일 전</td><td>20%</td><td class="text-right text-mono">137,200</td><td class="text-right text-mono">411,600</td></tr>
-              <tr><td>출발 13~7일 전</td><td>30%</td><td class="text-right text-mono">205,800</td><td class="text-right text-mono">617,400</td></tr>
-              <tr style="background:#ffebee;"><td>출발 6~3일 전</td><td>50%</td><td class="text-right text-mono">343,000</td><td class="text-right text-mono">1,029,000</td></tr>
-              <tr style="background:#ffebee;"><td>출발 2일 전~당일</td><td>100%</td><td class="text-right text-mono">686,000</td><td class="text-right text-mono">2,058,000</td></tr>
-            </tbody>
-          </table>
-          <div style="font-size:11px;color:#888;margin-top:8px;">
-            ※ 오늘 기준 D-54 → 위약금 0% 구간. 산정 시 출발일과 현재 일자를 다시 계산합니다.
-          </div>
-        </div>
-
-        <style>
-          /* 평소엔 위약금 관련 영역 숨김 */
-          #section-traveler .penalty-only { display: none; }
-          #section-traveler.penalty-mode div.penalty-only { display: block; }
-        </style>
-
-        <div class="penalty-only note" style="font-size:11px;color:#888;margin-top:8px;">
-          ※ 위약금/취소 처리 시 원장에 <b>PENALTY(800)</b> 항목으로 기록되고 <b>결제 필요 금액</b>이 즉시 재계산됩니다.
-        </div>
-
-        <script>
-          function togglePenaltyMode(){
-            const sec=document.getElementById('section-traveler');
-            const btn=document.getElementById('btn-toggle-penalty');
-            const on=sec.classList.toggle('penalty-mode');
-            btn.textContent = on ? '− 취소위약금 관리 닫기' : '+ 취소위약금 관리';
-            btn.classList.toggle('btn-danger', on);
-            btn.classList.toggle('btn-outline', !on);
-          }
-        </script>
-
-        <script>
-          const FARE_PER_PAX = 686000;
-          function recalcPenalty(){
-            const cnt=parseInt(document.getElementById('cancel-cnt').value)||0;
-            const base=cnt*FARE_PER_PAX;
-            document.getElementById('cancel-base').textContent=base.toLocaleString();
-            const p=parseInt(String(document.getElementById('cancel-penalty').value).replace(/[^0-9]/g,''))||0;
-            // 금액 정보 카드 동기화
-            const ptotal=document.getElementById('penalty-total');
-            if(ptotal){
-              ptotal.textContent=p.toLocaleString();
-              const card=document.getElementById('penalty-card');
-              if(p>0){
-                card.style.opacity='1'; card.style.background='#fff8e1';
-                card.querySelector('.label').style.color='#e65100';
-                ptotal.style.color='#e65100';
-                card.querySelector('div:last-child').textContent='취소위약금 관리 영역에서 산정';
-              } else {
-                card.style.opacity='0.5'; card.style.background='#f5f5f5';
-                card.querySelector('.label').style.color='#bbb';
-                ptotal.style.color='#bbb';
-                card.querySelector('div:last-child').textContent='여행자 영역에서 관리';
-              }
-            }
-          }
-        </script>
       </div>
     </div>
 
-    <!-- 4. 금액 정보 (원장 기반) -->
+    <!-- 4. 예약 금액 관리 (원장 기반) -->
     <div class="section">
       <div class="section-header">
-        <h2>금액 정보</h2>
+        <h2>예약 금액 관리</h2>
         <div class="actions">
           <button class="btn btn-plus btn-sm btn-icon" onclick="document.getElementById('modal-add').classList.add('show')">+ 금액 추가</button>
           <button class="btn btn-minus btn-sm btn-icon" onclick="document.getElementById('modal-sub').classList.add('show')">- 금액 차감</button>
         </div>
       </div>
       <div class="section-body">
+        <!-- 인원 구성 -->
+        <div style="background:#f0f7ff;border:1px solid #bbdefb;border-radius:8px;padding:14px 16px;margin-bottom:16px;">
+          <div style="display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap;">
+            <div>
+              <div style="font-size:11px;color:#1565c0;font-weight:600;margin-bottom:6px;">인원 구성</div>
+              <div style="display:flex;gap:8px;align-items:center;font-size:13px;font-weight:600;">
+                <span class="badge blue">성인 3</span>
+                <span class="badge gray">아동 0</span>
+                <span class="badge gray">유아 0</span>
+                <span style="color:#888;font-weight:400;font-size:12px;">총 3명</span>
+              </div>
+            </div>
+            <div style="text-align:right;">
+              <div style="font-size:10px;color:#888;">1인 판매가</div>
+              <div style="font-family:monospace;font-weight:700;font-size:16px;color:#1565c0;">686,000</div>
+              <div style="font-size:9px;color:#aaa;">상품가 699,000 - 특가 13,000</div>
+            </div>
+            <div style="text-align:right;">
+              <div style="font-size:10px;color:#888;">총 판매금액</div>
+              <div style="font-family:monospace;font-weight:700;font-size:16px;color:#e65100;">2,038,000</div>
+              <div style="font-size:9px;color:#aaa;">(686,000 x 3) - 쿠폰 20,000</div>
+            </div>
+          </div>
+        </div>
+
         <div class="highlight-box">
           <strong>금액 직접 수정 불가</strong> — 모든 변동은 [+금액 추가] 또는 [-금액 차감]으로만 처리되며 원장에 자동 기록됩니다.
         </div>
 
         <!-- ===== 예약 금액 영역 ===== -->
         <div style="font-size:11px;font-weight:700;color:#888;margin-bottom:8px;">예약 금액 (판매 기준)</div>
-        <div class="amount-summary" style="grid-template-columns:repeat(4,1fr);">
+        <div class="amount-summary" style="grid-template-columns:repeat(3,1fr);">
           <div class="amount-card">
-            <div class="label">상품금액</div>
+            <div class="label">상품금액 (100)</div>
             <div class="value">2,097,000</div>
           </div>
-          <div class="amount-card" style="position:relative;cursor:help;" title="여행사특가 -39,000 / 쿠폰할인 -20,000">
-            <div class="label">할인금액 <span style="font-size:9px;color:#bbb;">▾</span></div>
+          <div class="amount-card">
+            <div class="label">할인+쿠폰 (200·300)</div>
             <div class="value negative">-59,000</div>
             <div style="font-size:10px;color:#888;margin-top:4px;line-height:1.4;">
               <div>· 특가 <span style="font-family:monospace;color:#d32f2f;">-39,000</span></div>
               <div>· 쿠폰 <span style="font-family:monospace;color:#6a1b9a;">-20,000</span></div>
             </div>
-          </div>
-          <div class="amount-card" id="penalty-card" style="opacity:0.5;background:#f5f5f5;cursor:pointer;" onclick="document.getElementById('section-traveler').scrollIntoView({behavior:'smooth',block:'start'})" title="여행자 영역에서 관리">
-            <div class="label" style="color:#bbb;">취소위약금 ↗</div>
-            <div class="value" id="penalty-total" style="color:#bbb;">0</div>
-            <div style="font-size:10px;color:#bbb;margin-top:2px;">여행자 영역에서 관리</div>
           </div>
           <div class="amount-card" style="border:2px solid #1565c0;background:#e3f2fd;">
             <div class="label" style="color:#1565c0;font-weight:700;">결제 필요 금액</div>
@@ -423,87 +329,10 @@
         <!-- 결제 필요 금액 계산식 -->
         <div style="background:#f8f9fa;border-radius:6px;padding:8px 12px;font-size:11px;color:#888;margin-bottom:16px;display:flex;align-items:center;gap:4px;flex-wrap:wrap;">
           <span>결제 필요 금액 =</span>
-          <span style="font-weight:600;color:#333;">상품금액</span> <span>-</span>
-          <span style="font-weight:600;color:#d32f2f;">할인금액</span> <span>+</span>
-          <span style="font-weight:600;color:#e65100;">취소위약금</span>
-          <span style="margin-left:8px;color:#1565c0;">※ 취소위약금이 발생하면 결제 필요 금액이 증가</span>
-        </div>
-
-        <!-- 취소위약금 관리 (신규) -->
-        <div class="penalty-section" style="margin-bottom:16px;">
-          <div class="penalty-title">
-            <span class="feature-tag">신규</span>
-            취소위약금 관리
-          </div>
-
-          <!-- AS-IS / TO-BE 비교 -->
-          <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px;">
-            <div style="background:#fff5f5;border-radius:6px;padding:10px;border:1px solid #ffcdd2;">
-              <div style="font-size:10px;font-weight:700;color:#d32f2f;margin-bottom:4px;">AS-IS (기존)</div>
-              <div style="font-size:10px;color:#888;line-height:1.5;">
-                ① 예약에 인원별 취소위약금 설정<br>
-                ② <strong style="color:#d32f2f;">결제 금액에서</strong> 취소위약금 금액을 따로 잡음<br>
-                ③ 취소 시 결제금액 - 위약금 = 환불금액 계산<br>
-                <span style="color:#d32f2f;">→ 결제와 예약 금액이 섞여서 관리 복잡</span>
-              </div>
-            </div>
-            <div style="background:#f1f8e9;border-radius:6px;padding:10px;border:1px solid #c5e1a5;">
-              <div style="font-size:10px;font-weight:700;color:#2e7d32;margin-bottom:4px;">TO-BE (변경)</div>
-              <div style="font-size:10px;color:#888;line-height:1.5;">
-                ① 예약금액은 예약대로 관리 (위약금 포함)<br>
-                ② <strong style="color:#2e7d32;">결제는 결제한 금액만</strong> 관리<br>
-                ③ <strong style="color:#2e7d32;">결제 필요 금액 vs 결제된 금액</strong> 비교<br>
-                <span style="color:#2e7d32;">→ "얼마 내야 해?" / "얼마 냈어?" 만 보면 됨</span>
-              </div>
-            </div>
-          </div>
-
-          <!-- 인원별 취소위약금 테이블 -->
-          <table>
-            <thead><tr>
-              <th>여행자</th>
-              <th class="text-right">1인 판매가</th>
-              <th class="text-right">1인 위약금</th>
-              <th>위약 사유</th>
-              <th class="text-center">상태</th>
-              <th class="text-center">조작</th>
-            </tr></thead>
-            <tbody>
-              <tr>
-                <td>오기웅 (성인)</td>
-                <td class="text-right text-mono">686,000</td>
-                <td class="text-right text-mono" id="penalty-1">0</td>
-                <td>-</td>
-                <td class="text-center"><span class="badge gray">없음</span></td>
-                <td class="text-center"><button class="btn btn-outline btn-sm" style="font-size:10px;" onclick="openPenaltyInput(0)">위약금 설정</button></td>
-              </tr>
-              <tr>
-                <td>오서연 (성인)</td>
-                <td class="text-right text-mono">686,000</td>
-                <td class="text-right text-mono" id="penalty-2">0</td>
-                <td>-</td>
-                <td class="text-center"><span class="badge gray">없음</span></td>
-                <td class="text-center"><button class="btn btn-outline btn-sm" style="font-size:10px;" onclick="openPenaltyInput(1)">위약금 설정</button></td>
-              </tr>
-              <tr>
-                <td>오민준 (성인)</td>
-                <td class="text-right text-mono">686,000</td>
-                <td class="text-right text-mono" id="penalty-3">0</td>
-                <td>-</td>
-                <td class="text-center"><span class="badge gray">없음</span></td>
-                <td class="text-center"><button class="btn btn-outline btn-sm" style="font-size:10px;" onclick="openPenaltyInput(2)">위약금 설정</button></td>
-              </tr>
-            </tbody>
-          </table>
-
-          <!-- 핵심 개념 안내 -->
-          <div style="background:#fff;border-radius:6px;padding:10px 12px;margin-top:10px;font-size:11px;border:1px solid #ffe082;">
-            <div style="display:flex;flex-direction:column;gap:3px;">
-              <div><strong style="color:#e65100;">취소위약금</strong> = 고객이 취소해도 <strong>우리가 받아야 하는 금액</strong></div>
-              <div><strong style="color:#1565c0;">결제 필요 금액</strong> = 판매금액 + 취소위약금 (고객이 총 결제해야 하는 금액)</div>
-              <div style="color:#888;">→ 결제 영역에서는 "얼마 결제했나 / 얼마 환불했나" 만 관리</div>
-            </div>
-          </div>
+          <span style="font-weight:600;color:#333;">상품금액 (100)</span> <span>-</span>
+          <span style="font-weight:600;color:#d32f2f;">할인 (200)</span> <span>-</span>
+          <span style="font-weight:600;color:#6a1b9a;">쿠폰 (300)</span> <span>±</span>
+          <span style="font-weight:600;color:#e65100;">조정 (800)</span>
         </div>
 
         <!-- 원장 기반 예약금액 항목 (100/200/300) -->
