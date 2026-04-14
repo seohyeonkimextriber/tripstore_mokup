@@ -874,6 +874,17 @@
 
           <div style="font-size:13px;font-weight:700;margin:20px 0 10px;">환불 항목 (700 REFUND)</div>
           <div style="text-align:center;padding:20px;color:#bbb;font-size:12px;background:#fafafa;border-radius:8px;">환불 내역 없음</div>
+
+          <!-- 합계 -->
+          <div style="background:#f0f7ff;border:2px solid #1565c0;border-radius:8px;padding:14px 20px;margin-top:16px;">
+            <div style="font-size:11px;color:#1565c0;font-weight:600;margin-bottom:8px;">결제금액 관리 합계</div>
+            <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px;font-size:12px;">
+              <div><span style="color:#888;">총 결제</span><div style="font-family:monospace;font-weight:700;font-size:15px;color:#2e7d32;">+2,058,000</div></div>
+              <div><span style="color:#888;">총 환불</span><div style="font-family:monospace;font-weight:700;font-size:15px;">0</div></div>
+              <div><span style="color:#888;">순 결제액</span><div style="font-family:monospace;font-weight:700;font-size:15px;color:#1565c0;">2,058,000</div></div>
+              <div><span style="color:#888;">결제필요 대비 과부족</span><div style="font-family:monospace;font-weight:700;font-size:15px;color:#2e7d32;">+20,000</div><div style="font-size:9px;color:#888;">쿠폰 포함 기준</div></div>
+            </div>
+          </div>
         </div>
       </div>
 
@@ -917,35 +928,65 @@
               </tr>
             </tbody>
           </table>
+
+          <!-- 합계 -->
+          <div style="background:#fff8e1;border:2px solid #e65100;border-radius:8px;padding:14px 20px;margin-top:16px;">
+            <div style="font-size:11px;color:#e65100;font-weight:600;margin-bottom:8px;">정산 관리 합계</div>
+            <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px;font-size:12px;">
+              <div><span style="color:#888;">PG수수료</span><div style="font-family:monospace;font-weight:700;font-size:15px;color:#d32f2f;">-59,100</div></div>
+              <div><span style="color:#888;">플랫폼이용료(수익)</span><div style="font-family:monospace;font-weight:700;font-size:15px;color:#1565c0;">+179,344</div></div>
+              <div><span style="color:#888;">플랫폼 순수익</span><div style="font-family:monospace;font-weight:700;font-size:15px;color:#1565c0;">+120,244</div><div style="font-size:9px;color:#888;">이용료 - PG수수료</div></div>
+              <div><span style="color:#888;">여행사 대금이전</span><div style="font-family:monospace;font-weight:700;font-size:15px;color:#1565c0;">+1,878,656</div><div style="font-size:9px;color:#e65100;">정산예정 · 06-19</div></div>
+            </div>
+          </div>
         </div>
       </div>
 
       <!-- ===== 서브탭: 전체 원장 ===== -->
       <div id="ledger-sub-all" class="ledger-sub-content" style="display:none;">
         <div class="section-body">
-          <div style="display:flex;gap:6px;flex-wrap:wrap;align-items:center;margin-bottom:12px;">
-            <select style="padding:4px 8px;border:1px solid #d0d0d0;border-radius:4px;font-size:11px;">
-              <option>주체: 전체</option><option>🙋 고객</option><option>🔗 채널사</option><option>🏢 플랫폼</option><option>🚩 여행사</option>
-            </select>
-            <select style="padding:4px 8px;border:1px solid #d0d0d0;border-radius:4px;font-size:11px;">
-              <option>범주: 전체</option>
-              <option>100 CHARGE</option><option>200 DISCOUNT</option><option>300 COUPON</option>
-              <option>400 PAYMENT</option><option>500 TRANSFER</option><option>600 FEE</option>
-              <option>700 REFUND</option><option>800 ADJUSTMENT</option><option>900 CLOSING</option>
-            </select>
-            <input type="date" value="2026-04-01" style="padding:3px 6px;border:1px solid #d0d0d0;border-radius:4px;font-size:11px;">
-            <span style="font-size:11px;color:#888;">~</span>
-            <input type="date" value="2026-06-30" style="padding:3px 6px;border:1px solid #d0d0d0;border-radius:4px;font-size:11px;">
-            <button class="btn btn-outline btn-sm">CSV</button>
+          <!-- 필터 영역 -->
+          <div style="background:#f8f9fa;border:1px solid #e0e0e0;border-radius:8px;padding:12px 16px;margin-bottom:16px;">
+            <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;">
+              <select id="all-filter-party" onchange="filterAllLedger()" style="padding:5px 10px;border:1px solid #d0d0d0;border-radius:6px;font-size:12px;">
+                <option value="all">주체: 전체</option><option value="고객">🙋 고객</option><option value="채널사">🔗 채널사</option><option value="플랫폼">🏢 플랫폼</option><option value="여행사">🚩 여행사</option>
+              </select>
+              <select id="all-filter-kind" onchange="filterAllLedger()" style="padding:5px 10px;border:1px solid #d0d0d0;border-radius:6px;font-size:12px;">
+                <option value="all">범주: 전체</option>
+                <option value="100">100 CHARGE (청구)</option><option value="200">200 DISCOUNT (할인)</option><option value="300">300 COUPON (쿠폰)</option>
+                <option value="400">400 PAYMENT (결제)</option><option value="500">500 TRANSFER (대금이전)</option><option value="600">600 FEE (수수료)</option>
+                <option value="700">700 REFUND (환불)</option><option value="800">800 ADJUSTMENT (조정)</option><option value="900">900 CLOSING (결산)</option>
+              </select>
+              <input type="date" value="2026-04-01" style="padding:4px 8px;border:1px solid #d0d0d0;border-radius:6px;font-size:12px;">
+              <span style="font-size:11px;color:#888;">~</span>
+              <input type="date" value="2026-06-30" style="padding:4px 8px;border:1px solid #d0d0d0;border-radius:6px;font-size:12px;">
+              <button class="btn btn-outline btn-sm" onclick="filterAllLedger()">조회</button>
+              <button class="btn btn-outline btn-sm" onclick="document.getElementById('all-filter-party').value='all';document.getElementById('all-filter-kind').value='all';filterAllLedger()">초기화</button>
+              <button class="btn btn-outline btn-sm" style="margin-left:auto;">CSV 다운로드</button>
+            </div>
+            <div style="margin-top:6px;font-size:10px;color:#888;" id="all-filter-status">전체 7건 표시 중</div>
           </div>
-          <div style="padding:0;">
-            <div class="ledger-item"><div class="ledger-type"><span class="code charge">100</span></div><div class="ledger-desc"><div class="name">상품정가(CHARGE)</div><div class="sub">성인 699,000 x 3명</div></div><div class="ledger-party"><span class="badge gray">🙋 고객</span></div><div class="ledger-amount minus">-2,097,000</div><div class="ledger-date">04-07 08:43</div></div>
-            <div class="ledger-item"><div class="ledger-type"><span class="code discount">202</span></div><div class="ledger-desc"><div class="name">여행사특가할인</div><div class="sub">하나투어 2% · 13,000 x 3명</div></div><div class="ledger-party"><span class="badge gray">🙋 고객</span></div><div class="ledger-amount plus">+39,000</div><div class="ledger-date">04-07 08:43</div></div>
-            <div class="ledger-item"><div class="ledger-type"><span class="code coupon">301</span></div><div class="ledger-desc"><div class="name">쿠폰할인(플랫폼)</div><div class="sub">20,000원 쿠폰</div></div><div class="ledger-party"><span class="badge gray">🙋 고객</span></div><div class="ledger-amount plus">+20,000</div><div class="ledger-date">04-07 08:43</div></div>
-            <div class="ledger-item"><div class="ledger-type"><span class="code payment">401</span></div><div class="ledger-desc"><div class="name">고객결제(플랫폼)</div><div class="sub">nice_v2 · 신용카드</div></div><div class="ledger-party"><span class="badge gray">🏢 플랫폼</span></div><div class="ledger-amount plus">+2,038,000</div><div class="ledger-date">04-07 08:43</div></div>
-            <div class="ledger-item"><div class="ledger-type"><span class="code fee">601</span></div><div class="ledger-desc"><div class="name">PG수수료</div><div class="sub">PG수수료 차감</div></div><div class="ledger-party"><span class="badge gray">🏢 플랫폼</span></div><div class="ledger-amount minus">-59,100</div><div class="ledger-date">04-07 08:43</div></div>
-            <div class="ledger-item"><div class="ledger-type"><span class="code fee">602</span></div><div class="ledger-desc"><div class="name">플랫폼이용료</div><div class="sub">수수료율 8.8%</div></div><div class="ledger-party"><span class="badge gray">🏢 플랫폼</span></div><div class="ledger-amount plus">+179,344</div><div class="ledger-date">04-07 08:43</div></div>
-            <div class="ledger-item"><div class="ledger-type"><span class="code transfer">501</span></div><div class="ledger-desc"><div class="name">플랫폼대금이전 <span class="badge orange" style="margin-left:4px;">정산예정</span></div><div class="sub">플랫폼 → 여행사 · 지급예정 2026-06-19</div></div><div class="ledger-party"><span class="badge gray">🚩 여행사</span></div><div class="ledger-amount plus">+1,878,656</div><div class="ledger-date" style="color:#e65100;font-weight:600;">06-19 예정</div></div>
+
+          <!-- 원장 항목 리스트 -->
+          <div id="all-ledger-list">
+            <div class="ledger-item" data-code="100" data-party="고객"><div class="ledger-type"><span class="code charge">100</span></div><div class="ledger-desc"><div class="name">상품정가(CHARGE)</div><div class="sub">성인 699,000 x 3명</div></div><div class="ledger-party"><span class="badge gray">🙋 고객</span></div><div class="ledger-amount minus" data-amount="-2097000">-2,097,000</div><div class="ledger-date">04-07 08:43</div></div>
+            <div class="ledger-item" data-code="202" data-party="고객"><div class="ledger-type"><span class="code discount">202</span></div><div class="ledger-desc"><div class="name">여행사특가할인</div><div class="sub">하나투어 2% · 13,000 x 3명</div></div><div class="ledger-party"><span class="badge gray">🙋 고객</span></div><div class="ledger-amount plus" data-amount="39000">+39,000</div><div class="ledger-date">04-07 08:43</div></div>
+            <div class="ledger-item" data-code="301" data-party="고객"><div class="ledger-type"><span class="code coupon">301</span></div><div class="ledger-desc"><div class="name">쿠폰할인(플랫폼)</div><div class="sub">20,000원 쿠폰</div></div><div class="ledger-party"><span class="badge gray">🙋 고객</span></div><div class="ledger-amount plus" data-amount="20000">+20,000</div><div class="ledger-date">04-07 08:43</div></div>
+            <div class="ledger-item" data-code="401" data-party="플랫폼"><div class="ledger-type"><span class="code payment">401</span></div><div class="ledger-desc"><div class="name">고객결제(플랫폼)</div><div class="sub">nice_v2 · 신용카드</div></div><div class="ledger-party"><span class="badge gray">🏢 플랫폼</span></div><div class="ledger-amount plus" data-amount="2038000">+2,038,000</div><div class="ledger-date">04-07 08:43</div></div>
+            <div class="ledger-item" data-code="601" data-party="플랫폼"><div class="ledger-type"><span class="code fee">601</span></div><div class="ledger-desc"><div class="name">PG수수료</div><div class="sub">PG수수료 차감</div></div><div class="ledger-party"><span class="badge gray">🏢 플랫폼</span></div><div class="ledger-amount minus" data-amount="-59100">-59,100</div><div class="ledger-date">04-07 08:43</div></div>
+            <div class="ledger-item" data-code="602" data-party="플랫폼"><div class="ledger-type"><span class="code fee">602</span></div><div class="ledger-desc"><div class="name">플랫폼이용료</div><div class="sub">수수료율 8.8%</div></div><div class="ledger-party"><span class="badge gray">🏢 플랫폼</span></div><div class="ledger-amount plus" data-amount="179344">+179,344</div><div class="ledger-date">04-07 08:43</div></div>
+            <div class="ledger-item" data-code="501" data-party="여행사"><div class="ledger-type"><span class="code transfer">501</span></div><div class="ledger-desc"><div class="name">플랫폼대금이전 <span class="badge orange" style="margin-left:4px;">정산예정</span></div><div class="sub">플랫폼 → 여행사 · 지급예정 2026-06-19</div></div><div class="ledger-party"><span class="badge gray">🚩 여행사</span></div><div class="ledger-amount plus" data-amount="1878656">+1,878,656</div><div class="ledger-date" style="color:#e65100;font-weight:600;">06-19 예정</div></div>
+          </div>
+
+          <!-- 합계 -->
+          <div style="background:#1a1a1a;border-radius:8px;padding:14px 20px;margin-top:16px;color:#fff;" id="all-ledger-summary">
+            <div style="font-size:11px;color:rgba(255,255,255,0.6);margin-bottom:8px;">전체 원장 합계 <span id="all-summary-filter-label">(필터: 전체)</span></div>
+            <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px;font-size:12px;">
+              <div><span style="color:rgba(255,255,255,0.5);">표시 항목</span><div style="font-family:monospace;font-weight:700;font-size:15px;" id="all-sum-count">7건</div></div>
+              <div><span style="color:rgba(255,255,255,0.5);">유입 합계 (+)</span><div style="font-family:monospace;font-weight:700;font-size:15px;color:#64b5f6;" id="all-sum-plus">+4,155,000</div></div>
+              <div><span style="color:rgba(255,255,255,0.5);">유출 합계 (-)</span><div style="font-family:monospace;font-weight:700;font-size:15px;color:#ef9a9a;" id="all-sum-minus">-2,156,100</div></div>
+              <div><span style="color:rgba(255,255,255,0.5);">순합계</span><div style="font-family:monospace;font-weight:700;font-size:18px;" id="all-sum-net">+1,998,900</div></div>
+            </div>
           </div>
         </div>
       </div>
@@ -2459,6 +2500,45 @@ function switchLedgerSubtab(name) {
     tabs[idx].style.fontWeight = '600';
     tabs[idx].style.borderBottomColor = '#1a1a1a';
   }
+}
+
+function filterAllLedger() {
+  const party = document.getElementById('all-filter-party').value;
+  const kind = document.getElementById('all-filter-kind').value;
+  const items = document.querySelectorAll('#all-ledger-list .ledger-item');
+  let shown = 0, sumPlus = 0, sumMinus = 0;
+
+  items.forEach(item => {
+    const itemParty = item.dataset.party;
+    const itemCode = item.dataset.code;
+    const itemKind = itemCode.charAt(0) + '00'; // 100, 200, etc.
+    const amount = parseInt(item.querySelector('.ledger-amount').dataset.amount) || 0;
+
+    let matchParty = (party === 'all' || itemParty === party);
+    let matchKind = (kind === 'all' || itemKind === kind || itemCode === kind);
+
+    if (matchParty && matchKind) {
+      item.style.display = '';
+      shown++;
+      if (amount >= 0) sumPlus += amount;
+      else sumMinus += amount;
+    } else {
+      item.style.display = 'none';
+    }
+  });
+
+  const net = sumPlus + sumMinus;
+  document.getElementById('all-filter-status').textContent = `${shown}건 표시 중` + (party !== 'all' || kind !== 'all' ? ' (필터 적용)' : '');
+  document.getElementById('all-sum-count').textContent = shown + '건';
+  document.getElementById('all-sum-plus').textContent = '+' + sumPlus.toLocaleString();
+  document.getElementById('all-sum-minus').textContent = sumMinus.toLocaleString();
+  document.getElementById('all-sum-net').textContent = (net >= 0 ? '+' : '') + net.toLocaleString();
+  document.getElementById('all-sum-net').style.color = net >= 0 ? '#64b5f6' : '#ef9a9a';
+
+  const filterLabel = [];
+  if (party !== 'all') filterLabel.push(party);
+  if (kind !== 'all') filterLabel.push(kind);
+  document.getElementById('all-summary-filter-label').textContent = filterLabel.length > 0 ? `(필터: ${filterLabel.join(' · ')})` : '(필터: 전체)';
 }
 
 function togglePerPerson(checked) {
