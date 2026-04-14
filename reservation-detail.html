@@ -2274,23 +2274,21 @@
           <span>수신자 (다중 발송 가능)</span>
           <span style="display:flex;gap:6px;">
             <button class="btn btn-outline btn-sm" onclick="fillReserver()" type="button">예약자 정보 불러오기</button>
+            <button class="btn btn-outline btn-sm" onclick="splitPayUrlEqual()" type="button">1/N 균등분할</button>
             <button class="btn btn-plus btn-sm" onclick="addPayUrlRow()" type="button">+ 수신자 추가</button>
           </span>
         </label>
         <table id="payurl-table" style="margin-top:6px;">
           <thead><tr>
             <th style="width:130px;">휴대폰 번호</th>
-            <th style="width:160px;">발송 채널</th>
+            <th style="width:100px;">발송 채널</th>
             <th class="text-right" style="width:140px;">결제금액(원)</th>
             <th class="text-center" style="width:40px;"></th>
           </tr></thead>
           <tbody id="payurl-tbody">
             <tr>
               <td><input type="text" value="010-2374-8449" placeholder="010-" style="width:100%;padding:5px;border:1px solid #d0d0d0;border-radius:4px;font-size:12px;font-family:monospace;"></td>
-              <td>
-                <label style="font-size:11px;margin-right:6px;"><input type="checkbox" checked> SMS</label>
-                <label style="font-size:11px;"><input type="checkbox"> 알림톡</label>
-              </td>
+              <td><span style="font-size:11px;background:#e3f2fd;color:#1565c0;padding:2px 8px;border-radius:4px;font-weight:600;">알림톡</span></td>
               <td><input type="text" value="2,038,000" oninput="recalcPayUrlSum()" class="payurl-amount" style="width:100%;padding:5px;border:1px solid #d0d0d0;border-radius:4px;font-size:12px;font-family:monospace;text-align:right;font-weight:700;"></td>
               <td class="text-center"><button class="btn btn-danger btn-sm" onclick="this.closest('tr').remove();recalcPayUrlSum()" type="button">×</button></td>
             </tr>
@@ -2315,7 +2313,7 @@
       </div>
 
       <div class="form-group">
-        <label>메시지 미리보기 (수신자별 금액 자동 치환)</label>
+        <label>알림톡 메시지 미리보기 (수신자별 금액 자동 치환)</label>
         <div style="background:#fff8e1;border:1px solid #ffe0b2;border-radius:6px;padding:10px;font-size:12px;color:#5d4037;line-height:1.6;">
           [트립스토어] 예약(26040708-4300101H) 결제 안내드립니다.<br>
           ▶ 결제금액: <b>{금액}원</b><br>
@@ -2327,7 +2325,8 @@
       <!-- 발송 이력 -->
       <div style="margin-top:16px;border-top:1px dashed #e0e0e0;padding-top:12px;">
         <div style="font-size:11px;font-weight:600;color:#888;margin-bottom:6px;">발송 이력</div>
-        <div style="text-align:center;padding:12px;color:#bbb;font-size:11px;">발송 이력 없음</div>
+        <div id="payurl-history-empty" style="text-align:center;padding:12px;color:#bbb;font-size:11px;">발송 이력 없음</div>
+        <div id="payurl-history-list" style="display:none;max-height:200px;overflow-y:auto;"></div>
       </div>
     </div>
     <div class="modal-footer">
@@ -2356,7 +2355,7 @@ function addPayUrlRow(){
   const tb=document.getElementById('payurl-tbody');
   const tr=document.createElement('tr');
   tr.innerHTML=`<td><input type="text" placeholder="010-" style="width:100%;padding:5px;border:1px solid #d0d0d0;border-radius:4px;font-size:12px;font-family:monospace;"></td>
-    <td><label style="font-size:11px;margin-right:6px;"><input type="checkbox" checked> SMS</label><label style="font-size:11px;"><input type="checkbox"> 알림톡</label></td>
+    <td><span style="font-size:11px;background:#e3f2fd;color:#1565c0;padding:2px 8px;border-radius:4px;font-weight:600;">알림톡</span></td>
     <td><input type="text" value="0" oninput="recalcPayUrlSum()" class="payurl-amount" style="width:100%;padding:5px;border:1px solid #d0d0d0;border-radius:4px;font-size:12px;font-family:monospace;text-align:right;font-weight:700;"></td>
     <td class="text-center"><button type="button" class="btn btn-danger btn-sm" onclick="this.closest('tr').remove();recalcPayUrlSum()">×</button></td>`;
   tb.appendChild(tr);
@@ -2374,17 +2373,55 @@ function fillReserver(){
     recalcPayUrlSum();
   }
 }
+function splitPayUrlEqual(){
+  const tb=document.getElementById('payurl-tbody');
+  const rowCount=tb.querySelectorAll('tr').length;
+  if(rowCount<2){ alert('수신자가 2명 이상이어야 균등분할이 가능합니다.\n먼저 [+ 수신자 추가]로 행을 추가하세요.'); return; }
+  const total=2038000;
+  const perPerson=Math.floor(total/rowCount);
+  const remainder=total-(perPerson*rowCount);
+  tb.querySelectorAll('tr').forEach((tr,i)=>{
+    const amt=tr.querySelector('.payurl-amount');
+    amt.value=(i===0 ? perPerson+remainder : perPerson).toLocaleString();
+  });
+  recalcPayUrlSum();
+  showToast(`${rowCount}명 균등분할: 1인 ${perPerson.toLocaleString()}원${remainder>0?' (첫 수신자 +'+remainder+'원 단수처리)':''}`);
+}
+let payUrlHistory=[];
 function sendPayUrls(){
   const rows=document.querySelectorAll('#payurl-tbody tr');
   const list=[];
+  const now=new Date().toLocaleTimeString('ko-KR',{hour:'2-digit',minute:'2-digit'});
   rows.forEach(tr=>{
     const phone=tr.querySelector('input[type="text"]').value.trim();
     const amount=tr.querySelector('.payurl-amount').value;
-    if(phone) list.push(`· ${phone} → ${amount}원`);
+    if(phone) list.push({phone,amount,time:'04-14 '+now,status:'대기'});
   });
   if(list.length===0){ alert('수신자가 없습니다'); return; }
-  alert(`결제 URL 발송 완료 (${list.length}건)\n\n${list.join('\n')}\n\n만료: 2026-04-14 19:30`);
-  document.getElementById('modal-payurl').classList.remove('show');
+  payUrlHistory.push({date:'04-14 '+now,user:'김서현',items:list});
+  renderPayUrlHistory();
+  showToast(`결제 URL 알림톡 발송 완료 (${list.length}건) · 만료: 24시간`);
+}
+function renderPayUrlHistory(){
+  const empty=document.getElementById('payurl-history-empty');
+  const listEl=document.getElementById('payurl-history-list');
+  if(payUrlHistory.length===0){empty.style.display='block';listEl.style.display='none';return;}
+  empty.style.display='none';listEl.style.display='block';
+  listEl.innerHTML=payUrlHistory.map((h,i)=>`
+    <div style="background:#fafafa;border:1px solid #e8e8e8;border-radius:6px;padding:8px 12px;margin-bottom:6px;font-size:11px;">
+      <div style="display:flex;justify-content:space-between;margin-bottom:4px;">
+        <span style="font-weight:600;">${i+1}차 발송 · 알림톡 ${h.items.length}건</span>
+        <span style="color:#888;">${h.date} · ${h.user}</span>
+      </div>
+      ${h.items.map(item=>`
+        <div style="display:flex;justify-content:space-between;padding:2px 0;color:#666;">
+          <span style="font-family:monospace;">${item.phone}</span>
+          <span style="font-family:monospace;font-weight:600;">${item.amount}원</span>
+          <span class="badge ${item.status==='대기'?'orange':'green'}" style="font-size:9px;">${item.status}</span>
+        </div>
+      `).join('')}
+    </div>
+  `).join('');
 }
 function switchTab(name) {
   document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
