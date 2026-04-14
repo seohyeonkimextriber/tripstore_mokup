@@ -2386,41 +2386,121 @@ function splitPayUrlEqual(){
   recalcPayUrlSum();
   showToast(`${rowCount}명 균등분할: 1인 ${perPerson.toLocaleString()}원${remainder>0?' (첫 수신자 +'+remainder+'원 단수처리)':''}`);
 }
-let payUrlHistory=[];
+let payUrlLinks=[]; // {id, phone, amount(number), sentAt, expiresAt, status:'대기'|'결제완료'|'만료', batch}
+let payUrlBatch=0;
+const SALE_AMOUNT=2038000;
+
+function getActiveLinksTotal(){
+  return payUrlLinks.filter(l=>l.status==='대기').reduce((s,l)=>s+l.amount,0);
+}
+function getPaidTotal(){
+  return payUrlLinks.filter(l=>l.status==='결제완료').reduce((s,l)=>s+l.amount,0);
+}
+function getRemainingBudget(){
+  return SALE_AMOUNT - getActiveLinksTotal() - getPaidTotal();
+}
+
 function sendPayUrls(){
   const rows=document.querySelectorAll('#payurl-tbody tr');
-  const list=[];
-  const now=new Date().toLocaleTimeString('ko-KR',{hour:'2-digit',minute:'2-digit'});
+  const items=[];
   rows.forEach(tr=>{
     const phone=tr.querySelector('input[type="text"]').value.trim();
-    const amount=tr.querySelector('.payurl-amount').value;
-    if(phone) list.push({phone,amount,time:'04-14 '+now,status:'대기'});
+    const rawAmt=tr.querySelector('.payurl-amount').value;
+    const amount=parseInt(String(rawAmt).replace(/[^0-9]/g,''))||0;
+    if(phone && amount>0) items.push({phone,amount});
   });
-  if(list.length===0){ alert('수신자가 없습니다'); return; }
-  payUrlHistory.push({date:'04-14 '+now,user:'김서현',items:list});
+  if(items.length===0){ alert('수신자가 없습니다'); return; }
+
+  // 금액 초과 검증
+  const newTotal=items.reduce((s,i)=>s+i.amount,0);
+  const remaining=getRemainingBudget();
+  if(newTotal>remaining){
+    alert(`발송 불가: 금액 초과\n\n발송 요청: ${newTotal.toLocaleString()}원\n발송 가능 잔액: ${remaining.toLocaleString()}원\n\n(유효 링크 ${getActiveLinksTotal().toLocaleString()} + 결제완료 ${getPaidTotal().toLocaleString()} + 이번 발송 ${newTotal.toLocaleString()} = ${(getActiveLinksTotal()+getPaidTotal()+newTotal).toLocaleString()} > 판매금액 ${SALE_AMOUNT.toLocaleString()})`);
+    return;
+  }
+
+  payUrlBatch++;
+  const now=new Date().toLocaleTimeString('ko-KR',{hour:'2-digit',minute:'2-digit'});
+  const sentAt='2026-04-14 '+now;
+  const expires='2026-04-15 '+now;
+
+  items.forEach((item,i)=>{
+    payUrlLinks.push({
+      id: payUrlBatch+'-'+(i+1),
+      phone: item.phone,
+      amount: item.amount,
+      sentAt: sentAt,
+      expiresAt: expires,
+      status: '대기',
+      batch: payUrlBatch
+    });
+  });
+
   renderPayUrlHistory();
-  showToast(`결제 URL 알림톡 발송 완료 (${list.length}건) · 만료: 24시간`);
+  showToast(`결제 URL 알림톡 발송 완료 (${items.length}건) · 만료: 24시간 · 발송가능잔액: ${getRemainingBudget().toLocaleString()}원`);
 }
+
+function expirePayUrl(id){
+  const link=payUrlLinks.find(l=>l.id===id);
+  if(link){ link.status='만료'; renderPayUrlHistory(); showToast(`결제 링크 만료 처리: ${link.phone} ${link.amount.toLocaleString()}원`); }
+}
+function resendPayUrl(id){
+  const link=payUrlLinks.find(l=>l.id===id);
+  if(!link) return;
+  const now=new Date().toLocaleTimeString('ko-KR',{hour:'2-digit',minute:'2-digit'});
+  link.sentAt='2026-04-14 '+now;
+  link.expiresAt='2026-04-15 '+now;
+  link.status='대기';
+  renderPayUrlHistory();
+  showToast(`결제 링크 재발송: ${link.phone} ${link.amount.toLocaleString()}원`);
+}
+function simulatePayUrlPaid(id){
+  const link=payUrlLinks.find(l=>l.id===id);
+  if(link){ link.status='결제완료'; renderPayUrlHistory(); showToast(`결제 완료 시뮬레이션: ${link.phone} ${link.amount.toLocaleString()}원`); }
+}
+
 function renderPayUrlHistory(){
   const empty=document.getElementById('payurl-history-empty');
   const listEl=document.getElementById('payurl-history-list');
-  if(payUrlHistory.length===0){empty.style.display='block';listEl.style.display='none';return;}
+  if(payUrlLinks.length===0){empty.style.display='block';listEl.style.display='none';return;}
   empty.style.display='none';listEl.style.display='block';
-  listEl.innerHTML=payUrlHistory.map((h,i)=>`
-    <div style="background:#fafafa;border:1px solid #e8e8e8;border-radius:6px;padding:8px 12px;margin-bottom:6px;font-size:11px;">
-      <div style="display:flex;justify-content:space-between;margin-bottom:4px;">
-        <span style="font-weight:600;">${i+1}차 발송 · 알림톡 ${h.items.length}건</span>
-        <span style="color:#888;">${h.date} · ${h.user}</span>
-      </div>
-      ${h.items.map(item=>`
-        <div style="display:flex;justify-content:space-between;padding:2px 0;color:#666;">
-          <span style="font-family:monospace;">${item.phone}</span>
-          <span style="font-family:monospace;font-weight:600;">${item.amount}원</span>
-          <span class="badge ${item.status==='대기'?'orange':'green'}" style="font-size:9px;">${item.status}</span>
-        </div>
-      `).join('')}
-    </div>
-  `).join('');
+
+  // 상단 요약
+  const active=payUrlLinks.filter(l=>l.status==='대기');
+  const paid=payUrlLinks.filter(l=>l.status==='결제완료');
+  const expired=payUrlLinks.filter(l=>l.status==='만료');
+  const remaining=getRemainingBudget();
+
+  let html=`<div style="background:#f0f7ff;border:1px solid #bbdefb;border-radius:6px;padding:8px 12px;margin-bottom:8px;font-size:11px;display:flex;gap:12px;flex-wrap:wrap;">
+    <span>유효 링크: <strong style="color:#e65100;">${active.length}건 (${getActiveLinksTotal().toLocaleString()}원)</strong></span>
+    <span>결제완료: <strong style="color:#2e7d32;">${paid.length}건 (${getPaidTotal().toLocaleString()}원)</strong></span>
+    <span>만료: <strong style="color:#888;">${expired.length}건</strong></span>
+    <span style="margin-left:auto;">발송가능잔액: <strong style="color:${remaining>0?'#1565c0':'#d32f2f'};">${remaining.toLocaleString()}원</strong></span>
+  </div>`;
+
+  // 건별 표시
+  html+=payUrlLinks.map(l=>{
+    const statusBadge = l.status==='대기' ? '<span class="badge orange">대기</span>' : l.status==='결제완료' ? '<span class="badge green">결제완료</span>' : '<span class="badge gray">만료</span>';
+    const bg = l.status==='결제완료' ? '#f0fff0' : l.status==='만료' ? '#fafafa' : '#fff';
+    const opacity = l.status==='만료' ? '0.6' : '1';
+    const actions = l.status==='대기'
+      ? `<button class="btn btn-danger btn-sm" style="font-size:9px;padding:1px 6px;" onclick="expirePayUrl('${l.id}')">만료처리</button>
+         <button class="btn btn-outline btn-sm" style="font-size:9px;padding:1px 6px;" onclick="resendPayUrl('${l.id}')">재발송</button>
+         <button class="btn btn-plus btn-sm" style="font-size:9px;padding:1px 6px;" onclick="simulatePayUrlPaid('${l.id}')">결제완료(테스트)</button>`
+      : l.status==='만료'
+      ? `<button class="btn btn-outline btn-sm" style="font-size:9px;padding:1px 6px;" onclick="resendPayUrl('${l.id}')">재발송</button>`
+      : '';
+    return `<div style="background:${bg};border:1px solid #e8e8e8;border-radius:6px;padding:8px 12px;margin-bottom:4px;font-size:11px;opacity:${opacity};display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
+      <span style="font-family:monospace;font-weight:600;min-width:110px;">${l.phone}</span>
+      <span style="font-family:monospace;font-weight:700;min-width:90px;">${l.amount.toLocaleString()}원</span>
+      ${statusBadge}
+      <span style="color:#888;font-size:10px;">발송 ${l.sentAt}</span>
+      <span style="color:#888;font-size:10px;">만료 ${l.expiresAt}</span>
+      <span style="margin-left:auto;display:flex;gap:4px;">${actions}</span>
+    </div>`;
+  }).join('');
+
+  listEl.innerHTML=html;
 }
 function switchTab(name) {
   document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
