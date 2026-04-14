@@ -567,20 +567,30 @@ tr:hover td { background: #fafafa; }
             </div>
           </div>
 
-          <!-- 마진 범위 설정 -->
-          <div style="display:flex;gap:20px;align-items:center;margin-bottom:14px;padding:10px 14px;background:#f9f0ff;border:1px solid #d3adf7;border-radius:6px;">
-            <span style="font-size:12px;color:#722ed1;font-weight:500;">추가마진 허용 범위:</span>
-            <div style="display:flex;align-items:center;gap:6px;">
-              <span style="font-size:12px;">최소</span>
-              <input type="number" class="form-input form-input-sm" value="0" min="0" max="30" style="width:55px;height:26px;font-size:12px;" id="minMargin">
-              <span style="font-size:12px;">%</span>
+          <!-- 마진 설정 -->
+          <div style="display:flex;gap:16px;margin-bottom:14px;flex-wrap:wrap;">
+            <!-- 경쟁가 대비 할인율 -->
+            <div style="flex:1;min-width:280px;padding:10px 14px;background:#e6f4ff;border:1px solid #91caff;border-radius:6px;">
+              <div style="font-size:12px;color:#1677ff;font-weight:500;margin-bottom:6px;">경쟁가 대비 목표 할인율</div>
+              <div style="display:flex;align-items:center;gap:8px;">
+                <span style="font-size:12px;">경쟁 평균가 ×</span>
+                <input type="number" class="form-input form-input-sm" value="0.95" min="0.80" max="1.00" step="0.01" style="width:65px;height:26px;font-size:12px;" id="compRate">
+                <span style="font-size:12px;color:rgba(0,0,0,0.45);">= <strong id="compRateLabel">5% 저렴</strong>하게</span>
+              </div>
+              <div style="font-size:11px;color:rgba(0,0,0,0.35);margin-top:4px;">0.95 = 5% 저렴 / 0.97 = 3% 저렴 / 1.00 = 동일가</div>
             </div>
-            <div style="display:flex;align-items:center;gap:6px;">
-              <span style="font-size:12px;">최대</span>
-              <input type="number" class="form-input form-input-sm" value="20" min="0" max="50" style="width:55px;height:26px;font-size:12px;" id="maxMargin">
-              <span style="font-size:12px;">%</span>
+            <!-- 추가마진 허용 범위 -->
+            <div style="flex:1;min-width:280px;padding:10px 14px;background:#f9f0ff;border:1px solid #d3adf7;border-radius:6px;">
+              <div style="font-size:12px;color:#722ed1;font-weight:500;margin-bottom:6px;">추가마진 허용 범위</div>
+              <div style="display:flex;align-items:center;gap:8px;">
+                <span style="font-size:12px;">최소</span>
+                <input type="number" class="form-input form-input-sm" value="0" min="0" max="30" style="width:50px;height:26px;font-size:12px;" id="minMargin">
+                <span style="font-size:12px;">% ~ 최대</span>
+                <input type="number" class="form-input form-input-sm" value="20" min="0" max="50" style="width:50px;height:26px;font-size:12px;" id="maxMargin">
+                <span style="font-size:12px;">%</span>
+              </div>
+              <div style="font-size:11px;color:rgba(0,0,0,0.35);margin-top:4px;">범위 밖 → 역마진이면 탈락 / 최대 초과면 최대값 적용</div>
             </div>
-            <span style="font-size:11px;color:rgba(0,0,0,0.35);">범위 밖 → 생성 안 함(역마진) 또는 최대값 적용</span>
           </div>
 
           <div style="overflow-x:auto;">
@@ -1030,6 +1040,16 @@ document.querySelectorAll('.dest-tab').forEach(tab => {
       showToast(d.name + ' 마진 정책 로드됨');
     }
   });
+});
+
+// ===== 경쟁가 할인율 라벨 =====
+document.getElementById('compRate')?.addEventListener('input', function() {
+  const rate = parseFloat(this.value);
+  const discount = Math.round((1 - rate) * 100);
+  const label = document.getElementById('compRateLabel');
+  if (discount > 0) label.textContent = discount + '% 저렴';
+  else if (discount === 0) label.textContent = '동일가';
+  else label.textContent = Math.abs(discount) + '% 비쌈';
 });
 
 // ===== 여행기간 추가 =====
