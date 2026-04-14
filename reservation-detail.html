@@ -421,50 +421,6 @@
           </div>
         </div>
 
-        <!-- 쿠폰 관리 영역 (신규) -->
-        <div class="subsection">
-          <div class="subsection-title">
-            <span class="feature-tag">신규</span> 쿠폰 관리
-          </div>
-          <div style="font-size: 11px; color: #888; margin-bottom: 12px;">
-            행사이동/인원변경 시 쿠폰 조건이 변경될 수 있습니다. 사용자 보유 쿠폰을 조회하여 적용/조정할 수 있습니다.
-          </div>
-
-          <!-- 현재 적용된 쿠폰 -->
-          <div id="applied-coupon-area">
-            <div class="coupon-card" id="applied-coupon-card">
-              <div class="coupon-info">
-                <div class="coupon-name" id="applied-coupon-name">상해 자유여행 20,000원 할인</div>
-                <div class="coupon-detail" id="applied-coupon-detail">유효기간: 2026-03-01 ~ 2026-06-30 | 최소 결제금액: 500,000원 | 상태: <strong style="color:#2e7d32;">적용중</strong></div>
-              </div>
-              <div class="coupon-amount" id="applied-coupon-amount">-20,000</div>
-              <button class="btn btn-danger btn-sm" style="margin-left: 12px;" onclick="cancelCoupon()">쿠폰 취소</button>
-            </div>
-          </div>
-          <div id="no-coupon-area" style="display:none;background:#fafafa;border:1px dashed #d0d0d0;border-radius:8px;padding:16px;text-align:center;font-size:12px;color:#888;">
-            적용된 쿠폰이 없습니다. 아래에서 쿠폰을 조회하여 적용할 수 있습니다.
-          </div>
-
-          <!-- 쿠폰 변경 이력 -->
-          <div id="coupon-history-area" style="display:none;margin-top:8px;">
-            <div style="font-size:10px;font-weight:600;color:#888;margin-bottom:4px;">쿠폰 변경 이력</div>
-            <div id="coupon-history-list" style="font-size:11px;"></div>
-          </div>
-
-          <!-- 쿠폰 조회/적용 버튼 -->
-          <div style="display: flex; gap: 8px; margin-top: 8px;">
-            <button class="btn btn-coupon btn-sm btn-icon" onclick="document.getElementById('modal-coupon').classList.add('show')">
-              사용자 쿠폰 조회 및 적용
-            </button>
-            <button class="btn btn-outline btn-sm btn-icon" onclick="document.getElementById('modal-coupon-adjust').classList.add('show')" id="btn-coupon-adjust">
-              쿠폰 금액 조정
-            </button>
-          </div>
-          <div class="design-note">
-            <strong>[사용자 쿠폰 조회]</strong> 예약자의 보유 쿠폰 중 현재 예약 조건에 맞는 쿠폰 자동 필터링 → 선택 시 적용.<br>
-            <strong>[쿠폰 금액 조정]</strong> 행사이동 등으로 쿠폰 조건 불일치 시, 쿠폰 금액을 자동 재계산 또는 수동 조정. 원장에 쿠폰 조정 항목 생성.
-          </div>
-        </div>
       </div>
     </div>
 
@@ -568,6 +524,70 @@
           <strong>결제 영역은 "얼마 결제했나 / 얼마 환불했나"만 관리합니다.</strong> 금액 계산(위약금·할인 등)은 모두 예약 금액 영역에서 처리.<br>
           <strong>[결제수단 변경]</strong> 재결제 링크 SMS 발송 → 고객 재결제 완료 → 기존 결제 자동 취소 (결제 공백 없음).<br>
           <strong>[결제 이관 요청]</strong> 채널사 예약만 가능. 기존 결제 취소 → 대상 예약에 재결제.
+        </div>
+      </div>
+    </div>
+
+    <!-- 6. 쿠폰 관리 -->
+    <div class="section">
+      <div class="section-header">
+        <h2>쿠폰 관리</h2>
+        <div class="actions">
+          <button class="btn btn-coupon btn-sm btn-icon" onclick="document.getElementById('modal-coupon').classList.add('show')">사용자 쿠폰 조회 및 적용</button>
+        </div>
+      </div>
+      <div class="section-body">
+        <!-- 현재 적용된 쿠폰 -->
+        <div id="applied-coupon-area">
+          <div class="coupon-card" id="applied-coupon-card">
+            <div class="coupon-info">
+              <div class="coupon-name" id="applied-coupon-name">상해 자유여행 20,000원 할인</div>
+              <div class="coupon-detail" id="applied-coupon-detail">유효기간: 2026-03-01 ~ 2026-06-30 | 최소 결제금액: 500,000원 | 상태: <strong style="color:#2e7d32;">적용중</strong></div>
+            </div>
+            <div class="coupon-amount" id="applied-coupon-amount">-20,000</div>
+            <button class="btn btn-danger btn-sm" style="margin-left: 12px;" onclick="cancelCoupon()">쿠폰 취소</button>
+          </div>
+        </div>
+        <div id="no-coupon-area" style="display:none;background:#fafafa;border:1px dashed #d0d0d0;border-radius:8px;padding:16px;text-align:center;font-size:12px;color:#888;">
+          적용된 쿠폰이 없습니다. 위 [사용자 쿠폰 조회 및 적용] 버튼으로 쿠폰을 적용할 수 있습니다.
+        </div>
+
+        <!-- 쿠폰 자동 처리 정책 -->
+        <div style="background:#f3e5f5;border:1px solid #ce93d8;border-radius:8px;padding:14px 16px;margin-top:12px;">
+          <div style="font-size:12px;font-weight:700;color:#6a1b9a;margin-bottom:8px;">인원변경/행사이동 시 쿠폰 자동 처리</div>
+          <div style="display:flex;flex-direction:column;gap:8px;">
+            <!-- 방향 1 -->
+            <div style="background:#fff;border-radius:6px;padding:10px 12px;border:1px solid #e1bee7;">
+              <div style="display:flex;align-items:center;gap:6px;margin-bottom:4px;">
+                <span style="background:#6a1b9a;color:#fff;font-size:9px;padding:2px 6px;border-radius:3px;font-weight:700;">방향 1</span>
+                <span style="font-weight:700;font-size:12px;">판매금액 비율 차감</span>
+              </div>
+              <div style="font-size:11px;color:#666;line-height:1.6;">
+                인원삭제 등으로 판매금액이 감소하면 → 감소 비율만큼 쿠폰 금액도 자동 차감<br>
+                <span style="font-size:10px;color:#888;">예) 3명→2명 (66.7%) → 쿠폰 20,000 x 66.7% = <strong style="font-family:monospace;">13,340원</strong>으로 차감 (301)</span>
+              </div>
+            </div>
+            <!-- 방향 2 -->
+            <div style="background:#fff;border-radius:6px;padding:10px 12px;border:1px solid #e1bee7;">
+              <div style="display:flex;align-items:center;gap:6px;margin-bottom:4px;">
+                <span style="background:#6a1b9a;color:#fff;font-size:9px;padding:2px 6px;border-radius:3px;font-weight:700;">방향 2</span>
+                <span style="font-weight:700;font-size:12px;">쿠폰 해제 → 재적용</span>
+              </div>
+              <div style="font-size:11px;color:#666;line-height:1.6;">
+                기존 쿠폰 해제(302) → 변경된 판매금액 기준 사용자 보유 쿠폰 조회 → 적용 가능한 쿠폰 재적용(301)<br>
+                <span style="font-size:10px;color:#888;">예) 쿠폰 해제 후 → [사용자 쿠폰 조회 및 적용] 모달에서 새 쿠폰 선택</span>
+              </div>
+            </div>
+          </div>
+          <div style="margin-top:8px;font-size:10px;color:#888;">
+            ※ 판매금액 < 쿠폰 최소주문금액이면 두 방향 모두 <strong>쿠폰 자동 해제(302)</strong> 처리 (유효기간 내 원복)
+          </div>
+        </div>
+
+        <!-- 쿠폰 변경 이력 -->
+        <div id="coupon-history-area" style="display:none;margin-top:12px;">
+          <div style="font-size:11px;font-weight:600;color:#888;margin-bottom:4px;">쿠폰 변경 이력</div>
+          <div id="coupon-history-list" style="font-size:11px;"></div>
         </div>
       </div>
     </div>
