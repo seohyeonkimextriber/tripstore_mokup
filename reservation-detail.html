@@ -271,8 +271,8 @@
       <div class="section-header">
         <h2>예약 금액 관리</h2>
         <div class="actions">
-          <button class="btn btn-plus btn-sm btn-icon" onclick="document.getElementById('modal-add').classList.add('show')">+ 금액 추가</button>
-          <button class="btn btn-minus btn-sm btn-icon" onclick="document.getElementById('modal-sub').classList.add('show')">- 금액 차감</button>
+          <button class="btn btn-minus btn-sm btn-icon" onclick="document.getElementById('modal-sub').classList.add('show')">+ 금액 추가 (추가 청구)</button>
+          <button class="btn btn-plus btn-sm btn-icon" onclick="document.getElementById('modal-add').classList.add('show')">- 금액 차감 (할인/취소)</button>
         </div>
       </div>
       <div class="section-body">
@@ -306,7 +306,7 @@
         </div>
 
         <div class="highlight-box">
-          <strong>금액 직접 수정 불가</strong> — 모든 변동은 [+금액 추가] 또는 [-금액 차감]으로만 처리되며 원장에 자동 기록됩니다.
+          <strong>금액 직접 수정 불가</strong> — 모든 변동은 [+금액 추가(추가 청구)] 또는 [-금액 차감(할인/취소)]으로만 처리되며 원장에 자동 기록됩니다.
         </div>
 
         <!-- ===== 예약 금액 영역 ===== -->
@@ -1638,7 +1638,7 @@
     <div class="modal-body">
       <div style="background:#ffebee;border-radius:8px;padding:10px 14px;font-size:12px;color:#d32f2f;margin-bottom:16px;">
         인원 삭제 시 해당 인원의 모든 원장 항목이 <strong>역분개(취소)</strong> 처리됩니다.<br>
-        <span style="font-size:11px;opacity:0.8;">취소위약금이 필요하면 삭제 완료 후 [+금액 추가]로 위약금을 추가하세요.</span>
+        <span style="font-size:11px;opacity:0.8;">취소위약금이 필요하면 삭제 완료 후 [+금액 추가(추가 청구)]로 위약금을 추가하세요.</span>
       </div>
 
       <div class="form-group">
@@ -1693,7 +1693,7 @@
         <span style="font-size:14px;">💡</span>
         <div>
           <strong>취소위약금이 필요한 경우:</strong><br>
-          인원 삭제 완료 후 → [<strong>+금액 추가</strong>] 버튼 → 유형 "취소위약금(800)" 선택 → 금액 입력<br>
+          인원 삭제 완료 후 → [<strong>+금액 추가(추가 청구)</strong>] 버튼 → 유형 "취소위약금(800)" 선택 → 금액 입력<br>
           위약금은 결제 필요 금액을 증가시키며, 원장에 800 ADJUSTMENT로 기록됩니다.
         </div>
       </div>
@@ -1778,10 +1778,10 @@
 <!-- 금액 추가 모달 -->
 <div class="modal-overlay" id="modal-add">
   <div class="modal">
-    <div class="modal-header"><h3>+ 금액 추가 (할인/조정)</h3><button class="close" onclick="this.closest('.modal-overlay').classList.remove('show')">&times;</button></div>
+    <div class="modal-header"><h3>- 금액 차감 (할인/취소)</h3><button class="close" onclick="this.closest('.modal-overlay').classList.remove('show')">&times;</button></div>
     <div class="modal-body">
       <div style="background:#e3f2fd;border-radius:8px;padding:10px 14px;font-size:12px;color:#1565c0;margin-bottom:16px;">
-        고객에게 유리한 금액 변동 시 사용합니다. <strong>결제 필요 금액이 감소</strong>합니다.<br>
+        할인/취소 등 고객에게 유리한 금액 변동 시 사용합니다. <strong>결제 필요 금액이 감소</strong>합니다.<br>
         <span style="font-size:11px;opacity:0.8;">확인 시 원장에 해당 항목이 자동 생성됩니다.</span>
       </div>
       <div class="form-group">
@@ -1842,7 +1842,7 @@
     </div>
     <div class="modal-footer">
       <button class="btn btn-outline" onclick="this.closest('.modal-overlay').classList.remove('show')">취소</button>
-      <button class="btn btn-plus" id="btn-add-execute" onclick="executeAddAmount()" style="opacity:0.5;cursor:not-allowed;" disabled>금액 추가</button>
+      <button class="btn btn-plus" id="btn-add-execute" onclick="executeAddAmount()" style="opacity:0.5;cursor:not-allowed;" disabled>금액 차감</button>
     </div>
   </div>
 </div>
@@ -1850,10 +1850,10 @@
 <!-- 금액 차감 모달 -->
 <div class="modal-overlay" id="modal-sub">
   <div class="modal">
-    <div class="modal-header"><h3>- 금액 차감 (추가 청구)</h3><button class="close" onclick="this.closest('.modal-overlay').classList.remove('show')">&times;</button></div>
+    <div class="modal-header"><h3>+ 금액 추가 (추가 청구)</h3><button class="close" onclick="this.closest('.modal-overlay').classList.remove('show')">&times;</button></div>
     <div class="modal-body">
       <div style="background:#fff3e0;border-radius:8px;padding:10px 14px;font-size:12px;color:#e65100;margin-bottom:16px;">
-        고객에게 추가 청구가 필요한 금액 변동 시 사용합니다. <strong>결제 필요 금액이 증가</strong>합니다.<br>
+        추가 청구가 필요한 금액 변동 시 사용합니다. <strong>결제 필요 금액이 증가</strong>합니다.<br>
         <span style="font-size:11px;opacity:0.8;">확인 시 원장에 해당 항목이 자동 생성됩니다.</span>
       </div>
       <div class="form-group">
@@ -1871,6 +1871,7 @@
           <option value="discount-cancel" data-code="202">할인 취소 (환수)</option>
           <option value="surcharge" data-code="100">추가 요금</option>
           <option value="adjust" data-code="100">금액 조정 (증액)</option>
+          <option value="penalty" data-code="800">취소위약금</option>
           <option value="etc" data-code="299">기타</option>
         </select>
       </div>
@@ -1913,7 +1914,7 @@
     </div>
     <div class="modal-footer">
       <button class="btn btn-outline" onclick="this.closest('.modal-overlay').classList.remove('show')">취소</button>
-      <button class="btn btn-minus" id="btn-sub-execute" onclick="executeSubAmount()" style="opacity:0.5;cursor:not-allowed;" disabled>금액 차감</button>
+      <button class="btn btn-minus" id="btn-sub-execute" onclick="executeSubAmount()" style="opacity:0.5;cursor:not-allowed;" disabled>금액 추가</button>
     </div>
   </div>
 </div>
@@ -2571,9 +2572,9 @@ function executeRemovePax() {
 
   // 취소위약금 안내
   setTimeout(() => {
-    const addPenalty = confirm('취소위약금을 추가하시겠습니까?\n\n[확인] → +금액 추가 모달에서 위약금 입력\n[취소] → 위약금 없이 완료');
+    const addPenalty = confirm('취소위약금을 추가하시겠습니까?\n\n[확인] → +금액 추가(추가 청구) 모달에서 위약금 입력\n[취소] → 위약금 없이 완료');
     if (addPenalty) {
-      document.getElementById('modal-add').classList.add('show');
+      document.getElementById('modal-sub').classList.add('show');
     }
   }, 500);
 }
