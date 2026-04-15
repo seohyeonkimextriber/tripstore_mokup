@@ -568,17 +568,7 @@ tr:hover td { background: #fafafa; }
           </div>
 
           <!-- 마진 설정 -->
-          <div style="display:flex;gap:16px;margin-bottom:14px;flex-wrap:wrap;">
-            <!-- 경쟁가 대비 할인율 -->
-            <div style="flex:1;min-width:280px;padding:10px 14px;background:#e6f4ff;border:1px solid #91caff;border-radius:6px;">
-              <div style="font-size:12px;color:#1677ff;font-weight:500;margin-bottom:6px;">경쟁가 대비 목표 할인율</div>
-              <div style="display:flex;align-items:center;gap:8px;">
-                <span style="font-size:12px;">경쟁 평균가 ×</span>
-                <input type="number" class="form-input form-input-sm" value="0.95" min="0.80" max="1.00" step="0.01" style="width:65px;height:26px;font-size:12px;" id="compRate">
-                <span style="font-size:12px;color:rgba(0,0,0,0.45);">= <strong id="compRateLabel">5% 저렴</strong>하게</span>
-              </div>
-              <div style="font-size:11px;color:rgba(0,0,0,0.35);margin-top:4px;">0.95 = 5% 저렴 / 0.97 = 3% 저렴 / 1.00 = 동일가</div>
-            </div>
+          <div style="display:flex;gap:12px;margin-bottom:14px;flex-wrap:wrap;">
             <!-- 추가마진 허용 범위 -->
             <div style="flex:1;min-width:280px;padding:10px 14px;background:#f9f0ff;border:1px solid #d3adf7;border-radius:6px;">
               <div style="font-size:12px;color:#722ed1;font-weight:500;margin-bottom:6px;">추가마진 허용 범위</div>
@@ -586,12 +576,45 @@ tr:hover td { background: #fafafa; }
                 <span style="font-size:12px;">최소</span>
                 <input type="number" class="form-input form-input-sm" value="0" min="0" max="30" style="width:50px;height:26px;font-size:12px;" id="minMargin">
                 <span style="font-size:12px;">% ~ 최대</span>
-                <input type="number" class="form-input form-input-sm" value="20" min="0" max="50" style="width:50px;height:26px;font-size:12px;" id="maxMargin">
+                <input type="number" class="form-input form-input-sm" value="10" min="0" max="50" style="width:50px;height:26px;font-size:12px;" id="maxMargin">
                 <span style="font-size:12px;">%</span>
               </div>
-              <div style="font-size:11px;color:rgba(0,0,0,0.35);margin-top:4px;">범위 밖 → 역마진이면 탈락 / 최대 초과면 최대값 적용</div>
+              <div style="font-size:11px;color:rgba(0,0,0,0.35);margin-top:4px;">역마진(< 최소) → 탈락 / 최대 이상 → 최저가 공격 모드</div>
+            </div>
+            <!-- 최저가 공격 정책 -->
+            <div style="flex:1.2;min-width:320px;padding:10px 14px;background:#f6ffed;border:1px solid #b7eb8f;border-radius:6px;">
+              <div style="font-size:12px;color:#52c41a;font-weight:500;margin-bottom:6px;">💰 최저가 공격 정책</div>
+              <div style="font-size:12px;line-height:1.7;color:rgba(0,0,0,0.65);">
+                추가마진 ≥ <strong>최대값</strong> 도달 시:<br>
+                → 경쟁 최저가까지 내릴 수 있으면 <strong style="color:#52c41a;">최저가로 설정</strong><br>
+                → 최저가로 하면 최대% 미만이면 <strong>딱 최대% 가격으로</strong>
+              </div>
+              <div style="font-size:11px;color:rgba(0,0,0,0.35);margin-top:4px;">마진 여유 있으면 최저가 공격, 어떤 경우든 최대% 하한선 보장</div>
             </div>
           </div>
+
+          <!-- 고급 설정 (접힘) -->
+          <details style="margin-bottom:14px;">
+            <summary style="font-size:12px;color:rgba(0,0,0,0.35);cursor:pointer;padding:6px 0;">⚙️ 고급 설정 (경쟁가 할인율, 비교 기준)</summary>
+            <div style="display:flex;gap:12px;margin-top:8px;flex-wrap:wrap;">
+              <div style="flex:1;min-width:240px;padding:10px 14px;background:#fafafa;border:1px solid #e8e8e8;border-radius:6px;">
+                <div style="font-size:12px;color:rgba(0,0,0,0.55);font-weight:500;margin-bottom:6px;">경쟁가 대비 목표 할인율</div>
+                <div style="display:flex;align-items:center;gap:8px;">
+                  <span style="font-size:12px;">경쟁 평균가 ×</span>
+                  <input type="number" class="form-input form-input-sm" value="0.95" min="0.80" max="1.00" step="0.01" style="width:65px;height:26px;font-size:12px;" id="compRate">
+                  <span style="font-size:11px;color:rgba(0,0,0,0.35);">= <strong id="compRateLabel">5% 저렴</strong></span>
+                </div>
+              </div>
+              <div style="flex:1;min-width:240px;padding:10px 14px;background:#fafafa;border:1px solid #e8e8e8;border-radius:6px;">
+                <div style="font-size:12px;color:rgba(0,0,0,0.55);font-weight:500;margin-bottom:6px;">비교 기준</div>
+                <select class="form-input" style="height:28px;font-size:12px;width:100%;">
+                  <option selected>평균가 (기본)</option>
+                  <option>최저가</option>
+                  <option>중간값 (median)</option>
+                </select>
+              </div>
+            </div>
+          </details>
 
           <div style="overflow-x:auto;">
             <table id="marginTable">
@@ -694,7 +717,7 @@ tr:hover td { background: #fafafa; }
           </div>
           <div style="margin-top:10px;display:flex;justify-content:space-between;align-items:center;">
             <div style="font-size:11px;color:rgba(0,0,0,0.35);">
-              💡 추가마진은 경쟁가 비교 기준(1→2→3순위)에 따라 자동 산출. 3순위(비교대상 없음)는 기본값 9% 적용. 역마진 조합은 자동 탈락.
+              💡 추가마진은 경쟁가 비교(1→2→3순위) 자동 산출. 최대% 이상이면 최저가 공격. 역마진은 자동 탈락.
             </div>
             <div style="display:flex;gap:8px;">
               <span style="font-size:12px;padding:4px 10px;background:#f6ffed;border-radius:4px;color:#52c41a;font-weight:500;">생성 5개</span>
