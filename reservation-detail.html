@@ -1126,11 +1126,184 @@
 </div>
 
 <div class="footer-actions">
+  <button class="btn btn-danger" onclick="document.getElementById('modal-cancel-rsv').classList.add('show')">예약 취소</button>
   <button class="btn btn-outline">재예약</button>
   <button class="btn btn-primary">수정하기</button>
 </div>
 
 <!-- ==================== 모달들 ==================== -->
+
+<!-- 예약 취소 모달 -->
+<div class="modal-overlay" id="modal-cancel-rsv">
+  <div class="modal" style="width:640px;">
+    <div class="modal-header" style="background:#d32f2f;"><h3 style="color:#fff;">예약 취소</h3><button class="close" onclick="this.closest('.modal-overlay').classList.remove('show')" style="color:#fff;">&times;</button></div>
+    <div class="modal-body">
+
+      <div style="background:#ffebee;border-radius:8px;padding:12px 14px;font-size:12px;color:#d32f2f;margin-bottom:16px;">
+        <strong>예약을 취소하면 다음이 자동 처리됩니다:</strong><br>
+        <span style="font-size:11px;">① 예약관리 금액 전체 역분개 (100·200·800) → ② 쿠폰 자동 해제+원복 (302) → ③ 결제금액 환불 (703)</span>
+      </div>
+
+      <!-- 현재 예약 요약 -->
+      <div style="background:#f5f5f5;border-radius:8px;padding:12px;border:1px solid #e0e0e0;margin-bottom:16px;">
+        <div style="font-size:11px;color:#888;margin-bottom:6px;">취소 대상 예약</div>
+        <div style="display:flex;justify-content:space-between;align-items:center;">
+          <div>
+            <span class="text-mono" style="font-weight:700;">26040708-4300101H</span>
+            <span class="badge green" style="margin-left:6px;">예약완료</span>
+          </div>
+          <div style="text-align:right;">
+            <div style="font-size:11px;color:#888;">판매금액</div>
+            <div style="font-family:monospace;font-weight:700;font-size:15px;">2,038,000원</div>
+          </div>
+        </div>
+        <div style="font-size:11px;color:#888;margin-top:4px;">오기웅 · 성인 3명 · 하나투어 상하이 자유여행 4일</div>
+      </div>
+
+      <!-- Step 1: 취소위약금 -->
+      <div class="form-group">
+        <label style="display:flex;align-items:center;gap:8px;">
+          <span>취소위약금</span>
+          <label style="display:flex;align-items:center;gap:4px;font-size:11px;font-weight:400;cursor:pointer;">
+            <input type="checkbox" id="cancel-has-penalty" onchange="toggleCancelPenalty(this.checked)"> 취소위약금 발생
+          </label>
+        </label>
+      </div>
+
+      <!-- 위약금 상세 (체크 시 표시) -->
+      <div id="cancel-penalty-area" style="display:none;background:#fff8e1;border:1px solid #ffe0b2;border-radius:8px;padding:14px;margin-bottom:16px;">
+        <div class="form-group" style="margin-bottom:12px;">
+          <label>위약금 금액</label>
+          <input type="text" id="cancel-penalty-amount" placeholder="위약금 금액 입력" oninput="recalcCancelRefund()" style="font-family:monospace;font-size:14px;font-weight:700;text-align:right;">
+        </div>
+
+        <!-- 위약금 매길 결제 건 선택 -->
+        <div style="font-size:12px;font-weight:700;margin-bottom:8px;">위약금을 차감할 결제 건 선택</div>
+        <div id="cancel-penalty-target" style="display:flex;flex-direction:column;gap:6px;">
+          <label style="display:flex;align-items:center;gap:10px;padding:10px 12px;background:#fff;border:1px solid #e0e0e0;border-radius:8px;cursor:pointer;" onmouseover="this.style.borderColor='#e65100'" onmouseout="if(!this.querySelector('input').checked) this.style.borderColor='#e0e0e0'">
+            <input type="radio" name="penalty-target" value="pg-1" checked onchange="recalcCancelRefund()">
+            <div style="flex:1;">
+              <div style="display:flex;align-items:center;gap:6px;">
+                <span class="badge blue">PG</span>
+                <span style="font-weight:600;font-size:12px;">nice_v2 · 신용카드</span>
+              </div>
+              <div style="font-size:10px;color:#888;margin-top:2px;">26040708-4300101H-001 · 2026-04-07 08:43</div>
+            </div>
+            <div style="text-align:right;">
+              <div style="font-family:monospace;font-weight:700;">2,038,000원</div>
+            </div>
+          </label>
+          <label style="display:flex;align-items:center;gap:10px;padding:10px 12px;background:#fff;border:1px solid #e0e0e0;border-radius:8px;cursor:pointer;opacity:0.5;" onmouseover="this.style.borderColor='#6a1b9a'" onmouseout="if(!this.querySelector('input').checked) this.style.borderColor='#e0e0e0'">
+            <input type="radio" name="penalty-target" value="coupon" onchange="recalcCancelRefund()">
+            <div style="flex:1;">
+              <div style="display:flex;align-items:center;gap:6px;">
+                <span class="badge purple">쿠폰</span>
+                <span style="font-weight:600;font-size:12px;">상해 자유여행 20,000원</span>
+              </div>
+              <div style="font-size:10px;color:#888;margin-top:2px;">836331bf · 2026-04-07 08:43</div>
+            </div>
+            <div style="text-align:right;">
+              <div style="font-family:monospace;font-weight:700;">20,000원</div>
+            </div>
+          </label>
+        </div>
+        <div style="font-size:10px;color:#888;margin-top:6px;">※ 선택한 결제 건에서 위약금을 차감하고 나머지를 환불합니다</div>
+      </div>
+
+      <!-- 환불 계산 미리보기 -->
+      <div style="background:#f8f9fa;border-radius:8px;padding:14px;border:1px solid #e0e0e0;margin-bottom:16px;">
+        <div style="font-size:12px;font-weight:700;margin-bottom:10px;">환불 계산 미리보기</div>
+        <div id="cancel-refund-preview">
+          <table style="font-size:12px;">
+            <thead><tr>
+              <th>결제 건</th><th class="text-right">결제금액</th><th class="text-right">위약금 차감</th><th class="text-right">환불금액</th><th class="text-center">처리</th>
+            </tr></thead>
+            <tbody id="cancel-refund-tbody">
+              <tr>
+                <td><span class="badge blue">PG</span> nice_v2 · 신용카드</td>
+                <td class="text-right text-mono">2,038,000</td>
+                <td class="text-right text-mono" style="color:#888;">0</td>
+                <td class="text-right text-mono" style="color:#d32f2f;font-weight:700;">2,038,000</td>
+                <td class="text-center"><span class="badge red" style="font-size:10px;">전액환불</span></td>
+              </tr>
+              <tr>
+                <td><span class="badge purple">쿠폰</span> 상해 자유여행</td>
+                <td class="text-right text-mono">20,000</td>
+                <td class="text-right text-mono" style="color:#888;">0</td>
+                <td class="text-right text-mono" style="color:#6a1b9a;font-weight:700;">해제+원복</td>
+                <td class="text-center"><span class="badge purple" style="font-size:10px;">쿠폰원복</span></td>
+              </tr>
+            </tbody>
+            <tfoot>
+              <tr style="background:#ffebee;font-weight:700;border-top:2px solid #d32f2f;">
+                <td>합계</td>
+                <td class="text-right text-mono">2,058,000</td>
+                <td class="text-right text-mono" id="cancel-total-penalty" style="color:#e65100;">0</td>
+                <td class="text-right text-mono" id="cancel-total-refund" style="color:#d32f2f;font-size:14px;">2,058,000</td>
+                <td></td>
+              </tr>
+            </tfoot>
+          </table>
+        </div>
+      </div>
+
+      <!-- 원장 자동 생성 항목 -->
+      <div style="background:#f5f5f5;border-radius:8px;padding:12px;margin-bottom:16px;">
+        <div style="font-size:11px;font-weight:700;color:#888;margin-bottom:6px;">원장 자동 생성 항목</div>
+        <div style="display:flex;flex-direction:column;gap:3px;font-size:11px;" id="cancel-ledger-items">
+          <div style="display:flex;align-items:center;gap:6px;">
+            <span class="code charge" style="padding:1px 6px;border-radius:3px;font-family:monospace;font-size:10px;font-weight:700;">100</span>
+            <span>상품정가 취소 (역분개)</span>
+            <span style="margin-left:auto;font-family:monospace;color:#1565c0;">-2,097,000</span>
+          </div>
+          <div style="display:flex;align-items:center;gap:6px;">
+            <span class="code discount" style="padding:1px 6px;border-radius:3px;font-family:monospace;font-size:10px;font-weight:700;">202</span>
+            <span>여행사특가 취소 (역분개)</span>
+            <span style="margin-left:auto;font-family:monospace;color:#d32f2f;">+39,000</span>
+          </div>
+          <div style="display:flex;align-items:center;gap:6px;">
+            <span class="code coupon" style="padding:1px 6px;border-radius:3px;font-family:monospace;font-size:10px;font-weight:700;">302</span>
+            <span>쿠폰 해제 (원복)</span>
+            <span style="margin-left:auto;font-family:monospace;color:#6a1b9a;">+20,000</span>
+          </div>
+          <div style="display:flex;align-items:center;gap:6px;">
+            <span class="code refund" style="padding:1px 6px;border-radius:3px;font-family:monospace;font-size:10px;font-weight:700;">703</span>
+            <span>환불실행 (PG)</span>
+            <span style="margin-left:auto;font-family:monospace;color:#d32f2f;" id="cancel-ledger-refund">-2,038,000</span>
+          </div>
+          <div id="cancel-ledger-penalty-row" style="display:none;display:flex;align-items:center;gap:6px;">
+            <span style="background:#fff3e0;color:#bf360c;padding:1px 6px;border-radius:3px;font-family:monospace;font-size:10px;font-weight:700;">800</span>
+            <span>취소위약금</span>
+            <span style="margin-left:auto;font-family:monospace;color:#e65100;" id="cancel-ledger-penalty-amt">0</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- 취소 사유 -->
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+        <div class="form-group">
+          <label>취소 사유</label>
+          <select id="cancel-reason">
+            <option>고객 요청</option>
+            <option>상품 마감/출발 불가</option>
+            <option>인원 미달</option>
+            <option>여행사 요청</option>
+            <option>결제 오류</option>
+            <option>기타</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>비고 (선택)</label>
+          <input type="text" id="cancel-memo" placeholder="취소 사유 상세">
+        </div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-outline" onclick="this.closest('.modal-overlay').classList.remove('show')">닫기</button>
+      <button class="btn btn-danger" onclick="executeCancelReservation()">예약 취소 실행</button>
+    </div>
+  </div>
+</div>
 
 <!-- 고객 "내 예약" 화면 조회 모달 -->
 <div class="modal-overlay" id="modal-customer-view">
@@ -2658,6 +2831,90 @@ function clearEventSelection() {
 function formatDiff(val) {
   if (val === 0) return '0';
   return (val > 0 ? '+' : '') + val.toLocaleString();
+}
+
+// ==================== 예약 취소 ====================
+function toggleCancelPenalty(checked) {
+  document.getElementById('cancel-penalty-area').style.display = checked ? 'block' : 'none';
+  document.getElementById('cancel-ledger-penalty-row').style.display = checked ? 'flex' : 'none';
+  if (!checked) {
+    document.getElementById('cancel-penalty-amount').value = '';
+  }
+  recalcCancelRefund();
+}
+
+function recalcCancelRefund() {
+  const hasPenalty = document.getElementById('cancel-has-penalty').checked;
+  const penaltyAmt = hasPenalty ? (parseInt(String(document.getElementById('cancel-penalty-amount').value).replace(/[^0-9]/g,'')) || 0) : 0;
+  const penaltyTarget = document.querySelector('input[name="penalty-target"]:checked')?.value || 'pg-1';
+
+  const pgAmt = 2038000;
+  const couponAmt = 20000;
+
+  let pgPenalty = 0, couponPenalty = 0;
+  let pgRefund = pgAmt, couponRefund = couponAmt;
+
+  if (hasPenalty && penaltyAmt > 0) {
+    if (penaltyTarget === 'pg-1') {
+      pgPenalty = Math.min(penaltyAmt, pgAmt);
+      pgRefund = pgAmt - pgPenalty;
+    } else if (penaltyTarget === 'coupon') {
+      couponPenalty = Math.min(penaltyAmt, couponAmt);
+      couponRefund = couponAmt - couponPenalty;
+      // 나머지는 PG에서
+      const remaining = penaltyAmt - couponPenalty;
+      if (remaining > 0) {
+        pgPenalty = Math.min(remaining, pgAmt);
+        pgRefund = pgAmt - pgPenalty;
+      }
+    }
+  }
+
+  const pgLabel = pgRefund === pgAmt ? '전액환불' : pgRefund === 0 ? '환불없음' : '부분환불';
+  const pgBadge = pgRefund === 0 ? '<span class="badge gray" style="font-size:10px;">환불없음</span>' : '<span class="badge red" style="font-size:10px;">' + pgLabel + '</span>';
+
+  const tbody = document.getElementById('cancel-refund-tbody');
+  tbody.innerHTML = `
+    <tr${pgRefund === 0 ? ' style="opacity:0.5;"' : ''}>
+      <td><span class="badge blue">PG</span> nice_v2 · 신용카드</td>
+      <td class="text-right text-mono">2,038,000</td>
+      <td class="text-right text-mono" style="color:${pgPenalty > 0 ? '#e65100' : '#888'};">${pgPenalty > 0 ? '-' + pgPenalty.toLocaleString() : '0'}</td>
+      <td class="text-right text-mono" style="color:#d32f2f;font-weight:700;">${pgRefund.toLocaleString()}</td>
+      <td class="text-center">${pgBadge}</td>
+    </tr>
+    <tr>
+      <td><span class="badge purple">쿠폰</span> 상해 자유여행</td>
+      <td class="text-right text-mono">20,000</td>
+      <td class="text-right text-mono" style="color:${couponPenalty > 0 ? '#e65100' : '#888'};">${couponPenalty > 0 ? '-' + couponPenalty.toLocaleString() : '0'}</td>
+      <td class="text-right text-mono" style="color:#6a1b9a;font-weight:700;">${couponPenalty > 0 ? couponRefund.toLocaleString() : '해제+원복'}</td>
+      <td class="text-center"><span class="badge purple" style="font-size:10px;">${couponPenalty > 0 ? '부분원복' : '쿠폰원복'}</span></td>
+    </tr>`;
+
+  document.getElementById('cancel-total-penalty').textContent = penaltyAmt > 0 ? '-' + penaltyAmt.toLocaleString() : '0';
+  document.getElementById('cancel-total-refund').textContent = (pgRefund + (couponPenalty > 0 ? couponRefund : couponAmt)).toLocaleString();
+
+  // 원장 항목 업데이트
+  document.getElementById('cancel-ledger-refund').textContent = '-' + pgRefund.toLocaleString();
+  document.getElementById('cancel-ledger-penalty-amt').textContent = '+' + penaltyAmt.toLocaleString();
+}
+
+function executeCancelReservation() {
+  const reason = document.getElementById('cancel-reason').value;
+  const hasPenalty = document.getElementById('cancel-has-penalty').checked;
+  const penaltyAmt = hasPenalty ? (parseInt(String(document.getElementById('cancel-penalty-amount').value).replace(/[^0-9]/g,'')) || 0) : 0;
+
+  document.getElementById('modal-cancel-rsv').classList.remove('show');
+
+  // 예약 상태 배지 변경
+  document.querySelectorAll('#tab-basic .badge.green').forEach(b => {
+    if (b.textContent.includes('예약완료')) {
+      b.textContent = '취소완료';
+      b.className = 'badge red';
+    }
+  });
+
+  const penaltyNote = penaltyAmt > 0 ? ` · 취소위약금 ${penaltyAmt.toLocaleString()}원` : '';
+  showToast(`예약 취소 완료: ${reason}${penaltyNote} → 예약금액 역분개 + 쿠폰 해제 + 결제 환불 자동 처리`);
 }
 
 // ==================== 인원 추가/삭제 ====================
