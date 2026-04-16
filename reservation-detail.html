@@ -1133,42 +1133,113 @@
 
 <!-- ==================== 모달들 ==================== -->
 
-<!-- 예약 취소 모달 -->
+<!-- 예약 취소 모달 (2단계) -->
 <div class="modal-overlay" id="modal-cancel-rsv">
   <div class="modal" style="width:640px;">
-    <div class="modal-header" style="background:#d32f2f;"><h3 style="color:#fff;">예약 취소</h3><button class="close" onclick="this.closest('.modal-overlay').classList.remove('show')" style="color:#fff;">&times;</button></div>
+    <div class="modal-header" style="background:#d32f2f;">
+      <h3 style="color:#fff;">예약 취소</h3>
+      <button class="close" onclick="this.closest('.modal-overlay').classList.remove('show')" style="color:#fff;">&times;</button>
+    </div>
     <div class="modal-body">
 
-      <div style="background:#ffebee;border-radius:8px;padding:12px 14px;font-size:12px;color:#d32f2f;margin-bottom:16px;">
-        <strong>예약을 취소하면 다음이 자동 처리됩니다:</strong><br>
-        <span style="font-size:11px;">① 예약관리 금액 전체 역분개 (100·200·800) → ② 쿠폰 자동 해제+원복 (302) → ③ 결제금액 환불 (703)</span>
+      <!-- 스텝 인디케이터 -->
+      <div style="display:flex;align-items:center;gap:0;margin-bottom:20px;">
+        <div id="cancel-step-ind-1" style="display:flex;align-items:center;gap:6px;flex:1;">
+          <span style="background:#d32f2f;color:#fff;width:24px;height:24px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;">1</span>
+          <span style="font-size:12px;font-weight:700;color:#d32f2f;">취소사유</span>
+        </div>
+        <div style="width:40px;height:2px;background:#e0e0e0;"></div>
+        <div id="cancel-step-ind-2" style="display:flex;align-items:center;gap:6px;flex:1;">
+          <span style="background:#e0e0e0;color:#888;width:24px;height:24px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;">2</span>
+          <span style="font-size:12px;font-weight:500;color:#888;">위약금 · 환불</span>
+        </div>
       </div>
 
-      <!-- 현재 예약 요약 -->
+      <!-- 현재 예약 요약 (공통) -->
       <div style="background:#f5f5f5;border-radius:8px;padding:12px;border:1px solid #e0e0e0;margin-bottom:16px;">
-        <div style="font-size:11px;color:#888;margin-bottom:6px;">취소 대상 예약</div>
         <div style="display:flex;justify-content:space-between;align-items:center;">
           <div>
             <span class="text-mono" style="font-weight:700;">26040708-4300101H</span>
             <span class="badge green" style="margin-left:6px;">예약완료</span>
+            <span style="font-size:11px;color:#888;margin-left:8px;">오기웅 · 성인 3명 · 하나투어 상하이 자유여행 4일</span>
           </div>
-          <div style="text-align:right;">
-            <div style="font-size:11px;color:#888;">판매금액</div>
-            <div style="font-family:monospace;font-weight:700;font-size:15px;">2,038,000원</div>
-          </div>
+          <div style="font-family:monospace;font-weight:700;font-size:14px;">2,038,000원</div>
         </div>
-        <div style="font-size:11px;color:#888;margin-top:4px;">오기웅 · 성인 3명 · 하나투어 상하이 자유여행 4일</div>
       </div>
 
-      <!-- Step 1: 취소위약금 -->
-      <div class="form-group">
-        <label style="display:flex;align-items:center;gap:8px;">
-          <span>취소위약금</span>
-          <label style="display:flex;align-items:center;gap:4px;font-size:11px;font-weight:400;cursor:pointer;">
-            <input type="checkbox" id="cancel-has-penalty" onchange="toggleCancelPenalty(this.checked)"> 취소위약금 발생
+      <!-- ===== Step 1: 취소사유 수집 ===== -->
+      <div id="cancel-step-1">
+        <div style="font-size:13px;font-weight:700;margin-bottom:12px;">취소사유 선택 <span style="color:#d32f2f;">*</span></div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:16px;">
+          <label style="display:flex;align-items:flex-start;gap:8px;padding:10px 12px;background:#fff;border:1px solid #e0e0e0;border-radius:8px;cursor:pointer;font-size:12px;" onchange="validateCancelStep1()">
+            <input type="checkbox" name="cancel-reason" value="고객변심/고객사유">
+            <div><div style="font-weight:600;">고객변심/고객사유</div><div style="font-size:10px;color:#888;">미결제/여권불가/고객응답 부재 등</div></div>
           </label>
-        </label>
+          <label style="display:flex;align-items:flex-start;gap:8px;padding:10px 12px;background:#fff;border:1px solid #e0e0e0;border-radius:8px;cursor:pointer;font-size:12px;" onchange="validateCancelStep1()">
+            <input type="checkbox" name="cancel-reason" value="이용조건 불일치">
+            <div><div style="font-weight:600;">이용조건 불일치</div></div>
+          </label>
+          <label style="display:flex;align-items:flex-start;gap:8px;padding:10px 12px;background:#fff;border:1px solid #e0e0e0;border-radius:8px;cursor:pointer;font-size:12px;" onchange="validateCancelStep1()">
+            <input type="checkbox" name="cancel-reason" value="상품 출발 불가">
+            <div><div style="font-weight:600;">상품 출발 불가</div><div style="font-size:10px;color:#888;">항공 및 객실 불가, 천재지변 등</div></div>
+          </label>
+          <label style="display:flex;align-items:flex-start;gap:8px;padding:10px 12px;background:#fff;border:1px solid #e0e0e0;border-radius:8px;cursor:pointer;font-size:12px;" onchange="validateCancelStep1()">
+            <input type="checkbox" name="cancel-reason" value="가격인상">
+            <div><div style="font-weight:600;">가격인상</div></div>
+          </label>
+          <label style="display:flex;align-items:flex-start;gap:8px;padding:10px 12px;background:#fff;border:1px solid #e0e0e0;border-radius:8px;cursor:pointer;font-size:12px;" onchange="validateCancelStep1()">
+            <input type="checkbox" name="cancel-reason" value="조건미달(모객부족)">
+            <div><div style="font-weight:600;">조건미달(모객부족)</div></div>
+          </label>
+          <label style="display:flex;align-items:flex-start;gap:8px;padding:10px 12px;background:#fff;border:1px solid #e0e0e0;border-radius:8px;cursor:pointer;font-size:12px;" onchange="validateCancelStep1()">
+            <input type="checkbox" name="cancel-reason" value="중복 예약">
+            <div><div style="font-weight:600;">중복 예약</div></div>
+          </label>
+          <label style="display:flex;align-items:flex-start;gap:8px;padding:10px 12px;background:#fff;border:1px solid #e0e0e0;border-radius:8px;cursor:pointer;font-size:12px;" onchange="validateCancelStep1()">
+            <input type="checkbox" name="cancel-reason" value="행사변경">
+            <div><div style="font-weight:600;">행사변경</div><div style="font-size:10px;color:#888;">출발일,일정 변경 등</div></div>
+          </label>
+          <label style="display:flex;align-items:flex-start;gap:8px;padding:10px 12px;background:#fff;border:1px solid #e0e0e0;border-radius:8px;cursor:pointer;font-size:12px;" onchange="validateCancelStep1()">
+            <input type="checkbox" name="cancel-reason" value="정보표기 오류 및 시스템 오류">
+            <div><div style="font-weight:600;">정보표기 오류 및 시스템 오류</div></div>
+          </label>
+          <label style="display:flex;align-items:flex-start;gap:8px;padding:10px 12px;background:#fff;border:1px solid #e0e0e0;border-radius:8px;cursor:pointer;font-size:12px;" onchange="validateCancelStep1()">
+            <input type="checkbox" name="cancel-reason" value="재예약">
+            <div><div style="font-weight:600;">재예약</div><div style="font-size:10px;color:#888;">재결제 등</div></div>
+          </label>
+          <label style="display:flex;align-items:flex-start;gap:8px;padding:10px 12px;background:#fff;border:1px solid #e0e0e0;border-radius:8px;cursor:pointer;font-size:12px;" onchange="validateCancelStep1()">
+            <input type="checkbox" name="cancel-reason" value="테스트">
+            <div><div style="font-weight:600;">테스트</div></div>
+          </label>
+        </div>
+        <div class="form-group">
+          <label>기타 메모 (선택)</label>
+          <textarea id="cancel-memo" style="width:100%;padding:8px 12px;border:1px solid #d0d0d0;border-radius:6px;font-size:12px;min-height:60px;resize:vertical;" placeholder="기타 메모사항 입력" maxlength="300"></textarea>
+          <div style="text-align:right;font-size:10px;color:#888;margin-top:2px;"><span id="cancel-memo-count">0</span> / 300</div>
+        </div>
       </div>
+
+      <!-- ===== Step 2: 위약금 · 환불 ===== -->
+      <div id="cancel-step-2" style="display:none;">
+
+        <div style="background:#ffebee;border-radius:8px;padding:10px 14px;font-size:11px;color:#d32f2f;margin-bottom:16px;">
+          ① 예약관리 금액 전체 역분개 (100·200·800) → ② 쿠폰 자동 해제+원복 (302) → ③ 결제금액 환불 (703)
+        </div>
+
+        <!-- 선택된 취소사유 표시 -->
+        <div style="background:#f8f9fa;border-radius:6px;padding:8px 12px;margin-bottom:16px;font-size:11px;">
+          <span style="color:#888;">취소사유:</span> <strong id="cancel-selected-reasons"></strong>
+        </div>
+
+        <!-- 취소위약금 -->
+        <div class="form-group">
+          <label style="display:flex;align-items:center;gap:8px;">
+            <span>취소위약금</span>
+            <label style="display:flex;align-items:center;gap:4px;font-size:11px;font-weight:400;cursor:pointer;">
+              <input type="checkbox" id="cancel-has-penalty" onchange="toggleCancelPenalty(this.checked)"> 취소위약금 발생
+            </label>
+          </label>
+        </div>
 
       <!-- 위약금 상세 (체크 시 표시) -->
       <div id="cancel-penalty-area" style="display:none;background:#fff8e1;border:1px solid #ffe0b2;border-radius:8px;padding:14px;margin-bottom:16px;">
@@ -1294,28 +1365,19 @@
         </div>
       </div>
 
-      <!-- 취소 사유 -->
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
-        <div class="form-group">
-          <label>취소 사유</label>
-          <select id="cancel-reason">
-            <option>고객 요청</option>
-            <option>상품 마감/출발 불가</option>
-            <option>인원 미달</option>
-            <option>여행사 요청</option>
-            <option>결제 오류</option>
-            <option>기타</option>
-          </select>
-        </div>
-        <div class="form-group">
-          <label>비고 (선택)</label>
-          <input type="text" id="cancel-memo" placeholder="취소 사유 상세">
-        </div>
-      </div>
+      </div><!-- end step-2 -->
     </div>
     <div class="modal-footer">
-      <button class="btn btn-outline" onclick="this.closest('.modal-overlay').classList.remove('show')">닫기</button>
-      <button class="btn btn-danger" onclick="executeCancelReservation()">예약 취소 실행</button>
+      <!-- Step 1 footer -->
+      <div id="cancel-footer-1">
+        <button class="btn btn-outline" onclick="this.closest('.modal-overlay').classList.remove('show')">닫기</button>
+        <button class="btn btn-danger" id="cancel-next-btn" onclick="goToCancelStep2()" disabled style="opacity:0.5;">다음 →</button>
+      </div>
+      <!-- Step 2 footer -->
+      <div id="cancel-footer-2" style="display:none;">
+        <button class="btn btn-outline" onclick="goToCancelStep1()">← 이전</button>
+        <button class="btn btn-danger" onclick="executeCancelReservation()">예약 취소 실행</button>
+      </div>
     </div>
   </div>
 </div>
@@ -2849,6 +2911,61 @@ function formatDiff(val) {
 }
 
 // ==================== 예약 취소 ====================
+function validateCancelStep1() {
+  const checked = document.querySelectorAll('input[name="cancel-reason"]:checked');
+  const btn = document.getElementById('cancel-next-btn');
+  btn.disabled = checked.length === 0;
+  btn.style.opacity = checked.length === 0 ? '0.5' : '1';
+}
+
+function goToCancelStep2() {
+  const checked = document.querySelectorAll('input[name="cancel-reason"]:checked');
+  if (checked.length === 0) { alert('취소사유를 1개 이상 선택하세요.'); return; }
+
+  // 선택된 사유 표시
+  const reasons = Array.from(checked).map(cb => cb.value).join(', ');
+  document.getElementById('cancel-selected-reasons').textContent = reasons;
+
+  // 스텝 전환
+  document.getElementById('cancel-step-1').style.display = 'none';
+  document.getElementById('cancel-step-2').style.display = 'block';
+  document.getElementById('cancel-footer-1').style.display = 'none';
+  document.getElementById('cancel-footer-2').style.display = '';
+
+  // 인디케이터
+  document.getElementById('cancel-step-ind-1').querySelector('span:first-child').style.background = '#888';
+  document.getElementById('cancel-step-ind-1').querySelector('span:last-child').style.color = '#888';
+  document.getElementById('cancel-step-ind-2').querySelector('span:first-child').style.background = '#d32f2f';
+  document.getElementById('cancel-step-ind-2').querySelector('span:first-child').style.color = '#fff';
+  document.getElementById('cancel-step-ind-2').querySelector('span:last-child').style.color = '#d32f2f';
+  document.getElementById('cancel-step-ind-2').querySelector('span:last-child').style.fontWeight = '700';
+
+  recalcCancelRefund();
+}
+
+function goToCancelStep1() {
+  document.getElementById('cancel-step-1').style.display = 'block';
+  document.getElementById('cancel-step-2').style.display = 'none';
+  document.getElementById('cancel-footer-1').style.display = '';
+  document.getElementById('cancel-footer-2').style.display = 'none';
+
+  // 인디케이터 복원
+  document.getElementById('cancel-step-ind-1').querySelector('span:first-child').style.background = '#d32f2f';
+  document.getElementById('cancel-step-ind-1').querySelector('span:last-child').style.color = '#d32f2f';
+  document.getElementById('cancel-step-ind-2').querySelector('span:first-child').style.background = '#e0e0e0';
+  document.getElementById('cancel-step-ind-2').querySelector('span:first-child').style.color = '#888';
+  document.getElementById('cancel-step-ind-2').querySelector('span:last-child').style.color = '#888';
+  document.getElementById('cancel-step-ind-2').querySelector('span:last-child').style.fontWeight = '500';
+}
+
+// 메모 글자수
+document.addEventListener('DOMContentLoaded', () => {
+  const memo = document.getElementById('cancel-memo');
+  if (memo) memo.addEventListener('input', () => {
+    document.getElementById('cancel-memo-count').textContent = memo.value.length;
+  });
+});
+
 function toggleCancelPenalty(checked) {
   document.getElementById('cancel-penalty-area').style.display = checked ? 'block' : 'none';
   document.getElementById('cancel-ledger-penalty-row').style.display = checked ? 'flex' : 'none';
@@ -2937,7 +3054,8 @@ function recalcCancelRefund() {
 }
 
 function executeCancelReservation() {
-  const reason = document.getElementById('cancel-reason').value;
+  const reasons = Array.from(document.querySelectorAll('input[name="cancel-reason"]:checked')).map(cb => cb.value).join(', ');
+  const memo = document.getElementById('cancel-memo')?.value || '';
   const hasPenalty = document.getElementById('cancel-has-penalty').checked;
   const penaltyAmt = hasPenalty ? (parseInt(String(document.getElementById('cancel-penalty-amount').value).replace(/[^0-9]/g,'')) || 0) : 0;
 
@@ -2952,7 +3070,12 @@ function executeCancelReservation() {
   });
 
   const penaltyNote = penaltyAmt > 0 ? ` · 취소위약금 ${penaltyAmt.toLocaleString()}원` : '';
-  showToast(`예약 취소 완료: ${reason}${penaltyNote} → 예약금액 역분개 + 쿠폰 해제 + 결제 환불 자동 처리`);
+  showToast(`예약 취소 완료: ${reasons}${penaltyNote} → 예약금액 역분개 + 쿠폰 해제 + 결제 환불 자동 처리`);
+
+  // 스텝 초기화
+  goToCancelStep1();
+  document.querySelectorAll('input[name="cancel-reason"]').forEach(cb => cb.checked = false);
+  validateCancelStep1();
 }
 
 // ==================== 인원 추가/삭제 ====================
