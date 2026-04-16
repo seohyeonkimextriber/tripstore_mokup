@@ -1302,7 +1302,7 @@
         <div id="cancel-refund-preview">
           <table style="font-size:12px;">
             <thead><tr>
-              <th>결제 건</th><th class="text-right">결제금액</th><th class="text-right">위약금 차감</th><th class="text-right">환불금액</th><th class="text-center">처리</th>
+              <th>결제 건</th><th>결제수단 · 상세</th><th>결제일시</th><th class="text-right">결제금액</th><th class="text-right">위약금</th><th class="text-right">환불금액</th><th class="text-center">처리</th>
             </tr></thead>
             <tbody id="cancel-refund-tbody">
               <tr>
@@ -1322,7 +1322,7 @@
             </tbody>
             <tfoot>
               <tr style="background:#ffebee;font-weight:700;border-top:2px solid #d32f2f;">
-                <td>합계</td>
+                <td colspan="3">합계</td>
                 <td class="text-right text-mono">2,058,000</td>
                 <td class="text-right text-mono" id="cancel-total-penalty" style="color:#e65100;">0</td>
                 <td class="text-right text-mono" id="cancel-total-refund" style="color:#d32f2f;font-size:14px;">2,058,000</td>
@@ -2977,9 +2977,9 @@ function toggleCancelPenalty(checked) {
 
 // 결제 건 데이터 (다중 건)
 const cancelPayments = [
-  { id: 'pg-1', type: 'PG', label: 'nice_v2 · 신용카드', tag: '#1 예약금', code: '26040708-4300101H-001', date: '04-07 08:43', amount: 1019000 },
-  { id: 'pg-2', type: 'PG', label: 'nice_v2 · 신용카드', tag: '#2 잔금', code: '26040710-4300101H-002', date: '04-10 14:20', amount: 1019000 },
-  { id: 'coupon', type: '쿠폰', label: '상해 자유여행', tag: '', code: '836331bf', date: '04-07 08:43', amount: 20000 },
+  { id: 'pg-1', type: 'PG', label: 'nice_v2', tag: '#1 예약금', code: '26040708-4300101H-001', date: '2026-04-07 08:43', amount: 1019000, method: '신용카드', cardInfo: 'KB국민 ****1234 (일시불)' },
+  { id: 'pg-2', type: 'PG', label: 'nice_v2', tag: '#2 잔금', code: '26040710-4300101H-002', date: '2026-04-10 14:20', amount: 1019000, method: '신용카드', cardInfo: '삼성 ****5678 (3개월)' },
+  { id: 'coupon', type: '쿠폰', label: '상해 자유여행 20,000원', tag: '', code: '836331bf', date: '2026-04-07 08:43', amount: 20000, method: '쿠폰', cardInfo: '' },
 ];
 
 function recalcCancelRefund() {
@@ -3030,8 +3030,14 @@ function recalcCancelRefund() {
     const op = refund === 0 && !isCoupon ? 'opacity:0.5;' : '';
     const typeBadge = isCoupon ? '<span class="badge purple">쿠폰</span>' : '<span class="badge blue">PG</span>';
 
+    const methodDetail = isCoupon
+      ? `<span style="color:#6a1b9a;">쿠폰</span><div style="font-size:10px;color:#888;">${p.code}</div>`
+      : `${p.method}<div style="font-size:10px;color:#888;">${p.cardInfo}</div>`;
+
     return `<tr style="${op}">
       <td>${typeBadge} ${p.label}${p.tag ? ' <span style="font-size:9px;color:#888;">'+p.tag+'</span>' : ''}</td>
+      <td style="font-size:11px;">${methodDetail}</td>
+      <td style="font-size:11px;color:#888;">${p.date}</td>
       <td class="text-right text-mono">${p.amount.toLocaleString()}</td>
       <td class="text-right text-mono" style="color:${pen > 0 ? '#e65100' : '#888'};">${pen > 0 ? '-'+pen.toLocaleString() : '0'}</td>
       <td class="text-right text-mono" style="color:${isCoupon ? '#6a1b9a' : '#d32f2f'};font-weight:700;">${refundText}</td>
