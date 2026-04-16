@@ -1178,23 +1178,38 @@
         </div>
 
         <!-- 위약금 매길 결제 건 선택 -->
-        <div style="font-size:12px;font-weight:700;margin-bottom:8px;">위약금을 차감할 결제 건 선택</div>
+        <div style="font-size:12px;font-weight:700;margin-bottom:8px;">위약금을 차감할 결제 건 선택 <span style="font-weight:400;color:#888;font-size:10px;">(여러 건 선택 가능)</span></div>
         <div id="cancel-penalty-target" style="display:flex;flex-direction:column;gap:6px;">
-          <label style="display:flex;align-items:center;gap:10px;padding:10px 12px;background:#fff;border:1px solid #e0e0e0;border-radius:8px;cursor:pointer;" onmouseover="this.style.borderColor='#e65100'" onmouseout="if(!this.querySelector('input').checked) this.style.borderColor='#e0e0e0'">
-            <input type="radio" name="penalty-target" value="pg-1" checked onchange="recalcCancelRefund()">
+          <label style="display:flex;align-items:center;gap:10px;padding:10px 12px;background:#fff;border:1px solid #e0e0e0;border-radius:8px;cursor:pointer;" class="penalty-card" data-id="pg-1" data-amount="1019000">
+            <input type="checkbox" name="penalty-target" value="pg-1" data-amount="1019000" checked onchange="recalcCancelRefund()">
             <div style="flex:1;">
               <div style="display:flex;align-items:center;gap:6px;">
                 <span class="badge blue">PG</span>
                 <span style="font-weight:600;font-size:12px;">nice_v2 · 신용카드</span>
+                <span style="font-size:9px;color:#888;background:#f0f0f0;padding:1px 4px;border-radius:2px;">#1 예약금</span>
               </div>
               <div style="font-size:10px;color:#888;margin-top:2px;">26040708-4300101H-001 · 2026-04-07 08:43</div>
             </div>
             <div style="text-align:right;">
-              <div style="font-family:monospace;font-weight:700;">2,038,000원</div>
+              <div style="font-family:monospace;font-weight:700;">1,019,000원</div>
             </div>
           </label>
-          <label style="display:flex;align-items:center;gap:10px;padding:10px 12px;background:#fff;border:1px solid #e0e0e0;border-radius:8px;cursor:pointer;opacity:0.5;" onmouseover="this.style.borderColor='#6a1b9a'" onmouseout="if(!this.querySelector('input').checked) this.style.borderColor='#e0e0e0'">
-            <input type="radio" name="penalty-target" value="coupon" onchange="recalcCancelRefund()">
+          <label style="display:flex;align-items:center;gap:10px;padding:10px 12px;background:#fff;border:1px solid #e0e0e0;border-radius:8px;cursor:pointer;" class="penalty-card" data-id="pg-2" data-amount="1019000">
+            <input type="checkbox" name="penalty-target" value="pg-2" data-amount="1019000" onchange="recalcCancelRefund()">
+            <div style="flex:1;">
+              <div style="display:flex;align-items:center;gap:6px;">
+                <span class="badge blue">PG</span>
+                <span style="font-weight:600;font-size:12px;">nice_v2 · 신용카드</span>
+                <span style="font-size:9px;color:#888;background:#f0f0f0;padding:1px 4px;border-radius:2px;">#2 잔금</span>
+              </div>
+              <div style="font-size:10px;color:#888;margin-top:2px;">26040710-4300101H-002 · 2026-04-10 14:20</div>
+            </div>
+            <div style="text-align:right;">
+              <div style="font-family:monospace;font-weight:700;">1,019,000원</div>
+            </div>
+          </label>
+          <label style="display:flex;align-items:center;gap:10px;padding:10px 12px;background:#fff;border:1px solid #e0e0e0;border-radius:8px;cursor:pointer;" class="penalty-card" data-id="coupon" data-amount="20000">
+            <input type="checkbox" name="penalty-target" value="coupon" data-amount="20000" onchange="recalcCancelRefund()">
             <div style="flex:1;">
               <div style="display:flex;align-items:center;gap:6px;">
                 <span class="badge purple">쿠폰</span>
@@ -1207,7 +1222,7 @@
             </div>
           </label>
         </div>
-        <div style="font-size:10px;color:#888;margin-top:6px;">※ 선택한 결제 건에서 위약금을 차감하고 나머지를 환불합니다</div>
+        <div style="font-size:10px;color:#888;margin-top:6px;">※ 선택한 결제 건에서 위약금을 차감하고 나머지를 환불합니다. 여러 건 선택 시 선택 순서대로 차감.</div>
       </div>
 
       <!-- 환불 계산 미리보기 -->
@@ -2843,59 +2858,82 @@ function toggleCancelPenalty(checked) {
   recalcCancelRefund();
 }
 
+// 결제 건 데이터 (다중 건)
+const cancelPayments = [
+  { id: 'pg-1', type: 'PG', label: 'nice_v2 · 신용카드', tag: '#1 예약금', code: '26040708-4300101H-001', date: '04-07 08:43', amount: 1019000 },
+  { id: 'pg-2', type: 'PG', label: 'nice_v2 · 신용카드', tag: '#2 잔금', code: '26040710-4300101H-002', date: '04-10 14:20', amount: 1019000 },
+  { id: 'coupon', type: '쿠폰', label: '상해 자유여행', tag: '', code: '836331bf', date: '04-07 08:43', amount: 20000 },
+];
+
 function recalcCancelRefund() {
   const hasPenalty = document.getElementById('cancel-has-penalty').checked;
   const penaltyAmt = hasPenalty ? (parseInt(String(document.getElementById('cancel-penalty-amount').value).replace(/[^0-9]/g,'')) || 0) : 0;
-  const penaltyTarget = document.querySelector('input[name="penalty-target"]:checked')?.value || 'pg-1';
 
-  const pgAmt = 2038000;
-  const couponAmt = 20000;
+  // 위약금 차감 대상 (체크된 결제 건, 순서대로)
+  const checkedTargets = [];
+  document.querySelectorAll('input[name="penalty-target"]:checked').forEach(cb => {
+    const p = cancelPayments.find(x => x.id === cb.value);
+    if (p) checkedTargets.push(p.id);
+  });
 
-  let pgPenalty = 0, couponPenalty = 0;
-  let pgRefund = pgAmt, couponRefund = couponAmt;
+  // 각 결제 건별 위약금 배분 (선택된 건에 순서대로 차감)
+  let remainPenalty = penaltyAmt;
+  const penaltyMap = {};
+  cancelPayments.forEach(p => penaltyMap[p.id] = 0);
 
-  if (hasPenalty && penaltyAmt > 0) {
-    if (penaltyTarget === 'pg-1') {
-      pgPenalty = Math.min(penaltyAmt, pgAmt);
-      pgRefund = pgAmt - pgPenalty;
-    } else if (penaltyTarget === 'coupon') {
-      couponPenalty = Math.min(penaltyAmt, couponAmt);
-      couponRefund = couponAmt - couponPenalty;
-      // 나머지는 PG에서
-      const remaining = penaltyAmt - couponPenalty;
-      if (remaining > 0) {
-        pgPenalty = Math.min(remaining, pgAmt);
-        pgRefund = pgAmt - pgPenalty;
-      }
-    }
+  if (hasPenalty) {
+    checkedTargets.forEach(id => {
+      if (remainPenalty <= 0) return;
+      const p = cancelPayments.find(x => x.id === id);
+      const deduct = Math.min(remainPenalty, p.amount);
+      penaltyMap[id] = deduct;
+      remainPenalty -= deduct;
+    });
   }
 
-  const pgLabel = pgRefund === pgAmt ? '전액환불' : pgRefund === 0 ? '환불없음' : '부분환불';
-  const pgBadge = pgRefund === 0 ? '<span class="badge gray" style="font-size:10px;">환불없음</span>' : '<span class="badge red" style="font-size:10px;">' + pgLabel + '</span>';
-
+  // 테이블 렌더링
   const tbody = document.getElementById('cancel-refund-tbody');
-  tbody.innerHTML = `
-    <tr${pgRefund === 0 ? ' style="opacity:0.5;"' : ''}>
-      <td><span class="badge blue">PG</span> nice_v2 · 신용카드</td>
-      <td class="text-right text-mono">2,038,000</td>
-      <td class="text-right text-mono" style="color:${pgPenalty > 0 ? '#e65100' : '#888'};">${pgPenalty > 0 ? '-' + pgPenalty.toLocaleString() : '0'}</td>
-      <td class="text-right text-mono" style="color:#d32f2f;font-weight:700;">${pgRefund.toLocaleString()}</td>
-      <td class="text-center">${pgBadge}</td>
-    </tr>
-    <tr>
-      <td><span class="badge purple">쿠폰</span> 상해 자유여행</td>
-      <td class="text-right text-mono">20,000</td>
-      <td class="text-right text-mono" style="color:${couponPenalty > 0 ? '#e65100' : '#888'};">${couponPenalty > 0 ? '-' + couponPenalty.toLocaleString() : '0'}</td>
-      <td class="text-right text-mono" style="color:#6a1b9a;font-weight:700;">${couponPenalty > 0 ? couponRefund.toLocaleString() : '해제+원복'}</td>
-      <td class="text-center"><span class="badge purple" style="font-size:10px;">${couponPenalty > 0 ? '부분원복' : '쿠폰원복'}</span></td>
+  let totalPaid = 0, totalPenalty = 0, totalRefund = 0;
+
+  tbody.innerHTML = cancelPayments.map(p => {
+    const pen = penaltyMap[p.id];
+    const refund = p.amount - pen;
+    totalPaid += p.amount;
+    totalPenalty += pen;
+    totalRefund += refund;
+
+    const isCoupon = p.type === '쿠폰';
+    const badge = isCoupon
+      ? (pen > 0 ? '<span class="badge purple" style="font-size:10px;">부분원복</span>' : '<span class="badge purple" style="font-size:10px;">쿠폰원복</span>')
+      : (refund === p.amount ? '<span class="badge red" style="font-size:10px;">전액환불</span>'
+        : refund === 0 ? '<span class="badge gray" style="font-size:10px;">환불없음</span>'
+        : '<span class="badge orange" style="font-size:10px;">부분환불</span>');
+
+    const refundText = isCoupon && pen === 0 ? '해제+원복' : refund.toLocaleString();
+    const op = refund === 0 && !isCoupon ? 'opacity:0.5;' : '';
+    const typeBadge = isCoupon ? '<span class="badge purple">쿠폰</span>' : '<span class="badge blue">PG</span>';
+
+    return `<tr style="${op}">
+      <td>${typeBadge} ${p.label}${p.tag ? ' <span style="font-size:9px;color:#888;">'+p.tag+'</span>' : ''}</td>
+      <td class="text-right text-mono">${p.amount.toLocaleString()}</td>
+      <td class="text-right text-mono" style="color:${pen > 0 ? '#e65100' : '#888'};">${pen > 0 ? '-'+pen.toLocaleString() : '0'}</td>
+      <td class="text-right text-mono" style="color:${isCoupon ? '#6a1b9a' : '#d32f2f'};font-weight:700;">${refundText}</td>
+      <td class="text-center">${badge}</td>
     </tr>`;
+  }).join('');
 
-  document.getElementById('cancel-total-penalty').textContent = penaltyAmt > 0 ? '-' + penaltyAmt.toLocaleString() : '0';
-  document.getElementById('cancel-total-refund').textContent = (pgRefund + (couponPenalty > 0 ? couponRefund : couponAmt)).toLocaleString();
+  document.getElementById('cancel-total-penalty').textContent = totalPenalty > 0 ? '-' + totalPenalty.toLocaleString() : '0';
+  document.getElementById('cancel-total-refund').textContent = totalRefund.toLocaleString();
 
-  // 원장 항목 업데이트
-  document.getElementById('cancel-ledger-refund').textContent = '-' + pgRefund.toLocaleString();
+  // 원장
+  const pgRefundTotal = cancelPayments.filter(p=>p.type==='PG').reduce((s,p)=> s + (p.amount - penaltyMap[p.id]), 0);
+  document.getElementById('cancel-ledger-refund').textContent = '-' + pgRefundTotal.toLocaleString();
   document.getElementById('cancel-ledger-penalty-amt').textContent = '+' + penaltyAmt.toLocaleString();
+
+  // 위약금 초과 경고
+  if (remainPenalty > 0 && hasPenalty) {
+    showToast(`위약금이 선택한 결제 건 합계보다 ${remainPenalty.toLocaleString()}원 초과합니다. 다른 결제 건도 선택하세요.`);
+  }
 }
 
 function executeCancelReservation() {
