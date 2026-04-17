@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>POST 관리 — TripStore Admin</title>
+<title>TRP 게시판 — TripStore Admin</title>
 <link href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.6/dist/web/static/pretendard.css" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
 <style>
@@ -96,7 +96,6 @@ th { padding: 12px 16px; text-align: left; font-weight: 500; font-size: 13px; co
 td { padding: 11px 16px; font-size: 13px; color: rgba(0,0,0,0.88); border-bottom: 1px solid #f5f5f5; vertical-align: middle; }
 tr:last-child td { border-bottom: none; }
 tbody tr:hover td { background: #fafafa; }
-.col-id { width: 70px; }
 .col-cat { width: 115px; }
 .col-name { }
 .col-type { width: 85px; }
@@ -200,7 +199,7 @@ select.fc { height: 36px; padding: 0 32px 0 12px; appearance: none; background-i
 .wiz-step-title { font-size:16px; font-weight:700; color:rgba(0,0,0,0.88); margin-bottom:6px; }
 .wiz-step-sub { font-size:13px; color:rgba(0,0,0,0.45); margin-bottom:20px; }
 
-/* ===== 일괄 POST 항목 ===== */
+/* ===== 일괄 콘텐츠 항목 ===== */
 .bulk-post-list { display:flex; flex-direction:column; gap:10px; }
 .bulk-post-item { border:1.5px solid #e8e8e8; border-radius:10px; background:#fff; overflow:hidden; transition:all 0.2s; }
 .bulk-post-item.expanded { border-color:#91caff; box-shadow:0 2px 10px rgba(22,119,255,0.09); }
@@ -300,7 +299,7 @@ select.fc { height: 36px; padding: 0 32px 0 12px; appearance: none; background-i
 .itin-item-extra { font-size:11px; color:rgba(0,0,0,0.45); }
 .itin-item-det { font-size:11px; }
 
-/* ===== 파트너스 POST 관리 ===== */
+/* ===== 파트너스 콘텐츠 관리 ===== */
 .pp-cat-section { margin-bottom:20px; }
 .pp-cat-title { font-size:14px; font-weight:600; color:rgba(0,0,0,0.88); margin-bottom:10px; display:flex; align-items:center; gap:8px; }
 .pp-cat-title .cat-icon { font-size:15px; }
@@ -495,7 +494,7 @@ tr:hover .cov-td-prod { background: #fafafa; }
 .tree-mid-col { display: flex; flex-direction: column; justify-content: flex-start; padding: 52px 6px 0; gap: 60px; flex-shrink: 0; }
 .tree-mid-arrow { color: rgba(0,0,0,0.2); font-size: 16px; text-align: center; }
 
-/* ===== v4 규칙 기반 POST 등록 ===== */
+/* ===== v4 규칙 기반 콘텐츠 등록 ===== */
 .v4-layout { display: grid; grid-template-columns: 400px 1fr; gap: 20px; align-items: start; }
 .v4-panel { background: #fff; border-radius: 10px; box-shadow: 0 1px 4px rgba(0,0,0,0.07); }
 .v4-panel-header { padding: 18px 24px 14px; border-bottom: 1px solid #f0f0f0; }
@@ -509,8 +508,16 @@ tr:hover .cov-td-prod { background: #fafafa; }
 .preset-card-icon { font-size: 20px; flex-shrink: 0; }
 .preset-card-name { font-size: 13px; font-weight: 600; color: rgba(0,0,0,0.88); margin-bottom: 2px; }
 .preset-card-desc { font-size: 11px; color: rgba(0,0,0,0.4); line-height: 1.5; }
-.preset-card-count { font-size: 11px; font-weight: 700; color: #1677ff; background: #e6f4ff; border-radius: 10px; padding: 2px 8px; flex-shrink: 0; white-space: nowrap; margin-left: auto; }
-.preset-card-count.zero { color: rgba(0,0,0,0.25); background: #f5f5f5; }
+.preset-card-count { display: none; }
+.preset-card-count.zero { display: none; }
+.preset-inline-expand { display:none; background:#f8fbff; border:1.5px solid #91caff; border-radius:0 0 10px 10px; padding:14px 16px; margin-top:-9px; animation: expandIn 0.15s ease-out; }
+.preset-inline-expand.open { display:block; }
+.preset-card.selected + .preset-inline-expand { border-top:1px dashed #91caff; }
+@keyframes expandIn { from { opacity:0; max-height:0; padding:0 16px; } to { opacity:1; max-height:300px; padding:14px 16px; } }
+.preset-inline-summary { display:none; margin-top:-9px; background:#f0f7ff; border:1.5px solid #1677ff; border-radius:0 0 10px 10px; padding:8px 14px; font-size:12px; color:#0958d9; }
+.preset-inline-summary.show { display:flex; align-items:center; gap:6px; }
+.preset-inline-summary .summary-tags { display:flex; gap:4px; flex-wrap:wrap; flex:1; }
+.preset-inline-summary .summary-edit { font-size:11px; color:#1677ff; cursor:pointer; white-space:nowrap; }
 .v4-condition-box { background: #f8fbff; border: 1px solid #d3e8ff; border-radius: 10px; padding: 16px 18px; margin-bottom: 16px; }
 .v4-condition-title { font-size: 12px; font-weight: 700; color: #0958d9; letter-spacing: 0.3px; margin-bottom: 12px; display: flex; align-items: center; gap: 6px; }
 .v4-field-row { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; }
@@ -617,12 +624,9 @@ tr:hover .cov-td-prod { background: #fafafa; }
             <span class="mega-col-item">FAQ 관리</span>
           </div>
           <div class="mega-col">
-            <div class="mega-col-title" style="display:flex;align-items:center;gap:6px;">게시판 <span class="new-badge">NEW</span></div>
-            <span class="mega-col-item active" onclick="event.stopPropagation();showView('list')">게시판 관리</span>
-            <span class="mega-col-item" onclick="event.stopPropagation();showView('create-v4')" style="color:#1677ff;font-weight:700;">POST 등록</span>
-            <div style="height:1px;background:#f0f0f0;margin:6px 0;"></div>
-            <!-- 커버리지 매트릭스 메뉴 제거 -->
-            <span class="mega-col-item" onclick="event.stopPropagation();showView('impact')" style="color:#1677ff;font-weight:600;">POST 관리</span>
+            <div class="mega-col-title" style="display:flex;align-items:center;gap:6px;">TRP 게시판 <span class="new-badge">NEW</span></div>
+            <span class="mega-col-item active" onclick="event.stopPropagation();showView('list')">TRP 게시판 관리</span>
+            <span class="mega-col-item" onclick="event.stopPropagation();showView('impact')" style="color:#1677ff;font-weight:600;">콘텐츠 적용 현황</span>
           </div>
         </div>
         <!-- 하단 이미지/파일 -->
@@ -648,7 +652,7 @@ tr:hover .cov-td-prod { background: #fafafa; }
         <div class="gnb-dropdown-divider"></div>
         <div class="gnb-dropdown-group">파트너스 시뮬레이션</div>
         <div class="gnb-dropdown-item" onclick="event.stopPropagation();showView('partner-product')">파트너스 상품등록</div>
-        <div class="gnb-dropdown-item" onclick="event.stopPropagation();showView('partner-flow')">파트너스 POST 플로우</div>
+        <div class="gnb-dropdown-item" onclick="event.stopPropagation();showView('partner-flow')">파트너스 콘텐츠 플로우</div>
       </div>
     </div>
     <div class="gnb-item">마케팅</div>
@@ -657,26 +661,25 @@ tr:hover .cov-td-prod { background: #fafafa; }
 </nav>
 
 <!-- ============================================================ -->
-<!-- VIEW 1: POST 목록 -->
+<!-- VIEW 1: 콘텐츠 목록 -->
 <!-- ============================================================ -->
 <div id="view-list" class="view on">
   <div class="layout">
     <div class="breadcrumb">
       <span>카탈로그</span><span class="breadcrumb-sep">/</span>
-      <span style="color:rgba(0,0,0,0.88);font-weight:500;">게시판 관리</span>
+      <span style="color:rgba(0,0,0,0.88);font-weight:500;">TRP 게시판 관리</span>
     </div>
     <div class="page-header">
-      <div class="page-title">게시판 관리</div>
+      <div class="page-title">TRP 게시판 관리</div>
       <button class="btn btn-primary" onclick="showView('create-v4')">+ 등록하기</button>
     </div>
 
     <div style="display:flex;align-items:center;gap:8px;padding:8px 14px;margin-bottom:10px;background:#f0f7ff;border:1px solid #d3e8ff;border-radius:6px;font-size:11px;color:#0958d9;">
-      <span>📌</span> POST는 <strong>상품코드 단위</strong>로 관리됩니다. 같은 상품코드의 행사는 동일한 POST를 공유합니다.
+      <span>📌</span> 콘텐츠는 <strong>조건(규칙) 기반</strong>으로 매칭되는 <strong>상품 단위</strong>에 자동 적용됩니다. 조건을 만족하는 콘텐츠는 모두 노출됩니다(중복 허용, 덮어쓰기 없음).
     </div>
     <div class="card">
       <!-- 통합 필터 -->
       <div class="filter-bar" id="bfilter-all">
-        <input class="fi fi-sm" type="text" placeholder="ID">
         <select class="fi fi-md">
           <option value="">카테고리</option>
           <option>소개</option><option>핵심포인트</option><option>스페셜 혜택</option>
@@ -685,17 +688,10 @@ tr:hover .cov-td-prod { background: #fafafa; }
           <option>안내사항</option><option>출발 전 안내</option><option>수하물 규정</option>
         </select>
         <select class="fi fi-md">
-          <option value="">타겟유형</option>
-          <option>공통</option><option>항공사</option><option>공항</option>
-          <option>숙소</option><option>객실</option><option>국가</option>
-          <option>여행지</option><option>스팟/체험</option><option>식사</option>
-          <option>공급사</option>
-        </select>
-        <select class="fi fi-md">
           <option value="">상태</option>
-          <option>🟢 운영중</option><option>⏳ 대기</option><option>🔴 중단</option>
+          <option>🟢 운영중</option><option>📝 Draft</option><option>🔴 중단</option>
         </select>
-        <input class="fi fi-lg" type="text" placeholder="관리명 · 타겟 정보 검색">
+        <input class="fi fi-lg" type="text" placeholder="관리명 · 조건 검색">
         <div class="filter-actions">
           <button class="btn btn-primary btn-sm">검색</button>
           <button class="btn btn-default btn-sm">초기화</button>
@@ -706,19 +702,17 @@ tr:hover .cov-td-prod { background: #fafafa; }
         <table>
           <thead>
             <tr>
-              <th class="col-id">ID</th>
               <th class="col-cat">카테고리</th>
               <th class="col-name">관리명</th>
-              <th style="width:200px;">규칙 조건</th>
+              <th style="width:220px;">적용 조건</th>
               <th style="width:70px;text-align:center;">상태</th>
-              <th style="width:80px;text-align:center;">연결 행사</th>
               <th class="col-date">수정일시 ↓</th>
-              <th class="col-action">액션</th>
+              <th style="width:90px;text-align:center;">관리</th>
+              <th style="width:70px;text-align:center;">상태 변경</th>
             </tr>
           </thead>
           <tbody id="board-table-body">
             <tr>
-              <td>2620</td>
               <td><span class="tag tag-purple">스페셜 혜택</span></td>
               <td style="max-width:220px;">
                 <div style="font-weight:600;color:rgba(0,0,0,0.85);margin-bottom:2px;">얼리체크인 특전</div>
@@ -733,12 +727,11 @@ tr:hover .cov-td-prod { background: #fafafa; }
                 <div style="font-size:11px;color:rgba(0,0,0,0.45);line-height:1.5;"><strong style="color:rgba(0,0,0,0.55);">트립스토어</strong>의 <strong style="color:rgba(0,0,0,0.55);">솔 바이 멜리아</strong> · <strong style="color:rgba(0,0,0,0.55);">BB(조식)</strong> 상품에 적용</div>
               </td>
               <td style="text-align:center;"><span class="v4-status-badge st-active" style="font-size:10px;padding:1px 8px;">운영중</span></td>
-              <td style="text-align:center;"><span class="stock-num">4</span></td>
               <td style="color:rgba(0,0,0,0.4);font-size:12px;">2026-04-01 09:30</td>
-              <td style="text-align:center;"><button class="btn btn-text btn-sm" onclick="showView('create')">수정</button><button class="btn btn-text btn-sm">복제</button></td>
+              <td style="text-align:center;"><button class="btn btn-text btn-sm" onclick="showView('create-v4')">수정</button><button class="btn btn-text btn-sm">복제</button><button class="btn btn-text btn-sm" onclick="document.getElementById('version-history-modal').classList.remove('hidden')">이력</button></td>
+              <td style="text-align:center;"><button class="btn btn-text btn-sm" style="color:#f5222d;" onclick="alert('중단하시겠습니까?\n\n연결된 4개 상품에서 즉시 해제됩니다.')">중단</button></td>
             </tr>
             <tr>
-              <td>2617</td>
               <td><span class="tag tag-purple">포함사항</span></td>
               <td style="max-width:220px;">
                 <div style="font-weight:600;color:rgba(0,0,0,0.85);margin-bottom:2px;">객실 포함 안내</div>
@@ -754,12 +747,11 @@ tr:hover .cov-td-prod { background: #fafafa; }
                 <div style="font-size:11px;color:rgba(0,0,0,0.45);line-height:1.5;"><strong style="color:rgba(0,0,0,0.55);">트립스토어</strong>의 <strong style="color:rgba(0,0,0,0.55);">윙크호텔</strong> · <strong style="color:rgba(0,0,0,0.55);">슈페리어</strong> 객실 · <strong style="color:rgba(0,0,0,0.55);">HB(조+석식)</strong> 상품에 적용</div>
               </td>
               <td style="text-align:center;"><span class="v4-status-badge st-active" style="font-size:10px;padding:1px 8px;">운영중</span></td>
-              <td style="text-align:center;"><span class="stock-num">1</span></td>
               <td style="color:rgba(0,0,0,0.4);font-size:12px;">2026-03-31 17:20</td>
-              <td style="text-align:center;"><button class="btn btn-text btn-sm" onclick="showView('create')">수정</button><button class="btn btn-text btn-sm">복제</button></td>
+              <td style="text-align:center;"><button class="btn btn-text btn-sm" onclick="showView('create-v4')">수정</button><button class="btn btn-text btn-sm">복제</button><button class="btn btn-text btn-sm" onclick="document.getElementById('version-history-modal').classList.remove('hidden')">이력</button></td>
+              <td style="text-align:center;"><button class="btn btn-text btn-sm" style="color:#f5222d;">중단</button></td>
             </tr>
             <tr>
-              <td>2516</td>
               <td><span class="tag tag-purple">스페셜 혜택</span></td>
               <td style="max-width:220px;">
                 <div style="font-weight:600;color:rgba(0,0,0,0.85);margin-bottom:2px;">프라이빗 풀빌라 혜택</div>
@@ -772,13 +764,12 @@ tr:hover .cov-td-prod { background: #fafafa; }
                 </div>
                 <div style="font-size:11px;color:rgba(0,0,0,0.45);line-height:1.5;"><strong style="color:rgba(0,0,0,0.55);">고헤드투어</strong>의 <strong style="color:rgba(0,0,0,0.55);">래디슨 블루</strong> 숙소 상품에 적용</div>
               </td>
-              <td style="text-align:center;"><span class="v4-status-badge st-pending" style="font-size:10px;padding:1px 8px;">대기</span></td>
-              <td style="text-align:center;"><span style="font-size:11px;color:rgba(0,0,0,0.25);">—</span></td>
+              <td style="text-align:center;"><span class="v4-status-badge st-pending" style="font-size:10px;padding:1px 8px;">Draft</span></td>
               <td style="color:rgba(0,0,0,0.4);font-size:12px;">2026-02-13 15:46</td>
-              <td style="text-align:center;"><button class="btn btn-text btn-sm" onclick="showView('create')">수정</button><button class="btn btn-text btn-sm">복제</button></td>
+              <td style="text-align:center;"><button class="btn btn-text btn-sm" onclick="showView('create-v4')">수정</button><button class="btn btn-text btn-sm">복제</button><button class="btn btn-text btn-sm" onclick="document.getElementById('version-history-modal').classList.remove('hidden')">이력</button></td>
+              <td style="text-align:center;"><button class="btn btn-sm" style="background:#52c41a;color:#fff;border-color:#52c41a;font-weight:600;" onclick="alert('게시(Publish) 하시겠습니까?\n\n콘텐츠가 운영중 상태로 전환되어\n조건에 매칭되는 상품에 즉시 적용됩니다.')">게시</button></td>
             </tr>
             <tr>
-              <td>2515</td>
               <td><span class="tag tag-gray">유의사항</span></td>
               <td style="max-width:220px;">
                 <div style="font-weight:600;color:rgba(0,0,0,0.85);margin-bottom:2px;">체크인 안내</div>
@@ -791,12 +782,11 @@ tr:hover .cov-td-prod { background: #fafafa; }
                 <div style="font-size:11px;color:rgba(0,0,0,0.45);line-height:1.5;">여행지가 <strong style="color:rgba(0,0,0,0.55);">다낭</strong>인 모든 상품에 적용</div>
               </td>
               <td style="text-align:center;"><span class="v4-status-badge st-active" style="font-size:10px;padding:1px 8px;">운영중</span></td>
-              <td style="text-align:center;"><span class="stock-num">5</span></td>
               <td style="color:rgba(0,0,0,0.4);font-size:12px;">2026-02-13 13:07</td>
-              <td style="text-align:center;"><button class="btn btn-text btn-sm" onclick="showView('create')">수정</button><button class="btn btn-text btn-sm">복제</button></td>
+              <td style="text-align:center;"><button class="btn btn-text btn-sm" onclick="showView('create-v4')">수정</button><button class="btn btn-text btn-sm">복제</button><button class="btn btn-text btn-sm" onclick="document.getElementById('version-history-modal').classList.remove('hidden')">이력</button></td>
+              <td style="text-align:center;"><button class="btn btn-text btn-sm" style="color:#f5222d;">중단</button></td>
             </tr>
             <tr>
-              <td>577</td>
               <td><span class="tag tag-orange">수하물 규정</span></td>
               <td style="max-width:220px;">
                 <div style="font-weight:600;color:rgba(0,0,0,0.85);margin-bottom:2px;">일반석 위탁수하물 안내</div>
@@ -809,12 +799,11 @@ tr:hover .cov-td-prod { background: #fafafa; }
                 <div style="font-size:11px;color:rgba(0,0,0,0.45);line-height:1.5;">항공사가 <strong style="color:rgba(0,0,0,0.55);">비엣젯항공</strong>인 상품에 적용</div>
               </td>
               <td style="text-align:center;"><span class="v4-status-badge st-stopped" style="font-size:10px;padding:1px 8px;">중단</span></td>
-              <td style="text-align:center;"><span style="font-size:11px;color:#cf1322;text-decoration:line-through;">8</span></td>
               <td style="color:rgba(0,0,0,0.4);font-size:12px;">2024-12-12 13:52</td>
-              <td style="text-align:center;"><button class="btn btn-text btn-sm" onclick="showView('create')">수정</button><button class="btn btn-text btn-sm">복제</button></td>
+              <td style="text-align:center;"><button class="btn btn-text btn-sm" onclick="showView('create-v4')">수정</button><button class="btn btn-text btn-sm">복제</button><button class="btn btn-text btn-sm" onclick="document.getElementById('version-history-modal').classList.remove('hidden')">이력</button></td>
+              <td style="text-align:center;"><button class="btn btn-sm" style="background:#52c41a;color:#fff;border-color:#52c41a;font-weight:600;" onclick="alert('재게시하시겠습니까?\n\n조건에 매칭되는 상품에 다시 적용됩니다.')">재게시</button></td>
             </tr>
             <tr>
-              <td>2621</td>
               <td><span class="tag tag-gray">취소환불규정</span></td>
               <td style="max-width:220px;">
                 <div style="font-weight:600;color:rgba(0,0,0,0.85);margin-bottom:2px;">전체 취소/환불 규정</div>
@@ -827,9 +816,9 @@ tr:hover .cov-td-prod { background: #fafafa; }
                 <div style="font-size:11px;color:rgba(0,0,0,0.45);line-height:1.5;">조건 없음 — <strong style="color:rgba(0,0,0,0.55);">모든 상품</strong>에 적용</div>
               </td>
               <td style="text-align:center;"><span class="v4-status-badge st-active" style="font-size:10px;padding:1px 8px;">운영중</span></td>
-              <td style="text-align:center;"><span class="stock-num">12</span></td>
               <td style="color:rgba(0,0,0,0.4);font-size:12px;">2026-04-10 11:00</td>
-              <td style="text-align:center;"><button class="btn btn-text btn-sm" onclick="showView('create')">수정</button><button class="btn btn-text btn-sm">복제</button></td>
+              <td style="text-align:center;"><button class="btn btn-text btn-sm" onclick="showView('create-v4')">수정</button><button class="btn btn-text btn-sm">복제</button><button class="btn btn-text btn-sm" onclick="document.getElementById('version-history-modal').classList.remove('hidden')">이력</button></td>
+              <td style="text-align:center;"><button class="btn btn-text btn-sm" style="color:#f5222d;">중단</button></td>
             </tr>
           </tbody>
         </table>
@@ -1023,7 +1012,7 @@ tr:hover .cov-td-prod { background: #fafafa; }
     <div class="page-header">
       <div class="page-title" style="color:#d48806;">상품단위 게시판 관리</div>
       <div style="display:flex;gap:8px;">
-        <button class="btn btn-default" onclick="openProductLinkModal()">🔗 기존 POST 연결</button>
+        <button class="btn btn-default" onclick="openProductLinkModal()">🔗 기존 콘텐츠 연결</button>
         <button class="btn btn-primary" style="background:#d48806;border-color:#d48806;" onclick="showView('create')">+ 신규 작성</button>
       </div>
     </div>
@@ -1172,27 +1161,27 @@ tr:hover .cov-td-prod { background: #fafafa; }
 </div>
 
 <!-- ============================================================ -->
-<!-- VIEW 2: POST 등록 (위저드) -->
+<!-- VIEW 2: 콘텐츠 등록 (위저드) -->
 <!-- ============================================================ -->
 <div id="view-create" class="view">
   <div class="layout">
     <div class="breadcrumb">
       <span onclick="showView('list')">카탈로그</span><span class="breadcrumb-sep">/</span>
       <span onclick="showView('list')">게시판</span><span class="breadcrumb-sep">/</span>
-      <span style="color:rgba(0,0,0,0.88);font-weight:500;">POST 등록</span>
+      <span style="color:rgba(0,0,0,0.88);font-weight:500;">콘텐츠 등록</span>
     </div>
     <div class="page-header">
       <div style="display:flex;align-items:center;gap:14px;">
         <button class="btn-back" onclick="showView('list')">← 목록으로</button>
-        <div class="page-title">POST 등록하기</div>
+        <div class="page-title">콘텐츠 등록하기</div>
       </div>
     </div>
 
     <!-- AI 배너 -->
     <div class="ai-banner">
       <div class="ai-banner-info">
-        <h3>✨ AI로 POST 초안 자동 생성</h3>
-        <p>계약서 PDF 또는 요금표(Excel)를 업로드하면 AI가 카테고리별 POST 초안을 자동으로 만들어드립니다.</p>
+        <h3>✨ AI로 콘텐츠 초안 자동 생성</h3>
+        <p>계약서 PDF 또는 요금표(Excel)를 업로드하면 AI가 카테고리별 콘텐츠 초안을 자동으로 만들어드립니다.</p>
       </div>
       <button class="btn btn-ai" onclick="openAiModal()">AI 자동 생성 →</button>
     </div>
@@ -1200,7 +1189,7 @@ tr:hover .cov-td-prod { background: #fafafa; }
     <!-- ① STEP 1: 게시판 선택 -->
     <div id="wiz-s1" class="card" style="padding:28px;">
       <div class="wiz-section-tag blue"><div class="wst-num">1</div> 게시판 선택</div>
-      <div class="wiz-step-title">어디에 POST를 등록할까요?</div>
+      <div class="wiz-step-title">어디에 콘텐츠를 등록할까요?</div>
       <div class="wiz-step-sub">등록할 게시판 유형을 선택해주세요. 유형에 따라 이 콘텐츠가 적용되는 범위가 달라집니다.</div>
       <div class="board-cards">
         <div class="board-card" id="bc-catalog" onclick="wizSelectBoard('catalog')">
@@ -1242,7 +1231,7 @@ tr:hover .cov-td-prod { background: #fafafa; }
           <span style="font-size:18px;">📦</span>
           <div>
             <strong>상품 (PB 상품)</strong>이 선택됩니다.
-            <div style="font-size:12px;color:rgba(0,0,0,0.45);margin-top:2px;">파트너가 직접 구성한 상품 단위에 POST를 등록합니다. 다음 단계에서 상품을 검색해 선택하세요.</div>
+            <div style="font-size:12px;color:rgba(0,0,0,0.45);margin-top:2px;">파트너가 직접 구성한 상품 단위에 콘텐츠를 등록합니다. 다음 단계에서 상품을 검색해 선택하세요.</div>
           </div>
           <span style="margin-left:auto;color:#52c41a;font-size:16px;">✓</span>
         </div>
@@ -1286,8 +1275,8 @@ tr:hover .cov-td-prod { background: #fafafa; }
 
       <!-- 공급사: 공급사 선택 + 적용 범위 -->
       <div id="wiz2-supplier" style="display:none;">
-        <div class="wiz-step-title">어떤 공급사의 POST인가요?</div>
-        <div class="wiz-step-sub">공급사를 선택한 후, 이 POST를 어느 범위에 적용할지 설정해주세요.</div>
+        <div class="wiz-step-title">어떤 공급사의 콘텐츠인가요?</div>
+        <div class="wiz-step-sub">공급사를 선택한 후, 이 콘텐츠를 어느 범위에 적용할지 설정해주세요.</div>
         <div style="max-width:320px;margin-bottom:20px;">
           <label class="form-label">공급사 선택 <span class="req">*</span></label>
           <select class="fc" id="wiz2-sup-select" onchange="wizSupplierChange(this.value)">
@@ -1299,7 +1288,7 @@ tr:hover .cov-td-prod { background: #fafafa; }
           </select>
         </div>
         <div id="wiz2-sup-scope" style="display:none;">
-          <div style="font-size:14px;font-weight:600;color:rgba(0,0,0,0.88);margin-bottom:12px;">이 POST는 어느 범위에 적용되나요?</div>
+          <div style="font-size:14px;font-weight:600;color:rgba(0,0,0,0.88);margin-bottom:12px;">이 콘텐츠는 어느 범위에 적용되나요?</div>
           <div class="scope-section">
             <div class="scope-radio">
               <label><input type="radio" name="sup-scope" value="default" checked onchange="wizSupScopeChange('default')">
@@ -1433,9 +1422,9 @@ tr:hover .cov-td-prod { background: #fafafa; }
 
       <!-- 상품단위: PB 상품 검색 -->
       <div id="wiz2-product" style="display:none;">
-        <div class="wiz-step-title">어떤 <span style="color:#d48806;">PB 상품</span>에 적용할 POST인가요?</div>
+        <div class="wiz-step-title">어떤 <span style="color:#d48806;">PB 상품</span>에 적용할 콘텐츠인가요?</div>
         <div class="wiz-step-sub">상품 ID 또는 이름으로 검색 후 선택해주세요. <strong style="color:#d48806;">여러 개 선택 가능</strong>합니다.
-          <span style="display:inline-block;margin-top:4px;font-size:12px;color:rgba(0,0,0,0.35);">※ 항공권·숙박권·투어/티켓 POST는 공급사 게시판에서 등록하세요.</span>
+          <span style="display:inline-block;margin-top:4px;font-size:12px;color:rgba(0,0,0,0.35);">※ 항공권·숙박권·투어/티켓 콘텐츠는 공급사 게시판에서 등록하세요.</span>
         </div>
 
         <!-- 검색 인풋 -->
@@ -1475,7 +1464,7 @@ tr:hover .cov-td-prod { background: #fafafa; }
 
       <!-- 섹션 태그 + 등록 위치 요약 뱃지 -->
       <div style="padding:20px 28px 0;">
-        <div class="wiz-section-tag green" style="margin-bottom:10px;"><div class="wst-num">✓</div> POST 내용 작성</div>
+        <div class="wiz-section-tag green" style="margin-bottom:10px;"><div class="wst-num">✓</div> 콘텐츠 내용 작성</div>
         <div id="wiz3-summary" style="background:#f6ffed;border:1px solid #b7eb8f;border-radius:8px;padding:12px 16px;font-size:13px;display:flex;align-items:center;gap:12px;flex-wrap:wrap;">
           <span>📌 등록 위치:</span>
           <strong id="wiz3-sum-board" style="color:#389e0d;"></strong>
@@ -1485,10 +1474,10 @@ tr:hover .cov-td-prod { background: #fafafa; }
         </div>
       </div>
 
-      <!-- POST 항목 목록 (일괄 등록) -->
+      <!-- 콘텐츠 항목 목록 (일괄 등록) -->
       <div class="bulk-section-header" style="margin-top:18px;">
         <div style="display:flex;align-items:center;">
-          <span style="font-size:15px;font-weight:700;color:rgba(0,0,0,0.88);">POST 항목</span>
+          <span style="font-size:15px;font-weight:700;color:rgba(0,0,0,0.88);">콘텐츠 항목</span>
           <span class="bulk-count-badge" id="bulk-count-num">1</span>
           <span style="font-size:12px;color:rgba(0,0,0,0.35);margin-left:8px;">카테고리별로 각각 작성해주세요</span>
         </div>
@@ -1502,7 +1491,7 @@ tr:hover .cov-td-prod { background: #fafafa; }
           <!-- JS로 렌더링됨 -->
         </div>
         <div class="bulk-add-btn" onclick="addWizPost()">
-          ＋ POST 항목 추가하기 (카테고리 단위)
+          ＋ 콘텐츠 항목 추가하기 (카테고리 단위)
         </div>
       </div>
     </div>
@@ -1535,7 +1524,7 @@ tr:hover .cov-td-prod { background: #fafafa; }
       <!-- 등록 버튼 (wiz-s3 하단) -->
       <div style="padding:16px 28px 24px;display:flex;justify-content:space-between;align-items:center;border-top:1px solid #f0f0f0;margin-top:4px;">
         <button class="btn btn-default" onclick="showView('list')">취소</button>
-        <button class="btn btn-primary" id="wiz-next-btn" onclick="wizNext()" style="padding:0 28px;font-size:14px;height:38px;font-weight:600;">POST 등록</button>
+        <button class="btn btn-primary" id="wiz-next-btn" onclick="wizNext()" style="padding:0 28px;font-size:14px;height:38px;font-weight:600;">콘텐츠 등록</button>
       </div>
     </div>
     </div><!-- /wiz-s3-wrap -->
@@ -1543,13 +1532,13 @@ tr:hover .cov-td-prod { background: #fafafa; }
 </div>
 
 <!-- ============================================================ -->
-<!-- VIEW: POST 등록 v2 — 카테고리 중심 위자드                     -->
+<!-- VIEW: 콘텐츠 등록 v2 — 카테고리 중심 위자드                     -->
 <!-- ============================================================ -->
 <div id="view-create-v2" class="view">
   <div class="layout">
     <div class="breadcrumb">
-      <span onclick="showView('list')">게시판 관리</span><span class="breadcrumb-sep">/</span>
-      <span style="color:rgba(0,0,0,0.88);font-weight:500;">POST 등록 <span style="color:#722ed1;font-size:11px;font-weight:600;background:#f9f0ff;border:1px solid #d3adf7;border-radius:4px;padding:1px 6px;margin-left:4px;">v2 카테고리 중심</span></span>
+      <span onclick="showView('list')">TRP 게시판 관리</span><span class="breadcrumb-sep">/</span>
+      <span style="color:rgba(0,0,0,0.88);font-weight:500;">콘텐츠 등록 <span style="color:#722ed1;font-size:11px;font-weight:600;background:#f9f0ff;border:1px solid #d3adf7;border-radius:4px;padding:1px 6px;margin-left:4px;">v2 카테고리 중심</span></span>
     </div>
 
     <!-- 상단 비교 배너 -->
@@ -1702,7 +1691,7 @@ tr:hover .cov-td-prod { background: #fafafa; }
     <div class="wiz-reveal-wrap" id="v2-s3-wrap">
       <div class="wiz-connector">↓</div>
       <div class="card" id="v2-s3" style="padding:28px;">
-        <div class="wiz-section-tag" style="background:#f9f0ff;border-color:#d3adf7;color:#531dab;margin-bottom:16px;"><div class="wst-num" style="background:#722ed1;">3</div> POST 내용 작성</div>
+        <div class="wiz-section-tag" style="background:#f9f0ff;border-color:#d3adf7;color:#531dab;margin-bottom:16px;"><div class="wst-num" style="background:#722ed1;">3</div> 콘텐츠 내용 작성</div>
 
         <!-- 등록 요약 뱃지 -->
         <div id="v2-s3-summary" style="background:#f6ffed;border:1px solid #b7eb8f;border-radius:8px;padding:12px 16px;font-size:13px;display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:20px;">
@@ -1725,7 +1714,7 @@ tr:hover .cov-td-prod { background: #fafafa; }
         <!-- 제목 -->
         <div class="form-item" style="margin-bottom:16px;">
           <label class="form-label">제목 <span class="req">*</span></label>
-          <input class="fc" type="text" id="v2-title-input" placeholder="POST 제목을 입력해주세요">
+          <input class="fc" type="text" id="v2-title-input" placeholder="콘텐츠 제목을 입력해주세요">
         </div>
 
         <!-- 내용 -->
@@ -1740,7 +1729,7 @@ tr:hover .cov-td-prod { background: #fafafa; }
         <!-- 등록 버튼 -->
         <div style="display:flex;justify-content:space-between;align-items:center;padding-top:16px;border-top:1px solid #f0f0f0;">
           <button class="btn btn-default" onclick="showView('list')">취소</button>
-          <button class="btn btn-primary" onclick="alert('POST가 등록되었습니다.')" style="padding:0 28px;height:38px;font-weight:600;">POST 등록</button>
+          <button class="btn btn-primary" onclick="alert('콘텐츠가 등록되었습니다.')" style="padding:0 28px;height:38px;font-weight:600;">콘텐츠 등록</button>
         </div>
       </div>
     </div>
@@ -1749,7 +1738,7 @@ tr:hover .cov-td-prod { background: #fafafa; }
 
 <script>
 // ============================================================
-// POST 등록 v2 — 카테고리 중심 위자드 JS
+// 콘텐츠 등록 v2 — 카테고리 중심 위자드 JS
 // ============================================================
 var v2State = { category: null, catType: null, targetType: null, targetId: null, targetName: null, scope: null, supplierName: null, subKey: '' };
 
@@ -1933,19 +1922,19 @@ function v2ConfirmStep2() {
 </script>
 
 <!-- ============================================================ -->
-<!-- VIEW: POST 등록 v3 — 타겟 중심 2단계 위자드 (개선안)           -->
+<!-- VIEW: 콘텐츠 등록 v3 — 타겟 중심 2단계 위자드 (개선안)           -->
 <!-- ============================================================ -->
 <div id="view-create-v3" class="view">
   <div class="layout">
     <div class="breadcrumb">
       <span onclick="showView('list')">카탈로그</span><span class="breadcrumb-sep">/</span>
       <span onclick="showView('list')">게시판</span><span class="breadcrumb-sep">/</span>
-      <span style="color:rgba(0,0,0,0.88);font-weight:500;">POST 등록 <span style="background:#f6ffed;border:1px solid #b7eb8f;color:#389e0d;font-size:11px;font-weight:600;border-radius:4px;padding:1px 7px;margin-left:4px;">v3 개선안</span></span>
+      <span style="color:rgba(0,0,0,0.88);font-weight:500;">콘텐츠 등록 <span style="background:#f6ffed;border:1px solid #b7eb8f;color:#389e0d;font-size:11px;font-weight:600;border-radius:4px;padding:1px 7px;margin-left:4px;">v3 개선안</span></span>
     </div>
     <div class="page-header">
       <div style="display:flex;align-items:center;gap:14px;">
         <button class="btn-back" onclick="showView('list')">← 목록으로</button>
-        <div class="page-title">POST 등록하기</div>
+        <div class="page-title">콘텐츠 등록하기</div>
       </div>
       <div style="display:flex;align-items:center;gap:8px;font-size:12px;color:rgba(0,0,0,0.45);">
         <span>현행:</span><button class="btn btn-text btn-sm" onclick="showView('create')" style="color:rgba(0,0,0,0.4);">v1 (게시판 먼저)</button>
@@ -1956,8 +1945,8 @@ function v2ConfirmStep2() {
     <!-- AI 배너 -->
     <div class="ai-banner">
       <div class="ai-banner-info">
-        <h3>✨ AI로 POST 초안 자동 생성</h3>
-        <p>계약서 PDF 또는 요금표(Excel)를 업로드하면 AI가 카테고리별 POST 초안을 자동으로 만들어드립니다.</p>
+        <h3>✨ AI로 콘텐츠 초안 자동 생성</h3>
+        <p>계약서 PDF 또는 요금표(Excel)를 업로드하면 AI가 카테고리별 콘텐츠 초안을 자동으로 만들어드립니다.</p>
       </div>
       <button class="btn btn-ai" onclick="openAiModal()">AI 자동 생성 →</button>
     </div>
@@ -1965,7 +1954,7 @@ function v2ConfirmStep2() {
     <!-- ① STEP 1: 타겟 + 범위 (통합) -->
     <div id="v3-s1" class="card" style="padding:28px;">
       <div class="wiz-section-tag" style="color:#389e0d;"><div class="wst-num" style="background:#52c41a;color:#fff;">1</div> 등록 위치 설정</div>
-      <div class="wiz-step-title">어디에 POST를 등록할까요?</div>
+      <div class="wiz-step-title">어디에 콘텐츠를 등록할까요?</div>
       <div class="wiz-step-sub" style="margin-bottom:20px;">타겟 유형을 선택하면 범위에 따라 <strong>게시판이 자동으로 결정</strong>됩니다.</div>
 
       <!-- 타겟 유형 칩 -->
@@ -2107,7 +2096,7 @@ function v2ConfirmStep2() {
         <span id="v3-scope-preview" style="color:rgba(0,0,0,0.4);font-size:12px;"></span>
       </div>
 
-      <button class="btn btn-primary" onclick="v3ConfirmStep1()" style="height:38px;padding:0 28px;font-size:14px;font-weight:600;">POST 작성으로 →</button>
+      <button class="btn btn-primary" onclick="v3ConfirmStep1()" style="height:38px;padding:0 28px;font-size:14px;font-weight:600;">콘텐츠 작성으로 →</button>
     </div>
 
     <!-- ② STEP 2: 일괄 POST 작성 -->
@@ -2117,7 +2106,7 @@ function v2ConfirmStep2() {
 
         <!-- 등록 위치 요약 배지 -->
         <div style="padding:20px 28px 0;">
-          <div class="wiz-section-tag" style="color:#389e0d;margin-bottom:10px;"><div class="wst-num" style="background:#52c41a;color:#fff;">2</div> POST 내용 작성</div>
+          <div class="wiz-section-tag" style="color:#389e0d;margin-bottom:10px;"><div class="wst-num" style="background:#52c41a;color:#fff;">2</div> 콘텐츠 내용 작성</div>
           <div id="v3-s2-summary" style="background:#f6ffed;border:1px solid #b7eb8f;border-radius:8px;padding:12px 16px;font-size:13px;display:flex;align-items:center;gap:10px;flex-wrap:wrap;">
             <span>📌 등록 위치:</span>
             <strong id="v3-sum-board" style="color:#389e0d;"></strong>
@@ -2127,10 +2116,10 @@ function v2ConfirmStep2() {
           </div>
         </div>
 
-        <!-- 일괄 POST 항목 -->
+        <!-- 일괄 콘텐츠 항목 -->
         <div class="bulk-section-header" style="margin-top:18px;">
           <div style="display:flex;align-items:center;">
-            <span style="font-size:15px;font-weight:700;color:rgba(0,0,0,0.88);">POST 항목</span>
+            <span style="font-size:15px;font-weight:700;color:rgba(0,0,0,0.88);">콘텐츠 항목</span>
             <span class="bulk-count-badge" id="v3-bulk-count">1</span>
             <span style="font-size:12px;color:rgba(0,0,0,0.35);margin-left:8px;">카테고리별로 각각 작성 · 한 번에 일괄 등록</span>
           </div>
@@ -2141,13 +2130,13 @@ function v2ConfirmStep2() {
         </div>
         <div class="bulk-body-wrap">
           <div class="bulk-post-list" id="v3-post-list"></div>
-          <div class="bulk-add-btn" onclick="v3AddPost()">＋ POST 항목 추가하기 (카테고리 단위)</div>
+          <div class="bulk-add-btn" onclick="v3AddPost()">＋ 콘텐츠 항목 추가하기 (카테고리 단위)</div>
         </div>
 
         <!-- 등록 버튼 -->
         <div style="padding:16px 28px 24px;display:flex;justify-content:space-between;align-items:center;border-top:1px solid #f0f0f0;margin-top:4px;">
           <button class="btn btn-default" onclick="showView('list')">취소</button>
-          <button class="btn btn-primary" onclick="alert('POST가 등록되었습니다.')" style="padding:0 28px;font-size:14px;height:38px;font-weight:600;">POST 등록</button>
+          <button class="btn btn-primary" onclick="alert('콘텐츠가 등록되었습니다.')" style="padding:0 28px;font-size:14px;height:38px;font-weight:600;">콘텐츠 등록</button>
         </div>
       </div>
     </div>
@@ -2156,7 +2145,7 @@ function v2ConfirmStep2() {
 
 <script>
 // ============================================================
-// POST 등록 v3 — 타겟 중심 2단계 위자드
+// 콘텐츠 등록 v3 — 타겟 중심 2단계 위자드
 // ============================================================
 var v3 = { type: null, targetId: null, targetName: null, seatClass: '', scope: null, supplierName: null, subKey: '', productId: null, productName: null };
 var v3Posts = [], v3PostSeq = 1;
@@ -2425,7 +2414,7 @@ function v3ConfirmStep1() {
   el3('v3-sum-target').textContent = el3('v3-target-preview').textContent;
   el3('v3-sum-scope').textContent  = el3('v3-scope-preview').textContent;
 
-  // POST 목록 초기화
+  // 콘텐츠 목록 초기화
   v3Posts = []; v3PostSeq = 1;
   v3AddPost();
 
@@ -2445,7 +2434,7 @@ function v3AddPost() {
 }
 
 function v3RemovePost(id) {
-  if (v3Posts.length <= 1) { alert('최소 1개의 POST 항목이 필요합니다.'); return; }
+  if (v3Posts.length <= 1) { alert('최소 1개의 콘텐츠 항목이 필요합니다.'); return; }
   v3SaveValues();
   v3Posts = v3Posts.filter(p => p.id !== id);
   if (!v3Posts.some(p => p.expanded)) v3Posts[v3Posts.length - 1].expanded = true;
@@ -2592,7 +2581,7 @@ function v3RenderPosts() {
               <th style="width:90px;">공급사</th>
               <th style="width:90px;">가격(성인)</th>
               <th style="width:130px;">적용기간</th>
-              <th class="col-stock">연결 POST수</th>
+              <th class="col-stock">연결 콘텐츠</th>
               <th style="width:70px;">상태</th>
               <th class="col-date">등록일</th>
               <th class="col-action">액션</th>
@@ -2716,7 +2705,7 @@ function v3RenderPosts() {
               <th style="width:90px;">공급사</th>
               <th style="width:90px;">가격(성인)</th>
               <th style="width:130px;">투숙기간</th>
-              <th class="col-stock">연결 POST수</th>
+              <th class="col-stock">연결 콘텐츠</th>
               <th style="width:70px;">상태</th>
               <th class="col-date">등록일</th>
               <th class="col-action">액션</th>
@@ -2844,7 +2833,7 @@ function v3RenderPosts() {
               <th style="width:90px;">공급사</th>
               <th style="width:90px;">가격(성인)</th>
               <th style="width:130px;">적용기간</th>
-              <th class="col-stock">연결 POST수</th>
+              <th class="col-stock">연결 콘텐츠</th>
               <th style="width:70px;">상태</th>
               <th class="col-date">등록일</th>
               <th class="col-action">액션</th>
@@ -3160,7 +3149,7 @@ function v3RenderPosts() {
     <!-- 부가 정보 ★ -->
     <div class="card" style="margin-bottom:16px;">
       <div class="form-section" style="border-bottom:none;">
-        <div class="section-title" style="margin-bottom:20px;">부가 정보 <span style="font-size:11px;font-weight:400;color:rgba(0,0,0,0.4);margin-left:6px;">카탈로그 게시판에 등록된 POST를 연결합니다</span></div>
+        <div class="section-title" style="margin-bottom:20px;">부가 정보 <span style="font-size:11px;font-weight:400;color:rgba(0,0,0,0.4);margin-left:6px;">카탈로그 게시판에 등록된 콘텐츠를 연결합니다</span></div>
         <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
           <div class="post-slot" id="pslot-flight-유의사항" data-cat="유의사항" data-view="flight">
           </div>
@@ -3204,7 +3193,7 @@ function v3RenderPosts() {
     </div>
 
     <div class="form-footer" style="background:#fff;border:none;justify-content:space-between;padding:0 0 32px;">
-      <button class="btn" style="background:#f9f0ff;border-color:#d3adf7;color:#531dab;" onclick="openQuickPostModal('flight')">📝 POST 추가하기</button>
+      <button class="btn" style="background:#f9f0ff;border-color:#d3adf7;color:#531dab;" onclick="openQuickPostModal('flight')">📝 콘텐츠 추가하기</button>
       <div style="display:flex;gap:8px;">
         <button class="btn btn-default" onclick="showView('flight')">등록 취소</button>
         <button class="btn btn-primary" onclick="alert('항공권이 등록되었습니다.')">등록 완료</button>
@@ -3342,7 +3331,7 @@ function v3RenderPosts() {
     <div class="card" style="margin-bottom:16px;">
       <div class="form-section" style="border-bottom:none;">
         <div class="section-title" style="margin-bottom:0;">부가 정보
-          <span style="font-size:11px;font-weight:400;color:rgba(0,0,0,0.4);margin-left:6px;">카탈로그 게시판에 등록된 POST를 연결합니다</span>
+          <span style="font-size:11px;font-weight:400;color:rgba(0,0,0,0.4);margin-left:6px;">카탈로그 게시판에 등록된 콘텐츠를 연결합니다</span>
         </div>
         <div style="margin-top:16px;">
           <div class="hotel-info-tabbar" id="hc-info-tabbar">
@@ -3390,7 +3379,7 @@ function v3RenderPosts() {
     </div>
 
     <div class="form-footer" style="background:#fff;border:none;justify-content:space-between;padding:0 0 32px;">
-      <button class="btn" style="background:#f9f0ff;border-color:#d3adf7;color:#531dab;" onclick="openQuickPostModal('hotel')">📝 POST 추가하기</button>
+      <button class="btn" style="background:#f9f0ff;border-color:#d3adf7;color:#531dab;" onclick="openQuickPostModal('hotel')">📝 콘텐츠 추가하기</button>
       <div style="display:flex;gap:8px;">
         <button class="btn btn-default" onclick="showView('hotel-mgmt')">등록 취소</button>
         <button class="btn btn-primary" onclick="alert('숙박권이 등록되었습니다.')">등록 완료</button>
@@ -3628,7 +3617,7 @@ function v3RenderPosts() {
     <!-- 부가 정보 -->
     <div class="card" style="margin-bottom:16px;">
       <div class="form-section" style="border-bottom:none;">
-        <div class="section-title" style="margin-bottom:20px;">부가 정보 <span style="font-size:11px;font-weight:400;color:rgba(0,0,0,0.4);margin-left:6px;">카탈로그 게시판에 등록된 POST를 연결합니다</span></div>
+        <div class="section-title" style="margin-bottom:20px;">부가 정보 <span style="font-size:11px;font-weight:400;color:rgba(0,0,0,0.4);margin-left:6px;">카탈로그 게시판에 등록된 콘텐츠를 연결합니다</span></div>
         <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
           <div class="post-slot" id="pslot-tour-스페셜혜택" data-cat="스페셜 혜택" data-view="tour"></div>
           <div class="post-slot" id="pslot-tour-포함사항" data-cat="포함사항" data-view="tour"></div>
@@ -3666,7 +3655,7 @@ function v3RenderPosts() {
     </div>
 
     <div class="form-footer" style="background:#fff;border:none;justify-content:space-between;padding:0 0 32px;">
-      <button class="btn" style="background:#f9f0ff;border-color:#d3adf7;color:#531dab;" onclick="openQuickPostModal('tour')">📝 POST 추가하기</button>
+      <button class="btn" style="background:#f9f0ff;border-color:#d3adf7;color:#531dab;" onclick="openQuickPostModal('tour')">📝 콘텐츠 추가하기</button>
       <div style="display:flex;gap:8px;">
         <button class="btn btn-default" onclick="showView('tour')">등록 취소</button>
         <button class="btn btn-primary" onclick="alert('투어/티켓이 등록되었습니다.')">등록 완료</button>
@@ -4103,14 +4092,14 @@ function v3RenderPosts() {
 
     <!-- 탭 -->
     <div style="display:flex;gap:0;margin-bottom:16px;border-bottom:2px solid #f0f0f0;">
-      <button class="cv-tab active" onclick="switchCvTab(this,'cv-post')">POST 노출</button>
+      <button class="cv-tab active" onclick="switchCvTab(this,'cv-post')">콘텐츠 노출</button>
       <button class="cv-tab" onclick="switchCvTab(this,'cv-stock')">Stock 노출</button>
     </div>
 
-    <!-- POST 노출 매트릭스 -->
+    <!-- 콘텐츠 노출 매트릭스 -->
     <div id="cv-post" class="card">
       <div class="filter-bar">
-        <input class="fi fi-lg" type="text" placeholder="POST 관리명 검색">
+        <input class="fi fi-lg" type="text" placeholder="콘텐츠 관리명 검색">
         <select class="fi fi-md">
           <option value="">카테고리</option>
           <option>소개</option><option>유의사항</option><option>스페셜 혜택</option><option>취소환불규정</option>
@@ -4266,34 +4255,34 @@ function v3RenderPosts() {
 </div>
 
 <!-- ============================================================ -->
-<!-- 파트너스: POST 플로우차트 -->
+<!-- 파트너스: 콘텐츠 플로우차트 -->
 <!-- ============================================================ -->
 <div id="view-partner-flow" class="view">
   <div class="content-wrap" style="max-width:1400px;margin:0 auto;padding:24px;">
     <div style="background:#e6f4ff;border:1px solid #91caff;border-radius:8px;padding:14px 20px;margin-bottom:20px;display:flex;align-items:center;gap:12px;">
       <span style="font-size:20px;">📊</span>
       <div>
-        <div style="font-weight:600;color:#1677ff;">파트너스 POST 관리 플로우</div>
-        <div style="font-size:12px;color:rgba(0,0,0,0.55);margin-top:2px;">상품 단위로 POST를 관리하는 전체 흐름입니다 (NOL/JV/PB 확장 대비)</div>
+        <div style="font-weight:600;color:#1677ff;">파트너스 콘텐츠 관리 플로우</div>
+        <div style="font-size:12px;color:rgba(0,0,0,0.55);margin-top:2px;">상품 단위로 콘텐츠를 관리하는 전체 흐름입니다 (NOL/JV/PB 확장 대비)</div>
       </div>
       <button class="btn btn-default btn-sm" style="margin-left:auto;" onclick="showView('partner-product')">← 상품등록 화면</button>
     </div>
 
     <div style="background:#fff;border-radius:12px;padding:28px;box-shadow:0 1px 4px rgba(0,0,0,0.06);margin-bottom:20px;">
-      <h3 style="font-size:16px;font-weight:700;margin-bottom:20px;color:rgba(0,0,0,0.85);">1. 파트너스 상품 등록 시 POST 흐름</h3>
+      <h3 style="font-size:16px;font-weight:700;margin-bottom:20px;color:rgba(0,0,0,0.85);">1. 파트너스 상품 등록 시 콘텐츠 흐름</h3>
       <div class="mermaid" id="mermaid-flow-1">
 flowchart LR
     A[상품 등록 시작] --> B{Stock 선택}
     B --> B1[항공권 Stock]
     B --> B2[숙박권 Stock]
     B --> B3[투어/티켓 Stock]
-    B1 --> C[Stock POST 자동 로드]
+    B1 --> C[Stock 콘텐츠 자동 로드]
     B2 --> C
     B3 --> C
-    C --> D["🔒 Stock POST<br/>(수정/삭제 불가)"]
+    C --> D["🔒 Stock 콘텐츠<br/>(수정/삭제 불가)"]
     D --> D1["항상 노출<br/>(전 카테고리)"]
-    A --> E["✏️ 상품 POST 직접 작성"]
-    E --> F["📝 상품 POST<br/>(수정/삭제 가능)"]
+    A --> E["✏️ 상품 콘텐츠 직접 작성"]
+    E --> F["📝 상품 콘텐츠<br/>(수정/삭제 가능)"]
     F --> F1[수정]
     F --> F2[삭제]
 
@@ -4305,14 +4294,14 @@ flowchart LR
     </div>
 
     <div style="background:#fff;border-radius:12px;padding:28px;box-shadow:0 1px 4px rgba(0,0,0,0.06);margin-bottom:20px;">
-      <h3 style="font-size:16px;font-weight:700;margin-bottom:20px;color:rgba(0,0,0,0.85);">2. Stock POST 변경 싱크 흐름</h3>
+      <h3 style="font-size:16px;font-weight:700;margin-bottom:20px;color:rgba(0,0,0,0.85);">2. Stock 콘텐츠 변경 싱크 흐름</h3>
       <div class="mermaid" id="mermaid-flow-2">
 flowchart LR
-    A["어드민<br/>Stock POST 수정"] --> B["Kafka 이벤트 발행<br/>(stock.post.updated)"]
+    A["어드민<br/>Stock 콘텐츠 수정"] --> B["Kafka 이벤트 발행<br/>(stock.post.updated)"]
     B --> C{"해당 Stock을 사용하는<br/>상품 조회"}
-    C --> D1["상품 A<br/>POST 자동 업데이트"]
-    C --> D2["상품 B<br/>POST 자동 업데이트"]
-    C --> D3["상품 N<br/>POST 자동 업데이트"]
+    C --> D1["상품 A<br/>콘텐츠 자동 업데이트"]
+    C --> D2["상품 B<br/>콘텐츠 자동 업데이트"]
+    C --> D3["상품 N<br/>콘텐츠 자동 업데이트"]
     D1 --> E["파트너스 화면<br/>변경 반영 확인"]
     D2 --> E
     D3 --> E
@@ -4324,13 +4313,13 @@ flowchart LR
     </div>
 
     <div style="background:#fff;border-radius:12px;padding:28px;box-shadow:0 1px 4px rgba(0,0,0,0.06);margin-bottom:20px;">
-      <h3 style="font-size:16px;font-weight:700;margin-bottom:20px;color:rgba(0,0,0,0.85);">3. 상품 POST CRUD 플로우 (상품 단위)</h3>
+      <h3 style="font-size:16px;font-weight:700;margin-bottom:20px;color:rgba(0,0,0,0.85);">3. 상품 콘텐츠 CRUD 플로우 (상품 단위)</h3>
       <div class="mermaid" id="mermaid-flow-3">
 flowchart LR
-    A["파트너스<br/>상품 상세"] --> B{"POST 관리"}
-    B --> C["등록<br/>(POST 직접 작성)"]
-    B --> D["수정<br/>(기존 상품 POST)"]
-    B --> E["삭제<br/>(기존 상품 POST)"]
+    A["파트너스<br/>상품 상세"] --> B{"콘텐츠 관리"}
+    B --> C["등록<br/>(콘텐츠 직접 작성)"]
+    B --> D["수정<br/>(기존 상품 콘텐츠)"]
+    B --> E["삭제<br/>(기존 상품 콘텐츠)"]
     C --> C1["카테고리 선택"]
     C1 --> C2["관리명 + 제목 + 내용 입력"]
     C2 --> C3{"소개/핵심포인트?"}
@@ -4366,7 +4355,7 @@ flowchart LR
         </thead>
         <tbody>
           <tr>
-            <td style="padding:10px 14px;border-bottom:1px solid #f0f0f0;"><span style="background:#fff7e6;color:#d48806;padding:2px 8px;border-radius:4px;font-weight:600;">Stock POST</span></td>
+            <td style="padding:10px 14px;border-bottom:1px solid #f0f0f0;"><span style="background:#fff7e6;color:#d48806;padding:2px 8px;border-radius:4px;font-weight:600;">Stock 콘텐츠</span></td>
             <td style="padding:10px 14px;border-bottom:1px solid #f0f0f0;color:rgba(0,0,0,0.45);">자동 (Stock 연결)</td>
             <td style="padding:10px 14px;border-bottom:1px solid #f0f0f0;color:#ff4d4f;">불가 (어드민만)</td>
             <td style="padding:10px 14px;border-bottom:1px solid #f0f0f0;color:#ff4d4f;">불가</td>
@@ -4374,7 +4363,7 @@ flowchart LR
             <td style="padding:10px 14px;border-bottom:1px solid #f0f0f0;color:#1677ff;">Kafka 자동 싱크</td>
           </tr>
           <tr>
-            <td style="padding:10px 14px;border-bottom:1px solid #f0f0f0;"><span style="background:#e6f4ff;color:#1677ff;padding:2px 8px;border-radius:4px;font-weight:600;">상품 POST</span></td>
+            <td style="padding:10px 14px;border-bottom:1px solid #f0f0f0;"><span style="background:#e6f4ff;color:#1677ff;padding:2px 8px;border-radius:4px;font-weight:600;">상품 콘텐츠</span></td>
             <td style="padding:10px 14px;border-bottom:1px solid #f0f0f0;color:#52c41a;">직접 작성</td>
             <td style="padding:10px 14px;border-bottom:1px solid #f0f0f0;color:#52c41a;">가능</td>
             <td style="padding:10px 14px;border-bottom:1px solid #f0f0f0;color:#52c41a;">가능</td>
@@ -4502,12 +4491,12 @@ flowchart LR
       </div>
     </div>
 
-    <!-- POST 관리 -->
+    <!-- 콘텐츠 관리 -->
     <div class="card" style="margin-bottom:16px;">
       <div class="form-section" style="border-bottom:none;">
-        <div class="section-title" style="margin-bottom:6px;">POST 관리</div>
+        <div class="section-title" style="margin-bottom:6px;">콘텐츠 관리</div>
         <div style="font-size:12px;color:rgba(0,0,0,0.45);margin-bottom:20px;">
-          Stock에 연결된 POST는 자동으로 표시됩니다 (수정 불가). 상품 전용 POST를 추가로 등록할 수 있습니다.
+          Stock에 연결된 콘텐츠는 자동으로 표시됩니다 (수정 불가). 상품 전용 콘텐츠를 추가로 등록할 수 있습니다.
         </div>
 
         <div id="pp-post-area">
@@ -4524,14 +4513,14 @@ flowchart LR
 </div>
 
 <!-- ============================================================ -->
-<!-- 파트너스: POST 직접 작성 모달 -->
+<!-- 파트너스: 콘텐츠 직접 작성 모달 -->
 <!-- ============================================================ -->
 <div class="modal-overlay hidden" id="partner-post-create-modal" onclick="if(event.target===this)this.classList.add('hidden')">
   <div style="background:#fff;border-radius:12px;width:720px;max-height:85vh;display:flex;flex-direction:column;box-shadow:0 20px 60px rgba(0,0,0,0.2);" onclick="event.stopPropagation()">
     <div style="padding:20px 24px 16px;border-bottom:1px solid #f0f0f0;display:flex;align-items:center;justify-content:space-between;">
       <div>
-        <div style="font-size:16px;font-weight:600;" id="ppc-modal-title">POST 직접 작성</div>
-        <div style="font-size:12px;color:rgba(0,0,0,0.45);margin-top:2px;">상품 전용 POST를 직접 작성합니다</div>
+        <div style="font-size:16px;font-weight:600;" id="ppc-modal-title">콘텐츠 직접 작성</div>
+        <div style="font-size:12px;color:rgba(0,0,0,0.45);margin-top:2px;">상품 전용 콘텐츠를 직접 작성합니다</div>
       </div>
       <button onclick="document.getElementById('partner-post-create-modal').classList.add('hidden')" style="background:none;border:none;font-size:18px;cursor:pointer;color:rgba(0,0,0,0.45);line-height:1;">✕</button>
     </div>
@@ -4542,15 +4531,15 @@ flowchart LR
       </div>
       <div style="margin-bottom:16px;">
         <label class="form-label">관리명 <span class="req">*</span></label>
-        <input class="fc" id="ppc-mgmt" type="text" placeholder="POST 관리명 입력" style="height:32px;padding:0 10px;">
+        <input class="fc" id="ppc-mgmt" type="text" placeholder="콘텐츠 관리명 입력" style="height:32px;padding:0 10px;">
       </div>
       <div style="margin-bottom:16px;">
         <label class="form-label">제목 <span class="req">*</span></label>
-        <input class="fc" id="ppc-title" type="text" placeholder="POST 제목" style="height:32px;padding:0 10px;">
+        <input class="fc" id="ppc-title" type="text" placeholder="콘텐츠 제목" style="height:32px;padding:0 10px;">
       </div>
       <div style="margin-bottom:16px;">
         <label class="form-label">내용 <span class="req">*</span></label>
-        <textarea class="fc" id="ppc-content" rows="8" placeholder="POST 내용을 입력하세요" style="padding:10px;font-family:inherit;resize:vertical;"></textarea>
+        <textarea class="fc" id="ppc-content" rows="8" placeholder="콘텐츠 내용을 입력하세요" style="padding:10px;font-family:inherit;resize:vertical;"></textarea>
       </div>
       <div id="ppc-image-section" style="margin-bottom:16px;display:none;">
         <label class="form-label">이미지</label>
@@ -4571,14 +4560,14 @@ flowchart LR
 </div>
 
 <!-- ============================================================ -->
-<!-- POST 선택 모달 -->
+<!-- 콘텐츠 선택 모달 -->
 <!-- ============================================================ -->
 <div class="modal-overlay hidden" id="post-select-modal" onclick="handlePSOverlayClick(event)">
   <div style="background:#fff;border-radius:12px;width:680px;max-height:80vh;display:flex;flex-direction:column;box-shadow:0 20px 60px rgba(0,0,0,0.2);" onclick="event.stopPropagation()">
     <div style="padding:20px 24px 16px;border-bottom:1px solid #f0f0f0;display:flex;align-items:center;justify-content:space-between;">
       <div>
-        <div style="font-size:16px;font-weight:600;" id="ps-modal-title">POST 선택</div>
-        <div style="font-size:12px;color:rgba(0,0,0,0.45);margin-top:2px;" id="ps-modal-sub">해당 카테고리의 POST를 선택하세요</div>
+        <div style="font-size:16px;font-weight:600;" id="ps-modal-title">콘텐츠 선택</div>
+        <div style="font-size:12px;color:rgba(0,0,0,0.45);margin-top:2px;" id="ps-modal-sub">해당 카테고리의 콘텐츠를 선택하세요</div>
       </div>
       <button onclick="closePSModal()" style="background:none;border:none;font-size:18px;cursor:pointer;color:rgba(0,0,0,0.45);line-height:1;">✕</button>
     </div>
@@ -4619,12 +4608,12 @@ flowchart LR
       <div class="wz-line wz-line-off" id="wz-l12"></div>
       <div id="wz-s2" class="wz-step" onclick="goWizStep(2)">
         <div class="wz-num">2</div>
-        <div><div class="wz-label">AI 파싱 결과</div><div class="wz-sub">Stock · POST 자동 생성</div></div>
+        <div><div class="wz-label">AI 파싱 결과</div><div class="wz-sub">Stock · 콘텐츠 자동 생성</div></div>
       </div>
       <div class="wz-line wz-line-off" id="wz-l23"></div>
       <div id="wz-s3" class="wz-step" onclick="goWizStep(3)">
         <div class="wz-num">3</div>
-        <div><div class="wz-label">검토 · 수정</div><div class="wz-sub">요금 · POST · 일정표</div></div>
+        <div><div class="wz-label">검토 · 수정</div><div class="wz-sub">요금 · 콘텐츠 · 일정표</div></div>
       </div>
       <div class="wz-line wz-line-off" id="wz-l34"></div>
       <div id="wz-s4" class="wz-step" onclick="goWizStep(4)">
@@ -4758,7 +4747,7 @@ flowchart LR
           <div style="font-size:11px;color:rgba(0,0,0,0.4);margin-top:4px;">패스트트랙 · 사파리 · 빈원더스 · 스파 등</div>
         </div>
         <div style="background:#fff7e6;border:1px solid #ffd591;border-radius:10px;padding:16px;">
-          <div style="font-size:11px;color:#d48806;font-weight:600;margin-bottom:4px;">📝 POST</div>
+          <div style="font-size:11px;color:#d48806;font-weight:600;margin-bottom:4px;">📝 콘텐츠</div>
           <div style="font-size:24px;font-weight:700;color:#ad6800;">8<span style="font-size:13px;font-weight:400;color:#fa8c16;"> 건</span></div>
           <div style="font-size:11px;color:rgba(0,0,0,0.4);margin-top:4px;">유의사항 · 취소규정 · 프로모션 · 포함/불포함</div>
         </div>
@@ -4801,7 +4790,7 @@ flowchart LR
       <!-- POST 파싱 결과 -->
       <div style="margin-bottom:20px;">
         <div style="font-size:13px;font-weight:600;color:rgba(0,0,0,0.75);margin-bottom:10px;">
-          📝 POST 자동 생성 — 8건
+          📝 콘텐츠 자동 생성 — 8건
           <span style="font-size:11px;font-weight:400;color:rgba(0,0,0,0.4);margin-left:6px;">PDF에서 추출된 콘텐츠</span>
         </div>
         <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
@@ -4843,13 +4832,13 @@ flowchart LR
           </div>
           <div style="border:1px solid #f0f0f0;border-radius:8px;padding:12px 14px;display:flex;align-items:center;gap:10px;border-color:#d3adf7;background:#faf5ff;">
             <input type="checkbox" checked style="accent-color:#722ed1;">
-            <span class="tag" style="background:#f0f5ff;color:#2f54eb;font-size:11px;">공급사 POST</span>
+            <span class="tag" style="background:#f0f5ff;color:#2f54eb;font-size:11px;">공급사 콘텐츠</span>
             <span style="font-size:12px;flex:1;">피크타임_ACCOMMODATION_320 <code style="font-size:10px;background:#e6f7e6;padding:0 4px;border-radius:2px;">sub_key</code></span>
             <button class="btn btn-text btn-sm">미리보기</button>
           </div>
           <div style="border:1px solid #f0f0f0;border-radius:8px;padding:12px 14px;display:flex;align-items:center;gap:10px;border-color:#d3adf7;background:#faf5ff;">
             <input type="checkbox" checked style="accent-color:#722ed1;">
-            <span class="tag" style="background:#f0f5ff;color:#2f54eb;font-size:11px;">공급사 POST</span>
+            <span class="tag" style="background:#f0f5ff;color:#2f54eb;font-size:11px;">공급사 콘텐츠</span>
             <span style="font-size:12px;flex:1;">피크타임_default (전체 공통 유의사항)</span>
             <button class="btn btn-text btn-sm">미리보기</button>
           </div>
@@ -4900,7 +4889,7 @@ flowchart LR
         <div id="wz3-tab-accom" onclick="switchWz3Tab('accom')" style="padding:10px 20px;font-size:13px;font-weight:600;cursor:pointer;color:#722ed1;border-bottom:2px solid #722ed1;">🏨 숙박권 (13)</div>
         <div id="wz3-tab-flight" onclick="switchWz3Tab('flight')" style="padding:10px 20px;font-size:13px;cursor:pointer;color:rgba(0,0,0,0.45);">✈️ 항공권 (2)</div>
         <div id="wz3-tab-tour" onclick="switchWz3Tab('tour')" style="padding:10px 20px;font-size:13px;cursor:pointer;color:rgba(0,0,0,0.45);">🎫 투어/티켓 (5)</div>
-        <div id="wz3-tab-post" onclick="switchWz3Tab('post')" style="padding:10px 20px;font-size:13px;cursor:pointer;color:rgba(0,0,0,0.45);">📝 POST (8)</div>
+        <div id="wz3-tab-post" onclick="switchWz3Tab('post')" style="padding:10px 20px;font-size:13px;cursor:pointer;color:rgba(0,0,0,0.45);">📝 콘텐츠 (8)</div>
         <div id="wz3-tab-schedule" onclick="switchWz3Tab('schedule')" style="padding:10px 20px;font-size:13px;cursor:pointer;color:rgba(0,0,0,0.45);">📅 일정표</div>
       </div>
 
@@ -5100,7 +5089,7 @@ flowchart LR
             <span style="color:#52c41a;">✓</span> <strong>투어/티켓 5건</strong> — 패스트트랙, 사파리, 스파 등
           </div>
           <div style="display:flex;align-items:center;gap:8px;font-size:13px;">
-            <span style="color:#52c41a;">✓</span> <strong>POST 8건</strong> — 카탈로그 6건 + 공급사 2건
+            <span style="color:#52c41a;">✓</span> <strong>콘텐츠 8건</strong> — 카탈로그 6건 + 공급사 2건
           </div>
           <div style="display:flex;align-items:center;gap:8px;font-size:13px;">
             <span style="color:#52c41a;">✓</span> <strong>일정표 1건</strong> — 3박 5일 기본 일정
@@ -5119,8 +5108,8 @@ flowchart LR
             1. 숙소 요금표 PDF 열어서 13객실 × 3시즌 수동 입력<br>
             2. 항공 요금표 Excel에서 날짜별 요금 수동 입력<br>
             3. 투어/티켓 공급가 Excel에서 5건 개별 등록<br>
-            4. POST 8건 각각 내용 작성 (유의/취소/포함 등)<br>
-            5. 공급사 게시판 POST 별도 등록 + sub_key 설정<br>
+            4. 콘텐츠 8건 각각 내용 작성 (유의/취소/포함 등)<br>
+            5. 공급사 게시판 콘텐츠 별도 등록 + sub_key 설정<br>
             6. 상품 조합 + 일정표 작성<br>
             <strong style="color:#cf1322;">예상 소요: 2~3시간</strong>
           </div>
@@ -5130,7 +5119,7 @@ flowchart LR
           <div style="font-size:12px;color:rgba(0,0,0,0.65);line-height:2;">
             1. 문서 3개 업로드 (드래그 앤 드롭)<br>
             2. AI 파싱 결과 확인 (4초)<br>
-            3. 요금/POST 검토 및 수정<br>
+            3. 요금/콘텐츠 검토 및 수정<br>
             4. [일괄 등록] 클릭<br>
             <br>
             <strong style="color:#722ed1;">예상 소요: 15~20분</strong>
@@ -5142,7 +5131,7 @@ flowchart LR
         <button class="btn btn-default" onclick="goWizStep(3)">← 이전</button>
         <div style="display:flex;gap:10px;">
           <button class="btn btn-default" style="border-color:#d3adf7;color:#722ed1;">임시저장</button>
-          <button class="btn btn-primary" style="padding:10px 40px;font-size:15px;background:#722ed1;border-color:#722ed1;font-weight:600;" onclick="alert('총 30건이 일괄 등록되었습니다!\n\n항공권 2건 ✅\n숙박권 13건 ✅\n투어/티켓 5건 ✅\nPOST 8건 ✅\n일정표 1건 ✅\n상품 1건 ✅')">🚀 일괄 등록 (30건)</button>
+          <button class="btn btn-primary" style="padding:10px 40px;font-size:15px;background:#722ed1;border-color:#722ed1;font-weight:600;" onclick="alert('총 30건이 일괄 등록되었습니다!\n\n항공권 2건 ✅\n숙박권 13건 ✅\n투어/티켓 5건 ✅\n콘텐츠 8건 ✅\n일정표 1건 ✅\n상품 1건 ✅')">🚀 일괄 등록 (30건)</button>
         </div>
       </div>
     </div>
@@ -5151,16 +5140,16 @@ flowchart LR
 </div>
 
 <!-- ============================================================ -->
-<!-- 기존 POST 연결 모달 -->
+<!-- 기존 콘텐츠 연결 모달 -->
 <!-- ============================================================ -->
 <div class="modal-overlay hidden" id="product-link-modal" onclick="if(event.target===this)closeProductLinkModal()">
   <div class="modal" style="max-width:780px;width:100%;">
     <div class="modal-header">
-      <div class="modal-title">🔗 기존 POST 연결</div>
+      <div class="modal-title">🔗 기존 콘텐츠 연결</div>
       <button class="modal-close" onclick="closeProductLinkModal()">✕</button>
     </div>
     <div class="modal-body">
-      <p style="font-size:13px;color:rgba(0,0,0,0.55);margin:0 0 16px;">이미 등록된 POST를 이 상품에 연결합니다. 연결 후 원본 POST를 수정하면 이 상품에도 자동 반영됩니다.</p>
+      <p style="font-size:13px;color:rgba(0,0,0,0.55);margin:0 0 16px;">이미 등록된 콘텐츠를 이 상품에 연결합니다. 연결 후 원본 콘텐츠를 수정하면 이 상품에도 자동 반영됩니다.</p>
       <!-- 검색 필터 -->
       <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px;">
         <select class="fc" id="plm-type" style="width:130px;">
@@ -5224,7 +5213,79 @@ flowchart LR
     </div>
     <div class="modal-footer" style="display:flex;justify-content:flex-end;gap:8px;padding:16px 24px;border-top:1px solid #f0f0f0;">
       <button class="btn btn-default" onclick="closeProductLinkModal()">취소</button>
-      <button class="btn btn-primary">선택한 POST 연결하기</button>
+      <button class="btn btn-primary">선택한 콘텐츠 연결하기</button>
+    </div>
+  </div>
+</div>
+
+<!-- 버전 이력 비교 모달 -->
+<div class="modal-overlay hidden" id="version-history-modal" onclick="if(event.target===this)this.classList.add('hidden')">
+  <div style="background:#fff;border-radius:12px;width:800px;max-width:95vw;max-height:85vh;overflow:hidden;display:flex;flex-direction:column;">
+    <div style="padding:16px 20px;border-bottom:1px solid #f0f0f0;display:flex;align-items:center;justify-content:space-between;">
+      <div>
+        <div style="font-size:16px;font-weight:600;">🕘 버전 이력</div>
+        <div style="font-size:12px;color:rgba(0,0,0,0.45);margin-top:2px;">이전 버전을 조회하고 변경 내용을 비교합니다</div>
+      </div>
+      <button style="background:none;border:none;font-size:18px;cursor:pointer;color:rgba(0,0,0,0.35);padding:4px 8px;" onclick="this.closest('.modal-overlay').classList.add('hidden')">✕</button>
+    </div>
+    <div style="display:flex;flex:1;overflow:hidden;">
+      <!-- 좌: 버전 목록 -->
+      <div style="width:240px;border-right:1px solid #f0f0f0;overflow-y:auto;padding:12px 0;">
+        <div style="padding:0 12px 8px;font-size:11px;font-weight:600;color:rgba(0,0,0,0.35);letter-spacing:0.4px;">버전 목록</div>
+        <div style="padding:8px 12px;background:#e6f4ff;border-left:3px solid #1677ff;cursor:pointer;">
+          <div style="font-size:12px;font-weight:600;color:#1677ff;">v3 (현재)</div>
+          <div style="font-size:11px;color:rgba(0,0,0,0.45);margin-top:2px;">2026-04-16 14:30</div>
+          <div style="font-size:10px;color:rgba(0,0,0,0.35);margin-top:1px;">김서현 · 운영중</div>
+        </div>
+        <div style="padding:8px 12px;cursor:pointer;border-left:3px solid transparent;" onmouseover="this.style.background='#fafafa'" onmouseout="this.style.background=''">
+          <div style="font-size:12px;font-weight:500;color:rgba(0,0,0,0.75);">v2</div>
+          <div style="font-size:11px;color:rgba(0,0,0,0.45);margin-top:2px;">2026-04-10 11:00</div>
+          <div style="font-size:10px;color:rgba(0,0,0,0.35);margin-top:1px;">김서현 · 운영중</div>
+        </div>
+        <div style="padding:8px 12px;cursor:pointer;border-left:3px solid transparent;" onmouseover="this.style.background='#fafafa'" onmouseout="this.style.background=''">
+          <div style="font-size:12px;font-weight:500;color:rgba(0,0,0,0.75);">v1</div>
+          <div style="font-size:11px;color:rgba(0,0,0,0.45);margin-top:2px;">2026-03-25 09:15</div>
+          <div style="font-size:10px;color:rgba(0,0,0,0.35);margin-top:1px;">김서현 · Draft</div>
+        </div>
+      </div>
+      <!-- 우: diff 비교 -->
+      <div style="flex:1;overflow-y:auto;padding:16px 20px;">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;">
+          <div style="font-size:13px;font-weight:600;color:rgba(0,0,0,0.75);">v2 → v3 변경 내용</div>
+          <button class="btn btn-default btn-sm" onclick="alert('v2 버전으로 복원합니다.')">v2로 복원</button>
+        </div>
+        <!-- 제목 diff -->
+        <div style="margin-bottom:16px;">
+          <div style="font-size:11px;font-weight:600;color:rgba(0,0,0,0.4);margin-bottom:6px;">제목</div>
+          <div style="font-size:13px;color:rgba(0,0,0,0.65);">얼리체크인 특전 <span style="font-size:11px;color:rgba(0,0,0,0.25);">(변경 없음)</span></div>
+        </div>
+        <!-- 본문 diff -->
+        <div style="margin-bottom:16px;">
+          <div style="font-size:11px;font-weight:600;color:rgba(0,0,0,0.4);margin-bottom:6px;">본문</div>
+          <div style="background:#fafafa;border:1px solid #f0f0f0;border-radius:8px;padding:12px 14px;font-size:12px;line-height:1.8;color:rgba(0,0,0,0.65);">
+            <div>체크인 시간: 14:00</div>
+            <div style="background:#fff0f0;border-left:3px solid #f5222d;padding:2px 8px;margin:4px 0;color:#cf1322;text-decoration:line-through;">얼리체크인: 12:00부터 가능 (사전 요청 필수)</div>
+            <div style="background:#f0fff0;border-left:3px solid #52c41a;padding:2px 8px;margin:4px 0;color:#389e0d;">얼리체크인: 11:00부터 가능 (사전 요청 시, 선착순)</div>
+            <div>체크아웃 시간: 12:00</div>
+            <div style="background:#f0fff0;border-left:3px solid #52c41a;padding:2px 8px;margin:4px 0;color:#389e0d;">레이트 체크아웃: 14:00까지 (추가 비용 없음, 사전 요청 필수)</div>
+          </div>
+        </div>
+        <!-- 조건 diff -->
+        <div style="margin-bottom:16px;">
+          <div style="font-size:11px;font-weight:600;color:rgba(0,0,0,0.4);margin-bottom:6px;">적용 조건</div>
+          <div style="font-size:13px;color:rgba(0,0,0,0.65);">
+            <span class="rule-tag" style="font-size:10px;padding:1px 6px;">🏢 트립스토어</span>
+            <span class="rule-tag" style="font-size:10px;padding:1px 6px;">🏨 솔바이멜리아</span>
+            <span class="rule-tag" style="font-size:10px;padding:1px 6px;">🍽️ BB</span>
+            <span style="font-size:11px;color:rgba(0,0,0,0.25);margin-left:4px;">(변경 없음)</span>
+          </div>
+        </div>
+        <!-- 상태 변경 -->
+        <div>
+          <div style="font-size:11px;font-weight:600;color:rgba(0,0,0,0.4);margin-bottom:6px;">상태 변경</div>
+          <div style="font-size:13px;color:rgba(0,0,0,0.65);">운영중 → 운영중 <span style="font-size:11px;color:rgba(0,0,0,0.25);">(변경 없음)</span></div>
+        </div>
+      </div>
     </div>
   </div>
 </div>
@@ -5235,8 +5296,8 @@ flowchart LR
   <div style="background:#fff;border-radius:12px;width:680px;max-height:88vh;display:flex;flex-direction:column;box-shadow:0 20px 60px rgba(0,0,0,0.2);" onclick="event.stopPropagation()">
     <div style="padding:20px 24px 16px;border-bottom:1px solid #f0f0f0;display:flex;align-items:center;justify-content:space-between;">
       <div>
-        <div style="font-size:16px;font-weight:700;">POST 추가하기</div>
-        <div style="font-size:12px;color:rgba(0,0,0,0.45);margin-top:2px;"><span id="qpm-context-label"></span> 등록과 함께 POST를 바로 작성합니다 — 게시판은 <strong>공급사</strong>가 기본 선택됩니다</div>
+        <div style="font-size:16px;font-weight:700;">콘텐츠 추가하기</div>
+        <div style="font-size:12px;color:rgba(0,0,0,0.45);margin-top:2px;"><span id="qpm-context-label"></span> 등록과 함께 콘텐츠를 바로 작성합니다 — 게시판은 <strong>공급사</strong>가 기본 선택됩니다</div>
       </div>
       <button onclick="closeQuickPostModal()" style="background:none;border:none;font-size:18px;cursor:pointer;color:rgba(0,0,0,0.45);">✕</button>
     </div>
@@ -5282,12 +5343,12 @@ flowchart LR
       <!-- 제목 -->
       <div>
         <label class="form-label">제목 <span class="req">*</span></label>
-        <input class="fc" type="text" id="qpm-title" placeholder="POST 제목을 입력하세요">
+        <input class="fc" type="text" id="qpm-title" placeholder="콘텐츠 제목을 입력하세요">
       </div>
       <!-- 내용 -->
       <div>
         <label class="form-label">내용</label>
-        <textarea class="fc" id="qpm-content" rows="6" placeholder="POST 내용을 입력하세요" style="padding:10px;font-family:inherit;resize:vertical;"></textarea>
+        <textarea class="fc" id="qpm-content" rows="6" placeholder="콘텐츠 내용을 입력하세요" style="padding:10px;font-family:inherit;resize:vertical;"></textarea>
       </div>
       <!-- AI 생성 버튼 -->
       <div>
@@ -5296,10 +5357,10 @@ flowchart LR
       </div>
     </div>
     <div style="padding:14px 24px;border-top:1px solid #f0f0f0;display:flex;justify-content:space-between;align-items:center;">
-      <button class="btn btn-default btn-sm" onclick="alert('POST를 하나 더 추가합니다.')">+ 항목 추가</button>
+      <button class="btn btn-default btn-sm" onclick="alert('콘텐츠를 하나 더 추가합니다.')">+ 항목 추가</button>
       <div style="display:flex;gap:8px;">
         <button class="btn btn-default" onclick="closeQuickPostModal()">취소</button>
-        <button class="btn btn-primary" onclick="alert('POST가 저장되었습니다.');closeQuickPostModal()">저장</button>
+        <button class="btn btn-primary" onclick="alert('콘텐츠가 저장되었습니다.');closeQuickPostModal()">저장</button>
       </div>
     </div>
   </div>
@@ -5310,7 +5371,7 @@ flowchart LR
 <div class="modal-overlay hidden" id="ai-modal" onclick="handleOverlayClick(event)">
   <div class="modal">
     <div class="modal-header">
-      <div class="modal-title">✨ AI POST 자동 생성</div>
+      <div class="modal-title">✨ AI 콘텐츠 자동 생성</div>
       <button class="modal-close" onclick="closeAiModal()">✕</button>
     </div>
     <div class="modal-body">
@@ -5440,12 +5501,12 @@ flowchart LR
             <span style="font-size:11px;font-weight:700;color:rgba(0,0,0,0.35);letter-spacing:0.5px;text-transform:uppercase;">카탈로그</span>
             <span id="s3-cat-label" style="font-size:13px;font-weight:600;color:rgba(0,0,0,0.88);">솔바이멜리아 푸꾸옥 (ID: 45)</span>
           </div>
-          <div style="margin-left:auto;font-size:12px;color:#389e0d;">✓ <span id="s3-confirm-msg">TMG 전용 POST로 등록됩니다</span></div>
+          <div style="margin-left:auto;font-size:12px;color:#389e0d;">✓ <span id="s3-confirm-msg">TMG 전용 콘텐츠로 등록됩니다</span></div>
         </div>
 
         <!-- 요약 헤더 -->
         <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;">
-          <div style="font-size:13px;color:rgba(0,0,0,0.55);">등록할 항목을 선택하고 타겟을 설정하세요. AI가 <strong style="color:#722ed1;"><span id="s3-card-count">5</span>개</strong>의 POST 초안을 생성했습니다.</div>
+          <div style="font-size:13px;color:rgba(0,0,0,0.55);">등록할 항목을 선택하고 타겟을 설정하세요. AI가 <strong style="color:#722ed1;"><span id="s3-card-count">5</span>개</strong>의 콘텐츠 초안을 생성했습니다.</div>
           <div style="font-size:12px;color:rgba(0,0,0,0.45);white-space:nowrap;"><span id="sel-count">5</span>개 선택됨</div>
         </div>
         <div style="font-size:12px;color:rgba(0,0,0,0.35);background:#fffbe6;border:1px solid #ffe58f;border-radius:6px;padding:7px 12px;margin-bottom:14px;">
@@ -5630,19 +5691,19 @@ flowchart LR
 </div>
 
 <!-- ============================================================ -->
-<!-- VIEW: POST 등록 v4 — 규칙 기반 -->
+<!-- VIEW: 콘텐츠 등록 v4 — 규칙 기반 -->
 <!-- ============================================================ -->
 <div class="view" id="view-create-v4">
   <div class="layout">
     <div class="breadcrumb">
-      <span onclick="showView('list')">카탈로그 관리</span>
-      <span class="breadcrumb-sep">›</span><span>게시판</span>
-      <span class="breadcrumb-sep">›</span><span style="color:rgba(0,0,0,0.88);font-weight:600;">POST 등록</span>
+      <span onclick="showView('list')">카탈로그</span>
+      <span class="breadcrumb-sep">›</span><span onclick="showView('list')" style="cursor:pointer;">TRP 게시판 관리</span>
+      <span class="breadcrumb-sep">›</span><span style="color:rgba(0,0,0,0.88);font-weight:600;">콘텐츠 등록</span>
     </div>
     <div class="page-header">
       <div>
-        <div class="page-title">POST 등록 <span style="font-size:13px;font-weight:400;color:rgba(0,0,0,0.35);margin-left:8px;">규칙 기반 자동 연결</span></div>
-        <div style="font-size:13px;color:rgba(0,0,0,0.45);margin-top:4px;">조건을 설정하면 Factory 상품에 자동으로 연결됩니다</div>
+        <div class="page-title">콘텐츠 등록 <span style="font-size:13px;font-weight:400;color:rgba(0,0,0,0.35);margin-left:8px;">규칙 기반 자동 적용</span></div>
+        <div style="font-size:13px;color:rgba(0,0,0,0.45);margin-top:4px;">조건을 설정하면 매칭되는 상품에 자동으로 적용됩니다</div>
       </div>
       <button class="btn btn-default" onclick="showView('list')">취소</button>
     </div>
@@ -5661,6 +5722,7 @@ flowchart LR
           <div class="v4-panel-body">
             <div class="preset-grid" id="v4-preset-grid">
 
+              <!-- 1. 전체 공통 -->
               <div class="preset-card" onclick="v4SelectPreset('all',this)">
                 <div class="preset-card-icon">🌐</div>
                 <div>
@@ -5670,6 +5732,7 @@ flowchart LR
                 <span class="preset-card-count" id="pc-all">—</span>
               </div>
 
+              <!-- 2. 상품코드 -->
               <div class="preset-card" onclick="v4SelectPreset('product_code',this)">
                 <div class="preset-card-icon">📦</div>
                 <div>
@@ -5679,76 +5742,125 @@ flowchart LR
                 <span class="preset-card-count" id="pc-product_code">—</span>
               </div>
 
+              <!-- 3. 공급사별 -->
               <div class="preset-card" onclick="v4SelectPreset('operator',this)">
                 <div class="preset-card-icon">🏢</div>
                 <div>
-                  <div class="preset-card-name">공급사</div>
+                  <div class="preset-card-name">공급사별</div>
                   <div class="preset-card-desc">공급사 정책 · 취소환불, 유의사항</div>
                 </div>
                 <span class="preset-card-count" id="pc-operator">—</span>
               </div>
 
-              <div class="preset-card" onclick="v4SelectPreset('hotel_voucher',this)">
-                <div class="preset-card-icon">🏨</div>
+              <!-- 4. 공급사 + 숙소 -->
+              <div class="preset-card" onclick="v4SelectPreset('op_accom',this)">
+                <div class="preset-card-icon">🏢🏨</div>
                 <div>
-                  <div class="preset-card-name">숙박권</div>
-                  <div class="preset-card-desc">등록된 숙박권 ID 선택 · 공급사→숙소→객실→객실요금</div>
+                  <div class="preset-card-name">공급사 + 숙소</div>
+                  <div class="preset-card-desc">공급사의 특정 숙소 상품에 적용</div>
                 </div>
-                <span class="preset-card-count" id="pc-hotel_voucher">—</span>
+                <span class="preset-card-count" id="pc-op_accom">—</span>
               </div>
 
-              <div class="preset-card" onclick="v4SelectPreset('flight_voucher',this)">
-                <div class="preset-card-icon">✈️</div>
+              <!-- 5. 공급사 + 숙소 + 객실 -->
+              <div class="preset-card" onclick="v4SelectPreset('op_accom_room',this)">
+                <div class="preset-card-icon">🏢🛏️</div>
                 <div>
-                  <div class="preset-card-name">항공권</div>
-                  <div class="preset-card-desc">등록된 항공권 ID 선택 · 공급사→항공사</div>
+                  <div class="preset-card-name">공급사 + 숙소 + 객실</div>
+                  <div class="preset-card-desc">특정 숙소의 객실 타입까지 지정</div>
                 </div>
-                <span class="preset-card-count" id="pc-flight_voucher">—</span>
+                <span class="preset-card-count" id="pc-op_accom_room">—</span>
               </div>
 
+              <!-- 6. 공급사 + 숙소 + 식사 -->
+              <div class="preset-card" onclick="v4SelectPreset('op_accom_meal',this)">
+                <div class="preset-card-icon">🏢🍽️</div>
+                <div>
+                  <div class="preset-card-name">공급사 + 숙소 + 식사</div>
+                  <div class="preset-card-desc">숙소의 식사 옵션(BB/HB/AI)별 분리</div>
+                </div>
+                <span class="preset-card-count" id="pc-op_accom_meal">—</span>
+              </div>
+
+              <!-- 7. 공급사 + 숙소 + 객실 + 식사 -->
+              <div class="preset-card" onclick="v4SelectPreset('op_accom_room_meal',this)">
+                <div class="preset-card-icon">🛏️🍽️</div>
+                <div>
+                  <div class="preset-card-name">공급사 + 숙소 + 객실 + 식사</div>
+                  <div class="preset-card-desc">객실과 식사 옵션을 분리하여 적용</div>
+                </div>
+                <span class="preset-card-count" id="pc-op_accom_room_meal">—</span>
+              </div>
+
+              <!-- 8. 공급사 + 항공사 -->
+              <div class="preset-card" onclick="v4SelectPreset('op_airline',this)">
+                <div class="preset-card-icon">🏢✈️</div>
+                <div>
+                  <div class="preset-card-name">공급사 + 항공사</div>
+                  <div class="preset-card-desc">공급사의 항공사별 수하물/유의사항</div>
+                </div>
+                <span class="preset-card-count" id="pc-op_airline">—</span>
+              </div>
+
+              <!-- 9. 공급사 + 스팟/체험 -->
+              <div class="preset-card" onclick="v4SelectPreset('op_spot',this)">
+                <div class="preset-card-icon">🏢🎯</div>
+                <div>
+                  <div class="preset-card-name">공급사 + 스팟/체험</div>
+                  <div class="preset-card-desc">공급사의 스팟·체험 상품에 적용</div>
+                </div>
+                <span class="preset-card-count" id="pc-op_spot">—</span>
+              </div>
+
+              <!-- 10. 투어/티켓 -->
               <div class="preset-card" onclick="v4SelectPreset('tour',this)">
                 <div class="preset-card-icon">🎫</div>
                 <div>
                   <div class="preset-card-name">투어/티켓</div>
-                  <div class="preset-card-desc">등록된 투어/티켓 ID 선택 · 포함/불포함사항</div>
+                  <div class="preset-card-desc">등록된 투어/티켓 ID 선택</div>
                 </div>
                 <span class="preset-card-count" id="pc-tour">—</span>
               </div>
 
+              <!-- 11. 숙박권 -->
+              <div class="preset-card" onclick="v4SelectPreset('hotel_voucher',this)">
+                <div class="preset-card-icon">🏨</div>
+                <div>
+                  <div class="preset-card-name">숙박권</div>
+                  <div class="preset-card-desc">숙박권 ID → 객실 → 식사 옵션</div>
+                </div>
+                <span class="preset-card-count" id="pc-hotel_voucher">—</span>
+              </div>
+
+              <!-- 12. 항공권 -->
+              <div class="preset-card" onclick="v4SelectPreset('flight_voucher',this)">
+                <div class="preset-card-icon">✈️</div>
+                <div>
+                  <div class="preset-card-name">항공권</div>
+                  <div class="preset-card-desc">항공권 ID 선택</div>
+                </div>
+                <span class="preset-card-count" id="pc-flight_voucher">—</span>
+              </div>
+
+              <!-- 13. 여행지별 -->
               <div class="preset-card" onclick="v4SelectPreset('place',this)">
                 <div class="preset-card-icon">📍</div>
                 <div>
-                  <div class="preset-card-name">여행지 <span style="font-size:9px;background:#f0f5ff;color:#2f54eb;border:1px solid #adc6ff;border-radius:8px;padding:0 5px;margin-left:3px;font-weight:700;">카탈로그</span></div>
+                  <div class="preset-card-name">여행지별</div>
                   <div class="preset-card-desc">여행지 소개 · 비자/여권/입국 안내</div>
                 </div>
                 <span class="preset-card-count" id="pc-place">—</span>
               </div>
 
-              <div class="preset-card" onclick="v4SelectPreset('accom',this)">
-                <div class="preset-card-icon">🏠</div>
-                <div>
-                  <div class="preset-card-name">숙소 <span style="font-size:9px;background:#f0f5ff;color:#2f54eb;border:1px solid #adc6ff;border-radius:8px;padding:0 5px;margin-left:3px;font-weight:700;">카탈로그</span></div>
-                  <div class="preset-card-desc">숙소 단위 소개, 스페셜 혜택</div>
-                </div>
-                <span class="preset-card-count" id="pc-accom">—</span>
+              <!-- 인라인 조건 입력 (선택한 프리셋 아래로 이동) -->
+              <div id="v4-inline-expand" class="preset-inline-expand">
+                <div id="v4-inline-fields"></div>
               </div>
-
-              <div class="preset-card" onclick="v4SelectPreset('room',this)">
-                <div class="preset-card-icon">🛏️</div>
-                <div>
-                  <div class="preset-card-name">객실 <span style="font-size:9px;background:#f0f5ff;color:#2f54eb;border:1px solid #adc6ff;border-radius:8px;padding:0 5px;margin-left:3px;font-weight:700;">카탈로그</span></div>
-                  <div class="preset-card-desc">객실 타입 단위 소개, 유의사항</div>
-                </div>
-                <span class="preset-card-count" id="pc-room">—</span>
-              </div>
-
-              <div class="preset-card" onclick="v4SelectPreset('spot',this)">
-                <div class="preset-card-icon">🎯</div>
-                <div>
-                  <div class="preset-card-name">스팟/체험 <span style="font-size:9px;background:#f0f5ff;color:#2f54eb;border:1px solid #adc6ff;border-radius:8px;padding:0 5px;margin-left:3px;font-weight:700;">카탈로그</span></div>
-                  <div class="preset-card-desc">스팟·체험 소개, 핵심포인트</div>
-                </div>
-                <span class="preset-card-count" id="pc-spot">—</span>
+              <!-- 인라인 요약 (조건 완료 시 표시) -->
+              <div id="v4-inline-summary" class="preset-inline-summary">
+                <span style="font-size:13px;">✅</span>
+                <div class="summary-tags" id="v4-summary-tags"></div>
+                <span class="summary-edit" id="v4-summary-edit" onclick="v4ReopenInline()">수정</span>
               </div>
 
               <!-- 직접 조건 만들기 -->
@@ -5767,12 +5879,8 @@ flowchart LR
 
                   <!-- 전체 op 선택 -->
                   <div style="display:flex;align-items:center;gap:8px;margin-bottom:12px;font-size:12px;color:rgba(0,0,0,0.55);">
-                    아래 조건을
-                    <select class="fi" style="height:28px;font-size:12px;width:100px;" id="v4-custom-op">
-                      <option value="all">모두 만족</option>
-                      <option value="any">하나라도 만족</option>
-                    </select>
-                    하는 상품에 적용
+                    아래 조건을 <strong style="color:#1677ff;">모두 만족(AND)</strong> 하는 상품에 적용
+                    <input type="hidden" id="v4-custom-op" value="all">
                   </div>
 
                   <!-- 조건 행 목록 -->
@@ -5794,8 +5902,8 @@ flowchart LR
           </div>
         </div>
 
-        <!-- Step 2: 조건 값 입력 (프리셋 선택 후 표시) -->
-        <div class="v4-panel wiz-reveal-wrap" id="v4-condition-panel" style="margin-bottom:14px;">
+        <!-- Step 2: 조건 값 입력 (인라인으로 이동됨, 이 패널은 숨김) -->
+        <div class="v4-panel wiz-reveal-wrap" id="v4-condition-panel" style="margin-bottom:14px;display:none;">
           <div class="v4-panel-header">
             <div class="v4-panel-title">② 조건 값 선택</div>
             <div class="v4-panel-sub" id="v4-condition-panel-sub"></div>
@@ -5826,12 +5934,12 @@ flowchart LR
 
       </div>
 
-      <!-- 우측: POST 내용 작성 -->
+      <!-- 우측: 콘텐츠 내용 작성 -->
       <div>
         <div class="v4-panel">
           <div class="v4-panel-header" style="display:flex;align-items:center;justify-content:space-between;">
             <div>
-              <div class="v4-panel-title">③ POST 내용 작성</div>
+              <div class="v4-panel-title">③ 콘텐츠 내용 작성</div>
               <div class="v4-panel-sub">카테고리를 선택하고 내용을 작성하세요</div>
             </div>
             <div id="v4-rule-tags" style="display:flex;gap:4px;flex-wrap:wrap;max-width:300px;justify-content:flex-end;"></div>
@@ -5849,7 +5957,7 @@ flowchart LR
             <!-- 제목 -->
             <div class="form-item" style="margin-bottom:12px;">
               <div class="form-label">제목 <span class="req">*</span></div>
-              <input type="text" class="fc" id="v4-title" placeholder="POST 제목을 입력하세요" oninput="v4UpdateAdminName()">
+              <input type="text" class="fc" id="v4-title" placeholder="콘텐츠 제목을 입력하세요" oninput="v4UpdateAdminName()">
             </div>
 
             <!-- 관리명 자동생성 (제목 뒤에 자동 연결) -->
@@ -5892,14 +6000,20 @@ flowchart LR
               <button class="btn btn-default btn-sm" onclick="v4SwitchBulk()" style="white-space:nowrap;flex-shrink:0;">일괄 등록 →</button>
             </div>
 
-            <!-- 저장 버튼 -->
-            <div style="display:flex;gap:10px;align-items:center;padding-top:12px;border-top:1px solid #f0f0f0;">
-              <div style="flex:1;display:flex;align-items:center;gap:8px;">
-                <span style="font-size:11px;color:rgba(0,0,0,0.4);">저장 시 상태:</span>
-                <span class="v4-status-badge" id="v4-save-status-badge" style="font-size:11px;"></span>
+            <!-- Draft / Publish 플로우 -->
+            <div style="padding-top:12px;border-top:1px solid #f0f0f0;">
+              <div style="display:flex;align-items:center;gap:6px;margin-bottom:10px;font-size:11px;color:rgba(0,0,0,0.35);">
+                <span style="background:#fff7e6;color:#ad6800;border:1px solid #ffe58f;border-radius:4px;padding:1px 6px;font-weight:600;">Draft</span>
+                <span>→</span>
+                <span>검토</span>
+                <span>→</span>
+                <span style="background:#f6ffed;color:#389e0d;border:1px solid #b7eb8f;border-radius:4px;padding:1px 6px;font-weight:600;">게시(운영중)</span>
+                <span style="margin-left:4px;color:rgba(0,0,0,0.25);">Draft 저장 후 목록에서 게시할 수 있습니다</span>
               </div>
-              <button class="btn btn-default" onclick="v4Save('대기')" style="border-color:#faad14;color:#ad6800;">임시저장 (대기)</button>
-              <button class="btn btn-primary" style="height:36px;font-size:14px;font-weight:600;padding:0 24px;" onclick="v4Save('운영중')">저장 (운영중)</button>
+              <div style="display:flex;gap:10px;align-items:center;">
+                <button class="btn btn-default" onclick="v4Save('Draft')" style="border-color:#faad14;color:#ad6800;">임시저장 (Draft)</button>
+                <button class="btn btn-primary" style="height:36px;font-size:14px;font-weight:600;padding:0 24px;" onclick="if(confirm('게시(Publish) 하시겠습니까?\\n\\n콘텐츠가 운영중 상태로 전환되어 조건에 매칭되는 상품에 즉시 적용됩니다.')) v4Save('운영중')">게시 (운영중)</button>
+              </div>
             </div>
           </div>
         </div>
@@ -5922,8 +6036,8 @@ flowchart LR
                 <button class="btn-ai" onclick="v4BulkGenerateAll()" id="v4-bulk-ai-btn" style="margin-right:auto;">
                   <span class="ai-icon">✨</span> 전체 AI 초안 생성
                 </button>
-                <button class="btn btn-default" onclick="v4BulkSave('대기')" style="border-color:#faad14;color:#ad6800;">임시저장 (대기)</button>
-                <button class="btn btn-primary" style="height:36px;font-size:14px;font-weight:600;padding:0 24px;" onclick="v4BulkSave('운영중')">전체 저장 (운영중)</button>
+                <button class="btn btn-default" onclick="v4BulkSave('Draft')" style="border-color:#faad14;color:#ad6800;">임시저장 (Draft)</button>
+                <button class="btn btn-primary" style="height:36px;font-size:14px;font-weight:600;padding:0 24px;" onclick="v4BulkSave('운영중')">전체 게시 (운영중)</button>
               </div>
             </div>
           </div>
@@ -5943,11 +6057,11 @@ flowchart LR
     <div class="page-header">
       <div>
         <div class="page-title">📊 콘텐츠 커버리지 매트릭스</div>
-        <div style="font-size:13px;color:rgba(0,0,0,0.45);margin-top:4px;">상품별 카테고리 채움 현황 — 빈 칸 클릭 시 바로 POST 등록</div>
+        <div style="font-size:13px;color:rgba(0,0,0,0.45);margin-top:4px;">상품별 카테고리 채움 현황 — 빈 칸 클릭 시 바로 콘텐츠 등록</div>
       </div>
       <div style="display:flex;gap:8px;">
         <button class="btn btn-default" onclick="document.getElementById('cov-missing-only').checked=!document.getElementById('cov-missing-only').checked;renderCoverage();">누락만 보기</button>
-        <button class="btn btn-primary" onclick="showView('create-v3')">+ POST 등록</button>
+        <button class="btn btn-primary" onclick="showView('create-v3')">+ 콘텐츠 등록</button>
       </div>
     </div>
 
@@ -5973,7 +6087,7 @@ flowchart LR
           <input type="checkbox" id="cov-missing-only" onchange="renderCoverage()" style="accent-color:#fa8c16;width:15px;height:15px;">
           <span>미완성 상품만 보기</span>
         </label>
-        <span style="margin-left:auto;font-size:12px;color:rgba(0,0,0,0.35);">⭕ 클릭 → POST 바로 등록</span>
+        <span style="margin-left:auto;font-size:12px;color:rgba(0,0,0,0.35);">⭕ 클릭 → 콘텐츠 바로 등록</span>
       </div>
     </div>
 
@@ -5995,18 +6109,18 @@ flowchart LR
 <!-- ============================================================ -->
 <div class="view" id="view-impact">
   <div class="layout">
-    <div class="breadcrumb"><span onclick="showView('list')">카탈로그 관리</span><span class="breadcrumb-sep">›</span><span>게시판</span><span class="breadcrumb-sep">›</span><span style="font-weight:600;">POST 관리</span></div>
+    <div class="breadcrumb"><span onclick="showView('list')">카탈로그</span><span class="breadcrumb-sep">›</span><span onclick="showView('list')" style="cursor:pointer;">TRP 게시판 관리</span><span class="breadcrumb-sep">›</span><span style="font-weight:600;">콘텐츠 적용 현황</span></div>
     <div class="page-header">
       <div>
-        <div class="page-title">POST 관리</div>
-        <div style="font-size:13px;color:rgba(0,0,0,0.45);margin-top:4px;">행사코드로 연결된 POST를 조회하거나, POST를 선택해 연결 행사 확인 및 내용을 수정합니다</div>
+        <div class="page-title">콘텐츠 적용 현황</div>
+        <div style="font-size:13px;color:rgba(0,0,0,0.45);margin-top:4px;">상품코드로 연결된 콘텐츠를 조회하거나, 콘텐츠를 선택해 연결 상품 확인 및 내용을 수정합니다</div>
       </div>
     </div>
 
     <!-- 그라운드 룰 -->
     <div style="display:flex;align-items:center;gap:10px;padding:10px 16px;margin-bottom:12px;background:#f0f7ff;border:1px solid #d3e8ff;border-radius:8px;">
       <span style="font-size:16px;">📌</span>
-      <div style="font-size:12px;color:#0958d9;line-height:1.6;"><strong>상품코드 단위 관리 원칙</strong> — 같은 상품코드의 행사는 무조건 동일한 POST를 갖습니다. 행사코드 단위로 POST를 다르게 설정할 수 없습니다.</div>
+      <div style="font-size:12px;color:#0958d9;line-height:1.6;"><strong>상품코드 단위 관리 원칙</strong> — 같은 상품코드의 행사는 무조건 동일한 콘텐츠를 갖습니다. 행사코드 단위로 콘텐츠를 다르게 설정할 수 없습니다.</div>
     </div>
 
     <!-- 검색 영역: 양방향 -->
@@ -6014,7 +6128,7 @@ flowchart LR
       <div style="padding:16px 20px;">
         <div style="display:flex;gap:8px;align-items:flex-end;">
           <div style="flex:1;">
-            <div style="font-size:11px;font-weight:600;color:rgba(0,0,0,0.45);margin-bottom:6px;">행사코드 · 상품코드로 연결된 POST 조회</div>
+            <div style="font-size:11px;font-weight:600;color:rgba(0,0,0,0.45);margin-bottom:6px;">행사코드 · 상품코드로 연결된 콘텐츠 조회</div>
             <input class="fi" id="pm-product-search" style="width:100%;" placeholder="행사코드 또는 상품코드 입력 (예: 184, PK-PQ-001)" value="">
           </div>
           <button class="btn btn-primary btn-sm" style="height:32px;white-space:nowrap;" onclick="pmSearchByProduct()">조회</button>
@@ -6026,13 +6140,13 @@ flowchart LR
     <!-- 결과 영역 -->
     <div id="pm-result-area">
 
-      <!-- 기본 상태: POST 목록 -->
+      <!-- 기본 상태: 콘텐츠 목록 -->
       <div id="pm-default-view">
         <div class="impact-layout">
           <div>
-            <div style="font-size:13px;font-weight:600;color:rgba(0,0,0,0.65);margin-bottom:8px;">POST 목록</div>
+            <div style="font-size:13px;font-weight:600;color:rgba(0,0,0,0.65);margin-bottom:8px;">콘텐츠 목록</div>
             <div style="display:flex;gap:6px;margin-bottom:10px;flex-wrap:wrap;">
-              <input class="fi" id="pm-post-search" style="width:80px;height:28px;font-size:11px;" placeholder="POST ID" oninput="filterImpactPosts(this.value)">
+              <input class="fi" id="pm-post-search" style="width:80px;height:28px;font-size:11px;" placeholder="콘텐츠 ID" oninput="filterImpactPosts(this.value)">
               <input class="fi" style="flex:1;height:28px;font-size:11px;" placeholder="관리명 검색" oninput="filterImpactPosts(this.value)">
               <select class="fi" style="width:90px;height:28px;font-size:11px;" onchange="filterImpactPosts(this.value)">
                 <option value="">카테고리</option>
@@ -6047,7 +6161,7 @@ flowchart LR
           <div id="impact-result-panel">
             <div class="card impact-result-empty">
               <div style="font-size:40px;margin-bottom:12px;">👈</div>
-              <div style="font-weight:500;color:rgba(0,0,0,0.35);line-height:1.7;">왼쪽에서 POST를 선택하면<br>연결 행사 및 상세 정보가 표시됩니다</div>
+              <div style="font-weight:500;color:rgba(0,0,0,0.35);line-height:1.7;">왼쪽에서 콘텐츠를 선택하면<br>연결 행사 및 상세 정보가 표시됩니다</div>
             </div>
           </div>
         </div>
@@ -6065,7 +6179,7 @@ flowchart LR
             <span class="v4-status-badge st-active" style="font-size:11px;">운영중</span>
           </div>
           <div style="padding:16px 20px;">
-            <div style="font-size:12px;font-weight:600;color:rgba(0,0,0,0.55);margin-bottom:12px;">이 행사에 연결된 POST <span id="pm-prod-post-count" style="color:#1677ff;"></span></div>
+            <div style="font-size:12px;font-weight:600;color:rgba(0,0,0,0.55);margin-bottom:12px;">이 행사에 연결된 콘텐츠<span id="pm-prod-post-count" style="color:#1677ff;"></span></div>
             <div id="pm-prod-post-list"></div>
           </div>
         </div>
@@ -6125,7 +6239,7 @@ flowchart LR
           <div style="padding:20px 24px;">
             <div class="wiz-section-tag blue" style="margin-bottom:16px;"><span class="wst-num">2</span> 내용 변경</div>
             <div style="margin-bottom:14px;padding:10px 14px;background:#fafafa;border-radius:6px;border:1px solid #f0f0f0;font-size:12px;color:rgba(0,0,0,0.45);">
-              변경 대상 POST: <strong id="batch-current-name" style="color:rgba(0,0,0,0.75);font-size:13px;"></strong>
+              변경 대상 콘텐츠: <strong id="batch-current-name" style="color:rgba(0,0,0,0.75);font-size:13px;"></strong>
             </div>
             <div class="batch-diff">
               <div class="diff-panel before">
@@ -6146,11 +6260,11 @@ flowchart LR
 
       <!-- Step 3: 최종 확인 -->
       <div class="wiz-reveal-wrap" id="batch-step3-wrap">
-        <div class="wiz-connector">↓ 아래 상품들에 변경 내용이 즉시 반영됩니다</div>
+        <div class="wiz-connector">↓ 아래 상품들에 변경 내용이 반영됩니다 (기존 예약 건은 예약 당시 콘텐츠 유지)</div>
         <div class="card">
           <div style="padding:20px 24px 14px;">
             <div class="wiz-section-tag blue" style="margin-bottom:14px;"><span class="wst-num">3</span> 최종 확인 및 적용</div>
-            <div class="alert-info" style="margin-bottom:0;">ℹ️ 아래 상품을 이용하는 고객에게 즉시 반영됩니다. 예약 진행 중인 상품이 있다면 수정 전 담당자에게 공유해주세요.</div>
+            <div class="alert-info" style="margin-bottom:0;">ℹ️ 수정된 콘텐츠는 이후 새로운 예약에 적용됩니다. 기존 예약 건은 예약 당시 콘텐츠가 유지됩니다.</div>
           </div>
           <div id="batch-product-list" style="border-top:1px solid #f0f0f0;max-height:320px;overflow-y:auto;"></div>
           <div style="padding:16px 24px;border-top:1px solid #f0f0f0;display:flex;align-items:center;justify-content:space-between;background:#fafafa;border-radius:0 0 8px 8px;">
@@ -6194,7 +6308,7 @@ flowchart LR
     <!-- 범례 -->
     <div style="display:flex;align-items:center;gap:16px;margin-bottom:14px;padding:12px 16px;background:#fff;border:1px solid #f0f0f0;border-radius:8px;flex-wrap:wrap;">
       <span style="font-size:12px;font-weight:600;color:rgba(0,0,0,0.45);">범례:</span>
-      <span style="display:inline-flex;align-items:center;gap:4px;font-size:12px;"><span class="tcp tcp-filled">직접등록</span> 직접 작성한 POST</span>
+      <span style="display:inline-flex;align-items:center;gap:4px;font-size:12px;"><span class="tcp tcp-filled">직접등록</span> 직접 작성한 콘텐츠</span>
       <span style="display:inline-flex;align-items:center;gap:4px;font-size:12px;"><span class="tcp tcp-inherited">상속됨</span> 상위에서 자동 적용</span>
       <span style="display:inline-flex;align-items:center;gap:4px;font-size:12px;"><span class="tcp tcp-empty">누락</span> 등록 필요</span>
     </div>
@@ -6339,7 +6453,7 @@ function initPostSlots() {
         <span class="post-slot-badge">선택</span>
       </div>
       <div class="post-slot-empty">
-        <span class="post-slot-empty-hint">연결된 POST 없음</span>
+        <span class="post-slot-empty-hint">연결된 콘텐츠 없음</span>
         <button class="btn-add-post" onclick="openPSModal('${id}','${cat}')">+ 추가하기</button>
       </div>`;
   });
@@ -6347,8 +6461,8 @@ function initPostSlots() {
 
 function openPSModal(slotId, cat) {
   psCurrentSlotId = slotId;
-  document.getElementById('ps-modal-title').textContent = `"${cat}" POST 선택`;
-  document.getElementById('ps-modal-sub').textContent = '카탈로그 게시판에 등록된 POST 목록입니다';
+  document.getElementById('ps-modal-title').textContent = `"${cat}" 콘텐츠 선택`;
+  document.getElementById('ps-modal-sub').textContent = '카탈로그 게시판에 등록된 콘텐츠 목록입니다';
   document.getElementById('ps-search').value = '';
 
   const isFlightSlot = slotId.startsWith('pslot-flight-');
@@ -6498,13 +6612,13 @@ function renderPSList(cat, q) {
   const list = document.getElementById('ps-list');
   if (!filtered.length) {
     const hints = {
-      airline: !airline ? '위 기본 정보에서 항공사를 먼저 선택하면<br>해당 항공사 POST가 표시됩니다' : '해당 항공사 POST가 없습니다',
-      airport: (!dep && !arr) ? '항공편 출발/도착 공항을 먼저 선택하면<br>해당 공항 POST가 표시됩니다' : '해당 공항 POST가 없습니다',
-      hotel: !hotelName ? '숙소를 먼저 선택하면 해당 숙소 POST가 표시됩니다' : '해당 숙소 POST가 없습니다',
-      room: roomName === '전체' ? '객실 탭에서 열면 해당 객실 POST가 표시됩니다' : `"${roomName}" 객실 POST가 없습니다`,
-      common: '등록된 공통 POST가 없습니다',
+      airline: !airline ? '위 기본 정보에서 항공사를 먼저 선택하면<br>해당 항공사 콘텐츠가 표시됩니다' : '해당 항공사 콘텐츠가 없습니다',
+      airport: (!dep && !arr) ? '항공편 출발/도착 공항을 먼저 선택하면<br>해당 공항 콘텐츠가 표시됩니다' : '해당 공항 콘텐츠가 없습니다',
+      hotel: !hotelName ? '숙소를 먼저 선택하면 해당 숙소 콘텐츠가 표시됩니다' : '해당 숙소 콘텐츠가 없습니다',
+      room: roomName === '전체' ? '객실 탭에서 열면 해당 객실 콘텐츠가 표시됩니다' : `"${roomName}" 객실 콘텐츠가 없습니다`,
+      common: '등록된 공통 콘텐츠가 없습니다',
     };
-    list.innerHTML = `<div style="text-align:center;padding:40px 24px;color:rgba(0,0,0,0.35);font-size:13px;line-height:1.9;">${hints[psCurTab] || '등록된 POST가 없습니다'}</div>`;
+    list.innerHTML = `<div style="text-align:center;padding:40px 24px;color:rgba(0,0,0,0.35);font-size:13px;line-height:1.9;">${hints[psCurTab] || '등록된 콘텐츠가 없습니다'}</div>`;
     return;
   }
   list.innerHTML = filtered.map(p => `
@@ -6545,7 +6659,7 @@ function removePost(slotId, cat) {
       <span class="post-slot-badge">선택</span>
     </div>
     <div class="post-slot-empty">
-      <span class="post-slot-empty-hint">연결된 POST 없음</span>
+      <span class="post-slot-empty-hint">연결된 콘텐츠 없음</span>
       <button class="btn-add-post" onclick="openPSModal('${slotId}','${cat}')">+ 추가하기</button>
     </div>`;
 }
@@ -6767,7 +6881,7 @@ function renderHotelInfoTabs(hotelName) {
     const cat = slot.dataset.cat;
     const id = slot.id;
     slot.innerHTML = `<div class="post-slot-header"><span class="post-slot-cat">${cat}</span><span class="post-slot-badge">선택</span></div>
-      <div class="post-slot-empty"><span class="post-slot-empty-hint">연결된 POST 없음</span>
+      <div class="post-slot-empty"><span class="post-slot-empty-hint">연결된 콘텐츠 없음</span>
       <button class="btn-add-post" onclick="openPSModal('${id}','${cat}')">+ 추가하기</button></div>`;
   });
 }
@@ -7444,7 +7558,7 @@ function wizSelectCatalogType(el, type) {
   if (typename) typename.textContent = type === '공통' ? '공통 콘텐츠' : type;
 
   if (type === '공통') {
-    document.getElementById('wiz2-catalog').innerHTML = '<div class="wiz-section-tag blue"><div class="wst-num">2</div> 대상 및 적용 범위</div><div class="wiz-step-title">전체 공통 POST 등록</div><div class="wiz-step-sub">모든 상품에 공통 적용되는 POST입니다. 대상 선택 없이 바로 내용을 작성할 수 있습니다.</div>';
+    document.getElementById('wiz2-catalog').innerHTML = '<div class="wiz-section-tag blue"><div class="wst-num">2</div> 대상 및 적용 범위</div><div class="wiz-step-title">전체 공통 콘텐츠 등록</div><div class="wiz-step-sub">모든 상품에 공통 적용되는 콘텐츠입니다. 대상 선택 없이 바로 내용을 작성할 수 있습니다.</div>';
     wizRevealSection3();
   } else if (type !== '객실') {
     // 항공사/공항/숙소/여행지/국가/스팟: 검색 기반 UI 복원
@@ -7687,7 +7801,7 @@ function wizNext() {
     return;
   }
   const cats = wizPosts.map(p => `✅ ${p.category}${p.title ? ' — ' + p.title : ''}`).join('\n');
-  alert(`POST ${wizPosts.length}개가 등록되었습니다!\n\n${cats}`);
+  alert(`콘텐츠 ${wizPosts.length}개가 등록되었습니다!\n\n${cats}`);
   showView('list');
 }
 
@@ -7757,7 +7871,7 @@ function wizBuildProdKey() {
   if (label) { document.getElementById('wiz2-prod-preview').style.display = 'block'; document.getElementById('wiz2-prod-preview-label').textContent = label; }
 }
 
-// ===== 일괄 POST 항목 관리 =====
+// ===== 일괄 콘텐츠 항목 관리 =====
 let wizPostIdSeq = 1;
 let wizPosts = [];
 const WIZ_CATEGORIES = ['소개','핵심포인트','스페셜 혜택','포함사항','불포함사항','자주 묻는 질문','취소환불규정','유의사항','안내사항','출발 전 안내','수하물 규정'];
@@ -7777,7 +7891,7 @@ function addWizPost() {
 }
 
 function removeWizPost(id) {
-  if (wizPosts.length <= 1) { alert('최소 1개의 POST 항목이 필요합니다.'); return; }
+  if (wizPosts.length <= 1) { alert('최소 1개의 콘텐츠 항목이 필요합니다.'); return; }
   // 현재 입력값 저장
   saveWizPostValues();
   wizPosts = wizPosts.filter(p => p.id !== id);
@@ -7900,7 +8014,7 @@ function renderWizPosts() {
   if (countEl) countEl.textContent = wizPosts.length;
   const nextBtn = document.getElementById('wiz-next-btn');
   if (nextBtn && wizState.step === 3) {
-    nextBtn.textContent = `✓ POST ${wizPosts.length}개 등록`;
+    nextBtn.textContent = `✓ 콘텐츠 ${wizPosts.length}개 등록`;
     nextBtn.style.background = wizPosts.length > 1 ? '#722ed1' : '#1677ff';
     nextBtn.style.borderColor = wizPosts.length > 1 ? '#722ed1' : '#1677ff';
   }
@@ -8106,8 +8220,8 @@ function buildStep3() {
   document.getElementById('s3-sup-label').textContent = s1Supplier || '공통';
   document.getElementById('s3-type-label').textContent = typeLabels[s1FileType];
   const confirmMsg = s1Supplier && s1Supplier !== '공통'
-    ? `${s1Supplier} 전용 POST로 등록됩니다`
-    : '전체 공통 POST로 등록됩니다';
+    ? `${s1Supplier} 전용 콘텐츠로 등록됩니다`
+    : '전체 공통 콘텐츠로 등록됩니다';
   document.getElementById('s3-confirm-msg').textContent = confirmMsg;
 
   // 카탈로그 레이블
@@ -8307,7 +8421,7 @@ function modalNext() {
   } else if (step === 3) {
     const checked = document.querySelectorAll('.pc-check:checked').length;
     closeAiModal();
-    setTimeout(() => alert(`✅ POST ${checked}개가 성공적으로 등록되었습니다!\n목록에서 확인하세요.`), 100);
+    setTimeout(() => alert(`✅ 콘텐츠 ${checked}개가 성공적으로 등록되었습니다!\n목록에서 확인하세요.`), 100);
   }
 }
 function modalPrev() { if (step === 3) { step = 1; renderStep(); } }
@@ -8617,10 +8731,10 @@ function removeItinDay(di) {
   renderItinerary();
 }
 
-// ===== 파트너스 상품 POST 관리 =====
+// ===== 파트너스 상품 콘텐츠 관리 =====
 const POST_CATS_PRODUCT = ['소개','핵심포인트','스페셜 혜택','포함사항','불포함사항','유의사항','안내사항','취소환불규정','자주 묻는 질문'];
 const CAT_ICONS = {'소개':'🏠','핵심포인트':'⭐','스페셜 혜택':'🎁','포함사항':'✅','불포함사항':'❌','유의사항':'⚠️','안내사항':'📋','취소환불규정':'💳','자주 묻는 질문':'❓'};
-// Stock POST는 항상 노출 (토글 불가)
+// Stock 콘텐츠는 항상 노출 (토글 불가)
 
 // Stock별 연결 POST (어드민이 등록한 것들 시뮬레이션)
 const stockPosts = {
@@ -8699,7 +8813,7 @@ const stockPosts = {
   },
 };
 
-// 파트너스가 추가한 상품 POST
+// 파트너스가 추가한 상품 콘텐츠
 let partnerProductPosts = {};
 
 let ppcCurrentCat = '';
@@ -8714,7 +8828,7 @@ function renderPartnerPosts() {
   const tVal = document.getElementById('pp-tour')?.value || '';
   const selectedStocks = [fVal, hVal, tVal].filter(Boolean);
 
-  // Stock POST 합산 (카테고리별)
+  // Stock 콘텐츠 합산 (카테고리별)
   const mergedStockPosts = {};
   selectedStocks.forEach(sk => {
     const sd = stockPosts[sk];
@@ -8725,10 +8839,10 @@ function renderPartnerPosts() {
     });
   });
 
-  // 모든 카테고리 (Stock + 상품 POST 합집합)
+  // 모든 카테고리 (Stock + 상품 콘텐츠 합집합)
   const allCats = new Set([...POST_CATS_PRODUCT, ...Object.keys(mergedStockPosts), ...Object.keys(partnerProductPosts)]);
   const orderedCats = POST_CATS_PRODUCT.filter(c => allCats.has(c));
-  // Stock POST에만 있는 카테고리 추가
+  // Stock 콘텐츠에만 있는 카테고리 추가
   Object.keys(mergedStockPosts).forEach(c => { if (!orderedCats.includes(c)) orderedCats.push(c); });
 
   const area = document.getElementById('pp-post-area');
@@ -8742,7 +8856,7 @@ function renderPartnerPosts() {
     const stockItems = sps.map(p => {
       return `
       <div class="pp-post-item stock-post">
-        <span class="pp-post-lock" title="Stock POST (수정 불가)">🔒</span>
+        <span class="pp-post-lock" title="Stock 콘텐츠 (수정 불가)">🔒</span>
         <div class="pp-post-info">
           <div class="pp-post-mgmt">${p.mgmt}</div>
           <div class="pp-post-meta">#${p.id} · ${p.source} · ${p.stockType}</div>
@@ -8780,10 +8894,10 @@ function renderPartnerPosts() {
         </div>
         ${stockItems}
         ${productItems}
-        ${!hasAny ? '<div style="padding:16px;text-align:center;color:rgba(0,0,0,0.25);font-size:13px;border:1px dashed #e8e8e8;border-radius:8px;">등록된 POST가 없습니다</div>' : ''}
+        ${!hasAny ? '<div style="padding:16px;text-align:center;color:rgba(0,0,0,0.25);font-size:13px;border:1px dashed #e8e8e8;border-radius:8px;">등록된 콘텐츠가 없습니다</div>' : ''}
         <div class="pp-add-row">
           <button class="btn btn-default btn-sm" onclick="openPartnerPostCreate('${cat}')" style="display:flex;align-items:center;gap:4px;">
-            <span style="font-size:14px;">✏️</span> POST 직접 작성
+            <span style="font-size:14px;">✏️</span> 콘텐츠 직접 작성
           </button>
         </div>
       </div>`;
@@ -8800,7 +8914,7 @@ function openPartnerPostCreate(cat) {
   document.getElementById('ppc-mgmt').value = '';
   document.getElementById('ppc-title').value = '';
   document.getElementById('ppc-content').value = '';
-  document.getElementById('ppc-modal-title').textContent = `"${cat}" POST 직접 작성`;
+  document.getElementById('ppc-modal-title').textContent = `"${cat}" 콘텐츠 직접 작성`;
   const imgSection = document.getElementById('ppc-image-section');
   imgSection.style.display = PPC_IMAGE_CATS.includes(cat) ? '' : 'none';
   document.getElementById('ppc-image-list').innerHTML = '';
@@ -8859,7 +8973,7 @@ function editPartnerPost(cat, idx) {
   document.getElementById('ppc-mgmt').value = p.mgmt;
   document.getElementById('ppc-title').value = p.title;
   document.getElementById('ppc-content').value = p.content || '';
-  document.getElementById('ppc-modal-title').textContent = `"${cat}" POST 수정`;
+  document.getElementById('ppc-modal-title').textContent = `"${cat}" 콘텐츠 수정`;
   const imgSection = document.getElementById('ppc-image-section');
   imgSection.style.display = PPC_IMAGE_CATS.includes(cat) ? '' : 'none';
   renderPpcImages();
@@ -8868,13 +8982,13 @@ function editPartnerPost(cat, idx) {
 }
 
 function removePartnerPost(cat, idx) {
-  if (!confirm('이 상품 POST를 삭제하시겠습니까?')) return;
+  if (!confirm('이 상품 콘텐츠를 삭제하시겠습니까?')) return;
   partnerProductPosts[cat].splice(idx, 1);
   renderPartnerPosts();
 }
 
 // ================================================================
-// ===== v4 규칙 기반 POST 등록 =====
+// ===== v4 규칙 기반 콘텐츠 등록 =====
 // ================================================================
 
 // ---- 실제 DB 데이터 기반 마스터 데이터 ----
@@ -9002,18 +9116,19 @@ const V4_CATEGORY_RECOMMENDATIONS = {
 
 // ---- 프리셋 정의 ----
 const V4_PRESETS = {
-  all:             { fields: [] },
-  product_code:    { fields: ['productCodes'] },         // 여러 상품코드 입력
-  operator:        { fields: ['operator'] },
-  accom:           { fields: ['accom'] },
-  room:            { fields: ['accom','room'] },
-  hotel_voucher:   { fields: ['hotelVoucher','roomRate'] },  // 숙박권 ID → 객실요금표 ID (선택)
-  flight_voucher:  { fields: ['flightVoucher'] },           // 항공권 ID 선택
-  tour:            { fields: ['tour'] },
-  place:           { fields: ['place'] },
-  accom:           { fields: ['accom'] },
-  room:            { fields: ['accom','room'] },
-  spot:            { fields: ['spot'] },
+  all:                  { fields: [] },
+  product_code:         { fields: ['productCodes'] },
+  operator:             { fields: ['operator'] },
+  op_accom:             { fields: ['operator','accom'] },
+  op_accom_room:        { fields: ['operator','accom','room'] },
+  op_accom_meal:        { fields: ['operator','accom','meal'] },           // 식사 옵션 분리
+  op_accom_room_meal:   { fields: ['operator','accom','room','meal'] },    // 객실 + 식사 분리
+  op_airline:           { fields: ['operator','airline'] },
+  op_spot:              { fields: ['operator','spot'] },
+  tour:                 { fields: ['tour'] },
+  hotel_voucher:        { fields: ['hotelVoucher'], optional: ['room','meal'] },  // 객실·식사 선택적
+  flight_voucher:       { fields: ['flightVoucher'] },
+  place:                { fields: ['place'] },
 };
 
 let v4State = {
@@ -9095,22 +9210,159 @@ function v4SelectPreset(key, el) {
   v4State.flightVoucher = null;
 
   const preset = V4_PRESETS[key];
+  const inlineExpand = document.getElementById('v4-inline-expand');
+  const inlineSummary = document.getElementById('v4-inline-summary');
 
   // 카테고리 추천 업데이트
   v4RenderCatChips();
 
-  // 조건 패널 보이기
-  const panel = document.getElementById('v4-condition-panel');
-  if (preset.fields.length === 0) {
-    // 전체 공통 — 조건 패널 없이 바로 매칭
-    panel.classList.remove('shown');
+  // 인라인 확장을 선택한 카드 바로 뒤에 이동
+  inlineSummary.classList.remove('show');
+  const allFields = [...preset.fields, ...(preset.optional || [])];
+  if (allFields.length === 0) {
+    // 전체 공통 — 조건 없이 바로 요약
+    inlineExpand.classList.remove('open');
+    el.insertAdjacentElement('afterend', inlineSummary);
+    inlineSummary.classList.add('show');
+    document.getElementById('v4-summary-tags').innerHTML = '<span style="font-size:12px;color:#0958d9;">조건 없음 — 모든 상품에 적용</span>';
     v4RenderMatchPreview();
     v4UpdateRuleTags();
     v4AutoAdminName();
   } else {
-    panel.classList.add('shown');
-    v4RenderConditionFields(preset.fields);
+    // 인라인 확장을 카드 바로 뒤에 배치
+    el.insertAdjacentElement('afterend', inlineExpand);
+    inlineExpand.classList.add('open');
+    v4RenderInlineFields(allFields, preset.optional || []);
   }
+}
+
+// 인라인 조건 입력 렌더링
+function v4RenderInlineFields(fields, optionalFields) {
+  if (!optionalFields) optionalFields = V4_PRESETS[v4State.preset]?.optional || [];
+  const subLabels = { operator:'공급사', accom:'숙소', room:'객실', meal:'식사 옵션', airline:'항공사', place:'여행지', productCode:'상품코드', productCodes:'상품코드', spot:'스팟/체험', tour:'투어/티켓', hotelVoucher:'숙박권', roomRate:'객실요금표', flightVoucher:'항공권' };
+  const hasOptional = optionalFields.length > 0;
+
+  const html = fields.map(f => {
+    const label = subLabels[f];
+    const isOpt = optionalFields.includes(f);
+    const optBadge = isOpt ? ' <span style="font-size:9px;color:rgba(0,0,0,0.25);font-weight:400;">(선택)</span>' : '';
+    const filtered = v4GetFilteredOptions(f);
+    if (f === 'productCodes') {
+      return `<div style="margin-bottom:8px;">
+        <div style="font-size:11px;font-weight:600;color:rgba(0,0,0,0.45);margin-bottom:4px;">${label}${optBadge}</div>
+        <textarea class="fc" rows="2" style="font-size:12px;resize:vertical;width:100%;" placeholder="상품코드 입력 (쉼표/줄바꿈 구분)" oninput="v4SetProductCodes(this.value);v4CheckInlineComplete()">${v4State.productCodes||''}</textarea>
+      </div>`;
+    }
+    if (f === 'meal') {
+      return `<div style="margin-bottom:8px;">
+        <div style="font-size:11px;font-weight:600;color:rgba(0,0,0,0.45);margin-bottom:4px;">${label}${optBadge}</div>
+        <div style="display:flex;gap:4px;flex-wrap:wrap;">
+          ${filtered.map(m => `<button class="v4-chip${v4State.meal===m.code?' on':''}" onclick="v4SetMeal('${m.code}',this);v4CheckInlineComplete()" style="font-size:11px;padding:3px 10px;">${m.label}</button>`).join('')}
+          ${filtered.length===0?'<span style="font-size:11px;color:rgba(0,0,0,0.25);">상위 조건을 먼저 선택하세요</span>':''}
+        </div>
+      </div>`;
+    }
+    const options = filtered.map(item => {
+      const id = item.id || item.code || item.name;
+      const name = item.name || item.label || id;
+      const place = item.place ? ` (${item.place})` : '';
+      const iata = item.iata ? ` (${item.iata})` : '';
+      const sel = v4State[f] == id ? ' selected' : '';
+      return `<option value="${id}"${sel}>${name}${place}${iata}</option>`;
+    }).join('');
+    return `<div style="margin-bottom:8px;">
+      <div style="font-size:11px;font-weight:600;color:rgba(0,0,0,0.45);margin-bottom:4px;">${label}${optBadge}</div>
+      <select class="fc" style="width:100%;height:30px;font-size:12px;" onchange="v4SetField('${f}',this.value);v4RenderInlineFields(fields);v4CheckInlineComplete()">
+        <option value="">${isOpt ? '전체 (선택 안 함)' : '선택하세요'} (${filtered.length}개)</option>
+        ${options}
+      </select>
+    </div>`;
+  }).join('');
+
+  // optional 필드가 있으면 "적용" 버튼 추가
+  const applyBtn = hasOptional ? `<button onclick="v4ApplyInline()" style="margin-top:4px;width:100%;padding:7px;border:none;border-radius:6px;background:#1677ff;color:#fff;font-size:12px;font-weight:600;cursor:pointer;font-family:inherit;">적용 →</button>` : '';
+
+  document.getElementById('v4-inline-fields').innerHTML = html + applyBtn;
+  // 기존 condition panel에도 렌더 (매칭 미리보기용)
+  v4RenderConditionFields(fields);
+}
+
+// optional 있는 프리셋에서 "적용" 버튼 클릭
+function v4ApplyInline() {
+  const preset = V4_PRESETS[v4State.preset];
+  if (!preset) return;
+  // 필수 필드만 체크
+  const requiredFilled = preset.fields.every(f => {
+    if (f === 'productCodes') return v4State._parsedCodes && v4State._parsedCodes.length > 0;
+    if (f === 'meal') return !!v4State.meal;
+    return !!v4State[f];
+  });
+  if (!requiredFilled) { alert('필수 조건을 선택해주세요.'); return; }
+  v4ShowInlineSummary();
+}
+
+// 조건 완료 체크 → 요약으로 전환
+function v4CheckInlineComplete() {
+  const preset = V4_PRESETS[v4State.preset];
+  if (!preset) return;
+  // optional 필드가 있으면 자동완료 안 함 (적용 버튼 사용)
+  if (preset.optional && preset.optional.length > 0) return;
+  const allFilled = preset.fields.every(f => {
+    if (f === 'productCodes') return v4State._parsedCodes && v4State._parsedCodes.length > 0;
+    if (f === 'meal') return !!v4State.meal;
+    return !!v4State[f];
+  });
+  if (allFilled) v4ShowInlineSummary();
+}
+
+// 요약 표시 (공통)
+function v4ShowInlineSummary() {
+  const preset = V4_PRESETS[v4State.preset];
+  const allFields = [...preset.fields, ...(preset.optional || [])];
+  const inlineExpand = document.getElementById('v4-inline-expand');
+  const inlineSummary = document.getElementById('v4-inline-summary');
+  const selectedCard = document.querySelector('#v4-preset-grid .preset-card.selected');
+  inlineExpand.classList.remove('open');
+  if (selectedCard) selectedCard.insertAdjacentElement('afterend', inlineSummary);
+  const subLabels = { operator:'공급사', accom:'숙소', room:'객실', meal:'식사', airline:'항공사', place:'여행지', productCodes:'상품코드', spot:'스팟/체험', tour:'투어/티켓', hotelVoucher:'숙박권', flightVoucher:'항공권' };
+  const tags = allFields.filter(f => {
+    if (f === 'productCodes') return v4State._parsedCodes && v4State._parsedCodes.length > 0;
+    if (f === 'meal') return !!v4State.meal;
+    return !!v4State[f];
+  }).map(f => {
+    const label = subLabels[f] || f;
+    let val = '';
+    if (f === 'operator') val = V4_OPERATORS.find(o=>o.id==v4State.operator)?.name || v4State.operator;
+    else if (f === 'accom') val = V4_ACCOMMODATIONS.find(a=>a.id==v4State.accom)?.name || v4State.accom;
+    else if (f === 'room') val = V4_ROOMS.find(r=>r.id==v4State.room)?.name || v4State.room;
+    else if (f === 'meal') val = V4_MEALS.find(m=>m.code==v4State.meal)?.label || v4State.meal;
+    else if (f === 'airline') val = V4_AIRLINES.find(a=>a.id==v4State.airline)?.name || v4State.airline;
+    else if (f === 'place') val = V4_PLACES.find(p=>p.id==v4State.place)?.name || v4State.place;
+    else if (f === 'productCodes') val = v4State._parsedCodes?.length + '개';
+    else if (f === 'spot') val = V4_SPOTS.find(s=>s.id==v4State.spot)?.name || v4State.spot;
+    else if (f === 'tour') val = V4_TOURS.find(t=>t.id==v4State.tour)?.name || v4State.tour;
+    else if (f === 'hotelVoucher') val = V4_HOTEL_VOUCHERS.find(h=>h.id==v4State.hotelVoucher)?.name || v4State.hotelVoucher;
+    else if (f === 'flightVoucher') val = V4_FLIGHT_VOUCHERS.find(fv=>fv.id==v4State.flightVoucher)?.name || v4State.flightVoucher;
+    else val = v4State[f];
+    return `<span class="rule-tag" style="font-size:10px;padding:2px 8px;">${label}: ${val}</span>`;
+  }).join('');
+  document.getElementById('v4-summary-tags').innerHTML = tags;
+  inlineSummary.classList.add('show');
+  v4RenderMatchPreview();
+  v4UpdateRuleTags();
+  v4AutoAdminName();
+}
+
+// 요약에서 수정 클릭 → 다시 인라인 펼침
+function v4ReopenInline() {
+  const inlineExpand = document.getElementById('v4-inline-expand');
+  const inlineSummary = document.getElementById('v4-inline-summary');
+  const selectedCard = document.querySelector('#v4-preset-grid .preset-card.selected');
+  inlineSummary.classList.remove('show');
+  if (selectedCard) selectedCard.insertAdjacentElement('afterend', inlineExpand);
+  inlineExpand.classList.add('open');
+  const preset = V4_PRESETS[v4State.preset];
+  if (preset) v4RenderInlineFields(preset.fields);
 }
 
 function v4GetFilteredOptions(field) {
@@ -9143,7 +9395,7 @@ function v4GetFilteredOptions(field) {
 }
 
 function v4RenderConditionFields(fields) {
-  const subLabels = { operator:'공급사', accom:'숙소', room:'객실', meal:'식사(객실요금)', airline:'항공사', place:'여행지', productCode:'상품코드', productCodes:'상품코드', spot:'스팟/체험', tour:'투어/티켓', hotelVoucher:'숙박권', roomRate:'객실요금표', flightVoucher:'항공권' };
+  const subLabels = { operator:'공급사', accom:'숙소', room:'객실', meal:'식사 옵션', airline:'항공사', place:'여행지', productCode:'상품코드', productCodes:'상품코드', spot:'스팟/체험', tour:'투어/티켓', hotelVoucher:'숙박권', roomRate:'객실요금표', flightVoucher:'항공권' };
 
   const html = fields.map(f => {
     const label = subLabels[f];
@@ -9153,7 +9405,7 @@ function v4RenderConditionFields(fields) {
         <div class="v4-field-label" style="padding-top:6px;">${label}</div>
         <div class="v4-field-val" style="flex:1;">
           <textarea class="fc" rows="3" style="font-size:12px;resize:vertical;" placeholder="상품코드를 입력하세요 (쉼표 또는 줄바꿈으로 구분)&#10;예: PK-PQ-001, PK-DN-003" oninput="v4SetProductCodes(this.value)">${v4State.productCodes||''}</textarea>
-          <div style="font-size:10px;color:rgba(0,0,0,0.3);margin-top:4px;">같은 상품코드의 행사는 동일한 POST를 공유합니다</div>
+          <div style="font-size:10px;color:rgba(0,0,0,0.3);margin-top:4px;">같은 상품코드의 행사는 동일한 콘텐츠를 공유합니다</div>
         </div>
       </div>`;
     }
@@ -9321,7 +9573,7 @@ function v4RenderMatchPreview() {
   box.innerHTML = `<div class="v4-match-box">
     <div style="display:flex;align-items:center;gap:12px;margin-bottom:10px;">
       <div><div class="v4-match-count">${matched.length}</div><div class="v4-match-label">개 상품에 적용</div></div>
-      <div style="flex:1;font-size:11px;color:rgba(0,0,0,0.45);line-height:1.6;">이 POST를 등록하면 아래 상품들에<br>자동으로 연결됩니다</div>
+      <div style="flex:1;font-size:11px;color:rgba(0,0,0,0.45);line-height:1.6;">이 콘텐츠를 등록하면 아래 상품들에<br>자동으로 연결됩니다</div>
     </div>
     <div class="v4-match-products" style="max-height:200px;overflow-y:auto;">${previewHtml}</div>
   </div>`;
@@ -9483,12 +9735,12 @@ function v4Save(status) {
   const matched = v4MatchProducts();
   const statusLabel = { '대기':'⏳ 대기', '운영중':'🟢 운영중', '중단':'🔴 중단' }[status];
   const msg = status === '대기'
-    ? `POST를 임시저장할까요?\n상태: ${statusLabel}\n\n※ 대기 상태에서는 상품에 연결되지 않습니다.`
-    : `"${title}" POST를 저장하고\n${matched.length}개 상품에 연결할까요?\n상태: ${statusLabel}`;
+    ? `콘텐츠를 임시저장할까요?\n상태: ${statusLabel}\n\n※ 대기 상태에서는 상품에 연결되지 않습니다.`
+    : `"${title}" 콘텐츠를 저장하고\n${matched.length}개 상품에 연결할까요?\n상태: ${statusLabel}`;
   if (confirm(msg)) {
     alert(status === '대기'
-      ? '⏳ POST가 임시저장되었습니다. (대기 상태)'
-      : `🟢 POST가 저장되었습니다.\n→ ${matched.length}개 상품에 자동 연결됩니다.`);
+      ? '⏳ 콘텐츠가 임시저장되었습니다. (대기 상태)'
+      : `🟢 콘텐츠가 저장되었습니다.\n→ ${matched.length}개 상품에 자동 연결됩니다.`);
     showView('list');
   }
 }
@@ -9560,7 +9812,7 @@ function v4RenderBulkList() {
         </div>
         <div class="form-item" style="margin-bottom:12px;">
           <div class="form-label">제목 <span class="req">*</span></div>
-          <input class="fc" type="text" value="${p.title}" placeholder="POST 제목" oninput="v4BulkSetTitle(${i},this.value)">
+          <input class="fc" type="text" value="${p.title}" placeholder="콘텐츠 제목" oninput="v4BulkSetTitle(${i},this.value)">
         </div>
         <div class="form-item">
           <div class="form-label">본문</div>
@@ -9666,12 +9918,12 @@ function v4BulkSave(status) {
   const statusLabel = { '대기':'⏳ 대기', '운영중':'🟢 운영중', '중단':'🔴 중단' }[status];
   const cnt = status === '대기' ? v4State.bulkPosts.length : filled.length;
   const msg = status === '대기'
-    ? `${cnt}개 POST를 임시저장할까요?\n상태: ${statusLabel}`
-    : `${filled.length}개 POST를 저장하고\n${matched.length}개 상품에 연결할까요?\n상태: ${statusLabel}`;
+    ? `${cnt}개 콘텐츠를 임시저장할까요?\n상태: ${statusLabel}`
+    : `${filled.length}개 콘텐츠를 저장하고\n${matched.length}개 상품에 연결할까요?\n상태: ${statusLabel}`;
   if (confirm(msg)) {
     alert(status === '대기'
-      ? `⏳ ${cnt}개 POST가 임시저장되었습니다. (대기 상태)`
-      : `🟢 ${filled.length}개 POST가 저장되었습니다.\n→ ${matched.length}개 상품에 자동 연결됩니다.`);
+      ? `⏳ ${cnt}개 콘텐츠가 임시저장되었습니다. (대기 상태)`
+      : `🟢 ${filled.length}개 콘텐츠가 저장되었습니다.\n→ ${matched.length}개 상품에 자동 연결됩니다.`);
     showView('list');
   }
 }
@@ -9754,14 +10006,16 @@ const V4_SUBJECTS = [
   { key: 'operatorId',      label: '공급사',       type: 'select',  options: () => V4_OPERATORS.map(o => ({val: String(o.id), label: o.name})) },
   { key: 'accommodationId', label: '숙소',         type: 'select',  options: () => V4_ACCOMMODATIONS.map(a => ({val: String(a.id), label: `${a.name} (${a.place})`})) },
   { key: 'roomId',          label: '객실',         type: 'select',  options: () => V4_ROOMS.map(r => ({val: r.id, label: r.name})) },
-  { key: 'accomMealPlan',   label: '식사',         type: 'select',  options: () => V4_MEALS.map(m => ({val: m.code, label: m.label})) },
+  { key: 'accomMealPlan',   label: '식사 옵션',    type: 'select',  options: () => V4_MEALS.map(m => ({val: m.code, label: m.label})) },
   { key: 'airlineId',       label: '항공사',       type: 'select',  options: () => V4_AIRLINES.map(a => ({val: String(a.id), label: `${a.name} (${a.iata})`})) },
   { key: 'targetPlaceId',   label: '여행지',       type: 'select',  options: () => V4_PLACES.map(p => ({val: String(p.id), label: p.name})) },
   { key: 'startAirportId',  label: '출발공항',     type: 'text',    placeholder: '공항 ID (예: 971)' },
-  { key: 'accomEarlyCheckIn',label: '얼리체크인',  type: 'bool' },
-  { key: 'accomPickup',     label: '픽업포함',     type: 'bool' },
-  { key: 'conductor',       label: '인솔자포함',   type: 'bool' },
-  { key: 'guide',           label: '가이드포함',   type: 'bool' },
+  { key: 'accomEarlyCheckIn', label: '얼리체크인',    type: 'bool' },
+  { key: 'accomLateCheckOut',label: '레이트체크아웃', type: 'bool' },
+  { key: 'accomTransfer',   label: '이동(셔틀/픽업)', type: 'bool' },
+  { key: 'accomPickup',     label: '픽업포함',      type: 'bool' },
+  { key: 'conductor',       label: '인솔자포함',    type: 'bool' },
+  { key: 'guide',           label: '가이드포함',    type: 'bool' },
   { key: 'spotActivityId',  label: '스팟/체험',    type: 'select',  options: () => V4_SPOTS.map(s => ({val: s.id, label: s.name})) },
   { key: 'hotelVoucherId',  label: '숙박권 ID',   type: 'select',  options: () => V4_HOTEL_VOUCHERS.map(h => ({val: h.id, label: `${h.id} · ${h.name}`})) },
   { key: 'roomRateId',      label: '객실요금표 ID',type: 'select',  options: () => V4_ROOM_RATES.map(r => ({val: r.id, label: `${r.id} · ${r.name}`})) },
@@ -9950,11 +10204,11 @@ function v4ApplyCustom() {
     const s = V4_SUBJECTS.find(x => x.key === c.sub);
     const label = s ? s.label : c.sub;
     return `<span style="display:inline-flex;align-items:center;gap:3px;font-size:11px;font-weight:600;padding:2px 8px;border-radius:6px;background:#f0f5ff;color:#2f54eb;border:1px solid #adc6ff;">${label}</span>`;
-  }).join(`<span style="font-size:10px;color:rgba(0,0,0,0.3);margin:0 2px;">${op==='all'?'AND':'OR'}</span>`);
+  }).join(`<span style="font-size:10px;color:rgba(0,0,0,0.3);margin:0 2px;">AND</span>`);
 
   document.getElementById('v4-condition-fields').innerHTML = `
     <div class="v4-condition-box">
-      <div class="v4-condition-title">🛠️ 직접 구성한 조건 <span style="font-size:10px;font-weight:400;color:rgba(0,0,0,0.35);">(${op === 'all' ? '모두 만족' : '하나라도 만족'})</span></div>
+      <div class="v4-condition-title">🛠️ 직접 구성한 조건 <span style="font-size:10px;font-weight:400;color:rgba(0,0,0,0.35);">(모두 만족 · AND)</span></div>
       ${validClues.map((c,i) => {
         const s = V4_SUBJECTS.find(x => x.key === c.sub);
         const label = s ? s.label : c.sub;
@@ -9965,7 +10219,7 @@ function v4ApplyCustom() {
               : s.options().find(o=>o.val===c.value)?.label || c.value)
           : c.value;
         return `<div style="display:flex;align-items:center;gap:6px;font-size:12px;padding:5px 0;border-bottom:1px solid #f0f0f0;">
-          ${i > 0 ? `<span style="font-size:10px;background:#f0f0f0;border-radius:4px;padding:1px 5px;color:rgba(0,0,0,0.45);flex-shrink:0;">${op==='all'?'AND':'OR'}</span>` : '<span style="width:34px;flex-shrink:0;"></span>'}
+          ${i > 0 ? `<span style="font-size:10px;background:#f0f0f0;border-radius:4px;padding:1px 5px;color:rgba(0,0,0,0.45);flex-shrink:0;">AND</span>` : '<span style="width:34px;flex-shrink:0;"></span>'}
           <span style="font-weight:600;color:rgba(0,0,0,0.75);min-width:64px;">${label}</span>
           <span style="color:rgba(0,0,0,0.35);font-size:11px;">${opLabel}</span>
           <span style="color:#1677ff;font-weight:600;">${c.op==='isTrue'?'예' : c.op==='isFalse'?'아니오' : valLabel}</span>
@@ -10001,7 +10255,7 @@ function v4RenderCustomMatchPreview(clues, op) {
       if (c.op === 'isFalse') return !p[field];
       return true;
     });
-    return op === 'all' ? results.every(Boolean) : results.some(Boolean);
+    return results.every(Boolean); // AND only
   });
 
   const box = document.getElementById('v4-match-preview');
@@ -10013,7 +10267,7 @@ function v4RenderCustomMatchPreview(clues, op) {
     `<div class="v4-match-product-row"><span style="font-size:10px;background:#e6f4ff;color:#1677ff;border-radius:4px;padding:1px 5px;font-weight:700;flex-shrink:0;">#${p.id}</span><span style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${p.title}</span></div>`
   ).join('');
   const more = matched.length > 5 ? `<div style="font-size:11px;color:rgba(0,0,0,0.35);text-align:right;margin-top:4px;">+${matched.length-5}개 더...</div>` : '';
-  box.innerHTML = `<div class="v4-match-box"><div style="display:flex;align-items:center;gap:12px;margin-bottom:8px;"><div><div class="v4-match-count">${matched.length}</div><div class="v4-match-label">개 상품에 적용됩니다</div></div><div style="flex:1;font-size:11px;color:rgba(0,0,0,0.45);line-height:1.6;">이 POST를 등록하면 아래 상품들에<br>자동으로 연결됩니다</div></div><div class="v4-match-products">${previewItems}${more}</div></div>`;
+  box.innerHTML = `<div class="v4-match-box"><div style="display:flex;align-items:center;gap:12px;margin-bottom:8px;"><div><div class="v4-match-count">${matched.length}</div><div class="v4-match-label">개 상품에 적용됩니다</div></div><div style="flex:1;font-size:11px;color:rgba(0,0,0,0.45);line-height:1.6;">이 콘텐츠를 등록하면 아래 상품들에<br>자동으로 연결됩니다</div></div><div class="v4-match-products">${previewItems}${more}</div></div>`;
 }
 
 function v4UpdateCustomRuleTags(clues) {
@@ -10107,7 +10361,7 @@ function renderCoverage() {
     <div class="cov-stat-card"><div class="cov-stat-num" style="color:#1677ff;">${data.length}</div><div class="cov-stat-label">조회된 상품</div></div>
     <div class="cov-stat-card"><div class="cov-stat-num" style="color:${pctColor};">${pct}%</div><div class="cov-stat-label">평균 채움율</div></div>
     <div class="cov-stat-card"><div class="cov-stat-num" style="color:${incomplete>0?'#fa8c16':'#52c41a'};">${incomplete}</div><div class="cov-stat-label">미완성 상품</div></div>
-    <div class="cov-stat-card"><div class="cov-stat-num" style="color:${missingCnt>0?'#f5222d':'#52c41a'};">${missingCnt}</div><div class="cov-stat-label">누락 POST 수</div></div>
+    <div class="cov-stat-card"><div class="cov-stat-num" style="color:${missingCnt>0?'#f5222d':'#52c41a'};">${missingCnt}</div><div class="cov-stat-label">누락 콘텐츠 수</div></div>
   `;
 
   // 채움율 낮은순 정렬
@@ -10131,7 +10385,7 @@ function renderCoverage() {
       if (p.fill[i]) {
         html += `<td class="cov-td"><span class="cov-cell-fill" title="${cat}">✓</span></td>`;
       } else {
-        html += `<td class="cov-td"><span class="cov-cell-empty" title="${cat} POST 등록" onclick="covGoCreate('${p.name}','${cat}')">○</span></td>`;
+        html += `<td class="cov-td"><span class="cov-cell-empty" title="${cat} 콘텐츠 등록" onclick="covGoCreate('${p.name}','${cat}')">○</span></td>`;
       }
     });
     html += `<td class="cov-td">
@@ -10144,7 +10398,7 @@ function renderCoverage() {
 }
 
 function covGoCreate(productName, category) {
-  if (confirm(`"${productName}" 상품의 "${category}" POST를 등록할까요?\n\nv3 등록 위자드로 이동합니다.`)) {
+  if (confirm(`"${productName}" 상품의 "${category}" 콘텐츠를 등록할까요?\n\nv3 등록 위자드로 이동합니다.`)) {
     showView('create-v3');
   }
 }
@@ -10233,9 +10487,9 @@ function selectImpactPost(id) {
     <div style="padding:16px 24px;">
       <div class="impact-summary-box">
         <div style="font-size:14px;font-weight:700;color:#0958d9;margin-bottom:4px;">📌 ${selectedImpactPost.affected.length}개 상품에 적용 중</div>
-        <div style="font-size:12px;color:rgba(0,0,0,0.55);">이 POST를 수정하면 아래 상품들의 콘텐츠가 즉시 변경됩니다</div>
+        <div style="font-size:12px;color:rgba(0,0,0,0.55);">이 콘텐츠를 수정하면 아래 상품들의 콘텐츠가 즉시 변경됩니다</div>
       </div>
-      ${hasActiveRes ? `<div class="impact-warn-box">⚠️ <div><strong>주의:</strong> 진행 중인 예약이 있는 상품이 포함되어 있습니다. 이미 예약한 고객에게도 즉시 반영됩니다.</div></div>` : ''}
+      ${hasActiveRes ? `<div class="impact-warn-box">ℹ️ <div>진행 중인 예약이 있는 상품이 포함되어 있습니다. 기존 예약 건은 예약 당시 콘텐츠가 유지되며, 수정 내용은 이후 새 예약에 적용됩니다.</div></div>` : ''}
       <div style="font-size:12px;font-weight:600;color:rgba(0,0,0,0.45);margin-bottom:8px;text-transform:uppercase;letter-spacing:0.4px;">영향받는 상품 (${selectedImpactPost.affected.length})</div>
     </div>
     <div style="border-top:1px solid #f0f0f0;">
@@ -10250,14 +10504,71 @@ function selectImpactPost(id) {
             : `<span style="font-size:11px;color:rgba(0,0,0,0.25);">예약 없음</span>`}
         </div>`).join('')}
     </div>
+    <!-- 버전 이력 인라인 -->
+    <div style="padding:14px 24px;border-top:1px solid #f0f0f0;">
+      <div style="font-size:12px;font-weight:600;color:rgba(0,0,0,0.45);margin-bottom:10px;letter-spacing:0.3px;">🕘 버전 이력</div>
+      <div style="display:flex;flex-direction:column;gap:0;">
+        <div style="display:flex;align-items:flex-start;gap:10px;padding:8px 0;border-bottom:1px solid #f5f5f5;">
+          <div style="width:6px;height:6px;border-radius:50%;background:#1677ff;margin-top:5px;flex-shrink:0;"></div>
+          <div style="flex:1;">
+            <div style="display:flex;align-items:center;gap:6px;">
+              <span style="font-size:12px;font-weight:600;color:#1677ff;">v3 (현재)</span>
+              <span style="font-size:10px;color:rgba(0,0,0,0.3);">2026-04-16 14:30</span>
+              <span style="font-size:10px;background:#f6ffed;color:#389e0d;border:1px solid #b7eb8f;border-radius:4px;padding:0 4px;">운영중</span>
+            </div>
+            <div style="font-size:11px;color:rgba(0,0,0,0.45);margin-top:2px;">본문 수정 — 얼리체크인 시간 변경, 레이트체크아웃 추가</div>
+          </div>
+          <button class="btn btn-text btn-sm" onclick="var d=this.parentElement.nextElementSibling;d.style.display=d.style.display==='none'?'block':'none';this.textContent=d.style.display==='none'?'이력 확인 ▼':'접기 ▲'" style="font-size:10px;flex-shrink:0;">이력 확인 ▼</button>
+        </div>
+        <!-- v3 인라인 diff -->
+        <div style="display:none;margin:0 0 8px 16px;background:#fafafa;border:1px solid #f0f0f0;border-radius:8px;padding:10px 12px;font-size:11px;line-height:1.8;">
+          <div style="font-size:10px;font-weight:600;color:rgba(0,0,0,0.35);margin-bottom:6px;">v2 → v3 변경 내용</div>
+          <div style="margin-bottom:6px;"><span style="font-size:10px;font-weight:600;color:rgba(0,0,0,0.4);">본문</span></div>
+          <div style="background:#fff0f0;border-left:3px solid #f5222d;padding:2px 8px;margin:2px 0;color:#cf1322;text-decoration:line-through;">얼리체크인: 12:00부터 가능 (사전 요청 필수)</div>
+          <div style="background:#f0fff0;border-left:3px solid #52c41a;padding:2px 8px;margin:2px 0;color:#389e0d;">얼리체크인: 11:00부터 가능 (사전 요청 시, 선착순)</div>
+          <div style="background:#f0fff0;border-left:3px solid #52c41a;padding:2px 8px;margin:2px 0;color:#389e0d;">레이트 체크아웃: 14:00까지 (추가 비용 없음)</div>
+          <div style="margin-top:6px;"><span style="font-size:10px;color:rgba(0,0,0,0.25);">조건 · 제목 변경 없음</span></div>
+        </div>
+        <div style="display:flex;align-items:flex-start;gap:10px;padding:8px 0;border-bottom:1px solid #f5f5f5;">
+          <div style="width:6px;height:6px;border-radius:50%;background:#d9d9d9;margin-top:5px;flex-shrink:0;"></div>
+          <div style="flex:1;">
+            <div style="display:flex;align-items:center;gap:6px;">
+              <span style="font-size:12px;font-weight:500;color:rgba(0,0,0,0.65);">v2</span>
+              <span style="font-size:10px;color:rgba(0,0,0,0.3);">2026-04-10 11:00</span>
+              <span style="font-size:10px;background:#f6ffed;color:#389e0d;border:1px solid #b7eb8f;border-radius:4px;padding:0 4px;">운영중</span>
+            </div>
+            <div style="font-size:11px;color:rgba(0,0,0,0.45);margin-top:2px;">조건 변경 — 식사 옵션 BB 추가</div>
+          </div>
+          <button class="btn btn-text btn-sm" onclick="var d=this.parentElement.nextElementSibling;d.style.display=d.style.display==='none'?'block':'none';this.textContent=d.style.display==='none'?'이력 확인 ▼':'접기 ▲'" style="font-size:10px;flex-shrink:0;">이력 확인 ▼</button>
+        </div>
+        <!-- v2 인라인 diff -->
+        <div style="display:none;margin:0 0 8px 16px;background:#fafafa;border:1px solid #f0f0f0;border-radius:8px;padding:10px 12px;font-size:11px;line-height:1.8;">
+          <div style="font-size:10px;font-weight:600;color:rgba(0,0,0,0.35);margin-bottom:6px;">v1 → v2 변경 내용</div>
+          <div style="margin-bottom:6px;"><span style="font-size:10px;font-weight:600;color:rgba(0,0,0,0.4);">적용 조건</span></div>
+          <div style="background:#f0fff0;border-left:3px solid #52c41a;padding:2px 8px;margin:2px 0;color:#389e0d;">+ 식사 옵션 = BB (조식 포함)</div>
+          <div style="margin-top:6px;"><span style="font-size:10px;color:rgba(0,0,0,0.25);">본문 · 제목 변경 없음</span></div>
+        </div>
+        <div style="display:flex;align-items:flex-start;gap:10px;padding:8px 0;">
+          <div style="width:6px;height:6px;border-radius:50%;background:#d9d9d9;margin-top:5px;flex-shrink:0;"></div>
+          <div style="flex:1;">
+            <div style="display:flex;align-items:center;gap:6px;">
+              <span style="font-size:12px;font-weight:500;color:rgba(0,0,0,0.65);">v1</span>
+              <span style="font-size:10px;color:rgba(0,0,0,0.3);">2026-03-25 09:15</span>
+              <span style="font-size:10px;background:#fff7e6;color:#ad6800;border:1px solid #ffe58f;border-radius:4px;padding:0 4px;">Draft</span>
+            </div>
+            <div style="font-size:11px;color:rgba(0,0,0,0.45);margin-top:2px;">최초 등록</div>
+          </div>
+        </div>
+      </div>
+    </div>
     <div style="padding:14px 24px;border-top:1px solid #f0f0f0;display:flex;gap:8px;justify-content:flex-end;background:#fafafa;border-radius:0 0 8px 8px;">
       <button class="btn btn-default" onclick="showView('list')">목록으로</button>
-      <button class="btn btn-primary" onclick="pmShowEditPanel(${selectedImpactPost.id})">이 POST 수정하기 →</button>
+      <button class="btn btn-primary" onclick="pmShowEditPanel(${selectedImpactPost.id})">이 콘텐츠 수정하기 →</button>
     </div>
   </div>`;
 }
 
-// ---- POST 관리: 행사코드 조회 ----
+// ---- 콘텐츠 관리: 행사코드 조회 ----
 function pmSearchByProduct() {
   const code = document.getElementById('pm-product-search').value.trim();
   if (!code) { alert('행사코드 또는 상품코드를 입력해주세요.'); return; }
@@ -10281,7 +10592,7 @@ function pmSearchByProduct() {
 
   document.getElementById('pm-prod-post-count').textContent = `(${allPosts.length}개)`;
   document.getElementById('pm-prod-post-list').innerHTML = allPosts.length === 0
-    ? '<div style="text-align:center;padding:20px;color:rgba(0,0,0,0.25);font-size:13px;">연결된 POST가 없습니다</div>'
+    ? '<div style="text-align:center;padding:20px;color:rgba(0,0,0,0.25);font-size:13px;">연결된 콘텐츠가 없습니다</div>'
     : allPosts.map((p, idx) => `
       <div style="border:1px solid #f0f0f0;border-radius:8px;margin-bottom:8px;overflow:hidden;" id="pm-prod-post-${p.id}">
         <div style="display:flex;align-items:center;gap:10px;padding:12px 16px;cursor:pointer;background:#fff;" onclick="pmToggleProdPost(${p.id})">
@@ -10299,7 +10610,7 @@ function pmSearchByProduct() {
               ${p.cat === '취소환불규정' ? '<p>출발 30일 전: 전액 환불<br>출발 15~29일 전: 70% 환불<br>출발 7~14일 전: 50% 환불<br>출발 6일 이내: 환불 불가</p>'
               : p.cat === '스페셜 혜택' ? '<p>얼리체크인 (14:00→12:00)<br>레이트체크아웃 (12:00→14:00, 가용시)<br>웰컴 드링크 2잔 제공</p>'
               : p.cat === '포함사항' ? '<p>왕복 항공권 (위탁수하물 포함)<br>숙소 4박<br>BB (조식) 포함<br>공항-호텔 왕복 픽업/샌딩</p>'
-              : '<p>이 POST의 상세 내용이 여기에 표시됩니다.</p>'}
+              : '<p>이 콘텐츠의 상세 내용이 여기에 표시됩니다.</p>'}
             </div>
             <div style="display:flex;align-items:center;gap:8px;margin-top:10px;">
               <span style="font-size:11px;color:rgba(0,0,0,0.35);">연결 행사 ${p.affected.length}개 · 수정일 ${p.updated}</span>
@@ -10330,12 +10641,12 @@ function pmProdEditInline(postId) {
   const currentContent = post.cat === '취소환불규정' ? '출발 30일 전: 전액 환불\n출발 15~29일 전: 70% 환불\n출발 7~14일 전: 50% 환불\n출발 6일 이내: 환불 불가'
     : post.cat === '스페셜 혜택' ? '얼리체크인 (14:00→12:00)\n레이트체크아웃 (12:00→14:00, 가용시)\n웰컴 드링크 2잔 제공'
     : post.cat === '포함사항' ? '왕복 항공권 (위탁수하물 포함)\n숙소 4박\nBB (조식) 포함\n공항-호텔 왕복 픽업/샌딩'
-    : '이 POST의 상세 내용';
+    : '이 콘텐츠의 상세 내용';
 
   el.style.display = '';
   el.innerHTML = `
     <div style="padding:14px 16px;border-top:1px solid #e8e8e8;background:#fff;">
-      <div style="font-size:12px;font-weight:600;color:#1677ff;margin-bottom:10px;">POST 수정</div>
+      <div style="font-size:12px;font-weight:600;color:#1677ff;margin-bottom:10px;">콘텐츠 수정</div>
       <div class="form-item" style="margin-bottom:10px;">
         <div class="form-label" style="font-size:11px;">제목</div>
         <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
@@ -10358,10 +10669,10 @@ function pmProdEditInline(postId) {
           <span style="font-size:10px;color:#1677ff;">수정할 내용</span>
         </div>
       </div>
-      ${totalRes > 0 ? '<div class="impact-warn-box" style="font-size:12px;">⚠️ <div>진행 중인 예약 <strong>' + totalRes + '건</strong>이 있습니다. 수정 시 즉시 반영됩니다.</div></div>' : ''}
+      ${totalRes > 0 ? '<div class="impact-warn-box" style="font-size:12px;">ℹ️ <div>진행 중인 예약 <strong>' + totalRes + '건</strong>이 있습니다. 기존 예약은 당시 콘텐츠 유지, 수정분은 새 예약에 적용됩니다.</div></div>' : ''}
       <div style="display:flex;gap:6px;justify-content:flex-end;padding-top:8px;border-top:1px solid #f0f0f0;">
         <button class="btn btn-default btn-sm" onclick="document.getElementById('pm-prod-edit-${postId}').style.display='none'">취소</button>
-        <button class="btn btn-primary btn-sm" onclick="alert('✅ POST #${postId} 수정 완료.\\n→ ${post.affected.length}개 행사에 즉시 반영.');document.getElementById('pm-prod-edit-${postId}').style.display='none';">저장</button>
+        <button class="btn btn-primary btn-sm" onclick="alert('✅ 콘텐츠 #${postId} 수정 완료.\\n→ ${post.affected.length}개 상품에 반영 (기존 예약은 당시 콘텐츠 유지)');document.getElementById('pm-prod-edit-${postId}').style.display='none';">저장</button>
       </div>
     </div>`;
 }
@@ -10376,7 +10687,7 @@ function pmClearSearch() {
 
 function pmShowEditPanel(postId) {
   const post = IMPACT_POSTS.find(p => p.id === postId);
-  if (!post) { alert('POST 수정 모달 (준비 중)'); return; }
+  if (!post) { alert('콘텐츠 수정 모달 (준비 중)'); return; }
   const panel = document.getElementById('impact-result-panel');
   const totalRes = post.affected.reduce((s,a) => s+a.reservations, 0);
 
@@ -10398,7 +10709,7 @@ function pmShowEditPanel(postId) {
 
     <!-- 내용 수정: 좌=기존 / 우=수정 -->
     <div style="padding:16px 20px;">
-      <div style="font-size:12px;font-weight:600;color:rgba(0,0,0,0.55);margin-bottom:10px;">POST 내용 수정</div>
+      <div style="font-size:12px;font-weight:600;color:rgba(0,0,0,0.55);margin-bottom:10px;">콘텐츠 내용 수정</div>
       <div class="form-item" style="margin-bottom:14px;">
         <div class="form-label">제목</div>
         <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
@@ -10414,7 +10725,7 @@ function pmShowEditPanel(postId) {
         <div class="form-label">본문</div>
         <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
           <div style="background:#fafafa;border:1px solid #f0f0f0;border-radius:6px;padding:12px;font-size:13px;color:rgba(0,0,0,0.45);line-height:1.7;min-height:140px;">
-            <p>이 POST의 현재 내용이 여기에 표시됩니다.</p>
+            <p>이 콘텐츠의 현재 내용이 여기에 표시됩니다.</p>
             <p>수정 전 원본을 비교하면서 새 내용을 작성할 수 있습니다.</p>
           </div>
           <div class="editor-wrap" style="border-color:#1677ff;">
@@ -10427,7 +10738,7 @@ function pmShowEditPanel(postId) {
               <button class="etb" title="링크">🔗</button>
             </div>
             <div class="editor-body" contenteditable="true" style="min-height:120px;" data-placeholder="수정할 내용을 작성하세요...">
-              <p>이 POST의 현재 내용이 여기에 표시됩니다.</p>
+              <p>이 콘텐츠의 현재 내용이 여기에 표시됩니다.</p>
               <p>수정 전 원본을 비교하면서 새 내용을 작성할 수 있습니다.</p>
             </div>
           </div>
@@ -10437,13 +10748,63 @@ function pmShowEditPanel(postId) {
           <span style="font-size:10px;color:#1677ff;">수정할 내용</span>
         </div>
       </div>
-      ${totalRes > 0 ? `<div class="impact-warn-box">⚠️ <div>진행 중인 예약 <strong>${totalRes}건</strong>이 있습니다. 수정 내용이 즉시 반영됩니다.</div></div>` : ''}
+      ${totalRes > 0 ? `<div class="impact-warn-box">ℹ️ <div>진행 중인 예약 <strong>${totalRes}건</strong>이 있습니다. 기존 예약은 당시 콘텐츠 유지, 수정분은 새 예약에 적용됩니다.</div></div>` : ''}
+    </div>
+
+    <!-- 버전 이력 인라인 -->
+    <div style="padding:14px 20px;border-top:1px solid #f0f0f0;">
+      <div style="font-size:12px;font-weight:600;color:rgba(0,0,0,0.45);margin-bottom:10px;">🕘 버전 이력</div>
+      <div style="display:flex;flex-direction:column;gap:0;">
+        <div style="display:flex;align-items:flex-start;gap:10px;padding:6px 0;border-bottom:1px solid #f5f5f5;">
+          <div style="width:6px;height:6px;border-radius:50%;background:#1677ff;margin-top:5px;flex-shrink:0;"></div>
+          <div style="flex:1;">
+            <div style="display:flex;align-items:center;gap:6px;">
+              <span style="font-size:11px;font-weight:600;color:#1677ff;">v3 (현재)</span>
+              <span style="font-size:10px;color:rgba(0,0,0,0.3);">2026-04-16 14:30</span>
+              <span style="font-size:10px;background:#f6ffed;color:#389e0d;border:1px solid #b7eb8f;border-radius:4px;padding:0 4px;">운영중</span>
+            </div>
+            <div style="font-size:10px;color:rgba(0,0,0,0.4);margin-top:1px;">본문 수정 — 시간 변경</div>
+          </div>
+          <button class="btn btn-text btn-sm" onclick="var d=this.parentElement.nextElementSibling;d.style.display=d.style.display==='none'?'block':'none';this.textContent=d.style.display==='none'?'이력 확인 ▼':'접기 ▲'" style="font-size:10px;">이력 확인 ▼</button>
+        </div>
+        <div style="display:none;margin:0 0 6px 16px;background:#fafafa;border:1px solid #f0f0f0;border-radius:6px;padding:8px 10px;font-size:10px;line-height:1.8;">
+          <div style="font-weight:600;color:rgba(0,0,0,0.35);margin-bottom:4px;">v2 → v3</div>
+          <div style="background:#fff0f0;border-left:3px solid #f5222d;padding:1px 6px;margin:2px 0;color:#cf1322;text-decoration:line-through;">얼리체크인: 12:00부터 가능</div>
+          <div style="background:#f0fff0;border-left:3px solid #52c41a;padding:1px 6px;margin:2px 0;color:#389e0d;">얼리체크인: 11:00부터 가능 (선착순)</div>
+          <div style="background:#f0fff0;border-left:3px solid #52c41a;padding:1px 6px;margin:2px 0;color:#389e0d;">+ 레이트 체크아웃: 14:00까지</div>
+        </div>
+        <div style="display:flex;align-items:flex-start;gap:10px;padding:6px 0;border-bottom:1px solid #f5f5f5;">
+          <div style="width:6px;height:6px;border-radius:50%;background:#d9d9d9;margin-top:5px;flex-shrink:0;"></div>
+          <div style="flex:1;">
+            <div style="display:flex;align-items:center;gap:6px;">
+              <span style="font-size:11px;font-weight:500;color:rgba(0,0,0,0.55);">v2</span>
+              <span style="font-size:10px;color:rgba(0,0,0,0.3);">2026-04-10 11:00</span>
+            </div>
+            <div style="font-size:10px;color:rgba(0,0,0,0.4);margin-top:1px;">조건 변경 — 식사 옵션 추가</div>
+          </div>
+          <button class="btn btn-text btn-sm" onclick="var d=this.parentElement.nextElementSibling;d.style.display=d.style.display==='none'?'block':'none';this.textContent=d.style.display==='none'?'이력 확인 ▼':'접기 ▲'" style="font-size:10px;">이력 확인 ▼</button>
+        </div>
+        <div style="display:none;margin:0 0 6px 16px;background:#fafafa;border:1px solid #f0f0f0;border-radius:6px;padding:8px 10px;font-size:10px;line-height:1.8;">
+          <div style="font-weight:600;color:rgba(0,0,0,0.35);margin-bottom:4px;">v1 → v2</div>
+          <div style="background:#f0fff0;border-left:3px solid #52c41a;padding:1px 6px;margin:2px 0;color:#389e0d;">+ 식사 옵션 = BB (조식 포함)</div>
+        </div>
+        <div style="display:flex;align-items:flex-start;gap:10px;padding:6px 0;">
+          <div style="width:6px;height:6px;border-radius:50%;background:#d9d9d9;margin-top:5px;flex-shrink:0;"></div>
+          <div style="flex:1;">
+            <div style="display:flex;align-items:center;gap:6px;">
+              <span style="font-size:11px;font-weight:500;color:rgba(0,0,0,0.55);">v1</span>
+              <span style="font-size:10px;color:rgba(0,0,0,0.3);">2026-03-25 09:15</span>
+            </div>
+            <div style="font-size:10px;color:rgba(0,0,0,0.4);margin-top:1px;">최초 등록</div>
+          </div>
+        </div>
+      </div>
     </div>
 
     <div style="padding:14px 20px;border-top:1px solid #f0f0f0;display:flex;gap:8px;justify-content:flex-end;background:#fafafa;border-radius:0 0 8px 8px;">
       <button class="btn btn-default" onclick="selectImpactPost(${post.id})">취소</button>
       <button class="btn btn-default" onclick="pmChangeStatus(${post.id},'중단')" style="border-color:#ff4d4f;color:#cf1322;">중단</button>
-      <button class="btn btn-primary" onclick="alert('✅ POST가 수정되었습니다.\\n→ ${post.affected.length}개 행사에 즉시 반영됩니다.');selectImpactPost(${post.id})">저장</button>
+      <button class="btn btn-primary" onclick="alert('✅ 콘텐츠가 수정되었습니다.\\n→ ${post.affected.length}개 상품에 반영 (기존 예약은 당시 콘텐츠 유지)');selectImpactPost(${post.id})">저장</button>
     </div>
   </div>`;
 
@@ -10453,8 +10814,8 @@ function pmShowEditPanel(postId) {
 }
 
 function pmChangeStatus(postId, status) {
-  if (confirm('이 POST를 "' + status + '" 상태로 변경할까요?\\n연결된 행사에서 즉시 해제됩니다.')) {
-    alert('🔴 POST가 중단되었습니다.');
+  if (confirm('이 콘텐츠를 "' + status + '" 상태로 변경할까요?\\n연결된 행사에서 즉시 해제됩니다.')) {
+    alert('🔴 콘텐츠가 중단되었습니다.');
   }
 }
 
@@ -10542,7 +10903,7 @@ function batchApply() {
   const category = document.getElementById('batch-category').value;
   const count    = BATCH_DATA[supplier]?.[category]?.affected?.length || 0;
   document.getElementById('batch-done-text').textContent = `배치 업데이트 완료!`;
-  document.getElementById('batch-done-sub').textContent  = `${supplier}의 "${category}" POST가 ${count}개 상품에 성공적으로 반영되었습니다.`;
+  document.getElementById('batch-done-sub').textContent  = `${supplier}의 "${category}" 콘텐츠가 ${count}개 상품에 성공적으로 반영되었습니다.`;
   document.getElementById('batch-done-wrap').classList.add('shown');
   setTimeout(() => document.getElementById('batch-done-wrap').scrollIntoView({ behavior:'smooth', block:'start' }), 100);
 }
