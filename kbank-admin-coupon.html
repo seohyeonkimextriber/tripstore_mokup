@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>어드민 · 쿠폰 등록 — 결제 조건 섹션 추가 (목업)</title>
+<style>
+  :root {
+    --brand: #FF6B35;
+    --brand-dim: #FFF3EC;
+    --new: #2563EB;
+    --new-dim: #EFF6FF;
+    --new-border: #BFDBFE;
+    --text: #1F2328;
+    --text-sub: #6B7280;
+    --text-mute: #9CA3AF;
+    --border: #E5E7EB;
+    --border-strong: #D1D5DB;
+    --bg: #F7F8FA;
+    --white: #FFFFFF;
+    --radius: 10px;
+    --radius-sm: 6px;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin:0; padding:0; font-family: -apple-system, BlinkMacSystemFont, "Pretendard", "Apple SD Gothic Neo", sans-serif; background: var(--bg); color: var(--text); }
+  .wrap { max-width: 960px; margin: 0 auto; padding: 32px 24px 80px; }
+  .topbar { display:flex; align-items:center; justify-content:space-between; margin-bottom:20px; }
+  h1 { font-size: 22px; margin: 0; }
+  .sub { color: var(--text-sub); font-size: 13px; margin-top: 4px; }
+  .meta { display:flex; gap:8px; }
+  .tag { display:inline-block; padding:4px 10px; border-radius:999px; font-size:12px; font-weight:600; }
+  .tag.brand { background: var(--brand-dim); color: var(--brand); }
+  .tag.new { background: var(--new-dim); color: var(--new); border:1px solid var(--new-border); }
+  .card { background: var(--white); border:1px solid var(--border); border-radius: var(--radius); margin-bottom: 12px; overflow:hidden; }
+  .card.new { border: 2px solid var(--new); box-shadow: 0 0 0 4px var(--new-dim); }
+  .card-head { display:flex; align-items:center; justify-content:space-between; padding: 16px 20px; background: #FAFBFC; border-bottom:1px solid var(--border); }
+  .card-head h2 { font-size: 15px; margin:0; font-weight: 700; }
+  .card-head.new { background: var(--new-dim); }
+  .card-body { padding: 20px; }
+  .row { display:grid; grid-template-columns: 140px 1fr; gap: 16px; padding: 10px 0; align-items: start; }
+  .row + .row { border-top: 1px dashed var(--border); }
+  .label { font-size: 13px; font-weight: 600; color: var(--text); padding-top: 6px; }
+  .label .req { color: #EF4444; margin-left: 4px; }
+  .input { height: 36px; border:1px solid var(--border-strong); border-radius: var(--radius-sm); padding: 0 12px; font-size: 13px; width: 100%; max-width: 360px; background: var(--white); }
+  .input[disabled] { background: #F3F4F6; color: var(--text-mute); }
+  .opts { display:flex; flex-wrap:wrap; gap: 8px; }
+  .chk { display:inline-flex; align-items:center; gap:6px; padding: 8px 12px; border:1px solid var(--border-strong); border-radius: var(--radius-sm); font-size: 13px; cursor: pointer; user-select: none; background: var(--white); }
+  .chk input { margin: 0; accent-color: var(--new); }
+  .chk.checked { border-color: var(--new); background: var(--new-dim); color: var(--new); font-weight: 600; }
+  .radio-group { display:flex; gap: 16px; }
+  .radio { display:inline-flex; align-items:center; gap:6px; font-size: 13px; }
+  .hint { font-size: 12px; color: var(--text-sub); margin-top: 6px; display:flex; align-items:center; gap:6px; }
+  .hint.warn { color: #B45309; background:#FFFBEB; padding:8px 12px; border-radius:6px; border:1px solid #FDE68A; margin-top: 12px; }
+  .placeholder { color: var(--text-mute); font-size: 13px; padding: 12px 0; }
+  .footer { display:flex; justify-content:flex-end; gap:8px; margin-top: 24px; }
+  .btn { height: 40px; padding: 0 20px; border-radius: var(--radius-sm); font-size: 14px; font-weight:600; cursor:pointer; border:1px solid var(--border-strong); background: var(--white); }
+  .btn.primary { background: var(--brand); color: var(--white); border-color: var(--brand); }
+  details { margin-top: 32px; background: #FFFCF5; border:1px solid #FDE68A; border-radius: var(--radius); padding: 12px 16px; }
+  details summary { font-weight:700; cursor:pointer; font-size: 14px; }
+  details pre { background: #F9FAFB; padding: 12px; border-radius: 6px; font-size: 12px; overflow:auto; }
+  .new-badge { display:inline-block; background: var(--new); color: #fff; font-size: 11px; padding: 2px 8px; border-radius: 999px; margin-left: 8px; font-weight: 700; }
+  .legend { display:flex; gap: 16px; margin: 12px 0 24px; font-size: 12px; color: var(--text-sub); }
+  .legend-item { display:flex; align-items:center; gap: 6px; }
+  .legend-dot { width: 10px; height: 10px; border-radius: 3px; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="topbar">
+    <div>
+      <h1>쿠폰 등록</h1>
+      <div class="sub">혜택 관리 &gt; 쿠폰 &gt; 등록 — <strong>결제 조건 섹션 추가 목업</strong></div>
+    </div>
+    <div class="meta">
+      <span class="tag brand">Phase 2 Mockup</span>
+      <span class="tag new">v1 · 2026-04-21</span>
+    </div>
+  </div>
+
+  <div class="legend">
+    <div class="legend-item"><span class="legend-dot" style="background:#E5E7EB"></span>기존 섹션 (표시만)</div>
+    <div class="legend-item"><span class="legend-dot" style="background:#2563EB"></span>신규 섹션 (이번 범위)</div>
+  </div>
+
+  <!-- 기존 섹션 (플레이스홀더) -->
+  <div class="card">
+    <div class="card-head"><h2>1. 기본 정보</h2></div>
+    <div class="card-body"><div class="placeholder">쿠폰 표시명 / 운영명 / 형식(다운로드·코드) / 발급건 / 최소주문금액 — 기존 그대로</div></div>
+  </div>
+  <div class="card">
+    <div class="card-head"><h2>2. 할인 설정</h2></div>
+    <div class="card-body"><div class="placeholder">할인방식(금·율) / 트립·여행사·채널사 분담 — 기존 그대로</div></div>
+  </div>
+  <div class="card">
+    <div class="card-head"><h2>3. 기간 설정</h2></div>
+    <div class="card-body"><div class="placeholder">발급기간 / 유효기간 타입(고정·동적) — 기존 그대로</div></div>
+  </div>
+  <div class="card">
+    <div class="card-head"><h2>4. 채널 설정</h2></div>
+    <div class="card-body"><div class="placeholder">적용채널 — 기존 그대로</div></div>
+  </div>
+
+  <!-- ⭐ 신규 섹션 -->
+  <div class="card new">
+    <div class="card-head new">
+      <h2>5. 결제 조건 <span class="new-badge">NEW</span></h2>
+      <span class="sub" style="font-size:12px;">미선택 시 전체 허용 (기존 쿠폰 하위호환)</span>
+    </div>
+    <div class="card-body">
+      <div class="row">
+        <div class="label">적용 결제수단</div>
+        <div>
+          <div class="opts" id="pm-opts">
+            <label class="chk"><input type="checkbox" data-group="pm" value="CARD"> 카드결제</label>
+            <label class="chk checked"><input type="checkbox" data-group="pm" value="BANK" checked> 계좌결제</label>
+            <label class="chk"><input type="checkbox" data-group="pm" value="TOSS"> 토스페이</label>
+            <label class="chk"><input type="checkbox" data-group="pm" value="NAVER"> 네이버페이</label>
+            <label class="chk"><input type="checkbox" data-group="pm" value="KAKAO"> 카카오페이</label>
+            <label class="chk"><input type="checkbox" data-group="pm" value="VBANK"> 무통장입금(가상계좌)</label>
+          </div>
+          <div class="hint">다중 선택 가능. 선택한 결제수단으로 결제할 때만 이 쿠폰이 자동 적용/선택 가능.</div>
+        </div>
+      </div>
+
+      <div class="row">
+        <div class="label">적용 결제방식</div>
+        <div>
+          <div class="opts" id="pt-opts">
+            <label class="chk checked"><input type="checkbox" data-group="pt" value="FULL" checked> 전액결제</label>
+            <label class="chk"><input type="checkbox" data-group="pt" value="DEPOSIT"> 예약금결제</label>
+          </div>
+          <div class="hint">다중 선택 가능. 예약금결제(계약금만 결제 후 잔금)에 쿠폰 적용 여부 제어.</div>
+        </div>
+      </div>
+
+      <div class="hint warn">
+        ⚠️ 조건 미선택(빈 값) = <strong>전체 허용</strong>으로 저장됩니다. 기존 쿠폰은 마이그레이션 시 자동으로 '조건 없음' 상태가 됩니다.
+      </div>
+
+      <div class="row">
+        <div class="label">미리보기</div>
+        <div id="preview" style="font-size:13px; color: var(--text); background:#F9FAFB; padding: 10px 14px; border-radius: 6px; border:1px solid var(--border);">
+          선택된 조건을 확인하세요.
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 남은 기존 섹션 -->
+  <div class="card">
+    <div class="card-head"><h2>6. 적용상품</h2></div>
+    <div class="card-body"><div class="placeholder">규칙 / 상품지정 — 기존 그대로</div></div>
+  </div>
+  <div class="card">
+    <div class="card-head"><h2>7. 추가 옵션</h2></div>
+    <div class="card-body"><div class="placeholder">트립스토어 앱 전용 체크박스 — 기존 그대로</div></div>
+  </div>
+  <div class="card">
+    <div class="card-head"><h2>8. 쿠폰 적용행사</h2></div>
+    <div class="card-body"><div class="placeholder">행사 연결 — 기존 그대로</div></div>
+  </div>
+
+  <div class="footer">
+    <button class="btn">취소</button>
+    <button class="btn primary">등록</button>
+  </div>
+
+  <details open>
+    <summary>📌 기술 노트 · API/스키마 초안</summary>
+    <div style="margin-top:10px; font-size:13px; line-height:1.7;">
+      <strong>쿠폰 엔티티 추가 필드 (초안)</strong>
+      <pre>coupon {
+  ...existing,
+  allowedPaymentMethods: ["BANK"]          // 비어있으면 전체 허용
+  allowedPaymentTypes:   ["FULL", "DEPOSIT"] // 비어있으면 전체 허용
+}</pre>
+      <strong>카카오뱅크 계좌결제 1% 쿠폰 예시</strong>
+      <pre>{
+  name: "계좌결제 1% 즉시할인",
+  discountPolicy: "율",
+  discountRate: 1,
+  allowedPaymentMethods: ["BANK"],
+  allowedPaymentTypes:   ["FULL", "DEPOSIT"],
+  tripShare: 100, agencyShare: 0, channelShare: 0,
+  validityPeriod: "2026-05-01 ~ 2026-05-14"
+}</pre>
+      <strong>적용 로직 (의사코드)</strong>
+      <pre>const eligible = coupons.filter(c =>
+  (c.allowedPaymentMethods.length===0 || c.allowedPaymentMethods.includes(order.paymentMethod)) &&
+  (c.allowedPaymentTypes.length===0   || c.allowedPaymentTypes.includes(order.paymentType))
+);
+// 중복 불가 → 최대 할인액 자동 선택
+const applied = eligible.reduce((best,c) => calcDiscount(c) > calcDiscount(best) ? c : best);</pre>
+      <strong>서버사이드 검증</strong>
+      <ul>
+        <li>결제 요청 시점에 <code>(coupon, paymentMethod, paymentType)</code> 매칭 재검증</li>
+        <li>매칭 실패 → 쿠폰 자동 해제 + 최종 금액 재계산 후 사용자 확인 단계로</li>
+      </ul>
+    </div>
+  </details>
+</div>
+
+<script>
+  const label = {
+    CARD:'카드결제', BANK:'계좌결제', TOSS:'토스페이', NAVER:'네이버페이', KAKAO:'카카오페이', VBANK:'무통장입금(가상계좌)',
+    FULL:'전액결제', DEPOSIT:'예약금결제'
+  };
+  document.querySelectorAll('.chk input').forEach(cb => {
+    cb.addEventListener('change', () => {
+      cb.parentElement.classList.toggle('checked', cb.checked);
+      updatePreview();
+    });
+  });
+  function updatePreview(){
+    const pm = [...document.querySelectorAll('input[data-group=pm]:checked')].map(c=>label[c.value]);
+    const pt = [...document.querySelectorAll('input[data-group=pt]:checked')].map(c=>label[c.value]);
+    const pmText = pm.length? pm.join(', ') : '전체 허용';
+    const ptText = pt.length? pt.join(', ') : '전체 허용';
+    document.getElementById('preview').innerHTML =
+      `<strong>결제수단</strong>: ${pmText} &nbsp;·&nbsp; <strong>결제방식</strong>: ${ptText}`;
+  }
+  updatePreview();
+</script>
+</body>
+</html>
