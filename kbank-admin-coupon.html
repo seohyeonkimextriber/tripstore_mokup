@@ -106,10 +106,23 @@
               <input type="radio" name="issueMethod" value="AUTO_APPLY" checked>
               <strong style="color:var(--new);">자동적용</strong>
               <span class="new-badge">NEW</span>
-              <span style="color:var(--text-sub);">— 고객 행동 없이 조건(결제수단·방식·채널·상품 등) 충족 시 자동 적용</span>
+              <span style="color:var(--text-sub);">— 고객 행동 없이 아래 조건 모두 충족 시 자동 적용</span>
             </label>
           </div>
           <div class="hint" id="fmt-hint" style="margin-top:10px;"></div>
+          <div id="auto-conditions" style="margin-top:12px; background:#F8FAFC; border:1px solid var(--border); border-radius:8px; padding:14px 16px;">
+            <div style="font-size:12px; font-weight:700; color:var(--new); margin-bottom:8px;">📋 자동적용 매칭 조건 (AND)</div>
+            <ul style="margin:0; padding-left:18px; font-size:13px; line-height:1.8; color:var(--text);">
+              <li><strong>적용상품 규칙</strong> — 규칙 / 상품지정 (아래 6번 섹션)</li>
+              <li><strong>기간</strong> — 유효기간 내 예약·결제 시점 (3번 섹션)</li>
+              <li><strong>채널</strong> — 적용채널 (4번 섹션)</li>
+              <li><strong>결제 조건</strong> — 결제수단·결제방식 (5번 섹션) <span class="new-badge">NEW</span></li>
+              <li><strong>추가 옵션</strong> — 앱 전용 / 공통·개별 발급 / 표시정책 (7번 섹션)</li>
+            </ul>
+            <div style="font-size:12px; color:var(--text-sub); margin-top:10px; border-top:1px dashed var(--border); padding-top:8px;">
+              모든 조건이 일치하는 예약에서만 자동 노출/적용. 조건 미지정 필드는 <strong>전체 허용</strong>으로 동작.
+            </div>
+          </div>
         </div>
       </div>
       <div class="row" id="code-row" style="display:none;">
@@ -192,7 +205,10 @@
   </div>
   <div class="card">
     <div class="card-head"><h2>7. 추가 옵션</h2></div>
-    <div class="card-body"><div class="placeholder">트립스토어 앱 전용 체크박스 — 기존 그대로</div></div>
+    <div class="card-body">
+      <div class="placeholder" style="margin-bottom:6px;">트립스토어 앱 전용 체크박스 / 공통·개별 발급 / 표시정책 — 기존 그대로</div>
+      <div class="hint" style="color:var(--new);">ℹ️ 자동적용 쿠폰은 이 섹션의 옵션도 매칭 조건으로 함께 평가합니다.</div>
+    </div>
   </div>
   <div class="card">
     <div class="card-head"><h2>8. 쿠폰 적용행사</h2></div>
@@ -256,10 +272,11 @@ const applied = eligible.reduce((best,c) => calcDiscount(c) > calcDiscount(best)
     r.addEventListener('change', () => {
       const v = r.value;
       codeRow.style.display = (v === 'CODE') ? 'grid' : 'none';
+      document.getElementById('auto-conditions').style.display = (v === 'AUTO_APPLY') ? 'block' : 'none';
       const hints = {
         DOWNLOAD: '고객이 쿠폰함에서 "받기" 버튼을 눌러야 사용 가능. 발급 상한 설정 필요.',
         CODE: '고객이 체크아웃 단계에서 코드를 직접 입력해야 적용. 바이럴 프로모션에 적합.',
-        AUTO_APPLY: '고객 행동 0단계. 조건(결제수단·방식·채널·상품·기간)만 충족되면 자동 노출/적용. 계좌결제 1% 즉시할인, 앱 전용 할인 등 조건형 프로모션에 최적.'
+        AUTO_APPLY: '고객 행동 0단계. 아래 5종 조건(상품규칙·기간·채널·결제조건·추가옵션) 모두 충족 시 자동 노출/적용. 계좌결제 1% 즉시할인, 앱 전용 할인 등 조건형 프로모션에 최적.'
       };
       fmtHint.textContent = hints[v];
     });
