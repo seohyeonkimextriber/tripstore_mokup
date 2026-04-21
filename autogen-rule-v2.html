@@ -381,14 +381,14 @@ tr:hover td { background: #fafafa; }
       <!-- 1-A. 사용 숙박권 -->
       <div style="margin-bottom:20px;">
         <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px;">
-          <div style="font-size:13px;font-weight:600;color:rgba(0,0,0,0.75);">🏨 사용 숙박권 <span style="font-size:11px;color:#1677ff;font-weight:500;margin-left:4px;">7 / 10 선택</span></div>
+          <div style="font-size:13px;font-weight:600;color:rgba(0,0,0,0.75);">🏨 사용 숙박권 <span id="hotelCount" style="font-size:11px;color:#1677ff;font-weight:500;margin-left:4px;">7 / 10 선택</span></div>
           <div style="display:flex;gap:6px;">
             <input type="text" style="height:28px;border:1px solid #d9d9d9;border-radius:6px;padding:0 10px;font-size:11px;width:160px;" placeholder="🔍 숙박권 검색">
             <button class="btn btn-default btn-sm">전체 선택</button>
           </div>
         </div>
         <div style="font-size:11px;color:rgba(0,0,0,0.45);margin-bottom:10px;">등록된 숙박권 중 AI 상품 조합에 사용할 것만 체크. 신규 등록 시 기본 포함.</div>
-        <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:6px;max-height:260px;overflow-y:auto;padding:2px;">
+        <div id="hotelGrid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:6px;max-height:260px;overflow-y:auto;padding:2px;">
           <label style="display:flex;align-items:center;gap:8px;padding:8px 12px;border:1px solid #91caff;border-radius:6px;background:#e6f4ff;cursor:pointer;">
             <input type="checkbox" checked style="accent-color:#1677ff;">
             <div style="flex:1;min-width:0;">
@@ -465,14 +465,14 @@ tr:hover td { background: #fafafa; }
       <!-- 1-B. 사용 항공권 -->
       <div style="padding-top:16px;border-top:1px solid #f0f0f0;">
         <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px;">
-          <div style="font-size:13px;font-weight:600;color:rgba(0,0,0,0.75);">✈️ 사용 항공권 <span style="font-size:11px;color:#1677ff;font-weight:500;margin-left:4px;">8 / 12 항공편</span></div>
+          <div style="font-size:13px;font-weight:600;color:rgba(0,0,0,0.75);">✈️ 사용 항공권 <span id="flightCount" style="font-size:11px;color:#1677ff;font-weight:500;margin-left:4px;">8 / 12 항공편</span></div>
           <div style="display:flex;gap:6px;">
             <input type="text" style="height:28px;border:1px solid #d9d9d9;border-radius:6px;padding:0 10px;font-size:11px;width:160px;" placeholder="🔍 항공편/항공사 검색">
             <button class="btn btn-default btn-sm">항공사별 전체</button>
           </div>
         </div>
         <div style="font-size:11px;color:rgba(0,0,0,0.45);margin-bottom:10px;">등록된 항공편 중 AI 상품 조합에 사용할 것만 체크. 항공사별로 접어서 관리.</div>
-
+        <div id="flightGroups">
         <!-- 비엣젯 ICN↔PQC -->
         <details open style="margin-bottom:6px;border:1px solid #f0f0f0;border-radius:6px;">
           <summary style="padding:10px 14px;cursor:pointer;display:flex;align-items:center;justify-content:space-between;background:#fafafa;border-radius:6px;">
@@ -509,6 +509,7 @@ tr:hover td { background: #fafafa; }
           </summary>
           <div style="padding:10px;font-size:11px;color:rgba(0,0,0,0.45);">펼치려면 클릭...</div>
         </details>
+        </div><!-- /flightGroups -->
       </div>
     </div>
   </div>
@@ -526,31 +527,18 @@ tr:hover td { background: #fafafa; }
         <strong style="color:rgba(0,0,0,0.75);">마진 구조:</strong> 원가 → ÷(1-<span style="color:#722ed1;font-weight:600;">고정마진 5%</span>) → 기준원가 → ÷(1-<span style="color:#1677ff;font-weight:600;">추가마진 <small>(AI 자동 · 경쟁가 학습)</small></span>) → 판매가 → ÷(1-<span style="color:#f5222d;font-weight:600;">정가마진 <small>(AI 자동 · 사후 수정 가능)</small></span>) → 상품가(표시가)
       </div>
 
-      <!-- 고정마진 (사람 설정 · 여행지별) -->
+      <!-- 고정마진 (사람 설정 · 현재 탭 기준) -->
       <div style="padding:16px 20px;border:2px solid #d3adf7;border-radius:10px;background:#faf5ff;">
         <div style="display:flex;align-items:center;gap:16px;">
           <div style="font-size:28px;">💼</div>
           <div style="flex:1;">
-            <div style="font-size:14px;font-weight:700;color:#531dab;margin-bottom:2px;">고정마진 (사람 설정) <span style="font-size:10px;background:#fff;color:#722ed1;padding:2px 8px;border-radius:10px;border:1px solid #d3adf7;margin-left:4px;">여행지별 개별 설정 가능</span></div>
+            <div style="font-size:14px;font-weight:700;color:#531dab;margin-bottom:2px;">고정마진 (사람 설정)</div>
             <div style="font-size:11px;color:rgba(0,0,0,0.55);">결제수수료 + 운영비. 현재 탭의 여행지(<strong id="destNameLabel">🇻🇳 푸꾸옥</strong>)에 적용. 변동 시 대표님 승인 필요.</div>
           </div>
           <div style="display:flex;align-items:center;gap:6px;">
-            <input type="number" class="form-input" value="5" min="3" max="10" step="0.5" style="width:90px;height:40px;font-size:18px;font-weight:700;text-align:center;color:#531dab;">
+            <input type="number" class="form-input" id="fixedMargin" value="5" min="3" max="10" step="0.5" style="width:90px;height:40px;font-size:18px;font-weight:700;text-align:center;color:#531dab;">
             <span style="font-size:16px;color:#531dab;font-weight:600;">%</span>
           </div>
-        </div>
-
-        <!-- 여행지별 현황 요약 -->
-        <div style="margin-top:14px;padding-top:12px;border-top:1px dashed rgba(82,29,171,0.25);">
-          <div style="font-size:11px;color:#531dab;font-weight:600;margin-bottom:8px;">🌏 여행지별 고정마진 현황</div>
-          <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:6px;">
-            <div style="padding:8px 10px;background:#fff;border:1px solid #d3adf7;border-radius:6px;display:flex;align-items:center;justify-content:space-between;"><span style="font-size:11px;">🇻🇳 푸꾸옥</span><strong style="font-size:12px;color:#531dab;">5.0%</strong></div>
-            <div style="padding:8px 10px;background:#fff;border:1px solid #d3adf7;border-radius:6px;display:flex;align-items:center;justify-content:space-between;"><span style="font-size:11px;">🇻🇳 나트랑</span><strong style="font-size:12px;color:#531dab;">5.0%</strong></div>
-            <div style="padding:8px 10px;background:#fff;border:1px solid #d3adf7;border-radius:6px;display:flex;align-items:center;justify-content:space-between;"><span style="font-size:11px;">🇻🇳 다낭</span><strong style="font-size:12px;color:#531dab;">5.0%</strong></div>
-            <div style="padding:8px 10px;background:#fffbe6;border:1px solid #ffe58f;border-radius:6px;display:flex;align-items:center;justify-content:space-between;"><span style="font-size:11px;">🇹🇭 방콕</span><strong style="font-size:12px;color:#fa8c16;">7.0%</strong></div>
-            <div style="padding:8px 10px;background:#fffbe6;border:1px solid #ffe58f;border-radius:6px;display:flex;align-items:center;justify-content:space-between;"><span style="font-size:11px;">🇯🇵 도쿄 <span style="font-size:9px;color:#722ed1;">NEW</span></span><strong style="font-size:12px;color:#fa8c16;">6.5%</strong></div>
-          </div>
-          <div style="font-size:10px;color:rgba(0,0,0,0.45);margin-top:6px;line-height:1.5;">💡 신규 시장(일본·태국)은 초기 검증 단계라 리스크 흡수용으로 기본 5%보다 높게 설정 · 운영 안정화 후 조정</div>
         </div>
       </div>
 
@@ -795,30 +783,175 @@ function toggleResume(btn) {
   showToast('규칙 재개됨');
 }
 
-// ===== 여행지 탭 =====
+// ===== 여행지 탭 (여행지별 전체 설정 바인딩) =====
 const destData = {
-  phuquoc: { name: '🇻🇳 푸꾸옥', fixed: 5, peak: 5, off: 12 },
-  nhatrang: { name: '🇻🇳 나트랑', fixed: 6, peak: 5, off: 10 },
-  danang: { name: '🇻🇳 다낭', fixed: 5, peak: 4, off: 10 },
-  bangkok: { name: '🇹🇭 방콕', fixed: 7, peak: 5, off: 15 }
+  phuquoc: {
+    name: '🇻🇳 푸꾸옥',
+    fixed: 5,
+    hotels: [
+      { n: 'Sol by Melia', s: 5, r: 6, t: '자동', sel: true },
+      { n: 'Melia Vinpearl Phu Quoc', s: 5, r: 4, t: '수동', sel: true },
+      { n: 'Pullman Phu Quoc', s: 5, r: 3, t: '자동', sel: true },
+      { n: 'InterContinental Phu Quoc', s: 5, r: 5, sel: true },
+      { n: 'Sonaga Beach Resort', s: 4, r: 3, sel: true },
+      { n: 'JW Marriott Phu Quoc', s: 5, r: 4, sel: true },
+      { n: 'Premier Residences Phu Quoc', s: 4, r: 3, sel: true },
+      { n: 'Novotel Phu Quoc', s: 4, r: 3, sel: false },
+      { n: 'Seashells Phu Quoc', s: 4, r: 2, sel: false },
+      { n: 'Mercure Phu Quoc', s: 3, r: 2, sel: false }
+    ],
+    groups: [
+      { code: 'VJ', label: '비엣젯 (VJ)', route: 'ICN ↔ PQC', flights: [
+        { c: 'VJ871', r: 'ICN→PQC', t: '09:30', sel: true },
+        { c: 'VJ872', r: 'PQC→ICN', t: '22:00', sel: true },
+        { c: 'VJ873', r: 'ICN→PQC', t: '15:20', sel: true },
+        { c: 'VJ874', r: 'PQC→ICN', t: '04:30+1', sel: true },
+        { c: 'VJ875', r: 'ICN→PQC', t: '19:50', sel: false },
+        { c: 'VJ876', r: 'PQC→ICN', t: '08:40', sel: false }
+      ]},
+      { code: 'KE', label: '대한항공 (KE)', route: 'ICN ↔ PQC', flights: [
+        { c: 'KE463', r: 'ICN→PQC', t: '14:00', sel: true },
+        { c: 'KE464', r: 'PQC→ICN', t: '15:00', sel: true }
+      ]},
+      { code: 'OZ', label: '아시아나 (OZ)', route: 'ICN ↔ PQC', flights: [
+        { c: 'OZ751', r: 'ICN→PQC', t: '10:30', sel: false },
+        { c: 'OZ752', r: 'PQC→ICN', t: '19:00', sel: false }
+      ]}
+    ]
+  },
+  nhatrang: {
+    name: '🇻🇳 나트랑',
+    fixed: 5,
+    hotels: [
+      { n: 'Vinpearl Nha Trang Bay', s: 5, r: 4, t: '자동', sel: true },
+      { n: 'Amiana Resort', s: 5, r: 3, sel: true },
+      { n: 'Sheraton Nha Trang', s: 5, r: 4, sel: true },
+      { n: 'Mia Resort Nha Trang', s: 5, r: 3, sel: true },
+      { n: 'Sunrise Nha Trang Beach', s: 4, r: 3, sel: false },
+      { n: 'Amanoi Nha Trang', s: 5, r: 2, sel: false }
+    ],
+    groups: [
+      { code: 'VJ', label: '비엣젯 (VJ)', route: 'ICN ↔ CXR', flights: [
+        { c: 'VJ961', r: 'ICN→CXR', t: '10:15', sel: true },
+        { c: 'VJ962', r: 'CXR→ICN', t: '23:30', sel: true }
+      ]},
+      { code: 'KE', label: '대한항공 (KE)', route: 'ICN ↔ CXR', flights: [
+        { c: 'KE467', r: 'ICN→CXR', t: '20:00', sel: true },
+        { c: 'KE468', r: 'CXR→ICN', t: '01:00+1', sel: true }
+      ]}
+    ]
+  },
+  danang: {
+    name: '🇻🇳 다낭',
+    fixed: 5,
+    hotels: [
+      { n: 'InterContinental Danang Sun Peninsula', s: 5, r: 3, sel: true },
+      { n: 'Furama Resort Danang', s: 5, r: 4, sel: true },
+      { n: 'Premier Village Danang', s: 5, r: 3, sel: true },
+      { n: 'Pullman Danang Beach', s: 5, r: 4, sel: true },
+      { n: 'Novotel Danang Premier', s: 4, r: 3, sel: false }
+    ],
+    groups: [
+      { code: 'VJ', label: '비엣젯 (VJ)', route: 'ICN ↔ DAD', flights: [
+        { c: 'VJ871', r: 'ICN→DAD', t: '13:00', sel: true },
+        { c: 'VJ872', r: 'DAD→ICN', t: '21:30', sel: true }
+      ]},
+      { code: 'KE', label: '대한항공 (KE)', route: 'ICN ↔ DAD', flights: [
+        { c: 'KE465', r: 'ICN→DAD', t: '11:30', sel: true },
+        { c: 'KE466', r: 'DAD→ICN', t: '18:30', sel: true }
+      ]},
+      { code: 'OZ', label: '아시아나 (OZ)', route: 'ICN ↔ DAD', flights: [
+        { c: 'OZ751', r: 'ICN→DAD', t: '19:30', sel: false }
+      ]}
+    ]
+  },
+  bangkok: {
+    name: '🇹🇭 방콕',
+    fixed: 7,
+    hotels: [
+      { n: 'Mandarin Oriental Bangkok', s: 5, r: 3, sel: true },
+      { n: 'Siam Kempinski', s: 5, r: 4, sel: true },
+      { n: 'W Bangkok', s: 5, r: 3, sel: false },
+      { n: 'Pullman Bangkok King Power', s: 4, r: 4, sel: false }
+    ],
+    groups: [
+      { code: 'TG', label: '타이항공 (TG)', route: 'ICN ↔ BKK', flights: [
+        { c: 'TG657', r: 'ICN→BKK', t: '09:20', sel: true },
+        { c: 'TG658', r: 'BKK→ICN', t: '23:55', sel: true }
+      ]},
+      { code: 'KE', label: '대한항공 (KE)', route: 'ICN ↔ BKK', flights: [
+        { c: 'KE651', r: 'ICN→BKK', t: '18:10', sel: false }
+      ]}
+    ]
+  }
 };
+
+function renderHotels(d) {
+  const grid = document.getElementById('hotelGrid');
+  if (!grid) return;
+  grid.innerHTML = d.hotels.map(h => {
+    const bg = h.sel ? 'background:#e6f4ff;border:1px solid #91caff;' : 'background:#fff;border:1px solid #e8e8e8;';
+    const textColor = h.sel ? '' : 'color:rgba(0,0,0,0.65);';
+    const typeTag = h.t ? `<span style="font-size:9px;background:${h.t==='자동'?'#1677ff':'#fa8c16'};color:#fff;padding:1px 5px;border-radius:3px;margin-left:4px;">${h.t}</span>` : '';
+    return `<label style="display:flex;align-items:center;gap:8px;padding:8px 12px;${bg}border-radius:6px;cursor:pointer;">
+      <input type="checkbox" ${h.sel?'checked':''} style="accent-color:#1677ff;">
+      <div style="flex:1;min-width:0;">
+        <div style="font-size:12px;font-weight:500;${textColor}">${h.n}${typeTag}</div>
+        <div style="font-size:10px;color:rgba(0,0,0,0.45);">${d.name} · ${h.s}성 · ${h.r}객실</div>
+      </div>
+    </label>`;
+  }).join('');
+  const selCount = d.hotels.filter(h=>h.sel).length;
+  const hc = document.getElementById('hotelCount');
+  if (hc) hc.textContent = `${selCount} / ${d.hotels.length} 선택`;
+}
+
+function renderFlights(d) {
+  const box = document.getElementById('flightGroups');
+  if (!box) return;
+  box.innerHTML = d.groups.map((g, idx) => {
+    const selCount = g.flights.filter(f=>f.sel).length;
+    const items = g.flights.map(f => {
+      const st = f.sel ? 'border:1px solid #91caff;background:#e6f4ff;' : 'border:1px solid #e8e8e8;color:rgba(0,0,0,0.65);';
+      return `<label style="display:flex;align-items:center;gap:6px;padding:6px 10px;${st}border-radius:4px;cursor:pointer;font-size:11px;"><input type="checkbox" ${f.sel?'checked':''}><strong>${f.c}</strong> ${f.r} <span style="color:rgba(0,0,0,0.45);">${f.t}</span></label>`;
+    }).join('');
+    return `<details ${idx<2?'open':''} style="margin-bottom:6px;border:1px solid #f0f0f0;border-radius:6px;">
+      <summary style="padding:10px 14px;cursor:pointer;display:flex;align-items:center;justify-content:space-between;background:#fafafa;border-radius:6px;">
+        <div style="display:flex;align-items:center;gap:8px;"><strong style="font-size:12px;">${g.label}</strong><span style="font-size:10px;color:rgba(0,0,0,0.45);">${g.route}</span><span style="font-size:10px;color:rgba(0,0,0,0.45);">${selCount} / ${g.flights.length} 선택</span></div>
+        <span style="font-size:11px;color:#1677ff;">전체 선택</span>
+      </summary>
+      <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:4px;padding:10px;">${items}</div>
+    </details>`;
+  }).join('');
+  const total = d.groups.reduce((a,g)=>a+g.flights.length,0);
+  const sel = d.groups.reduce((a,g)=>a+g.flights.filter(f=>f.sel).length,0);
+  const fc = document.getElementById('flightCount');
+  if (fc) fc.textContent = `${sel} / ${total} 항공편`;
+}
+
+function applyDest(key) {
+  const d = destData[key];
+  if (!d) return;
+  const dl = document.getElementById('destLabel'); if (dl) dl.textContent = d.name;
+  const dnl = document.getElementById('destNameLabel'); if (dnl) dnl.textContent = d.name;
+  const dhl = document.getElementById('destHeaderLabel'); if (dhl) dhl.textContent = d.name;
+  const fm = document.getElementById('fixedMargin'); if (fm) fm.value = d.fixed;
+  renderHotels(d);
+  renderFlights(d);
+}
 
 document.querySelectorAll('.dest-tab').forEach(tab => {
   tab.addEventListener('click', function() {
     if (this.dataset.dest === 'add') { alert('여행지 추가 기능 (개발 예정)'); return; }
     document.querySelectorAll('.dest-tab').forEach(t => t.classList.remove('active'));
     this.classList.add('active');
-    const d = destData[this.dataset.dest];
-    if (d) {
-      document.getElementById('destLabel').textContent = d.name;
-      document.getElementById('fixedMargin').value = d.fixed;
-      document.getElementById('peakMargin').value = d.peak;
-      document.getElementById('offMargin').value = d.off;
-      updateMarginPreview();
-      showToast(d.name + ' 마진 정책 로드됨');
-    }
+    applyDest(this.dataset.dest);
+    showToast((destData[this.dataset.dest]?.name || '') + ' 설정 로드됨');
   });
 });
+
+// 초기 로드 시 푸꾸옥 바인딩
+applyDest('phuquoc');
 
 // ===== 경쟁가 할인율 라벨 =====
 document.getElementById('compRate')?.addEventListener('input', function() {
