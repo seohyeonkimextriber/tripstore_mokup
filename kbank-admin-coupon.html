@@ -83,9 +83,48 @@
   </div>
 
   <!-- 기존 섹션 (플레이스홀더) -->
-  <div class="card">
-    <div class="card-head"><h2>1. 기본 정보</h2></div>
-    <div class="card-body"><div class="placeholder">쿠폰 표시명 / 운영명 / 형식(다운로드·코드) / 발급건 / 최소주문금액 — 기존 그대로</div></div>
+  <div class="card new">
+    <div class="card-head new">
+      <h2>1. 기본 정보 <span class="new-badge">쿠폰 형식 확장</span></h2>
+    </div>
+    <div class="card-body">
+      <div class="row">
+        <div class="label">쿠폰 표시명</div>
+        <div><input class="input" placeholder="쿠폰 표시명을 입력하세요" value="계좌결제 1% 즉시할인"></div>
+      </div>
+      <div class="row">
+        <div class="label">쿠폰 운영명</div>
+        <div><input class="input" placeholder="쿠폰 운영명을 입력하세요" value="[PROMO-26Q2] 계좌결제 1% 즉시할인"></div>
+      </div>
+      <div class="row">
+        <div class="label">쿠폰 형식</div>
+        <div>
+          <div class="radio-group" id="fmt-group" style="flex-direction:column; gap:10px;">
+            <label class="radio"><input type="radio" name="issueMethod" value="DOWNLOAD"> <strong>다운로드</strong> <span style="color:var(--text-sub);">— 고객이 쿠폰함에서 받아야 사용 (기존)</span></label>
+            <label class="radio"><input type="radio" name="issueMethod" value="CODE"> <strong>쿠폰 코드</strong> <span style="color:var(--text-sub);">— 고객이 코드 입력 시 적용 (기존)</span></label>
+            <label class="radio" style="background:var(--new-dim); border:1px solid var(--new-border); padding:10px 12px; border-radius:6px;">
+              <input type="radio" name="issueMethod" value="AUTO_APPLY" checked>
+              <strong style="color:var(--new);">자동적용</strong>
+              <span class="new-badge">NEW</span>
+              <span style="color:var(--text-sub);">— 고객 행동 없이 조건(결제수단·방식·채널·상품 등) 충족 시 자동 적용</span>
+            </label>
+          </div>
+          <div class="hint" id="fmt-hint" style="margin-top:10px;"></div>
+        </div>
+      </div>
+      <div class="row" id="code-row" style="display:none;">
+        <div class="label">쿠폰 코드</div>
+        <div><input class="input" placeholder="예: KBANK1P"></div>
+      </div>
+      <div class="row">
+        <div class="label">발급건</div>
+        <div><input class="input" placeholder="발급 개수를 입력하세요" disabled value="무제한 (자동적용)"></div>
+      </div>
+      <div class="row">
+        <div class="label">최소주문금액</div>
+        <div><input class="input" placeholder="최소 주문금액을 입력하세요" value="0"></div>
+      </div>
+    </div>
   </div>
   <div class="card">
     <div class="card-head"><h2>2. 할인 설정</h2></div>
@@ -211,6 +250,21 @@ const applied = eligible.reduce((best,c) => calcDiscount(c) > calcDiscount(best)
       updatePreview();
     });
   });
+  const fmtHint = document.getElementById('fmt-hint');
+  const codeRow = document.getElementById('code-row');
+  document.querySelectorAll('input[name=issueMethod]').forEach(r => {
+    r.addEventListener('change', () => {
+      const v = r.value;
+      codeRow.style.display = (v === 'CODE') ? 'grid' : 'none';
+      const hints = {
+        DOWNLOAD: '고객이 쿠폰함에서 "받기" 버튼을 눌러야 사용 가능. 발급 상한 설정 필요.',
+        CODE: '고객이 체크아웃 단계에서 코드를 직접 입력해야 적용. 바이럴 프로모션에 적합.',
+        AUTO_APPLY: '고객 행동 0단계. 조건(결제수단·방식·채널·상품·기간)만 충족되면 자동 노출/적용. 계좌결제 1% 즉시할인, 앱 전용 할인 등 조건형 프로모션에 최적.'
+      };
+      fmtHint.textContent = hints[v];
+    });
+  });
+  document.querySelector('input[name=issueMethod]:checked').dispatchEvent(new Event('change'));
   function updatePreview(){
     const pm = [...document.querySelectorAll('input[data-group=pm]:checked')].map(c=>label[c.value]);
     const pt = [...document.querySelectorAll('input[data-group=pt]:checked')].map(c=>label[c.value]);
