@@ -465,13 +465,13 @@ tr:hover td { background: #fafafa; }
       <!-- 1-B. 사용 항공권 -->
       <div style="padding-top:16px;border-top:1px solid #f0f0f0;">
         <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px;">
-          <div style="font-size:13px;font-weight:600;color:rgba(0,0,0,0.75);">✈️ 사용 항공권 <span id="flightCount" style="font-size:11px;color:#1677ff;font-weight:500;margin-left:4px;">8 / 12 항공편</span></div>
+          <div style="font-size:13px;font-weight:600;color:rgba(0,0,0,0.75);">✈️ 사용 항공권 <span id="flightCount" style="font-size:11px;color:#1677ff;font-weight:500;margin-left:4px;">5 / 5 왕복권</span></div>
           <div style="display:flex;gap:6px;">
             <input type="text" style="height:28px;border:1px solid #d9d9d9;border-radius:6px;padding:0 10px;font-size:11px;width:160px;" placeholder="🔍 항공편/항공사 검색">
             <button class="btn btn-default btn-sm">항공사별 전체</button>
           </div>
         </div>
-        <div style="font-size:11px;color:rgba(0,0,0,0.45);margin-bottom:10px;">등록된 항공편 중 AI 상품 조합에 사용할 것만 체크. 항공사별로 접어서 관리.</div>
+        <div style="font-size:11px;color:rgba(0,0,0,0.45);margin-bottom:10px;">등록된 왕복권(가는편 + 오는편 묶음) 중 AI 상품 조합에 사용할 것만 체크. 항공사별로 접어서 관리.</div>
         <div id="flightGroups">
         <!-- 비엣젯 ICN↔PQC -->
         <details open style="margin-bottom:6px;border:1px solid #f0f0f0;border-radius:6px;">
@@ -801,21 +801,16 @@ const destData = {
       { n: 'Mercure Phu Quoc', s: 3, r: 2, sel: false }
     ],
     groups: [
-      { code: 'VJ', label: '비엣젯 (VJ)', route: 'ICN ↔ PQC', flights: [
-        { c: 'VJ871', r: 'ICN→PQC', t: '09:30', sel: true },
-        { c: 'VJ872', r: 'PQC→ICN', t: '22:00', sel: true },
-        { c: 'VJ873', r: 'ICN→PQC', t: '15:20', sel: true },
-        { c: 'VJ874', r: 'PQC→ICN', t: '04:30+1', sel: true },
-        { c: 'VJ875', r: 'ICN→PQC', t: '19:50', sel: false },
-        { c: 'VJ876', r: 'PQC→ICN', t: '08:40', sel: false }
+      { code: 'VJ', label: '비엣젯 (VJ)', route: 'ICN ↔ PQC', tickets: [
+        { id: 'VJ-PQC-001', name: '주간출발 / 야간복귀', out: { c:'VJ871', dep:'ICN 09:30', arr:'PQC 13:00' }, in:  { c:'VJ872', dep:'PQC 22:00', arr:'ICN 05:00+1' }, sel: true },
+        { id: 'VJ-PQC-002', name: '오후출발 / 새벽복귀', out: { c:'VJ873', dep:'ICN 15:20', arr:'PQC 18:50' }, in:  { c:'VJ874', dep:'PQC 04:30+1', arr:'ICN 11:30+1' }, sel: true },
+        { id: 'VJ-PQC-003', name: '저녁출발 / 오전복귀', out: { c:'VJ875', dep:'ICN 19:50', arr:'PQC 23:20' }, in:  { c:'VJ876', dep:'PQC 08:40', arr:'ICN 15:40' }, sel: false }
       ]},
-      { code: 'KE', label: '대한항공 (KE)', route: 'ICN ↔ PQC', flights: [
-        { c: 'KE463', r: 'ICN→PQC', t: '14:00', sel: true },
-        { c: 'KE464', r: 'PQC→ICN', t: '15:00', sel: true }
+      { code: 'KE', label: '대한항공 (KE)', route: 'ICN ↔ PQC', tickets: [
+        { id: 'KE-PQC-001', name: '오후출발 / 오후복귀', out: { c:'KE463', dep:'ICN 14:00', arr:'PQC 17:30' }, in:  { c:'KE464', dep:'PQC 15:00', arr:'ICN 22:00' }, sel: true }
       ]},
-      { code: 'OZ', label: '아시아나 (OZ)', route: 'ICN ↔ PQC', flights: [
-        { c: 'OZ751', r: 'ICN→PQC', t: '10:30', sel: false },
-        { c: 'OZ752', r: 'PQC→ICN', t: '19:00', sel: false }
+      { code: 'OZ', label: '아시아나 (OZ)', route: 'ICN ↔ PQC', tickets: [
+        { id: 'OZ-PQC-001', name: '오전출발 / 저녁복귀', out: { c:'OZ751', dep:'ICN 10:30', arr:'PQC 14:00' }, in:  { c:'OZ752', dep:'PQC 19:00', arr:'ICN 01:30+1' }, sel: false }
       ]}
     ]
   },
@@ -831,13 +826,11 @@ const destData = {
       { n: 'Amanoi Nha Trang', s: 5, r: 2, sel: false }
     ],
     groups: [
-      { code: 'VJ', label: '비엣젯 (VJ)', route: 'ICN ↔ CXR', flights: [
-        { c: 'VJ961', r: 'ICN→CXR', t: '10:15', sel: true },
-        { c: 'VJ962', r: 'CXR→ICN', t: '23:30', sel: true }
+      { code: 'VJ', label: '비엣젯 (VJ)', route: 'ICN ↔ CXR', tickets: [
+        { id: 'VJ-CXR-001', name: '오전출발 / 심야복귀', out: { c:'VJ961', dep:'ICN 10:15', arr:'CXR 14:00' }, in:  { c:'VJ962', dep:'CXR 23:30', arr:'ICN 06:40+1' }, sel: true }
       ]},
-      { code: 'KE', label: '대한항공 (KE)', route: 'ICN ↔ CXR', flights: [
-        { c: 'KE467', r: 'ICN→CXR', t: '20:00', sel: true },
-        { c: 'KE468', r: 'CXR→ICN', t: '01:00+1', sel: true }
+      { code: 'KE', label: '대한항공 (KE)', route: 'ICN ↔ CXR', tickets: [
+        { id: 'KE-CXR-001', name: '저녁출발 / 새벽복귀', out: { c:'KE467', dep:'ICN 20:00', arr:'CXR 23:40' }, in:  { c:'KE468', dep:'CXR 01:00+1', arr:'ICN 08:20+1' }, sel: true }
       ]}
     ]
   },
@@ -852,16 +845,14 @@ const destData = {
       { n: 'Novotel Danang Premier', s: 4, r: 3, sel: false }
     ],
     groups: [
-      { code: 'VJ', label: '비엣젯 (VJ)', route: 'ICN ↔ DAD', flights: [
-        { c: 'VJ871', r: 'ICN→DAD', t: '13:00', sel: true },
-        { c: 'VJ872', r: 'DAD→ICN', t: '21:30', sel: true }
+      { code: 'VJ', label: '비엣젯 (VJ)', route: 'ICN ↔ DAD', tickets: [
+        { id: 'VJ-DAD-001', name: '오후출발 / 저녁복귀', out: { c:'VJ871', dep:'ICN 13:00', arr:'DAD 16:20' }, in:  { c:'VJ872', dep:'DAD 21:30', arr:'ICN 04:30+1' }, sel: true }
       ]},
-      { code: 'KE', label: '대한항공 (KE)', route: 'ICN ↔ DAD', flights: [
-        { c: 'KE465', r: 'ICN→DAD', t: '11:30', sel: true },
-        { c: 'KE466', r: 'DAD→ICN', t: '18:30', sel: true }
+      { code: 'KE', label: '대한항공 (KE)', route: 'ICN ↔ DAD', tickets: [
+        { id: 'KE-DAD-001', name: '오전출발 / 저녁복귀', out: { c:'KE465', dep:'ICN 11:30', arr:'DAD 14:40' }, in:  { c:'KE466', dep:'DAD 18:30', arr:'ICN 01:30+1' }, sel: true }
       ]},
-      { code: 'OZ', label: '아시아나 (OZ)', route: 'ICN ↔ DAD', flights: [
-        { c: 'OZ751', r: 'ICN→DAD', t: '19:30', sel: false }
+      { code: 'OZ', label: '아시아나 (OZ)', route: 'ICN ↔ DAD', tickets: [
+        { id: 'OZ-DAD-001', name: '저녁출발 / 오전복귀', out: { c:'OZ751', dep:'ICN 19:30', arr:'DAD 22:40' }, in:  { c:'OZ752', dep:'DAD 10:20', arr:'ICN 17:20' }, sel: false }
       ]}
     ]
   },
@@ -875,12 +866,11 @@ const destData = {
       { n: 'Pullman Bangkok King Power', s: 4, r: 4, sel: false }
     ],
     groups: [
-      { code: 'TG', label: '타이항공 (TG)', route: 'ICN ↔ BKK', flights: [
-        { c: 'TG657', r: 'ICN→BKK', t: '09:20', sel: true },
-        { c: 'TG658', r: 'BKK→ICN', t: '23:55', sel: true }
+      { code: 'TG', label: '타이항공 (TG)', route: 'ICN ↔ BKK', tickets: [
+        { id: 'TG-BKK-001', name: '오전출발 / 심야복귀', out: { c:'TG657', dep:'ICN 09:20', arr:'BKK 13:30' }, in:  { c:'TG658', dep:'BKK 23:55', arr:'ICN 07:30+1' }, sel: true }
       ]},
-      { code: 'KE', label: '대한항공 (KE)', route: 'ICN ↔ BKK', flights: [
-        { c: 'KE651', r: 'ICN→BKK', t: '18:10', sel: false }
+      { code: 'KE', label: '대한항공 (KE)', route: 'ICN ↔ BKK', tickets: [
+        { id: 'KE-BKK-001', name: '저녁출발 / 저녁복귀', out: { c:'KE651', dep:'ICN 18:10', arr:'BKK 22:10' }, in:  { c:'KE652', dep:'BKK 23:20', arr:'ICN 06:40+1' }, sel: false }
       ]}
     ]
   }
@@ -910,23 +900,44 @@ function renderFlights(d) {
   const box = document.getElementById('flightGroups');
   if (!box) return;
   box.innerHTML = d.groups.map((g, idx) => {
-    const selCount = g.flights.filter(f=>f.sel).length;
-    const items = g.flights.map(f => {
-      const st = f.sel ? 'border:1px solid #91caff;background:#e6f4ff;' : 'border:1px solid #e8e8e8;color:rgba(0,0,0,0.65);';
-      return `<label style="display:flex;align-items:center;gap:6px;padding:6px 10px;${st}border-radius:4px;cursor:pointer;font-size:11px;"><input type="checkbox" ${f.sel?'checked':''}><strong>${f.c}</strong> ${f.r} <span style="color:rgba(0,0,0,0.45);">${f.t}</span></label>`;
+    const selCount = g.tickets.filter(t=>t.sel).length;
+    const items = g.tickets.map(tk => {
+      const st = tk.sel ? 'border:1px solid #91caff;background:#e6f4ff;' : 'border:1px solid #e8e8e8;background:#fff;';
+      const textDim = tk.sel ? '' : 'color:rgba(0,0,0,0.65);';
+      return `<label style="display:flex;gap:10px;padding:10px 12px;${st}border-radius:6px;cursor:pointer;">
+        <input type="checkbox" ${tk.sel?'checked':''} style="margin-top:2px;">
+        <div style="flex:1;min-width:0;">
+          <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px;">
+            <code style="font-size:11px;background:#fff;color:#1677ff;padding:2px 8px;border-radius:4px;border:1px solid #d9d9d9;font-family:'SF Mono',Menlo,monospace;font-weight:600;">${tk.id}</code>
+            <span style="font-size:12px;font-weight:500;${textDim}">${tk.name}</span>
+          </div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
+            <div style="display:flex;align-items:center;gap:6px;font-size:11px;${textDim}">
+              <span style="color:#52c41a;font-weight:600;">↗ 가는편</span>
+              <strong>${tk.out.c}</strong>
+              <span style="color:rgba(0,0,0,0.55);">${tk.out.dep} → ${tk.out.arr}</span>
+            </div>
+            <div style="display:flex;align-items:center;gap:6px;font-size:11px;${textDim}">
+              <span style="color:#fa541c;font-weight:600;">↙ 오는편</span>
+              <strong>${tk.in.c}</strong>
+              <span style="color:rgba(0,0,0,0.55);">${tk.in.dep} → ${tk.in.arr}</span>
+            </div>
+          </div>
+        </div>
+      </label>`;
     }).join('');
-    return `<details ${idx<2?'open':''} style="margin-bottom:6px;border:1px solid #f0f0f0;border-radius:6px;">
+    return `<details ${idx<3?'open':''} style="margin-bottom:6px;border:1px solid #f0f0f0;border-radius:6px;">
       <summary style="padding:10px 14px;cursor:pointer;display:flex;align-items:center;justify-content:space-between;background:#fafafa;border-radius:6px;">
-        <div style="display:flex;align-items:center;gap:8px;"><strong style="font-size:12px;">${g.label}</strong><span style="font-size:10px;color:rgba(0,0,0,0.45);">${g.route}</span><span style="font-size:10px;color:rgba(0,0,0,0.45);">${selCount} / ${g.flights.length} 선택</span></div>
+        <div style="display:flex;align-items:center;gap:8px;"><strong style="font-size:12px;">${g.label}</strong><span style="font-size:10px;color:rgba(0,0,0,0.45);">${g.route}</span><span style="font-size:10px;color:rgba(0,0,0,0.45);">${selCount} / ${g.tickets.length} 왕복권</span></div>
         <span style="font-size:11px;color:#1677ff;">전체 선택</span>
       </summary>
-      <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:4px;padding:10px;">${items}</div>
+      <div style="display:flex;flex-direction:column;gap:6px;padding:10px;">${items}</div>
     </details>`;
   }).join('');
-  const total = d.groups.reduce((a,g)=>a+g.flights.length,0);
-  const sel = d.groups.reduce((a,g)=>a+g.flights.filter(f=>f.sel).length,0);
+  const total = d.groups.reduce((a,g)=>a+g.tickets.length,0);
+  const sel = d.groups.reduce((a,g)=>a+g.tickets.filter(t=>t.sel).length,0);
   const fc = document.getElementById('flightCount');
-  if (fc) fc.textContent = `${sel} / ${total} 항공편`;
+  if (fc) fc.textContent = `${sel} / ${total} 왕복권`;
 }
 
 function applyDest(key) {
