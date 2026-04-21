@@ -1,0 +1,609 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>트립스토어 · 계좌결제 1% 즉시할인 (목업)</title>
+<style>
+  :root {
+    --brand: #FF6B35;
+    --brand-dim: #FFF3EC;
+    --kbank-yellow: #FFE812;
+    --kbank-brown: #3B1E1E;
+    --text: #1F2328;
+    --text-sub: #6B7280;
+    --text-mute: #9CA3AF;
+    --border: #E5E7EB;
+    --border-strong: #D1D5DB;
+    --bg: #F7F8FA;
+    --white: #FFFFFF;
+    --danger: #EF4444;
+    --success: #10B981;
+    --discount: #E11D48;
+    --radius: 10px;
+    --radius-sm: 6px;
+    --shadow-sm: 0 1px 2px rgba(0,0,0,.04);
+    --shadow-md: 0 4px 12px rgba(0,0,0,.06);
+  }
+  * { box-sizing: border-box; }
+  html, body { margin:0; padding:0; font-family: -apple-system, BlinkMacSystemFont, "Pretendard", "Apple SD Gothic Neo", sans-serif; background: var(--bg); color: var(--text); -webkit-font-smoothing: antialiased; }
+  a { color: inherit; text-decoration: none; }
+  button { font-family: inherit; cursor: pointer; border: none; background: none; }
+
+  /* Layout */
+  .top-banner { background: var(--kbank-yellow); color: var(--kbank-brown); text-align: center; padding: 10px 16px; font-size: 13px; font-weight: 600; }
+  .top-banner b { font-weight: 800; }
+  .header { background: var(--white); border-bottom: 1px solid var(--border); padding: 14px 20px; display: flex; align-items: center; justify-content: space-between; position: sticky; top: 0; z-index: 50; }
+  .logo { font-size: 20px; font-weight: 800; color: var(--brand); letter-spacing: -0.5px; }
+  .header-title { font-size: 15px; font-weight: 600; }
+
+  .layout { max-width: 1200px; margin: 0 auto; padding: 24px 20px; display: grid; grid-template-columns: 1fr 360px; gap: 24px; }
+  @media (max-width: 900px) { .layout { grid-template-columns: 1fr; } }
+
+  /* Case tabs */
+  .case-tabs { grid-column: 1 / -1; display: flex; gap: 8px; background: var(--white); padding: 8px; border-radius: var(--radius); border: 1px solid var(--border); overflow-x: auto; }
+  .case-tab { padding: 10px 14px; border-radius: var(--radius-sm); font-size: 13px; font-weight: 600; color: var(--text-sub); white-space: nowrap; }
+  .case-tab.active { background: var(--brand); color: var(--white); }
+  .case-tab .num { display: inline-block; width: 18px; height: 18px; line-height: 18px; border-radius: 50%; background: rgba(255,255,255,.25); font-size: 11px; text-align: center; margin-right: 6px; }
+  .case-tab:not(.active) .num { background: var(--border); color: var(--text-sub); }
+
+  /* Sections */
+  .section { background: var(--white); border: 1px solid var(--border); border-radius: var(--radius); margin-bottom: 16px; overflow: hidden; }
+  .section-head { padding: 16px 20px; border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; }
+  .section-title { font-size: 16px; font-weight: 700; }
+  .section-body { padding: 20px; }
+
+  /* Product summary */
+  .product-row { display: flex; gap: 16px; align-items: flex-start; }
+  .product-thumb { width: 96px; height: 96px; border-radius: var(--radius-sm); background: linear-gradient(135deg, #FFB088, #FF6B35); display: flex; align-items: center; justify-content: center; color: var(--white); font-size: 32px; flex-shrink: 0; }
+  .product-info { flex: 1; }
+  .product-title { font-size: 15px; font-weight: 700; margin-bottom: 6px; }
+  .product-meta { font-size: 13px; color: var(--text-sub); line-height: 1.6; }
+  .product-meta .sep { color: var(--border-strong); margin: 0 6px; }
+
+  /* Traveler */
+  .traveler-row { display: flex; justify-content: space-between; align-items: center; padding: 12px 0; border-bottom: 1px dashed var(--border); }
+  .traveler-row:last-child { border-bottom: 0; }
+  .traveler-name { font-size: 14px; font-weight: 600; }
+  .traveler-meta { font-size: 12px; color: var(--text-sub); }
+
+  /* Payment method selector */
+  .pay-methods { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; }
+  .pay-method { position: relative; border: 2px solid var(--border); border-radius: var(--radius); padding: 16px; cursor: pointer; transition: all .2s; background: var(--white); }
+  .pay-method:hover { border-color: var(--border-strong); }
+  .pay-method.selected { border-color: var(--brand); background: var(--brand-dim); }
+  .pay-method .pm-radio { width: 18px; height: 18px; border: 2px solid var(--border-strong); border-radius: 50%; display: inline-block; position: absolute; top: 16px; right: 16px; background: var(--white); }
+  .pay-method.selected .pm-radio { border-color: var(--brand); background: var(--brand); box-shadow: inset 0 0 0 3px var(--white); }
+  .pay-method .pm-name { font-size: 14px; font-weight: 700; margin-bottom: 4px; }
+  .pay-method .pm-sub { font-size: 12px; color: var(--text-sub); }
+  .pay-method .pm-badge { position: absolute; top: -8px; left: 12px; background: var(--kbank-yellow); color: var(--kbank-brown); font-size: 11px; font-weight: 800; padding: 3px 8px; border-radius: 20px; box-shadow: var(--shadow-sm); }
+  .pay-method .pm-icon { font-size: 20px; margin-right: 6px; }
+
+  .pay-method.highlight { animation: pulse 1.4s ease-in-out 1; }
+  @keyframes pulse {
+    0%, 100% { box-shadow: 0 0 0 0 rgba(255, 107, 53, 0); }
+    50% { box-shadow: 0 0 0 6px rgba(255, 107, 53, .25); }
+  }
+
+  /* Account sub-select */
+  .account-detail { display: none; margin-top: 12px; padding: 14px; background: #FAFBFC; border: 1px solid var(--border); border-radius: var(--radius-sm); }
+  .pay-method.selected.show-detail + .account-detail,
+  .pay-method.selected.account-method ~ .account-detail { display: block; }
+  .bank-chips { display: flex; flex-wrap: wrap; gap: 8px; }
+  .bank-chip { padding: 8px 12px; border: 1px solid var(--border); border-radius: 20px; font-size: 12px; font-weight: 600; background: var(--white); cursor: pointer; }
+  .bank-chip.selected { border-color: var(--kbank-brown); background: var(--kbank-yellow); color: var(--kbank-brown); }
+
+  /* Coupon */
+  .coupon-card { border: 1.5px dashed var(--border-strong); border-radius: var(--radius); padding: 14px 16px; display: flex; align-items: center; justify-content: space-between; background: var(--white); }
+  .coupon-card.applied { border-style: solid; border-color: var(--discount); background: #FFF1F2; }
+  .coupon-card.auto { border-color: var(--kbank-brown); background: #FFFBEB; }
+  .cp-left { flex: 1; }
+  .cp-label { font-size: 11px; font-weight: 700; color: var(--discount); margin-bottom: 4px; text-transform: uppercase; letter-spacing: .5px; }
+  .cp-label.auto { color: var(--kbank-brown); }
+  .cp-name { font-size: 14px; font-weight: 700; margin-bottom: 2px; }
+  .cp-meta { font-size: 12px; color: var(--text-sub); }
+  .cp-amount { font-size: 16px; font-weight: 800; color: var(--discount); white-space: nowrap; }
+  .cp-change { font-size: 12px; color: var(--brand); font-weight: 600; cursor: pointer; border: 1px solid var(--brand); padding: 6px 10px; border-radius: var(--radius-sm); background: var(--white); }
+
+  .notice-auto { margin-top: 10px; padding: 10px 12px; background: #FFFBEB; border: 1px solid #FEF3C7; border-radius: var(--radius-sm); font-size: 12px; color: var(--kbank-brown); line-height: 1.5; display: flex; gap: 8px; }
+  .notice-auto .ico { font-size: 14px; flex-shrink: 0; }
+
+  /* Summary (right) */
+  .summary { position: sticky; top: 80px; align-self: start; background: var(--white); border: 1px solid var(--border); border-radius: var(--radius); overflow: hidden; }
+  .summary-title { padding: 16px 20px; border-bottom: 1px solid var(--border); font-size: 15px; font-weight: 700; }
+  .summary-body { padding: 20px; }
+  .sum-row { display: flex; justify-content: space-between; padding: 6px 0; font-size: 13px; }
+  .sum-row .k { color: var(--text-sub); }
+  .sum-row .v { font-weight: 600; }
+  .sum-row.discount .v { color: var(--discount); }
+  .sum-divider { height: 1px; background: var(--border); margin: 12px 0; }
+  .sum-total { display: flex; justify-content: space-between; align-items: baseline; padding: 8px 0; }
+  .sum-total .k { font-size: 14px; font-weight: 700; }
+  .sum-total .v { font-size: 22px; font-weight: 800; color: var(--brand); }
+  .sum-total .v .won { font-size: 14px; margin-left: 2px; }
+  .cta { width: 100%; background: var(--brand); color: var(--white); font-size: 15px; font-weight: 700; padding: 14px; border-radius: var(--radius-sm); margin-top: 16px; }
+  .cta:disabled { background: var(--border-strong); cursor: not-allowed; }
+  .save-hint { margin-top: 10px; padding: 10px 12px; background: var(--kbank-yellow); color: var(--kbank-brown); border-radius: var(--radius-sm); font-size: 12px; font-weight: 700; text-align: center; display: none; }
+  .save-hint.visible { display: block; }
+
+  /* Toast */
+  .toast { position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%) translateY(80px); background: var(--kbank-brown); color: var(--kbank-yellow); padding: 12px 20px; border-radius: 24px; font-size: 13px; font-weight: 600; box-shadow: var(--shadow-md); transition: transform .4s cubic-bezier(.2,.9,.3,1.2); z-index: 100; display: flex; align-items: center; gap: 8px; }
+  .toast.show { transform: translateX(-50%) translateY(0); }
+
+  /* Modal */
+  .modal-bg { display: none; position: fixed; inset: 0; background: rgba(0,0,0,.5); z-index: 200; align-items: center; justify-content: center; padding: 20px; }
+  .modal-bg.open { display: flex; }
+  .modal { background: var(--white); border-radius: var(--radius); width: 100%; max-width: 480px; max-height: 80vh; overflow: hidden; display: flex; flex-direction: column; }
+  .modal-head { padding: 18px 20px; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; }
+  .modal-title { font-size: 16px; font-weight: 700; }
+  .modal-close { font-size: 20px; color: var(--text-sub); }
+  .modal-body { padding: 20px; overflow-y: auto; }
+  .coupon-item { padding: 14px; border: 1px solid var(--border); border-radius: var(--radius); margin-bottom: 10px; cursor: pointer; }
+  .coupon-item.best { border-color: var(--discount); background: #FFF1F2; position: relative; }
+  .coupon-item.best::before { content: "최대할인"; position: absolute; top: -8px; right: 12px; background: var(--discount); color: var(--white); font-size: 10px; font-weight: 700; padding: 3px 8px; border-radius: 10px; }
+  .coupon-item.disabled { opacity: .45; background: #FAFAFA; cursor: not-allowed; }
+  .ci-name { font-size: 14px; font-weight: 700; margin-bottom: 4px; }
+  .ci-amt { font-size: 13px; color: var(--discount); font-weight: 700; }
+  .ci-meta { font-size: 12px; color: var(--text-sub); margin-top: 4px; }
+
+  /* Flow diagram */
+  .flow-section { grid-column: 1 / -1; }
+  .flow { display: flex; gap: 12px; padding: 16px 0; overflow-x: auto; }
+  .flow-step { min-width: 180px; padding: 14px; border: 1px solid var(--border); border-radius: var(--radius); background: var(--white); font-size: 12px; flex-shrink: 0; }
+  .flow-step .fs-num { display: inline-block; width: 22px; height: 22px; line-height: 22px; border-radius: 50%; background: var(--brand); color: var(--white); text-align: center; font-weight: 700; margin-right: 6px; font-size: 11px; }
+  .flow-step .fs-title { font-weight: 700; margin-bottom: 6px; display: inline-block; }
+  .flow-step .fs-desc { color: var(--text-sub); line-height: 1.5; }
+  .flow-step.warn { border-color: var(--danger); background: #FEF2F2; }
+  .flow-step.warn .fs-num { background: var(--danger); }
+  .flow-arrow { display: flex; align-items: center; color: var(--text-mute); font-size: 18px; flex-shrink: 0; }
+
+  /* Edge case list */
+  .edge-list { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; }
+  @media (max-width: 700px) { .edge-list { grid-template-columns: 1fr; } }
+  .edge-item { padding: 14px; border: 1px solid var(--border); border-left: 3px solid var(--brand); border-radius: var(--radius-sm); background: var(--white); }
+  .edge-item.risk { border-left-color: var(--danger); }
+  .edge-title { font-size: 13px; font-weight: 700; margin-bottom: 6px; }
+  .edge-desc { font-size: 12px; color: var(--text-sub); line-height: 1.5; }
+
+  /* Hidden case content */
+  .case-view { display: none; }
+  .case-view.active { display: block; }
+
+  /* Info tag */
+  .info-tag { display: inline-block; background: var(--brand-dim); color: var(--brand); font-size: 11px; font-weight: 700; padding: 2px 8px; border-radius: 10px; margin-left: 6px; vertical-align: middle; }
+
+  /* Footer note */
+  .footnote { grid-column: 1 / -1; text-align: center; color: var(--text-mute); font-size: 12px; padding: 20px; }
+</style>
+</head>
+<body>
+
+<!-- 상단 프로모션 배너 -->
+<div class="top-banner">💛 카카오뱅크 계좌로 결제 시 <b>1% 즉시할인</b> · 금액 제한 없음</div>
+
+<!-- 헤더 -->
+<div class="header">
+  <div class="logo">TRIPSTORE</div>
+  <div class="header-title">예약 · 결제</div>
+  <div style="font-size:12px;color:var(--text-sub)">STEP 2 / 3</div>
+</div>
+
+<div class="layout">
+
+  <!-- 케이스 탭 -->
+  <div class="case-tabs">
+    <button class="case-tab active" data-case="default"><span class="num">1</span>카드결제 기본</button>
+    <button class="case-tab" data-case="account"><span class="num">2</span>계좌결제 + 1%할인 자동적용</button>
+    <button class="case-tab" data-case="compare"><span class="num">3</span>쿠폰 비교 (최대할인 자동)</button>
+    <button class="case-tab" data-case="edge"><span class="num">4</span>엣지 케이스 / 플로우</button>
+  </div>
+
+  <!-- ===================== 메인 컨텐츠 ===================== -->
+  <div>
+
+    <!-- CASE 1: 카드결제 기본 -->
+    <div class="case-view active" id="case-default">
+
+      <!-- 예약 정보 -->
+      <div class="section">
+        <div class="section-head"><div class="section-title">예약 정보</div></div>
+        <div class="section-body">
+          <div class="product-row">
+            <div class="product-thumb">🏝️</div>
+            <div class="product-info">
+              <div class="product-title">다낭/호이안 4일 · 풀빌라 2박 + 시티 1박</div>
+              <div class="product-meta">
+                2026.05.08(금) 출발 <span class="sep">|</span> 3박 4일 <span class="sep">|</span> 성인 2 · 아동 1
+              </div>
+              <div class="product-meta" style="margin-top:4px">
+                상품번호 <b>TS-DAD-0508-2261</b>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 결제수단 -->
+      <div class="section">
+        <div class="section-head"><div class="section-title">결제수단</div></div>
+        <div class="section-body">
+          <div class="pay-methods">
+            <div class="pay-method selected" data-method="card">
+              <div class="pm-name"><span class="pm-icon">💳</span>신용·체크카드</div>
+              <div class="pm-sub">모든 카드사 · 무이자 할부 지원</div>
+              <div class="pm-radio"></div>
+            </div>
+            <div class="pay-method" data-method="account">
+              <div class="pm-badge">💛 1% 즉시할인</div>
+              <div class="pm-name"><span class="pm-icon">🏦</span>계좌 실시간 결제</div>
+              <div class="pm-sub">카카오뱅크 계좌 결제 시 1% 자동 할인</div>
+              <div class="pm-radio"></div>
+            </div>
+            <div class="pay-method" data-method="vbank">
+              <div class="pm-name"><span class="pm-icon">📄</span>가상계좌 입금</div>
+              <div class="pm-sub">발급일 포함 2일 이내 입금</div>
+              <div class="pm-radio"></div>
+            </div>
+            <div class="pay-method" data-method="kakao">
+              <div class="pm-name"><span class="pm-icon">💬</span>카카오페이</div>
+              <div class="pm-sub">간편결제</div>
+              <div class="pm-radio"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 쿠폰/적립금 -->
+      <div class="section">
+        <div class="section-head">
+          <div class="section-title">쿠폰 · 적립금</div>
+          <button class="cp-change" onclick="openCouponModal('default')">쿠폰 변경</button>
+        </div>
+        <div class="section-body">
+          <div class="coupon-card applied">
+            <div class="cp-left">
+              <div class="cp-label">적용 중</div>
+              <div class="cp-name">앱 설치 감사 쿠폰 · 1%</div>
+              <div class="cp-meta">결제금액 50만원 이상 · 최대 10,000원</div>
+            </div>
+            <div class="cp-amount">-10,000원</div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- CASE 2: 계좌결제 + 1%할인 자동적용 -->
+    <div class="case-view" id="case-account">
+
+      <div class="section">
+        <div class="section-head"><div class="section-title">예약 정보</div></div>
+        <div class="section-body">
+          <div class="product-row">
+            <div class="product-thumb">🏝️</div>
+            <div class="product-info">
+              <div class="product-title">다낭/호이안 4일 · 풀빌라 2박 + 시티 1박</div>
+              <div class="product-meta">
+                2026.05.08(금) 출발 <span class="sep">|</span> 3박 4일 <span class="sep">|</span> 성인 2 · 아동 1
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 결제수단 : 계좌 선택됨 -->
+      <div class="section">
+        <div class="section-head">
+          <div class="section-title">결제수단</div>
+          <span style="font-size:12px;color:var(--success);font-weight:600">✓ 1% 즉시할인 적용됨</span>
+        </div>
+        <div class="section-body">
+          <div class="pay-methods">
+            <div class="pay-method" data-method="card">
+              <div class="pm-name"><span class="pm-icon">💳</span>신용·체크카드</div>
+              <div class="pm-sub">모든 카드사 · 무이자 할부 지원</div>
+              <div class="pm-radio"></div>
+            </div>
+            <div class="pay-method selected highlight" data-method="account">
+              <div class="pm-badge">💛 1% 즉시할인 적용</div>
+              <div class="pm-name"><span class="pm-icon">🏦</span>계좌 실시간 결제</div>
+              <div class="pm-sub">카카오뱅크 계좌 결제 시 1% 자동 할인</div>
+              <div class="pm-radio"></div>
+            </div>
+            <div class="pay-method" data-method="vbank">
+              <div class="pm-name"><span class="pm-icon">📄</span>가상계좌 입금</div>
+              <div class="pm-sub">발급일 포함 2일 이내 입금</div>
+              <div class="pm-radio"></div>
+            </div>
+            <div class="pay-method" data-method="kakao">
+              <div class="pm-name"><span class="pm-icon">💬</span>카카오페이</div>
+              <div class="pm-sub">간편결제</div>
+              <div class="pm-radio"></div>
+            </div>
+          </div>
+
+          <!-- 은행 선택 -->
+          <div class="account-detail" style="display:block">
+            <div style="font-size:12px;font-weight:600;margin-bottom:10px;color:var(--text-sub)">은행 선택</div>
+            <div class="bank-chips">
+              <div class="bank-chip selected">💛 카카오뱅크 <span style="font-weight:800;color:var(--discount);margin-left:4px">1% 할인</span></div>
+              <div class="bank-chip">KB국민</div>
+              <div class="bank-chip">신한</div>
+              <div class="bank-chip">우리</div>
+              <div class="bank-chip">하나</div>
+              <div class="bank-chip">농협</div>
+              <div class="bank-chip">+ 더보기</div>
+            </div>
+            <div style="font-size:11px;color:var(--text-mute);margin-top:10px">* 카카오뱅크 외 은행 선택 시 1% 즉시할인은 적용되지 않습니다.</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 쿠폰 : 자동 교체됨 -->
+      <div class="section">
+        <div class="section-head">
+          <div class="section-title">쿠폰 · 적립금</div>
+          <button class="cp-change" onclick="openCouponModal('account')">쿠폰 변경</button>
+        </div>
+        <div class="section-body">
+          <div class="coupon-card auto">
+            <div class="cp-left">
+              <div class="cp-label auto">💛 계좌결제 전용 · 자동 적용</div>
+              <div class="cp-name">카카오뱅크 계좌결제 1% 즉시할인</div>
+              <div class="cp-meta">금액 제한 없음 · 1건당 1회 · 최대할인 자동 적용</div>
+            </div>
+            <div class="cp-amount">-12,900원</div>
+          </div>
+
+          <div class="notice-auto">
+            <span class="ico">ℹ️</span>
+            <div>
+              <b>최대 할인이 자동으로 적용되었습니다.</b><br/>
+              현재 보유한 쿠폰 중 계좌결제 1% 할인(-12,900원)이 앱 설치 쿠폰(-10,000원)보다 많아 자동 전환되었습니다. 쿠폰은 예약당 1개만 적용됩니다.
+              <a href="#" onclick="openCouponModal('compare');return false" style="color:var(--brand);font-weight:700">쿠폰 비교 보기 →</a>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- CASE 3: 쿠폰 비교 (최대할인 자동) -->
+    <div class="case-view" id="case-compare">
+      <div class="section">
+        <div class="section-head">
+          <div class="section-title">쿠폰 비교 · 최대할인 자동 선택 로직</div>
+        </div>
+        <div class="section-body" style="padding:0">
+          <div style="padding:16px 20px;background:#FFFBEB;border-bottom:1px solid var(--border);font-size:13px;line-height:1.6;color:var(--kbank-brown)">
+            <b>정책</b> · 쿠폰 중복 적용은 예약당 1개로 제한됩니다(1안). 결제수단에 따라 <b>자동으로 최대할인 쿠폰이 선택</b>됩니다. 사용자가 수동으로 다른 쿠폰을 선택하면 자동 적용은 해제됩니다.
+          </div>
+
+          <div style="padding:20px">
+            <div style="font-size:13px;font-weight:600;margin-bottom:12px;color:var(--text-sub)">보유 쿠폰 3건 · 현재 결제금액 1,290,000원</div>
+
+            <div class="coupon-item best">
+              <div class="ci-name">💛 카카오뱅크 계좌결제 1% 즉시할인</div>
+              <div class="ci-amt">-12,900원</div>
+              <div class="ci-meta">계좌결제 + 카카오뱅크 선택 시 · 금액 제한 없음 · 유효기간 2026.12.31</div>
+            </div>
+
+            <div class="coupon-item">
+              <div class="ci-name">앱 설치 감사 쿠폰 · 1%</div>
+              <div class="ci-amt">-10,000원 <span style="color:var(--text-mute);font-weight:400">(최대 10,000원 한도)</span></div>
+              <div class="ci-meta">전 상품 · 결제금액 50만원 이상 · 유효기간 2026.06.30</div>
+            </div>
+
+            <div class="coupon-item disabled">
+              <div class="ci-name">회원가입 축하 쿠폰 · 5,000원</div>
+              <div class="ci-amt">-5,000원</div>
+              <div class="ci-meta">결제금액 30만원 이상 · 이미 사용됨</div>
+            </div>
+          </div>
+
+          <div style="padding:16px 20px;background:#F7F8FA;border-top:1px solid var(--border);font-size:12px;color:var(--text-sub);line-height:1.7">
+            <b style="color:var(--text)">자동 선택 로직</b>
+            <div>① 결제수단 선택 → ② 해당 결제수단에 적용 가능한 쿠폰 필터링 → ③ 현재 결제금액 기준 할인액 최대 쿠폰 자동 선택 → ④ 사용자 수동 변경 시 이후에는 자동 선택 해제</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- CASE 4: 엣지 케이스 & 플로우 -->
+    <div class="case-view" id="case-edge">
+
+      <!-- 플로우 다이어그램 -->
+      <div class="section flow-section">
+        <div class="section-head">
+          <div class="section-title">결제 플로우 · 계좌결제 1% 즉시할인 적용 순서</div>
+        </div>
+        <div class="section-body">
+          <div class="flow">
+            <div class="flow-step"><span class="fs-num">1</span><span class="fs-title">상품 선택</span><div class="fs-desc">여행 상품 · 여행자 수 · 출발일 확정</div></div>
+            <div class="flow-arrow">→</div>
+            <div class="flow-step"><span class="fs-num">2</span><span class="fs-title">결제수단 선택</span><div class="fs-desc">계좌 실시간 결제 + 카카오뱅크 선택</div></div>
+            <div class="flow-arrow">→</div>
+            <div class="flow-step"><span class="fs-num">3</span><span class="fs-title">쿠폰 자동 적용</span><div class="fs-desc">1% 계좌결제 쿠폰 자동 발급·적용<br/>기존 선택 쿠폰은 자동 해제</div></div>
+            <div class="flow-arrow">→</div>
+            <div class="flow-step warn"><span class="fs-num">4</span><span class="fs-title">서버 재검증 (중요)</span><div class="fs-desc">결제 직전 결제수단·은행·쿠폰 매칭 재검증. 프런트 조작 방지</div></div>
+            <div class="flow-arrow">→</div>
+            <div class="flow-step"><span class="fs-num">5</span><span class="fs-title">PG 요청</span><div class="fs-desc">CMS/나이스페이 계좌이체 호출 · 할인 반영 금액</div></div>
+            <div class="flow-arrow">→</div>
+            <div class="flow-step"><span class="fs-num">6</span><span class="fs-title">결제 완료</span><div class="fs-desc">예약 확정 · 정산원장 할인 태그 기록</div></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 엣지 케이스 -->
+      <div class="section">
+        <div class="section-head"><div class="section-title">엣지 케이스 · 정책 초안</div></div>
+        <div class="section-body">
+          <div class="edge-list">
+            <div class="edge-item risk">
+              <div class="edge-title">🚨 계좌결제 쿠폰 적용 후 카드로 변경</div>
+              <div class="edge-desc">프런트에서 쿠폰 적용된 상태로 카드 결제 호출 시 <b>서버에서 결제수단·쿠폰 매칭 재검증</b>. 불일치 시 쿠폰 자동 해제 후 원래 금액으로 결제 진행.</div>
+            </div>
+            <div class="edge-item risk">
+              <div class="edge-title">🚨 결제 취소 후 카드로 재결제</div>
+              <div class="edge-desc">계좌결제 쿠폰 사용 → 취소 후 카드 재결제 시 쿠폰 복원 여부 정책 필요. <b>1안: 쿠폰 복원 후 카드결제에서는 미적용</b> / 2안: 복원 금지.</div>
+            </div>
+            <div class="edge-item">
+              <div class="edge-title">일부 여행자만 취소 (부분취소)</div>
+              <div class="edge-desc">할인금액을 여행자 수로 N등분 → 취소 여행자분 할인 환급 (쿠폰 금액 기준). 정산 원장에서는 원 쿠폰 금액 그대로 유지.</div>
+            </div>
+            <div class="edge-item">
+              <div class="edge-title">카카오뱅크 외 은행 선택</div>
+              <div class="edge-desc">계좌결제 선택했더라도 은행이 카카오뱅크가 아니면 쿠폰 자동 해제. 안내 토스트 노출.</div>
+            </div>
+            <div class="edge-item">
+              <div class="edge-title">카뱅 채널 유입 예약</div>
+              <div class="edge-desc">카뱅 채널에서 넘어온 예약은 <b>별도 쿠폰 종류</b>로 발급 (분담 주체가 다름). 따따따 자체 트래픽과 정산 분리.</div>
+            </div>
+            <div class="edge-item">
+              <div class="edge-title">기존 1% 쿠폰 보유 고객</div>
+              <div class="edge-desc">앱설치/회원가입 1% 쿠폰과 중복 불가(1안). 계좌결제 선택 시 계좌쿠폰이 금액제한 없어 대부분 최대할인 → 자동 전환.</div>
+            </div>
+            <div class="edge-item">
+              <div class="edge-title">PG(CMS/나이스페이) 파라미터 위임</div>
+              <div class="edge-desc">결제건별 즉시할인 파라미터 위임 가능성 CMS 측에 1차 문의 필요. 불가 시 자체 구현(현 기본 방향).</div>
+            </div>
+            <div class="edge-item">
+              <div class="edge-title">카뱅 앱 2% 할인 (후속 스펙)</div>
+              <div class="edge-desc">5월 이후 카뱅 앱 내 트립스토어 결제 시 2% 할인. 동일 즉시할인 시스템 재사용 · 쿠폰 종류만 분리.</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+  </div>
+
+  <!-- ===================== 우측 요약 ===================== -->
+  <div class="summary" id="summary">
+    <div class="summary-title">결제 요약</div>
+    <div class="summary-body">
+      <div class="sum-row"><span class="k">상품 금액</span><span class="v">1,290,000원</span></div>
+      <div class="sum-row"><span class="k">옵션 추가</span><span class="v">0원</span></div>
+      <div class="sum-row" id="sum-coupon-row"><span class="k" id="sum-coupon-k">쿠폰 할인 (앱 설치 1%)</span><span class="v" id="sum-coupon-v" style="color:var(--discount)">-10,000원</span></div>
+      <div class="sum-divider"></div>
+      <div class="sum-total"><span class="k">최종 결제금액</span><span class="v"><span id="sum-total">1,280,000</span><span class="won">원</span></span></div>
+      <button class="cta">결제하기</button>
+      <div class="save-hint" id="save-hint">💛 카카오뱅크 계좌결제로 2,900원 추가 절약 중</div>
+    </div>
+  </div>
+
+  <div class="footnote">
+    Tripstore Mockup · 카카오뱅크 계좌결제 1% 즉시할인 (1안 · 단일 쿠폰 방식) · v0.1 · 2026-04-21<br/>
+    GitHub Pages 배포 · 기획 검토용 프로토타입
+  </div>
+
+</div>
+
+<!-- Toast -->
+<div class="toast" id="toast">💛 <span id="toast-msg">계좌결제 1% 즉시할인이 자동 적용되었습니다</span></div>
+
+<!-- Modal -->
+<div class="modal-bg" id="modal-bg" onclick="if(event.target===this)closeModal()">
+  <div class="modal">
+    <div class="modal-head">
+      <div class="modal-title">쿠폰 선택</div>
+      <button class="modal-close" onclick="closeModal()">✕</button>
+    </div>
+    <div class="modal-body" id="modal-body"></div>
+  </div>
+</div>
+
+<script>
+  // 케이스 탭 전환
+  document.querySelectorAll('.case-tab').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('.case-tab').forEach(b => b.classList.remove('active'));
+      document.querySelectorAll('.case-view').forEach(v => v.classList.remove('active'));
+      btn.classList.add('active');
+      const view = document.getElementById('case-' + btn.dataset.case);
+      view.classList.add('active');
+      updateSummary(btn.dataset.case);
+    });
+  });
+
+  // CASE 1에서 결제수단 클릭 시 인터랙션
+  document.querySelectorAll('#case-default .pay-method').forEach(pm => {
+    pm.addEventListener('click', () => {
+      document.querySelectorAll('#case-default .pay-method').forEach(p => p.classList.remove('selected'));
+      pm.classList.add('selected');
+      if (pm.dataset.method === 'account') {
+        // 계좌 선택 시 Case 2로 자동 전환 + 토스트
+        showToast('💛 계좌결제 1% 즉시할인이 자동 적용되었습니다');
+        setTimeout(() => {
+          document.querySelector('.case-tab[data-case="account"]').click();
+        }, 400);
+      }
+    });
+  });
+
+  // 요약 업데이트
+  function updateSummary(caseName) {
+    const k = document.getElementById('sum-coupon-k');
+    const v = document.getElementById('sum-coupon-v');
+    const total = document.getElementById('sum-total');
+    const hint = document.getElementById('save-hint');
+    if (caseName === 'account') {
+      k.innerHTML = '쿠폰 할인 <span class="info-tag">계좌결제 1%</span>';
+      v.textContent = '-12,900원';
+      total.textContent = '1,277,100';
+      hint.classList.add('visible');
+    } else if (caseName === 'default') {
+      k.textContent = '쿠폰 할인 (앱 설치 1%)';
+      v.textContent = '-10,000원';
+      total.textContent = '1,280,000';
+      hint.classList.remove('visible');
+    } else if (caseName === 'compare') {
+      k.innerHTML = '쿠폰 할인 <span class="info-tag">최대할인 자동</span>';
+      v.textContent = '-12,900원';
+      total.textContent = '1,277,100';
+      hint.classList.add('visible');
+    } else {
+      k.textContent = '쿠폰 할인';
+      v.textContent = '-12,900원';
+      total.textContent = '1,277,100';
+      hint.classList.add('visible');
+    }
+  }
+
+  // Toast
+  function showToast(msg) {
+    const t = document.getElementById('toast');
+    document.getElementById('toast-msg').textContent = msg;
+    t.classList.add('show');
+    setTimeout(() => t.classList.remove('show'), 2800);
+  }
+
+  // Modal
+  function openCouponModal(mode) {
+    const body = document.getElementById('modal-body');
+    body.innerHTML = `
+      <div style="font-size:12px;color:var(--text-sub);margin-bottom:10px">결제수단: ${mode === 'account' ? '계좌 실시간 결제 · 카카오뱅크' : '신용·체크카드'}</div>
+      <div class="coupon-item ${mode === 'account' ? 'best' : 'disabled'}">
+        <div class="ci-name">💛 카카오뱅크 계좌결제 1% 즉시할인</div>
+        <div class="ci-amt">-12,900원</div>
+        <div class="ci-meta">${mode === 'account' ? '금액 제한 없음' : '계좌결제 + 카카오뱅크 선택 시에만 적용 가능'}</div>
+      </div>
+      <div class="coupon-item ${mode !== 'account' ? 'best' : ''}">
+        <div class="ci-name">앱 설치 감사 쿠폰 · 1%</div>
+        <div class="ci-amt">-10,000원</div>
+        <div class="ci-meta">전 상품 · 결제금액 50만원 이상 · 최대 10,000원</div>
+      </div>
+      <div class="coupon-item disabled">
+        <div class="ci-name">회원가입 축하 쿠폰 · 5,000원</div>
+        <div class="ci-amt">-5,000원</div>
+        <div class="ci-meta">이미 사용됨</div>
+      </div>
+    `;
+    document.getElementById('modal-bg').classList.add('open');
+  }
+  function closeModal() { document.getElementById('modal-bg').classList.remove('open'); }
+</script>
+
+</body>
+</html>
