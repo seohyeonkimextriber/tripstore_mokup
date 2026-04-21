@@ -373,7 +373,7 @@ tr:hover td { background: #fafafa; }
   <!-- 1. 대분류 세팅 (사람이 설정 · 최소 경계값) -->
   <div class="card">
     <div class="card-header">
-      <h3><span class="section-num">1</span> 대분류 세팅 <span style="font-size:11px;color:rgba(0,0,0,0.45);font-weight:400;margin-left:8px;">— 현재 탭(<strong id="destHeaderLabel" style="color:#1677ff;">🇻🇳 푸꾸옥</strong>)에서 AI가 쓸 숙박권·항공권만 지정</span></h3>
+      <h3><span class="section-num">1</span> 대분류 세팅 <span style="font-size:11px;color:rgba(0,0,0,0.45);font-weight:400;margin-left:8px;">— 현재 탭(<strong id="destHeaderLabel" style="color:#1677ff;">🇻🇳 푸꾸옥</strong>)에서 AI가 쓸 숙박권·항공권·투어·티켓 풀 지정</span></h3>
       <span style="font-size:11px;color:rgba(0,0,0,0.45);">여행지 범위는 상단 탭으로 관리</span>
     </div>
     <div class="card-body">
@@ -510,6 +510,30 @@ tr:hover td { background: #fafafa; }
           <div style="padding:10px;font-size:11px;color:rgba(0,0,0,0.45);">펼치려면 클릭...</div>
         </details>
         </div><!-- /flightGroups -->
+      </div>
+
+      <!-- 1-C. 사용 투어·티켓 -->
+      <div style="padding-top:16px;border-top:1px solid #f0f0f0;margin-top:20px;">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px;">
+          <div style="font-size:13px;font-weight:600;color:rgba(0,0,0,0.75);">🎫 사용 투어·티켓 <span id="attrCount" style="font-size:11px;color:#1677ff;font-weight:500;margin-left:4px;">— / —</span></div>
+          <div style="display:flex;gap:6px;">
+            <input type="text" style="height:28px;border:1px solid #d9d9d9;border-radius:6px;padding:0 10px;font-size:11px;width:160px;" placeholder="🔍 투어·티켓 검색">
+            <button class="btn btn-default btn-sm">전체 선택</button>
+          </div>
+        </div>
+        <div style="font-size:11px;color:rgba(0,0,0,0.45);margin-bottom:10px;">등록된 투어·티켓 중 AI 조합 대상만 체크. AI가 그루핑(A/B/C타입)을 자동 구성할 풀.</div>
+
+        <!-- 투어 -->
+        <div style="margin-bottom:10px;">
+          <div style="font-size:11px;font-weight:600;color:#52c41a;margin-bottom:6px;display:flex;align-items:center;gap:6px;">🗺️ 투어 <span id="tourCount" style="font-size:10px;color:rgba(0,0,0,0.45);font-weight:400;">— / —</span></div>
+          <div id="tourGrid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:6px;"></div>
+        </div>
+
+        <!-- 티켓 -->
+        <div>
+          <div style="font-size:11px;font-weight:600;color:#1677ff;margin-bottom:6px;display:flex;align-items:center;gap:6px;">🎟️ 티켓 <span id="ticketItemCount" style="font-size:10px;color:rgba(0,0,0,0.45);font-weight:400;">— / —</span></div>
+          <div id="ticketGrid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:6px;"></div>
+        </div>
       </div>
     </div>
   </div>
@@ -800,6 +824,17 @@ const destData = {
       { n: 'Seashells Phu Quoc', s: 4, r: 2, sel: false },
       { n: 'Mercure Phu Quoc', s: 3, r: 2, sel: false }
     ],
+    attractions: [
+      { t:'투어', n:'호핑투어 (4섬)',          icon:'🚤', sel: true },
+      { t:'투어', n:'빈펄 사파리',             icon:'🦁', sel: true },
+      { t:'투어', n:'야시장 투어',             icon:'🌙', sel: true },
+      { t:'투어', n:'선셋 세일링',             icon:'⛵', sel: true },
+      { t:'투어', n:'스쿠버다이빙',            icon:'🤿', sel: false },
+      { t:'티켓', n:'빈펄랜드 입장권',         icon:'🎢', sel: true },
+      { t:'티켓', n:'푸꾸옥 케이블카 (Hon Thom)', icon:'🚠', sel: true },
+      { t:'티켓', n:'VinWonders 통합권',       icon:'🎠', sel: true },
+      { t:'티켓', n:'아쿠아토피아 워터파크',     icon:'💧', sel: false }
+    ],
     groups: [
       { code: 'VJ', label: '비엣젯 (VJ)', route: 'ICN ↔ PQC', tickets: [
         { id: 'VJ-PQC-001', name: '주간출발 / 야간복귀', out: { c:'VJ871', dep:'ICN 09:30', arr:'PQC 13:00' }, in:  { c:'VJ872', dep:'PQC 22:00', arr:'ICN 05:00+1' }, sel: true },
@@ -825,6 +860,15 @@ const destData = {
       { n: 'Sunrise Nha Trang Beach', s: 4, r: 3, sel: false },
       { n: 'Amanoi Nha Trang', s: 5, r: 2, sel: false }
     ],
+    attractions: [
+      { t:'투어', n:'빈원더스 통합 투어',   icon:'🎡', sel: true },
+      { t:'투어', n:'머드온천 스파',        icon:'💆', sel: true },
+      { t:'투어', n:'나트랑 시티투어',      icon:'🚌', sel: true },
+      { t:'투어', n:'혼문섬 호핑',          icon:'🏝️', sel: false },
+      { t:'티켓', n:'빈원더스 입장권',      icon:'🎢', sel: true },
+      { t:'티켓', n:'머드온천 입장권',      icon:'🛁', sel: true },
+      { t:'티켓', n:'나트랑 야시장 셔틀',   icon:'🌃', sel: false }
+    ],
     groups: [
       { code: 'VJ', label: '비엣젯 (VJ)', route: 'ICN ↔ CXR', tickets: [
         { id: 'VJ-CXR-001', name: '오전출발 / 심야복귀', out: { c:'VJ961', dep:'ICN 10:15', arr:'CXR 14:00' }, in:  { c:'VJ962', dep:'CXR 23:30', arr:'ICN 06:40+1' }, sel: true }
@@ -843,6 +887,15 @@ const destData = {
       { n: 'Premier Village Danang', s: 5, r: 3, sel: true },
       { n: 'Pullman Danang Beach', s: 5, r: 4, sel: true },
       { n: 'Novotel Danang Premier', s: 4, r: 3, sel: false }
+    ],
+    attractions: [
+      { t:'투어', n:'바나힐 투어',          icon:'🏔️', sel: true },
+      { t:'투어', n:'회안 구시가 투어',     icon:'🏮', sel: true },
+      { t:'투어', n:'미케비치 액티비티',    icon:'🏖️', sel: true },
+      { t:'투어', n:'후에 당일 투어',       icon:'🏯', sel: false },
+      { t:'티켓', n:'바나힐 케이블카·입장권', icon:'🚠', sel: true },
+      { t:'티켓', n:'회안 구시가 입장권',   icon:'🎟️', sel: true },
+      { t:'티켓', n:'오행산 입장권',        icon:'⛰️', sel: false }
     ],
     groups: [
       { code: 'VJ', label: '비엣젯 (VJ)', route: 'ICN ↔ DAD', tickets: [
@@ -864,6 +917,14 @@ const destData = {
       { n: 'Siam Kempinski', s: 5, r: 4, sel: true },
       { n: 'W Bangkok', s: 5, r: 3, sel: false },
       { n: 'Pullman Bangkok King Power', s: 4, r: 4, sel: false }
+    ],
+    attractions: [
+      { t:'투어', n:'왓아룬·왓포·왕궁 투어', icon:'🛕', sel: true },
+      { t:'투어', n:'아시아티크 야시장',     icon:'🌉', sel: true },
+      { t:'투어', n:'수상시장 투어',         icon:'🛶', sel: true },
+      { t:'투어', n:'시암 쇼+뷔페',          icon:'🎭', sel: false },
+      { t:'티켓', n:'아이콘시암 쇼권',       icon:'🎫', sel: false },
+      { t:'티켓', n:'마담투소 입장권',       icon:'🎨', sel: false }
     ],
     groups: [
       { code: 'TG', label: '타이항공 (TG)', route: 'ICN ↔ BKK', tickets: [
@@ -940,6 +1001,37 @@ function renderFlights(d) {
   if (fc) fc.textContent = `${sel} / ${total} 왕복권`;
 }
 
+function renderAttractions(d) {
+  const items = d.attractions || [];
+  const tours = items.filter(x => x.t === '투어');
+  const tix = items.filter(x => x.t === '티켓');
+
+  const card = (x) => {
+    const color = x.t === '투어' ? '#52c41a' : '#1677ff';
+    const bg = x.sel ? (x.t === '투어' ? 'background:#f6ffed;border:1px solid #b7eb8f;' : 'background:#e6f4ff;border:1px solid #91caff;') : 'background:#fff;border:1px solid #e8e8e8;';
+    const textDim = x.sel ? '' : 'color:rgba(0,0,0,0.65);';
+    return `<label style="display:flex;align-items:center;gap:8px;padding:8px 12px;${bg}border-radius:6px;cursor:pointer;">
+      <input type="checkbox" ${x.sel?'checked':''} style="accent-color:${color};">
+      <span style="font-size:16px;">${x.icon || '📍'}</span>
+      <div style="font-size:12px;font-weight:500;${textDim}flex:1;min-width:0;">${x.n}</div>
+    </label>`;
+  };
+
+  const tg = document.getElementById('tourGrid');
+  const kg = document.getElementById('ticketGrid');
+  if (tg) tg.innerHTML = tours.map(card).join('');
+  if (kg) kg.innerHTML = tix.map(card).join('');
+
+  const selTours = tours.filter(x=>x.sel).length;
+  const selTix = tix.filter(x=>x.sel).length;
+  const tc = document.getElementById('tourCount');
+  const kc = document.getElementById('ticketItemCount');
+  const ac = document.getElementById('attrCount');
+  if (tc) tc.textContent = `${selTours} / ${tours.length} 선택`;
+  if (kc) kc.textContent = `${selTix} / ${tix.length} 선택`;
+  if (ac) ac.textContent = `${selTours + selTix} / ${items.length} 선택`;
+}
+
 function applyDest(key) {
   const d = destData[key];
   if (!d) return;
@@ -949,6 +1041,7 @@ function applyDest(key) {
   const fm = document.getElementById('fixedMargin'); if (fm) fm.value = d.fixed;
   renderHotels(d);
   renderFlights(d);
+  renderAttractions(d);
 }
 
 document.querySelectorAll('.dest-tab').forEach(tab => {

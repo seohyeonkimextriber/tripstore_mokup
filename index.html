@@ -508,6 +508,12 @@ tr:hover .cov-td-prod { background: #fafafa; }
 .preset-card-icon { font-size: 20px; flex-shrink: 0; }
 .preset-card-name { font-size: 13px; font-weight: 600; color: rgba(0,0,0,0.88); margin-bottom: 2px; }
 .preset-card-desc { font-size: 11px; color: rgba(0,0,0,0.4); line-height: 1.5; }
+.stat-tab:hover { border-color: #91caff !important; box-shadow: 0 2px 8px rgba(22,119,255,0.08); }
+.stat-tab.active { border-color: #1677ff !important; background: #f0f7ff !important; }
+.preset-group-title { font-size: 11px; font-weight: 700; color: rgba(0,0,0,0.4); letter-spacing: 0.4px; margin: 8px 0 2px; padding: 0 2px; text-transform: uppercase; }
+.preset-group-title:first-child { margin-top: 0; }
+.preset-card.hidden-by-search { display: none; }
+.preset-group-title.hidden-by-search { display: none; }
 .preset-card-count { display: none; }
 .preset-card-count.zero { display: none; }
 .preset-inline-expand { display:none; background:#f8fbff; border:1.5px solid #91caff; border-radius:0 0 10px 10px; padding:14px 16px; margin-top:-9px; animation: expandIn 0.15s ease-out; }
@@ -677,6 +683,27 @@ tr:hover .cov-td-prod { background: #fafafa; }
     <div style="display:flex;align-items:center;gap:8px;padding:8px 14px;margin-bottom:10px;background:#f0f7ff;border:1px solid #d3e8ff;border-radius:6px;font-size:11px;color:#0958d9;">
       <span>📌</span> 콘텐츠는 <strong>조건(규칙) 기반</strong>으로 매칭되는 <strong>상품 단위</strong>에 자동 적용됩니다. 조건을 만족하는 콘텐츠는 모두 노출됩니다(중복 허용, 덮어쓰기 없음).
     </div>
+
+    <!-- 상태별 빠른 필터 탭 -->
+    <div style="display:flex;gap:8px;margin-bottom:12px;">
+      <div class="stat-tab active" onclick="switchStatTab(this,'all')" style="flex:1;cursor:pointer;padding:12px 16px;border-radius:8px;background:#fff;border:2px solid #1677ff;transition:all 0.15s;">
+        <div style="font-size:11px;color:rgba(0,0,0,0.45);margin-bottom:4px;">전체</div>
+        <div style="font-size:22px;font-weight:700;color:rgba(0,0,0,0.88);">2,835<span style="font-size:12px;font-weight:400;color:rgba(0,0,0,0.4);margin-left:3px;">건</span></div>
+      </div>
+      <div class="stat-tab" onclick="switchStatTab(this,'active')" style="flex:1;cursor:pointer;padding:12px 16px;border-radius:8px;background:#fff;border:2px solid #f0f0f0;transition:all 0.15s;">
+        <div style="font-size:11px;color:rgba(0,0,0,0.45);margin-bottom:4px;"><span style="color:#52c41a;">●</span> 운영중</div>
+        <div style="font-size:22px;font-weight:700;color:#389e0d;">1,820<span style="font-size:12px;font-weight:400;color:rgba(0,0,0,0.4);margin-left:3px;">건</span></div>
+      </div>
+      <div class="stat-tab" onclick="switchStatTab(this,'draft')" style="flex:1;cursor:pointer;padding:12px 16px;border-radius:8px;background:#fff;border:2px solid #f0f0f0;transition:all 0.15s;">
+        <div style="font-size:11px;color:rgba(0,0,0,0.45);margin-bottom:4px;"><span style="color:#faad14;">●</span> Draft</div>
+        <div style="font-size:22px;font-weight:700;color:#d48806;">120<span style="font-size:12px;font-weight:400;color:rgba(0,0,0,0.4);margin-left:3px;">건</span></div>
+      </div>
+      <div class="stat-tab" onclick="switchStatTab(this,'stopped')" style="flex:1;cursor:pointer;padding:12px 16px;border-radius:8px;background:#fff;border:2px solid #f0f0f0;transition:all 0.15s;">
+        <div style="font-size:11px;color:rgba(0,0,0,0.45);margin-bottom:4px;"><span style="color:#f5222d;">●</span> 중단</div>
+        <div style="font-size:22px;font-weight:700;color:#cf1322;">895<span style="font-size:12px;font-weight:400;color:rgba(0,0,0,0.4);margin-left:3px;">건</span></div>
+      </div>
+    </div>
+
     <div class="card">
       <!-- 통합 필터 -->
       <div class="filter-bar" id="bfilter-all">
@@ -687,11 +714,7 @@ tr:hover .cov-td-prod { background: #fafafa; }
           <option>자주 묻는 질문</option><option>취소환불규정</option>
           <option>안내사항</option><option>출발 전 안내</option><option>수하물 규정</option>
         </select>
-        <select class="fi fi-md">
-          <option value="">상태</option>
-          <option>🟢 운영중</option><option>📝 Draft</option><option>🔴 중단</option>
-        </select>
-        <input class="fi fi-lg" type="text" placeholder="관리명 · 조건 검색">
+        <input class="fi fi-lg" type="text" placeholder="솔바이멜리아, 트립스토어, BB 등 키워드 검색" style="flex:1;min-width:280px;">
         <div class="filter-actions">
           <button class="btn btn-primary btn-sm">검색</button>
           <button class="btn btn-default btn-sm">초기화</button>
@@ -703,7 +726,7 @@ tr:hover .cov-td-prod { background: #fafafa; }
           <thead>
             <tr>
               <th class="col-cat">카테고리</th>
-              <th class="col-name">관리명</th>
+              <th class="col-name">제목</th>
               <th style="width:220px;">적용 조건</th>
               <th style="width:70px;text-align:center;">상태</th>
               <th class="col-date">수정일시 ↓</th>
@@ -714,9 +737,8 @@ tr:hover .cov-td-prod { background: #fafafa; }
           <tbody id="board-table-body">
             <tr>
               <td><span class="tag tag-purple">스페셜 혜택</span></td>
-              <td style="max-width:220px;">
-                <div style="font-weight:600;color:rgba(0,0,0,0.85);margin-bottom:2px;">얼리체크인 특전</div>
-                <div style="font-size:11px;color:rgba(0,0,0,0.4);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">트립스토어_솔바이멜리아_BB_스페셜혜택_얼리체크인 특전</div>
+              <td style="max-width:260px;">
+                <div style="font-weight:600;color:rgba(0,0,0,0.88);font-size:13px;" title="관리명: 트립스토어_솔바이멜리아_BB_스페셜혜택_얼리체크인 특전">얼리체크인 특전</div>
               </td>
               <td>
                 <div style="display:flex;flex-wrap:wrap;gap:3px;margin-bottom:4px;">
@@ -733,9 +755,8 @@ tr:hover .cov-td-prod { background: #fafafa; }
             </tr>
             <tr>
               <td><span class="tag tag-purple">포함사항</span></td>
-              <td style="max-width:220px;">
-                <div style="font-weight:600;color:rgba(0,0,0,0.85);margin-bottom:2px;">객실 포함 안내</div>
-                <div style="font-size:11px;color:rgba(0,0,0,0.4);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">트립스토어_윙크호텔_슈페리어_HB_포함사항_객실 포함 안내</div>
+              <td style="max-width:260px;">
+                <div style="font-weight:600;color:rgba(0,0,0,0.88);font-size:13px;" title="관리명: 트립스토어_윙크호텔_슈페리어_HB_포함사항_객실 포함 안내">객실 포함 안내</div>
               </td>
               <td>
                 <div style="display:flex;flex-wrap:wrap;gap:3px;margin-bottom:4px;">
@@ -753,9 +774,8 @@ tr:hover .cov-td-prod { background: #fafafa; }
             </tr>
             <tr>
               <td><span class="tag tag-purple">스페셜 혜택</span></td>
-              <td style="max-width:220px;">
-                <div style="font-weight:600;color:rgba(0,0,0,0.85);margin-bottom:2px;">프라이빗 풀빌라 혜택</div>
-                <div style="font-size:11px;color:rgba(0,0,0,0.4);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">고헤드투어_래디슨블루_스페셜혜택_프라이빗 풀빌라 혜택</div>
+              <td style="max-width:260px;">
+                <div style="font-weight:600;color:rgba(0,0,0,0.88);font-size:13px;" title="관리명: 고헤드투어_래디슨블루_스페셜혜택_프라이빗 풀빌라 혜택">프라이빗 풀빌라 혜택</div>
               </td>
               <td>
                 <div style="display:flex;flex-wrap:wrap;gap:3px;margin-bottom:4px;">
@@ -771,9 +791,8 @@ tr:hover .cov-td-prod { background: #fafafa; }
             </tr>
             <tr>
               <td><span class="tag tag-gray">유의사항</span></td>
-              <td style="max-width:220px;">
-                <div style="font-weight:600;color:rgba(0,0,0,0.85);margin-bottom:2px;">체크인 안내</div>
-                <div style="font-size:11px;color:rgba(0,0,0,0.4);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">다낭_유의사항_체크인 안내</div>
+              <td style="max-width:260px;">
+                <div style="font-weight:600;color:rgba(0,0,0,0.88);font-size:13px;" title="관리명: 다낭_유의사항_체크인 안내">체크인 안내</div>
               </td>
               <td>
                 <div style="display:flex;flex-wrap:wrap;gap:3px;margin-bottom:4px;">
@@ -788,9 +807,8 @@ tr:hover .cov-td-prod { background: #fafafa; }
             </tr>
             <tr>
               <td><span class="tag tag-orange">수하물 규정</span></td>
-              <td style="max-width:220px;">
-                <div style="font-weight:600;color:rgba(0,0,0,0.85);margin-bottom:2px;">일반석 위탁수하물 안내</div>
-                <div style="font-size:11px;color:rgba(0,0,0,0.4);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">비엣젯항공_수하물규정_일반석 위탁수하물 안내</div>
+              <td style="max-width:260px;">
+                <div style="font-weight:600;color:rgba(0,0,0,0.88);font-size:13px;" title="관리명: 비엣젯항공_수하물규정_일반석 위탁수하물 안내">일반석 위탁수하물 안내</div>
               </td>
               <td>
                 <div style="display:flex;flex-wrap:wrap;gap:3px;margin-bottom:4px;">
@@ -805,9 +823,8 @@ tr:hover .cov-td-prod { background: #fafafa; }
             </tr>
             <tr>
               <td><span class="tag tag-gray">취소환불규정</span></td>
-              <td style="max-width:220px;">
-                <div style="font-weight:600;color:rgba(0,0,0,0.85);margin-bottom:2px;">전체 취소/환불 규정</div>
-                <div style="font-size:11px;color:rgba(0,0,0,0.4);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">공통_취소환불규정_전체 취소/환불 규정</div>
+              <td style="max-width:260px;">
+                <div style="font-weight:600;color:rgba(0,0,0,0.88);font-size:13px;" title="관리명: 공통_취소환불규정_전체 취소/환불 규정">전체 취소/환불 규정</div>
               </td>
               <td>
                 <div style="display:flex;flex-wrap:wrap;gap:3px;margin-bottom:4px;">
@@ -5218,6 +5235,43 @@ flowchart LR
   </div>
 </div>
 
+<!-- 게시 확인 모달 -->
+<div class="modal-overlay hidden" id="publish-confirm-modal" onclick="if(event.target===this)this.classList.add('hidden')">
+  <div style="background:#fff;border-radius:12px;width:520px;max-width:92vw;overflow:hidden;">
+    <div style="padding:16px 20px;border-bottom:1px solid #f0f0f0;">
+      <div style="font-size:16px;font-weight:600;">게시 전 확인</div>
+      <div style="font-size:12px;color:rgba(0,0,0,0.45);margin-top:2px;">아래 내용으로 콘텐츠가 운영중 상태로 전환됩니다</div>
+    </div>
+    <div style="padding:18px 20px;">
+      <div id="publish-confirm-body">
+        <div style="display:flex;align-items:flex-start;gap:10px;padding:10px 0;border-bottom:1px solid #f5f5f5;">
+          <span style="font-size:11px;font-weight:600;color:rgba(0,0,0,0.4);min-width:80px;padding-top:2px;">카테고리</span>
+          <span style="flex:1;font-size:13px;color:rgba(0,0,0,0.85);" id="pc-cat">—</span>
+        </div>
+        <div style="display:flex;align-items:flex-start;gap:10px;padding:10px 0;border-bottom:1px solid #f5f5f5;">
+          <span style="font-size:11px;font-weight:600;color:rgba(0,0,0,0.4);min-width:80px;padding-top:2px;">제목</span>
+          <span style="flex:1;font-size:13px;color:rgba(0,0,0,0.85);font-weight:500;" id="pc-title">—</span>
+        </div>
+        <div style="display:flex;align-items:flex-start;gap:10px;padding:10px 0;border-bottom:1px solid #f5f5f5;">
+          <span style="font-size:11px;font-weight:600;color:rgba(0,0,0,0.4);min-width:80px;padding-top:2px;">적용 조건</span>
+          <div style="flex:1;display:flex;flex-wrap:wrap;gap:4px;" id="pc-rules">—</div>
+        </div>
+        <div style="display:flex;align-items:center;gap:10px;padding:10px 0;">
+          <span style="font-size:11px;font-weight:600;color:rgba(0,0,0,0.4);min-width:80px;">매칭 상품</span>
+          <span style="flex:1;font-size:13px;color:#1677ff;font-weight:600;" id="pc-matched">—</span>
+        </div>
+      </div>
+      <div style="background:#fffbe6;border:1px solid #ffe58f;border-radius:6px;padding:10px 12px;margin-top:10px;font-size:11px;color:#7c5800;line-height:1.6;">
+        ℹ️ 게시 이후 수정은 <strong>새 예약부터</strong> 적용되며, 기존 예약 건은 예약 당시 콘텐츠가 유지됩니다.
+      </div>
+    </div>
+    <div style="padding:12px 20px;background:#fafafa;display:flex;gap:8px;justify-content:flex-end;border-top:1px solid #f0f0f0;">
+      <button class="btn btn-default" onclick="document.getElementById('publish-confirm-modal').classList.add('hidden')">뒤로</button>
+      <button class="btn btn-primary" style="background:#389e0d;border-color:#389e0d;" onclick="document.getElementById('publish-confirm-modal').classList.add('hidden');v4Save('운영중')">이 내용으로 게시하기</button>
+    </div>
+  </div>
+</div>
+
 <!-- 버전 이력 비교 모달 -->
 <div class="modal-overlay hidden" id="version-history-modal" onclick="if(event.target===this)this.classList.add('hidden')">
   <div style="background:#fff;border-radius:12px;width:800px;max-width:95vw;max-height:85vh;overflow:hidden;display:flex;flex-direction:column;">
@@ -5715,15 +5769,19 @@ flowchart LR
 
         <!-- Step 1: 프리셋 선택 -->
         <div class="v4-panel" style="margin-bottom:14px;">
-          <div class="v4-panel-header">
-            <div class="v4-panel-title">① 어떤 상품에 붙일까요?</div>
-            <div class="v4-panel-sub">자주 쓰는 조합을 선택하거나 직접 조건을 추가하세요</div>
+          <div class="v4-panel-header" style="display:flex;align-items:center;justify-content:space-between;gap:12px;">
+            <div>
+              <div class="v4-panel-title">① 어떤 상품에 붙일까요?</div>
+              <div class="v4-panel-sub">자주 쓰는 조합을 선택하거나 직접 조건을 추가하세요</div>
+            </div>
+            <input type="text" class="fi fi-lg" placeholder="🔍 프리셋 검색 (예: 숙소, 식사)" style="width:220px;" oninput="filterPresets(this.value)">
           </div>
           <div class="v4-panel-body">
             <div class="preset-grid" id="v4-preset-grid">
 
               <!-- 1. 전체 공통 -->
-              <div class="preset-card" onclick="v4SelectPreset('all',this)">
+              <div class="preset-group-title" data-group="common">🌐 공통 / 범위</div>
+              <div class="preset-card" data-preset-keywords="전체 공통 모든 상품" onclick="v4SelectPreset('all',this)">
                 <div class="preset-card-icon">🌐</div>
                 <div>
                   <div class="preset-card-name">전체 공통</div>
@@ -5733,7 +5791,7 @@ flowchart LR
               </div>
 
               <!-- 2. 상품코드 -->
-              <div class="preset-card" onclick="v4SelectPreset('product_code',this)">
+              <div class="preset-card" data-preset-keywords="상품코드" onclick="v4SelectPreset('product_code',this)">
                 <div class="preset-card-icon">📦</div>
                 <div>
                   <div class="preset-card-name">상품코드</div>
@@ -5743,7 +5801,7 @@ flowchart LR
               </div>
 
               <!-- 3. 공급사별 -->
-              <div class="preset-card" onclick="v4SelectPreset('operator',this)">
+              <div class="preset-card" data-preset-keywords="공급사 operator" onclick="v4SelectPreset('operator',this)">
                 <div class="preset-card-icon">🏢</div>
                 <div>
                   <div class="preset-card-name">공급사별</div>
@@ -5752,8 +5810,20 @@ flowchart LR
                 <span class="preset-card-count" id="pc-operator">—</span>
               </div>
 
+              <!-- 13. 여행지별 (공통 그룹으로 이동) -->
+              <div class="preset-card" data-preset-keywords="여행지 place" onclick="v4SelectPreset('place',this)">
+                <div class="preset-card-icon">📍</div>
+                <div>
+                  <div class="preset-card-name">여행지별</div>
+                  <div class="preset-card-desc">여행지 소개 · 비자/여권/입국 안내</div>
+                </div>
+                <span class="preset-card-count" id="pc-place">—</span>
+              </div>
+
+              <div class="preset-group-title" data-group="hotel">🏨 숙박</div>
+
               <!-- 4. 공급사 + 숙소 -->
-              <div class="preset-card" onclick="v4SelectPreset('op_accom',this)">
+              <div class="preset-card" data-preset-keywords="공급사 숙소 hotel accom" onclick="v4SelectPreset('op_accom',this)">
                 <div class="preset-card-icon">🏢🏨</div>
                 <div>
                   <div class="preset-card-name">공급사 + 숙소</div>
@@ -5763,7 +5833,7 @@ flowchart LR
               </div>
 
               <!-- 5. 공급사 + 숙소 + 객실 -->
-              <div class="preset-card" onclick="v4SelectPreset('op_accom_room',this)">
+              <div class="preset-card" data-preset-keywords="공급사 숙소 객실 room" onclick="v4SelectPreset('op_accom_room',this)">
                 <div class="preset-card-icon">🏢🛏️</div>
                 <div>
                   <div class="preset-card-name">공급사 + 숙소 + 객실</div>
@@ -5773,7 +5843,7 @@ flowchart LR
               </div>
 
               <!-- 6. 공급사 + 숙소 + 식사 -->
-              <div class="preset-card" onclick="v4SelectPreset('op_accom_meal',this)">
+              <div class="preset-card" data-preset-keywords="공급사 숙소 식사 meal BB HB AI" onclick="v4SelectPreset('op_accom_meal',this)">
                 <div class="preset-card-icon">🏢🍽️</div>
                 <div>
                   <div class="preset-card-name">공급사 + 숙소 + 식사</div>
@@ -5783,7 +5853,7 @@ flowchart LR
               </div>
 
               <!-- 7. 공급사 + 숙소 + 객실 + 식사 -->
-              <div class="preset-card" onclick="v4SelectPreset('op_accom_room_meal',this)">
+              <div class="preset-card" data-preset-keywords="공급사 숙소 객실 식사 meal room" onclick="v4SelectPreset('op_accom_room_meal',this)">
                 <div class="preset-card-icon">🛏️🍽️</div>
                 <div>
                   <div class="preset-card-name">공급사 + 숙소 + 객실 + 식사</div>
@@ -5792,8 +5862,20 @@ flowchart LR
                 <span class="preset-card-count" id="pc-op_accom_room_meal">—</span>
               </div>
 
+              <!-- 11. 숙박권 -->
+              <div class="preset-card" data-preset-keywords="숙박권 voucher hotel" onclick="v4SelectPreset('hotel_voucher',this)">
+                <div class="preset-card-icon">🏨</div>
+                <div>
+                  <div class="preset-card-name">숙박권</div>
+                  <div class="preset-card-desc">숙박권 ID → 객실 → 식사 옵션</div>
+                </div>
+                <span class="preset-card-count" id="pc-hotel_voucher">—</span>
+              </div>
+
+              <div class="preset-group-title" data-group="flight">✈️ 항공</div>
+
               <!-- 8. 공급사 + 항공사 -->
-              <div class="preset-card" onclick="v4SelectPreset('op_airline',this)">
+              <div class="preset-card" data-preset-keywords="공급사 항공사 airline" onclick="v4SelectPreset('op_airline',this)">
                 <div class="preset-card-icon">🏢✈️</div>
                 <div>
                   <div class="preset-card-name">공급사 + 항공사</div>
@@ -5802,8 +5884,20 @@ flowchart LR
                 <span class="preset-card-count" id="pc-op_airline">—</span>
               </div>
 
+              <!-- 12. 항공권 -->
+              <div class="preset-card" data-preset-keywords="항공권 flight" onclick="v4SelectPreset('flight_voucher',this)">
+                <div class="preset-card-icon">✈️</div>
+                <div>
+                  <div class="preset-card-name">항공권</div>
+                  <div class="preset-card-desc">항공권 ID 선택</div>
+                </div>
+                <span class="preset-card-count" id="pc-flight_voucher">—</span>
+              </div>
+
+              <div class="preset-group-title" data-group="tour">🎯 스팟 / 투어</div>
+
               <!-- 9. 공급사 + 스팟/체험 -->
-              <div class="preset-card" onclick="v4SelectPreset('op_spot',this)">
+              <div class="preset-card" data-preset-keywords="공급사 스팟 체험 spot" onclick="v4SelectPreset('op_spot',this)">
                 <div class="preset-card-icon">🏢🎯</div>
                 <div>
                   <div class="preset-card-name">공급사 + 스팟/체험</div>
@@ -5813,43 +5907,13 @@ flowchart LR
               </div>
 
               <!-- 10. 투어/티켓 -->
-              <div class="preset-card" onclick="v4SelectPreset('tour',this)">
+              <div class="preset-card" data-preset-keywords="투어 티켓 tour ticket" onclick="v4SelectPreset('tour',this)">
                 <div class="preset-card-icon">🎫</div>
                 <div>
                   <div class="preset-card-name">투어/티켓</div>
                   <div class="preset-card-desc">등록된 투어/티켓 ID 선택</div>
                 </div>
                 <span class="preset-card-count" id="pc-tour">—</span>
-              </div>
-
-              <!-- 11. 숙박권 -->
-              <div class="preset-card" onclick="v4SelectPreset('hotel_voucher',this)">
-                <div class="preset-card-icon">🏨</div>
-                <div>
-                  <div class="preset-card-name">숙박권</div>
-                  <div class="preset-card-desc">숙박권 ID → 객실 → 식사 옵션</div>
-                </div>
-                <span class="preset-card-count" id="pc-hotel_voucher">—</span>
-              </div>
-
-              <!-- 12. 항공권 -->
-              <div class="preset-card" onclick="v4SelectPreset('flight_voucher',this)">
-                <div class="preset-card-icon">✈️</div>
-                <div>
-                  <div class="preset-card-name">항공권</div>
-                  <div class="preset-card-desc">항공권 ID 선택</div>
-                </div>
-                <span class="preset-card-count" id="pc-flight_voucher">—</span>
-              </div>
-
-              <!-- 13. 여행지별 -->
-              <div class="preset-card" onclick="v4SelectPreset('place',this)">
-                <div class="preset-card-icon">📍</div>
-                <div>
-                  <div class="preset-card-name">여행지별</div>
-                  <div class="preset-card-desc">여행지 소개 · 비자/여권/입국 안내</div>
-                </div>
-                <span class="preset-card-count" id="pc-place">—</span>
               </div>
 
               <!-- 인라인 조건 입력 (선택한 프리셋 아래로 이동) -->
@@ -6012,7 +6076,7 @@ flowchart LR
               </div>
               <div style="display:flex;gap:10px;align-items:center;">
                 <button class="btn btn-default" onclick="v4Save('Draft')" style="border-color:#faad14;color:#ad6800;">임시저장 (Draft)</button>
-                <button class="btn btn-primary" style="height:36px;font-size:14px;font-weight:600;padding:0 24px;" onclick="if(confirm('게시(Publish) 하시겠습니까?\\n\\n콘텐츠가 운영중 상태로 전환되어 조건에 매칭되는 상품에 즉시 적용됩니다.')) v4Save('운영중')">게시 (운영중)</button>
+                <button class="btn btn-primary" style="height:36px;font-size:14px;font-weight:600;padding:0 24px;" onclick="v4OpenPublishConfirm()">게시 (운영중)</button>
               </div>
             </div>
           </div>
@@ -9187,6 +9251,54 @@ function v4UpdatePresetCounts() {
     const cnt = v4PresetCount(key);
     el.textContent = cnt + '개';
     el.className = cnt > 0 ? 'preset-card-count' : 'preset-card-count zero';
+  });
+}
+
+// 목록 상태 탭 전환
+function switchStatTab(el, type) {
+  document.querySelectorAll('.stat-tab').forEach(t => t.classList.remove('active'));
+  el.classList.add('active');
+}
+
+// 게시 전 확인 모달 열기
+function v4OpenPublishConfirm() {
+  // 카테고리
+  const cat = v4State.category || '—';
+  document.getElementById('pc-cat').textContent = cat;
+  // 제목
+  const title = document.getElementById('v4-title')?.value?.trim() || '(제목 없음)';
+  document.getElementById('pc-title').textContent = title;
+  // 조건 태그
+  const tagsHtml = document.getElementById('v4-rule-tags')?.innerHTML || '<span style="font-size:12px;color:rgba(0,0,0,0.4);">조건 없음 (전체 공통)</span>';
+  document.getElementById('pc-rules').innerHTML = tagsHtml;
+  // 매칭 상품 수
+  const matched = (typeof v4MatchProducts === 'function') ? v4MatchProducts().length : 0;
+  document.getElementById('pc-matched').innerHTML = `${matched}개 상품 <span style="font-size:11px;color:rgba(0,0,0,0.45);font-weight:400;">(게시 시점 기준)</span>`;
+  document.getElementById('publish-confirm-modal').classList.remove('hidden');
+}
+
+// 프리셋 검색 필터
+function filterPresets(keyword) {
+  const q = keyword.trim().toLowerCase();
+  const cards = document.querySelectorAll('#v4-preset-grid .preset-card');
+  const titles = document.querySelectorAll('#v4-preset-grid .preset-group-title');
+  cards.forEach(c => {
+    const kw = (c.dataset.presetKeywords || '').toLowerCase();
+    const name = (c.querySelector('.preset-card-name')?.textContent || '').toLowerCase();
+    const match = !q || kw.includes(q) || name.includes(q);
+    c.classList.toggle('hidden-by-search', !match);
+  });
+  // 그룹 헤더: 해당 그룹 안에 보이는 카드가 하나도 없으면 숨김
+  titles.forEach(t => {
+    let visible = false;
+    let n = t.nextElementSibling;
+    while (n && !n.classList.contains('preset-group-title')) {
+      if (n.classList.contains('preset-card') && !n.classList.contains('hidden-by-search')) {
+        visible = true; break;
+      }
+      n = n.nextElementSibling;
+    }
+    t.classList.toggle('hidden-by-search', !visible);
   });
 }
 
