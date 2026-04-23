@@ -183,6 +183,72 @@ tr:last-child td { border-bottom: none; }
     </div>
   </div>
 
+  <!-- 🧭 TMG 예약 플로우 (공식 · 2026-04-23 전달) -->
+  <div style="background:#fff;border-radius:10px;box-shadow:0 1px 3px rgba(0,0,0,0.08);margin-bottom:20px;overflow:hidden;">
+    <div style="padding:14px 20px;border-bottom:1px solid #f0f0f0;display:flex;align-items:center;justify-content:space-between;">
+      <div style="display:flex;align-items:center;gap:10px;">
+        <span style="font-size:18px;">🧭</span>
+        <strong style="font-size:14px;">TMG 예약 플로우 <span style="font-size:11px;color:rgba(0,0,0,0.45);font-weight:400;margin-left:4px;">공식 · 3-Swim-Lane (CLIENT / TRIPSTORES / TMG)</span></strong>
+      </div>
+      <a href="https://www.figma.com/design/9K43k01ICze3fW8MoEuMDO/Untitled?node-id=0-1" target="_blank" style="font-size:11px;color:#1677ff;text-decoration:none;">📐 Figma 원본 →</a>
+    </div>
+    <div style="padding:16px 20px;">
+      <!-- 3-Swim-Lane 시각화 -->
+      <div style="display:grid;grid-template-columns:90px 1fr 1fr 1fr;gap:8px;align-items:stretch;">
+        <div></div>
+        <div style="text-align:center;font-size:11px;font-weight:700;color:#1677ff;background:#e6f4ff;padding:6px;border-radius:4px;">CLIENT</div>
+        <div style="text-align:center;font-size:11px;font-weight:700;color:#531dab;background:#f9f0ff;padding:6px;border-radius:4px;">TRIPSTORES</div>
+        <div style="text-align:center;font-size:11px;font-weight:700;color:#d4380d;background:#fff2e8;padding:6px;border-radius:4px;">TMG SYSTEM</div>
+
+        <!-- Step 1 -->
+        <div style="display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:600;color:rgba(0,0,0,0.55);">① 가용성</div>
+        <div style="padding:8px 10px;border:1px solid #d9d9d9;border-radius:6px;font-size:11px;background:#fafafa;text-align:center;">조회 요청</div>
+        <div style="padding:8px 10px;border:1px solid #d9d9d9;border-radius:6px;font-size:11px;background:#fafafa;text-align:center;">Check Availability<br><code style="font-size:9px;color:#1677ff;">CheckAvailability</code></div>
+        <div style="padding:8px 10px;border:1px solid #d9d9d9;border-radius:6px;font-size:11px;background:#fafafa;text-align:center;">Response Availability<br><span style="font-size:9px;color:rgba(0,0,0,0.45);">객실·요금 or null</span></div>
+
+        <!-- Step 2 -->
+        <div style="display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:600;color:rgba(0,0,0,0.55);">② 예약요청</div>
+        <div style="padding:8px 10px;border:1px solid #91caff;border-radius:6px;font-size:11px;background:#e6f4ff;text-align:center;">예약 요청</div>
+        <div style="padding:8px 10px;border:1px solid #d3adf7;border-radius:6px;font-size:11px;background:#f9f0ff;text-align:center;"><code style="font-size:9px;color:#722ed1;">reserveBooking</code><br>→ 결제 대기</div>
+        <div style="padding:8px 10px;border:1px solid #ffbb96;border-radius:6px;font-size:11px;background:#fff2e8;text-align:center;">Booking HOLD<br><span style="font-size:9px;color:#d4380d;">deadline 응답</span></div>
+
+        <!-- Step 3 -->
+        <div style="display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:600;color:rgba(0,0,0,0.55);">③ 결제</div>
+        <div style="padding:8px 10px;border:1px solid #91caff;border-radius:6px;font-size:11px;background:#e6f4ff;text-align:center;">Payment<br><span style="font-size:9px;color:rgba(0,0,0,0.45);">데드라인 내</span></div>
+        <div style="padding:8px 10px;border:1px solid #d9d9d9;border-radius:6px;font-size:11px;background:#fafafa;text-align:center;color:rgba(0,0,0,0.45);">결제 검증</div>
+        <div style="padding:8px 10px;border:1px dashed #d9d9d9;border-radius:6px;font-size:10px;background:#fafafa;text-align:center;color:rgba(0,0,0,0.35);">(대기)</div>
+
+        <!-- Step 4 -->
+        <div style="display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:600;color:rgba(0,0,0,0.55);">④ 확정</div>
+        <div style="padding:8px 10px;border:1px solid #b7eb8f;border-radius:6px;font-size:11px;background:#f6ffed;text-align:center;">예약 확정<br><span style="font-size:9px;color:#52c41a;">수신</span></div>
+        <div style="padding:8px 10px;border:1px solid #d3adf7;border-radius:6px;font-size:11px;background:#f9f0ff;text-align:center;"><code style="font-size:9px;color:#722ed1;">confirmBooking</code><br><span style="font-size:9px;color:rgba(0,0,0,0.45);">Phase 1: 어드민 수동</span></div>
+        <div style="padding:8px 10px;border:1px solid #ffbb96;border-radius:6px;font-size:11px;background:#fff2e8;text-align:center;">CONFIRMED<br><span style="font-size:9px;color:#d4380d;">확정 상세</span></div>
+
+        <!-- Optional 5 -->
+        <div style="display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:600;color:rgba(0,0,0,0.35);">⑤ 조회</div>
+        <div style="padding:6px 10px;border:1px dashed #d9d9d9;border-radius:6px;font-size:10px;background:#fff;text-align:center;color:rgba(0,0,0,0.45);">(상세 요청)</div>
+        <div style="padding:6px 10px;border:1px dashed #d9d9d9;border-radius:6px;font-size:10px;background:#fff;text-align:center;color:rgba(0,0,0,0.55);"><code style="font-size:9px;">retrieveBooking/{code}</code></div>
+        <div style="padding:6px 10px;border:1px dashed #d9d9d9;border-radius:6px;font-size:10px;background:#fff;text-align:center;color:rgba(0,0,0,0.55);">booking details</div>
+
+        <!-- Optional 6 -->
+        <div style="display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:600;color:rgba(0,0,0,0.35);">⑥ 취소</div>
+        <div style="padding:6px 10px;border:1px dashed #ffa39e;border-radius:6px;font-size:10px;background:#fff1f0;text-align:center;color:#cf1322;">취소 요청</div>
+        <div style="padding:6px 10px;border:1px dashed #ffa39e;border-radius:6px;font-size:10px;background:#fff1f0;text-align:center;color:#cf1322;"><code style="font-size:9px;">cancelBooking</code><br>reason 포함</div>
+        <div style="padding:6px 10px;border:1px dashed #ffa39e;border-radius:6px;font-size:10px;background:#fff1f0;text-align:center;color:#cf1322;">CANCELLED<br><span style="font-size:9px;">cancelFee 반환</span></div>
+      </div>
+
+      <!-- 현재 예약 건 단계별 집계 -->
+      <div style="margin-top:14px;padding-top:12px;border-top:1px solid #f0f0f0;display:flex;gap:8px;flex-wrap:wrap;">
+        <span style="padding:4px 10px;background:#e6f4ff;color:#0958d9;border-radius:4px;font-size:11px;font-weight:500;">① 조회 중 147</span>
+        <span style="padding:4px 10px;background:#f9f0ff;color:#722ed1;border-radius:4px;font-size:11px;font-weight:500;">② 결제 대기(HOLD) 12</span>
+        <span style="padding:4px 10px;background:#fff2e8;color:#d4380d;border-radius:4px;font-size:11px;font-weight:500;">③ 결제 진행 3</span>
+        <span style="padding:4px 10px;background:#f6ffed;color:#52c41a;border-radius:4px;font-size:11px;font-weight:500;">④ CONFIRMED 42</span>
+        <span style="padding:4px 10px;background:#fff1f0;color:#cf1322;border-radius:4px;font-size:11px;font-weight:500;">⑥ 취소 진행 2</span>
+        <span style="margin-left:auto;font-size:11px;color:rgba(0,0,0,0.45);">⚠️ HOLD 만료 임박: 2건 (계약요금 30분 이내)</span>
+      </div>
+    </div>
+  </div>
+
   <!-- FILTER -->
   <div class="filter-bar">
     <span class="tag active">All</span>
