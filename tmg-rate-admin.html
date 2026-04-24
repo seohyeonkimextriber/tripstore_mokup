@@ -1,0 +1,764 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>TMG 숙소 요금표 관리 — TripStore Admin</title>
+<link href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.6/dist/web/static/pretendard.css" rel="stylesheet">
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: 'Pretendard', 'Apple SD Gothic Neo', -apple-system, sans-serif; font-size: 14px; color: rgba(0,0,0,0.88); background: #f5f5f5; }
+
+/* GNB */
+.gnb { background: #fff; height: 56px; display: flex; align-items: center; padding: 0 24px; border-bottom: 1px solid #f0f0f0; position: sticky; top: 0; z-index: 100; }
+.gnb-logo { font-weight: 800; font-size: 15px; margin-right: 32px; letter-spacing: -0.3px; }
+.gnb-logo span { color: #1677ff; }
+.gnb-menu { display: flex; gap: 0; }
+.gnb-item { color: rgba(0,0,0,0.65); padding: 0 16px; height: 56px; display: flex; align-items: center; cursor: pointer; font-size: 13px; font-weight: 500; position: relative; }
+.gnb-item.active { color: #1677ff; }
+.gnb-item.active::after { content: ''; position: absolute; bottom: 0; left: 0; right: 0; height: 2px; background: #1677ff; }
+.gnb-user { margin-left: auto; font-size: 13px; color: rgba(0,0,0,0.55); }
+
+/* BREADCRUMB + PAGE HEADER */
+.breadcrumb { padding: 16px 24px 0; font-size: 12px; color: rgba(0,0,0,0.45); }
+.breadcrumb-sep { margin: 0 6px; color: rgba(0,0,0,0.25); }
+.layout { padding: 12px 24px 40px; }
+.page-header { display: flex; align-items: center; justify-content: space-between; margin: 12px 0 20px; }
+.page-title { font-size: 22px; font-weight: 700; }
+.page-sub { font-size: 13px; color: rgba(0,0,0,0.55); margin-top: 6px; }
+
+/* CARD */
+.card { background: #fff; border-radius: 10px; box-shadow: 0 1px 3px rgba(0,0,0,0.06); margin-bottom: 20px; overflow: hidden; }
+
+/* TAB BAR — 요금타입 */
+.rate-tabs { display: flex; border-bottom: 1px solid #f0f0f0; padding: 0 20px; background: #fff; }
+.rate-tab { padding: 16px 18px; cursor: pointer; font-size: 14px; color: rgba(0,0,0,0.65); font-weight: 500; border-bottom: 2px solid transparent; display: flex; align-items: center; gap: 8px; transition: all 0.15s; }
+.rate-tab:hover { color: rgba(0,0,0,0.88); }
+.rate-tab.active { color: #1677ff; border-bottom-color: #1677ff; font-weight: 600; }
+.rate-tab .tab-count { font-size: 11px; color: rgba(0,0,0,0.45); background: #f5f5f5; padding: 1px 7px; border-radius: 10px; font-weight: 500; }
+.rate-tab.active .tab-count { background: #e6f4ff; color: #1677ff; }
+.rate-tab .type-dot { width: 8px; height: 8px; border-radius: 50%; display: inline-block; }
+.dot-green { background: #52c41a; }
+.dot-blue { background: #1677ff; }
+.dot-purple { background: #722ed1; }
+
+/* NOTICE BANNER */
+.notice-banner { padding: 12px 20px; display: flex; align-items: flex-start; gap: 10px; font-size: 13px; line-height: 1.6; border-bottom: 1px solid #f0f0f0; }
+.notice-blue { background: #e6f4ff; color: #0958d9; border-left: 3px solid #1677ff; }
+.notice-purple { background: #f9f0ff; color: #531dab; border-left: 3px solid #722ed1; }
+.notice-orange { background: #fff7e6; color: #ad6800; border-left: 3px solid #fa8c16; }
+.notice-icon { font-size: 16px; flex-shrink: 0; line-height: 1.5; }
+.notice-banner strong { font-weight: 700; }
+
+/* FILTER BAR */
+.filter-bar { padding: 14px 20px; border-bottom: 1px solid #f0f0f0; display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+.fi { height: 32px; border: 1px solid #d9d9d9; border-radius: 6px; font-size: 13px; font-family: inherit; color: rgba(0,0,0,0.88); outline: none; background: #fff; }
+.fi:focus { border-color: #1677ff; box-shadow: 0 0 0 2px rgba(22,119,255,0.1); }
+input.fi { padding: 0 10px; }
+input.fi::placeholder { color: rgba(0,0,0,0.25); }
+select.fi { padding: 0 28px 0 10px; appearance: none; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='%23bbb'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 8px center; cursor: pointer; }
+.fi-md { width: 140px; }
+.fi-lg { width: 180px; }
+
+/* ACTION BAR (탭 내부 상단) */
+.action-bar { padding: 12px 20px; display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid #f0f0f0; background: #fafafa; }
+.action-left { font-size: 13px; color: rgba(0,0,0,0.65); }
+.action-left strong { color: rgba(0,0,0,0.88); font-weight: 600; }
+.action-right { display: flex; gap: 8px; }
+
+/* BUTTONS */
+.btn { height: 32px; padding: 0 14px; border-radius: 6px; font-size: 13px; font-family: inherit; cursor: pointer; border: 1px solid transparent; display: inline-flex; align-items: center; gap: 6px; transition: all 0.15s; white-space: nowrap; font-weight: 500; }
+.btn-primary { background: #1677ff; color: #fff; border-color: #1677ff; }
+.btn-primary:hover { background: #4096ff; }
+.btn-default { background: #fff; color: rgba(0,0,0,0.88); border-color: #d9d9d9; }
+.btn-default:hover { color: #1677ff; border-color: #1677ff; }
+.btn-ghost { background: transparent; color: #1677ff; border-color: transparent; padding: 0 8px; }
+.btn-ghost:hover { background: #e6f4ff; }
+.btn-sm { height: 28px; padding: 0 10px; font-size: 12px; }
+.btn:disabled { background: #f5f5f5; color: rgba(0,0,0,0.25); border-color: #d9d9d9; cursor: not-allowed; }
+
+/* TABLE */
+.table-wrap { overflow-x: auto; }
+table { width: 100%; border-collapse: collapse; }
+th { padding: 12px 16px; text-align: left; font-weight: 500; font-size: 13px; color: rgba(0,0,0,0.65); background: #fafafa; border-bottom: 1px solid #f0f0f0; white-space: nowrap; }
+td { padding: 12px 16px; font-size: 13px; color: rgba(0,0,0,0.88); border-bottom: 1px solid #f5f5f5; vertical-align: middle; }
+tbody tr:hover td { background: #fafafa; }
+.td-id { font-family: 'SF Mono', Monaco, monospace; font-size: 12px; color: rgba(0,0,0,0.55); }
+.td-hotel { max-width: 280px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+/* TAGS */
+.tag { display: inline-flex; align-items: center; gap: 4px; padding: 2px 8px; border-radius: 4px; font-size: 12px; font-weight: 500; }
+.tag-green { background: #f6ffed; color: #389e0d; border: 1px solid #b7eb8f; }
+.tag-blue { background: #e6f4ff; color: #1677ff; border: 1px solid #91caff; }
+.tag-purple { background: #f9f0ff; color: #722ed1; border: 1px solid #d3adf7; }
+.tag-gray { background: #f5f5f5; color: rgba(0,0,0,0.55); border: 1px solid #e8e8e8; }
+.tag-orange { background: #fff7e6; color: #d48806; border: 1px solid #ffd591; }
+
+/* INLINE VALUE */
+.val-ok { color: #389e0d; font-weight: 500; }
+.val-live { display: inline-flex; align-items: center; gap: 6px; color: #722ed1; font-weight: 500; }
+.val-live::before { content: '●'; color: #722ed1; font-size: 9px; animation: blink 1.5s infinite; }
+.val-manual { color: rgba(0,0,0,0.55); font-style: italic; }
+.val-number { font-weight: 600; font-family: 'SF Mono', Monaco, monospace; }
+@keyframes blink { 0%, 60% { opacity: 1; } 80% { opacity: 0.3; } 100% { opacity: 1; } }
+
+.sync-time { font-size: 11px; color: rgba(0,0,0,0.35); margin-top: 2px; }
+
+/* STATUS DOT */
+.status-row { display: flex; align-items: center; gap: 6px; }
+.status-dot { width: 6px; height: 6px; border-radius: 50%; }
+.status-dot.active { background: #52c41a; }
+.status-dot.pending { background: #fa8c16; }
+.status-dot.inactive { background: #d9d9d9; }
+
+/* PAGINATION */
+.pagination { padding: 14px 20px; display: flex; align-items: center; gap: 6px; justify-content: flex-end; border-top: 1px solid #f0f0f0; }
+.page-btn { min-width: 28px; height: 28px; padding: 0 8px; border: 1px solid #d9d9d9; background: #fff; border-radius: 4px; font-size: 12px; cursor: pointer; color: rgba(0,0,0,0.65); }
+.page-btn.active { border-color: #1677ff; color: #1677ff; }
+
+/* MODAL */
+.modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.5); display: none; align-items: center; justify-content: center; z-index: 1000; padding: 40px 20px; }
+.modal-overlay.show { display: flex; }
+.modal { background: #fff; border-radius: 12px; width: 640px; max-width: 100%; max-height: 85vh; overflow-y: auto; }
+.modal-header { padding: 20px 24px 16px; border-bottom: 1px solid #f0f0f0; display: flex; align-items: center; justify-content: space-between; }
+.modal-title { font-size: 17px; font-weight: 700; display: flex; align-items: center; gap: 10px; }
+.modal-close { background: transparent; border: none; font-size: 20px; cursor: pointer; color: rgba(0,0,0,0.45); padding: 0; width: 32px; height: 32px; border-radius: 50%; }
+.modal-close:hover { background: #f5f5f5; color: rgba(0,0,0,0.88); }
+.modal-body { padding: 20px 24px; }
+.modal-footer { padding: 14px 24px 20px; border-top: 1px solid #f0f0f0; display: flex; justify-content: flex-end; gap: 8px; background: #fafafa; }
+
+/* FORM */
+.form-section { margin-bottom: 20px; }
+.form-section-title { font-size: 13px; font-weight: 700; color: rgba(0,0,0,0.88); margin-bottom: 10px; display: flex; align-items: center; gap: 6px; }
+.form-info { background: #fafafa; border-radius: 8px; padding: 12px 14px; font-size: 13px; line-height: 1.7; }
+.form-info .row { display: flex; justify-content: space-between; }
+.form-info .row + .row { margin-top: 4px; }
+.form-info .label { color: rgba(0,0,0,0.55); }
+.form-group { margin-bottom: 14px; }
+.form-label { display: block; font-size: 12px; color: rgba(0,0,0,0.65); font-weight: 500; margin-bottom: 6px; }
+.form-label .required { color: #f5222d; margin-left: 2px; }
+.form-control { width: 100%; height: 38px; padding: 0 12px; border: 1px solid #d9d9d9; border-radius: 6px; font-size: 13px; font-family: inherit; outline: none; background: #fff; }
+.form-control:focus { border-color: #1677ff; box-shadow: 0 0 0 2px rgba(22,119,255,0.1); }
+.form-control:disabled { background: #fafafa; color: rgba(0,0,0,0.45); }
+.form-help { font-size: 11px; color: rgba(0,0,0,0.45); margin-top: 4px; line-height: 1.5; }
+.form-row-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+
+.live-badge { display: inline-flex; align-items: center; gap: 4px; background: #f9f0ff; color: #722ed1; padding: 2px 8px; border-radius: 4px; font-size: 11px; font-weight: 600; border: 1px solid #d3adf7; }
+.live-badge::before { content: '●'; font-size: 8px; animation: blink 1.5s infinite; }
+
+.legal-warn { background: #fffbe6; border: 1px solid #ffe58f; border-radius: 8px; padding: 10px 12px; font-size: 12px; color: #ad6800; line-height: 1.6; margin-top: 10px; }
+.legal-warn strong { color: #874d00; }
+
+/* DETAIL PREVIEW (사용자 화면) */
+.preview-frame { background: #fafafa; border-radius: 10px; padding: 20px; margin-top: 14px; }
+.preview-label { font-size: 11px; color: rgba(0,0,0,0.45); margin-bottom: 10px; text-transform: uppercase; letter-spacing: 0.5px; font-weight: 600; }
+.preview-device { background: #fff; border-radius: 8px; padding: 16px; max-width: 360px; margin: 0 auto; box-shadow: 0 2px 8px rgba(0,0,0,0.08); }
+.pv-hotel { font-size: 15px; font-weight: 700; margin-bottom: 4px; }
+.pv-room { font-size: 12px; color: rgba(0,0,0,0.55); margin-bottom: 14px; }
+.pv-loading { display: flex; align-items: center; gap: 8px; padding: 12px; background: #f0f7ff; border-radius: 6px; font-size: 12px; color: #0958d9; margin-bottom: 10px; }
+.pv-spinner { width: 12px; height: 12px; border: 2px solid #91caff; border-top-color: #1677ff; border-radius: 50%; animation: spin 0.8s linear infinite; }
+@keyframes spin { to { transform: rotate(360deg); } }
+.pv-price { display: flex; align-items: baseline; gap: 6px; margin-bottom: 6px; }
+.pv-label { font-size: 11px; color: rgba(0,0,0,0.45); }
+.pv-amount { font-size: 22px; font-weight: 800; color: #f5222d; }
+.pv-unit { font-size: 12px; color: rgba(0,0,0,0.55); }
+.pv-hint { font-size: 11px; color: rgba(0,0,0,0.45); }
+.pv-inv { font-size: 12px; color: #389e0d; margin-top: 4px; font-weight: 500; }
+
+/* FLOW DIAGRAM */
+.flow-box { display: flex; align-items: center; gap: 8px; margin-top: 14px; flex-wrap: wrap; }
+.flow-step { background: #fff; border: 1px solid #e8e8e8; border-radius: 8px; padding: 10px 14px; font-size: 12px; flex: 1; min-width: 120px; }
+.flow-step strong { display: block; font-size: 12px; font-weight: 700; margin-bottom: 2px; color: rgba(0,0,0,0.88); }
+.flow-step span { color: rgba(0,0,0,0.55); }
+.flow-arrow { color: rgba(0,0,0,0.25); font-size: 14px; }
+.flow-step.api { background: #f9f0ff; border-color: #d3adf7; }
+.flow-step.api strong { color: #722ed1; }
+</style>
+</head>
+<body>
+
+<!-- GNB -->
+<div class="gnb">
+  <div class="gnb-logo">Tripstore<span>.Admin</span></div>
+  <div class="gnb-menu">
+    <div class="gnb-item">대시보드</div>
+    <div class="gnb-item">상품관리</div>
+    <div class="gnb-item">예약 관리</div>
+    <div class="gnb-item active">PB 관리</div>
+    <div class="gnb-item">카탈로그</div>
+    <div class="gnb-item">정산</div>
+  </div>
+  <div class="gnb-user">김서현 님</div>
+</div>
+
+<div class="breadcrumb">
+  PB 관리<span class="breadcrumb-sep">›</span>TMG<span class="breadcrumb-sep">›</span>숙소 요금표 관리
+</div>
+
+<div class="layout">
+
+  <div class="page-header">
+    <div>
+      <div class="page-title">TMG 숙소 요금표 관리</div>
+      <div class="page-sub">요금타입별로 PB 숙박권 생성 방식이 달라집니다. 탭을 확인하세요.</div>
+    </div>
+    <div>
+      <button class="btn btn-default">TMG 요금 동기화</button>
+      <button class="btn btn-primary">+ 신규 매핑</button>
+    </div>
+  </div>
+
+  <div class="card">
+    <!-- 요금타입 탭 -->
+    <div class="rate-tabs">
+      <div class="rate-tab active" data-tab="static-static" onclick="switchTab('static-static')">
+        <span class="type-dot dot-green"></span>
+        고정요금 + 고정재고
+        <span class="tab-count">184</span>
+      </div>
+      <div class="rate-tab" data-tab="static-dynamic" onclick="switchTab('static-dynamic')">
+        <span class="type-dot dot-blue"></span>
+        고정요금 + 실시간재고
+        <span class="tab-count">62</span>
+      </div>
+      <div class="rate-tab" data-tab="dynamic-dynamic" onclick="switchTab('dynamic-dynamic')">
+        <span class="type-dot dot-purple"></span>
+        실시간요금 + 실시간재고
+        <span class="tab-count">47</span>
+      </div>
+    </div>
+
+    <!-- ==================== 탭1: 고정요금 + 고정재고 ==================== -->
+    <div class="tab-content" data-content="static-static">
+      <div class="notice-banner notice-blue">
+        <span class="notice-icon">✓</span>
+        <div><strong>Static Rate + Static Allotment</strong> · TMG에서 받아온 요금·재고 값을 그대로 사용합니다. 별도 실시간 조회 없이 바로 PB 숙박권으로 등록됩니다.</div>
+      </div>
+
+      <div class="filter-bar">
+        <input type="text" class="fi fi-md" placeholder="TMG 요금표 ID">
+        <input type="text" class="fi fi-md" placeholder="TMG 숙소 ID">
+        <input type="text" class="fi fi-lg" placeholder="TMG 숙소 명">
+        <select class="fi fi-md"><option>숙박권 선택</option></select>
+        <select class="fi fi-md"><option>PB 생성 여부</option></select>
+        <select class="fi fi-md"><option>상태</option></select>
+        <button class="btn btn-primary">검색</button>
+        <button class="btn btn-default">초기화</button>
+      </div>
+
+      <div class="action-bar">
+        <div class="action-left">총 <strong>184건</strong> · PB 미생성 <strong style="color:#fa8c16">23건</strong></div>
+        <div class="action-right">
+          <button class="btn btn-default btn-sm">일괄 PB 생성</button>
+          <button class="btn btn-default btn-sm">CSV 내보내기</button>
+        </div>
+      </div>
+
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>요금 ID</th>
+              <th>요금명</th>
+              <th>요금타입</th>
+              <th>숙소</th>
+              <th>요금</th>
+              <th>재고</th>
+              <th>카탈로그 매핑</th>
+              <th>PB 숙박권</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td class="td-id">46882</td>
+              <td>Ưu Đãi Đặt Trước</td>
+              <td><span class="tag tag-green">고정+고정</span></td>
+              <td class="td-hotel">Khu nghỉ dưỡng Grand Ocean Bay Phú Quốc</td>
+              <td><span class="val-number">₩185,000</span></td>
+              <td><span class="val-number">48</span>실</td>
+              <td><span class="val-ok">✓ 완료 (7/7)</span></td>
+              <td><span class="tag tag-green">생성</span></td>
+              <td><button class="btn btn-ghost btn-sm">상세</button></td>
+            </tr>
+            <tr>
+              <td class="td-id">46880</td>
+              <td>Ưu Đãi Đặt Trước</td>
+              <td><span class="tag tag-green">고정+고정</span></td>
+              <td class="td-hotel">Vinpearl Resort Nha Trang</td>
+              <td><span class="val-number">₩245,000</span></td>
+              <td><span class="val-number">32</span>실</td>
+              <td><span class="val-ok">✓ 완료 (6/6)</span></td>
+              <td><span class="tag tag-gray">미생성</span></td>
+              <td><button class="btn btn-primary btn-sm" onclick="openModal('static-static')">PB 생성</button></td>
+            </tr>
+            <tr>
+              <td class="td-id">46879</td>
+              <td>Ưu Đãi Đặc Biệt</td>
+              <td><span class="tag tag-green">고정+고정</span></td>
+              <td class="td-hotel">Melia Ho Tram Beach Resort</td>
+              <td><span class="val-number">₩198,000</span></td>
+              <td><span class="val-number">15</span>실</td>
+              <td><span class="val-ok">✓ 완료 (7/7)</span></td>
+              <td><span class="tag tag-green">생성</span></td>
+              <td><button class="btn btn-ghost btn-sm">상세</button></td>
+            </tr>
+            <tr>
+              <td class="td-id">46853</td>
+              <td>Ưu Đãi Đặc Biệt</td>
+              <td><span class="tag tag-green">고정+고정</span></td>
+              <td class="td-hotel">InterContinental Danang Sun Peninsula</td>
+              <td><span class="val-number">₩412,000</span></td>
+              <td><span class="val-number">22</span>실</td>
+              <td><span class="val-ok">✓ 완료 (6/6)</span></td>
+              <td><span class="tag tag-gray">미생성</span></td>
+              <td><button class="btn btn-primary btn-sm" onclick="openModal('static-static')">PB 생성</button></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="pagination">
+        <button class="page-btn">‹</button>
+        <button class="page-btn active">1</button>
+        <button class="page-btn">2</button>
+        <button class="page-btn">3</button>
+        <button class="page-btn">›</button>
+      </div>
+    </div>
+
+    <!-- ==================== 탭2: 고정요금 + 실시간재고 ==================== -->
+    <div class="tab-content" data-content="static-dynamic" style="display:none;">
+      <div class="notice-banner notice-blue">
+        <span class="notice-icon">ℹ</span>
+        <div><strong>Static Rate + Dynamic Inventory</strong> · 요금은 TMG 데이터를 사용하고, <strong>재고는 관리자가 임의로 등록</strong>합니다. 사용자 상세페이지 진입 시 <code>checkAvailability</code>로 실제 재고를 조회해 덮어씁니다.</div>
+      </div>
+
+      <div class="filter-bar">
+        <input type="text" class="fi fi-md" placeholder="TMG 요금표 ID">
+        <input type="text" class="fi fi-md" placeholder="TMG 숙소 ID">
+        <input type="text" class="fi fi-lg" placeholder="TMG 숙소 명">
+        <select class="fi fi-md"><option>숙박권 선택</option></select>
+        <select class="fi fi-md"><option>PB 생성 여부</option></select>
+        <select class="fi fi-md"><option>상태</option></select>
+        <button class="btn btn-primary">검색</button>
+        <button class="btn btn-default">초기화</button>
+      </div>
+
+      <div class="action-bar">
+        <div class="action-left">총 <strong>62건</strong> · 임의 재고 미입력 <strong style="color:#fa8c16">8건</strong></div>
+        <div class="action-right">
+          <button class="btn btn-default btn-sm">🔄 재고 일괄 새로고침</button>
+          <button class="btn btn-default btn-sm">CSV 내보내기</button>
+        </div>
+      </div>
+
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>요금 ID</th>
+              <th>요금명</th>
+              <th>요금타입</th>
+              <th>숙소</th>
+              <th>요금 (TMG)</th>
+              <th>재고 (임의값 / 실시간)</th>
+              <th>카탈로그 매핑</th>
+              <th>PB 숙박권</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td class="td-id">47102</td>
+              <td>Flexible Rate</td>
+              <td><span class="tag tag-blue">고정+실시간</span></td>
+              <td class="td-hotel">Vinpearl Nha Trang Bay</td>
+              <td><span class="val-number">₩298,000</span></td>
+              <td>
+                <span class="val-manual">임의: 20실</span>
+                <div class="sync-time">최근 실시간 조회 · 2분 전 (18실)</div>
+              </td>
+              <td><span class="val-ok">✓ 완료 (5/5)</span></td>
+              <td><span class="tag tag-green">생성</span></td>
+              <td><button class="btn btn-ghost btn-sm">상세</button></td>
+            </tr>
+            <tr>
+              <td class="td-id">47098</td>
+              <td>Best Available Rate</td>
+              <td><span class="tag tag-blue">고정+실시간</span></td>
+              <td class="td-hotel">JW Marriott Phu Quoc</td>
+              <td><span class="val-number">₩520,000</span></td>
+              <td>
+                <span class="val-manual">임의: 10실</span>
+                <div class="sync-time">최근 실시간 조회 · 14분 전 (12실)</div>
+              </td>
+              <td><span class="val-ok">✓ 완료 (4/4)</span></td>
+              <td><span class="tag tag-gray">미생성</span></td>
+              <td><button class="btn btn-primary btn-sm" onclick="openModal('static-dynamic')">PB 생성</button></td>
+            </tr>
+            <tr>
+              <td class="td-id">47095</td>
+              <td>Early Bird</td>
+              <td><span class="tag tag-blue">고정+실시간</span></td>
+              <td class="td-hotel">Fusion Resort Cam Ranh</td>
+              <td><span class="val-number">₩340,000</span></td>
+              <td>
+                <span class="val-manual" style="color:#fa8c16">⚠ 임의값 미입력</span>
+                <div class="sync-time">임의 재고를 먼저 등록해주세요</div>
+              </td>
+              <td><span class="val-ok">✓ 완료 (6/6)</span></td>
+              <td><span class="tag tag-gray">미생성</span></td>
+              <td><button class="btn btn-primary btn-sm" onclick="openModal('static-dynamic')">PB 생성</button></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="pagination">
+        <button class="page-btn">‹</button>
+        <button class="page-btn active">1</button>
+        <button class="page-btn">›</button>
+      </div>
+    </div>
+
+    <!-- ==================== 탭3: 실시간요금 + 실시간재고 ==================== -->
+    <div class="tab-content" data-content="dynamic-dynamic" style="display:none;">
+      <div class="notice-banner notice-purple">
+        <span class="notice-icon">⚠</span>
+        <div>
+          <strong>Dynamic Rate + Dynamic Inventory</strong> · TMG에서 요금·재고 모두 제공하지 않습니다. 관리자가 <strong>예상값을 수동 입력</strong>하여 노출하고, 사용자 상세페이지 진입 시 <code>checkAvailability</code>로 실제 요금·재고를 조회해 덮어씁니다.<br>
+          <span style="font-size:12px; opacity:0.85;">⚠ 리스트/검색 노출가는 "예상가" 표기 필수 · 표시광고법 리스크 검토 완료 필요</span>
+        </div>
+      </div>
+
+      <div class="filter-bar">
+        <input type="text" class="fi fi-md" placeholder="TMG 요금표 ID">
+        <input type="text" class="fi fi-md" placeholder="TMG 숙소 ID">
+        <input type="text" class="fi fi-lg" placeholder="TMG 숙소 명">
+        <select class="fi fi-md"><option>숙박권 선택</option></select>
+        <select class="fi fi-md"><option>PB 생성 여부</option></select>
+        <select class="fi fi-md"><option>상태</option></select>
+        <button class="btn btn-primary">검색</button>
+        <button class="btn btn-default">초기화</button>
+      </div>
+
+      <div class="action-bar">
+        <div class="action-left">총 <strong>47건</strong> · 예상값 미입력 <strong style="color:#fa8c16">19건</strong></div>
+        <div class="action-right">
+          <button class="btn btn-default btn-sm">📝 예상값 일괄 입력</button>
+          <button class="btn btn-default btn-sm">CSV 내보내기</button>
+        </div>
+      </div>
+
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>요금 ID</th>
+              <th>요금명</th>
+              <th>요금타입</th>
+              <th>숙소</th>
+              <th>예상 요금 (수동)</th>
+              <th>예상 재고 (수동)</th>
+              <th>카탈로그 매핑</th>
+              <th>PB 숙박권</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td class="td-id">48205</td>
+              <td>Real-time BAR</td>
+              <td><span class="tag tag-purple">실시간+실시간</span></td>
+              <td class="td-hotel">Vinpearl Luxury Landmark 81</td>
+              <td>
+                <span class="val-manual">예상: ₩680,000</span>
+                <div class="sync-time">관리자 입력 · 박민지 · 04-22</div>
+              </td>
+              <td><span class="val-manual">예상: 8실</span></td>
+              <td><span class="val-ok">✓ 완료 (5/5)</span></td>
+              <td><span class="tag tag-green">생성</span></td>
+              <td><button class="btn btn-ghost btn-sm">상세</button></td>
+            </tr>
+            <tr>
+              <td class="td-id">48198</td>
+              <td>Real-time BAR</td>
+              <td><span class="tag tag-purple">실시간+실시간</span></td>
+              <td class="td-hotel">Vinpearl Resort & Spa Long Beach</td>
+              <td><span class="val-manual">예상: ₩425,000</span></td>
+              <td><span class="val-manual">예상: 15실</span></td>
+              <td><span class="val-ok">✓ 완료 (6/6)</span></td>
+              <td><span class="tag tag-gray">미생성</span></td>
+              <td><button class="btn btn-primary btn-sm" onclick="openModal('dynamic-dynamic')">PB 생성</button></td>
+            </tr>
+            <tr>
+              <td class="td-id">48190</td>
+              <td>Dynamic Package</td>
+              <td><span class="tag tag-purple">실시간+실시간</span></td>
+              <td class="td-hotel">Vinpearl Discovery Greenhill</td>
+              <td>
+                <span class="val-manual" style="color:#fa8c16">⚠ 예상값 미입력</span>
+              </td>
+              <td><span class="val-manual" style="color:#fa8c16">⚠ 예상값 미입력</span></td>
+              <td><span class="val-ok">✓ 완료 (4/4)</span></td>
+              <td><span class="tag tag-gray">미생성</span></td>
+              <td><button class="btn btn-primary btn-sm" onclick="openModal('dynamic-dynamic')">PB 생성</button></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="pagination">
+        <button class="page-btn">‹</button>
+        <button class="page-btn active">1</button>
+        <button class="page-btn">›</button>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- 사용자 상세페이지 플로우 설명 -->
+  <div class="card" style="padding: 24px;">
+    <div style="font-size: 15px; font-weight: 700; margin-bottom: 8px;">📱 사용자 상세페이지 — 실시간 조회 플로우</div>
+    <div style="font-size: 13px; color: rgba(0,0,0,0.55); margin-bottom: 14px;">
+      고정+고정 상품은 그대로 노출. 재고/요금이 실시간 타입인 경우 상세페이지 진입 시 <code>checkAvailability</code>로 실제값을 조회해 덮어씁니다.
+    </div>
+
+    <div class="flow-box">
+      <div class="flow-step"><strong>① 리스트/검색</strong><span>어드민 입력값 (예상가 or TMG 고정값)</span></div>
+      <span class="flow-arrow">→</span>
+      <div class="flow-step"><strong>② 상세 진입</strong><span>날짜·인원 자동 세팅</span></div>
+      <span class="flow-arrow">→</span>
+      <div class="flow-step api"><strong>③ checkAvailability</strong><span>TMG API 호출 (2초 타임아웃)</span></div>
+      <span class="flow-arrow">→</span>
+      <div class="flow-step"><strong>④ 실제값 덮어쓰기</strong><span>요금·재고 업데이트</span></div>
+      <span class="flow-arrow">→</span>
+      <div class="flow-step api"><strong>⑤ 결제 직전</strong><span>1회 더 재조회 → 변동시 confirm 모달</span></div>
+    </div>
+
+    <div class="preview-frame">
+      <div class="preview-label">사용자 상세페이지 프리뷰 — 실시간 조회 중</div>
+      <div class="preview-device">
+        <div class="pv-hotel">Vinpearl Luxury Landmark 81</div>
+        <div class="pv-room">디럭스 시티뷰 · 2인 1박 · 2026-05-15</div>
+        <div class="pv-loading">
+          <div class="pv-spinner"></div>
+          <span>실시간 요금·재고 조회 중…</span>
+        </div>
+        <div class="pv-price">
+          <span class="pv-label">예상가 ·</span>
+          <span class="pv-amount" style="font-size:16px; color:rgba(0,0,0,0.35); text-decoration:line-through;">₩680,000</span>
+        </div>
+        <div class="pv-hint">날짜 선택 시 실제 요금이 확정됩니다</div>
+      </div>
+
+      <div class="preview-device" style="margin-top:14px;">
+        <div class="pv-hotel">Vinpearl Luxury Landmark 81</div>
+        <div class="pv-room">디럭스 시티뷰 · 2인 1박 · 2026-05-15</div>
+        <div class="pv-price">
+          <span class="pv-amount">₩645,000</span>
+          <span class="pv-unit">/ 1박</span>
+        </div>
+        <div class="pv-inv">잔여 6실 · 실시간 확인</div>
+        <div class="pv-hint" style="margin-top:6px;">TMG 실시간가 적용 · 결제 직전 재확인됩니다</div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<!-- ==================== MODAL: 탭1 (고정+고정) ==================== -->
+<div class="modal-overlay" id="modal-static-static">
+  <div class="modal">
+    <div class="modal-header">
+      <div class="modal-title">
+        <span class="tag tag-green">고정+고정</span>
+        PB 숙박권 생성
+      </div>
+      <button class="modal-close" onclick="closeModal()">×</button>
+    </div>
+    <div class="modal-body">
+      <div class="form-section">
+        <div class="form-section-title">📎 TMG 원본 데이터</div>
+        <div class="form-info">
+          <div class="row"><span class="label">요금 ID</span><span>46880</span></div>
+          <div class="row"><span class="label">숙소</span><span>Vinpearl Resort Nha Trang</span></div>
+          <div class="row"><span class="label">요금</span><span>₩245,000 <span class="tag tag-green" style="margin-left:6px;">고정</span></span></div>
+          <div class="row"><span class="label">재고</span><span>32실 <span class="tag tag-green" style="margin-left:6px;">고정</span></span></div>
+        </div>
+      </div>
+
+      <div class="form-section">
+        <div class="form-section-title">💾 PB 숙박권 설정</div>
+        <div class="form-group">
+          <label class="form-label">판매 요금 (원) <span class="required">*</span></label>
+          <input type="text" class="form-control" value="245,000">
+          <div class="form-help">TMG 원가 ₩245,000 · 마진 설정 시 판매가 자동 계산</div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">판매 재고 (실) <span class="required">*</span></label>
+          <input type="text" class="form-control" value="32">
+          <div class="form-help">TMG 고정 재고 그대로 사용</div>
+        </div>
+        <div class="form-row-2">
+          <div class="form-group">
+            <label class="form-label">판매 시작일 <span class="required">*</span></label>
+            <input type="date" class="form-control" value="2026-05-01">
+          </div>
+          <div class="form-group">
+            <label class="form-label">판매 종료일 <span class="required">*</span></label>
+            <input type="date" class="form-control" value="2026-07-31">
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-default" onclick="closeModal()">취소</button>
+      <button class="btn btn-primary">PB 숙박권 생성</button>
+    </div>
+  </div>
+</div>
+
+<!-- ==================== MODAL: 탭2 (고정+실시간) ==================== -->
+<div class="modal-overlay" id="modal-static-dynamic">
+  <div class="modal">
+    <div class="modal-header">
+      <div class="modal-title">
+        <span class="tag tag-blue">고정+실시간</span>
+        PB 숙박권 생성
+      </div>
+      <button class="modal-close" onclick="closeModal()">×</button>
+    </div>
+    <div class="modal-body">
+      <div class="notice-banner notice-blue" style="border-radius:8px; border-left-width:3px; margin-bottom:16px;">
+        <span class="notice-icon">ℹ</span>
+        <div>재고는 관리자가 <strong>임의값</strong>으로 등록하며, 사용자 상세페이지 진입 시 TMG <code>checkAvailability</code>로 실제 재고를 조회해 덮어씁니다.</div>
+      </div>
+
+      <div class="form-section">
+        <div class="form-section-title">📎 TMG 원본 데이터</div>
+        <div class="form-info">
+          <div class="row"><span class="label">요금 ID</span><span>47098</span></div>
+          <div class="row"><span class="label">숙소</span><span>JW Marriott Phu Quoc</span></div>
+          <div class="row"><span class="label">요금</span><span>₩520,000 <span class="tag tag-green" style="margin-left:6px;">고정</span></span></div>
+          <div class="row"><span class="label">재고</span><span><span class="live-badge">LIVE</span> 실시간 조회 전용</span></div>
+        </div>
+      </div>
+
+      <div class="form-section">
+        <div class="form-section-title">💾 PB 숙박권 설정</div>
+        <div class="form-group">
+          <label class="form-label">판매 요금 (원) <span class="required">*</span></label>
+          <input type="text" class="form-control" value="520,000">
+          <div class="form-help">TMG 원가 ₩520,000 (고정) · 수정 불필요</div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">임의 재고 (실) <span class="required">*</span> <span class="live-badge" style="margin-left:6px;">실시간 덮어씀</span></label>
+          <input type="text" class="form-control" value="10" placeholder="예: 10">
+          <div class="form-help">리스트/검색 노출용 임의값. 실제 판매는 TMG 실시간 재고 기준.</div>
+        </div>
+        <div class="form-row-2">
+          <div class="form-group">
+            <label class="form-label">판매 시작일 <span class="required">*</span></label>
+            <input type="date" class="form-control" value="2026-05-01">
+          </div>
+          <div class="form-group">
+            <label class="form-label">판매 종료일 <span class="required">*</span></label>
+            <input type="date" class="form-control" value="2026-07-31">
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-default" onclick="closeModal()">취소</button>
+      <button class="btn btn-primary">PB 숙박권 생성</button>
+    </div>
+  </div>
+</div>
+
+<!-- ==================== MODAL: 탭3 (실시간+실시간) ==================== -->
+<div class="modal-overlay" id="modal-dynamic-dynamic">
+  <div class="modal">
+    <div class="modal-header">
+      <div class="modal-title">
+        <span class="tag tag-purple">실시간+실시간</span>
+        PB 숙박권 생성
+      </div>
+      <button class="modal-close" onclick="closeModal()">×</button>
+    </div>
+    <div class="modal-body">
+      <div class="notice-banner notice-purple" style="border-radius:8px; border-left-width:3px; margin-bottom:16px;">
+        <span class="notice-icon">⚠</span>
+        <div>요금·재고 모두 TMG가 제공하지 않습니다. <strong>예상가·예상재고를 수동 입력</strong>하며, 사용자 상세페이지 진입 시 <code>checkAvailability</code>로 실제값이 확정됩니다.</div>
+      </div>
+
+      <div class="form-section">
+        <div class="form-section-title">📎 TMG 원본 데이터</div>
+        <div class="form-info">
+          <div class="row"><span class="label">요금 ID</span><span>48198</span></div>
+          <div class="row"><span class="label">숙소</span><span>Vinpearl Resort & Spa Long Beach</span></div>
+          <div class="row"><span class="label">요금</span><span><span class="live-badge">LIVE</span> 실시간 조회 전용</span></div>
+          <div class="row"><span class="label">재고</span><span><span class="live-badge">LIVE</span> 실시간 조회 전용</span></div>
+        </div>
+      </div>
+
+      <div class="form-section">
+        <div class="form-section-title">💾 PB 숙박권 설정 (예상값)</div>
+        <div class="form-group">
+          <label class="form-label">예상 요금 (원) <span class="required">*</span> <span class="live-badge" style="margin-left:6px;">실시간 덮어씀</span></label>
+          <input type="text" class="form-control" value="" placeholder="예: 425,000">
+          <div class="form-help">최근 30일 유사 상품 평균 또는 전년 동월 기준 입력. 리스트/검색에는 "예상가" 라벨로 노출.</div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">예상 재고 (실) <span class="required">*</span> <span class="live-badge" style="margin-left:6px;">실시간 덮어씀</span></label>
+          <input type="text" class="form-control" value="" placeholder="예: 15">
+          <div class="form-help">리스트/검색 노출용 추정치. 실제 판매는 TMG 실시간 재고 기준.</div>
+        </div>
+        <div class="form-row-2">
+          <div class="form-group">
+            <label class="form-label">판매 시작일 <span class="required">*</span></label>
+            <input type="date" class="form-control" value="2026-05-01">
+          </div>
+          <div class="form-group">
+            <label class="form-label">판매 종료일 <span class="required">*</span></label>
+            <input type="date" class="form-control" value="2026-07-31">
+          </div>
+        </div>
+
+        <div class="legal-warn">
+          <strong>⚠ 표시광고법 리스크 안내</strong><br>
+          예상가를 "가격"으로 단독 표시하면 안 됩니다. 노출 시 반드시 <strong>"예상가 · 날짜 선택 시 확정"</strong> 문구와 함께 표기되며, 실제 판매 시 예상가와 차이가 클 경우 고객 확인 모달이 자동 노출됩니다.
+        </div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-default" onclick="closeModal()">취소</button>
+      <button class="btn btn-primary">PB 숙박권 생성</button>
+    </div>
+  </div>
+</div>
+
+<script>
+function switchTab(tabId) {
+  document.querySelectorAll('.rate-tab').forEach(t => t.classList.remove('active'));
+  document.querySelector(`.rate-tab[data-tab="${tabId}"]`).classList.add('active');
+  document.querySelectorAll('.tab-content').forEach(c => c.style.display = 'none');
+  document.querySelector(`.tab-content[data-content="${tabId}"]`).style.display = 'block';
+}
+
+function openModal(type) {
+  document.getElementById(`modal-${type}`).classList.add('show');
+}
+
+function closeModal() {
+  document.querySelectorAll('.modal-overlay').forEach(m => m.classList.remove('show'));
+}
+
+document.querySelectorAll('.modal-overlay').forEach(m => {
+  m.addEventListener('click', e => { if (e.target === m) closeModal(); });
+});
+</script>
+
+</body>
+</html>
