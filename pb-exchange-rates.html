@@ -325,7 +325,7 @@ button { font-family: inherit; cursor: pointer; }
       <div class="m-title-wrap">
         <div class="m-title">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
-          기준환율 수정이력
+          <span id="modalTitleCur">USD</span> 환율 수정이력
         </div>
         <div class="m-sub">PB 상품에 적용된 환율 변경 내역을 시간순으로 확인합니다.</div>
       </div>
@@ -336,7 +336,6 @@ button { font-family: inherit; cursor: pointer; }
 
     <div class="m-filter">
       <select class="fi" id="filterCurrency">
-        <option value="ALL">통화: 전체</option>
         <option value="USD">USD</option>
         <option value="JPY">JPY</option>
       </select>
@@ -461,11 +460,7 @@ function openHistoryModal(currency) {
   const filter = document.getElementById('filterCurrency');
   backdrop.classList.add('active');
   document.body.classList.add('modal-open');
-  if (currency && currency !== 'ALL') {
-    filter.value = currency;
-  } else {
-    filter.value = 'ALL';
-  }
+  filter.value = currency || 'USD';
   applyFilter();
 }
 
@@ -476,6 +471,7 @@ function closeHistoryModal() {
 
 function applyFilter() {
   const cur = document.getElementById('filterCurrency').value;
+  document.getElementById('modalTitleCur').textContent = cur;
   const rows = document.querySelectorAll('#historyTbody tr');
   let count = 0;
   let lastDateRow = null;
@@ -488,7 +484,7 @@ function applyFilter() {
       row.style.display = '';
     } else {
       const rowCur = row.getAttribute('data-cur');
-      if (cur === 'ALL' || rowCur === cur) {
+      if (rowCur === cur) {
         row.style.display = '';
         count++;
         dateRowHasData = true;
