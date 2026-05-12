@@ -94,6 +94,16 @@ tbody tr:hover td { background: #fafafa; }
 .tag-gray { background: #f5f5f5; color: rgba(0,0,0,0.55); border: 1px solid #e8e8e8; }
 .tag-orange { background: #fff7e6; color: #d48806; border: 1px solid #ffd591; }
 
+/* HOTEL LINK + CONTENT BUTTON */
+.hotel-cell { display: flex; align-items: center; gap: 6px; }
+.hotel-cell .name { max-width: 220px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.content-link { font-size: 11px; padding: 2px 7px; border-radius: 4px; cursor: pointer; color: rgba(0,0,0,0.55); border: 1px solid transparent; flex-shrink: 0; white-space: nowrap; }
+.content-link:hover { color: #1677ff; background: #e6f4ff; border-color: #91caff; }
+.content-link.changed { color: #d48806; background: #fff7e6; border-color: #ffd591; }
+.content-link.changed::before { content: '●'; font-size: 8px; margin-right: 3px; }
+.content-link.new { color: #ad6800; background: #fffbe6; border-color: #ffe58f; }
+.content-link.new::before { content: '!'; font-weight: 800; margin-right: 3px; }
+
 /* INLINE VALUE */
 .val-ok { color: #389e0d; font-weight: 500; }
 .val-live { display: inline-flex; align-items: center; gap: 6px; color: #722ed1; font-weight: 500; }
@@ -120,6 +130,8 @@ tbody tr:hover td { background: #fafafa; }
 .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.5); display: none; align-items: center; justify-content: center; z-index: 1000; padding: 40px 20px; }
 .modal-overlay.show { display: flex; }
 .modal { background: #fff; border-radius: 12px; width: 640px; max-width: 100%; max-height: 85vh; overflow-y: auto; }
+.modal-lg { width: 1040px; }
+.modal-xl { width: 1180px; }
 .modal-header { padding: 20px 24px 16px; border-bottom: 1px solid #f0f0f0; display: flex; align-items: center; justify-content: space-between; }
 .modal-title { font-size: 17px; font-weight: 700; display: flex; align-items: center; gap: 10px; }
 .modal-close { background: transparent; border: none; font-size: 20px; cursor: pointer; color: rgba(0,0,0,0.45); padding: 0; width: 32px; height: 32px; border-radius: 50%; }
@@ -165,6 +177,94 @@ tbody tr:hover td { background: #fafafa; }
 .pv-hint { font-size: 11px; color: rgba(0,0,0,0.45); }
 .pv-inv { font-size: 12px; color: #389e0d; margin-top: 4px; font-weight: 500; }
 
+/* CONTENT MODAL — 호텔 콘텐츠 (2.6) */
+.content-grid { display: grid; grid-template-columns: 1fr 380px; gap: 16px; }
+.content-main { min-width: 0; }
+.content-side { background: #fafafa; border-radius: 10px; padding: 16px; align-self: start; position: sticky; top: 0; }
+
+.hotel-hero { background: linear-gradient(180deg, #f0f7ff 0%, #fafafa 100%); border-radius: 10px; padding: 18px 18px 16px; margin-bottom: 16px; }
+.hotel-hero-top { display: flex; align-items: flex-start; gap: 14px; }
+.hotel-avatar { width: 100px; height: 80px; border-radius: 8px; background: linear-gradient(135deg, #91caff, #1677ff); flex-shrink: 0; display: flex; align-items: center; justify-content: center; color: #fff; font-size: 24px; font-weight: 800; }
+.hotel-name { font-size: 17px; font-weight: 700; margin-bottom: 4px; line-height: 1.3; }
+.hotel-addr { font-size: 12px; color: rgba(0,0,0,0.55); line-height: 1.5; }
+.hotel-stars { display: inline-flex; align-items: center; gap: 4px; font-size: 12px; color: #fa8c16; margin-bottom: 6px; }
+.hotel-meta { display: flex; gap: 14px; margin-top: 12px; flex-wrap: wrap; }
+.hotel-meta-item { display: flex; flex-direction: column; }
+.hotel-meta-item .k { font-size: 11px; color: rgba(0,0,0,0.45); }
+.hotel-meta-item .v { font-size: 13px; font-weight: 600; color: rgba(0,0,0,0.88); }
+
+.content-section { margin-bottom: 18px; }
+.content-section-title { font-size: 13px; font-weight: 700; margin-bottom: 10px; display: flex; align-items: center; gap: 8px; color: rgba(0,0,0,0.88); }
+.content-section-title .api-tag { font-size: 10px; background: #f9f0ff; color: #722ed1; padding: 2px 6px; border-radius: 4px; font-weight: 600; border: 1px solid #d3adf7; }
+.content-section-title .field-name { font-family: 'SF Mono', monospace; font-size: 11px; color: rgba(0,0,0,0.45); font-weight: 500; }
+
+.img-strip { display: flex; gap: 6px; overflow-x: auto; padding-bottom: 4px; }
+.img-thumb { width: 110px; height: 80px; border-radius: 6px; background: linear-gradient(135deg, #d9d9d9, #f0f0f0); flex-shrink: 0; display: flex; align-items: center; justify-content: center; font-size: 18px; color: rgba(0,0,0,0.35); }
+.img-thumb:nth-child(2n) { background: linear-gradient(135deg, #b5d6ff, #e6f4ff); }
+.img-thumb:nth-child(3n) { background: linear-gradient(135deg, #ffd8bf, #fff2e8); }
+
+.html-preview { background: #fff; border: 1px solid #f0f0f0; border-radius: 8px; padding: 12px 14px; font-size: 12px; line-height: 1.6; color: rgba(0,0,0,0.65); max-height: 100px; overflow-y: auto; }
+
+.room-list { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.room-card { background: #fff; border: 1px solid #f0f0f0; border-radius: 8px; padding: 10px 12px; }
+.room-card-top { display: flex; gap: 10px; align-items: center; margin-bottom: 8px; }
+.room-card-img { width: 48px; height: 38px; border-radius: 4px; background: linear-gradient(135deg, #ffadd2, #fff0f6); flex-shrink: 0; display: flex; align-items: center; justify-content: center; font-size: 14px; color: rgba(0,0,0,0.35); }
+.room-card-img.r2 { background: linear-gradient(135deg, #b7eb8f, #f6ffed); }
+.room-card-img.r3 { background: linear-gradient(135deg, #91caff, #e6f4ff); }
+.room-card-img.r4 { background: linear-gradient(135deg, #d3adf7, #f9f0ff); }
+.room-card-name { font-size: 13px; font-weight: 600; margin-bottom: 2px; }
+.room-card-occ { font-size: 11px; color: rgba(0,0,0,0.55); }
+.room-card-id { font-family: 'SF Mono', monospace; font-size: 10px; color: rgba(0,0,0,0.35); margin-top: 4px; }
+.room-card-meta { display: flex; gap: 8px; font-size: 11px; color: rgba(0,0,0,0.55); border-top: 1px dashed #f0f0f0; padding-top: 6px; }
+.room-card-meta span { display: inline-flex; gap: 2px; }
+.room-card-meta strong { color: rgba(0,0,0,0.88); font-weight: 600; }
+
+.policy-card { background: #fff; border: 1px solid #f0f0f0; border-radius: 8px; padding: 10px 14px; margin-bottom: 6px; }
+.policy-name { font-size: 12px; font-weight: 700; color: rgba(0,0,0,0.88); margin-bottom: 4px; }
+.policy-desc { font-size: 12px; color: rgba(0,0,0,0.55); line-height: 1.5; }
+
+/* SIDE PANEL — 우리 시스템 등록 상태 */
+.sync-status { background: #fff; border-radius: 8px; padding: 12px 14px; margin-bottom: 12px; border: 1px solid #f0f0f0; }
+.sync-status.status-new { border-color: #ffd591; background: #fff7e6; }
+.sync-status.status-changed { border-color: #91caff; background: #e6f4ff; }
+.sync-status.status-synced { border-color: #b7eb8f; background: #f6ffed; }
+.sync-status-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px; }
+.sync-status-label { font-size: 12px; font-weight: 700; }
+.sync-status.status-new .sync-status-label { color: #ad6800; }
+.sync-status.status-changed .sync-status-label { color: #0958d9; }
+.sync-status.status-synced .sync-status-label { color: #389e0d; }
+.sync-status-time { font-size: 11px; color: rgba(0,0,0,0.45); }
+.sync-status-msg { font-size: 12px; line-height: 1.5; color: rgba(0,0,0,0.65); }
+
+.diff-list { font-size: 12px; }
+.diff-item { padding: 8px 0; border-bottom: 1px dashed #f0f0f0; display: flex; justify-content: space-between; align-items: flex-start; gap: 10px; }
+.diff-item:last-child { border-bottom: none; }
+.diff-key { color: rgba(0,0,0,0.55); flex-shrink: 0; font-size: 11px; }
+.diff-val { text-align: right; }
+.diff-val .old { color: rgba(0,0,0,0.35); text-decoration: line-through; font-size: 11px; display: block; }
+.diff-val .new { color: #0958d9; font-weight: 600; }
+.diff-val .same { color: rgba(0,0,0,0.65); }
+
+.side-action-list { display: flex; flex-direction: column; gap: 8px; margin-top: 8px; }
+.side-action-list .btn { width: 100%; justify-content: center; }
+
+/* RATE QUERY MODAL — 2.9 */
+.query-form { display: grid; grid-template-columns: 1.4fr 1fr 1fr auto; gap: 10px; align-items: flex-end; margin-bottom: 16px; }
+.query-result-head { display: flex; align-items: center; justify-content: space-between; padding: 12px 16px; background: #fafafa; border-radius: 8px 8px 0 0; border: 1px solid #f0f0f0; border-bottom: none; }
+.query-result-head .meta { font-size: 12px; color: rgba(0,0,0,0.65); }
+.query-result-head .meta strong { color: rgba(0,0,0,0.88); }
+.rate-table-wrap { border: 1px solid #f0f0f0; border-radius: 0 0 8px 8px; max-height: 400px; overflow: auto; }
+.rate-table { width: 100%; font-size: 12px; border-collapse: collapse; }
+.rate-table th { padding: 10px 12px; background: #fafafa; border-bottom: 1px solid #f0f0f0; font-weight: 600; color: rgba(0,0,0,0.65); text-align: left; position: sticky; top: 0; z-index: 2; white-space: nowrap; }
+.rate-table td { padding: 9px 12px; border-bottom: 1px solid #f5f5f5; }
+.rate-table tbody tr:hover td { background: #fafafa; }
+.rate-table .num { font-family: 'SF Mono', monospace; text-align: right; font-weight: 600; }
+.rate-table .room-name { font-weight: 600; min-width: 140px; }
+.rate-plan-row { background: #f9f0ff !important; font-weight: 600; color: #531dab; }
+.rate-plan-row td { background: #f9f0ff !important; }
+
+.empty-state { padding: 60px 20px; text-align: center; background: #fafafa; border-radius: 8px; color: rgba(0,0,0,0.45); font-size: 13px; }
+
 /* FLOW DIAGRAM */
 .flow-box { display: flex; align-items: center; gap: 8px; margin-top: 14px; flex-wrap: wrap; }
 .flow-step { background: #fff; border: 1px solid #e8e8e8; border-radius: 8px; padding: 10px 14px; font-size: 12px; flex: 1; min-width: 120px; }
@@ -205,9 +305,10 @@ tbody tr:hover td { background: #fafafa; }
     <div style="display:flex; align-items:center; gap:12px;">
       <div style="display:flex; flex-direction:column; align-items:flex-end; gap:2px;">
         <span style="font-size:12px; color:rgba(0,0,0,0.55);">자동 동기화 <span style="color:#52c41a;">●</span> 정상</span>
-        <span style="font-size:11px; color:rgba(0,0,0,0.35);">마지막 동기화: 12분 전 (RATE_UPDATE webhook)</span>
+        <span style="font-size:11px; color:rgba(0,0,0,0.35);">마지막 webhook: 12분 전 (RATE_UPDATE)</span>
       </div>
-      <button class="btn btn-default" onclick="alert('전체 요금 데이터를 TMG에서 강제 재동기화합니다.\\n\\n사용 시점:\\n· 데이터 누락이 의심될 때\\n· 신규 호텔 추가 후 즉시 반영 필요할 때\\n· webhook 장애 후 복구 시\\n\\n예상 소요: 약 3~5분')">🔄 전체 강제 재동기화</button>
+      <button class="btn btn-default" onclick="openRateQueryModal()">📊 요금표 조회</button>
+      <button class="btn btn-default" onclick="if(confirm('전체 요금 데이터를 TMG에서 강제 재동기화합니다.\\n\\n사용 시점:\\n· webhook 장애 후 복구\\n· 데이터 누락 의심 시\\n· 신규 호텔 추가 직후\\n\\n예상 소요: 약 3~5분\\n\\n진행할까요?')) alert('재동기화를 시작합니다.\\n\\nAPI: /getRatesFromTo 전체 호텔 일괄 호출\\n진행 상황은 상단 알림으로 확인할 수 있습니다.')">🔄 전체 강제 재동기화</button>
     </div>
   </div>
 
@@ -272,7 +373,7 @@ tbody tr:hover td { background: #fafafa; }
               <td class="td-id">46882</td>
               <td>Ưu Đãi Đặt Trước</td>
               <td><span class="tag tag-green">고정+고정</span></td>
-              <td class="td-hotel">Khu nghỉ dưỡng Grand Ocean Bay Phú Quốc</td>
+              <td><div class="hotel-cell"><span class="name" title="Khu nghỉ dưỡng Grand Ocean Bay Phú Quốc">Khu nghỉ dưỡng Grand Ocean Bay Phú Quốc</span><span class="content-link" onclick="openContentModal('synced')">콘텐츠</span></div></td>
               <td style="font-size:12px; color:rgba(0,0,0,0.65);">2026-05-01 ~ 07-31</td>
               <td><span class="val-ok">✓ 완료 (7/7)</span></td>
               <td><span class="tag tag-green">생성</span></td>
@@ -282,7 +383,7 @@ tbody tr:hover td { background: #fafafa; }
               <td class="td-id">46880</td>
               <td>Ưu Đãi Đặt Trước</td>
               <td><span class="tag tag-green">고정+고정</span></td>
-              <td class="td-hotel">Vinpearl Resort Nha Trang</td>
+              <td><div class="hotel-cell"><span class="name" title="Vinpearl Resort Nha Trang">Vinpearl Resort Nha Trang</span><span class="content-link new" onclick="openContentModal('new')">콘텐츠</span></div></td>
               <td style="font-size:12px; color:rgba(0,0,0,0.65);">2026-06-30 ~ 12-31</td>
               <td><span class="val-ok">✓ 완료 (6/6)</span></td>
               <td><span class="tag tag-gray">미생성</span></td>
@@ -292,7 +393,7 @@ tbody tr:hover td { background: #fafafa; }
               <td class="td-id">46879</td>
               <td>Ưu Đãi Đặc Biệt</td>
               <td><span class="tag tag-green">고정+고정</span></td>
-              <td class="td-hotel">Melia Ho Tram Beach Resort</td>
+              <td><div class="hotel-cell"><span class="name" title="Melia Ho Tram Beach Resort">Melia Ho Tram Beach Resort</span><span class="content-link changed" onclick="openContentModal('changed')">콘텐츠</span></div></td>
               <td style="font-size:12px; color:rgba(0,0,0,0.65);">2026-04-01 ~ 09-30</td>
               <td><span class="val-ok">✓ 완료 (7/7)</span></td>
               <td><span class="tag tag-green">생성</span></td>
@@ -302,7 +403,7 @@ tbody tr:hover td { background: #fafafa; }
               <td class="td-id">46853</td>
               <td>Ưu Đãi Đặc Biệt</td>
               <td><span class="tag tag-green">고정+고정</span></td>
-              <td class="td-hotel">InterContinental Danang Sun Peninsula</td>
+              <td><div class="hotel-cell"><span class="name" title="InterContinental Danang Sun Peninsula">InterContinental Danang Sun Peninsula</span><span class="content-link new" onclick="openContentModal('new')">콘텐츠</span></div></td>
               <td style="font-size:12px; color:rgba(0,0,0,0.65);">2026-05-15 ~ 11-15</td>
               <td><span class="val-ok">✓ 완료 (6/6)</span></td>
               <td><span class="tag tag-gray">미생성</span></td>
@@ -366,7 +467,7 @@ tbody tr:hover td { background: #fafafa; }
               <td class="td-id">47102</td>
               <td>Flexible Rate</td>
               <td><span class="tag tag-blue">고정+실시간</span></td>
-              <td class="td-hotel">Vinpearl Nha Trang Bay</td>
+              <td><div class="hotel-cell"><span class="name" title="Vinpearl Nha Trang Bay">Vinpearl Nha Trang Bay</span><span class="content-link" onclick="openContentModal('synced')">콘텐츠</span></div></td>
               <td style="font-size:12px; color:rgba(0,0,0,0.65);">2026-05-01 ~ 10-31</td>
               <td><span class="tag tag-green">✓ 입력됨</span></td>
               <td><span class="val-ok">✓ 완료 (5/5)</span></td>
@@ -377,7 +478,7 @@ tbody tr:hover td { background: #fafafa; }
               <td class="td-id">47098</td>
               <td>Best Available Rate</td>
               <td><span class="tag tag-blue">고정+실시간</span></td>
-              <td class="td-hotel">JW Marriott Phu Quoc</td>
+              <td><div class="hotel-cell"><span class="name" title="JW Marriott Phu Quoc">JW Marriott Phu Quoc</span><span class="content-link new" onclick="openContentModal('new')">콘텐츠</span></div></td>
               <td style="font-size:12px; color:rgba(0,0,0,0.65);">2026-04-01 ~ 12-31</td>
               <td><span class="tag tag-green">✓ 입력됨</span></td>
               <td><span class="val-ok">✓ 완료 (4/4)</span></td>
@@ -388,7 +489,7 @@ tbody tr:hover td { background: #fafafa; }
               <td class="td-id">47095</td>
               <td>Early Bird</td>
               <td><span class="tag tag-blue">고정+실시간</span></td>
-              <td class="td-hotel">Fusion Resort Cam Ranh</td>
+              <td><div class="hotel-cell"><span class="name" title="Fusion Resort Cam Ranh">Fusion Resort Cam Ranh</span><span class="content-link changed" onclick="openContentModal('changed')">콘텐츠</span></div></td>
               <td style="font-size:12px; color:rgba(0,0,0,0.65);">2026-06-01 ~ 09-30</td>
               <td><span class="tag tag-orange">⚠ 미입력</span></td>
               <td><span class="val-ok">✓ 완료 (6/6)</span></td>
@@ -454,7 +555,7 @@ tbody tr:hover td { background: #fafafa; }
               <td class="td-id">48205</td>
               <td>Real-time BAR</td>
               <td><span class="tag tag-purple">실시간+실시간</span></td>
-              <td class="td-hotel">Vinpearl Luxury Landmark 81</td>
+              <td><div class="hotel-cell"><span class="name" title="Vinpearl Luxury Landmark 81">Vinpearl Luxury Landmark 81</span><span class="content-link" onclick="openContentModal('synced')">콘텐츠</span></div></td>
               <td style="font-size:12px; color:rgba(0,0,0,0.65);">2026-04-29 ~ 2031-04-29 <span class="tag tag-gray" style="margin-left:4px;">자동</span></td>
               <td><span class="tag tag-green">✓ 입력됨</span></td>
               <td><span class="val-ok">✓ 완료 (5/5)</span></td>
@@ -465,7 +566,7 @@ tbody tr:hover td { background: #fafafa; }
               <td class="td-id">48198</td>
               <td>Real-time BAR</td>
               <td><span class="tag tag-purple">실시간+실시간</span></td>
-              <td class="td-hotel">Vinpearl Resort & Spa Long Beach</td>
+              <td><div class="hotel-cell"><span class="name" title="Vinpearl Resort &amp; Spa Long Beach">Vinpearl Resort &amp; Spa Long Beach</span><span class="content-link changed" onclick="openContentModal('changed')">콘텐츠</span></div></td>
               <td style="font-size:12px; color:rgba(0,0,0,0.65);">2026-04-29 ~ 2031-04-29 <span class="tag tag-gray" style="margin-left:4px;">자동</span></td>
               <td><span class="tag tag-green">✓ 입력됨</span></td>
               <td><span class="val-ok">✓ 완료 (6/6)</span></td>
@@ -476,7 +577,7 @@ tbody tr:hover td { background: #fafafa; }
               <td class="td-id">48190</td>
               <td>Dynamic Package</td>
               <td><span class="tag tag-purple">실시간+실시간</span></td>
-              <td class="td-hotel">Vinpearl Discovery Greenhill</td>
+              <td><div class="hotel-cell"><span class="name" title="Vinpearl Discovery Greenhill">Vinpearl Discovery Greenhill</span><span class="content-link new" onclick="openContentModal('new')">콘텐츠</span></div></td>
               <td style="font-size:12px; color:rgba(0,0,0,0.65);">2026-04-29 ~ 2031-04-29 <span class="tag tag-gray" style="margin-left:4px;">자동</span></td>
               <td><span class="tag tag-orange">⚠ 미입력</span></td>
               <td><span class="val-ok">✓ 완료 (4/4)</span></td>
@@ -682,6 +783,436 @@ tbody tr:hover td { background: #fafafa; }
   </div>
 </div>
 
+<!-- ==================== MODAL: TMG 호텔 콘텐츠 (2.6 getPropertyContent) ==================== -->
+<div class="modal-overlay" id="modal-content">
+  <div class="modal modal-lg">
+    <div class="modal-header">
+      <div class="modal-title">
+        <span class="tag tag-purple">2.6 getPropertyContent</span>
+        TMG 호텔 콘텐츠
+        <span id="content-status-pill"></span>
+      </div>
+      <button class="modal-close" onclick="closeModal()">×</button>
+    </div>
+    <div class="modal-body">
+      <div class="content-grid">
+
+        <!-- 좌측: TMG 원본 콘텐츠 -->
+        <div class="content-main">
+
+          <!-- 호텔 헤더 -->
+          <div class="hotel-hero">
+            <div class="hotel-hero-top">
+              <div class="hotel-avatar">VN</div>
+              <div style="flex:1;">
+                <div class="hotel-stars">★★★★★ <span style="color:rgba(0,0,0,0.45); margin-left:6px;">5성급</span></div>
+                <div class="hotel-name" id="content-hotel-name">Vinpearl Resort Nha Trang</div>
+                <div class="hotel-addr">7 Hon Tre Island, Vinh Nguyen Ward, Nha Trang City, Khanh Hoa Province, Việt Nam</div>
+              </div>
+            </div>
+            <div class="hotel-meta">
+              <div class="hotel-meta-item"><span class="k">호텔 ID</span><span class="v" style="font-family:'SF Mono',monospace;">577194</span></div>
+              <div class="hotel-meta-item"><span class="k">호텔 코드</span><span class="v" style="font-family:'SF Mono',monospace;">V002637</span></div>
+              <div class="hotel-meta-item"><span class="k">체크인</span><span class="v">15:00</span></div>
+              <div class="hotel-meta-item"><span class="k">체크아웃</span><span class="v">12:00</span></div>
+              <div class="hotel-meta-item"><span class="k">평점</span><span class="v">9.6 (746)</span></div>
+              <div class="hotel-meta-item"><span class="k">위경도</span><span class="v" style="font-size:11px;">12.21, 109.30</span></div>
+            </div>
+          </div>
+
+          <!-- 이미지 -->
+          <div class="content-section">
+            <div class="content-section-title">📷 이미지 <span class="field-name">avatar + images[]</span></div>
+            <div class="img-strip">
+              <div class="img-thumb">대표</div>
+              <div class="img-thumb">전경</div>
+              <div class="img-thumb">로비</div>
+              <div class="img-thumb">수영장</div>
+              <div class="img-thumb">레스토랑</div>
+              <div class="img-thumb">바</div>
+              <div class="img-thumb">라이브러리</div>
+            </div>
+            <div class="form-help" style="margin-top:6px;">총 7장 · CDN: cdn1.ivivu.com</div>
+          </div>
+
+          <!-- 설명 -->
+          <div class="content-section">
+            <div class="content-section-title">📝 호텔 소개 <span class="field-name">shortDescription + fullDescription</span></div>
+            <div class="html-preview" style="margin-bottom:8px;">
+              <strong>한 줄 소개</strong> · Khu vực Bãi Trước, Bãi biển riêng, Hồ bơi ngoài trời
+            </div>
+            <div class="html-preview">
+              <strong>상세 설명 (HTML)</strong> · Nằm ngay tại khu vực Sao Mai, Marina Bay Vũng Tàu Resort &amp; Spa với vị trí thuận lợi cho việc di chuyển. Bạn chỉ mất chừng 5 phút để đến các nhà hàng hải sản danh tiếng…
+            </div>
+          </div>
+
+          <!-- 객실 타입 -->
+          <div class="content-section">
+            <div class="content-section-title">🛏 객실 타입 <span class="field-name">rooms[]</span><span style="font-size:11px; color:rgba(0,0,0,0.45); font-weight:500;">· 총 4개</span></div>
+            <div class="room-list">
+              <div class="room-card">
+                <div class="room-card-top">
+                  <div class="room-card-img">📷</div>
+                  <div>
+                    <div class="room-card-name">Deluxe Double Room</div>
+                    <div class="room-card-occ">기본 2인 · 표준 2A</div>
+                    <div class="room-card-id">ID 75944</div>
+                  </div>
+                </div>
+                <div class="room-card-meta">
+                  <span>성인 <strong>3</strong></span>
+                  <span>아동 <strong>2</strong></span>
+                  <span>최대 <strong>4</strong></span>
+                  <span>엑베 <strong>1</strong></span>
+                </div>
+              </div>
+              <div class="room-card">
+                <div class="room-card-top">
+                  <div class="room-card-img r2">📷</div>
+                  <div>
+                    <div class="room-card-name">Premier Double Garden View</div>
+                    <div class="room-card-occ">기본 2인 · 표준 2A</div>
+                    <div class="room-card-id">ID 74617</div>
+                  </div>
+                </div>
+                <div class="room-card-meta">
+                  <span>성인 <strong>3</strong></span>
+                  <span>아동 <strong>2</strong></span>
+                  <span>최대 <strong>5</strong></span>
+                  <span>엑베 <strong>1</strong></span>
+                </div>
+              </div>
+              <div class="room-card">
+                <div class="room-card-top">
+                  <div class="room-card-img r3">📷</div>
+                  <div>
+                    <div class="room-card-name">Ocean Suite</div>
+                    <div class="room-card-occ">기본 2인 · 표준 2A</div>
+                    <div class="room-card-id">ID 74618</div>
+                  </div>
+                </div>
+                <div class="room-card-meta">
+                  <span>성인 <strong>3</strong></span>
+                  <span>아동 <strong>2</strong></span>
+                  <span>최대 <strong>5</strong></span>
+                  <span>엑베 <strong>1</strong></span>
+                </div>
+              </div>
+              <div class="room-card">
+                <div class="room-card-top">
+                  <div class="room-card-img r4">📷</div>
+                  <div>
+                    <div class="room-card-name">Beach Villa 2BR</div>
+                    <div class="room-card-occ">기본 4인 · 표준 4A</div>
+                    <div class="room-card-id">ID 74620</div>
+                  </div>
+                </div>
+                <div class="room-card-meta">
+                  <span>성인 <strong>5</strong></span>
+                  <span>아동 <strong>3</strong></span>
+                  <span>최대 <strong>8</strong></span>
+                  <span>엑베 <strong>2</strong></span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- 연령 기준 -->
+          <div class="content-section">
+            <div class="content-section-title">👶 연령 기준 <span class="field-name">infantAgeFrom/To, childAgeFrom/To</span></div>
+            <div class="form-info">
+              <div class="row"><span class="label">유아 (Infant)</span><span>0세 ~ 5세</span></div>
+              <div class="row"><span class="label">아동 (Child)</span><span>6세 ~ 11세</span></div>
+              <div class="row"><span class="label">청소년 (Minor)</span><span style="color:rgba(0,0,0,0.45);">미적용</span></div>
+            </div>
+          </div>
+
+          <!-- 호텔 정책 -->
+          <div class="content-section">
+            <div class="content-section-title">📋 호텔 정책 <span class="field-name">hotelPolicies[]</span></div>
+            <div class="policy-card">
+              <div class="policy-name">Hướng dẫn nhận phòng (체크인 안내)</div>
+              <div class="policy-desc">- 모든 투숙객은 신분증/여권 원본 제시 (베트남 국적 신분증 또는 외국인 여권+비자). 외에 iVIVU 예약확인서 지참 필요. - 호텔에서 보증금 요구 가능. 신용카드 권장.</div>
+            </div>
+          </div>
+
+          <!-- 지역 -->
+          <div class="content-section">
+            <div class="content-section-title">📍 지역 정보 <span class="field-name">region{}</span></div>
+            <div class="form-info">
+              <div class="row"><span class="label">지역 ID</span><span style="font-family:'SF Mono',monospace;">114198</span></div>
+              <div class="row"><span class="label">지역 코드</span><span style="font-family:'SF Mono',monospace;">vung-tau</span></div>
+              <div class="row"><span class="label">지역명</span><span>Vũng Tàu</span></div>
+            </div>
+            <div class="html-preview" style="margin-top:6px;"><strong>가이드</strong> · 호치민에서 약 3시간 거리 · 베트남 남부 대표 휴양지 · 해변 따라 20km 이어진 풍경</div>
+          </div>
+
+        </div>
+
+        <!-- 우측: 우리 시스템 등록 상태 -->
+        <div class="content-side">
+          <div class="form-section-title" style="margin-bottom:12px;">⚙ Tripstore 시스템 등록 상태</div>
+
+          <!-- 등록 상태 박스 (상태별로 표시) -->
+          <div class="sync-status status-new" id="status-new" style="display:none;">
+            <div class="sync-status-head">
+              <span class="sync-status-label">⚠ 미등록</span>
+            </div>
+            <div class="sync-status-msg">아직 Tripstore에 등록되지 않은 호텔입니다. 아래 [Tripstore에 등록] 버튼으로 콘텐츠를 가져와 PB 마스터에 생성하세요.</div>
+          </div>
+
+          <div class="sync-status status-changed" id="status-changed" style="display:none;">
+            <div class="sync-status-head">
+              <span class="sync-status-label">● 변경 감지</span>
+              <span class="sync-status-time">3시간 전</span>
+            </div>
+            <div class="sync-status-msg">TMG 원본 데이터에 변경사항이 감지되었습니다. 아래 차이점을 확인하고 동기화하세요.</div>
+          </div>
+
+          <div class="sync-status status-synced" id="status-synced" style="display:none;">
+            <div class="sync-status-head">
+              <span class="sync-status-label">✓ 최신 상태</span>
+              <span class="sync-status-time">2시간 전</span>
+            </div>
+            <div class="sync-status-msg">TMG 원본과 일치합니다. 마지막 자동 동기화: 2026-05-12 06:15</div>
+          </div>
+
+          <!-- 차이점 (변경감지 상태일 때) -->
+          <div id="diff-block" style="display:none;">
+            <div class="form-section-title" style="margin-top:14px; margin-bottom:8px; font-size:12px;">🔍 변경 감지 항목</div>
+            <div class="diff-list">
+              <div class="diff-item">
+                <span class="diff-key">체크인 시간</span>
+                <div class="diff-val">
+                  <span class="old">14:00</span>
+                  <span class="new">15:00</span>
+                </div>
+              </div>
+              <div class="diff-item">
+                <span class="diff-key">평점</span>
+                <div class="diff-val">
+                  <span class="old">9.4</span>
+                  <span class="new">9.6</span>
+                </div>
+              </div>
+              <div class="diff-item">
+                <span class="diff-key">이미지</span>
+                <div class="diff-val">
+                  <span class="old">6장</span>
+                  <span class="new">7장 (+1)</span>
+                </div>
+              </div>
+              <div class="diff-item">
+                <span class="diff-key">객실 타입</span>
+                <div class="diff-val">
+                  <span class="new">신규 1개 (Beach Villa 2BR)</span>
+                </div>
+              </div>
+              <div class="diff-item">
+                <span class="diff-key">호텔 정책</span>
+                <div class="diff-val">
+                  <span class="same">변경 없음</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- 우리 시스템 매핑 정보 (synced 상태) -->
+          <div id="mapping-block" style="display:none;">
+            <div class="form-section-title" style="margin-top:14px; margin-bottom:8px; font-size:12px;">🔗 PB 마스터 매핑</div>
+            <div class="diff-list">
+              <div class="diff-item">
+                <span class="diff-key">Tripstore 호텔 ID</span>
+                <span class="diff-val same">TS_HTL_2814</span>
+              </div>
+              <div class="diff-item">
+                <span class="diff-key">카탈로그</span>
+                <span class="diff-val same">베트남 &gt; 나트랑</span>
+              </div>
+              <div class="diff-item">
+                <span class="diff-key">PB 숙박권</span>
+                <span class="diff-val same">4개 객실 / 7개 요금표</span>
+              </div>
+              <div class="diff-item">
+                <span class="diff-key">상품 노출</span>
+                <span class="diff-val"><span class="val-ok">활성 (3개 상품)</span></span>
+              </div>
+            </div>
+          </div>
+
+          <!-- 액션 버튼 -->
+          <div class="side-action-list">
+            <button class="btn btn-primary" id="action-register" style="display:none;">Tripstore에 등록</button>
+            <button class="btn btn-primary" id="action-sync-diff" style="display:none;">변경분 동기화</button>
+            <button class="btn btn-default" id="action-force-sync" style="display:none;">🔄 강제 재동기화</button>
+            <button class="btn btn-default" id="action-view-master" style="display:none;">PB 마스터로 이동</button>
+          </div>
+
+          <div class="form-help" style="margin-top:14px; line-height:1.6;">
+            <strong style="color:rgba(0,0,0,0.65);">API</strong> · GET /getPropertyContent<br>
+            <strong style="color:rgba(0,0,0,0.65);">호출</strong> · propertyId=577194, language=kr
+          </div>
+        </div>
+
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-default" onclick="closeModal()">닫기</button>
+    </div>
+  </div>
+</div>
+
+<!-- ==================== MODAL: 요금표 조회 (2.9 getRatesFromTo) ==================== -->
+<div class="modal-overlay" id="modal-rate-query">
+  <div class="modal modal-xl">
+    <div class="modal-header">
+      <div class="modal-title">
+        <span class="tag tag-purple">2.9 getRatesFromTo</span>
+        요금표 수동 조회
+      </div>
+      <button class="modal-close" onclick="closeModal()">×</button>
+    </div>
+    <div class="modal-body">
+      <div class="notice-banner notice-orange" style="border-radius:8px; border-left-width:3px; margin-bottom:16px;">
+        <span class="notice-icon">ℹ</span>
+        <div>특정 호텔의 기간별 요금·재고를 TMG에서 직접 조회합니다. <strong>운영 데이터 검증, PB 가격 비교, Webhook 누락 fallback</strong> 용도로 사용하세요. 조회 결과는 화면 표시 전용이며 자동 저장되지 않습니다.</div>
+      </div>
+
+      <div class="query-form">
+        <div class="form-group" style="margin-bottom:0;">
+          <label class="form-label">호텔 <span class="required">*</span></label>
+          <select class="form-control">
+            <option>Vinpearl Resort Nha Trang (577194)</option>
+            <option>JW Marriott Phu Quoc</option>
+            <option>InterContinental Danang</option>
+            <option>Marina Bay Vũng Tàu Resort</option>
+          </select>
+        </div>
+        <div class="form-group" style="margin-bottom:0;">
+          <label class="form-label">시작일 <span class="required">*</span></label>
+          <input type="date" class="form-control" value="2026-05-15">
+        </div>
+        <div class="form-group" style="margin-bottom:0;">
+          <label class="form-label">종료일 <span class="required">*</span></label>
+          <input type="date" class="form-control" value="2026-05-20">
+        </div>
+        <button class="btn btn-primary" style="height:38px;">조회하기</button>
+      </div>
+
+      <div class="query-result-head">
+        <div class="meta">
+          <strong>Vinpearl Resort Nha Trang</strong> · 2026-05-15 ~ 2026-05-20 (6일)
+          <span style="margin-left:10px; color:rgba(0,0,0,0.45);">조회 시각: 2026-05-12 17:24</span>
+        </div>
+        <div style="display:flex; gap:6px;">
+          <button class="btn btn-default btn-sm">CSV 내보내기</button>
+          <button class="btn btn-default btn-sm">PB 가격과 비교</button>
+        </div>
+      </div>
+
+      <div class="rate-table-wrap">
+        <table class="rate-table">
+          <thead>
+            <tr>
+              <th>객실</th>
+              <th>요금 플랜</th>
+              <th>boardCode</th>
+              <th>05-15</th>
+              <th>05-16</th>
+              <th>05-17</th>
+              <th>05-18</th>
+              <th>05-19</th>
+              <th>05-20</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr class="rate-plan-row">
+              <td colspan="9">💼 Tripstores Contracting (rateId: 40639) · 2025-06-30 ~ 2025-12-31 · cutOff 0 · minNight 1</td>
+            </tr>
+            <tr>
+              <td class="room-name">Superior Double<br><span style="font-size:11px; color:rgba(0,0,0,0.45);">2A · 1462</span></td>
+              <td><span class="tag tag-purple">Tripstores</span></td>
+              <td>BB</td>
+              <td class="num">1,050,000</td>
+              <td class="num">1,050,000</td>
+              <td class="num">1,150,000</td>
+              <td class="num">1,250,000</td>
+              <td class="num">1,250,000</td>
+              <td class="num">1,050,000</td>
+            </tr>
+            <tr>
+              <td class="room-name">Deluxe Double<br><span style="font-size:11px; color:rgba(0,0,0,0.45);">2A · 75944</span></td>
+              <td><span class="tag tag-purple">Tripstores</span></td>
+              <td>BB</td>
+              <td class="num">1,500,000</td>
+              <td class="num">1,500,000</td>
+              <td class="num">1,650,000</td>
+              <td class="num">1,800,000</td>
+              <td class="num">1,800,000</td>
+              <td class="num">1,500,000</td>
+            </tr>
+            <tr>
+              <td class="room-name">Premier Garden<br><span style="font-size:11px; color:rgba(0,0,0,0.45);">2A · 74617</span></td>
+              <td><span class="tag tag-purple">Tripstores</span></td>
+              <td>BB</td>
+              <td class="num">1,800,000</td>
+              <td class="num">1,800,000</td>
+              <td class="num">1,950,000</td>
+              <td class="num">2,100,000</td>
+              <td class="num">2,100,000</td>
+              <td class="num">1,800,000</td>
+            </tr>
+            <tr>
+              <td class="room-name">Premier Twin<br><span style="font-size:11px; color:rgba(0,0,0,0.45);">2A · 16086</span></td>
+              <td><span class="tag tag-purple">Tripstores</span></td>
+              <td>BB</td>
+              <td class="num">1,500,000</td>
+              <td class="num">1,500,000</td>
+              <td class="num">1,650,000</td>
+              <td class="num">1,800,000</td>
+              <td class="num">1,800,000</td>
+              <td class="num">1,500,000</td>
+            </tr>
+            <tr class="rate-plan-row">
+              <td colspan="9">💼 Best Available Rate (rateId: r456) · 2025-03-01 ~ 2025-09-30 · cutOff 1 · minNight 1</td>
+            </tr>
+            <tr>
+              <td class="room-name">Deluxe Double<br><span style="font-size:11px; color:rgba(0,0,0,0.45);">2A · 75944</span></td>
+              <td><span class="tag tag-blue">BAR</span></td>
+              <td>BB</td>
+              <td class="num">2,500,000</td>
+              <td class="num">2,500,000</td>
+              <td class="num">2,650,000</td>
+              <td class="num">2,800,000</td>
+              <td class="num">2,800,000</td>
+              <td class="num">2,500,000</td>
+            </tr>
+            <tr>
+              <td class="room-name">Ocean Suite<br><span style="font-size:11px; color:rgba(0,0,0,0.45);">2A · 74618</span></td>
+              <td><span class="tag tag-blue">BAR</span></td>
+              <td>BB</td>
+              <td class="num">3,800,000</td>
+              <td class="num">3,800,000</td>
+              <td class="num">4,000,000</td>
+              <td class="num">4,200,000</td>
+              <td class="num">4,200,000</td>
+              <td class="num">3,800,000</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div style="margin-top:12px; font-size:11px; color:rgba(0,0,0,0.45); line-height:1.6;">
+        💡 추가요금 (supplementRates): ExtraBedForAdult 500,000 VND/박, ExtraBedForChild 500,000 VND/박, ChildWithoutExtraBed 150,000 VND/박, CompulsoryMeal — 객실 우클릭 시 상세 표시<br>
+        💡 cancellationPolicies: 24h 전 100% / 168h 전 50% / 72h 전 100% — 요금 플랜 행 클릭 시 상세 표시
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-default" onclick="closeModal()">닫기</button>
+    </div>
+  </div>
+</div>
+
 <script>
 function switchTab(tabId) {
   document.querySelectorAll('.rate-tab').forEach(t => t.classList.remove('active'));
@@ -692,6 +1223,49 @@ function switchTab(tabId) {
 
 function openModal(type) {
   document.getElementById(`modal-${type}`).classList.add('show');
+}
+
+function openContentModal(state) {
+  // 상태별 표시 토글
+  const statusNew = document.getElementById('status-new');
+  const statusChanged = document.getElementById('status-changed');
+  const statusSynced = document.getElementById('status-synced');
+  const diffBlock = document.getElementById('diff-block');
+  const mappingBlock = document.getElementById('mapping-block');
+  const statusPill = document.getElementById('content-status-pill');
+  const actRegister = document.getElementById('action-register');
+  const actSyncDiff = document.getElementById('action-sync-diff');
+  const actForceSync = document.getElementById('action-force-sync');
+  const actViewMaster = document.getElementById('action-view-master');
+
+  [statusNew, statusChanged, statusSynced, diffBlock, mappingBlock,
+   actRegister, actSyncDiff, actForceSync, actViewMaster].forEach(el => el.style.display = 'none');
+
+  if (state === 'new') {
+    statusNew.style.display = 'block';
+    actRegister.style.display = 'inline-flex';
+    statusPill.innerHTML = '<span class="tag tag-orange" style="font-size:11px;">미등록</span>';
+  } else if (state === 'changed') {
+    statusChanged.style.display = 'block';
+    diffBlock.style.display = 'block';
+    mappingBlock.style.display = 'block';
+    actSyncDiff.style.display = 'inline-flex';
+    actForceSync.style.display = 'inline-flex';
+    actViewMaster.style.display = 'inline-flex';
+    statusPill.innerHTML = '<span class="tag tag-blue" style="font-size:11px;">변경감지</span>';
+  } else {
+    statusSynced.style.display = 'block';
+    mappingBlock.style.display = 'block';
+    actForceSync.style.display = 'inline-flex';
+    actViewMaster.style.display = 'inline-flex';
+    statusPill.innerHTML = '<span class="tag tag-green" style="font-size:11px;">최신</span>';
+  }
+
+  document.getElementById('modal-content').classList.add('show');
+}
+
+function openRateQueryModal() {
+  document.getElementById('modal-rate-query').classList.add('show');
 }
 
 function closeModal() {
