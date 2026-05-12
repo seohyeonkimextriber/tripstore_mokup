@@ -1,0 +1,285 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>기준환율 조회 — PB 설정 — TripStore Partners</title>
+<link href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.6/dist/web/static/pretendard.css" rel="stylesheet">
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: 'Pretendard', 'Apple SD Gothic Neo', -apple-system, sans-serif; font-size: 14px; color: rgba(0,0,0,0.88); background: #f5f5f5; }
+a { color: inherit; text-decoration: none; }
+button { font-family: inherit; cursor: pointer; }
+
+/* ===== GNB ===== */
+.gnb { background: #f0f5ff; height: 48px; display: flex; align-items: center; position: sticky; top: 0; z-index: 100; padding: 0 20px; border-bottom: 1px solid #d6e4ff; box-shadow: 0 1px 4px rgba(0,0,0,0.06); }
+.gnb-logo { color: #222427; font-weight: 800; font-size: 15px; margin-right: 24px; letter-spacing: -0.3px; }
+.gnb-logo span { color: #1677ff; }
+.gnb-logo .partners-badge { background: #1677ff; color: #fff; font-size: 10px; font-weight: 700; padding: 2px 6px; border-radius: 4px; margin-left: 6px; letter-spacing: 0.3px; vertical-align: middle; }
+.gnb-menu { display: flex; gap: 0; }
+.gnb-item { color: rgba(0,0,0,0.55); padding: 0 14px; height: 48px; display: flex; align-items: center; cursor: pointer; font-size: 13px; white-space: nowrap; position: relative; transition: color 0.15s; font-weight: 500; }
+.gnb-item:hover { color: rgba(0,0,0,0.88); }
+.gnb-item.active { color: #1677ff; }
+.gnb-item.active::after { content: ''; position: absolute; bottom: 0; left: 0; right: 0; height: 2px; background: #1677ff; }
+.gnb-right { margin-left: auto; display: flex; align-items: center; gap: 14px; }
+.gnb-user { font-size: 12px; color: rgba(0,0,0,0.55); display: flex; align-items: center; gap: 6px; }
+.gnb-user-name { font-weight: 600; color: rgba(0,0,0,0.75); }
+.gnb-org-badge { background: #fff; border: 1px solid #d6e4ff; color: #1677ff; font-size: 11px; font-weight: 600; padding: 3px 8px; border-radius: 4px; }
+
+/* ===== BREADCRUMB ===== */
+.breadcrumb { padding: 14px 24px 0; font-size: 12px; color: rgba(0,0,0,0.45); display: flex; align-items: center; gap: 6px; }
+.breadcrumb span:not(.sep) { cursor: pointer; transition: color 0.15s; }
+.breadcrumb span:not(.sep):hover { color: #1677ff; }
+.sep { color: rgba(0,0,0,0.2); cursor: default !important; }
+.bc-current { color: rgba(0,0,0,0.88) !important; cursor: default !important; }
+
+/* ===== LAYOUT ===== */
+.layout { padding: 14px 24px 48px; max-width: 1440px; margin: 0 auto; }
+
+/* ===== PAGE HEADER ===== */
+.page-header { margin: 12px 0 18px; display: flex; align-items: flex-end; justify-content: space-between; gap: 14px; flex-wrap: wrap; }
+.page-title-wrap { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+.page-title { font-size: 22px; font-weight: 700; color: rgba(0,0,0,0.88); letter-spacing: -0.3px; }
+.page-desc { font-size: 13px; color: rgba(0,0,0,0.5); margin-top: 4px; }
+.readonly-badge { display: inline-flex; align-items: center; gap: 5px; background: #fff7e6; color: #d48806; border: 1px solid #ffd666; border-radius: 4px; font-size: 11px; font-weight: 700; padding: 4px 10px; letter-spacing: 0.2px; }
+.readonly-badge svg { width: 12px; height: 12px; }
+
+/* ===== SUB NAV (탭) ===== */
+.subnav-card { background: #fff; border: 1px solid #f0f0f0; border-radius: 8px; padding: 4px; margin-bottom: 16px; display: inline-flex; }
+.subnav-item { padding: 8px 18px; font-size: 13px; font-weight: 500; color: rgba(0,0,0,0.55); cursor: pointer; border-radius: 6px; transition: all 0.15s; white-space: nowrap; }
+.subnav-item:hover { color: rgba(0,0,0,0.88); }
+.subnav-item.active { color: #1677ff; background: #e6f4ff; font-weight: 600; }
+
+/* ===== SUMMARY BANNER ===== */
+.summary { background: linear-gradient(135deg, #f6f9ff 0%, #eef4ff 100%); border: 1px solid #d6e4ff; border-radius: 12px; padding: 18px 22px; margin-bottom: 16px; display: flex; align-items: center; justify-content: space-between; gap: 16px; flex-wrap: wrap; }
+.summary-left { display: flex; align-items: center; gap: 18px; flex-wrap: wrap; }
+.summary-block { display: flex; flex-direction: column; gap: 3px; }
+.summary-label { font-size: 11px; color: rgba(0,0,0,0.5); font-weight: 600; letter-spacing: 0.3px; text-transform: uppercase; }
+.summary-value { font-size: 14px; color: rgba(0,0,0,0.88); font-weight: 600; }
+.summary-divider { width: 1px; height: 28px; background: #d6e4ff; }
+.summary-right { display: flex; align-items: center; gap: 8px; }
+
+/* ===== BUTTONS ===== */
+.btn { height: 36px; padding: 0 16px; border-radius: 6px; font-size: 13px; cursor: pointer; border: 1px solid transparent; display: inline-flex; align-items: center; gap: 6px; transition: all 0.15s; white-space: nowrap; font-weight: 500; font-family: inherit; }
+.btn-primary { background: #1677ff; color: #fff; border-color: #1677ff; }
+.btn-primary:hover { background: #4096ff; border-color: #4096ff; }
+.btn-default { background: #fff; color: rgba(0,0,0,0.88); border-color: #d9d9d9; }
+.btn-default:hover { color: #1677ff; border-color: #1677ff; }
+.btn-text { background: transparent; color: #1677ff; border-color: transparent; padding: 0 10px; }
+.btn-text:hover { background: #e6f4ff; }
+.btn-sm { height: 30px; padding: 0 12px; font-size: 12px; }
+.btn-icon { width: 32px; padding: 0; justify-content: center; }
+
+/* ===== CURRENCY GRID ===== */
+.currency-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; margin-bottom: 24px; }
+@media (max-width: 1100px) { .currency-grid { grid-template-columns: repeat(2, 1fr); } }
+@media (max-width: 720px) { .currency-grid { grid-template-columns: 1fr; } }
+
+.cur-card { background: #fff; border: 1px solid #f0f0f0; border-radius: 12px; padding: 20px 22px; position: relative; transition: all 0.2s; }
+.cur-card:hover { border-color: #91caff; box-shadow: 0 4px 12px rgba(22,119,255,0.08); transform: translateY(-1px); }
+
+.cur-head { display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: 14px; }
+.cur-head-left { display: flex; align-items: center; gap: 10px; }
+.cur-flag { width: 36px; height: 36px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 22px; background: #fafafa; border: 1px solid #f0f0f0; line-height: 1; }
+.cur-name { font-size: 14px; font-weight: 700; color: rgba(0,0,0,0.88); line-height: 1.3; }
+.cur-code { font-size: 11px; color: rgba(0,0,0,0.45); font-weight: 600; letter-spacing: 0.4px; margin-top: 2px; }
+.cur-head-right { display: flex; gap: 2px; }
+.cur-icon-btn { width: 28px; height: 28px; border-radius: 6px; border: 1px solid transparent; background: transparent; display: flex; align-items: center; justify-content: center; color: rgba(0,0,0,0.45); cursor: pointer; transition: all 0.15s; }
+.cur-icon-btn:hover { background: #f5f5f5; color: #1677ff; }
+.cur-icon-btn svg { width: 14px; height: 14px; }
+
+.cur-rate { padding: 10px 0 14px; border-top: 1px dashed #f0f0f0; border-bottom: 1px dashed #f0f0f0; margin-bottom: 12px; }
+.cur-rate-label { font-size: 11px; color: rgba(0,0,0,0.4); font-weight: 600; letter-spacing: 0.3px; margin-bottom: 4px; }
+.cur-rate-value { display: flex; align-items: baseline; gap: 6px; }
+.cur-rate-base { font-size: 13px; color: rgba(0,0,0,0.55); font-weight: 500; }
+.cur-rate-equals { font-size: 13px; color: rgba(0,0,0,0.35); margin: 0 2px; }
+.cur-rate-amount { font-size: 28px; font-weight: 800; color: #1677ff; letter-spacing: -0.5px; line-height: 1; }
+.cur-rate-unit { font-size: 14px; color: rgba(0,0,0,0.55); font-weight: 500; margin-left: 2px; }
+
+.cur-meta { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
+.cur-trend { display: inline-flex; align-items: center; gap: 4px; padding: 3px 8px; border-radius: 4px; font-size: 11px; font-weight: 600; }
+.cur-trend.up { background: #fff1f0; color: #cf1322; }
+.cur-trend.down { background: #f6ffed; color: #389e0d; }
+.cur-trend.flat { background: #f5f5f5; color: rgba(0,0,0,0.55); }
+.cur-trend svg { width: 10px; height: 10px; }
+.cur-updated { font-size: 11px; color: rgba(0,0,0,0.4); }
+.cur-updated strong { color: rgba(0,0,0,0.65); font-weight: 600; }
+
+/* ===== EMPTY STATE (통화 추가 카드) ===== */
+.cur-card.add { background: #fafbff; border: 1px dashed #d6e4ff; display: flex; align-items: center; justify-content: center; min-height: 184px; color: rgba(0,0,0,0.45); cursor: pointer; transition: all 0.2s; }
+.cur-card.add:hover { background: #f0f5ff; border-color: #91caff; color: #1677ff; box-shadow: none; transform: none; }
+.cur-card.add-inner { display: flex; flex-direction: column; align-items: center; gap: 8px; }
+.cur-add-icon { width: 36px; height: 36px; border-radius: 50%; background: #fff; border: 1px solid #d6e4ff; display: flex; align-items: center; justify-content: center; font-size: 18px; font-weight: 300; color: #1677ff; }
+.cur-add-text { font-size: 13px; font-weight: 500; }
+
+/* ===== FOOTNOTE ===== */
+.footnote { display: flex; align-items: flex-start; gap: 8px; padding: 12px 16px; background: #fff7e6; border: 1px solid #ffd666; border-radius: 8px; font-size: 12px; color: #874d00; }
+.footnote svg { width: 14px; height: 14px; flex-shrink: 0; margin-top: 2px; color: #d48806; }
+
+/* ===== ICONS (inline SVG helper) ===== */
+.icon { display: inline-block; vertical-align: middle; }
+</style>
+</head>
+<body>
+
+<!-- ===== GNB ===== -->
+<nav class="gnb">
+  <div class="gnb-logo">Trip<span>Store</span> <span class="partners-badge">PARTNERS</span></div>
+  <div class="gnb-menu">
+    <div class="gnb-item">대시보드</div>
+    <div class="gnb-item">페이지 제작</div>
+    <div class="gnb-item">상품 관리</div>
+    <div class="gnb-item">예약 관리</div>
+    <div class="gnb-item active">PB 관리</div>
+    <div class="gnb-item">카탈로그</div>
+    <div class="gnb-item">쿠폰</div>
+    <div class="gnb-item">정산</div>
+  </div>
+  <div class="gnb-right">
+    <span class="gnb-org-badge">놀유니버스</span>
+    <span class="gnb-user"><span class="gnb-user-name">김수현</span>님</span>
+  </div>
+</nav>
+
+<!-- ===== BREADCRUMB ===== -->
+<div class="breadcrumb">
+  <span>PB 관리</span>
+  <span class="sep">/</span>
+  <span>PB 설정</span>
+  <span class="sep">/</span>
+  <span class="bc-current">기준환율</span>
+</div>
+
+<div class="layout">
+
+  <!-- ===== PAGE HEADER ===== -->
+  <div class="page-header">
+    <div>
+      <div class="page-title-wrap">
+        <div class="page-title">PB 설정</div>
+        <span class="readonly-badge">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+          조회 전용
+        </span>
+      </div>
+      <div class="page-desc">PB 상품 가격 산출에 사용되는 기준 환율을 확인합니다. 환율 수정은 트립스토어 운영팀이 진행합니다.</div>
+    </div>
+  </div>
+
+  <!-- ===== SUB NAV ===== -->
+  <div class="subnav-card">
+    <div class="subnav-item active">기준환율</div>
+    <div class="subnav-item">유류할증료</div>
+    <div class="subnav-item">공항이용료</div>
+    <div class="subnav-item">여행보장</div>
+  </div>
+
+  <!-- ===== SUMMARY BANNER ===== -->
+  <div class="summary">
+    <div class="summary-left">
+      <div class="summary-block">
+        <div class="summary-label">등록 통화</div>
+        <div class="summary-value">총 2개</div>
+      </div>
+      <div class="summary-divider"></div>
+      <div class="summary-block">
+        <div class="summary-label">마지막 수정</div>
+        <div class="summary-value">2026.05.11 14:32 · 김수현</div>
+      </div>
+      <div class="summary-divider"></div>
+      <div class="summary-block">
+        <div class="summary-label">반영 범위</div>
+        <div class="summary-value">PB 상품 가격 자동 환산</div>
+      </div>
+    </div>
+    <div class="summary-right">
+      <button class="btn btn-default btn-sm">
+        <svg class="icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+        전체 수정이력 보기
+      </button>
+    </div>
+  </div>
+
+  <!-- ===== CURRENCY GRID ===== -->
+  <div class="currency-grid">
+
+    <!-- USD -->
+    <div class="cur-card">
+      <div class="cur-head">
+        <div class="cur-head-left">
+          <div class="cur-flag">🇺🇸</div>
+          <div>
+            <div class="cur-name">미국 달러</div>
+            <div class="cur-code">USD</div>
+          </div>
+        </div>
+        <div class="cur-head-right">
+          <button class="cur-icon-btn" title="수정이력 보기">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+          </button>
+        </div>
+      </div>
+      <div class="cur-rate">
+        <div class="cur-rate-label">환율 (KRW 기준)</div>
+        <div class="cur-rate-value">
+          <span class="cur-rate-base">1 USD</span>
+          <span class="cur-rate-equals">=</span>
+          <span class="cur-rate-amount">1,520</span>
+          <span class="cur-rate-unit">원</span>
+        </div>
+      </div>
+      <div class="cur-meta">
+        <span class="cur-trend up">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="18 15 12 9 6 15"/></svg>
+          +0.7% (전월 대비)
+        </span>
+        <span class="cur-updated"><strong>2026.05.11</strong> 14:32</span>
+      </div>
+    </div>
+
+    <!-- JPY -->
+    <div class="cur-card">
+      <div class="cur-head">
+        <div class="cur-head-left">
+          <div class="cur-flag">🇯🇵</div>
+          <div>
+            <div class="cur-name">일본 엔</div>
+            <div class="cur-code">JPY</div>
+          </div>
+        </div>
+        <div class="cur-head-right">
+          <button class="cur-icon-btn" title="수정이력 보기">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+          </button>
+        </div>
+      </div>
+      <div class="cur-rate">
+        <div class="cur-rate-label">환율 (KRW 기준)</div>
+        <div class="cur-rate-value">
+          <span class="cur-rate-base">100 JPY</span>
+          <span class="cur-rate-equals">=</span>
+          <span class="cur-rate-amount">1,000</span>
+          <span class="cur-rate-unit">원</span>
+        </div>
+      </div>
+      <div class="cur-meta">
+        <span class="cur-trend down">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+          −1.2% (전월 대비)
+        </span>
+        <span class="cur-updated"><strong>2026.05.04</strong> 09:18</span>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- ===== FOOTNOTE ===== -->
+  <div class="footnote">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+    <div>표시된 환율은 PB 상품 가격 산출에 적용되는 기준값입니다. 변경이 필요한 경우 트립스토어 운영팀으로 요청해 주세요.</div>
+  </div>
+
+</div>
+
+</body>
+</html>
