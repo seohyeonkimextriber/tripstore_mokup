@@ -1,0 +1,396 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>숙박권 등록 — PB 관리 — TripStore Partners</title>
+<link href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.6/dist/web/static/pretendard.css" rel="stylesheet">
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: 'Pretendard', 'Apple SD Gothic Neo', -apple-system, sans-serif; font-size: 14px; color: rgba(0,0,0,0.88); background: #f5f5f5; }
+button { font-family: inherit; cursor: pointer; }
+
+/* GNB */
+.gnb { background: #f0f5ff; height: 48px; display: flex; align-items: center; position: sticky; top: 0; z-index: 100; padding: 0 20px; border-bottom: 1px solid #d6e4ff; box-shadow: 0 1px 4px rgba(0,0,0,0.06); }
+.gnb-logo { color: #222427; font-weight: 800; font-size: 15px; margin-right: 24px; letter-spacing: -0.3px; }
+.gnb-logo span { color: #1677ff; }
+.gnb-logo .partners-badge { background: #1677ff; color: #fff; font-size: 10px; font-weight: 700; padding: 2px 6px; border-radius: 4px; margin-left: 6px; vertical-align: middle; }
+.gnb-menu { display: flex; }
+.gnb-item { color: rgba(0,0,0,0.55); padding: 0 14px; height: 48px; display: flex; align-items: center; cursor: pointer; font-size: 13px; white-space: nowrap; position: relative; font-weight: 500; }
+.gnb-item:hover { color: rgba(0,0,0,0.88); }
+.gnb-item.active { color: #1677ff; }
+.gnb-item.active::after { content: ''; position: absolute; bottom: 0; left: 0; right: 0; height: 2px; background: #1677ff; }
+.gnb-right { margin-left: auto; display: flex; align-items: center; gap: 14px; }
+.gnb-user { font-size: 12px; color: rgba(0,0,0,0.55); }
+.gnb-user-name { font-weight: 600; color: rgba(0,0,0,0.75); }
+.gnb-org-badge { background: #fff; border: 1px solid #d6e4ff; color: #1677ff; font-size: 11px; font-weight: 600; padding: 3px 8px; border-radius: 4px; }
+
+/* BREADCRUMB */
+.breadcrumb { padding: 14px 24px 0; font-size: 12px; color: rgba(0,0,0,0.45); display: flex; align-items: center; gap: 6px; }
+.breadcrumb span:not(.sep) { cursor: pointer; }
+.breadcrumb span:not(.sep):hover { color: #1677ff; }
+.sep { color: rgba(0,0,0,0.2); }
+.bc-current { color: rgba(0,0,0,0.88) !important; cursor: default !important; }
+
+/* PAGE HEADER */
+.page-bar { position: sticky; top: 48px; z-index: 90; background: #f5f5f5; padding: 14px 24px 12px; display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
+.btn-back { background: transparent; border: 1px solid #d9d9d9; height: 34px; padding: 0 12px; border-radius: 6px; font-size: 12.5px; color: rgba(0,0,0,0.65); display: inline-flex; align-items: center; gap: 6px; transition: all 0.15s; font-family: inherit; }
+.btn-back:hover { background: #fff; color: rgba(0,0,0,0.88); border-color: rgba(0,0,0,0.25); }
+.btn-back svg { width: 13px; height: 13px; }
+.page-title { font-size: 20px; font-weight: 700; color: rgba(0,0,0,0.88); letter-spacing: -0.3px; }
+.page-bar-right { margin-left: auto; display: flex; gap: 8px; }
+.btn { height: 34px; padding: 0 16px; border-radius: 6px; font-size: 13px; font-weight: 600; font-family: inherit; cursor: pointer; transition: all 0.15s; display: inline-flex; align-items: center; gap: 6px; }
+.btn-default { background: #fff; color: rgba(0,0,0,0.85); border: 1px solid #d9d9d9; }
+.btn-default:hover { color: #1677ff; border-color: #1677ff; }
+.btn-primary { background: #1677ff; color: #fff; border: 1px solid #1677ff; }
+.btn-primary:hover { background: #4096ff; }
+.btn-primary svg { width: 13px; height: 13px; }
+
+/* LAYOUT */
+.layout { padding: 0 24px 48px; max-width: 980px; margin: 0 auto; }
+
+/* CARD / SECTION */
+.section { background: #fff; border: 1px solid #f0f0f0; border-radius: 10px; padding: 18px 22px; margin-bottom: 14px; }
+.section-head { display: flex; align-items: center; gap: 8px; padding-bottom: 14px; margin-bottom: 16px; border-bottom: 1px solid #f5f5f5; }
+.section-num { display: inline-flex; align-items: center; justify-content: center; width: 22px; height: 22px; border-radius: 50%; background: #e6f4ff; color: #1677ff; font-size: 12px; font-weight: 700; }
+.section-title { font-size: 14.5px; font-weight: 700; color: rgba(0,0,0,0.85); }
+.section-desc { font-size: 12px; color: rgba(0,0,0,0.45); margin-left: auto; }
+
+/* FORM */
+.form { display: flex; flex-direction: column; gap: 14px; }
+.row-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+.row-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 14px; }
+.row-4 { display: grid; grid-template-columns: 1fr 1fr 1fr 1fr; gap: 14px; }
+.field { display: flex; flex-direction: column; }
+.field-label { font-size: 12px; font-weight: 600; color: rgba(0,0,0,0.65); margin-bottom: 6px; letter-spacing: 0.2px; display: flex; align-items: center; gap: 4px; }
+.field-label .req { color: #f5222d; }
+.field-label .opt { color: rgba(0,0,0,0.35); font-weight: 500; font-size: 11px; margin-left: 4px; }
+.fi-input { width: 100%; height: 36px; border: 1px solid #d9d9d9; border-radius: 6px; padding: 0 12px; font-size: 13px; font-family: inherit; outline: none; transition: all 0.2s; background: #fff; color: rgba(0,0,0,0.88); }
+.fi-input:focus { border-color: #1677ff; box-shadow: 0 0 0 2px rgba(22,119,255,0.1); }
+.fi-input::placeholder { color: rgba(0,0,0,0.28); }
+.fi-input:read-only { background: #fafbfc; color: rgba(0,0,0,0.55); cursor: not-allowed; }
+.fi-input.ta { height: auto; min-height: 78px; padding: 10px 12px; resize: vertical; line-height: 1.45; font-family: inherit; }
+.fi-select { width: 100%; height: 36px; border: 1px solid #d9d9d9; border-radius: 6px; padding: 0 28px 0 12px; font-size: 13px; outline: none; background: #fff; appearance: none; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='%23bbb'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 10px center; cursor: pointer; color: rgba(0,0,0,0.88); font-family: inherit; }
+.fi-select:focus, .fi-select:hover { border-color: #1677ff; }
+.field-hint { font-size: 11px; color: rgba(0,0,0,0.45); margin-top: 5px; }
+.field-hint.info { color: #1677ff; display: inline-flex; align-items: center; gap: 4px; }
+.field-hint.info svg { width: 11px; height: 11px; }
+
+/* CATALOG SEARCH */
+.catalog-result { background: #f0f7ff; border: 1px solid #91caff; border-radius: 8px; padding: 12px 14px; display: flex; align-items: center; gap: 12px; margin-top: 8px; }
+.catalog-result .thumb { width: 48px; height: 48px; border-radius: 6px; background: #d6e4ff url('data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="%231677ff" stroke-width="1.6"%3E%3Cpath d="M3 21h18M5 21V7l8-4v18M19 21V11l-6-4M9 9v.01M9 12v.01M9 15v.01"/%3E%3C/svg%3E') center / 26px no-repeat; flex-shrink: 0; }
+.catalog-result .info { flex: 1; min-width: 0; }
+.catalog-result .info .name { font-size: 13.5px; font-weight: 700; color: rgba(0,0,0,0.88); }
+.catalog-result .info .sub { font-size: 11.5px; color: rgba(0,0,0,0.5); margin-top: 2px; }
+.catalog-result .id-tag { font-family: 'SF Mono', monospace; font-size: 11px; color: #1677ff; background: #fff; padding: 3px 8px; border-radius: 4px; border: 1px solid #d6e4ff; font-weight: 600; }
+.catalog-result .btn-clear { background: transparent; border: none; color: rgba(0,0,0,0.4); cursor: pointer; padding: 4px; }
+.catalog-result .btn-clear:hover { color: #f5222d; }
+
+/* PRICE PREVIEW */
+.price-preview { background: #fafbfc; border: 1px dashed #d9d9d9; border-radius: 8px; padding: 14px 16px; margin-top: 8px; }
+.price-preview-label { font-size: 11px; color: rgba(0,0,0,0.5); font-weight: 600; letter-spacing: 0.3px; margin-bottom: 6px; }
+.price-preview-value { font-size: 18px; font-weight: 800; color: rgba(0,0,0,0.88); letter-spacing: -0.3px; }
+.price-preview-value .cur { font-size: 12px; color: rgba(0,0,0,0.5); font-weight: 600; margin-left: 4px; }
+.price-preview-meta { font-size: 11px; color: rgba(0,0,0,0.45); margin-top: 5px; }
+
+/* SUPPLIER CHIP */
+.supplier-chips { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px; }
+.supplier-chip { padding: 6px 12px; border: 1px solid #e8e8e8; border-radius: 999px; background: #fff; font-size: 12px; font-weight: 500; color: rgba(0,0,0,0.7); cursor: pointer; transition: all 0.15s; font-family: inherit; }
+.supplier-chip:hover { border-color: #91caff; color: #1677ff; }
+.supplier-chip.active { background: #e6f4ff; border-color: #1677ff; color: #1677ff; font-weight: 700; }
+
+/* CHECKBOX */
+.checkbox-group { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 4px; }
+.chk { display: inline-flex; align-items: center; gap: 6px; padding: 8px 12px; border: 1px solid #e8e8e8; border-radius: 6px; cursor: pointer; transition: all 0.15s; font-size: 12.5px; user-select: none; }
+.chk:hover { border-color: #91caff; }
+.chk input { accent-color: #1677ff; }
+.chk.checked { background: #f0f7ff; border-color: #1677ff; color: #1677ff; font-weight: 600; }
+</style>
+</head>
+<body>
+
+<!-- GNB -->
+<nav class="gnb">
+  <div class="gnb-logo">Trip<span>Store</span> <span class="partners-badge">PARTNERS</span></div>
+  <div class="gnb-menu">
+    <div class="gnb-item">대시보드</div>
+    <div class="gnb-item">페이지 제작</div>
+    <div class="gnb-item">상품 관리</div>
+    <div class="gnb-item">예약 관리</div>
+    <div class="gnb-item active">PB 관리</div>
+    <div class="gnb-item">카탈로그</div>
+    <div class="gnb-item">쿠폰</div>
+    <div class="gnb-item">정산</div>
+  </div>
+  <div class="gnb-right">
+    <span class="gnb-org-badge">놀유니버스</span>
+    <span class="gnb-user"><span class="gnb-user-name">김수현</span>님</span>
+  </div>
+</nav>
+
+<!-- BREADCRUMB -->
+<div class="breadcrumb">
+  <span>PB 관리</span>
+  <span class="sep">/</span>
+  <span>아이템 관리</span>
+  <span class="sep">/</span>
+  <span>숙박권</span>
+  <span class="sep">/</span>
+  <span class="bc-current">등록</span>
+</div>
+
+<!-- PAGE BAR -->
+<div class="page-bar">
+  <button class="btn-back" onclick="history.back()">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
+    목록
+  </button>
+  <div class="page-title">숙박권 등록</div>
+  <div class="page-bar-right">
+    <button class="btn btn-default">임시저장</button>
+    <button class="btn btn-primary">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+      등록
+    </button>
+  </div>
+</div>
+
+<div class="layout">
+
+  <!-- 1. 호텔 정보 -->
+  <div class="section">
+    <div class="section-head">
+      <span class="section-num">1</span>
+      <span class="section-title">호텔 정보</span>
+      <span class="section-desc">카탈로그에 등록된 호텔을 검색해 선택합니다.</span>
+    </div>
+    <div class="form">
+      <div class="field">
+        <label class="field-label">호텔 검색<span class="req">*</span></label>
+        <input class="fi-input" placeholder="호텔명·도시·카탈로그 ID 입력">
+        <div class="catalog-result">
+          <div class="thumb"></div>
+          <div class="info">
+            <div class="name">라데라 리조트 다낭</div>
+            <div class="sub">Ladera Resort Da Nang · 다낭, 베트남 · ⭐ 4.7</div>
+          </div>
+          <span class="id-tag">CAT-VN-DAD-00128</span>
+          <button class="btn-clear" title="선택 해제">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+          </button>
+        </div>
+        <div class="field-hint info">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
+          카탈로그에 없는 신규 호텔은 <a href="#" style="text-decoration:underline;">카탈로그 등록</a> 후 다시 시도하세요.
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 2. 객실 정보 -->
+  <div class="section">
+    <div class="section-head">
+      <span class="section-num">2</span>
+      <span class="section-title">객실 정보</span>
+    </div>
+    <div class="form">
+      <div class="row-2">
+        <div class="field">
+          <label class="field-label">룸 타입<span class="req">*</span></label>
+          <input class="fi-input" placeholder="예: 디럭스 더블 시티뷰">
+        </div>
+        <div class="field">
+          <label class="field-label">베드 타입<span class="req">*</span></label>
+          <select class="fi-select">
+            <option>선택</option>
+            <option>싱글 (Single)</option>
+            <option>더블 (Double)</option>
+            <option>트윈 (Twin)</option>
+            <option>트리플 (Triple)</option>
+            <option>패밀리 (Family)</option>
+          </select>
+        </div>
+      </div>
+      <div class="row-2">
+        <div class="field">
+          <label class="field-label">기준 인원<span class="req">*</span></label>
+          <select class="fi-select">
+            <option>2인</option><option>1인</option><option>3인</option><option>4인</option>
+          </select>
+        </div>
+        <div class="field">
+          <label class="field-label">최대 인원<span class="req">*</span></label>
+          <select class="fi-select">
+            <option>2인</option><option>3인</option><option>4인</option>
+          </select>
+        </div>
+      </div>
+      <div class="field">
+        <label class="field-label">식사 옵션<span class="req">*</span></label>
+        <div class="checkbox-group">
+          <label class="chk checked"><input type="checkbox" checked>미포함</label>
+          <label class="chk"><input type="checkbox">조식 (BB)</label>
+          <label class="chk"><input type="checkbox">반보드 (HB)</label>
+          <label class="chk"><input type="checkbox">풀보드 (FB)</label>
+          <label class="chk"><input type="checkbox">올인클루시브 (AI)</label>
+        </div>
+        <div class="field-hint">중복 선택 가능. 식사 옵션별로 가격이 다르면 별도 숙박권으로 등록해 주세요.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 3. 일정·재고 -->
+  <div class="section">
+    <div class="section-head">
+      <span class="section-num">3</span>
+      <span class="section-title">일정 · 재고</span>
+    </div>
+    <div class="form">
+      <div class="row-3">
+        <div class="field">
+          <label class="field-label">체크인 일자<span class="req">*</span></label>
+          <input class="fi-input" type="date" value="2026-06-15">
+        </div>
+        <div class="field">
+          <label class="field-label">체크아웃 일자<span class="req">*</span></label>
+          <input class="fi-input" type="date" value="2026-06-18">
+        </div>
+        <div class="field">
+          <label class="field-label">박 수</label>
+          <input class="fi-input" type="number" value="3" readonly>
+        </div>
+      </div>
+      <div class="row-2">
+        <div class="field">
+          <label class="field-label">객실 수 (재고)<span class="req">*</span></label>
+          <input class="fi-input" type="number" placeholder="0" value="5">
+          <div class="field-hint">재고가 0이 되면 연결된 PB 상품은 자동으로 마감 처리됩니다.</div>
+        </div>
+        <div class="field">
+          <label class="field-label">요금 유효기간 (선택)</label>
+          <input class="fi-input" type="date">
+          <div class="field-hint">미입력 시 체크아웃 일자까지 유효합니다.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 4. 가격 -->
+  <div class="section">
+    <div class="section-head">
+      <span class="section-num">4</span>
+      <span class="section-title">가격</span>
+      <span class="section-desc">원화 환산값은 기준환율 기준 자동 계산됩니다.</span>
+    </div>
+    <div class="form">
+      <div class="row-4">
+        <div class="field">
+          <label class="field-label">통화<span class="req">*</span></label>
+          <select class="fi-select" id="curSel" onchange="updateKrw()">
+            <option value="USD">USD</option>
+            <option value="JPY">JPY</option>
+            <option value="VND">VND</option>
+            <option value="KRW">KRW</option>
+          </select>
+        </div>
+        <div class="field">
+          <label class="field-label">1박 원가<span class="req">*</span></label>
+          <input class="fi-input" type="number" id="costInput" placeholder="0" value="180" oninput="updateKrw()">
+        </div>
+        <div class="field">
+          <label class="field-label">마진<span class="opt">선택</span></label>
+          <input class="fi-input" placeholder="10% 또는 20,000">
+        </div>
+        <div class="field">
+          <label class="field-label">1박 판매가<span class="opt">선택</span></label>
+          <input class="fi-input" type="number" placeholder="자동 계산">
+        </div>
+      </div>
+      <div class="price-preview">
+        <div class="price-preview-label">원화 환산 (1박 원가)</div>
+        <div class="price-preview-value"><span id="krwOut">273,600</span><span class="cur">원</span></div>
+        <div class="price-preview-meta">기준환율 USD 1 = 1,520원 적용 · 총 3박 × 5객실 = <strong id="totalKrw">4,104,000원</strong></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 5. 공급사 -->
+  <div class="section">
+    <div class="section-head">
+      <span class="section-num">5</span>
+      <span class="section-title">공급사</span>
+    </div>
+    <div class="form">
+      <div class="field">
+        <label class="field-label">숙박 공급사<span class="req">*</span></label>
+        <div class="supplier-chips">
+          <button class="supplier-chip active">부킹닷컴</button>
+          <button class="supplier-chip">익스피디아</button>
+          <button class="supplier-chip">아고다</button>
+          <button class="supplier-chip">직접 계약</button>
+        </div>
+        <div class="field-hint">공급사를 새로 등록하려면 <a href="pb-settings.html#providers" style="text-decoration:underline;">공급사 관리</a>에서 추가하세요.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 6. 추가 정보 -->
+  <div class="section">
+    <div class="section-head">
+      <span class="section-num">6</span>
+      <span class="section-title">추가 정보</span>
+      <span class="section-desc">선택 입력</span>
+    </div>
+    <div class="form">
+      <div class="field">
+        <label class="field-label">취소 정책<span class="opt">선택</span></label>
+        <select class="fi-select">
+          <option>선택</option>
+          <option>환불 불가</option>
+          <option>체크인 7일 전 무료 취소</option>
+          <option>체크인 14일 전 무료 취소</option>
+          <option>체크인 30일 전 무료 취소</option>
+        </select>
+      </div>
+      <div class="field">
+        <label class="field-label">내부 메모<span class="opt">선택</span></label>
+        <textarea class="fi-input ta" placeholder="공급사 담당자 연락처, 특이사항 등 내부 참고용"></textarea>
+      </div>
+    </div>
+  </div>
+
+  <!-- 하단 액션 -->
+  <div style="display:flex; gap:8px; justify-content:flex-end; padding: 4px 4px 0;">
+    <button class="btn btn-default">취소</button>
+    <button class="btn btn-default">임시저장</button>
+    <button class="btn btn-primary">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+      등록
+    </button>
+  </div>
+
+</div>
+
+<script>
+const rates = { USD: 1520, JPY: 10, VND: 0.06, KRW: 1 };
+function updateKrw() {
+  const cur = document.getElementById('curSel').value;
+  const cost = parseFloat(document.getElementById('costInput').value) || 0;
+  const krw = Math.round(cost * rates[cur]);
+  document.getElementById('krwOut').textContent = krw.toLocaleString('ko-KR');
+  document.getElementById('totalKrw').textContent = (krw * 3 * 5).toLocaleString('ko-KR') + '원';
+}
+// 체크박스 토글
+document.querySelectorAll('.chk').forEach(c => c.addEventListener('click', e => {
+  const cb = c.querySelector('input');
+  setTimeout(() => c.classList.toggle('checked', cb.checked), 0);
+}));
+// 공급사 칩 토글
+document.querySelectorAll('.supplier-chip').forEach(c => c.addEventListener('click', () => {
+  document.querySelectorAll('.supplier-chip').forEach(x => x.classList.remove('active'));
+  c.classList.add('active');
+}));
+</script>
+
+</body>
+</html>
