@@ -1,0 +1,1223 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>TRP 게시판 v3 — 상품 콘텐츠 통합 뷰</title>
+<link href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.6/dist/web/static/pretendard.css" rel="stylesheet">
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: 'Pretendard', 'Apple SD Gothic Neo', -apple-system, sans-serif; font-size: 14px; color: rgba(0,0,0,0.88); background: #f5f5f5; }
+
+/* ===== GNB ===== */
+.gnb { background: #fff; height: 48px; display: flex; align-items: center; padding: 0 20px; border-bottom: 1px solid #e8e8e8; position: sticky; top: 0; z-index: 100; }
+.gnb-logo { font-weight: 800; font-size: 15px; margin-right: 36px; letter-spacing: -0.3px; }
+.gnb-logo span { color: #1677ff; }
+.gnb-badge { font-size: 10px; background: #722ed1; color: #fff; padding: 1px 6px; border-radius: 10px; margin-left: 6px; font-weight: 700; letter-spacing: 0.3px; }
+.gnb-menu { display: flex; gap: 0; flex: 1; }
+.gnb-item { color: rgba(0,0,0,0.55); padding: 0 14px; height: 48px; display: flex; align-items: center; cursor: pointer; font-size: 13px; font-weight: 500; transition: color 0.15s; position: relative; }
+.gnb-item:hover { color: rgba(0,0,0,0.88); }
+.gnb-item.active { color: #1677ff; }
+.gnb-item.active::after { content: ''; position: absolute; bottom: 0; left: 0; right: 0; height: 2px; background: #1677ff; }
+.gnb-right { display: flex; align-items: center; gap: 16px; font-size: 12px; color: rgba(0,0,0,0.55); }
+
+/* ===== LAYOUT ===== */
+.shell { display: flex; min-height: calc(100vh - 48px); }
+.side { width: 230px; background: #fff; border-right: 1px solid #f0f0f0; padding: 18px 0; flex-shrink: 0; }
+.side-group { padding: 0 16px; margin-bottom: 18px; }
+.side-title { font-size: 11px; font-weight: 700; color: rgba(0,0,0,0.35); letter-spacing: 0.5px; text-transform: uppercase; margin-bottom: 8px; padding: 0 4px; }
+.side-item { display: flex; align-items: center; gap: 8px; padding: 9px 10px; border-radius: 6px; font-size: 13px; color: rgba(0,0,0,0.75); cursor: pointer; margin-bottom: 2px; transition: all 0.15s; }
+.side-item:hover { background: #f5f5f5; color: rgba(0,0,0,0.88); }
+.side-item.active { background: #e6f4ff; color: #1677ff; font-weight: 600; }
+.side-item-icon { font-size: 14px; }
+.side-item-sub { padding: 6px 10px 6px 34px; font-size: 12px; color: rgba(0,0,0,0.55); cursor: pointer; border-radius: 6px; }
+.side-item-sub:hover { background: #fafafa; color: #1677ff; }
+.side-item-sub.active { background: #e6f4ff; color: #1677ff; font-weight: 500; }
+
+.main { flex: 1; padding: 20px 24px 40px; overflow-x: hidden; }
+.breadcrumb { font-size: 12px; color: rgba(0,0,0,0.45); margin-bottom: 10px; display: flex; align-items: center; gap: 6px; }
+.breadcrumb .sep { color: rgba(0,0,0,0.25); }
+.page-header { display: flex; align-items: flex-end; justify-content: space-between; margin-bottom: 16px; }
+.page-title { font-size: 22px; font-weight: 700; color: rgba(0,0,0,0.88); letter-spacing: -0.3px; }
+.page-desc { font-size: 13px; color: rgba(0,0,0,0.45); margin-top: 4px; }
+
+/* ===== CARD ===== */
+.card { background: #fff; border-radius: 10px; box-shadow: 0 1px 3px rgba(0,0,0,0.04); border: 1px solid #f0f0f0; }
+
+/* ===== BUTTON ===== */
+.btn { height: 32px; padding: 0 14px; border-radius: 6px; font-size: 13px; font-family: inherit; cursor: pointer; border: 1px solid transparent; display: inline-flex; align-items: center; gap: 5px; transition: all 0.15s; white-space: nowrap; font-weight: 500; }
+.btn-primary { background: #1677ff; color: #fff; border-color: #1677ff; }
+.btn-primary:hover { background: #4096ff; border-color: #4096ff; }
+.btn-default { background: #fff; color: rgba(0,0,0,0.88); border-color: #d9d9d9; }
+.btn-default:hover { color: #1677ff; border-color: #1677ff; }
+.btn-ghost { background: transparent; color: rgba(0,0,0,0.65); border: 1px solid #d9d9d9; }
+.btn-ghost:hover { color: #1677ff; border-color: #1677ff; }
+.btn-text { background: transparent; color: #1677ff; border-color: transparent; padding: 0 8px; height: 28px; font-size: 12px; }
+.btn-text:hover { background: #e6f4ff; }
+.btn-sm { height: 28px; padding: 0 10px; font-size: 12px; }
+.btn-lg { height: 38px; padding: 0 20px; font-size: 14px; font-weight: 600; }
+
+/* ===== INPUT ===== */
+.fi { height: 32px; border: 1px solid #d9d9d9; border-radius: 6px; font-size: 13px; font-family: inherit; outline: none; transition: border 0.2s; background: #fff; padding: 0 10px; width: 100%; }
+.fi:focus { border-color: #1677ff; box-shadow: 0 0 0 2px rgba(22,119,255,0.1); }
+.fi::placeholder { color: rgba(0,0,0,0.3); }
+textarea.fi { min-height: 60px; padding: 8px 10px; resize: vertical; font-family: inherit; line-height: 1.6; }
+select.fi { appearance: none; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='%23bbb'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 10px center; padding-right: 28px; cursor: pointer; }
+
+/* ===== VIEWS ===== */
+.view { display: none; }
+.view.on { display: block; }
+
+/* ============================================================ */
+/* === [VIEW 1] 상품 통합 뷰 (NEW · 메인 진입) ============== */
+/* ============================================================ */
+
+/* 상품 헤더 */
+.prod-header { background: linear-gradient(135deg, #f0f7ff 0%, #faf5ff 100%); border: 1px solid #91caff; border-radius: 12px; padding: 18px 22px; margin-bottom: 16px; display: flex; gap: 18px; align-items: flex-start; }
+.prod-header-cover { width: 96px; height: 72px; border-radius: 10px; background: #d9d9d9 url('https://images.unsplash.com/photo-1507525428034-b723cf961d3e?w=400') center/cover; flex-shrink: 0; box-shadow: 0 2px 6px rgba(0,0,0,0.1); }
+.prod-header-info { flex: 1; min-width: 0; }
+.prod-header-tag { display: inline-block; font-size: 10px; font-weight: 700; padding: 2px 8px; border-radius: 4px; background: #722ed1; color: #fff; letter-spacing: 0.4px; margin-bottom: 6px; }
+.prod-header-name { font-size: 18px; font-weight: 700; color: rgba(0,0,0,0.88); margin-bottom: 4px; }
+.prod-header-code { font-size: 11px; color: rgba(0,0,0,0.45); font-family: 'SF Mono', Consolas, monospace; }
+.prod-header-meta { display: flex; gap: 12px; margin-top: 10px; flex-wrap: wrap; font-size: 12px; color: rgba(0,0,0,0.65); }
+.prod-header-meta strong { color: rgba(0,0,0,0.88); font-weight: 600; }
+.prod-header-actions { display: flex; gap: 8px; flex-direction: column; align-items: flex-end; }
+.prod-header-counts { font-size: 11px; color: rgba(0,0,0,0.55); text-align: right; margin-bottom: 4px; }
+.prod-header-counts strong { color: #1677ff; font-weight: 700; font-size: 13px; }
+
+/* 뷰 모드 토글 */
+.mode-bar { display: flex; gap: 0; background: #fff; border: 1px solid #e8e8e8; border-radius: 8px; padding: 3px; margin-bottom: 16px; width: fit-content; }
+.mode-tab { padding: 7px 16px; font-size: 12.5px; font-weight: 500; color: rgba(0,0,0,0.55); cursor: pointer; border-radius: 6px; transition: all 0.15s; display: flex; align-items: center; gap: 6px; }
+.mode-tab:hover { color: rgba(0,0,0,0.88); }
+.mode-tab.active { background: #1677ff; color: #fff; font-weight: 600; }
+
+/* 자동저장 표시 */
+.autosave { font-size: 11px; color: rgba(0,0,0,0.45); display: flex; align-items: center; gap: 4px; }
+.autosave .dot { width: 6px; height: 6px; border-radius: 50%; background: #52c41a; }
+
+/* 콘텐츠 타입 6섹션 */
+.type-stack { display: flex; flex-direction: column; gap: 12px; }
+.type-sec { background: #fff; border: 1px solid #e8e8e8; border-radius: 10px; overflow: hidden; transition: all 0.15s; }
+.type-sec:hover { border-color: #91caff; }
+.type-sec.missing { border-color: #ffd591; background: #fffbe6; }
+.type-sec-head { display: flex; align-items: center; gap: 12px; padding: 14px 18px; background: #fafafa; border-bottom: 1px solid #f0f0f0; cursor: pointer; user-select: none; }
+.type-sec.missing .type-sec-head { background: #fff7e6; }
+.type-sec-chevron { font-size: 11px; color: rgba(0,0,0,0.45); transition: transform 0.2s; }
+.type-sec.collapsed .type-sec-chevron { transform: rotate(-90deg); }
+.type-sec.collapsed .type-sec-head { border-bottom: none; }
+.type-sec-icon { width: 32px; height: 32px; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 16px; flex-shrink: 0; }
+.type-sec-icon.t-product { background: #f6ffed; color: #389e0d; border: 1px solid #b7eb8f; }
+.type-sec-icon.t-hotel { background: #e6f4ff; color: #0958d9; border: 1px solid #91caff; }
+.type-sec-icon.t-flight { background: #f9f0ff; color: #531dab; border: 1px solid #d3adf7; }
+.type-sec-icon.t-tour { background: #fff1f0; color: #cf1322; border: 1px solid #ffa39e; }
+.type-sec-icon.t-insurance { background: #e6fffb; color: #08979c; border: 1px solid #87e8de; }
+.type-sec-icon.t-place { background: #fff7e6; color: #d46b08; border: 1px solid #ffd591; }
+.type-sec-title { font-size: 14px; font-weight: 700; color: rgba(0,0,0,0.85); }
+.type-sec-sub { font-size: 11px; color: rgba(0,0,0,0.45); margin-left: 8px; }
+.type-sec-count { background: #1677ff; color: #fff; font-size: 10px; font-weight: 700; padding: 2px 7px; border-radius: 10px; }
+.type-sec-count.empty { background: #faad14; }
+.type-sec-actions { margin-left: auto; display: flex; gap: 6px; }
+.type-sec-body { padding: 14px 18px; }
+.type-sec.collapsed .type-sec-body { display: none; }
+
+/* 매칭된 콘텐츠 글 카드 */
+.post-card { border: 1px solid #f0f0f0; border-radius: 8px; padding: 12px 14px; background: #fff; transition: all 0.15s; margin-bottom: 8px; cursor: pointer; }
+.post-card:hover { border-color: #91caff; box-shadow: 0 2px 6px rgba(22,119,255,0.06); }
+.post-card.expanded { border-color: #1677ff; box-shadow: 0 2px 8px rgba(22,119,255,0.1); }
+.post-card-head { display: flex; align-items: center; gap: 10px; }
+.post-card-status { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+.post-card-status.live { background: #52c41a; }
+.post-card-status.draft { background: #faad14; }
+.post-card-status.stopped { background: #d9d9d9; }
+.post-card-title { font-size: 13.5px; font-weight: 600; color: rgba(0,0,0,0.88); flex: 1; }
+.post-card-meta { font-size: 11px; color: rgba(0,0,0,0.45); display: flex; gap: 10px; align-items: center; }
+.post-card-rule { display: inline-flex; align-items: center; gap: 4px; padding: 2px 7px; background: #f5f5f5; border-radius: 10px; font-size: 10.5px; color: rgba(0,0,0,0.65); }
+.post-card-rule strong { color: #1677ff; font-weight: 700; }
+.post-card-actions { display: flex; gap: 4px; opacity: 0; transition: opacity 0.15s; }
+.post-card:hover .post-card-actions { opacity: 1; }
+.post-card-expand-body { margin-top: 12px; padding-top: 12px; border-top: 1px dashed #f0f0f0; display: none; }
+.post-card.expanded .post-card-expand-body { display: block; }
+.post-card.expandable { position: relative; }
+.post-card.expandable::after { content: '▾ 클릭하여 인라인 편집'; position: absolute; right: 12px; top: 12px; font-size: 10px; color: rgba(0,0,0,0.3); opacity: 0; transition: opacity 0.15s; pointer-events: none; }
+.post-card.expandable:hover::after { opacity: 1; }
+.post-card.expanded::after { content: '▴ 접기'; opacity: 1; color: #1677ff; }
+
+/* Draft 영역 (통합 뷰 분리) */
+.draft-zone { background: #fff7e6; border: 1px dashed #ffd591; border-radius: 8px; padding: 10px 14px; margin-top: 10px; }
+.draft-zone-h { font-size: 11px; font-weight: 700; color: #ad6800; margin-bottom: 6px; display: flex; align-items: center; gap: 6px; }
+.draft-zone .post-card { background: rgba(255,255,255,0.6); border-style: dashed; opacity: 0.85; }
+
+/* 룰 값 칩 (자유텍스트 X → ID lookup 위젯) */
+.rule-chip { display: inline-flex; align-items: center; gap: 6px; padding: 4px 10px; background: #fff; border: 1px solid #91caff; border-radius: 14px; font-size: 12px; color: #0958d9; height: 28px; flex: 1; min-width: 0; }
+.rule-chip-id { font-family: 'SF Mono', monospace; font-size: 11px; background: #e6f4ff; padding: 1px 5px; border-radius: 3px; color: #0958d9; font-weight: 700; }
+.rule-chip-name { color: rgba(0,0,0,0.7); flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.rule-chip-edit { font-size: 10px; color: #1677ff; cursor: pointer; padding: 0 2px; }
+
+/* 본문 모드 토글 */
+.body-mode-tabs { display: flex; gap: 0; border: 1px solid #d9d9d9; border-radius: 6px; padding: 2px; background: #fafafa; margin-bottom: 8px; width: fit-content; }
+.body-mode-tab { padding: 5px 12px; font-size: 11px; font-weight: 500; color: rgba(0,0,0,0.55); cursor: pointer; border-radius: 4px; transition: all 0.15s; }
+.body-mode-tab.active { background: #1677ff; color: #fff; font-weight: 600; }
+
+/* 스냅샷 안내 칩 */
+.snapshot-chip { display: inline-flex; align-items: center; gap: 6px; padding: 6px 12px; background: #f6ffed; border: 1px solid #b7eb8f; border-radius: 6px; font-size: 11.5px; color: #389e0d; }
+.snapshot-chip strong { font-weight: 700; }
+
+/* 버전 이력 모달 */
+.modal-mask { position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 1000; display: none; align-items: center; justify-content: center; }
+.modal-mask.on { display: flex; }
+.modal { background: #fff; border-radius: 12px; width: 720px; max-width: 92%; max-height: 88vh; overflow: hidden; display: flex; flex-direction: column; box-shadow: 0 12px 40px rgba(0,0,0,0.2); }
+.modal-head { padding: 16px 20px; border-bottom: 1px solid #f0f0f0; display: flex; align-items: center; justify-content: space-between; }
+.modal-title { font-size: 16px; font-weight: 700; }
+.modal-close { background: transparent; border: none; cursor: pointer; font-size: 18px; color: rgba(0,0,0,0.45); }
+.modal-body { padding: 18px 20px; overflow-y: auto; }
+.modal-foot { padding: 12px 20px; border-top: 1px solid #f0f0f0; display: flex; justify-content: flex-end; gap: 8px; }
+.ver-row { display: flex; gap: 12px; padding: 10px 0; border-bottom: 1px solid #f5f5f5; }
+.ver-row:last-child { border-bottom: none; }
+.ver-dot { width: 8px; height: 8px; border-radius: 50%; background: #1677ff; margin-top: 6px; flex-shrink: 0; }
+.ver-info { flex: 1; }
+.ver-info-h { font-size: 13px; font-weight: 600; margin-bottom: 2px; }
+.ver-info-m { font-size: 11px; color: rgba(0,0,0,0.45); }
+.ver-diff { background: #fafafa; border-radius: 6px; padding: 8px 12px; margin-top: 6px; font-family: monospace; font-size: 11px; line-height: 1.6; }
+.ver-diff .add { background: #d9f7be; color: #135200; padding: 0 4px; }
+.ver-diff .del { background: #ffccc7; color: #820014; padding: 0 4px; text-decoration: line-through; }
+
+/* 충돌/편집중 배지 */
+.editing-badge { display: inline-flex; align-items: center; gap: 4px; padding: 2px 8px; background: #fff0f6; border: 1px solid #ffadd2; border-radius: 10px; font-size: 10.5px; color: #c41d7f; font-weight: 600; }
+.editing-badge .dot { width: 5px; height: 5px; border-radius: 50%; background: #c41d7f; animation: pulse 1.5s ease-in-out infinite; }
+@keyframes pulse { 0%,100% { opacity: 1; } 50% { opacity: 0.3; } }
+
+/* 인라인 편집 폼 */
+.inline-edit { background: #fafafa; border-radius: 8px; padding: 14px; }
+.inline-edit-row { margin-bottom: 10px; }
+.inline-edit-label { font-size: 11px; font-weight: 600; color: rgba(0,0,0,0.55); margin-bottom: 4px; display: block; }
+.inline-edit-foot { display: flex; gap: 8px; justify-content: flex-end; margin-top: 8px; }
+
+/* 비어있는 섹션 */
+.empty-state { padding: 20px; text-align: center; color: rgba(0,0,0,0.45); }
+.empty-state .icon { font-size: 24px; margin-bottom: 6px; }
+.empty-state .msg { font-size: 12.5px; margin-bottom: 10px; }
+.empty-state.warn .icon { color: #faad14; }
+.empty-state.warn .msg { color: #ad6800; }
+
+/* 통합 미리보기 (오른쪽 패널) */
+.split2 { display: grid; grid-template-columns: 1fr 480px; gap: 16px; }
+@media (max-width: 1400px) { .split2 { grid-template-columns: 1fr; } .split2-preview { display: none; } }
+.split2-preview { position: sticky; top: 64px; align-self: flex-start; background: #fff; border: 1px solid #e8e8e8; border-radius: 12px; overflow: hidden; max-height: calc(100vh - 80px); display: flex; flex-direction: column; }
+.split2-preview-head { padding: 12px 16px; background: linear-gradient(135deg, #f9f0ff 0%, #fff0f6 100%); border-bottom: 1px solid #e8e8e8; display: flex; align-items: center; justify-content: space-between; }
+.split2-preview-title { font-size: 12px; font-weight: 700; color: #531dab; display: flex; align-items: center; gap: 6px; }
+.split2-preview-sub { font-size: 10px; color: rgba(0,0,0,0.45); }
+.split2-preview-body { flex: 1; overflow-y: auto; padding: 0; background: #fafafa; }
+
+/* 모바일 프리뷰 (스마트폰 프레임) */
+.mobile-frame { background: #fff; margin: 14px; border-radius: 12px; padding: 14px; box-shadow: 0 2px 12px rgba(0,0,0,0.06); }
+.mobile-frame-title { font-size: 16px; font-weight: 700; color: rgba(0,0,0,0.88); margin-bottom: 4px; }
+.mobile-frame-sub { font-size: 11px; color: rgba(0,0,0,0.5); margin-bottom: 12px; }
+.mobile-sec { margin-top: 16px; padding-top: 14px; border-top: 1px solid #f5f5f5; }
+.mobile-sec:first-of-type { border-top: none; padding-top: 0; }
+.mobile-sec-h { font-size: 13px; font-weight: 700; margin-bottom: 8px; display: flex; align-items: center; gap: 6px; position: relative; }
+.mobile-sec-h .edit-hint { font-size: 10px; color: #1677ff; opacity: 0; transition: opacity 0.15s; cursor: pointer; }
+.mobile-sec:hover .mobile-sec-h .edit-hint { opacity: 1; }
+.mobile-item { font-size: 12px; color: rgba(0,0,0,0.7); line-height: 1.55; padding: 4px 0; display: flex; gap: 6px; align-items: flex-start; }
+.mobile-item .b { color: #1677ff; flex-shrink: 0; }
+.mobile-item-warn .b { color: #faad14; }
+
+/* ============================================================ */
+/* === [VIEW 2] 콘텐츠 글 등록 (편집 화면) ================== */
+/* ============================================================ */
+
+.editor-wrap { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; min-height: 600px; }
+@media (max-width: 1200px) { .editor-wrap { grid-template-columns: 1fr; } }
+.editor-pane { background: #fff; border-radius: 10px; border: 1px solid #f0f0f0; display: flex; flex-direction: column; }
+.editor-pane-head { padding: 12px 16px; border-bottom: 1px solid #f0f0f0; display: flex; align-items: center; justify-content: space-between; }
+.editor-pane-title { font-size: 13px; font-weight: 700; color: rgba(0,0,0,0.75); display: flex; align-items: center; gap: 6px; }
+.editor-pane-body { padding: 18px; flex: 1; overflow-y: auto; }
+
+.form-row { margin-bottom: 16px; }
+.form-label { font-size: 12px; font-weight: 600; color: rgba(0,0,0,0.75); margin-bottom: 6px; display: flex; align-items: center; gap: 4px; }
+.form-label .req { color: #f5222d; }
+.form-help { font-size: 11px; color: rgba(0,0,0,0.45); margin-top: 4px; }
+
+/* 콘텐츠 타입 선택 */
+.type-picker { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+.type-pick { border: 1.5px solid #f0f0f0; border-radius: 10px; padding: 12px 10px; cursor: pointer; transition: all 0.15s; text-align: center; background: #fff; }
+.type-pick:hover { border-color: #91caff; }
+.type-pick.on { border-color: #1677ff; background: #f0f7ff; box-shadow: 0 0 0 1px #1677ff inset; }
+.type-pick-icon { font-size: 22px; margin-bottom: 4px; }
+.type-pick-name { font-size: 12px; font-weight: 600; color: rgba(0,0,0,0.85); }
+.type-pick-desc { font-size: 10px; color: rgba(0,0,0,0.45); margin-top: 2px; }
+
+/* 룰 빌더 (AND 조건) */
+.rule-builder { border: 1px dashed #d9d9d9; border-radius: 8px; padding: 12px; background: #fafafa; }
+.rule-row { display: flex; gap: 6px; align-items: center; margin-bottom: 6px; }
+.rule-row select, .rule-row input { height: 30px; font-size: 12px; }
+.rule-and { font-size: 10px; font-weight: 700; color: #1677ff; padding: 2px 8px; background: #e6f4ff; border-radius: 4px; }
+.rule-del { background: transparent; border: none; color: rgba(0,0,0,0.3); cursor: pointer; padding: 4px 8px; font-size: 12px; }
+.rule-del:hover { color: #f5222d; }
+.rule-add { font-size: 11px; color: #1677ff; cursor: pointer; padding: 4px 0; display: inline-flex; align-items: center; gap: 4px; }
+
+/* 본문 아이템 (체크리스트) */
+.bi-list { display: flex; flex-direction: column; gap: 6px; }
+.bi-item { display: flex; align-items: flex-start; gap: 8px; padding: 8px 10px; background: #fff; border: 1px solid #f0f0f0; border-radius: 6px; }
+.bi-item-bullet { color: #52c41a; font-weight: 700; padding-top: 2px; flex-shrink: 0; }
+.bi-item-bullet.warn { color: #faad14; }
+.bi-item-bullet.info { color: #1677ff; }
+.bi-item-main { flex: 1; display: flex; flex-direction: column; gap: 4px; }
+.bi-item-title { border: none; outline: none; font-size: 13px; font-weight: 600; padding: 2px 0; font-family: inherit; background: transparent; }
+.bi-item-desc { border: none; outline: none; font-size: 11.5px; color: rgba(0,0,0,0.6); padding: 2px 0; font-family: inherit; resize: vertical; min-height: 32px; background: transparent; }
+.bi-item-del { background: transparent; border: none; color: rgba(0,0,0,0.25); cursor: pointer; font-size: 11px; padding: 4px; }
+.bi-item-del:hover { color: #f5222d; }
+.bi-add-btn { font-size: 12px; color: #1677ff; cursor: pointer; padding: 8px 10px; border: 1px dashed #91caff; border-radius: 6px; text-align: center; transition: all 0.15s; background: #fff; }
+.bi-add-btn:hover { background: #e6f4ff; }
+
+/* 매칭 상품 예측 */
+.match-preview { background: #f6ffed; border: 1px solid #b7eb8f; border-radius: 8px; padding: 10px 14px; font-size: 12px; color: #389e0d; display: flex; align-items: center; gap: 8px; }
+.match-preview strong { font-weight: 700; }
+.match-preview .icon { font-size: 14px; }
+
+/* ============================================================ */
+/* === [VIEW 3] 콘텐츠 글 목록 =============================== */
+/* ============================================================ */
+
+.list-toolbar { display: flex; gap: 8px; padding: 12px 16px; background: #fff; border-radius: 10px 10px 0 0; border: 1px solid #f0f0f0; border-bottom: none; align-items: center; }
+.list-toolbar .fi { width: 220px; }
+.tbl { width: 100%; background: #fff; border: 1px solid #f0f0f0; border-radius: 0 0 10px 10px; border-collapse: collapse; font-size: 12.5px; }
+.tbl th, .tbl td { padding: 10px 12px; text-align: left; border-bottom: 1px solid #f0f0f0; }
+.tbl th { font-size: 11px; font-weight: 700; color: rgba(0,0,0,0.55); background: #fafafa; }
+.tbl tr:hover td { background: #fafafa; cursor: pointer; }
+.type-pill { display: inline-flex; align-items: center; gap: 4px; padding: 2px 8px; border-radius: 10px; font-size: 11px; font-weight: 600; }
+.type-pill.t-product { background: #f6ffed; color: #389e0d; }
+.type-pill.t-hotel { background: #e6f4ff; color: #0958d9; }
+.type-pill.t-flight { background: #f9f0ff; color: #531dab; }
+.type-pill.t-tour { background: #fff1f0; color: #cf1322; }
+.type-pill.t-insurance { background: #e6fffb; color: #08979c; }
+.type-pill.t-place { background: #fff7e6; color: #d46b08; }
+.status-pill { display: inline-flex; align-items: center; gap: 4px; padding: 2px 8px; border-radius: 10px; font-size: 11px; font-weight: 600; }
+.status-pill.live { background: #f6ffed; color: #52c41a; }
+.status-pill.draft { background: #fff7e6; color: #faad14; }
+.status-pill.stopped { background: #f5f5f5; color: rgba(0,0,0,0.45); }
+
+/* 푸터 액션바 */
+.action-bar { display: flex; gap: 8px; justify-content: flex-end; padding: 14px 0; }
+
+/* 보조 */
+.spacer { height: 14px; }
+.divider-h { height: 1px; background: #f0f0f0; margin: 16px 0; }
+.kbd { display: inline-block; padding: 1px 5px; font-family: monospace; font-size: 10px; background: #fff; border: 1px solid #d9d9d9; border-radius: 3px; color: rgba(0,0,0,0.65); }
+</style>
+</head>
+<body>
+
+<!-- ============================================================ -->
+<!-- GNB -->
+<!-- ============================================================ -->
+<div class="gnb">
+  <div class="gnb-logo">Trip<span>Store</span> Admin <span class="gnb-badge">v3</span></div>
+  <div class="gnb-menu">
+    <div class="gnb-item">📊 대시보드</div>
+    <div class="gnb-item">📦 상품</div>
+    <div class="gnb-item active">📝 TRP 게시판</div>
+    <div class="gnb-item">🛒 예약</div>
+    <div class="gnb-item">⚙️ 설정</div>
+  </div>
+  <div class="gnb-right">
+    <span>📂 Catalog</span>
+    <span>김서현 PM</span>
+  </div>
+</div>
+
+<div class="shell">
+
+  <!-- ============================================================ -->
+  <!-- SIDEBAR -->
+  <!-- ============================================================ -->
+  <div class="side">
+    <div class="side-group">
+      <div class="side-title">TRP 게시판 v3</div>
+      <div class="side-item active" onclick="showView('product')"><span class="side-item-icon">📦</span> 상품 통합 뷰</div>
+      <div class="side-item-sub active">PB-2025-푸꾸옥-7박</div>
+      <div class="side-item-sub">PB-2025-다낭-5박</div>
+      <div class="side-item-sub">PB-2025-나트랑-6박</div>
+      <div class="side-item-sub" style="color:#1677ff;">+ 상품 검색</div>
+    </div>
+    <div class="side-group">
+      <div class="side-title">콘텐츠 글 관리</div>
+      <div class="side-item" onclick="showView('list')"><span class="side-item-icon">📝</span> 전체 글 목록</div>
+      <div class="side-item" onclick="showView('editor')"><span class="side-item-icon">✏️</span> 새 글 작성</div>
+    </div>
+    <div class="side-group">
+      <div class="side-title">타입별 필터</div>
+      <div class="side-item-sub" onclick="showView('list')">📦 상품 (12)</div>
+      <div class="side-item-sub" onclick="showView('list')">🏨 숙박권 (48)</div>
+      <div class="side-item-sub" onclick="showView('list')">✈️ 항공권 (15)</div>
+      <div class="side-item-sub" onclick="showView('list')">🎫 투어/티켓 (24)</div>
+      <div class="side-item-sub" onclick="showView('list')">🛡 보험 (3)</div>
+      <div class="side-item-sub" onclick="showView('list')">📍 여행지 유의사항 (22)</div>
+    </div>
+  </div>
+
+  <!-- ============================================================ -->
+  <!-- MAIN -->
+  <!-- ============================================================ -->
+  <div class="main">
+
+    <!-- ============================================================ -->
+    <!-- [VIEW 1] 상품 통합 뷰 -->
+    <!-- ============================================================ -->
+    <div id="view-product" class="view on">
+
+      <div class="breadcrumb">
+        <span>TRP 게시판</span>
+        <span class="sep">›</span>
+        <span>상품 통합 뷰</span>
+        <span class="sep">›</span>
+        <span style="color:rgba(0,0,0,0.88);font-weight:600;">PB-2025-푸꾸옥-7박</span>
+      </div>
+
+      <!-- 상품 헤더 -->
+      <div class="prod-header">
+        <div class="prod-header-cover"></div>
+        <div class="prod-header-info">
+          <span class="prod-header-tag">PB 패키지 · 운영중</span>
+          <div class="prod-header-name">[허니문 추천] 푸꾸옥 솔바이멜리아 7박 9일 · 올인클루시브</div>
+          <div class="prod-header-code">PB-2025-PQC-SOL-7N · 상품코드 #PRD-50231</div>
+          <div class="prod-header-meta">
+            <span>🛫 <strong>대한항공 KE</strong> · 인천→푸꾸옥 직항</span>
+            <span>🏨 <strong>솔바이멜리아</strong> · 디럭스 씨뷰 · AI</span>
+            <span>🎫 <strong>투어 2건</strong> · 선셋크루즈 + 사파리</span>
+            <span>🛡 <strong>보험</strong> · KB여행보험 골드</span>
+          </div>
+        </div>
+        <div class="prod-header-actions">
+          <div class="prod-header-counts">
+            매칭 콘텐츠 <strong>11건</strong> (운영중) · Draft <strong style="color:#faad14;">1건</strong> · 미작성 <strong style="color:#f5222d;">1건</strong>
+          </div>
+          <div class="snapshot-chip" style="margin-bottom:6px;">
+            🔒 <strong>예약 스냅샷 정책</strong>: 콘텐츠 수정은 <strong>새 예약부터 적용</strong>, 기존 예약은 영향 없음
+          </div>
+          <div style="display:flex;gap:6px;">
+            <button class="btn btn-default btn-sm">🔄 룰 재계산</button>
+            <button class="btn btn-primary btn-sm">👁 고객 노출 미리보기</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- 뷰 모드 토글 + 자동저장 -->
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;">
+        <div class="mode-bar">
+          <div class="mode-tab active">📦 상품 기준 (조립)</div>
+          <div class="mode-tab" onclick="showView('list')">📝 콘텐츠 글 기준</div>
+        </div>
+        <div class="autosave"><span class="dot"></span> 자동저장됨 · 방금 전</div>
+      </div>
+
+      <!-- 메인 영역: 좌(섹션 스택) + 우(모바일 프리뷰) -->
+      <div class="split2">
+
+        <!-- 좌: 6타입 콘텐츠 섹션 -->
+        <div>
+          <div class="type-stack">
+
+            <!-- 섹션 1. 상품 -->
+            <div class="type-sec">
+              <div class="type-sec-head" onclick="toggleSec(this)">
+                <span class="type-sec-chevron">▼</span>
+                <div class="type-sec-icon t-product">📦</div>
+                <span class="type-sec-title">상품</span>
+                <span class="type-sec-sub">상품코드 단위 콘텐츠 · 1건 매칭</span>
+                <span class="type-sec-count">1</span>
+                <div class="type-sec-actions">
+                  <button class="btn btn-ghost btn-sm">+ 새 글</button>
+                </div>
+              </div>
+              <div class="type-sec-body">
+                <div class="post-card expandable" onclick="toggleCard(this)">
+                  <div class="post-card-head">
+                    <span class="post-card-status live"></span>
+                    <div style="flex:1;">
+                      <div class="post-card-title">[푸꾸옥 7박] 트립스토어 단독 혜택 안내</div>
+                      <div class="post-card-meta" style="margin-top:4px;">
+                        <span class="post-card-rule">상품코드 = <strong>PRD-50231</strong></span>
+                        <span>v3 · 운영중</span>
+                        <span>2026-05-08 수정</span>
+                      </div>
+                    </div>
+                    <div class="post-card-actions">
+                      <button class="btn btn-text">수정</button>
+                      <button class="btn btn-text">이력</button>
+                    </div>
+                  </div>
+                  <div class="post-card-expand-body">
+                    <div class="inline-edit">
+                      <div class="inline-edit-row">
+                        <span class="inline-edit-label">제목</span>
+                        <input type="text" class="fi" value="[푸꾸옥 7박] 트립스토어 단독 혜택 안내">
+                      </div>
+                      <div class="inline-edit-row">
+                        <span class="inline-edit-label">본문 아이템</span>
+                        <div class="bi-list">
+                          <div class="bi-item">
+                            <span class="bi-item-bullet">✓</span>
+                            <div class="bi-item-main">
+                              <input class="bi-item-title" value="공항-호텔 왕복 픽업 (한국어 가이드 동승)">
+                            </div>
+                            <button class="bi-item-del">✕</button>
+                          </div>
+                          <div class="bi-item">
+                            <span class="bi-item-bullet">✓</span>
+                            <div class="bi-item-main">
+                              <input class="bi-item-title" value="허니문 한정 객실 업그레이드 (선착순)">
+                            </div>
+                            <button class="bi-item-del">✕</button>
+                          </div>
+                        </div>
+                        <div class="bi-add-btn" style="margin-top:6px;">+ 항목 추가</div>
+                      </div>
+                      <div class="inline-edit-foot">
+                        <button class="btn btn-default btn-sm">취소</button>
+                        <button class="btn btn-primary btn-sm">저장</button>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- 섹션 2. 숙박권 -->
+            <div class="type-sec">
+              <div class="type-sec-head" onclick="toggleSec(this)">
+                <span class="type-sec-chevron">▼</span>
+                <div class="type-sec-icon t-hotel">🏨</div>
+                <span class="type-sec-title">숙박권</span>
+                <span class="type-sec-sub">숙박권 ID + 객실 + 식사 옵션 · 4건 매칭</span>
+                <span class="type-sec-count">4</span>
+                <div class="type-sec-actions">
+                  <button class="btn btn-ghost btn-sm">+ 새 글</button>
+                </div>
+              </div>
+              <div class="type-sec-body">
+                <div class="post-card expandable" onclick="toggleCard(this)">
+                  <div class="post-card-head">
+                    <span class="post-card-status live"></span>
+                    <div style="flex:1;">
+                      <div class="post-card-title">솔바이멜리아 푸꾸옥 · 숙소 소개</div>
+                      <div class="post-card-meta" style="margin-top:4px;">
+                        <span class="post-card-rule">숙박권 = <strong>#103</strong></span>
+                        <span>전체 객실/식사 적용</span>
+                      </div>
+                    </div>
+                    <div class="post-card-actions"><button class="btn btn-text">수정</button></div>
+                  </div>
+                </div>
+                <div class="post-card expandable" onclick="toggleCard(this)">
+                  <div class="post-card-head">
+                    <span class="post-card-status live"></span>
+                    <div style="flex:1;">
+                      <div class="post-card-title">디럭스 씨뷰 객실 안내 + 유의사항</div>
+                      <div class="post-card-meta" style="margin-top:4px;">
+                        <span class="post-card-rule">숙박권 = <strong>#103</strong> AND 객실 = <strong>디럭스씨뷰</strong></span>
+                      </div>
+                    </div>
+                    <div class="post-card-actions"><button class="btn btn-text">수정</button></div>
+                  </div>
+                </div>
+                <div class="post-card expandable" onclick="toggleCard(this)">
+                  <div class="post-card-head">
+                    <span class="post-card-status live"></span>
+                    <div style="flex:1;">
+                      <div class="post-card-title">올인클루시브(AI) 식사 포함사항</div>
+                      <div class="post-card-meta" style="margin-top:4px;">
+                        <span class="post-card-rule">숙박권 = <strong>#103</strong> AND 식사 = <strong>AI</strong></span>
+                      </div>
+                    </div>
+                    <div class="post-card-actions"><button class="btn btn-text">수정</button></div>
+                  </div>
+                </div>
+                <!-- Draft 분리 영역 (정책: Draft는 상품에 연결 안 됨 → 회색 + 별도 컨테이너) -->
+                <div class="draft-zone">
+                  <div class="draft-zone-h">
+                    ⚠ 미게시 Draft (이 영역의 글은 <strong>고객 노출 안 됨</strong>) · 1건
+                  </div>
+                  <div class="post-card">
+                    <div class="post-card-head">
+                      <span class="post-card-status draft"></span>
+                      <div style="flex:1;">
+                        <div class="post-card-title">얼리체크인 옵션 안내</div>
+                        <div class="post-card-meta" style="margin-top:4px;">
+                          <span class="post-card-rule">숙박권 = <strong>#103</strong> AND 옵션 = <strong>얼리체크인</strong></span>
+                          <span style="color:#faad14;font-weight:600;">Draft</span>
+                        </div>
+                      </div>
+                      <div class="post-card-actions">
+                        <button class="btn btn-text">수정</button>
+                        <button class="btn btn-primary btn-sm">게시하기</button>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- 섹션 3. 항공권 -->
+            <div class="type-sec">
+              <div class="type-sec-head" onclick="toggleSec(this)">
+                <span class="type-sec-chevron">▼</span>
+                <div class="type-sec-icon t-flight">✈️</div>
+                <span class="type-sec-title">항공권</span>
+                <span class="type-sec-sub">항공사 / 노선 단위 · 2건 매칭</span>
+                <span class="type-sec-count">2</span>
+                <div class="type-sec-actions">
+                  <button class="btn btn-ghost btn-sm">+ 새 글</button>
+                </div>
+              </div>
+              <div class="type-sec-body">
+                <div class="post-card expandable" onclick="toggleCard(this)">
+                  <div class="post-card-head">
+                    <span class="post-card-status live"></span>
+                    <div style="flex:1;">
+                      <div class="post-card-title">대한항공 KE 수하물 규정</div>
+                      <div class="post-card-meta" style="margin-top:4px;">
+                        <span class="post-card-rule">항공사 = <strong>KE</strong></span>
+                      </div>
+                    </div>
+                    <div class="post-card-actions"><button class="btn btn-text">수정</button></div>
+                  </div>
+                </div>
+                <div class="post-card expandable" onclick="toggleCard(this)">
+                  <div class="post-card-head">
+                    <span class="post-card-status live"></span>
+                    <div style="flex:1;">
+                      <div class="post-card-title">인천→푸꾸옥 직항 안내</div>
+                      <div class="post-card-meta" style="margin-top:4px;">
+                        <span class="post-card-rule">항공사 = <strong>KE</strong> AND 노선 = <strong>ICN-PQC</strong></span>
+                      </div>
+                    </div>
+                    <div class="post-card-actions"><button class="btn btn-text">수정</button></div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- 섹션 4. 투어/티켓 -->
+            <div class="type-sec">
+              <div class="type-sec-head" onclick="toggleSec(this)">
+                <span class="type-sec-chevron">▼</span>
+                <div class="type-sec-icon t-tour">🎫</div>
+                <span class="type-sec-title">투어/티켓</span>
+                <span class="type-sec-sub">투어·티켓 ID 단위 · 3건 매칭</span>
+                <span class="type-sec-count">3</span>
+                <div class="type-sec-actions">
+                  <button class="btn btn-ghost btn-sm">+ 새 글</button>
+                </div>
+              </div>
+              <div class="type-sec-body">
+                <div class="post-card expandable" onclick="toggleCard(this)">
+                  <div class="post-card-head">
+                    <span class="post-card-status live"></span>
+                    <div style="flex:1;">
+                      <div class="post-card-title">선셋 크루즈 투어 상세</div>
+                      <div class="post-card-meta" style="margin-top:4px;">
+                        <span class="post-card-rule">투어 = <strong>#T-PQC-001</strong></span>
+                      </div>
+                    </div>
+                    <div class="post-card-actions"><button class="btn btn-text">수정</button></div>
+                  </div>
+                </div>
+                <div class="post-card expandable" onclick="toggleCard(this)">
+                  <div class="post-card-head">
+                    <span class="post-card-status live"></span>
+                    <div style="flex:1;">
+                      <div class="post-card-title">사파리 + 케이블카 패키지</div>
+                      <div class="post-card-meta" style="margin-top:4px;">
+                        <span class="post-card-rule">투어 = <strong>#T-PQC-007</strong></span>
+                      </div>
+                    </div>
+                    <div class="post-card-actions"><button class="btn btn-text">수정</button></div>
+                  </div>
+                </div>
+                <div class="post-card expandable" onclick="toggleCard(this)">
+                  <div class="post-card-head">
+                    <span class="post-card-status live"></span>
+                    <div style="flex:1;">
+                      <div class="post-card-title">투어 공통 유의사항 (날씨/취소)</div>
+                      <div class="post-card-meta" style="margin-top:4px;">
+                        <span class="post-card-rule">여행지 = <strong>푸꾸옥</strong> AND 콘텐츠타입 = <strong>투어</strong></span>
+                      </div>
+                    </div>
+                    <div class="post-card-actions"><button class="btn btn-text">수정</button></div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- 섹션 5. 보험 (누락 상태) -->
+            <div class="type-sec missing">
+              <div class="type-sec-head" onclick="toggleSec(this)">
+                <span class="type-sec-chevron">▼</span>
+                <div class="type-sec-icon t-insurance">🛡</div>
+                <span class="type-sec-title">보험</span>
+                <span class="type-sec-sub">여행지 / 상품타입 단위 · ⚠ 매칭 없음</span>
+                <span class="type-sec-count empty">0</span>
+                <div class="type-sec-actions">
+                  <button class="btn btn-primary btn-sm">+ 보험 콘텐츠 작성</button>
+                </div>
+              </div>
+              <div class="type-sec-body">
+                <div class="empty-state warn">
+                  <div class="icon">⚠️</div>
+                  <div class="msg">이 상품에 매칭된 <strong>보험 콘텐츠가 없습니다</strong>.<br>고객 노출 페이지에서 보험 섹션이 비어 보일 수 있어요.</div>
+                  <button class="btn btn-primary btn-sm">+ 새 보험 글 작성하기</button>
+                </div>
+              </div>
+            </div>
+
+            <!-- 섹션 6. 여행지 유의사항 -->
+            <div class="type-sec">
+              <div class="type-sec-head" onclick="toggleSec(this)">
+                <span class="type-sec-chevron">▼</span>
+                <div class="type-sec-icon t-place">📍</div>
+                <span class="type-sec-title">여행지 유의사항</span>
+                <span class="type-sec-sub">여행지 / 국가 단위 · 2건 매칭</span>
+                <span class="type-sec-count">2</span>
+                <div class="type-sec-actions">
+                  <button class="btn btn-ghost btn-sm">+ 새 글</button>
+                </div>
+              </div>
+              <div class="type-sec-body">
+                <div class="post-card expandable" onclick="toggleCard(this)">
+                  <div class="post-card-head">
+                    <span class="post-card-status live"></span>
+                    <div style="flex:1;">
+                      <div class="post-card-title">베트남 입국 시 유의사항 (비자/통화)</div>
+                      <div class="post-card-meta" style="margin-top:4px;">
+                        <span class="post-card-rule">국가 = <strong>베트남</strong></span>
+                      </div>
+                    </div>
+                    <div class="post-card-actions"><button class="btn btn-text">수정</button></div>
+                  </div>
+                </div>
+                <div class="post-card expandable" onclick="toggleCard(this)">
+                  <div class="post-card-head">
+                    <span class="post-card-status live"></span>
+                    <div style="flex:1;">
+                      <div class="post-card-title">푸꾸옥 우기/날씨 안내</div>
+                      <div class="post-card-meta" style="margin-top:4px;">
+                        <span class="post-card-rule">여행지 = <strong>푸꾸옥</strong></span>
+                      </div>
+                    </div>
+                    <div class="post-card-actions"><button class="btn btn-text">수정</button></div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+          </div>
+        </div>
+
+        <!-- 우: 통합 미리보기 (모바일 프레임) -->
+        <div class="split2-preview">
+          <div class="split2-preview-head">
+            <div class="split2-preview-title">📱 고객 노출 미리보기</div>
+            <div class="split2-preview-sub">실시간 조립</div>
+          </div>
+          <div class="split2-preview-body">
+            <div class="mobile-frame">
+              <div class="mobile-frame-title">푸꾸옥 솔바이멜리아 7박 9일</div>
+              <div class="mobile-frame-sub">허니문 추천 · 올인클루시브</div>
+
+              <div class="mobile-sec">
+                <div class="mobile-sec-h" onclick="jumpToSection(0)" style="cursor:pointer;">📦 트립스토어 단독 혜택 <span class="edit-hint">✏️ 좌측 점프</span></div>
+                <div class="mobile-item"><span class="b">✓</span> 공항-호텔 왕복 픽업 (한국어 가이드)</div>
+                <div class="mobile-item"><span class="b">✓</span> 허니문 한정 객실 업그레이드</div>
+              </div>
+
+              <div class="mobile-sec">
+                <div class="mobile-sec-h" onclick="jumpToSection(1)" style="cursor:pointer;">🏨 솔바이멜리아 푸꾸옥 <span class="edit-hint">✏️ 좌측 점프</span></div>
+                <div class="mobile-item"><span class="b">·</span> 디럭스 씨뷰 · 오션 전망 객실</div>
+                <div class="mobile-item"><span class="b">·</span> 올인클루시브: 전 식음료 무제한</div>
+              </div>
+
+              <div class="mobile-sec">
+                <div class="mobile-sec-h" onclick="jumpToSection(2)" style="cursor:pointer;">✈️ 대한항공 KE <span class="edit-hint">✏️ 좌측 점프</span></div>
+                <div class="mobile-item"><span class="b">·</span> 인천→푸꾸옥 직항 5시간</div>
+                <div class="mobile-item"><span class="b">·</span> 위탁수하물 23kg 1개</div>
+              </div>
+
+              <div class="mobile-sec">
+                <div class="mobile-sec-h" onclick="jumpToSection(3)" style="cursor:pointer;">🎫 투어/티켓 <span class="edit-hint">✏️ 좌측 점프</span></div>
+                <div class="mobile-item"><span class="b">·</span> 선셋 크루즈 (2시간)</div>
+                <div class="mobile-item"><span class="b">·</span> 사파리 + 케이블카</div>
+              </div>
+
+              <div class="mobile-sec" style="background:#fffbe6;margin:14px -14px -14px;padding:14px;border-radius:0 0 12px 12px;">
+                <div class="mobile-sec-h" onclick="jumpToSection(4)" style="cursor:pointer;color:#ad6800;">🛡 보험 안내 <span style="font-size:10px;color:#faad14;">미작성 ✏️</span></div>
+                <div class="mobile-item mobile-item-warn"><span class="b">⚠</span> 콘텐츠 미연결 — 고객 페이지 빈 섹션</div>
+              </div>
+
+              <div class="mobile-sec">
+                <div class="mobile-sec-h" onclick="jumpToSection(5)" style="cursor:pointer;">📍 푸꾸옥 여행 유의 <span class="edit-hint">✏️ 좌측 점프</span></div>
+                <div class="mobile-item"><span class="b">·</span> 베트남 비자 사전 확인</div>
+                <div class="mobile-item"><span class="b">·</span> 5~10월 우기 강수 잦음</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+      <div class="action-bar">
+        <button class="btn btn-default">설계 노트 (PRD)</button>
+        <button class="btn btn-primary btn-lg">전체 변경사항 반영</button>
+      </div>
+
+    </div>
+
+
+    <!-- ============================================================ -->
+    <!-- [VIEW 2] 콘텐츠 글 등록 (편집) -->
+    <!-- ============================================================ -->
+    <div id="view-editor" class="view">
+      <div class="breadcrumb">
+        <span onclick="showView('list')">TRP 게시판</span>
+        <span class="sep">›</span>
+        <span onclick="showView('list')">콘텐츠 글 관리</span>
+        <span class="sep">›</span>
+        <span style="color:rgba(0,0,0,0.88);font-weight:600;">새 글 작성</span>
+      </div>
+      <div class="page-header">
+        <div>
+          <div class="page-title">📝 콘텐츠 글 등록</div>
+          <div class="page-desc">게시판 글 1편 = 1개 콘텐츠. 적용 조건(룰)에 매칭되는 모든 상품에 자동 노출됩니다.</div>
+        </div>
+        <div style="display:flex;gap:8px;align-items:center;">
+          <span class="editing-badge"><span class="dot"></span> 편집중 (다른 PM 0명)</span>
+          <span class="autosave"><span class="dot"></span> 자동저장됨 · 12초 전</span>
+          <button class="btn btn-default" onclick="openVerModal()">🕘 버전 이력</button>
+          <button class="btn btn-default">취소</button>
+          <button class="btn btn-default" style="border-color:#faad14;color:#ad6800;">임시저장 (Draft)</button>
+          <button class="btn btn-primary btn-lg" title="게시 시 새 예약부터 적용. 기존 예약 영향 없음.">게시 (운영중)</button>
+        </div>
+      </div>
+
+      <div class="editor-wrap">
+
+        <!-- 좌: 편집 폼 -->
+        <div class="editor-pane">
+          <div class="editor-pane-head">
+            <div class="editor-pane-title">✏️ 편집</div>
+            <span style="font-size:11px;color:rgba(0,0,0,0.45);">관리자 전용</span>
+          </div>
+          <div class="editor-pane-body">
+
+            <!-- 1) 콘텐츠 타입 -->
+            <div class="form-row">
+              <div class="form-label">콘텐츠 타입 <span class="req">*</span></div>
+              <div class="type-picker">
+                <div class="type-pick"><div class="type-pick-icon">📦</div><div class="type-pick-name">상품</div><div class="type-pick-desc">상품코드</div></div>
+                <div class="type-pick on"><div class="type-pick-icon">🏨</div><div class="type-pick-name">숙박권</div><div class="type-pick-desc">숙박권+객실+식사</div></div>
+                <div class="type-pick"><div class="type-pick-icon">✈️</div><div class="type-pick-name">항공권</div><div class="type-pick-desc">항공사/노선</div></div>
+                <div class="type-pick"><div class="type-pick-icon">🎫</div><div class="type-pick-name">투어/티켓</div><div class="type-pick-desc">투어·티켓 ID</div></div>
+                <div class="type-pick"><div class="type-pick-icon">🛡</div><div class="type-pick-name">보험</div><div class="type-pick-desc">여행지/상품타입</div></div>
+                <div class="type-pick"><div class="type-pick-icon">📍</div><div class="type-pick-name">여행지 유의</div><div class="type-pick-desc">여행지/국가</div></div>
+              </div>
+            </div>
+
+            <!-- 2) 적용 조건 (Rule Builder) -->
+            <div class="form-row">
+              <div class="form-label">적용 조건 (Rule) <span class="req">*</span></div>
+              <div class="form-help" style="margin-bottom:6px;">모든 조건은 <strong>AND</strong> 결합. 조건에 매칭되는 상품 모두에 자동 노출됩니다.</div>
+              <div class="rule-builder">
+                <div class="rule-row">
+                  <select class="fi" style="width:140px;"><option>숙박권 ID</option></select>
+                  <select class="fi" style="width:60px;"><option>=</option></select>
+                  <span class="rule-chip">
+                    <span class="rule-chip-id">#103</span>
+                    <span class="rule-chip-name">솔바이멜리아 푸꾸옥</span>
+                    <span class="rule-chip-edit">🔍 변경</span>
+                  </span>
+                  <button class="rule-del">✕</button>
+                </div>
+                <div class="rule-row">
+                  <span class="rule-and">AND</span>
+                  <select class="fi" style="width:140px;"><option>객실</option></select>
+                  <select class="fi" style="width:60px;"><option>=</option></select>
+                  <span class="rule-chip">
+                    <span class="rule-chip-id">RM-12</span>
+                    <span class="rule-chip-name">디럭스 씨뷰</span>
+                    <span class="rule-chip-edit">🔍 변경</span>
+                  </span>
+                  <button class="rule-del">✕</button>
+                </div>
+                <div class="rule-row">
+                  <span class="rule-and">AND</span>
+                  <select class="fi" style="width:140px;"><option>식사</option></select>
+                  <select class="fi" style="width:60px;"><option>=</option></select>
+                  <span class="rule-chip">
+                    <span class="rule-chip-id">AI</span>
+                    <span class="rule-chip-name">올인클루시브</span>
+                    <span class="rule-chip-edit">🔍 변경</span>
+                  </span>
+                  <button class="rule-del">✕</button>
+                </div>
+                <div class="rule-add">+ 조건 추가</div>
+              </div>
+              <div class="match-preview" style="margin-top:8px;">
+                <span class="icon">📊</span>
+                현재 룰로 매칭되는 <strong>상품 23개</strong>
+                <span style="font-size:10px;color:rgba(0,0,0,0.45);margin-left:4px;">(입력 후 0.5초 디바운스 갱신)</span>
+                <button class="btn btn-text" style="margin-left:auto;">상품 목록 보기 →</button>
+              </div>
+            </div>
+
+            <!-- 3) 제목 -->
+            <div class="form-row">
+              <div class="form-label">제목 <span class="req">*</span></div>
+              <input class="fi" value="디럭스 씨뷰 객실 안내 + 유의사항" placeholder="콘텐츠 글 제목">
+            </div>
+
+            <!-- 4) 카테고리 -->
+            <div class="form-row">
+              <div class="form-label">카테고리 <span class="req">*</span></div>
+              <select class="fi" style="width:200px;">
+                <option>유의사항</option>
+                <option>혜택/특전</option>
+                <option>포함/불포함</option>
+                <option>일정/스케줄</option>
+                <option>FAQ</option>
+                <option>기타 안내</option>
+              </select>
+            </div>
+
+            <!-- 5) 본문 -->
+            <div class="form-row">
+              <div class="form-label">본문</div>
+              <div class="body-mode-tabs">
+                <div class="body-mode-tab active">✓ 체크리스트</div>
+                <div class="body-mode-tab">📝 산문</div>
+                <div class="body-mode-tab">🖼 이미지</div>
+                <div class="body-mode-tab">🎯 포인트</div>
+              </div>
+              <div class="bi-list">
+                <div class="bi-item">
+                  <span class="bi-item-bullet warn">⚠</span>
+                  <div class="bi-item-main">
+                    <input class="bi-item-title" value="테라스 바닥 미끄럼 주의 (우천 시)">
+                    <textarea class="bi-item-desc">비 온 후 1시간은 슬리퍼 착용 권장</textarea>
+                  </div>
+                  <button class="bi-item-del">✕</button>
+                </div>
+                <div class="bi-item">
+                  <span class="bi-item-bullet warn">⚠</span>
+                  <div class="bi-item-main">
+                    <input class="bi-item-title" value="오션뷰 특성상 바람 유의">
+                  </div>
+                  <button class="bi-item-del">✕</button>
+                </div>
+              </div>
+              <div class="bi-add-btn" style="margin-top:8px;">+ 항목 추가</div>
+            </div>
+
+          </div>
+        </div>
+
+        <!-- 우: 매칭 결과 미리보기 -->
+        <div class="editor-pane">
+          <div class="editor-pane-head">
+            <div class="editor-pane-title">👁 미리보기 + 매칭 결과</div>
+            <span style="font-size:11px;color:rgba(0,0,0,0.45);">실시간</span>
+          </div>
+          <div class="editor-pane-body" style="background:#fafafa;">
+            <div class="mobile-frame" style="margin:0;">
+              <div class="mobile-frame-title">디럭스 씨뷰 객실 안내 + 유의사항</div>
+              <div class="mobile-frame-sub">숙박권 카테고리 · 유의사항</div>
+              <div class="mobile-sec" style="border-top:none;padding-top:0;">
+                <div class="mobile-item mobile-item-warn"><span class="b">⚠</span> 테라스 바닥 미끄럼 주의 (우천 시)</div>
+                <div class="mobile-item mobile-item-warn"><span class="b">⚠</span> 오션뷰 특성상 바람 유의</div>
+              </div>
+            </div>
+
+            <div class="divider-h"></div>
+
+            <div style="font-size:12px;font-weight:700;color:rgba(0,0,0,0.65);margin-bottom:8px;">📊 이 글이 노출될 상품 (TOP 5)</div>
+            <div style="display:flex;flex-direction:column;gap:6px;">
+              <div class="post-card" style="margin:0;cursor:default;">
+                <div class="post-card-head">
+                  <span class="post-card-status live"></span>
+                  <div style="flex:1;font-size:12px;">PB-2025-푸꾸옥-7박</div>
+                  <span style="font-size:10px;color:rgba(0,0,0,0.45);">디럭스 씨뷰 AI</span>
+                </div>
+              </div>
+              <div class="post-card" style="margin:0;cursor:default;">
+                <div class="post-card-head">
+                  <span class="post-card-status live"></span>
+                  <div style="flex:1;font-size:12px;">PB-2025-푸꾸옥-5박</div>
+                  <span style="font-size:10px;color:rgba(0,0,0,0.45);">디럭스 씨뷰 AI</span>
+                </div>
+              </div>
+              <div class="post-card" style="margin:0;cursor:default;">
+                <div class="post-card-head">
+                  <span class="post-card-status live"></span>
+                  <div style="flex:1;font-size:12px;">PB-2025-푸꾸옥-허니문</div>
+                  <span style="font-size:10px;color:rgba(0,0,0,0.45);">디럭스 씨뷰 AI</span>
+                </div>
+              </div>
+              <div style="font-size:11px;color:rgba(0,0,0,0.45);text-align:center;padding:4px;">+ 20개 더보기</div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+
+    <!-- ============================================================ -->
+    <!-- [VIEW 3] 콘텐츠 글 목록 -->
+    <!-- ============================================================ -->
+    <div id="view-list" class="view">
+      <div class="breadcrumb">
+        <span>TRP 게시판</span>
+        <span class="sep">›</span>
+        <span style="color:rgba(0,0,0,0.88);font-weight:600;">콘텐츠 글 관리</span>
+      </div>
+      <div class="page-header">
+        <div>
+          <div class="page-title">📝 콘텐츠 글 관리</div>
+          <div class="page-desc">
+            <span style="color:rgba(0,0,0,0.55);font-weight:600;">[운영 지표]</span> 전체 글 124건 ·
+            <span style="color:#52c41a;font-weight:600;">고객 노출 98건 (운영중)</span> ·
+            <span style="color:#faad14;">Draft 21건 (노출 X)</span> ·
+            <span style="color:rgba(0,0,0,0.45);">중단 5건</span>
+          </div>
+        </div>
+        <div style="display:flex;gap:8px;">
+          <button class="btn btn-default">📥 일괄 등록</button>
+          <button class="btn btn-primary btn-lg" onclick="showView('editor')">+ 새 글 작성</button>
+        </div>
+      </div>
+
+      <div class="list-toolbar">
+        <input class="fi" placeholder="제목/내용 검색">
+        <select class="fi" style="width:140px;">
+          <option>전체 타입</option><option>📦 상품</option><option>🏨 숙박권</option>
+          <option>✈️ 항공권</option><option>🎫 투어/티켓</option><option>🛡 보험</option><option>📍 여행지 유의</option>
+        </select>
+        <select class="fi" style="width:120px;">
+          <option>전체 상태</option><option>운영중</option><option>Draft</option><option>중단</option>
+        </select>
+        <span style="margin-left:auto;font-size:12px;color:rgba(0,0,0,0.45);">총 124건</span>
+      </div>
+
+      <table class="tbl">
+        <thead>
+          <tr>
+            <th style="width:80px;">상태</th>
+            <th style="width:110px;">타입</th>
+            <th>제목</th>
+            <th style="width:240px;">적용 조건 (룰)</th>
+            <th style="width:90px;">매칭 상품</th>
+            <th style="width:110px;">최근 수정</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr onclick="showView('editor')">
+            <td><span class="status-pill live">● 운영중</span></td>
+            <td><span class="type-pill t-hotel">🏨 숙박권</span></td>
+            <td>디럭스 씨뷰 객실 안내 + 유의사항</td>
+            <td><span class="post-card-rule">숙박권=#103 AND 객실=디럭스씨뷰 AND 식사=AI</span></td>
+            <td>23개</td>
+            <td>5/10</td>
+          </tr>
+          <tr onclick="showView('editor')">
+            <td><span class="status-pill live">● 운영중</span></td>
+            <td><span class="type-pill t-product">📦 상품</span></td>
+            <td>[푸꾸옥 7박] 트립스토어 단독 혜택 안내</td>
+            <td><span class="post-card-rule">상품코드=PRD-50231</span></td>
+            <td>1개</td>
+            <td>5/8</td>
+          </tr>
+          <tr onclick="showView('editor')">
+            <td><span class="status-pill live">● 운영중</span></td>
+            <td><span class="type-pill t-flight">✈️ 항공권</span></td>
+            <td>대한항공 KE 수하물 규정</td>
+            <td><span class="post-card-rule">항공사=KE</span></td>
+            <td>87개</td>
+            <td>5/9</td>
+          </tr>
+          <tr onclick="showView('editor')">
+            <td><span class="status-pill live">● 운영중</span></td>
+            <td><span class="type-pill t-tour">🎫 투어/티켓</span></td>
+            <td>선셋 크루즈 투어 상세</td>
+            <td><span class="post-card-rule">투어=#T-PQC-001</span></td>
+            <td>14개</td>
+            <td>5/7</td>
+          </tr>
+          <tr onclick="showView('editor')">
+            <td><span class="status-pill draft">● Draft</span></td>
+            <td><span class="type-pill t-hotel">🏨 숙박권</span></td>
+            <td>얼리체크인 옵션 안내</td>
+            <td><span class="post-card-rule">숙박권=#103 AND 옵션=얼리체크인</span></td>
+            <td>5개</td>
+            <td>5/6</td>
+          </tr>
+          <tr onclick="showView('editor')" style="background:#fffbe6;">
+            <td><span class="status-pill draft">● Draft</span></td>
+            <td><span class="type-pill t-insurance">🛡 보험</span></td>
+            <td style="color:#ad6800;font-weight:600;">⚠ KB여행보험 골드 안내 (작성 필요)</td>
+            <td><span class="post-card-rule">국가=베트남 AND 상품타입=PB패키지</span></td>
+            <td>—</td>
+            <td>—</td>
+          </tr>
+          <tr onclick="showView('editor')">
+            <td><span class="status-pill live">● 운영중</span></td>
+            <td><span class="type-pill t-place">📍 여행지 유의</span></td>
+            <td>베트남 입국 시 유의사항 (비자/통화)</td>
+            <td><span class="post-card-rule">국가=베트남</span></td>
+            <td>62개</td>
+            <td>5/3</td>
+          </tr>
+          <tr onclick="showView('editor')">
+            <td><span class="status-pill live">● 운영중</span></td>
+            <td><span class="type-pill t-place">📍 여행지 유의</span></td>
+            <td>푸꾸옥 우기/날씨 안내</td>
+            <td><span class="post-card-rule">여행지=푸꾸옥</span></td>
+            <td>28개</td>
+            <td>4/29</td>
+          </tr>
+          <tr onclick="showView('editor')">
+            <td><span class="status-pill live">● 운영중</span></td>
+            <td><span class="type-pill t-hotel">🏨 숙박권</span></td>
+            <td>올인클루시브(AI) 식사 포함사항</td>
+            <td><span class="post-card-rule">숙박권=#103 AND 식사=AI</span></td>
+            <td>18개</td>
+            <td>4/28</td>
+          </tr>
+        </tbody>
+      </table>
+
+    </div>
+
+
+  </div>
+</div>
+
+<!-- ============================================================ -->
+<!-- 버전 이력 모달 -->
+<!-- ============================================================ -->
+<div class="modal-mask" id="ver-modal">
+  <div class="modal">
+    <div class="modal-head">
+      <div>
+        <div class="modal-title">🕘 버전 이력 · 디럭스 씨뷰 객실 안내</div>
+        <div style="font-size:11px;color:rgba(0,0,0,0.45);margin-top:2px;">변경 이력 + diff 비교 · 롤백 가능</div>
+      </div>
+      <button class="modal-close" onclick="closeVerModal()">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="ver-row">
+        <div class="ver-dot" style="background:#52c41a;"></div>
+        <div class="ver-info">
+          <div class="ver-info-h">v3 (현재 · 운영중)</div>
+          <div class="ver-info-m">김서현 PM · 2026-05-10 14:23 · 매칭 상품 23개</div>
+          <div class="ver-diff">
+            <div><span class="add">+ 테라스 바닥 미끄럼 주의 (우천 시) — 비 온 후 1시간은 슬리퍼 착용 권장</span></div>
+          </div>
+        </div>
+      </div>
+      <div class="ver-row">
+        <div class="ver-dot"></div>
+        <div class="ver-info">
+          <div class="ver-info-h">v2</div>
+          <div class="ver-info-m">박수정 PM · 2026-05-03 11:05 · 매칭 상품 21개</div>
+          <div class="ver-diff">
+            <div><span class="del">- 객실 내 흡연 금지</span></div>
+            <div><span class="add">+ 오션뷰 특성상 바람 유의</span></div>
+          </div>
+          <div style="margin-top:6px;"><button class="btn btn-text">↩ 이 버전으로 롤백</button></div>
+        </div>
+      </div>
+      <div class="ver-row">
+        <div class="ver-dot"></div>
+        <div class="ver-info">
+          <div class="ver-info-h">v1 (최초 게시)</div>
+          <div class="ver-info-m">김서현 PM · 2026-04-22 16:40 · 매칭 상품 18개</div>
+        </div>
+      </div>
+      <div class="snapshot-chip" style="margin-top:14px;">
+        🔒 <strong>예약 스냅샷</strong>: 각 버전 게시 시점의 콘텐츠는 그 시점 예약건에 영구 보존됩니다. 롤백해도 과거 예약은 안 바뀝니다.
+      </div>
+    </div>
+    <div class="modal-foot">
+      <button class="btn btn-default" onclick="closeVerModal()">닫기</button>
+    </div>
+  </div>
+</div>
+
+<script>
+function showView(name){
+  document.querySelectorAll('.view').forEach(v=>v.classList.remove('on'));
+  const el = document.getElementById('view-'+name);
+  if (el) el.classList.add('on');
+  // 사이드바 ↔ 모드바 동기화
+  document.querySelectorAll('.side-item').forEach(s=>s.classList.remove('active'));
+  document.querySelectorAll('.mode-tab').forEach(m=>m.classList.remove('active'));
+  if (name === 'product') {
+    document.querySelectorAll('.side-item')[0]?.classList.add('active');
+    document.querySelectorAll('.mode-tab')[0]?.classList.add('active');
+  } else if (name === 'list') {
+    document.querySelectorAll('.side-item')[1]?.classList.add('active');
+    document.querySelectorAll('.mode-tab')[1]?.classList.add('active');
+  } else if (name === 'editor') {
+    document.querySelectorAll('.side-item')[2]?.classList.add('active');
+  }
+  window.scrollTo(0,0);
+}
+// 모바일 프리뷰 섹션 → 좌측 카드 점프
+function jumpToSection(idx){
+  const secs = document.querySelectorAll('.type-sec');
+  if (secs[idx]) {
+    secs[idx].scrollIntoView({behavior:'smooth', block:'center'});
+    secs[idx].style.transition = 'box-shadow 0.3s';
+    secs[idx].style.boxShadow = '0 0 0 3px #1677ff';
+    setTimeout(()=>{ secs[idx].style.boxShadow = ''; }, 1200);
+  }
+}
+function toggleSec(el){
+  el.parentElement.classList.toggle('collapsed');
+}
+function toggleCard(el){
+  // 액션 버튼 클릭 시 토글 안 함
+  if (event && event.target.closest('.post-card-actions, .btn')) return;
+  document.querySelectorAll('.post-card.expanded').forEach(c => { if (c !== el) c.classList.remove('expanded'); });
+  // 인라인 편집 body가 없으면 동적 생성 (일관성)
+  if (!el.querySelector('.post-card-expand-body')) {
+    const title = el.querySelector('.post-card-title')?.innerText || '';
+    const body = document.createElement('div');
+    body.className = 'post-card-expand-body';
+    body.innerHTML = `
+      <div class="inline-edit">
+        <div class="inline-edit-row">
+          <span class="inline-edit-label">제목</span>
+          <input type="text" class="fi" value="${title}">
+        </div>
+        <div class="inline-edit-row">
+          <span class="inline-edit-label">본문</span>
+          <textarea class="fi" rows="3">자유 본문 텍스트가 여기 들어갑니다. (체크리스트/산문/이미지 중 선택 가능)</textarea>
+        </div>
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-top:6px;">
+          <span class="snapshot-chip" style="font-size:10.5px;padding:4px 8px;">🔒 새 예약부터 적용</span>
+          <div class="inline-edit-foot" style="margin:0;">
+            <button class="btn btn-text" onclick="openVerModal();event.stopPropagation();">🕘 버전 이력</button>
+            <button class="btn btn-default btn-sm">취소</button>
+            <button class="btn btn-primary btn-sm">저장</button>
+          </div>
+        </div>
+      </div>`;
+    el.appendChild(body);
+  }
+  el.classList.toggle('expanded');
+}
+function openVerModal(){ document.getElementById('ver-modal').classList.add('on'); }
+function closeVerModal(){ document.getElementById('ver-modal').classList.remove('on'); }
+</script>
+
+</body>
+</html>
