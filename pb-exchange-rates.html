@@ -8,6 +8,7 @@
 <style>
 * { box-sizing: border-box; margin: 0; padding: 0; }
 body { font-family: 'Pretendard', 'Apple SD Gothic Neo', -apple-system, sans-serif; font-size: 14px; color: rgba(0,0,0,0.88); background: #f5f5f5; }
+body.modal-open { overflow: hidden; }
 a { color: inherit; text-decoration: none; }
 button { font-family: inherit; cursor: pointer; }
 
@@ -65,10 +66,7 @@ button { font-family: inherit; cursor: pointer; }
 .btn-primary:hover { background: #4096ff; border-color: #4096ff; }
 .btn-default { background: #fff; color: rgba(0,0,0,0.88); border-color: #d9d9d9; }
 .btn-default:hover { color: #1677ff; border-color: #1677ff; }
-.btn-text { background: transparent; color: #1677ff; border-color: transparent; padding: 0 10px; }
-.btn-text:hover { background: #e6f4ff; }
 .btn-sm { height: 30px; padding: 0 12px; font-size: 12px; }
-.btn-icon { width: 32px; padding: 0; justify-content: center; }
 
 /* ===== CURRENCY GRID ===== */
 .currency-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; margin-bottom: 24px; }
@@ -85,7 +83,7 @@ button { font-family: inherit; cursor: pointer; }
 .cur-code { font-size: 11px; color: rgba(0,0,0,0.45); font-weight: 600; letter-spacing: 0.4px; margin-top: 2px; }
 .cur-head-right { display: flex; gap: 2px; }
 .cur-icon-btn { width: 28px; height: 28px; border-radius: 6px; border: 1px solid transparent; background: transparent; display: flex; align-items: center; justify-content: center; color: rgba(0,0,0,0.45); cursor: pointer; transition: all 0.15s; }
-.cur-icon-btn:hover { background: #f5f5f5; color: #1677ff; }
+.cur-icon-btn:hover { background: #e6f4ff; color: #1677ff; }
 .cur-icon-btn svg { width: 14px; height: 14px; }
 
 .cur-rate { padding: 10px 0 14px; border-top: 1px dashed #f0f0f0; border-bottom: 1px dashed #f0f0f0; margin-bottom: 12px; }
@@ -97,27 +95,71 @@ button { font-family: inherit; cursor: pointer; }
 .cur-rate-unit { font-size: 14px; color: rgba(0,0,0,0.55); font-weight: 500; margin-left: 2px; }
 
 .cur-meta { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
-.cur-trend { display: inline-flex; align-items: center; gap: 4px; padding: 3px 8px; border-radius: 4px; font-size: 11px; font-weight: 600; }
-.cur-trend.up { background: #fff1f0; color: #cf1322; }
-.cur-trend.down { background: #f6ffed; color: #389e0d; }
-.cur-trend.flat { background: #f5f5f5; color: rgba(0,0,0,0.55); }
-.cur-trend svg { width: 10px; height: 10px; }
-.cur-updated { font-size: 11px; color: rgba(0,0,0,0.4); }
-.cur-updated strong { color: rgba(0,0,0,0.65); font-weight: 600; }
-
-/* ===== EMPTY STATE (통화 추가 카드) ===== */
-.cur-card.add { background: #fafbff; border: 1px dashed #d6e4ff; display: flex; align-items: center; justify-content: center; min-height: 184px; color: rgba(0,0,0,0.45); cursor: pointer; transition: all 0.2s; }
-.cur-card.add:hover { background: #f0f5ff; border-color: #91caff; color: #1677ff; box-shadow: none; transform: none; }
-.cur-card.add-inner { display: flex; flex-direction: column; align-items: center; gap: 8px; }
-.cur-add-icon { width: 36px; height: 36px; border-radius: 50%; background: #fff; border: 1px solid #d6e4ff; display: flex; align-items: center; justify-content: center; font-size: 18px; font-weight: 300; color: #1677ff; }
-.cur-add-text { font-size: 13px; font-weight: 500; }
+.cur-updated { font-size: 11px; color: rgba(0,0,0,0.45); }
+.cur-updated strong { color: rgba(0,0,0,0.7); font-weight: 600; }
+.cur-history-link { font-size: 11px; color: #1677ff; font-weight: 600; cursor: pointer; display: inline-flex; align-items: center; gap: 3px; padding: 4px 8px; border-radius: 4px; transition: all 0.15s; border: none; background: transparent; }
+.cur-history-link:hover { background: #e6f4ff; }
+.cur-history-link svg { width: 11px; height: 11px; }
 
 /* ===== FOOTNOTE ===== */
 .footnote { display: flex; align-items: flex-start; gap: 8px; padding: 12px 16px; background: #fff7e6; border: 1px solid #ffd666; border-radius: 8px; font-size: 12px; color: #874d00; }
 .footnote svg { width: 14px; height: 14px; flex-shrink: 0; margin-top: 2px; color: #d48806; }
 
-/* ===== ICONS (inline SVG helper) ===== */
-.icon { display: inline-block; vertical-align: middle; }
+/* ===== MODAL ===== */
+.backdrop { position: fixed; inset: 0; background: rgba(0,21,41,0.45); backdrop-filter: blur(2px); z-index: 1000; display: none; align-items: center; justify-content: center; padding: 32px 24px; animation: fadeIn 0.2s ease-out; }
+.backdrop.active { display: flex; }
+@keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+
+.modal { background: #fff; border-radius: 14px; box-shadow: 0 20px 60px rgba(0,0,0,0.25); width: 100%; max-width: 880px; max-height: calc(100vh - 64px); display: flex; flex-direction: column; overflow: hidden; animation: slideUp 0.25s ease-out; }
+@keyframes slideUp { from { transform: translateY(20px); opacity: 0.5; } to { transform: translateY(0); opacity: 1; } }
+
+.m-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 16px; padding: 22px 24px 16px; border-bottom: 1px solid #f0f0f0; }
+.m-title-wrap { display: flex; flex-direction: column; gap: 4px; }
+.m-title { font-size: 18px; font-weight: 700; color: rgba(0,0,0,0.88); letter-spacing: -0.3px; display: flex; align-items: center; gap: 8px; }
+.m-title svg { width: 18px; height: 18px; color: #1677ff; }
+.m-sub { font-size: 12px; color: rgba(0,0,0,0.5); }
+.m-close { width: 32px; height: 32px; border-radius: 8px; border: 1px solid transparent; background: transparent; color: rgba(0,0,0,0.45); display: flex; align-items: center; justify-content: center; cursor: pointer; transition: all 0.15s; }
+.m-close:hover { background: #f5f5f5; color: rgba(0,0,0,0.88); }
+.m-close svg { width: 16px; height: 16px; }
+
+.m-filter { display: flex; align-items: center; gap: 8px; padding: 14px 24px; background: #fafbfc; border-bottom: 1px solid #f0f0f0; flex-wrap: wrap; }
+.fi { height: 32px; border: 1px solid #d9d9d9; border-radius: 6px; font-size: 13px; font-family: inherit; color: rgba(0,0,0,0.88); outline: none; background: #fff; padding: 0 28px 0 12px; appearance: none; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='%23bbb'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 10px center; cursor: pointer; transition: border 0.2s; min-width: 130px; }
+.fi:focus, .fi:hover { border-color: #1677ff; }
+.m-filter-total { margin-left: auto; font-size: 12px; color: rgba(0,0,0,0.55); display: flex; align-items: center; gap: 6px; }
+.m-filter-total strong { color: #1677ff; font-weight: 700; font-size: 13px; }
+
+.m-body { overflow-y: auto; flex: 1; }
+
+.h-table { width: 100%; border-collapse: collapse; }
+.h-table thead th { position: sticky; top: 0; background: #fff; padding: 11px 16px; text-align: left; font-size: 11px; font-weight: 700; color: rgba(0,0,0,0.45); letter-spacing: 0.4px; text-transform: uppercase; border-bottom: 1px solid #f0f0f0; z-index: 5; }
+.h-table thead th.right { text-align: right; }
+.h-table tbody td { padding: 14px 16px; font-size: 13px; color: rgba(0,0,0,0.88); border-bottom: 1px solid #f5f5f5; vertical-align: middle; }
+.h-table tbody tr:hover td { background: #fafbff; }
+.date-row td { background: #fafbfc !important; padding: 8px 16px !important; font-size: 11px; font-weight: 700; color: rgba(0,0,0,0.45); letter-spacing: 0.4px; text-transform: uppercase; border-bottom: 1px solid #f0f0f0 !important; }
+
+.h-cur { display: inline-flex; align-items: center; gap: 8px; }
+.h-flag { width: 22px; height: 22px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 14px; background: #fafafa; border: 1px solid #f0f0f0; line-height: 1; }
+.h-cur-code { font-size: 13px; font-weight: 700; color: rgba(0,0,0,0.75); letter-spacing: 0.2px; }
+.h-cur-base { font-size: 11px; color: rgba(0,0,0,0.4); margin-left: 2px; }
+
+.h-change { display: inline-flex; align-items: center; gap: 8px; font-variant-numeric: tabular-nums; }
+.h-val-from { font-size: 13px; color: rgba(0,0,0,0.45); text-decoration: line-through; text-decoration-color: rgba(0,0,0,0.25); }
+.h-arrow { color: rgba(0,0,0,0.3); font-size: 12px; }
+.h-val-to { font-size: 14px; font-weight: 700; color: rgba(0,0,0,0.88); }
+.h-unit { font-size: 11px; color: rgba(0,0,0,0.45); margin-left: 2px; font-weight: 500; }
+
+.h-diff { display: inline-flex; align-items: center; gap: 4px; padding: 3px 8px; border-radius: 4px; font-size: 12px; font-weight: 700; font-variant-numeric: tabular-nums; }
+.h-diff.up { background: #fff1f0; color: #cf1322; }
+.h-diff.down { background: #f6ffed; color: #389e0d; }
+.h-diff svg { width: 9px; height: 9px; }
+
+.h-time { font-size: 12px; color: rgba(0,0,0,0.55); font-variant-numeric: tabular-nums; text-align: right; white-space: nowrap; }
+.h-time strong { color: rgba(0,0,0,0.88); font-weight: 600; }
+
+.m-foot { padding: 12px 24px; border-top: 1px solid #f0f0f0; display: flex; align-items: center; justify-content: space-between; background: #fafbfc; }
+.m-foot-info { font-size: 12px; color: rgba(0,0,0,0.45); }
+.btn-modal-close { height: 32px; padding: 0 14px; border-radius: 6px; font-size: 13px; cursor: pointer; border: 1px solid #d9d9d9; background: #fff; color: rgba(0,0,0,0.88); font-family: inherit; font-weight: 500; transition: all 0.15s; }
+.btn-modal-close:hover { color: #1677ff; border-color: #1677ff; }
 </style>
 </head>
 <body>
@@ -184,7 +226,7 @@ button { font-family: inherit; cursor: pointer; }
       <div class="summary-divider"></div>
       <div class="summary-block">
         <div class="summary-label">마지막 수정</div>
-        <div class="summary-value">2026.05.11 14:32 · 김수현</div>
+        <div class="summary-value">2026.05.11 14:32</div>
       </div>
       <div class="summary-divider"></div>
       <div class="summary-block">
@@ -193,8 +235,8 @@ button { font-family: inherit; cursor: pointer; }
       </div>
     </div>
     <div class="summary-right">
-      <button class="btn btn-default btn-sm">
-        <svg class="icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+      <button class="btn btn-default btn-sm" onclick="openHistoryModal()">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
         전체 수정이력 보기
       </button>
     </div>
@@ -214,7 +256,7 @@ button { font-family: inherit; cursor: pointer; }
           </div>
         </div>
         <div class="cur-head-right">
-          <button class="cur-icon-btn" title="수정이력 보기">
+          <button class="cur-icon-btn" title="수정이력 보기" onclick="openHistoryModal('USD')">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
           </button>
         </div>
@@ -229,11 +271,11 @@ button { font-family: inherit; cursor: pointer; }
         </div>
       </div>
       <div class="cur-meta">
-        <span class="cur-trend up">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="18 15 12 9 6 15"/></svg>
-          +0.7% (전월 대비)
-        </span>
-        <span class="cur-updated"><strong>2026.05.11</strong> 14:32</span>
+        <span class="cur-updated">마지막 수정 <strong>2026.05.11 14:32</strong></span>
+        <button class="cur-history-link" onclick="openHistoryModal('USD')">
+          수정이력
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
+        </button>
       </div>
     </div>
 
@@ -248,7 +290,7 @@ button { font-family: inherit; cursor: pointer; }
           </div>
         </div>
         <div class="cur-head-right">
-          <button class="cur-icon-btn" title="수정이력 보기">
+          <button class="cur-icon-btn" title="수정이력 보기" onclick="openHistoryModal('JPY')">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
           </button>
         </div>
@@ -263,11 +305,11 @@ button { font-family: inherit; cursor: pointer; }
         </div>
       </div>
       <div class="cur-meta">
-        <span class="cur-trend down">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
-          −1.2% (전월 대비)
-        </span>
-        <span class="cur-updated"><strong>2026.05.04</strong> 09:18</span>
+        <span class="cur-updated">마지막 수정 <strong>2026.05.04 09:18</strong></span>
+        <button class="cur-history-link" onclick="openHistoryModal('JPY')">
+          수정이력
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
+        </button>
       </div>
     </div>
 
@@ -280,6 +322,196 @@ button { font-family: inherit; cursor: pointer; }
   </div>
 
 </div>
+
+<!-- ===== HISTORY MODAL ===== -->
+<div class="backdrop" id="historyBackdrop" onclick="if(event.target===this) closeHistoryModal()">
+  <div class="modal">
+
+    <div class="m-head">
+      <div class="m-title-wrap">
+        <div class="m-title">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+          기준환율 수정이력
+        </div>
+        <div class="m-sub">PB 상품에 적용된 환율 변경 내역을 시간순으로 확인합니다.</div>
+      </div>
+      <button class="m-close" onclick="closeHistoryModal()" aria-label="닫기">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>
+    </div>
+
+    <div class="m-filter">
+      <select class="fi" id="filterCurrency">
+        <option value="ALL">통화: 전체</option>
+        <option value="USD">USD</option>
+        <option value="JPY">JPY</option>
+      </select>
+      <select class="fi">
+        <option>최근 3개월</option>
+        <option>최근 1개월</option>
+        <option>최근 6개월</option>
+        <option>전체 기간</option>
+      </select>
+      <div class="m-filter-total">총 <strong id="totalCount">11</strong>건</div>
+    </div>
+
+    <div class="m-body">
+      <table class="h-table">
+        <thead>
+          <tr>
+            <th>통화</th>
+            <th>변경 내역</th>
+            <th>변동</th>
+            <th class="right">수정일시</th>
+          </tr>
+        </thead>
+        <tbody id="historyTbody">
+          <tr class="date-row" data-cur="ALL"><td colspan="4">2026년 5월</td></tr>
+          <tr data-cur="USD">
+            <td><span class="h-cur"><span class="h-flag">🇺🇸</span><span class="h-cur-code">USD</span><span class="h-cur-base">/ 1달러</span></span></td>
+            <td><span class="h-change"><span class="h-val-from">1,500</span><span class="h-arrow">→</span><span class="h-val-to">1,520<span class="h-unit">원</span></span></span></td>
+            <td><span class="h-diff up"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="18 15 12 9 6 15"/></svg>+20원 (+1.3%)</span></td>
+            <td class="h-time"><strong>05.11</strong> 09:05</td>
+          </tr>
+          <tr data-cur="USD">
+            <td><span class="h-cur"><span class="h-flag">🇺🇸</span><span class="h-cur-code">USD</span><span class="h-cur-base">/ 1달러</span></span></td>
+            <td><span class="h-change"><span class="h-val-from">1,520</span><span class="h-arrow">→</span><span class="h-val-to">1,500<span class="h-unit">원</span></span></span></td>
+            <td><span class="h-diff down"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>−20원 (−1.3%)</span></td>
+            <td class="h-time"><strong>05.07</strong> 09:03</td>
+          </tr>
+          <tr data-cur="JPY">
+            <td><span class="h-cur"><span class="h-flag">🇯🇵</span><span class="h-cur-code">JPY</span><span class="h-cur-base">/ 100엔</span></span></td>
+            <td><span class="h-change"><span class="h-val-from">1,020</span><span class="h-arrow">→</span><span class="h-val-to">1,000<span class="h-unit">원</span></span></span></td>
+            <td><span class="h-diff down"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>−20원 (−2.0%)</span></td>
+            <td class="h-time"><strong>05.04</strong> 09:18</td>
+          </tr>
+          <tr data-cur="USD">
+            <td><span class="h-cur"><span class="h-flag">🇺🇸</span><span class="h-cur-code">USD</span><span class="h-cur-base">/ 1달러</span></span></td>
+            <td><span class="h-change"><span class="h-val-from">1,540</span><span class="h-arrow">→</span><span class="h-val-to">1,520<span class="h-unit">원</span></span></span></td>
+            <td><span class="h-diff down"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>−20원 (−1.3%)</span></td>
+            <td class="h-time"><strong>05.04</strong> 09:09</td>
+          </tr>
+
+          <tr class="date-row" data-cur="ALL"><td colspan="4">2026년 4월</td></tr>
+          <tr data-cur="USD">
+            <td><span class="h-cur"><span class="h-flag">🇺🇸</span><span class="h-cur-code">USD</span><span class="h-cur-base">/ 1달러</span></span></td>
+            <td><span class="h-change"><span class="h-val-from">1,520</span><span class="h-arrow">→</span><span class="h-val-to">1,540<span class="h-unit">원</span></span></span></td>
+            <td><span class="h-diff up"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="18 15 12 9 6 15"/></svg>+20원 (+1.3%)</span></td>
+            <td class="h-time"><strong>04.30</strong> 09:10</td>
+          </tr>
+          <tr data-cur="USD">
+            <td><span class="h-cur"><span class="h-flag">🇺🇸</span><span class="h-cur-code">USD</span><span class="h-cur-base">/ 1달러</span></span></td>
+            <td><span class="h-change"><span class="h-val-from">1,500</span><span class="h-arrow">→</span><span class="h-val-to">1,520<span class="h-unit">원</span></span></span></td>
+            <td><span class="h-diff up"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="18 15 12 9 6 15"/></svg>+20원 (+1.3%)</span></td>
+            <td class="h-time"><strong>04.21</strong> 09:05</td>
+          </tr>
+          <tr data-cur="USD">
+            <td><span class="h-cur"><span class="h-flag">🇺🇸</span><span class="h-cur-code">USD</span><span class="h-cur-base">/ 1달러</span></span></td>
+            <td><span class="h-change"><span class="h-val-from">1,520</span><span class="h-arrow">→</span><span class="h-val-to">1,500<span class="h-unit">원</span></span></span></td>
+            <td><span class="h-diff down"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>−20원 (−1.3%)</span></td>
+            <td class="h-time"><strong>04.21</strong> 09:05</td>
+          </tr>
+          <tr data-cur="JPY">
+            <td><span class="h-cur"><span class="h-flag">🇯🇵</span><span class="h-cur-code">JPY</span><span class="h-cur-base">/ 100엔</span></span></td>
+            <td><span class="h-change"><span class="h-val-from">1,000</span><span class="h-arrow">→</span><span class="h-val-to">1,020<span class="h-unit">원</span></span></span></td>
+            <td><span class="h-diff up"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="18 15 12 9 6 15"/></svg>+20원 (+2.0%)</span></td>
+            <td class="h-time"><strong>04.18</strong> 10:24</td>
+          </tr>
+          <tr data-cur="USD">
+            <td><span class="h-cur"><span class="h-flag">🇺🇸</span><span class="h-cur-code">USD</span><span class="h-cur-base">/ 1달러</span></span></td>
+            <td><span class="h-change"><span class="h-val-from">1,540</span><span class="h-arrow">→</span><span class="h-val-to">1,520<span class="h-unit">원</span></span></span></td>
+            <td><span class="h-diff down"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>−20원 (−1.3%)</span></td>
+            <td class="h-time"><strong>04.14</strong> 09:09</td>
+          </tr>
+          <tr data-cur="USD">
+            <td><span class="h-cur"><span class="h-flag">🇺🇸</span><span class="h-cur-code">USD</span><span class="h-cur-base">/ 1달러</span></span></td>
+            <td><span class="h-change"><span class="h-val-from">1,520</span><span class="h-arrow">→</span><span class="h-val-to">1,540<span class="h-unit">원</span></span></span></td>
+            <td><span class="h-diff up"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="18 15 12 9 6 15"/></svg>+20원 (+1.3%)</span></td>
+            <td class="h-time"><strong>04.13</strong> 09:21</td>
+          </tr>
+          <tr data-cur="USD">
+            <td><span class="h-cur"><span class="h-flag">🇺🇸</span><span class="h-cur-code">USD</span><span class="h-cur-base">/ 1달러</span></span></td>
+            <td><span class="h-change"><span class="h-val-from">1,560</span><span class="h-arrow">→</span><span class="h-val-to">1,520<span class="h-unit">원</span></span></span></td>
+            <td><span class="h-diff down"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>−40원 (−2.6%)</span></td>
+            <td class="h-time"><strong>04.08</strong> 13:05</td>
+          </tr>
+
+          <tr class="date-row" data-cur="ALL"><td colspan="4">2026년 3월</td></tr>
+          <tr data-cur="USD">
+            <td><span class="h-cur"><span class="h-flag">🇺🇸</span><span class="h-cur-code">USD</span><span class="h-cur-base">/ 1달러</span></span></td>
+            <td><span class="h-change"><span class="h-val-from">1,540</span><span class="h-arrow">→</span><span class="h-val-to">1,560<span class="h-unit">원</span></span></span></td>
+            <td><span class="h-diff up"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="18 15 12 9 6 15"/></svg>+20원 (+1.3%)</span></td>
+            <td class="h-time"><strong>03.31</strong> 14:55</td>
+          </tr>
+          <tr data-cur="USD">
+            <td><span class="h-cur"><span class="h-flag">🇺🇸</span><span class="h-cur-code">USD</span><span class="h-cur-base">/ 1달러</span></span></td>
+            <td><span class="h-change"><span class="h-val-from">1,460</span><span class="h-arrow">→</span><span class="h-val-to">1,540<span class="h-unit">원</span></span></span></td>
+            <td><span class="h-diff up"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="18 15 12 9 6 15"/></svg>+80원 (+5.5%)</span></td>
+            <td class="h-time"><strong>03.16</strong> 14:22</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="m-foot">
+      <div class="m-foot-info">표시된 환율은 PB 상품 가격 산출에 적용되는 기준값입니다.</div>
+      <button class="btn-modal-close" onclick="closeHistoryModal()">닫기</button>
+    </div>
+
+  </div>
+</div>
+
+<script>
+function openHistoryModal(currency) {
+  const backdrop = document.getElementById('historyBackdrop');
+  const filter = document.getElementById('filterCurrency');
+  backdrop.classList.add('active');
+  document.body.classList.add('modal-open');
+  if (currency && currency !== 'ALL') {
+    filter.value = currency;
+  } else {
+    filter.value = 'ALL';
+  }
+  applyFilter();
+}
+
+function closeHistoryModal() {
+  document.getElementById('historyBackdrop').classList.remove('active');
+  document.body.classList.remove('modal-open');
+}
+
+function applyFilter() {
+  const cur = document.getElementById('filterCurrency').value;
+  const rows = document.querySelectorAll('#historyTbody tr');
+  let count = 0;
+  let lastDateRow = null;
+  let dateRowHasData = false;
+  rows.forEach(row => {
+    if (row.classList.contains('date-row')) {
+      if (lastDateRow && !dateRowHasData) lastDateRow.style.display = 'none';
+      lastDateRow = row;
+      dateRowHasData = false;
+      row.style.display = '';
+    } else {
+      const rowCur = row.getAttribute('data-cur');
+      if (cur === 'ALL' || rowCur === cur) {
+        row.style.display = '';
+        count++;
+        dateRowHasData = true;
+      } else {
+        row.style.display = 'none';
+      }
+    }
+  });
+  if (lastDateRow && !dateRowHasData) lastDateRow.style.display = 'none';
+  document.getElementById('totalCount').textContent = count;
+}
+
+document.getElementById('filterCurrency').addEventListener('change', applyFilter);
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape') closeHistoryModal();
+});
+</script>
 
 </body>
 </html>
