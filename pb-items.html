@@ -1,0 +1,570 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>아이템 관리 — PB 관리 — TripStore Partners</title>
+<link href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.6/dist/web/static/pretendard.css" rel="stylesheet">
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: 'Pretendard', 'Apple SD Gothic Neo', -apple-system, sans-serif; font-size: 14px; color: rgba(0,0,0,0.88); background: #f5f5f5; }
+body.modal-open { overflow: hidden; }
+a { color: inherit; text-decoration: none; }
+button { font-family: inherit; cursor: pointer; }
+
+/* GNB */
+.gnb { background: #f0f5ff; height: 48px; display: flex; align-items: center; position: sticky; top: 0; z-index: 100; padding: 0 20px; border-bottom: 1px solid #d6e4ff; box-shadow: 0 1px 4px rgba(0,0,0,0.06); }
+.gnb-logo { color: #222427; font-weight: 800; font-size: 15px; margin-right: 24px; letter-spacing: -0.3px; }
+.gnb-logo span { color: #1677ff; }
+.gnb-logo .partners-badge { background: #1677ff; color: #fff; font-size: 10px; font-weight: 700; padding: 2px 6px; border-radius: 4px; margin-left: 6px; letter-spacing: 0.3px; vertical-align: middle; }
+.gnb-menu { display: flex; }
+.gnb-item { color: rgba(0,0,0,0.55); padding: 0 14px; height: 48px; display: flex; align-items: center; cursor: pointer; font-size: 13px; white-space: nowrap; position: relative; transition: color 0.15s; font-weight: 500; }
+.gnb-item:hover { color: rgba(0,0,0,0.88); }
+.gnb-item.active { color: #1677ff; }
+.gnb-item.active::after { content: ''; position: absolute; bottom: 0; left: 0; right: 0; height: 2px; background: #1677ff; }
+.gnb-right { margin-left: auto; display: flex; align-items: center; gap: 14px; }
+.gnb-user { font-size: 12px; color: rgba(0,0,0,0.55); }
+.gnb-user-name { font-weight: 600; color: rgba(0,0,0,0.75); }
+.gnb-org-badge { background: #fff; border: 1px solid #d6e4ff; color: #1677ff; font-size: 11px; font-weight: 600; padding: 3px 8px; border-radius: 4px; }
+
+/* BREADCRUMB / LAYOUT */
+.breadcrumb { padding: 14px 24px 0; font-size: 12px; color: rgba(0,0,0,0.45); display: flex; align-items: center; gap: 6px; }
+.breadcrumb span:not(.sep) { cursor: pointer; }
+.breadcrumb span:not(.sep):hover { color: #1677ff; }
+.sep { color: rgba(0,0,0,0.2); }
+.bc-current { color: rgba(0,0,0,0.88) !important; cursor: default !important; }
+.layout { padding: 14px 24px 48px; max-width: 1440px; margin: 0 auto; }
+
+/* PAGE HEADER */
+.page-header { margin: 12px 0 18px; }
+.page-title { font-size: 22px; font-weight: 700; color: rgba(0,0,0,0.88); letter-spacing: -0.3px; }
+.page-desc { font-size: 13px; color: rgba(0,0,0,0.5); margin-top: 4px; }
+
+/* SUBNAV */
+.subnav-card { background: #fff; border: 1px solid #f0f0f0; border-radius: 8px; padding: 4px; margin-bottom: 16px; display: inline-flex; }
+.subnav-item { padding: 8px 18px; font-size: 13px; font-weight: 500; color: rgba(0,0,0,0.55); cursor: pointer; border-radius: 6px; transition: all 0.15s; white-space: nowrap; border: none; background: transparent; font-family: inherit; display: inline-flex; align-items: center; gap: 6px; }
+.subnav-item:hover { color: rgba(0,0,0,0.88); }
+.subnav-item.active { color: #1677ff; background: #e6f4ff; font-weight: 600; }
+.subnav-item .dot { width: 6px; height: 6px; border-radius: 50%; background: currentColor; opacity: 0.6; }
+.subnav-item .count { font-size: 11px; background: rgba(0,0,0,0.08); padding: 1px 7px; border-radius: 10px; font-weight: 700; color: rgba(0,0,0,0.55); }
+.subnav-item.active .count { background: #1677ff; color: #fff; }
+
+.tab-panel { display: none; }
+.tab-panel.active { display: block; animation: fadeInPanel 0.2s ease-out; }
+@keyframes fadeInPanel { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: translateY(0); } }
+
+/* FILTER */
+.toolbar { display: flex; align-items: center; gap: 8px; margin-bottom: 12px; flex-wrap: wrap; }
+.search-wrap { position: relative; }
+.search-wrap input { height: 34px; border: 1px solid #d9d9d9; border-radius: 6px; padding: 0 12px 0 34px; font-size: 13px; font-family: inherit; outline: none; width: 260px; transition: border 0.2s; background: #fff; }
+.search-wrap input:focus { border-color: #1677ff; box-shadow: 0 0 0 2px rgba(22,119,255,0.1); }
+.search-icon { position: absolute; left: 11px; top: 50%; transform: translateY(-50%); color: rgba(0,0,0,0.3); pointer-events: none; }
+.search-icon svg { width: 14px; height: 14px; display: block; }
+.fi { height: 34px; border: 1px solid #d9d9d9; border-radius: 6px; font-size: 13px; font-family: inherit; outline: none; background: #fff; padding: 0 28px 0 12px; appearance: none; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='%23bbb'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 10px center; cursor: pointer; min-width: 140px; }
+.fi:focus, .fi:hover { border-color: #1677ff; }
+.btn-primary { height: 34px; padding: 0 14px; border-radius: 6px; font-size: 13px; font-weight: 600; cursor: pointer; border: 1px solid #1677ff; background: #1677ff; color: #fff; font-family: inherit; display: inline-flex; align-items: center; gap: 6px; transition: all 0.15s; margin-left: auto; }
+.btn-primary:hover { background: #4096ff; }
+.btn-primary svg { width: 13px; height: 13px; }
+.btn-secondary { height: 34px; padding: 0 14px; border-radius: 6px; font-size: 13px; font-weight: 500; cursor: pointer; border: 1px solid #d9d9d9; background: #fff; color: rgba(0,0,0,0.85); font-family: inherit; display: inline-flex; align-items: center; gap: 6px; }
+.btn-secondary:hover { color: #1677ff; border-color: #1677ff; }
+.btn-secondary svg { width: 13px; height: 13px; }
+
+/* TABLE */
+.main-card { background: #fff; border: 1px solid #f0f0f0; border-radius: 10px; overflow: hidden; margin-bottom: 14px; }
+.table-wrap { overflow-x: auto; }
+table.tbl { width: 100%; border-collapse: collapse; }
+table.tbl thead th { padding: 11px 16px; text-align: left; font-size: 10.5px; font-weight: 700; color: rgba(0,0,0,0.45); letter-spacing: 0.4px; text-transform: uppercase; background: #fafbfc; border-bottom: 1px solid #f0f0f0; white-space: nowrap; }
+table.tbl thead th.right { text-align: right; }
+table.tbl thead th.center { text-align: center; }
+table.tbl tbody td { padding: 12px 16px; font-size: 12.5px; color: rgba(0,0,0,0.88); border-bottom: 1px solid #f5f5f5; vertical-align: middle; }
+table.tbl tbody tr:last-child td { border-bottom: none; }
+table.tbl tbody tr:hover td { background: #fafbff; }
+.cell-name { font-weight: 600; color: rgba(0,0,0,0.88); font-size: 13px; }
+.cell-sub { font-size: 11px; color: rgba(0,0,0,0.45); margin-top: 1px; }
+.tag { display: inline-block; padding: 2px 8px; border-radius: 4px; font-size: 11px; font-weight: 600; }
+.tag-blue { background: #e6f4ff; color: #1677ff; }
+.tag-purple { background: #f9f0ff; color: #722ed1; }
+.tag-green { background: #f6ffed; color: #389e0d; }
+.tag-orange { background: #fff7e6; color: #d48806; }
+.tag-gray { background: #f5f5f5; color: rgba(0,0,0,0.55); }
+.amount { font-variant-numeric: tabular-nums; font-weight: 700; }
+.amount-cur { font-size: 11px; color: rgba(0,0,0,0.4); font-weight: 600; margin-left: 3px; }
+.row-actions { display: inline-flex; gap: 2px; }
+.icon-btn { width: 28px; height: 28px; border-radius: 6px; border: 1px solid transparent; background: transparent; color: rgba(0,0,0,0.45); display: inline-flex; align-items: center; justify-content: center; cursor: pointer; transition: all 0.15s; }
+.icon-btn:hover { background: #f0f5ff; color: #1677ff; }
+.icon-btn.danger:hover { background: #fff1f0; color: #cf1322; }
+.icon-btn svg { width: 13px; height: 13px; }
+.status-pill { display: inline-flex; align-items: center; gap: 5px; padding: 3px 8px; border-radius: 4px; font-size: 11px; font-weight: 600; }
+.status-pill::before { content: ''; width: 5px; height: 5px; border-radius: 50%; }
+.status-pill.live { color: #389e0d; background: #f6ffed; }
+.status-pill.live::before { background: #52c41a; }
+.status-pill.draft { color: rgba(0,0,0,0.55); background: #f5f5f5; }
+.status-pill.draft::before { background: #bfbfbf; }
+.status-pill.closed { color: #cf1322; background: #fff1f0; }
+.status-pill.closed::before { background: #f5222d; }
+
+.empty-state { padding: 60px 20px; text-align: center; color: rgba(0,0,0,0.45); font-size: 13px; }
+
+/* MODAL */
+.backdrop { position: fixed; inset: 0; background: rgba(0,21,41,0.45); backdrop-filter: blur(2px); z-index: 1000; display: none; align-items: center; justify-content: center; padding: 32px 24px; animation: fadeIn 0.2s; }
+.backdrop.active { display: flex; }
+@keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+.modal { background: #fff; border-radius: 14px; box-shadow: 0 20px 60px rgba(0,0,0,0.25); width: 100%; max-width: 560px; max-height: calc(100vh - 64px); display: flex; flex-direction: column; overflow: hidden; animation: slideUp 0.25s; }
+.modal.md { max-width: 680px; }
+@keyframes slideUp { from { transform: translateY(20px); opacity: 0.5; } to { transform: translateY(0); opacity: 1; } }
+.m-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 16px; padding: 22px 24px 16px; border-bottom: 1px solid #f0f0f0; }
+.m-title-wrap { flex: 1; min-width: 0; }
+.m-title { font-size: 17px; font-weight: 700; color: rgba(0,0,0,0.88); display: flex; align-items: center; gap: 8px; }
+.m-title svg { width: 18px; height: 18px; color: #1677ff; }
+.m-sub { font-size: 12px; color: rgba(0,0,0,0.5); margin-top: 4px; }
+.m-close { width: 32px; height: 32px; border-radius: 8px; border: 1px solid transparent; background: transparent; color: rgba(0,0,0,0.45); display: flex; align-items: center; justify-content: center; cursor: pointer; flex-shrink: 0; }
+.m-close:hover { background: #f5f5f5; color: rgba(0,0,0,0.88); }
+.m-close svg { width: 16px; height: 16px; }
+.m-body { overflow-y: auto; flex: 1; padding: 20px 24px; }
+.m-foot { padding: 14px 24px; border-top: 1px solid #f0f0f0; display: flex; align-items: center; justify-content: flex-end; gap: 8px; background: #fafbfc; }
+.btn-modal-close { height: 34px; padding: 0 14px; border-radius: 6px; font-size: 13px; cursor: pointer; border: 1px solid #d9d9d9; background: #fff; color: rgba(0,0,0,0.88); font-weight: 500; font-family: inherit; }
+.btn-modal-close:hover { color: #1677ff; border-color: #1677ff; }
+
+/* FORM */
+.form { display: flex; flex-direction: column; gap: 14px; }
+.field { display: flex; flex-direction: column; }
+.field-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.field-row-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px; }
+.field-label { font-size: 12px; font-weight: 600; color: rgba(0,0,0,0.65); margin-bottom: 6px; letter-spacing: 0.2px; }
+.field-label .req { color: #f5222d; margin-left: 2px; }
+.fi-input { width: 100%; height: 36px; border: 1px solid #d9d9d9; border-radius: 6px; padding: 0 12px; font-size: 13px; font-family: inherit; outline: none; transition: all 0.2s; background: #fff; color: rgba(0,0,0,0.88); }
+.fi-input:focus { border-color: #1677ff; box-shadow: 0 0 0 2px rgba(22,119,255,0.1); }
+.fi-input::placeholder { color: rgba(0,0,0,0.28); }
+.fi-select { width: 100%; height: 36px; border: 1px solid #d9d9d9; border-radius: 6px; padding: 0 28px 0 12px; font-size: 13px; font-family: inherit; outline: none; background: #fff; appearance: none; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='%23bbb'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 10px center; cursor: pointer; color: rgba(0,0,0,0.88); }
+.fi-select:focus, .fi-select:hover { border-color: #1677ff; }
+.field-hint { font-size: 11px; color: rgba(0,0,0,0.45); margin-top: 4px; }
+.field-amount { display: grid; grid-template-columns: 100px 1fr; gap: 6px; }
+.divider { height: 1px; background: #f0f0f0; margin: 4px 0; }
+.field-grouped { background: #fafbfc; border: 1px solid #f0f0f0; border-radius: 8px; padding: 12px 14px; }
+.field-grouped .field-label { color: rgba(0,0,0,0.5); }
+.auto-pill { display: inline-flex; align-items: center; gap: 4px; padding: 3px 8px; border-radius: 4px; font-size: 11px; font-weight: 600; background: #f0f5ff; color: #1677ff; }
+.auto-pill svg { width: 10px; height: 10px; }
+</style>
+</head>
+<body>
+
+<!-- GNB -->
+<nav class="gnb">
+  <div class="gnb-logo">Trip<span>Store</span> <span class="partners-badge">PARTNERS</span></div>
+  <div class="gnb-menu">
+    <div class="gnb-item">대시보드</div>
+    <div class="gnb-item">페이지 제작</div>
+    <div class="gnb-item">상품 관리</div>
+    <div class="gnb-item">예약 관리</div>
+    <div class="gnb-item active">PB 관리</div>
+    <div class="gnb-item">카탈로그</div>
+    <div class="gnb-item">쿠폰</div>
+    <div class="gnb-item">정산</div>
+  </div>
+  <div class="gnb-right">
+    <span class="gnb-org-badge">놀유니버스</span>
+    <span class="gnb-user"><span class="gnb-user-name">김수현</span>님</span>
+  </div>
+</nav>
+
+<!-- BREADCRUMB -->
+<div class="breadcrumb">
+  <span>PB 관리</span>
+  <span class="sep">/</span>
+  <span class="bc-current" id="bcCurrent">숙박권</span>
+</div>
+
+<div class="layout">
+
+  <!-- PAGE HEADER -->
+  <div class="page-header">
+    <div class="page-title">아이템 관리</div>
+    <div class="page-desc" id="pageDesc">PB 상품 구성에 사용되는 숙박권을 관리합니다.</div>
+  </div>
+
+  <!-- SUBNAV -->
+  <div class="subnav-card">
+    <button class="subnav-item active" data-tab="vouchers" onclick="switchTab('vouchers')">숙박권 <span class="count" id="cntVouchers">0</span></button>
+    <button class="subnav-item" data-tab="airtickets" onclick="switchTab('airtickets')">항공권 <span class="count" id="cntAirtickets">0</span></button>
+    <button class="subnav-item" data-tab="tours" onclick="switchTab('tours')">투어·티켓 <span class="count" id="cntTours">0</span></button>
+    <button class="subnav-item" data-tab="insurance" onclick="switchTab('insurance')">보험 <span class="count" id="cntInsurance">0</span></button>
+  </div>
+
+  <!-- ====== TAB: 숙박권 ====== -->
+  <div class="tab-panel active" id="panel-vouchers">
+    <div class="toolbar">
+      <div class="search-wrap">
+        <span class="search-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg></span>
+        <input type="text" placeholder="호텔명·도시 검색">
+      </div>
+      <select class="fi"><option>도시 전체</option><option>다낭</option><option>방콕</option><option>도쿄</option></select>
+      <select class="fi"><option>상태 전체</option><option>판매중</option><option>마감</option><option>임시</option></select>
+      <button class="btn-secondary"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>엑셀 업로드</button>
+      <button class="btn-primary" onclick="openModal('voucher')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>숙박권 등록</button>
+    </div>
+
+    <div class="main-card">
+      <div class="table-wrap">
+        <table class="tbl">
+          <thead><tr><th>호텔</th><th>룸 타입</th><th>식사</th><th>체크인 ~ 아웃</th><th class="right">객실</th><th class="right">1박 요금</th><th>공급사</th><th class="center">상태</th><th class="center">관리</th></tr></thead>
+          <tbody id="voucherTbody"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- ====== TAB: 항공권 ====== -->
+  <div class="tab-panel" id="panel-airtickets">
+    <div class="toolbar">
+      <div class="search-wrap">
+        <span class="search-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg></span>
+        <input type="text" placeholder="항공사·노선 검색">
+      </div>
+      <select class="fi"><option>항공사 전체</option><option>KE 대한항공</option><option>OZ 아시아나</option><option>LJ 진에어</option></select>
+      <select class="fi"><option>상태 전체</option><option>판매중</option><option>마감</option></select>
+      <button class="btn-secondary"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>엑셀 업로드</button>
+      <button class="btn-primary" onclick="openModal('airticket')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>항공권 등록</button>
+    </div>
+
+    <div class="main-card">
+      <div class="table-wrap">
+        <table class="tbl">
+          <thead><tr><th>항공사</th><th>노선</th><th>출발 ~ 도착</th><th>등급</th><th class="right">좌석</th><th class="right">총 운임</th><th>공급사</th><th class="center">상태</th><th class="center">관리</th></tr></thead>
+          <tbody id="airticketTbody"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- ====== TAB: 투어·티켓 ====== -->
+  <div class="tab-panel" id="panel-tours">
+    <div class="toolbar">
+      <div class="search-wrap">
+        <span class="search-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg></span>
+        <input type="text" placeholder="상품명·도시 검색">
+      </div>
+      <select class="fi"><option>카테고리 전체</option><option>입장권</option><option>투어</option><option>액티비티</option></select>
+      <select class="fi"><option>도시 전체</option><option>다낭</option><option>방콕</option><option>도쿄</option></select>
+      <button class="btn-primary" onclick="openModal('tour')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>투어·티켓 등록</button>
+    </div>
+
+    <div class="main-card">
+      <div class="table-wrap">
+        <table class="tbl">
+          <thead><tr><th>상품명</th><th>카테고리</th><th>도시</th><th>운영일</th><th class="right">성인</th><th class="right">아동</th><th>공급사</th><th class="center">상태</th><th class="center">관리</th></tr></thead>
+          <tbody id="tourTbody"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- ====== TAB: 보험 ====== -->
+  <div class="tab-panel" id="panel-insurance">
+    <div class="toolbar">
+      <div class="search-wrap">
+        <span class="search-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg></span>
+        <input type="text" placeholder="상품명·보험사 검색">
+      </div>
+      <select class="fi"><option>보험사 전체</option><option>어시스트카드</option><option>KB손해보험</option><option>메리츠화재</option><option>삼성화재</option></select>
+      <button class="btn-primary" onclick="openModal('insurance')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>보험 등록</button>
+    </div>
+
+    <div class="main-card">
+      <div class="table-wrap">
+        <table class="tbl">
+          <thead><tr><th>상품명</th><th>보험사</th><th>플랜</th><th>적용 기간</th><th class="right">1인 보험료</th><th class="center">상태</th><th class="center">관리</th></tr></thead>
+          <tbody id="insuranceTbody"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<!-- ===== 숙박권 등록 MODAL ===== -->
+<div class="backdrop" id="modal-voucher" onclick="if(event.target===this) closeModal('voucher')">
+  <div class="modal md">
+    <div class="m-head">
+      <div class="m-title-wrap">
+        <div class="m-title"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 21h18"/><path d="M5 21V7l8-4v18"/><path d="M19 21V11l-6-4"/><path d="M9 9v.01"/><path d="M9 12v.01"/><path d="M9 15v.01"/></svg>숙박권 등록</div>
+        <div class="m-sub">PB 상품 구성에 사용할 숙박권을 등록합니다.</div>
+      </div>
+      <button class="m-close" onclick="closeModal('voucher')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
+    </div>
+    <div class="m-body">
+      <div class="form">
+        <div class="field"><label class="field-label">호텔명<span class="req">*</span></label><input class="fi-input" placeholder="예: 라데라 리조트 다낭"></div>
+        <div class="field-row">
+          <div class="field"><label class="field-label">도시<span class="req">*</span></label><select class="fi-select"><option>선택</option><option>다낭</option><option>방콕</option><option>도쿄</option></select></div>
+          <div class="field"><label class="field-label">공급사<span class="req">*</span></label><select class="fi-select"><option>선택</option><option>부킹닷컴</option><option>익스피디아</option><option>아고다</option><option>직접 계약</option></select></div>
+        </div>
+        <div class="field-row">
+          <div class="field"><label class="field-label">룸 타입<span class="req">*</span></label><input class="fi-input" placeholder="예: 디럭스 더블"></div>
+          <div class="field"><label class="field-label">식사 옵션</label><select class="fi-select"><option>미포함</option><option>조식 (BB)</option><option>반보드 (HB)</option><option>풀보드 (FB)</option><option>올인클루시브 (AI)</option></select></div>
+        </div>
+        <div class="field-row">
+          <div class="field"><label class="field-label">체크인<span class="req">*</span></label><input class="fi-input" type="date"></div>
+          <div class="field"><label class="field-label">체크아웃<span class="req">*</span></label><input class="fi-input" type="date"></div>
+        </div>
+        <div class="field-row-3">
+          <div class="field"><label class="field-label">객실 수<span class="req">*</span></label><input class="fi-input" type="number" placeholder="1"></div>
+          <div class="field"><label class="field-label">통화<span class="req">*</span></label><select class="fi-select"><option>USD</option><option>JPY</option><option>VND</option><option>KRW</option></select></div>
+          <div class="field"><label class="field-label">1박 요금<span class="req">*</span></label><input class="fi-input" type="number" placeholder="0"></div>
+        </div>
+        <div class="field"><label class="field-label">메모</label><input class="fi-input" placeholder="내부 메모 (선택)"></div>
+      </div>
+    </div>
+    <div class="m-foot">
+      <button class="btn-modal-close" onclick="closeModal('voucher')">취소</button>
+      <button class="btn-primary" style="margin-left:0;" onclick="closeModal('voucher')">등록</button>
+    </div>
+  </div>
+</div>
+
+<!-- ===== 항공권 등록 MODAL ===== -->
+<div class="backdrop" id="modal-airticket" onclick="if(event.target===this) closeModal('airticket')">
+  <div class="modal md">
+    <div class="m-head">
+      <div class="m-title-wrap">
+        <div class="m-title"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M17.8 19.2L16 11l3.5-3.5C21 6 21.5 4 21 3c-1-.5-3 0-4.5 1.5L13 8 4.8 6.2c-.5-.1-.9.1-1.1.5l-.3.5c-.2.5-.1 1 .3 1.3L9 12l-2 3H4l-1 1 3 2 2 3 1-1v-3l3-2 3.5 5.3c.3.4.8.5 1.3.3l.5-.2c.4-.3.6-.7.5-1.2z"/></svg>항공권 등록</div>
+        <div class="m-sub">PB 상품 구성에 사용할 항공권을 등록합니다. 유류할증료·공항이용료는 자동 합산됩니다.</div>
+      </div>
+      <button class="m-close" onclick="closeModal('airticket')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
+    </div>
+    <div class="m-body">
+      <div class="form">
+        <div class="field-row">
+          <div class="field"><label class="field-label">항공사<span class="req">*</span></label><select class="fi-select"><option>선택</option><option>KE 대한항공</option><option>OZ 아시아나항공</option><option>LJ 진에어</option><option>TW 티웨이항공</option><option>JL 일본항공</option></select></div>
+          <div class="field"><label class="field-label">공급사<span class="req">*</span></label><select class="fi-select"><option>선택</option><option>토파스</option><option>아마데우스</option><option>갈릴레오</option><option>항공사 직판</option></select></div>
+        </div>
+        <div class="field-row">
+          <div class="field"><label class="field-label">출발 공항<span class="req">*</span></label><input class="fi-input" placeholder="ICN 인천"></div>
+          <div class="field"><label class="field-label">도착 공항<span class="req">*</span></label><input class="fi-input" placeholder="DAD 다낭"></div>
+        </div>
+        <div class="field-row">
+          <div class="field"><label class="field-label">출국일<span class="req">*</span></label><input class="fi-input" type="date"></div>
+          <div class="field"><label class="field-label">귀국일<span class="req">*</span></label><input class="fi-input" type="date"></div>
+        </div>
+        <div class="field-row-3">
+          <div class="field"><label class="field-label">등급<span class="req">*</span></label><select class="fi-select"><option>Y · 이코노미</option><option>W · 프리미엄</option><option>C · 비즈니스</option><option>F · 퍼스트</option></select></div>
+          <div class="field"><label class="field-label">좌석 수<span class="req">*</span></label><input class="fi-input" type="number" placeholder="1"></div>
+          <div class="field"><label class="field-label">통화<span class="req">*</span></label><select class="fi-select"><option>USD</option><option>KRW</option></select></div>
+        </div>
+        <div class="field"><label class="field-label">항공운임 (기본)<span class="req">*</span></label><input class="fi-input" type="number" placeholder="0"></div>
+        <div class="field-grouped">
+          <div class="field-label" style="display:flex; align-items:center; justify-content:space-between;">
+            자동 합산 항목
+            <span class="auto-pill"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>PB 설정 기준 자동 적용</span>
+          </div>
+          <div class="field-hint" style="margin-top:8px;">유류할증료 (대한항공·동남아 기준 80 USD) + 공항이용료 (ICN 28,000원) 가 항공운임에 자동 합산됩니다.</div>
+        </div>
+      </div>
+    </div>
+    <div class="m-foot">
+      <button class="btn-modal-close" onclick="closeModal('airticket')">취소</button>
+      <button class="btn-primary" style="margin-left:0;" onclick="closeModal('airticket')">등록</button>
+    </div>
+  </div>
+</div>
+
+<!-- ===== 투어·티켓 등록 MODAL ===== -->
+<div class="backdrop" id="modal-tour" onclick="if(event.target===this) closeModal('tour')">
+  <div class="modal md">
+    <div class="m-head">
+      <div class="m-title-wrap">
+        <div class="m-title"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/><path d="M16 14h-8"/><path d="M16 18h-8"/><path d="M3 10v10a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V10"/></svg>투어·티켓 등록</div>
+        <div class="m-sub">입장권·투어·액티비티 단위 아이템을 등록합니다.</div>
+      </div>
+      <button class="m-close" onclick="closeModal('tour')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
+    </div>
+    <div class="m-body">
+      <div class="form">
+        <div class="field"><label class="field-label">상품명<span class="req">*</span></label><input class="fi-input" placeholder="예: 바나힐 입장권 + 케이블카"></div>
+        <div class="field-row-3">
+          <div class="field"><label class="field-label">카테고리<span class="req">*</span></label><select class="fi-select"><option>입장권</option><option>투어</option><option>액티비티</option><option>스파·마사지</option></select></div>
+          <div class="field"><label class="field-label">도시<span class="req">*</span></label><select class="fi-select"><option>선택</option><option>다낭</option><option>방콕</option><option>도쿄</option></select></div>
+          <div class="field"><label class="field-label">공급사<span class="req">*</span></label><select class="fi-select"><option>선택</option><option>KKday</option><option>Klook</option><option>GetYourGuide</option><option>Viator</option></select></div>
+        </div>
+        <div class="field"><label class="field-label">운영일<span class="req">*</span></label><input class="fi-input" type="date"></div>
+        <div class="field"><label class="field-label">통화<span class="req">*</span></label><select class="fi-select" style="max-width:160px;"><option>USD</option><option>JPY</option><option>VND</option><option>KRW</option></select></div>
+        <div class="field-row-3">
+          <div class="field"><label class="field-label">성인 금액<span class="req">*</span></label><input class="fi-input" type="number" placeholder="0"></div>
+          <div class="field"><label class="field-label">아동 금액</label><input class="fi-input" type="number" placeholder="0"></div>
+          <div class="field"><label class="field-label">유아 금액</label><input class="fi-input" type="number" placeholder="0"></div>
+        </div>
+      </div>
+    </div>
+    <div class="m-foot">
+      <button class="btn-modal-close" onclick="closeModal('tour')">취소</button>
+      <button class="btn-primary" style="margin-left:0;" onclick="closeModal('tour')">등록</button>
+    </div>
+  </div>
+</div>
+
+<!-- ===== 보험 등록 MODAL ===== -->
+<div class="backdrop" id="modal-insurance" onclick="if(event.target===this) closeModal('insurance')">
+  <div class="modal md">
+    <div class="m-head">
+      <div class="m-title-wrap">
+        <div class="m-title"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>보험 등록</div>
+        <div class="m-sub">단일 플랜 보험 상품을 등록합니다.</div>
+      </div>
+      <button class="m-close" onclick="closeModal('insurance')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
+    </div>
+    <div class="m-body">
+      <div class="form">
+        <div class="field"><label class="field-label">보험 상품명<span class="req">*</span></label><input class="fi-input" placeholder="예: 동남아 패키지 1억 플랜"></div>
+        <div class="field-row">
+          <div class="field"><label class="field-label">보험사<span class="req">*</span></label><select class="fi-select"><option>선택</option><option>어시스트카드</option><option>KB손해보험</option><option>메리츠화재</option><option>삼성화재</option></select></div>
+          <div class="field"><label class="field-label">플랜<span class="req">*</span></label><input class="fi-input" placeholder="예: 1억 / 3억 / 5억"></div>
+        </div>
+        <div class="field-row">
+          <div class="field"><label class="field-label">적용 시작일<span class="req">*</span></label><input class="fi-input" type="date"></div>
+          <div class="field"><label class="field-label">적용 종료일<span class="req">*</span></label><input class="fi-input" type="date"></div>
+        </div>
+        <div class="field-row">
+          <div class="field"><label class="field-label">통화<span class="req">*</span></label><select class="fi-select"><option>KRW</option><option>USD</option></select></div>
+          <div class="field"><label class="field-label">1인 보험료<span class="req">*</span></label><input class="fi-input" type="number" placeholder="0"></div>
+        </div>
+        <div class="field-hint">멀티 플랜 구조는 후속 단계에서 지원됩니다. 현재는 단일 플랜만 등록 가능합니다.</div>
+      </div>
+    </div>
+    <div class="m-foot">
+      <button class="btn-modal-close" onclick="closeModal('insurance')">취소</button>
+      <button class="btn-primary" style="margin-left:0;" onclick="closeModal('insurance')">등록</button>
+    </div>
+  </div>
+</div>
+
+<script>
+const tabMeta = {
+  vouchers: { label: '숙박권', desc: 'PB 상품 구성에 사용되는 숙박권을 관리합니다.' },
+  airtickets: { label: '항공권', desc: 'PB 상품 구성에 사용되는 항공권을 관리합니다. 유류할증료·공항이용료는 자동 합산됩니다.' },
+  tours: { label: '투어·티켓', desc: 'PB 상품 구성에 사용되는 투어·티켓·액티비티 아이템을 관리합니다.' },
+  insurance: { label: '보험', desc: 'PB 상품 구성에 사용되는 보험 상품을 관리합니다. 단일 플랜 구조 기준.' },
+};
+function switchTab(tab) {
+  document.querySelectorAll('.subnav-item').forEach(b => b.classList.toggle('active', b.dataset.tab === tab));
+  document.querySelectorAll('.tab-panel').forEach(p => p.classList.toggle('active', p.id === 'panel-' + tab));
+  document.getElementById('bcCurrent').textContent = tabMeta[tab].label;
+  document.getElementById('pageDesc').textContent = tabMeta[tab].desc;
+  if (history.replaceState) history.replaceState(null, '', '#' + tab);
+}
+const initTab = (location.hash || '').replace('#', '');
+if (initTab && tabMeta[initTab]) switchTab(initTab);
+
+function openModal(kind) {
+  document.getElementById('modal-' + kind).classList.add('active');
+  document.body.classList.add('modal-open');
+}
+function closeModal(kind) {
+  document.getElementById('modal-' + kind).classList.remove('active');
+  if (!document.querySelectorAll('.backdrop.active').length) document.body.classList.remove('modal-open');
+}
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape') document.querySelectorAll('.backdrop.active').forEach(m => {
+    const id = m.id.replace('modal-', '');
+    closeModal(id);
+  });
+});
+
+// MOCK DATA
+const vouchers = [
+  { hotel: '라데라 리조트 다낭', en: 'Ladera Resort Da Nang', room: '디럭스 더블', meal: '조식', period: '06.15 ~ 06.18', rooms: 1, price: '180', cur: 'USD', supplier: '부킹닷컴', status: 'live' },
+  { hotel: '풀먼 방콕 G', en: 'Pullman Bangkok G', room: '슈페리어', meal: '미포함', period: '07.01 ~ 07.04', rooms: 2, price: '150', cur: 'USD', supplier: '아고다', status: 'live' },
+  { hotel: '신주쿠 그랜벨', en: 'Shinjuku Granbell', room: '트윈 디럭스', meal: '미포함', period: '08.10 ~ 08.13', rooms: 1, price: '22,000', cur: 'JPY', supplier: '익스피디아', status: 'draft' },
+];
+const airtickets = [
+  { airline: 'KE 대한항공', route: 'ICN → DAD', period: '06.15 → 06.18', grade: 'Y · 이코노미', seats: 2, price: '480', cur: 'USD', supplier: '토파스', status: 'live' },
+  { airline: 'OZ 아시아나항공', route: 'ICN → BKK', period: '07.01 → 07.04', grade: 'Y · 이코노미', seats: 2, price: '520', cur: 'USD', supplier: '아마데우스', status: 'live' },
+  { airline: 'LJ 진에어', route: 'ICN → NRT', period: '08.10 → 08.13', grade: 'Y · 이코노미', seats: 1, price: '38,000', cur: 'JPY', supplier: '갈릴레오', status: 'closed' },
+];
+const tours = [
+  { name: '바나힐 입장권 + 케이블카', category: '입장권', city: '다낭', date: '06.16', adult: '45', child: '35', cur: 'USD', supplier: 'KKday', status: 'live' },
+  { name: '왕궁 + 에메랄드 사원 투어', category: '투어', city: '방콕', date: '07.02', adult: '60', child: '40', cur: 'USD', supplier: 'Klook', status: 'live' },
+  { name: '디즈니랜드 1일권', category: '입장권', city: '도쿄', date: '08.11', adult: '9,400', child: '5,600', cur: 'JPY', supplier: 'KKday', status: 'live' },
+];
+const insurances = [
+  { name: '동남아 패키지 1억 플랜', insurer: '어시스트카드', plan: '1억원', period: '06.01 ~ 12.31', price: '8,500', cur: 'KRW', status: 'live' },
+  { name: '동남아 패키지 3억 플랜', insurer: 'KB손해보험', plan: '3억원', period: '06.01 ~ 12.31', price: '12,800', cur: 'KRW', status: 'live' },
+  { name: '미주·유럽 5억 플랜', insurer: '삼성화재', plan: '5억원', period: '06.01 ~ 12.31', price: '24,500', cur: 'KRW', status: 'live' },
+];
+
+const statusLabel = { live: '판매중', draft: '임시', closed: '마감' };
+const supplierTagClass = (s) => {
+  if (['KKday','Klook','GetYourGuide','Viator'].includes(s)) return 'tag-blue';
+  if (['어시스트카드','KB손해보험','메리츠화재','삼성화재'].includes(s)) return 'tag-purple';
+  if (['부킹닷컴','익스피디아','아고다'].includes(s)) return 'tag-green';
+  if (['토파스','아마데우스','갈릴레오','항공사 직판'].includes(s)) return 'tag-orange';
+  return 'tag-gray';
+};
+const actions = `
+  <div class="row-actions">
+    <button class="icon-btn" title="수정"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg></button>
+    <button class="icon-btn danger" title="삭제"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/></svg></button>
+  </div>
+`;
+function nf(n) { return n; }
+
+document.getElementById('voucherTbody').innerHTML = vouchers.map(v => `
+  <tr>
+    <td><div class="cell-name">${v.hotel}</div><div class="cell-sub">${v.en}</div></td>
+    <td>${v.room}</td>
+    <td><span class="tag tag-gray">${v.meal}</span></td>
+    <td>${v.period}</td>
+    <td class="right">${v.rooms}</td>
+    <td class="right"><span class="amount">${nf(v.price)}</span><span class="amount-cur">${v.cur}</span></td>
+    <td><span class="tag ${supplierTagClass(v.supplier)}">${v.supplier}</span></td>
+    <td class="center"><span class="status-pill ${v.status}">${statusLabel[v.status]}</span></td>
+    <td class="center">${actions}</td>
+  </tr>
+`).join('');
+
+document.getElementById('airticketTbody').innerHTML = airtickets.map(a => `
+  <tr>
+    <td><div class="cell-name">${a.airline}</div></td>
+    <td><div class="cell-name">${a.route}</div></td>
+    <td>${a.period}</td>
+    <td>${a.grade}</td>
+    <td class="right">${a.seats}</td>
+    <td class="right"><span class="amount">${nf(a.price)}</span><span class="amount-cur">${a.cur}</span></td>
+    <td><span class="tag ${supplierTagClass(a.supplier)}">${a.supplier}</span></td>
+    <td class="center"><span class="status-pill ${a.status}">${statusLabel[a.status]}</span></td>
+    <td class="center">${actions}</td>
+  </tr>
+`).join('');
+
+document.getElementById('tourTbody').innerHTML = tours.map(t => `
+  <tr>
+    <td><div class="cell-name">${t.name}</div></td>
+    <td><span class="tag tag-gray">${t.category}</span></td>
+    <td>${t.city}</td>
+    <td>${t.date}</td>
+    <td class="right"><span class="amount">${nf(t.adult)}</span><span class="amount-cur">${t.cur}</span></td>
+    <td class="right"><span class="amount">${nf(t.child)}</span><span class="amount-cur">${t.cur}</span></td>
+    <td><span class="tag ${supplierTagClass(t.supplier)}">${t.supplier}</span></td>
+    <td class="center"><span class="status-pill ${t.status}">${statusLabel[t.status]}</span></td>
+    <td class="center">${actions}</td>
+  </tr>
+`).join('');
+
+document.getElementById('insuranceTbody').innerHTML = insurances.map(i => `
+  <tr>
+    <td><div class="cell-name">${i.name}</div></td>
+    <td><span class="tag ${supplierTagClass(i.insurer)}">${i.insurer}</span></td>
+    <td>${i.plan}</td>
+    <td>${i.period}</td>
+    <td class="right"><span class="amount">${nf(i.price)}</span><span class="amount-cur">${i.cur}</span></td>
+    <td class="center"><span class="status-pill ${i.status}">${statusLabel[i.status]}</span></td>
+    <td class="center">${actions}</td>
+  </tr>
+`).join('');
+
+document.getElementById('cntVouchers').textContent = vouchers.length;
+document.getElementById('cntAirtickets').textContent = airtickets.length;
+document.getElementById('cntTours').textContent = tours.length;
+document.getElementById('cntInsurance').textContent = insurances.length;
+</script>
+
+</body>
+</html>
