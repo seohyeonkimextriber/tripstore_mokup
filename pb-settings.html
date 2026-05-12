@@ -179,12 +179,30 @@ table.tbl.compact tbody td { padding: 9px 14px; font-size: 12.5px; }
 .btn-primary-sm { height: 32px; padding: 0 14px; border-radius: 6px; font-size: 12.5px; font-weight: 600; cursor: pointer; border: 1px solid #1677ff; background: #1677ff; color: #fff; display: inline-flex; align-items: center; gap: 5px; transition: all 0.15s; }
 .btn-primary-sm:hover { background: #4096ff; }
 .btn-primary-sm svg { width: 13px; height: 13px; }
-.group-row td { background: #fafbfc !important; padding: 9px 14px !important; font-size: 11.5px; font-weight: 700; color: rgba(0,0,0,0.55); border-bottom: 1px solid #f0f0f0 !important; letter-spacing: 0.2px; }
-.group-row td .group-label { display: inline-flex; align-items: center; gap: 7px; }
-.group-row td .group-dot { width: 6px; height: 6px; border-radius: 50%; display: inline-block; }
-.group-row td .group-dot.ticket { background: #1677ff; }
-.group-row td .group-dot.insurance { background: #722ed1; }
-.group-row td .group-count { color: rgba(0,0,0,0.4); font-weight: 600; margin-left: 4px; }
+/* ===== PROVIDER SECTIONS (카드 그리드) ===== */
+.prov-section { background: #fff; border: 1px solid #f0f0f0; border-radius: 10px; padding: 14px 16px 16px; margin-bottom: 14px; }
+.prov-section-head { display: flex; align-items: center; gap: 10px; margin-bottom: 12px; padding-bottom: 12px; border-bottom: 1px solid #f5f5f5; }
+.prov-section-dot { width: 7px; height: 7px; border-radius: 50%; }
+.prov-section-dot.ticket { background: #1677ff; }
+.prov-section-dot.insurance { background: #722ed1; }
+.prov-section-title { font-size: 13.5px; font-weight: 700; color: rgba(0,0,0,0.85); letter-spacing: -0.2px; }
+.prov-section-count { font-size: 12px; color: rgba(0,0,0,0.45); font-weight: 600; margin-left: auto; background: #f5f5f5; padding: 3px 9px; border-radius: 10px; }
+
+.prov-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; }
+@media (max-width: 1200px) { .prov-grid { grid-template-columns: repeat(3, 1fr); } }
+@media (max-width: 880px) { .prov-grid { grid-template-columns: repeat(2, 1fr); } }
+@media (max-width: 600px) { .prov-grid { grid-template-columns: 1fr; } }
+
+.prov-card { background: #fafbfc; border: 1px solid #f0f0f0; border-radius: 8px; padding: 12px 14px; position: relative; transition: all 0.15s; }
+.prov-card:hover { background: #fff; border-color: #91caff; box-shadow: 0 2px 8px rgba(22,119,255,0.07); }
+.prov-card-head { display: flex; align-items: center; gap: 9px; margin-bottom: 10px; }
+.prov-card-edit { position: absolute; top: 10px; right: 10px; }
+.prov-card-info { display: flex; flex-direction: column; gap: 4px; min-width: 0; }
+.prov-card-line { display: flex; align-items: center; gap: 6px; font-size: 11.5px; color: rgba(0,0,0,0.55); }
+.prov-card-line .lbl { font-weight: 600; color: rgba(0,0,0,0.4); width: 50px; flex-shrink: 0; letter-spacing: 0.2px; }
+.prov-card-line .val { color: rgba(0,0,0,0.82); font-weight: 500; }
+.prov-card-line .val.mono { font-family: 'SF Mono', 'Roboto Mono', monospace; font-size: 11px; }
+.prov-empty { padding: 28px 16px; text-align: center; color: rgba(0,0,0,0.4); font-size: 12.5px; }
 .row-actions { display: inline-flex; gap: 2px; }
 .icon-btn { width: 26px; height: 26px; border-radius: 6px; border: 1px solid transparent; background: transparent; color: rgba(0,0,0,0.45); display: inline-flex; align-items: center; justify-content: center; cursor: pointer; transition: all 0.15s; }
 .icon-btn:hover { background: #f0f5ff; color: #1677ff; }
@@ -467,7 +485,7 @@ table.tbl.compact tbody td { padding: 9px 14px; font-size: 12.5px; }
       </div>
     </div>
 
-    <div class="filter-bar">
+    <div style="display:flex; align-items:center; gap:10px; margin-bottom:14px; flex-wrap:wrap;">
       <div class="search-wrap">
         <span class="search-icon">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
@@ -479,42 +497,17 @@ table.tbl.compact tbody td { padding: 9px 14px; font-size: 12.5px; }
         <option value="ticket">티켓 공급사</option>
         <option value="insurance">보험 공급사</option>
       </select>
-      <select class="fi">
-        <option>상태 전체</option>
-        <option>운영중</option>
-        <option>중단</option>
-      </select>
-      <div style="margin-left:auto; display:flex; align-items:center; gap:10px;">
-        <div class="filter-total">총 <strong id="provFilterTotal">8</strong>개사</div>
-        <button class="btn-primary-sm" onclick="alert('공급사 등록 (목업)')">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-          공급사 등록
-        </button>
-      </div>
+      <button class="btn-primary-sm" style="margin-left:auto;" onclick="alert('공급사 등록 (목업)')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+        공급사 등록
+      </button>
     </div>
 
-    <div class="main-card">
-      <div class="table-wrap">
-        <table class="tbl compact">
-          <thead>
-            <tr>
-              <th>공급사</th>
-              <th>코드</th>
-              <th>통화</th>
-              <th>정산 조건</th>
-              <th>담당자</th>
-              <th class="center">상태</th>
-              <th class="center">관리</th>
-            </tr>
-          </thead>
-          <tbody id="provTbody"><!-- rendered by JS --></tbody>
-        </table>
-      </div>
-    </div>
+    <div id="provSections"><!-- rendered by JS --></div>
 
     <div class="footnote">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
-      <div>티켓·보험 공급사는 PB 상품 구성 시 선택할 수 있는 거래처입니다. 등록·수정·삭제는 PB 관리자 권한 계정에서만 가능합니다.</div>
+      <div>티켓·보험 공급사는 PB 상품 구성 시 선택할 수 있는 거래처입니다. 등록·수정은 PB 관리자 권한 계정에서만 가능하며, 한 번 등록된 공급사는 삭제할 수 없습니다.</div>
     </div>
   </div>
 
@@ -1000,56 +993,50 @@ const providers = [
 function renderProviderTable() {
   const cat = document.getElementById('provCategory').value;
   const list = providers.filter(p => cat === 'ALL' || p.category === cat);
-  document.getElementById('provFilterTotal').textContent = list.length;
 
   const categories = [
     { key: 'ticket',    label: '티켓 공급사' },
     { key: 'insurance', label: '보험 공급사' },
   ];
 
-  const providerRow = (p) => `
-    <tr>
-      <td>
-        <div class="airline-cell">
-          <div class="prov-logo ${p.logo}">${p.code.slice(0,2)}</div>
-          <div><div class="prov-name">${p.name}</div><div class="prov-en">${p.en}</div></div>
+  const providerCard = (p) => `
+    <div class="prov-card">
+      <button class="icon-btn prov-card-edit" title="수정" onclick="alert('${p.name} 수정 (목업)')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+      </button>
+      <div class="prov-card-head">
+        <div class="prov-logo ${p.logo}">${p.code.slice(0,2)}</div>
+        <div style="min-width:0;">
+          <div class="prov-name">${p.name}</div>
+          <div class="prov-en">${p.en}</div>
         </div>
-      </td>
-      <td style="font-family: 'SF Mono', 'Roboto Mono', monospace; color: rgba(0,0,0,0.65); font-size: 11.5px;">${p.code}</td>
-      <td>${p.currency}</td>
-      <td>${p.terms}</td>
-      <td style="color: rgba(0,0,0,0.65);">${p.manager}</td>
-      <td style="text-align:center;"><span class="status-dot ${p.status === 'active' ? '' : 'inactive'}">${p.status === 'active' ? '운영중' : '중단'}</span></td>
-      <td style="text-align:center;">
-        <div class="row-actions">
-          <button class="icon-btn" title="수정" onclick="alert('${p.name} 수정 (목업)')">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
-          </button>
-          <button class="icon-btn" title="삭제" onclick="alert('${p.name} 삭제 (목업)')">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/></svg>
-          </button>
-        </div>
-      </td>
-    </tr>
+      </div>
+      <div class="prov-card-info">
+        <div class="prov-card-line"><span class="lbl">코드</span><span class="val mono">${p.code}</span></div>
+        <div class="prov-card-line"><span class="lbl">통화</span><span class="val">${p.currency}</span></div>
+        <div class="prov-card-line"><span class="lbl">정산</span><span class="val">${p.terms}</span></div>
+        <div class="prov-card-line"><span class="lbl">담당자</span><span class="val">${p.manager}</span></div>
+      </div>
+    </div>
   `;
 
   const html = categories.map(c => {
     const inCat = list.filter(p => p.category === c.key);
-    if (inCat.length === 0) return '';
+    if (cat !== 'ALL' && cat !== c.key) return '';
+    if (inCat.length === 0 && cat === 'ALL') return '';
     return `
-      <tr class="group-row">
-        <td colspan="7">
-          <span class="group-label">
-            <span class="group-dot ${c.key}"></span>${c.label}
-            <span class="group-count">${inCat.length}개사</span>
-          </span>
-        </td>
-      </tr>
-      ${inCat.map(providerRow).join('')}
+      <div class="prov-section">
+        <div class="prov-section-head">
+          <span class="prov-section-dot ${c.key}"></span>
+          <span class="prov-section-title">${c.label}</span>
+          <span class="prov-section-count">${inCat.length}개사</span>
+        </div>
+        ${inCat.length ? `<div class="prov-grid">${inCat.map(providerCard).join('')}</div>` : `<div class="prov-empty">등록된 ${c.label}가 없습니다.</div>`}
+      </div>
     `;
   }).join('');
 
-  document.getElementById('provTbody').innerHTML = html || `<tr><td colspan="7" style="text-align:center; padding:32px; color:rgba(0,0,0,0.4);">조건에 맞는 공급사가 없습니다.</td></tr>`;
+  document.getElementById('provSections').innerHTML = html || `<div class="prov-empty">조건에 맞는 공급사가 없습니다.</div>`;
   document.getElementById('provTotal').textContent = providers.length;
   document.getElementById('provTicket').textContent = providers.filter(p => p.category === 'ticket').length;
   document.getElementById('provInsurance').textContent = providers.filter(p => p.category === 'insurance').length;
