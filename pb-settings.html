@@ -265,6 +265,28 @@ table.tbl.compact tbody td { padding: 9px 14px; font-size: 12.5px; }
 .m-foot-info { font-size: 12px; color: rgba(0,0,0,0.45); }
 .btn-modal-close { height: 32px; padding: 0 14px; border-radius: 6px; font-size: 13px; cursor: pointer; border: 1px solid #d9d9d9; background: #fff; color: rgba(0,0,0,0.88); font-family: inherit; font-weight: 500; transition: all 0.15s; }
 .btn-modal-close:hover { color: #1677ff; border-color: #1677ff; }
+
+/* ===== CREATE PROVIDER MODAL ===== */
+.modal.sm { max-width: 480px; }
+.m-form { padding: 22px 24px 8px; display: flex; flex-direction: column; gap: 18px; }
+.field-label { display: block; font-size: 12px; font-weight: 600; color: rgba(0,0,0,0.65); margin-bottom: 7px; letter-spacing: 0.2px; }
+.field-label .req { color: #f5222d; margin-left: 2px; }
+.cat-options { display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; }
+.cat-option { display: flex; align-items: center; gap: 8px; padding: 10px 14px; border: 1px solid #e8e8e8; border-radius: 8px; cursor: pointer; background: #fff; transition: all 0.15s; font-size: 13px; font-weight: 500; color: rgba(0,0,0,0.75); font-family: inherit; }
+.cat-option:hover { border-color: #91caff; color: rgba(0,0,0,0.88); }
+.cat-option.active { background: #f0f7ff; border-color: #1677ff; color: #1677ff; font-weight: 600; }
+.cat-option .dot { width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0; }
+.cat-option .dot.ticket { background: #1677ff; }
+.cat-option .dot.insurance { background: #722ed1; }
+.cat-option .dot.hotel { background: #389e0d; }
+.cat-option .dot.flight { background: #d48806; }
+.fi-input { width: 100%; height: 38px; border: 1px solid #d9d9d9; border-radius: 6px; padding: 0 12px; font-size: 13.5px; font-family: inherit; color: rgba(0,0,0,0.88); outline: none; transition: border 0.2s, box-shadow 0.2s; background: #fff; }
+.fi-input:focus { border-color: #1677ff; box-shadow: 0 0 0 2px rgba(22,119,255,0.1); }
+.fi-input::placeholder { color: rgba(0,0,0,0.28); }
+.field-hint { font-size: 11px; color: rgba(0,0,0,0.45); margin-top: 6px; }
+.m-foot .btn-primary { height: 34px; padding: 0 16px; border-radius: 6px; font-size: 13px; font-weight: 600; cursor: pointer; border: 1px solid #1677ff; background: #1677ff; color: #fff; font-family: inherit; transition: all 0.15s; }
+.m-foot .btn-primary:hover { background: #4096ff; }
+.m-foot .btn-primary:disabled { background: #d9d9d9; border-color: #d9d9d9; color: #fff; cursor: not-allowed; }
 </style>
 </head>
 <body>
@@ -503,7 +525,7 @@ table.tbl.compact tbody td { padding: 9px 14px; font-size: 12.5px; }
         <option value="hotel">숙박 공급사</option>
         <option value="flight">항공 공급사</option>
       </select>
-      <button class="btn-primary-sm" style="margin-left:auto;" onclick="alert('공급사 등록 (목업)')">
+      <button class="btn-primary-sm" style="margin-left:auto;" onclick="openProviderCreate()">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
         공급사 등록
       </button>
@@ -517,6 +539,50 @@ table.tbl.compact tbody td { padding: 9px 14px; font-size: 12.5px; }
     </div>
   </div>
 
+</div>
+
+<!-- ===== CREATE PROVIDER MODAL ===== -->
+<div class="backdrop" id="createProvBackdrop" onclick="if(event.target===this) closeProviderCreate()">
+  <div class="modal sm">
+    <div class="m-head">
+      <div class="m-title-wrap">
+        <div class="m-title">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+          공급사 등록
+        </div>
+        <div class="m-sub">카테고리를 선택하고 공급사 명칭을 입력해 주세요. 등록 후에는 명칭 수정·삭제가 불가합니다.</div>
+      </div>
+      <button class="m-close" onclick="closeProviderCreate()" aria-label="닫기">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>
+    </div>
+
+    <div class="m-form">
+      <div>
+        <label class="field-label">카테고리<span class="req">*</span></label>
+        <div class="cat-options" id="catOptions">
+          <button class="cat-option" data-cat="ticket" onclick="selectCategory('ticket')"><span class="dot ticket"></span>티켓 공급사</button>
+          <button class="cat-option" data-cat="insurance" onclick="selectCategory('insurance')"><span class="dot insurance"></span>보험 공급사</button>
+          <button class="cat-option" data-cat="hotel" onclick="selectCategory('hotel')"><span class="dot hotel"></span>숙박 공급사</button>
+          <button class="cat-option" data-cat="flight" onclick="selectCategory('flight')"><span class="dot flight"></span>항공 공급사</button>
+        </div>
+      </div>
+
+      <div>
+        <label class="field-label" for="provNameInput">공급사 명칭<span class="req">*</span></label>
+        <input type="text" id="provNameInput" class="fi-input" placeholder="예: KKday, 어시스트카드" oninput="validateCreateForm()">
+        <div class="field-hint">한글·영문·숫자 입력 가능. 등록 후 수정 불가.</div>
+      </div>
+    </div>
+
+    <div class="m-foot">
+      <div class="m-foot-info">⚠ 등록 후 명칭 수정·삭제는 할 수 없습니다.</div>
+      <div style="display:flex; gap:8px;">
+        <button class="btn-modal-close" onclick="closeProviderCreate()">취소</button>
+        <button class="btn-primary" id="provCreateBtn" onclick="submitProviderCreate()" disabled>등록</button>
+      </div>
+    </div>
+  </div>
 </div>
 
 <!-- ===== EXCHANGE HISTORY MODAL ===== -->
@@ -979,7 +1045,8 @@ function anyModalOpen() {
 }
 document.addEventListener('keydown', e => {
   if (e.key === 'Escape') {
-    if (document.getElementById('fuelHistoryBackdrop').classList.contains('active')) closeFuelHistory();
+    if (document.getElementById('createProvBackdrop').classList.contains('active')) closeProviderCreate();
+    else if (document.getElementById('fuelHistoryBackdrop').classList.contains('active')) closeFuelHistory();
     else if (document.getElementById('routesBackdrop').classList.contains('active')) closeRoutesModal();
     else if (document.getElementById('exchangeBackdrop').classList.contains('active')) closeExchangeHistory();
   }
@@ -1047,9 +1114,46 @@ function renderProviderTable() {
   document.getElementById('provFlight').textContent = providers.filter(p => p.category === 'flight').length;
 }
 
+// ===================== CREATE PROVIDER MODAL =====================
+let createCategory = null;
+function openProviderCreate() {
+  createCategory = null;
+  document.querySelectorAll('#catOptions .cat-option').forEach(b => b.classList.remove('active'));
+  document.getElementById('provNameInput').value = '';
+  validateCreateForm();
+  document.getElementById('createProvBackdrop').classList.add('active');
+  document.body.classList.add('modal-open');
+  setTimeout(() => document.getElementById('provNameInput').focus(), 50);
+}
+function closeProviderCreate() {
+  document.getElementById('createProvBackdrop').classList.remove('active');
+  if (!anyModalOpen()) document.body.classList.remove('modal-open');
+}
+function selectCategory(cat) {
+  createCategory = cat;
+  document.querySelectorAll('#catOptions .cat-option').forEach(b => b.classList.toggle('active', b.dataset.cat === cat));
+  validateCreateForm();
+}
+function validateCreateForm() {
+  const name = document.getElementById('provNameInput').value.trim();
+  document.getElementById('provCreateBtn').disabled = !(createCategory && name.length >= 1);
+}
+function submitProviderCreate() {
+  const name = document.getElementById('provNameInput').value.trim();
+  if (!createCategory || !name) return;
+  const labels = { ticket: '티켓', insurance: '보험', hotel: '숙박', flight: '항공' };
+  providers.push({ name, en: '', logo: '', category: createCategory });
+  closeProviderCreate();
+  renderProviderTable();
+}
+
 // ===================== INIT =====================
 renderAirlineTable();
 renderProviderTable();
+if (new URLSearchParams(location.search).get('openCreate')) {
+  switchTab('providers');
+  openProviderCreate();
+}
 </script>
 
 </body>
