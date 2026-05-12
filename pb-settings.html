@@ -179,6 +179,12 @@ table.tbl.compact tbody td { padding: 9px 14px; font-size: 12.5px; }
 .btn-primary-sm { height: 32px; padding: 0 14px; border-radius: 6px; font-size: 12.5px; font-weight: 600; cursor: pointer; border: 1px solid #1677ff; background: #1677ff; color: #fff; display: inline-flex; align-items: center; gap: 5px; transition: all 0.15s; }
 .btn-primary-sm:hover { background: #4096ff; }
 .btn-primary-sm svg { width: 13px; height: 13px; }
+.group-row td { background: #fafbfc !important; padding: 9px 14px !important; font-size: 11.5px; font-weight: 700; color: rgba(0,0,0,0.55); border-bottom: 1px solid #f0f0f0 !important; letter-spacing: 0.2px; }
+.group-row td .group-label { display: inline-flex; align-items: center; gap: 7px; }
+.group-row td .group-dot { width: 6px; height: 6px; border-radius: 50%; display: inline-block; }
+.group-row td .group-dot.ticket { background: #1677ff; }
+.group-row td .group-dot.insurance { background: #722ed1; }
+.group-row td .group-count { color: rgba(0,0,0,0.4); font-weight: 600; margin-left: 4px; }
 .row-actions { display: inline-flex; gap: 2px; }
 .icon-btn { width: 26px; height: 26px; border-radius: 6px; border: 1px solid transparent; background: transparent; color: rgba(0,0,0,0.45); display: inline-flex; align-items: center; justify-content: center; cursor: pointer; transition: all 0.15s; }
 .icon-btn:hover { background: #f0f5ff; color: #1677ff; }
@@ -493,7 +499,6 @@ table.tbl.compact tbody td { padding: 9px 14px; font-size: 12.5px; }
           <thead>
             <tr>
               <th>공급사</th>
-              <th>카테고리</th>
               <th>코드</th>
               <th>통화</th>
               <th>정산 조건</th>
@@ -996,8 +1001,13 @@ function renderProviderTable() {
   const cat = document.getElementById('provCategory').value;
   const list = providers.filter(p => cat === 'ALL' || p.category === cat);
   document.getElementById('provFilterTotal').textContent = list.length;
-  const catLabel = (c) => c === 'ticket' ? '티켓 공급사' : '보험 공급사';
-  document.getElementById('provTbody').innerHTML = list.map(p => `
+
+  const categories = [
+    { key: 'ticket',    label: '티켓 공급사' },
+    { key: 'insurance', label: '보험 공급사' },
+  ];
+
+  const providerRow = (p) => `
     <tr>
       <td>
         <div class="airline-cell">
@@ -1005,7 +1015,6 @@ function renderProviderTable() {
           <div><div class="prov-name">${p.name}</div><div class="prov-en">${p.en}</div></div>
         </div>
       </td>
-      <td><span class="cat-tag ${p.category}">${catLabel(p.category)}</span></td>
       <td style="font-family: 'SF Mono', 'Roboto Mono', monospace; color: rgba(0,0,0,0.65); font-size: 11.5px;">${p.code}</td>
       <td>${p.currency}</td>
       <td>${p.terms}</td>
@@ -1022,7 +1031,25 @@ function renderProviderTable() {
         </div>
       </td>
     </tr>
-  `).join('');
+  `;
+
+  const html = categories.map(c => {
+    const inCat = list.filter(p => p.category === c.key);
+    if (inCat.length === 0) return '';
+    return `
+      <tr class="group-row">
+        <td colspan="7">
+          <span class="group-label">
+            <span class="group-dot ${c.key}"></span>${c.label}
+            <span class="group-count">${inCat.length}개사</span>
+          </span>
+        </td>
+      </tr>
+      ${inCat.map(providerRow).join('')}
+    `;
+  }).join('');
+
+  document.getElementById('provTbody').innerHTML = html || `<tr><td colspan="7" style="text-align:center; padding:32px; color:rgba(0,0,0,0.4);">조건에 맞는 공급사가 없습니다.</td></tr>`;
   document.getElementById('provTotal').textContent = providers.length;
   document.getElementById('provTicket').textContent = providers.filter(p => p.category === 'ticket').length;
   document.getElementById('provInsurance').textContent = providers.filter(p => p.category === 'insurance').length;
