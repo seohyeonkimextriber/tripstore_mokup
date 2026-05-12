@@ -307,7 +307,6 @@ tbody tr:hover td { background: #fafafa; }
         <span style="font-size:12px; color:rgba(0,0,0,0.55);">자동 동기화 <span style="color:#52c41a;">●</span> 정상</span>
         <span style="font-size:11px; color:rgba(0,0,0,0.35);">마지막 webhook: 12분 전 (RATE_UPDATE)</span>
       </div>
-      <button class="btn btn-default" onclick="openRateQueryModal()">📊 요금표 조회</button>
       <button class="btn btn-default" onclick="if(confirm('전체 요금 데이터를 TMG에서 강제 재동기화합니다.\\n\\n사용 시점:\\n· webhook 장애 후 복구\\n· 데이터 누락 의심 시\\n· 신규 호텔 추가 직후\\n\\n예상 소요: 약 3~5분\\n\\n진행할까요?')) alert('재동기화를 시작합니다.\\n\\nAPI: /getRatesFromTo 전체 호텔 일괄 호출\\n진행 상황은 상단 알림으로 확인할 수 있습니다.')">🔄 전체 강제 재동기화</button>
     </div>
   </div>
@@ -1062,157 +1061,6 @@ tbody tr:hover td { background: #fafafa; }
   </div>
 </div>
 
-<!-- ==================== MODAL: 요금표 조회 (2.9 getRatesFromTo) ==================== -->
-<div class="modal-overlay" id="modal-rate-query">
-  <div class="modal modal-xl">
-    <div class="modal-header">
-      <div class="modal-title">
-        <span class="tag tag-purple">2.9 getRatesFromTo</span>
-        요금표 수동 조회
-      </div>
-      <button class="modal-close" onclick="closeModal()">×</button>
-    </div>
-    <div class="modal-body">
-      <div class="notice-banner notice-orange" style="border-radius:8px; border-left-width:3px; margin-bottom:16px;">
-        <span class="notice-icon">ℹ</span>
-        <div>특정 호텔의 기간별 요금·재고를 TMG에서 직접 조회합니다. <strong>운영 데이터 검증, PB 가격 비교, Webhook 누락 fallback</strong> 용도로 사용하세요. 조회 결과는 화면 표시 전용이며 자동 저장되지 않습니다.</div>
-      </div>
-
-      <div class="query-form">
-        <div class="form-group" style="margin-bottom:0;">
-          <label class="form-label">호텔 <span class="required">*</span></label>
-          <select class="form-control">
-            <option>Vinpearl Resort Nha Trang (577194)</option>
-            <option>JW Marriott Phu Quoc</option>
-            <option>InterContinental Danang</option>
-            <option>Marina Bay Vũng Tàu Resort</option>
-          </select>
-        </div>
-        <div class="form-group" style="margin-bottom:0;">
-          <label class="form-label">시작일 <span class="required">*</span></label>
-          <input type="date" class="form-control" value="2026-05-15">
-        </div>
-        <div class="form-group" style="margin-bottom:0;">
-          <label class="form-label">종료일 <span class="required">*</span></label>
-          <input type="date" class="form-control" value="2026-05-20">
-        </div>
-        <button class="btn btn-primary" style="height:38px;">조회하기</button>
-      </div>
-
-      <div class="query-result-head">
-        <div class="meta">
-          <strong>Vinpearl Resort Nha Trang</strong> · 2026-05-15 ~ 2026-05-20 (6일)
-          <span style="margin-left:10px; color:rgba(0,0,0,0.45);">조회 시각: 2026-05-12 17:24</span>
-        </div>
-        <div style="display:flex; gap:6px;">
-          <button class="btn btn-default btn-sm">CSV 내보내기</button>
-          <button class="btn btn-default btn-sm">PB 가격과 비교</button>
-        </div>
-      </div>
-
-      <div class="rate-table-wrap">
-        <table class="rate-table">
-          <thead>
-            <tr>
-              <th>객실</th>
-              <th>요금 플랜</th>
-              <th>boardCode</th>
-              <th>05-15</th>
-              <th>05-16</th>
-              <th>05-17</th>
-              <th>05-18</th>
-              <th>05-19</th>
-              <th>05-20</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr class="rate-plan-row">
-              <td colspan="9">💼 Tripstores Contracting (rateId: 40639) · 2025-06-30 ~ 2025-12-31 · cutOff 0 · minNight 1</td>
-            </tr>
-            <tr>
-              <td class="room-name">Superior Double<br><span style="font-size:11px; color:rgba(0,0,0,0.45);">2A · 1462</span></td>
-              <td><span class="tag tag-purple">Tripstores</span></td>
-              <td>BB</td>
-              <td class="num">1,050,000</td>
-              <td class="num">1,050,000</td>
-              <td class="num">1,150,000</td>
-              <td class="num">1,250,000</td>
-              <td class="num">1,250,000</td>
-              <td class="num">1,050,000</td>
-            </tr>
-            <tr>
-              <td class="room-name">Deluxe Double<br><span style="font-size:11px; color:rgba(0,0,0,0.45);">2A · 75944</span></td>
-              <td><span class="tag tag-purple">Tripstores</span></td>
-              <td>BB</td>
-              <td class="num">1,500,000</td>
-              <td class="num">1,500,000</td>
-              <td class="num">1,650,000</td>
-              <td class="num">1,800,000</td>
-              <td class="num">1,800,000</td>
-              <td class="num">1,500,000</td>
-            </tr>
-            <tr>
-              <td class="room-name">Premier Garden<br><span style="font-size:11px; color:rgba(0,0,0,0.45);">2A · 74617</span></td>
-              <td><span class="tag tag-purple">Tripstores</span></td>
-              <td>BB</td>
-              <td class="num">1,800,000</td>
-              <td class="num">1,800,000</td>
-              <td class="num">1,950,000</td>
-              <td class="num">2,100,000</td>
-              <td class="num">2,100,000</td>
-              <td class="num">1,800,000</td>
-            </tr>
-            <tr>
-              <td class="room-name">Premier Twin<br><span style="font-size:11px; color:rgba(0,0,0,0.45);">2A · 16086</span></td>
-              <td><span class="tag tag-purple">Tripstores</span></td>
-              <td>BB</td>
-              <td class="num">1,500,000</td>
-              <td class="num">1,500,000</td>
-              <td class="num">1,650,000</td>
-              <td class="num">1,800,000</td>
-              <td class="num">1,800,000</td>
-              <td class="num">1,500,000</td>
-            </tr>
-            <tr class="rate-plan-row">
-              <td colspan="9">💼 Best Available Rate (rateId: r456) · 2025-03-01 ~ 2025-09-30 · cutOff 1 · minNight 1</td>
-            </tr>
-            <tr>
-              <td class="room-name">Deluxe Double<br><span style="font-size:11px; color:rgba(0,0,0,0.45);">2A · 75944</span></td>
-              <td><span class="tag tag-blue">BAR</span></td>
-              <td>BB</td>
-              <td class="num">2,500,000</td>
-              <td class="num">2,500,000</td>
-              <td class="num">2,650,000</td>
-              <td class="num">2,800,000</td>
-              <td class="num">2,800,000</td>
-              <td class="num">2,500,000</td>
-            </tr>
-            <tr>
-              <td class="room-name">Ocean Suite<br><span style="font-size:11px; color:rgba(0,0,0,0.45);">2A · 74618</span></td>
-              <td><span class="tag tag-blue">BAR</span></td>
-              <td>BB</td>
-              <td class="num">3,800,000</td>
-              <td class="num">3,800,000</td>
-              <td class="num">4,000,000</td>
-              <td class="num">4,200,000</td>
-              <td class="num">4,200,000</td>
-              <td class="num">3,800,000</td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
-
-      <div style="margin-top:12px; font-size:11px; color:rgba(0,0,0,0.45); line-height:1.6;">
-        💡 추가요금 (supplementRates): ExtraBedForAdult 500,000 VND/박, ExtraBedForChild 500,000 VND/박, ChildWithoutExtraBed 150,000 VND/박, CompulsoryMeal — 객실 우클릭 시 상세 표시<br>
-        💡 cancellationPolicies: 24h 전 100% / 168h 전 50% / 72h 전 100% — 요금 플랜 행 클릭 시 상세 표시
-      </div>
-    </div>
-    <div class="modal-footer">
-      <button class="btn btn-default" onclick="closeModal()">닫기</button>
-    </div>
-  </div>
-</div>
-
 <script>
 function switchTab(tabId) {
   document.querySelectorAll('.rate-tab').forEach(t => t.classList.remove('active'));
@@ -1262,10 +1110,6 @@ function openContentModal(state) {
   }
 
   document.getElementById('modal-content').classList.add('show');
-}
-
-function openRateQueryModal() {
-  document.getElementById('modal-rate-query').classList.add('show');
 }
 
 function closeModal() {

@@ -1,0 +1,564 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PB 숙박권 상세 — TripStore Admin</title>
+<link href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.6/dist/web/static/pretendard.css" rel="stylesheet">
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: 'Pretendard', 'Apple SD Gothic Neo', -apple-system, sans-serif; font-size: 14px; color: rgba(0,0,0,0.88); background: #f5f5f5; }
+
+/* GNB */
+.gnb { background: #fff; height: 56px; display: flex; align-items: center; padding: 0 24px; border-bottom: 1px solid #f0f0f0; position: sticky; top: 0; z-index: 100; }
+.gnb-logo { font-weight: 800; font-size: 15px; margin-right: 32px; letter-spacing: -0.3px; }
+.gnb-logo span { color: #1677ff; }
+.gnb-menu { display: flex; gap: 0; }
+.gnb-item { color: rgba(0,0,0,0.65); padding: 0 16px; height: 56px; display: flex; align-items: center; cursor: pointer; font-size: 13px; font-weight: 500; position: relative; }
+.gnb-item.active { color: #1677ff; }
+.gnb-item.active::after { content: ''; position: absolute; bottom: 0; left: 0; right: 0; height: 2px; background: #1677ff; }
+.gnb-user { margin-left: auto; font-size: 13px; color: rgba(0,0,0,0.55); }
+
+.breadcrumb { padding: 16px 24px 0; font-size: 12px; color: rgba(0,0,0,0.45); }
+.breadcrumb a { color: rgba(0,0,0,0.55); text-decoration: none; }
+.breadcrumb a:hover { color: #1677ff; }
+.breadcrumb-sep { margin: 0 6px; color: rgba(0,0,0,0.25); }
+
+.layout { padding: 12px 24px 40px; max-width: 1440px; margin: 0 auto; }
+.page-header { display: flex; align-items: flex-start; justify-content: space-between; margin: 12px 0 20px; gap: 16px; }
+.page-title-row { display: flex; align-items: center; gap: 10px; }
+.page-title { font-size: 22px; font-weight: 700; }
+.page-sub { font-size: 13px; color: rgba(0,0,0,0.55); margin-top: 6px; }
+.page-actions { display: flex; gap: 8px; align-items: center; }
+
+/* CARDS */
+.card { background: #fff; border-radius: 10px; box-shadow: 0 1px 3px rgba(0,0,0,0.06); margin-bottom: 16px; overflow: hidden; }
+.card-head { padding: 14px 20px; border-bottom: 1px solid #f0f0f0; display: flex; align-items: center; justify-content: space-between; }
+.card-title { font-size: 15px; font-weight: 700; display: flex; align-items: center; gap: 8px; }
+.card-title .api-tag { font-size: 10px; background: #f9f0ff; color: #722ed1; padding: 2px 6px; border-radius: 4px; font-weight: 600; border: 1px solid #d3adf7; }
+.card-body { padding: 16px 20px; }
+
+/* GRID — 2 column layout */
+.detail-grid { display: grid; grid-template-columns: 1fr 360px; gap: 16px; }
+
+/* TAGS */
+.tag { display: inline-flex; align-items: center; gap: 4px; padding: 2px 8px; border-radius: 4px; font-size: 12px; font-weight: 500; }
+.tag-green { background: #f6ffed; color: #389e0d; border: 1px solid #b7eb8f; }
+.tag-blue { background: #e6f4ff; color: #1677ff; border: 1px solid #91caff; }
+.tag-purple { background: #f9f0ff; color: #722ed1; border: 1px solid #d3adf7; }
+.tag-gray { background: #f5f5f5; color: rgba(0,0,0,0.55); border: 1px solid #e8e8e8; }
+.tag-orange { background: #fff7e6; color: #d48806; border: 1px solid #ffd591; }
+.tag-lg { font-size: 13px; padding: 4px 10px; }
+
+/* BUTTONS */
+.btn { height: 32px; padding: 0 14px; border-radius: 6px; font-size: 13px; font-family: inherit; cursor: pointer; border: 1px solid transparent; display: inline-flex; align-items: center; gap: 6px; transition: all 0.15s; white-space: nowrap; font-weight: 500; }
+.btn-primary { background: #1677ff; color: #fff; border-color: #1677ff; }
+.btn-primary:hover { background: #4096ff; }
+.btn-default { background: #fff; color: rgba(0,0,0,0.88); border-color: #d9d9d9; }
+.btn-default:hover { color: #1677ff; border-color: #1677ff; }
+.btn-ghost { background: transparent; color: #1677ff; border-color: transparent; padding: 0 8px; }
+.btn-ghost:hover { background: #e6f4ff; }
+.btn-sm { height: 28px; padding: 0 10px; font-size: 12px; }
+.btn-lg { height: 38px; padding: 0 18px; font-size: 14px; }
+
+/* INFO TABLE */
+.info-table { font-size: 13px; line-height: 1.8; }
+.info-row { display: flex; padding: 6px 0; border-bottom: 1px dashed #f0f0f0; }
+.info-row:last-child { border-bottom: none; }
+.info-label { color: rgba(0,0,0,0.55); flex-shrink: 0; width: 130px; }
+.info-value { color: rgba(0,0,0,0.88); font-weight: 500; }
+.info-value.mono { font-family: 'SF Mono', Monaco, monospace; font-size: 12px; }
+
+/* SIDE INFO */
+.side-section { padding: 14px 16px; border-bottom: 1px solid #f0f0f0; }
+.side-section:last-child { border-bottom: none; }
+.side-section-title { font-size: 11px; color: rgba(0,0,0,0.45); text-transform: uppercase; letter-spacing: 0.5px; font-weight: 600; margin-bottom: 8px; }
+.side-section .info-row { padding: 4px 0; font-size: 12px; }
+.side-section .info-label { width: 90px; font-size: 12px; }
+
+/* ROOM MAPPING */
+.room-mapping-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; }
+.room-map-card { border: 1px solid #f0f0f0; border-radius: 8px; padding: 12px 14px; }
+.room-map-name { font-size: 13px; font-weight: 700; margin-bottom: 4px; }
+.room-map-id { font-family: 'SF Mono', monospace; font-size: 11px; color: rgba(0,0,0,0.45); margin-bottom: 8px; }
+.room-map-mapping { display: flex; align-items: center; gap: 6px; font-size: 12px; color: rgba(0,0,0,0.65); }
+.room-map-mapping .arrow { color: rgba(0,0,0,0.35); }
+
+/* SUMMARY CHIP ROW */
+.chip-row { display: flex; gap: 8px; flex-wrap: wrap; }
+.chip { background: #fafafa; border-radius: 6px; padding: 8px 12px; display: flex; flex-direction: column; gap: 2px; min-width: 100px; }
+.chip-label { font-size: 11px; color: rgba(0,0,0,0.45); }
+.chip-value { font-size: 14px; font-weight: 700; color: rgba(0,0,0,0.88); }
+
+/* CALENDAR PREVIEW */
+.cal-preview { display: grid; grid-template-columns: repeat(7, 1fr); gap: 4px; }
+.cal-cell { background: #fafafa; border-radius: 4px; padding: 6px 4px; text-align: center; font-size: 11px; }
+.cal-cell.has-rate { background: #f6ffed; color: #389e0d; }
+.cal-cell.no-allotment { background: #fff1f0; color: #cf1322; }
+.cal-day { font-size: 10px; color: rgba(0,0,0,0.45); margin-bottom: 2px; }
+.cal-rate { font-size: 11px; font-weight: 600; }
+.cal-inv { font-size: 9px; color: rgba(0,0,0,0.45); margin-top: 1px; }
+
+/* MODAL */
+.modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.5); display: none; align-items: center; justify-content: center; z-index: 1000; padding: 40px 20px; }
+.modal-overlay.show { display: flex; }
+.modal { background: #fff; border-radius: 12px; width: 640px; max-width: 100%; max-height: 90vh; overflow-y: auto; }
+.modal-xl { width: 1180px; }
+.modal-header { padding: 20px 24px 16px; border-bottom: 1px solid #f0f0f0; display: flex; align-items: center; justify-content: space-between; }
+.modal-title { font-size: 17px; font-weight: 700; display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+.modal-close { background: transparent; border: none; font-size: 20px; cursor: pointer; color: rgba(0,0,0,0.45); padding: 0; width: 32px; height: 32px; border-radius: 50%; }
+.modal-close:hover { background: #f5f5f5; color: rgba(0,0,0,0.88); }
+.modal-body { padding: 20px 24px; }
+.modal-footer { padding: 14px 24px 20px; border-top: 1px solid #f0f0f0; display: flex; justify-content: flex-end; gap: 8px; background: #fafafa; }
+
+/* RATE QUERY MODAL — rateId 기반 */
+.rate-meta-header { background: linear-gradient(180deg, #f9f0ff 0%, #fafafa 100%); border-radius: 10px; padding: 16px 18px; margin-bottom: 16px; }
+.rate-meta-top { display: flex; align-items: center; gap: 10px; margin-bottom: 12px; flex-wrap: wrap; }
+.rate-meta-name { font-size: 16px; font-weight: 700; }
+.rate-meta-hotel { font-size: 12px; color: rgba(0,0,0,0.55); }
+.rate-meta-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 12px; }
+.rate-meta-item { display: flex; flex-direction: column; gap: 2px; }
+.rate-meta-item .k { font-size: 11px; color: rgba(0,0,0,0.45); }
+.rate-meta-item .v { font-size: 13px; font-weight: 600; color: rgba(0,0,0,0.88); }
+.rate-meta-item .v.mono { font-family: 'SF Mono', monospace; font-size: 12px; }
+
+.cancel-policy { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; margin-top: 12px; padding-top: 12px; border-top: 1px solid rgba(255,255,255,0.5); }
+.cancel-policy .label { font-size: 11px; color: rgba(0,0,0,0.45); }
+.cancel-chip { background: #fff; border: 1px solid #d3adf7; color: #722ed1; padding: 3px 10px; border-radius: 12px; font-size: 11px; font-weight: 600; }
+
+.query-range { display: flex; align-items: center; gap: 8px; padding: 10px 16px; background: #fafafa; border-radius: 8px 8px 0 0; border: 1px solid #f0f0f0; border-bottom: none; flex-wrap: wrap; }
+.query-range .label { font-size: 12px; color: rgba(0,0,0,0.55); }
+.query-range input { height: 30px; padding: 0 8px; border: 1px solid #d9d9d9; border-radius: 4px; font-size: 12px; font-family: inherit; }
+.query-range .quick { display: flex; gap: 4px; margin-left: auto; }
+.quick-btn { height: 28px; padding: 0 10px; font-size: 11px; border: 1px solid #d9d9d9; background: #fff; border-radius: 4px; cursor: pointer; color: rgba(0,0,0,0.65); }
+.quick-btn.active { border-color: #1677ff; color: #1677ff; background: #e6f4ff; }
+
+.rate-table-wrap { border: 1px solid #f0f0f0; border-radius: 0 0 8px 8px; max-height: 460px; overflow: auto; }
+.rate-table { width: 100%; font-size: 12px; border-collapse: collapse; }
+.rate-table th { padding: 10px 12px; background: #fafafa; border-bottom: 1px solid #f0f0f0; font-weight: 600; color: rgba(0,0,0,0.65); text-align: left; position: sticky; top: 0; z-index: 2; white-space: nowrap; }
+.rate-table th.weekend { background: #fffbe6; }
+.rate-table td { padding: 9px 12px; border-bottom: 1px solid #f5f5f5; }
+.rate-table tbody tr:hover td { background: #fafafa; }
+.rate-table .num { font-family: 'SF Mono', monospace; text-align: right; font-weight: 600; }
+.rate-table .num.high { color: #cf1322; }
+.rate-table .num.low { color: #389e0d; }
+.rate-table .room-name { font-weight: 600; min-width: 160px; position: sticky; left: 0; background: #fff; z-index: 1; }
+.rate-table .room-name-sub { font-size: 11px; color: rgba(0,0,0,0.45); font-weight: 400; margin-top: 2px; }
+.rate-table .allotment { font-size: 10px; color: rgba(0,0,0,0.45); font-weight: 400; }
+.rate-table .allotment.warn { color: #fa8c16; font-weight: 600; }
+.rate-table .allotment.zero { color: #cf1322; font-weight: 600; }
+.rate-table tr.weekend-row td { background: #fffbe6; }
+.rate-table tr.weekend-row .room-name { background: #fffbe6; }
+
+.suppl-row { background: #fafafa; }
+.suppl-row td { padding: 8px 12px; color: rgba(0,0,0,0.55); font-size: 11px; }
+.suppl-row strong { color: rgba(0,0,0,0.65); font-weight: 600; }
+
+.modal-info-banner { background: #fff7e6; border: 1px solid #ffd591; color: #ad6800; border-radius: 8px; padding: 10px 14px; font-size: 12px; line-height: 1.6; margin-top: 12px; }
+.modal-info-banner strong { color: #874d00; }
+
+/* STATUS DOT */
+.status-dot { width: 8px; height: 8px; border-radius: 50%; display: inline-block; }
+.dot-green { background: #52c41a; }
+.dot-blue { background: #1677ff; }
+.dot-purple { background: #722ed1; }
+.dot-orange { background: #fa8c16; }
+.dot-red { background: #cf1322; }
+
+.live-badge { display: inline-flex; align-items: center; gap: 4px; background: #f9f0ff; color: #722ed1; padding: 2px 8px; border-radius: 4px; font-size: 11px; font-weight: 600; border: 1px solid #d3adf7; }
+.live-badge::before { content: '●'; font-size: 8px; animation: blink 1.5s infinite; }
+@keyframes blink { 0%, 60% { opacity: 1; } 80% { opacity: 0.3; } 100% { opacity: 1; } }
+</style>
+</head>
+<body>
+
+<!-- GNB -->
+<div class="gnb">
+  <div class="gnb-logo">Tripstore<span>.Admin</span></div>
+  <div class="gnb-menu">
+    <div class="gnb-item">대시보드</div>
+    <div class="gnb-item">상품관리</div>
+    <div class="gnb-item">예약 관리</div>
+    <div class="gnb-item active">PB 관리</div>
+    <div class="gnb-item">카탈로그</div>
+    <div class="gnb-item">정산</div>
+  </div>
+  <div class="gnb-user">김서현 님</div>
+</div>
+
+<div class="breadcrumb">
+  <a href="#">PB 관리</a><span class="breadcrumb-sep">›</span>
+  <a href="#">TMG</a><span class="breadcrumb-sep">›</span>
+  <a href="tmg-rate-admin.html">숙소 요금표 관리</a><span class="breadcrumb-sep">›</span>
+  Tripstores Contracting · Vinpearl Resort Nha Trang
+</div>
+
+<div class="layout">
+
+  <div class="page-header">
+    <div>
+      <div class="page-title-row">
+        <div class="page-title">Tripstores Contracting</div>
+        <span class="tag tag-purple tag-lg">고정+실시간</span>
+        <span class="tag tag-green">생성됨</span>
+      </div>
+      <div class="page-sub">
+        <span style="font-family:'SF Mono',monospace; color:rgba(0,0,0,0.65);">rateId: 40639</span>
+        · Vinpearl Resort Nha Trang
+        · 판매기간 2026-06-30 ~ 2026-12-31
+      </div>
+    </div>
+    <div class="page-actions">
+      <button class="btn btn-default" onclick="openContentModalRef()">📄 TMG 콘텐츠 보기</button>
+      <button class="btn btn-primary btn-lg" onclick="openRateQueryModal()">📊 요금 조회</button>
+    </div>
+  </div>
+
+  <div class="detail-grid">
+
+    <!-- LEFT MAIN -->
+    <div>
+
+      <!-- 요약 칩 -->
+      <div class="card">
+        <div class="card-body" style="padding:14px 16px;">
+          <div class="chip-row">
+            <div class="chip">
+              <span class="chip-label">매핑 객실</span>
+              <span class="chip-value">4 / 4</span>
+            </div>
+            <div class="chip">
+              <span class="chip-label">기본 요금 범위</span>
+              <span class="chip-value">1.05M ~ 4.2M VND</span>
+            </div>
+            <div class="chip">
+              <span class="chip-label">평균 재고</span>
+              <span class="chip-value">8.4 실</span>
+            </div>
+            <div class="chip">
+              <span class="chip-label">취소정책</span>
+              <span class="chip-value" style="font-size:12px;">24h/100% · 168h/50%</span>
+            </div>
+            <div class="chip">
+              <span class="chip-label">최근 webhook</span>
+              <span class="chip-value" style="font-size:12px; color:#52c41a;">● 12분 전</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 기본 정보 -->
+      <div class="card">
+        <div class="card-head">
+          <div class="card-title">기본 정보 <span class="api-tag">2.8 getDetailRates</span></div>
+          <button class="btn btn-ghost btn-sm">수정</button>
+        </div>
+        <div class="card-body">
+          <div class="info-table">
+            <div class="info-row"><span class="info-label">TMG 요금 ID</span><span class="info-value mono">40639</span></div>
+            <div class="info-row"><span class="info-label">요금 명</span><span class="info-value">Tripstores Contracting</span></div>
+            <div class="info-row"><span class="info-label">요금 설명</span><span class="info-value" style="color:rgba(0,0,0,0.45);">(없음)</span></div>
+            <div class="info-row"><span class="info-label">rateType</span><span class="info-value"><span class="tag tag-blue">ALM-DYNAMIC</span> <span style="font-size:11px; color:rgba(0,0,0,0.45); margin-left:6px;">요금 고정 + 재고 실시간</span></span></div>
+            <div class="info-row"><span class="info-label">supplier</span><span class="info-value">VINPEARL <span class="live-badge" style="margin-left:6px;">동적 공급</span></span></div>
+            <div class="info-row"><span class="info-label">호텔</span><span class="info-value">Vinpearl Resort Nha Trang <span style="font-family:'SF Mono',monospace; color:rgba(0,0,0,0.45); font-size:11px; margin-left:6px;">(577194)</span></span></div>
+            <div class="info-row"><span class="info-label">판매 기간</span><span class="info-value">2026-06-30 ~ 2026-12-31</span></div>
+            <div class="info-row"><span class="info-label">cutOff / minNight</span><span class="info-value">0일 / 1박</span></div>
+            <div class="info-row"><span class="info-label">연령 기준</span><span class="info-value">유아 0~5세 · 아동 6~11세</span></div>
+            <div class="info-row"><span class="info-label">취소 정책</span><span class="info-value" style="line-height:1.6;">체크인 24h 전 100% 청구<br>체크인 168h 전 50% 청구<br>체크인 72h 전 100% 청구</span></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 객실 매핑 -->
+      <div class="card">
+        <div class="card-head">
+          <div class="card-title">객실 매핑 <span class="api-tag">2.6 getPropertyContent</span></div>
+          <span style="font-size:12px; color:#389e0d;">✓ 완료 (4/4)</span>
+        </div>
+        <div class="card-body">
+          <div class="room-mapping-grid">
+            <div class="room-map-card">
+              <div class="room-map-name">Superior Double</div>
+              <div class="room-map-id">TMG roomId: 1462</div>
+              <div class="room-map-mapping">
+                <span class="status-dot dot-green"></span>
+                Tripstore 객실: <strong>TS_RM_3201</strong>
+              </div>
+            </div>
+            <div class="room-map-card">
+              <div class="room-map-name">Deluxe Double</div>
+              <div class="room-map-id">TMG roomId: 75944</div>
+              <div class="room-map-mapping">
+                <span class="status-dot dot-green"></span>
+                Tripstore 객실: <strong>TS_RM_3202</strong>
+              </div>
+            </div>
+            <div class="room-map-card">
+              <div class="room-map-name">Premier Garden View</div>
+              <div class="room-map-id">TMG roomId: 74617</div>
+              <div class="room-map-mapping">
+                <span class="status-dot dot-green"></span>
+                Tripstore 객실: <strong>TS_RM_3203</strong>
+              </div>
+            </div>
+            <div class="room-map-card">
+              <div class="room-map-name">Premier Twin</div>
+              <div class="room-map-id">TMG roomId: 16086</div>
+              <div class="room-map-mapping">
+                <span class="status-dot dot-green"></span>
+                Tripstore 객실: <strong>TS_RM_3204</strong>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 요금/재고 캘린더 요약 (7일) -->
+      <div class="card">
+        <div class="card-head">
+          <div class="card-title">요금·재고 미리보기 (이번 주)</div>
+          <button class="btn btn-default btn-sm" onclick="openRateQueryModal()">전체 요금 조회 →</button>
+        </div>
+        <div class="card-body">
+          <div style="font-size:12px; color:rgba(0,0,0,0.55); margin-bottom:10px;">Superior Double 기준 · 2026-05-12 ~ 2026-05-18</div>
+          <div class="cal-preview">
+            <div class="cal-cell has-rate"><div class="cal-day">월 5/12</div><div class="cal-rate">1.05M</div><div class="cal-inv">10실</div></div>
+            <div class="cal-cell has-rate"><div class="cal-day">화 5/13</div><div class="cal-rate">1.05M</div><div class="cal-inv">10실</div></div>
+            <div class="cal-cell has-rate"><div class="cal-day">수 5/14</div><div class="cal-rate">1.05M</div><div class="cal-inv">8실</div></div>
+            <div class="cal-cell has-rate"><div class="cal-day">목 5/15</div><div class="cal-rate">1.15M</div><div class="cal-inv">6실</div></div>
+            <div class="cal-cell has-rate" style="background:#fffbe6;"><div class="cal-day" style="color:#d48806;">금 5/16</div><div class="cal-rate">1.25M</div><div class="cal-inv">4실</div></div>
+            <div class="cal-cell has-rate" style="background:#fffbe6;"><div class="cal-day" style="color:#d48806;">토 5/17</div><div class="cal-rate">1.25M</div><div class="cal-inv">2실</div></div>
+            <div class="cal-cell no-allotment"><div class="cal-day">일 5/18</div><div class="cal-rate">1.05M</div><div class="cal-inv">0실</div></div>
+          </div>
+          <div style="font-size:11px; color:rgba(0,0,0,0.45); margin-top:10px; line-height:1.5;">
+            ※ ALM-DYNAMIC 요금이므로 재고는 사용자 상세 진입 시 <code>checkAvailability</code>로 재확인됩니다. 위 값은 마지막 동기화 시점 기준.
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- RIGHT SIDE -->
+    <div>
+
+      <!-- TMG 메타 -->
+      <div class="card">
+        <div class="side-section">
+          <div class="side-section-title">⚙ TMG 동기화 상태</div>
+          <div class="info-row"><span class="info-label">자동 동기화</span><span style="color:#52c41a;">● 정상</span></div>
+          <div class="info-row"><span class="info-label">마지막 webhook</span><span>12분 전</span></div>
+          <div class="info-row"><span class="info-label">이벤트 타입</span><span><span class="tag tag-blue">RATE_UPDATE</span></span></div>
+          <div class="info-row"><span class="info-label">webhook 키</span><span style="font-family:'SF Mono',monospace; font-size:11px;">UPDATE\|V123456\|r40639\|2026-05-12</span></div>
+        </div>
+        <div class="side-section">
+          <div class="side-section-title">📅 카탈로그 / 노출</div>
+          <div class="info-row"><span class="info-label">카탈로그</span><span>베트남 &gt; 나트랑</span></div>
+          <div class="info-row"><span class="info-label">노출 상품</span><span>3개 (활성)</span></div>
+          <div class="info-row"><span class="info-label">예약 누적</span><span>147건</span></div>
+        </div>
+        <div class="side-section">
+          <div class="side-section-title">🔧 운영 액션</div>
+          <div style="display:flex; flex-direction:column; gap:8px;">
+            <button class="btn btn-default" style="width:100%; justify-content:center;" onclick="alert('TMG에서 이 요금의 최신값을 가져와 우리 시스템에 덮어씁니다.')">🔄 이 요금만 재동기화</button>
+            <button class="btn btn-default" style="width:100%; justify-content:center;" onclick="alert('Tripstore PB 마스터 상품 페이지로 이동합니다.')">PB 마스터 상품 보기 →</button>
+            <button class="btn btn-default" style="width:100%; justify-content:center; color:#cf1322; border-color:#ffccc7;" onclick="if(confirm('이 요금표를 비활성화하시겠습니까?\\n\\n노출 중인 상품에도 영향을 미칠 수 있습니다.')) alert('비활성화 처리됨')">요금표 비활성화</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- API 호출 디버그 -->
+      <div class="card">
+        <div class="card-head" style="padding:12px 16px;">
+          <div class="card-title" style="font-size:13px;">🔎 API 호출 (디버그)</div>
+        </div>
+        <div class="card-body" style="padding:12px 16px; font-size:11px; color:rgba(0,0,0,0.55); line-height:1.7;">
+          <div><strong style="color:rgba(0,0,0,0.65);">2.6</strong> GET /getPropertyContent?propertyId=577194</div>
+          <div><strong style="color:rgba(0,0,0,0.65);">2.8</strong> GET /getDetailRates?key=UPDATE|V123456|r40639|2026-05-12</div>
+          <div><strong style="color:rgba(0,0,0,0.65);">2.9</strong> POST /getRatesFromTo {"propertyId":"577194","fromDate":"…","toDate":"…"}</div>
+          <div style="margin-top:6px;">→ 응답에서 <code style="background:#f5f5f5; padding:1px 4px; border-radius:3px;">rateId === 40639</code> 만 필터링하여 표시</div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+</div>
+
+<!-- ==================== MODAL: 요금 조회 (rateId 기반) ==================== -->
+<div class="modal-overlay" id="modal-rate-query">
+  <div class="modal modal-xl">
+    <div class="modal-header">
+      <div class="modal-title">
+        <span class="tag tag-purple">2.9 getRatesFromTo</span>
+        요금 조회
+        <span style="font-size:12px; color:rgba(0,0,0,0.45); font-weight:500;">rateId 40639</span>
+      </div>
+      <button class="modal-close" onclick="closeModal()">×</button>
+    </div>
+    <div class="modal-body">
+
+      <!-- 요금 메타 헤더 (자동 표시, 입력 폼 없음) -->
+      <div class="rate-meta-header">
+        <div class="rate-meta-top">
+          <span class="tag tag-blue tag-lg">ALM-DYNAMIC</span>
+          <span class="rate-meta-name">Tripstores Contracting</span>
+          <span class="rate-meta-hotel">· Vinpearl Resort Nha Trang (577194)</span>
+        </div>
+        <div class="rate-meta-grid">
+          <div class="rate-meta-item">
+            <span class="k">rateId</span>
+            <span class="v mono">40639</span>
+          </div>
+          <div class="rate-meta-item">
+            <span class="k">supplier</span>
+            <span class="v">VINPEARL <span class="live-badge" style="margin-left:4px; font-size:10px;">LIVE</span></span>
+          </div>
+          <div class="rate-meta-item">
+            <span class="k">판매 기간</span>
+            <span class="v">2026-06-30 ~ 2026-12-31</span>
+          </div>
+          <div class="rate-meta-item">
+            <span class="k">cutOff / minNight</span>
+            <span class="v">0일 / 1박</span>
+          </div>
+          <div class="rate-meta-item">
+            <span class="k">연령 기준</span>
+            <span class="v">유아 0–5 · 아동 6–11</span>
+          </div>
+        </div>
+        <div class="cancel-policy">
+          <span class="label">취소 정책:</span>
+          <span class="cancel-chip">24h 전 100%</span>
+          <span class="cancel-chip">168h 전 50%</span>
+          <span class="cancel-chip">72h 전 100%</span>
+        </div>
+      </div>
+
+      <!-- 기간 선택 (rateId 고정, 기간만 변경 가능) -->
+      <div class="query-range">
+        <span class="label">조회 기간</span>
+        <input type="date" value="2026-05-15">
+        <span class="label">~</span>
+        <input type="date" value="2026-05-21">
+        <button class="btn btn-default btn-sm">조회 새로고침</button>
+        <div class="quick">
+          <button class="quick-btn">오늘부터 7일</button>
+          <button class="quick-btn active">선택 주</button>
+          <button class="quick-btn">선택 월</button>
+          <button class="quick-btn">30일</button>
+        </div>
+      </div>
+
+      <!-- 결과 매트릭스 -->
+      <div class="rate-table-wrap">
+        <table class="rate-table">
+          <thead>
+            <tr>
+              <th style="position:sticky; left:0; background:#fafafa; z-index:3;">객실</th>
+              <th>05-15<br><span style="font-weight:400; color:rgba(0,0,0,0.45);">목</span></th>
+              <th class="weekend">05-16<br><span style="font-weight:400; color:#d48806;">금</span></th>
+              <th class="weekend">05-17<br><span style="font-weight:400; color:#d48806;">토</span></th>
+              <th>05-18<br><span style="font-weight:400; color:rgba(0,0,0,0.45);">일</span></th>
+              <th>05-19<br><span style="font-weight:400; color:rgba(0,0,0,0.45);">월</span></th>
+              <th>05-20<br><span style="font-weight:400; color:rgba(0,0,0,0.45);">화</span></th>
+              <th>05-21<br><span style="font-weight:400; color:rgba(0,0,0,0.45);">수</span></th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td class="room-name">Superior Double<div class="room-name-sub">2A · roomId 1462</div></td>
+              <td><div class="num">1,050,000</div><div class="allotment">잔여 10실</div></td>
+              <td><div class="num high">1,250,000</div><div class="allotment warn">잔여 4실</div></td>
+              <td><div class="num high">1,250,000</div><div class="allotment warn">잔여 2실</div></td>
+              <td><div class="num">1,050,000</div><div class="allotment zero">매진 (0실)</div></td>
+              <td><div class="num">1,050,000</div><div class="allotment">잔여 8실</div></td>
+              <td><div class="num">1,050,000</div><div class="allotment">잔여 10실</div></td>
+              <td><div class="num">1,050,000</div><div class="allotment">잔여 10실</div></td>
+            </tr>
+            <tr>
+              <td class="room-name">Deluxe Double<div class="room-name-sub">2A · roomId 75944</div></td>
+              <td><div class="num">1,500,000</div><div class="allotment">잔여 12실</div></td>
+              <td><div class="num high">1,800,000</div><div class="allotment">잔여 6실</div></td>
+              <td><div class="num high">1,800,000</div><div class="allotment warn">잔여 3실</div></td>
+              <td><div class="num">1,500,000</div><div class="allotment">잔여 9실</div></td>
+              <td><div class="num">1,500,000</div><div class="allotment">잔여 12실</div></td>
+              <td><div class="num">1,500,000</div><div class="allotment">잔여 12실</div></td>
+              <td><div class="num">1,500,000</div><div class="allotment">잔여 11실</div></td>
+            </tr>
+            <tr>
+              <td class="room-name">Premier Garden<div class="room-name-sub">2A · roomId 74617</div></td>
+              <td><div class="num">1,800,000</div><div class="allotment">잔여 6실</div></td>
+              <td><div class="num high">2,100,000</div><div class="allotment warn">잔여 3실</div></td>
+              <td><div class="num high">2,100,000</div><div class="allotment warn">잔여 2실</div></td>
+              <td><div class="num">1,800,000</div><div class="allotment">잔여 5실</div></td>
+              <td><div class="num">1,800,000</div><div class="allotment">잔여 6실</div></td>
+              <td><div class="num">1,800,000</div><div class="allotment">잔여 6실</div></td>
+              <td><div class="num">1,800,000</div><div class="allotment">잔여 6실</div></td>
+            </tr>
+            <tr>
+              <td class="room-name">Premier Twin<div class="room-name-sub">2A · roomId 16086</div></td>
+              <td><div class="num">1,500,000</div><div class="allotment">잔여 8실</div></td>
+              <td><div class="num high">1,800,000</div><div class="allotment warn">잔여 4실</div></td>
+              <td><div class="num high">1,800,000</div><div class="allotment warn">잔여 3실</div></td>
+              <td><div class="num">1,500,000</div><div class="allotment">잔여 7실</div></td>
+              <td><div class="num">1,500,000</div><div class="allotment">잔여 8실</div></td>
+              <td><div class="num">1,500,000</div><div class="allotment">잔여 8실</div></td>
+              <td><div class="num">1,500,000</div><div class="allotment">잔여 8실</div></td>
+            </tr>
+            <tr class="suppl-row">
+              <td colspan="8">
+                <strong>추가요금 (공통)</strong> · ExtraBedForAdult <code>500,000 VND/박</code> · ExtraBedForChild <code>500,000 VND/박</code> · ChildWithoutExtraBed <code>150,000 VND/박</code> · CompulsoryMeal <code>0</code> (PerBooking PerAdult PerChild)
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- 액션 / 안내 -->
+      <div style="display:flex; align-items:center; justify-content:space-between; margin-top:12px; gap:12px; flex-wrap:wrap;">
+        <div style="font-size:11px; color:rgba(0,0,0,0.45);">
+          API: <code>GET /getRatesFromTo</code> · 응답에서 <code>rateId=40639</code> 필터링 · 4개 객실 × 7일 표시
+        </div>
+        <div style="display:flex; gap:6px;">
+          <button class="btn btn-default btn-sm">CSV 내보내기</button>
+          <button class="btn btn-default btn-sm">PB 가격과 비교</button>
+        </div>
+      </div>
+
+      <div class="modal-info-banner">
+        <strong>ℹ ALM-DYNAMIC 요금 안내</strong> · 요금은 TMG 확정값(고정)이며 위 값을 그대로 신뢰할 수 있습니다. 단, 재고(allotment)는 3rd party 실시간 공급이므로 위 값은 마지막 동기화 시점 기준 추정치이며, 실제 판매 시점에는 사용자 상세 진입 시 <code>checkAvailability</code>로 재조회됩니다.
+      </div>
+
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-default" onclick="closeModal()">닫기</button>
+    </div>
+  </div>
+</div>
+
+<script>
+function openRateQueryModal() {
+  document.getElementById('modal-rate-query').classList.add('show');
+}
+
+function openContentModalRef() {
+  alert('TMG 호텔 콘텐츠 모달 (2.6 getPropertyContent)\n\n실제로는 tmg-rate-admin.html의 콘텐츠 모달과 동일한 컴포넌트가 호출됩니다.\n호텔 정보, 객실 타입, 정책 등 표시.');
+}
+
+function closeModal() {
+  document.querySelectorAll('.modal-overlay').forEach(m => m.classList.remove('show'));
+}
+
+document.querySelectorAll('.modal-overlay').forEach(m => {
+  m.addEventListener('click', e => { if (e.target === m) closeModal(); });
+});
+
+// quick range
+document.querySelectorAll('.quick-btn').forEach(b => b.addEventListener('click', () => {
+  document.querySelectorAll('.quick-btn').forEach(x => x.classList.remove('active'));
+  b.classList.add('active');
+}));
+</script>
+
+</body>
+</html>
