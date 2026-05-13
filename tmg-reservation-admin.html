@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>TMG 숙소 예약 관리 — TripStore Admin</title>
+<title>패키지 예약 관리 (TMG 숙박 + 항공 + 옵션) — TripStore Admin</title>
 <link href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.6/dist/web/static/pretendard.css" rel="stylesheet">
 <style>
 * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -19,8 +19,7 @@ body { font-family: 'Pretendard', 'Apple SD Gothic Neo', -apple-system, sans-ser
 .gnb-item.active::after { content: ''; position: absolute; bottom: 0; left: 0; right: 0; height: 2px; background: #1677ff; }
 .gnb-user { margin-left: auto; font-size: 13px; color: rgba(0,0,0,0.55); }
 
-/* BREADCRUMB + PAGE HEADER */
-.breadcrumb { padding: 16px 24px 0; font-size: 12px; color: rgba(0,0,0,0.45); }
+.breadcrumb { padding: 16px 24px 0; font-size: 12px; color: rgba(0,0,0,0.45); max-width: 1600px; margin: 0 auto; }
 .breadcrumb-sep { margin: 0 6px; color: rgba(0,0,0,0.25); }
 .layout { padding: 12px 24px 40px; max-width: 1600px; margin: 0 auto; }
 .page-header { display: flex; align-items: flex-end; justify-content: space-between; margin: 12px 0 20px; }
@@ -28,12 +27,9 @@ body { font-family: 'Pretendard', 'Apple SD Gothic Neo', -apple-system, sans-ser
 .page-sub { font-size: 13px; color: rgba(0,0,0,0.55); margin-top: 6px; }
 .page-actions { display: flex; gap: 8px; }
 
-/* CARD */
-.card { background: #fff; border-radius: 10px; box-shadow: 0 1px 3px rgba(0,0,0,0.06); margin-bottom: 16px; overflow: hidden; }
-
-/* KPI ROW */
+/* KPI */
 .kpi-row { display: grid; grid-template-columns: repeat(5, 1fr); gap: 12px; margin-bottom: 16px; }
-.kpi-card { background: #fff; border-radius: 10px; padding: 16px 18px; border: 1px solid #f0f0f0; cursor: pointer; transition: all 0.15s; position: relative; overflow: hidden; }
+.kpi-card { background: #fff; border-radius: 10px; padding: 16px 18px; border: 1px solid #f0f0f0; cursor: pointer; transition: all 0.15s; }
 .kpi-card:hover { border-color: #1677ff; transform: translateY(-1px); box-shadow: 0 4px 12px rgba(22,119,255,0.08); }
 .kpi-card .kpi-label { font-size: 12px; color: rgba(0,0,0,0.55); margin-bottom: 8px; display: flex; align-items: center; gap: 6px; }
 .kpi-card .kpi-value { font-size: 26px; font-weight: 700; font-family: 'SF Mono', Monaco, monospace; }
@@ -48,15 +44,15 @@ body { font-family: 'Pretendard', 'Apple SD Gothic Neo', -apple-system, sans-ser
 .kpi-card.warn .kpi-dot { background: #fa8c16; }
 .kpi-card.primary .kpi-dot { background: #1677ff; }
 .kpi-card.success .kpi-dot { background: #52c41a; }
+.kpi-card .kpi-dot.gray { background: #bfbfbf; }
 @keyframes pulse { 0%,100% { opacity:1 } 50% { opacity: 0.35 } }
 
-/* NOTICE BANNER */
-.notice-banner { padding: 12px 20px; display: flex; align-items: flex-start; gap: 10px; font-size: 13px; line-height: 1.6; border-bottom: 1px solid #f0f0f0; }
-.notice-blue { background: #e6f4ff; color: #0958d9; border-left: 3px solid #1677ff; }
-.notice-icon { font-size: 16px; flex-shrink: 0; line-height: 1.5; }
-
-/* FILTER BAR */
-.filter-bar { padding: 14px 20px; border-bottom: 1px solid #f0f0f0; display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+/* Filter container card */
+.toolbar { background: #fff; border-radius: 10px; box-shadow: 0 1px 3px rgba(0,0,0,0.06); margin-bottom: 16px; overflow: hidden; }
+.notice-banner { padding: 12px 20px; display: flex; align-items: flex-start; gap: 10px; font-size: 13px; line-height: 1.6; background: #e6f4ff; color: #0958d9; border-left: 3px solid #1677ff; }
+.notice-banner strong { font-weight: 700; }
+.notice-banner a { color: #1677ff; font-weight: 600; text-decoration: none; }
+.filter-bar { padding: 14px 20px; display: flex; align-items: center; gap: 8px; flex-wrap: wrap; border-bottom: 1px solid #f0f0f0; }
 .filter-bar .label { font-size: 12px; color: rgba(0,0,0,0.55); margin-right: 4px; }
 .fi { height: 32px; border: 1px solid #d9d9d9; border-radius: 6px; font-size: 13px; font-family: inherit; color: rgba(0,0,0,0.88); outline: none; background: #fff; }
 .fi:focus { border-color: #1677ff; box-shadow: 0 0 0 2px rgba(22,119,255,0.1); }
@@ -64,58 +60,84 @@ input.fi { padding: 0 10px; }
 input.fi::placeholder { color: rgba(0,0,0,0.25); }
 select.fi { padding: 0 28px 0 10px; appearance: none; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='%23bbb'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 8px center; cursor: pointer; }
 .fi-sm { width: 110px; }
-.fi-md { width: 140px; }
-.fi-lg { width: 180px; }
-.fi-xl { width: 240px; }
+.fi-md { width: 160px; }
+.fi-lg { width: 200px; }
 
-/* CHIPS */
-.chip-bar { padding: 8px 20px; border-bottom: 1px solid #f0f0f0; display: flex; gap: 6px; flex-wrap: wrap; background: #fafafa; }
+.chip-bar { padding: 10px 20px; display: flex; gap: 6px; flex-wrap: wrap; background: #fafafa; }
 .chip { padding: 5px 11px; border-radius: 14px; font-size: 12px; cursor: pointer; background: #fff; border: 1px solid #d9d9d9; color: rgba(0,0,0,0.65); transition: all 0.15s; display: inline-flex; align-items: center; gap: 4px; }
 .chip:hover { border-color: #1677ff; color: #1677ff; }
 .chip.active { background: #e6f4ff; border-color: #1677ff; color: #0958d9; font-weight: 600; }
 .chip-count { font-size: 11px; opacity: 0.7; }
 
-/* ACTION BAR */
-.action-bar { padding: 12px 20px; display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid #f0f0f0; background: #fafafa; }
-.action-left { font-size: 13px; color: rgba(0,0,0,0.65); }
-.action-left strong { color: rgba(0,0,0,0.88); font-weight: 600; }
-.action-right { display: flex; gap: 8px; }
+.list-meta { padding: 10px 20px; display: flex; justify-content: space-between; align-items: center; font-size: 12px; color: rgba(0,0,0,0.55); border-top: 1px solid #f0f0f0; background: #fafafa; }
+.list-meta strong { color: rgba(0,0,0,0.88); font-weight: 600; }
+.sort-toggle { display: flex; gap: 6px; }
 
-/* BUTTONS */
-.btn { height: 32px; padding: 0 14px; border-radius: 6px; font-size: 13px; font-family: inherit; cursor: pointer; border: 1px solid transparent; display: inline-flex; align-items: center; gap: 6px; transition: all 0.15s; white-space: nowrap; font-weight: 500; }
-.btn-primary { background: #1677ff; color: #fff; border-color: #1677ff; }
-.btn-primary:hover { background: #4096ff; }
-.btn-default { background: #fff; color: rgba(0,0,0,0.88); border-color: #d9d9d9; }
-.btn-default:hover { color: #1677ff; border-color: #1677ff; }
-.btn-ghost { background: transparent; color: #1677ff; border-color: transparent; padding: 0 8px; }
-.btn-ghost:hover { background: #e6f4ff; }
-.btn-danger { background: #fff; color: #cf1322; border-color: #ffa39e; }
-.btn-danger:hover { background: #fff1f0; border-color: #ff4d4f; }
-.btn-warn { background: #fa8c16; color: #fff; border-color: #fa8c16; }
-.btn-warn:hover { background: #ffa940; }
-.btn-sm { height: 28px; padding: 0 10px; font-size: 12px; }
-.btn:disabled { background: #f5f5f5; color: rgba(0,0,0,0.25); border-color: #d9d9d9; cursor: not-allowed; }
+/* Reservation Card */
+.rsv-card { background: #fff; border-radius: 12px; box-shadow: 0 1px 3px rgba(0,0,0,0.06); margin-bottom: 16px; overflow: hidden; border: 1px solid #f0f0f0; transition: all 0.15s; }
+.rsv-card:hover { box-shadow: 0 4px 16px rgba(0,0,0,0.06); }
+.rsv-card.danger { border-left: 4px solid #f5222d; }
+.rsv-card.warn { border-left: 4px solid #fa8c16; }
+.rsv-card.success { border-left: 4px solid #52c41a; }
+.rsv-card.primary { border-left: 4px solid #1677ff; }
 
-/* TABLE */
-.table-wrap { overflow-x: auto; }
-table { width: 100%; border-collapse: collapse; }
-th { padding: 12px 14px; text-align: left; font-weight: 500; font-size: 12px; color: rgba(0,0,0,0.55); background: #fafafa; border-bottom: 1px solid #f0f0f0; white-space: nowrap; }
-td { padding: 14px 14px; font-size: 13px; color: rgba(0,0,0,0.88); border-bottom: 1px solid #f5f5f5; vertical-align: middle; }
-tbody tr.row-main { cursor: pointer; transition: background 0.15s; }
-tbody tr.row-main:hover td { background: #fafcff; }
-tbody tr.row-main.expanded td { background: #f0f7ff; border-bottom-color: #e6f4ff; }
-tbody tr.row-detail td { background: #f0f7ff; border-bottom: 2px solid #e6f4ff; padding: 0; }
-.td-id { font-family: 'SF Mono', Monaco, monospace; font-size: 12px; color: rgba(0,0,0,0.55); }
-.cell-customer { display: flex; flex-direction: column; gap: 2px; }
-.cell-customer .name { font-weight: 600; }
-.cell-customer .sub { font-size: 11px; color: rgba(0,0,0,0.45); font-family: 'SF Mono', Monaco, monospace; }
-.cell-hotel { display: flex; flex-direction: column; gap: 2px; max-width: 260px; }
-.cell-hotel .name { font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.cell-hotel .sub { font-size: 11px; color: rgba(0,0,0,0.45); }
-.cell-stay { font-family: 'SF Mono', Monaco, monospace; font-size: 12px; }
-.cell-stay .nights { font-size: 11px; color: rgba(0,0,0,0.45); }
+/* CARD HEADER */
+.rsv-head { padding: 14px 20px; display: flex; align-items: center; gap: 16px; border-bottom: 1px solid #f0f0f0; background: linear-gradient(180deg, #fafbfc 0%, #fff 100%); }
+.rsv-id-block { display: flex; flex-direction: column; gap: 2px; min-width: 160px; }
+.rsv-id { font-family: 'SF Mono', Monaco, monospace; font-size: 13px; color: #1677ff; font-weight: 600; cursor: pointer; }
+.rsv-id:hover { text-decoration: underline; }
+.rsv-received { font-size: 11px; color: rgba(0,0,0,0.45); }
+.rsv-cust { font-size: 14px; font-weight: 700; min-width: 140px; }
+.rsv-cust .pax { font-size: 11px; color: rgba(0,0,0,0.55); font-weight: 500; margin-left: 4px; }
+.rsv-product { flex: 1; min-width: 0; }
+.rsv-product .name { font-size: 13.5px; font-weight: 600; color: rgba(0,0,0,0.88); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.rsv-product .meta { font-size: 11.5px; color: rgba(0,0,0,0.55); margin-top: 2px; }
+.rsv-status-block { display: flex; flex-direction: column; align-items: flex-end; gap: 4px; min-width: 200px; }
+.rsv-status-line { font-size: 11px; color: rgba(0,0,0,0.55); }
+.rsv-status-line strong { color: rgba(0,0,0,0.88); }
 
-/* TAGS */
+/* AGGREGATE STATUS BADGE */
+.agg-status { display: inline-flex; align-items: center; gap: 6px; padding: 4px 10px; border-radius: 14px; font-size: 12px; font-weight: 600; }
+.agg-pending { background: #fff7e6; color: #d48806; border: 1px solid #ffd591; }
+.agg-partial { background: #f9f0ff; color: #722ed1; border: 1px solid #d3adf7; }
+.agg-confirmed { background: #f6ffed; color: #389e0d; border: 1px solid #b7eb8f; }
+.agg-failed { background: #fff1f0; color: #cf1322; border: 1px solid #ffa39e; }
+.agg-expired { background: #f5f5f5; color: rgba(0,0,0,0.55); border: 1px solid #d9d9d9; }
+.agg-dot { width: 6px; height: 6px; border-radius: 50%; }
+.agg-dot.amber { background: #fa8c16; animation: pulse 1.6s infinite; }
+.agg-dot.purple { background: #722ed1; }
+.agg-dot.green { background: #52c41a; }
+.agg-dot.red { background: #f5222d; }
+.agg-dot.gray { background: #bfbfbf; }
+
+/* ITEMS TABLE */
+.items-wrap { padding: 0; }
+.items-table { width: 100%; border-collapse: collapse; }
+.items-table th { padding: 10px 14px; text-align: left; font-size: 11px; color: rgba(0,0,0,0.45); font-weight: 600; text-transform: uppercase; letter-spacing: 0.4px; background: #fafafa; border-bottom: 1px solid #f0f0f0; }
+.items-table td { padding: 14px 14px; font-size: 13px; vertical-align: middle; border-bottom: 1px solid #f5f5f5; }
+.items-table tr:last-child td { border-bottom: none; }
+.items-table tr:hover td { background: #fafcff; }
+
+/* ITEM TYPE BADGE */
+.type-cell { display: flex; align-items: center; gap: 8px; min-width: 130px; }
+.type-icon { width: 32px; height: 32px; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 16px; flex-shrink: 0; }
+.type-icon.flight { background: #e6f4ff; color: #1677ff; }
+.type-icon.hotel { background: #f9f0ff; color: #722ed1; }
+.type-icon.tour { background: #fff7e6; color: #d48806; }
+.type-icon.ticket { background: #f6ffed; color: #389e0d; }
+.type-cell .type-name { font-size: 12px; font-weight: 600; }
+.type-cell .type-sub { font-size: 10.5px; color: rgba(0,0,0,0.45); }
+
+/* SUPPLIER / DETAIL CELL */
+.supplier-cell { min-width: 200px; }
+.supplier-cell .sup-name { font-size: 13px; font-weight: 600; }
+.supplier-cell .sup-code { font-size: 11px; color: rgba(0,0,0,0.55); font-family: 'SF Mono', Monaco, monospace; margin-top: 1px; }
+.detail-cell { font-size: 12.5px; color: rgba(0,0,0,0.75); }
+.detail-cell .detail-main { font-weight: 500; }
+.detail-cell .detail-sub { font-size: 11px; color: rgba(0,0,0,0.45); margin-top: 2px; }
+
+/* STATUS + COUNTDOWN */
+.status-cell { min-width: 160px; }
 .tag { display: inline-flex; align-items: center; gap: 4px; padding: 2px 8px; border-radius: 4px; font-size: 12px; font-weight: 500; white-space: nowrap; }
 .tag-green { background: #f6ffed; color: #389e0d; border: 1px solid #b7eb8f; }
 .tag-blue { background: #e6f4ff; color: #1677ff; border: 1px solid #91caff; }
@@ -126,88 +148,85 @@ tbody tr.row-detail td { background: #f0f7ff; border-bottom: 2px solid #e6f4ff; 
 .tag-dot { width: 6px; height: 6px; border-radius: 50%; display: inline-block; }
 .tag-dot.green { background: #52c41a; }
 .tag-dot.blue { background: #1677ff; }
-.tag-dot.purple { background: #722ed1; }
-.tag-dot.gray { background: #bfbfbf; }
 .tag-dot.orange { background: #fa8c16; }
 .tag-dot.red { background: #f5222d; }
+.tag-dot.gray { background: #bfbfbf; }
+.tag-dot.purple { background: #722ed1; }
 
-/* RATETYPE BADGES */
-.rt-static { background: #f6ffed; color: #389e0d; border: 1px solid #b7eb8f; }
-.rt-alm { background: #e6f4ff; color: #1677ff; border: 1px solid #91caff; }
-.rt-dyn { background: #f9f0ff; color: #722ed1; border: 1px solid #d3adf7; }
+.countdown { font-family: 'SF Mono', Monaco, monospace; font-weight: 600; font-size: 12px; padding: 2px 7px; border-radius: 4px; display: inline-flex; align-items: center; gap: 4px; margin-top: 4px; }
+.countdown.ok { background: #f6ffed; color: #389e0d; }
+.countdown.warn { background: #fff7e6; color: #d48806; }
+.countdown.danger { background: #fff1f0; color: #cf1322; animation: pulse 1.6s infinite; }
+.countdown.expired { background: #f5f5f5; color: rgba(0,0,0,0.55); text-decoration: line-through; }
 
-/* AIR LINKAGE */
-.air-cell { display: flex; flex-direction: column; gap: 2px; }
-.air-cell .air-status { font-size: 11px; color: rgba(0,0,0,0.45); }
+/* RATE TYPE BADGE */
+.rt-static { background: #f6ffed; color: #389e0d; border: 1px solid #b7eb8f; padding: 1px 6px; border-radius: 3px; font-size: 10px; font-weight: 600; }
+.rt-alm { background: #e6f4ff; color: #1677ff; border: 1px solid #91caff; padding: 1px 6px; border-radius: 3px; font-size: 10px; font-weight: 600; }
+.rt-dyn { background: #f9f0ff; color: #722ed1; border: 1px solid #d3adf7; padding: 1px 6px; border-radius: 3px; font-size: 10px; font-weight: 600; }
 
-/* COUNTDOWN */
-.countdown { font-family: 'SF Mono', Monaco, monospace; font-weight: 600; font-size: 13px; padding: 3px 8px; border-radius: 6px; display: inline-flex; align-items: center; gap: 4px; }
-.countdown.ok { background: #f6ffed; color: #389e0d; border: 1px solid #d9f7be; }
-.countdown.warn { background: #fff7e6; color: #d48806; border: 1px solid #ffe7ba; }
-.countdown.danger { background: #fff1f0; color: #cf1322; border: 1px solid #ffccc7; animation: pulse 1.6s infinite; }
-.countdown.expired { background: #f5f5f5; color: rgba(0,0,0,0.45); border: 1px solid #d9d9d9; text-decoration: line-through; }
-.countdown .icon { font-size: 11px; }
-.countdown-sub { font-size: 10px; color: rgba(0,0,0,0.45); margin-top: 2px; }
+/* DOCUMENT (Invoice/Voucher) */
+.doc-cell { display: flex; flex-direction: column; gap: 4px; min-width: 160px; }
+.doc-chip { display: inline-flex; align-items: center; gap: 5px; padding: 3px 8px; border-radius: 4px; font-size: 11px; max-width: 100%; }
+.doc-chip.attached { background: #f6ffed; color: #389e0d; border: 1px solid #d9f7be; }
+.doc-chip.empty { background: #fafafa; color: rgba(0,0,0,0.45); border: 1px dashed #d9d9d9; cursor: pointer; }
+.doc-chip.empty:hover { color: #1677ff; border-color: #1677ff; }
+.doc-chip .docname { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 110px; }
+.doc-chip .docx { color: rgba(0,0,0,0.35); cursor: pointer; }
+.doc-chip .docx:hover { color: #cf1322; }
 
-/* DETAIL PANEL (Expanded row) */
-.detail-panel { padding: 18px 24px 22px; }
-.detail-grid { display: grid; grid-template-columns: 320px 1fr 280px; gap: 20px; }
-.detail-section { background: #fff; border-radius: 8px; border: 1px solid #e8e8e8; }
-.detail-section .ds-header { padding: 12px 16px; border-bottom: 1px solid #f0f0f0; font-size: 13px; font-weight: 600; display: flex; align-items: center; gap: 6px; justify-content: space-between; }
-.detail-section .ds-header .ds-title { display: flex; align-items: center; gap: 6px; }
-.detail-section .ds-header .icon { font-size: 14px; }
-.detail-section .ds-body { padding: 12px 16px; }
-.kv-row { display: flex; padding: 7px 0; font-size: 12.5px; border-bottom: 1px dashed #f5f5f5; }
-.kv-row:last-child { border-bottom: none; }
-.kv-row .kv-key { width: 110px; color: rgba(0,0,0,0.55); flex-shrink: 0; }
-.kv-row .kv-val { color: rgba(0,0,0,0.88); font-weight: 500; word-break: break-all; }
-.kv-row .kv-val.mono { font-family: 'SF Mono', Monaco, monospace; font-size: 12px; }
-.kv-row .kv-val.muted { color: rgba(0,0,0,0.45); }
+/* ITEM ACTIONS */
+.item-actions { display: flex; gap: 4px; justify-content: flex-end; flex-wrap: wrap; min-width: 180px; }
 
-/* STATUS TIMELINE */
-.timeline { padding: 4px 0; }
-.tl-item { display: flex; gap: 10px; padding: 8px 0; position: relative; }
-.tl-item::before { content: ''; position: absolute; left: 5px; top: 22px; bottom: -8px; width: 1px; background: #e8e8e8; }
-.tl-item:last-child::before { display: none; }
-.tl-dot { width: 11px; height: 11px; border-radius: 50%; flex-shrink: 0; margin-top: 4px; border: 2px solid #fff; box-shadow: 0 0 0 1.5px #d9d9d9; background: #fff; z-index: 1; }
-.tl-dot.done { background: #52c41a; box-shadow: 0 0 0 1.5px #52c41a; }
-.tl-dot.current { background: #1677ff; box-shadow: 0 0 0 1.5px #1677ff; animation: pulse 1.6s infinite; }
-.tl-dot.fail { background: #f5222d; box-shadow: 0 0 0 1.5px #f5222d; }
-.tl-content { flex: 1; min-width: 0; }
-.tl-title { font-size: 12.5px; font-weight: 600; }
-.tl-meta { font-size: 11px; color: rgba(0,0,0,0.45); margin-top: 1px; font-family: 'SF Mono', Monaco, monospace; }
-.tl-item.pending .tl-title { color: rgba(0,0,0,0.45); font-weight: 500; }
+/* BUTTONS */
+.btn { height: 30px; padding: 0 12px; border-radius: 6px; font-size: 12.5px; font-family: inherit; cursor: pointer; border: 1px solid transparent; display: inline-flex; align-items: center; gap: 5px; transition: all 0.15s; white-space: nowrap; font-weight: 500; }
+.btn-primary { background: #1677ff; color: #fff; border-color: #1677ff; }
+.btn-primary:hover { background: #4096ff; }
+.btn-default { background: #fff; color: rgba(0,0,0,0.88); border-color: #d9d9d9; }
+.btn-default:hover { color: #1677ff; border-color: #1677ff; }
+.btn-ghost { background: transparent; color: #1677ff; border-color: transparent; padding: 0 8px; }
+.btn-ghost:hover { background: #e6f4ff; }
+.btn-danger { background: #fff; color: #cf1322; border-color: #ffa39e; }
+.btn-danger:hover { background: #fff1f0; border-color: #ff4d4f; }
+.btn-warn { background: #fa8c16; color: #fff; border-color: #fa8c16; }
+.btn-warn:hover { background: #ffa940; }
+.btn-success { background: #389e0d; color: #fff; border-color: #389e0d; }
+.btn-success:hover { background: #52c41a; }
+.btn-xs { height: 26px; padding: 0 9px; font-size: 11.5px; }
+.btn:disabled { background: #f5f5f5 !important; color: rgba(0,0,0,0.25) !important; border-color: #d9d9d9 !important; cursor: not-allowed; }
 
-/* ACTION SECTION */
-.action-stack { display: flex; flex-direction: column; gap: 8px; }
-.action-card { border: 1px solid #e8e8e8; border-radius: 6px; padding: 12px; font-size: 12px; background: #fafafa; }
-.action-card .action-title { font-weight: 600; font-size: 13px; margin-bottom: 6px; display: flex; align-items: center; gap: 6px; }
-.action-card .action-desc { color: rgba(0,0,0,0.55); margin-bottom: 8px; line-height: 1.5; }
-.action-card.enabled { background: #fff; border-color: #91caff; }
-.action-card.enabled .action-title { color: #1677ff; }
-.action-card.warn { background: #fff7e6; border-color: #ffd591; }
-.action-card.warn .action-title { color: #d48806; }
-.action-card.danger { background: #fff1f0; border-color: #ffa39e; }
-.action-card.danger .action-title { color: #cf1322; }
-.action-card .btn { width: 100%; justify-content: center; }
-.action-card.disabled { opacity: 0.55; }
-.action-card.disabled .btn { background: #f5f5f5; color: rgba(0,0,0,0.25); border-color: #d9d9d9; cursor: not-allowed; }
-
-/* RAW PAYLOAD */
-.payload { background: #1f1f1f; color: #d9d9d9; border-radius: 6px; padding: 12px 14px; font-family: 'SF Mono', Monaco, monospace; font-size: 11px; line-height: 1.5; max-height: 200px; overflow-y: auto; white-space: pre-wrap; word-break: break-all; }
-.payload .k { color: #95de64; }
-.payload .s { color: #ffd591; }
-.payload .n { color: #69c0ff; }
+/* CARD FOOTER */
+.rsv-foot { padding: 12px 20px; display: flex; align-items: center; gap: 12px; background: #fafafa; border-top: 1px solid #f0f0f0; flex-wrap: wrap; }
+.rsv-foot-msg { flex: 1; font-size: 12.5px; color: rgba(0,0,0,0.65); min-width: 280px; }
+.rsv-foot-msg strong { color: rgba(0,0,0,0.88); }
+.rsv-foot-msg .phase-tag { display: inline-flex; align-items: center; gap: 4px; padding: 2px 7px; border-radius: 10px; font-size: 11px; font-weight: 600; background: #e6f4ff; color: #1677ff; margin-right: 6px; vertical-align: middle; }
+.rsv-foot-msg .phase-tag.warn { background: #fff7e6; color: #d48806; }
+.rsv-foot-msg .phase-tag.danger { background: #fff1f0; color: #cf1322; }
+.rsv-foot-msg .phase-tag.success { background: #f6ffed; color: #389e0d; }
+.rsv-foot-actions { display: flex; gap: 6px; flex-wrap: wrap; }
 
 /* PAGINATION */
-.pagination { padding: 16px 20px; display: flex; align-items: center; justify-content: space-between; font-size: 13px; color: rgba(0,0,0,0.55); }
-.pagination .pgn-btns { display: flex; gap: 4px; }
-.pagination .pgn-btn { min-width: 30px; height: 30px; border: 1px solid #d9d9d9; background: #fff; border-radius: 4px; cursor: pointer; font-family: inherit; font-size: 13px; color: rgba(0,0,0,0.65); padding: 0 8px; }
-.pagination .pgn-btn.active { color: #1677ff; border-color: #1677ff; font-weight: 600; }
-.pagination .pgn-btn:hover { color: #1677ff; border-color: #1677ff; }
+.pagination { padding: 16px 20px; display: flex; align-items: center; justify-content: space-between; font-size: 13px; color: rgba(0,0,0,0.55); background: #fff; border-radius: 10px; box-shadow: 0 1px 3px rgba(0,0,0,0.06); margin-top: 16px; }
+.pgn-btns { display: flex; gap: 4px; }
+.pgn-btn { min-width: 30px; height: 30px; border: 1px solid #d9d9d9; background: #fff; border-radius: 4px; cursor: pointer; font-family: inherit; font-size: 13px; color: rgba(0,0,0,0.65); padding: 0 8px; }
+.pgn-btn.active { color: #1677ff; border-color: #1677ff; font-weight: 600; }
+.pgn-btn:hover { color: #1677ff; border-color: #1677ff; }
 
-/* RESPONSIVE */
-@media (max-width: 1400px) { .detail-grid { grid-template-columns: 1fr 1fr; } .detail-section.actions-section { grid-column: 1 / -1; } .kpi-row { grid-template-columns: repeat(3, 1fr); } }
+/* AIR LINKAGE BADGE on header */
+.air-link-tag { font-size: 11px; padding: 2px 8px; border-radius: 10px; font-weight: 600; }
+.air-link-tag.has { background: #e6f4ff; color: #1677ff; }
+.air-link-tag.none { background: #f5f5f5; color: rgba(0,0,0,0.55); }
+
+/* LEGEND */
+.legend-card { background: #fff; border-radius: 10px; box-shadow: 0 1px 3px rgba(0,0,0,0.06); padding: 16px 20px; margin-top: 16px; }
+.legend-title { font-size: 13px; font-weight: 600; margin-bottom: 10px; }
+.legend-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; font-size: 12px; color: rgba(0,0,0,0.65); line-height: 1.6; }
+
+@media (max-width: 1400px) {
+  .kpi-row { grid-template-columns: repeat(3, 1fr); }
+  .legend-grid { grid-template-columns: repeat(2, 1fr); }
+  .rsv-head { flex-wrap: wrap; }
+  .rsv-product { flex-basis: 100%; order: 4; margin-top: 4px; }
+}
 </style>
 </head>
 <body>
@@ -217,8 +236,8 @@ tbody tr.row-detail td { background: #f0f7ff; border-bottom: 2px solid #e6f4ff; 
   <div class="gnb-logo">Trip<span>Store</span> Admin</div>
   <div class="gnb-menu">
     <div class="gnb-item">대시보드</div>
-    <div class="gnb-item">예약 관리</div>
-    <div class="gnb-item active">PB 관리</div>
+    <div class="gnb-item active">예약 관리</div>
+    <div class="gnb-item">PB 관리</div>
     <div class="gnb-item">상품 관리</div>
     <div class="gnb-item">정산</div>
   </div>
@@ -227,7 +246,7 @@ tbody tr.row-detail td { background: #f0f7ff; border-bottom: 2px solid #e6f4ff; 
 
 <!-- BREADCRUMB -->
 <div class="breadcrumb">
-  PB 관리 <span class="breadcrumb-sep">›</span> TMG <span class="breadcrumb-sep">›</span> 숙소 예약 관리
+  예약 관리 <span class="breadcrumb-sep">›</span> 패키지 예약 운영 <span class="breadcrumb-sep">›</span> TMG 숙소 포함 예약
 </div>
 
 <div class="layout">
@@ -235,17 +254,16 @@ tbody tr.row-detail td { background: #f0f7ff; border-bottom: 2px solid #e6f4ff; 
 <!-- PAGE HEADER -->
 <div class="page-header">
   <div>
-    <div class="page-title">TMG 숙소 예약 관리</div>
-    <div class="page-sub">TMG HotelLink API 연동 예약을 통합 관리 · Phase 4 ~ Phase 6 운영 화면</div>
+    <div class="page-title">패키지 예약 운영 — TMG 숙소 포함</div>
+    <div class="page-sub">상품(패키지) 단위로 항공권 + 숙박권(TMG) + 옵션을 통합 관리 · Phase 4 ~ Phase 6 운영 화면</div>
   </div>
   <div class="page-actions">
     <button class="btn btn-default">🔄 전체 동기화</button>
     <button class="btn btn-default">📤 CSV 내보내기</button>
-    <button class="btn btn-primary">＋ 수동 예약 등록</button>
   </div>
 </div>
 
-<!-- KPI ROW -->
+<!-- KPI -->
 <div class="kpi-row">
   <div class="kpi-card primary">
     <div class="kpi-label"><span class="kpi-dot"></span>오늘 confirm 대상</div>
@@ -253,14 +271,14 @@ tbody tr.row-detail td { background: #f0f7ff; border-bottom: 2px solid #e6f4ff; 
     <div class="kpi-sub">항공연동 O 8건 · 연동 X 4건</div>
   </div>
   <div class="kpi-card warn">
-    <div class="kpi-label"><span class="kpi-dot"></span>시한 임박 (1시간 이내)</div>
+    <div class="kpi-label"><span class="kpi-dot"></span>TMG 시한 임박 (1시간 이내)</div>
     <div class="kpi-value">3<span class="kpi-unit">건</span></div>
-    <div class="kpi-sub">다이나믹 요금 2건 · 계약 1건</div>
+    <div class="kpi-sub">다이나믹 2건 · 계약 1건</div>
   </div>
   <div class="kpi-card danger">
     <div class="kpi-label"><span class="kpi-dot"></span>시한 초과 (재예약 필요)</div>
     <div class="kpi-value">2<span class="kpi-unit">건</span></div>
-    <div class="kpi-sub">[재예약 시도] 버튼 활성화</div>
+    <div class="kpi-sub">[재예약 시도] 활성</div>
   </div>
   <div class="kpi-card success">
     <div class="kpi-label"><span class="kpi-dot"></span>오늘 CONFIRMED</div>
@@ -268,404 +286,452 @@ tbody tr.row-detail td { background: #f0f7ff; border-bottom: 2px solid #e6f4ff; 
     <div class="kpi-sub">자동 18건 · 수동 10건</div>
   </div>
   <div class="kpi-card">
-    <div class="kpi-label"><span class="kpi-dot"></span>취소·환불 대기</div>
+    <div class="kpi-label"><span class="kpi-dot gray"></span>취소·환불 대기</div>
     <div class="kpi-value">5<span class="kpi-unit">건</span></div>
     <div class="kpi-sub">cancelFees 검토 필요</div>
   </div>
 </div>
 
-<!-- MAIN CARD -->
-<div class="card">
-
-  <!-- NOTICE BANNER -->
-  <div class="notice-banner notice-blue">
-    <div class="notice-icon">ℹ️</div>
-    <div>
-      <strong>Phase 4 운영 가이드</strong> — 항공 연동 X = 영업실이 [숙박권 confirm] 수동 클릭 / 항공 연동 O = 항공권 RESERVED 시 자동 confirm / confirmBefore 시한 초과 시 [재예약 시도] 버튼으로 일괄 재호출.
-      <a href="#" style="color:#1677ff; margin-left:6px; font-weight:600;">전체 플로우 보기 →</a>
-    </div>
+<!-- TOOLBAR -->
+<div class="toolbar">
+  <div class="notice-banner">
+    <div style="font-size:16px;">ℹ️</div>
+    <div><strong>Phase 4 운영 가이드</strong> — 예약 = 패키지 단위. 항공권 RESERVED 시 TMG 숙소 자동 confirm 트리거 / 숙박 단독은 영업실 수동 [숙박권 confirm] / confirmBefore 시한 초과 시 [재예약 시도] 일괄 호출. <a href="#">전체 플로우 →</a></div>
   </div>
-
-  <!-- FILTER BAR -->
   <div class="filter-bar">
-    <span class="label">호텔</span>
+    <span class="label">호텔(TMG)</span>
     <select class="fi fi-lg">
-      <option>전체 호텔 (52)</option>
+      <option>전체 (52)</option>
+      <option>Sol by Melia Phu Quoc</option>
       <option>Vinpearl Resort Nha Trang</option>
       <option>JW Marriott Hanoi</option>
-      <option>InterContinental Danang</option>
     </select>
     <span class="label">rateType</span>
-    <select class="fi fi-md">
-      <option>전체</option>
-      <option>STATIC</option>
-      <option>ALM-DYNAMIC</option>
-      <option>DYNAMIC</option>
-    </select>
-    <span class="label">항공연동</span>
-    <select class="fi fi-sm">
-      <option>전체</option>
-      <option>연동 O</option>
-      <option>연동 X</option>
-    </select>
-    <span class="label">TMG 상태</span>
-    <select class="fi fi-md">
-      <option>전체</option>
-      <option>TMG_RESERVED</option>
-      <option>TMG_CONFIRMED</option>
-      <option>예약 만료</option>
-      <option>CANCELLED</option>
-    </select>
-    <span class="label">기간</span>
+    <select class="fi fi-md"><option>전체</option><option>STATIC</option><option>ALM-DYNAMIC</option><option>DYNAMIC</option></select>
+    <span class="label">패키지 구성</span>
+    <select class="fi fi-md"><option>전체</option><option>항공+숙박</option><option>항공+숙박+옵션</option><option>숙박 단독</option></select>
+    <span class="label">집계 상태</span>
+    <select class="fi fi-md"><option>전체</option><option>Pending</option><option>Partial</option><option>Confirmed</option><option>Expired</option></select>
+    <span class="label">출발일</span>
     <input class="fi fi-md" type="date" value="2026-05-13">
-    <span style="color: rgba(0,0,0,0.35); font-size:12px;">~</span>
+    <span style="color:rgba(0,0,0,0.35); font-size:12px;">~</span>
     <input class="fi fi-md" type="date" value="2026-06-13">
-    <input class="fi fi-lg" placeholder="🔍 예약번호·고객명·bookingCode 검색" style="margin-left: auto;">
+    <input class="fi fi-lg" placeholder="🔍 예약번호·고객·bookingCode" style="margin-left:auto;">
   </div>
-
-  <!-- CHIP BAR (Quick filters) -->
   <div class="chip-bar">
-    <span style="font-size:12px; color: rgba(0,0,0,0.45); margin-right: 4px; align-self:center;">빠른 필터:</span>
+    <span style="font-size:12px; color:rgba(0,0,0,0.45); align-self:center;">빠른 필터:</span>
     <div class="chip active">전체 <span class="chip-count">(247)</span></div>
-    <div class="chip">⏰ 시한 임박 <span class="chip-count">3</span></div>
+    <div class="chip">⏰ TMG 시한 임박 <span class="chip-count">3</span></div>
     <div class="chip">🚨 시한 초과 <span class="chip-count">2</span></div>
-    <div class="chip">✈️ 항공권 대기 <span class="chip-count">5</span></div>
+    <div class="chip">✈️ 항공권 RESERVED 대기 <span class="chip-count">5</span></div>
     <div class="chip">✋ 영업실 수동 confirm 대기 <span class="chip-count">4</span></div>
     <div class="chip">⚠️ UNAVAILABLE 발생 <span class="chip-count">1</span></div>
     <div class="chip">💸 cancelFees 검토 <span class="chip-count">2</span></div>
   </div>
-
-  <!-- ACTION BAR -->
-  <div class="action-bar">
-    <div class="action-left">총 <strong>247</strong>건 · 페이지당 <strong>20</strong>건 · 선택 <strong>0</strong>건</div>
-    <div class="action-right">
-      <button class="btn btn-default btn-sm" disabled>일괄 [상태값 확인]</button>
-      <button class="btn btn-default btn-sm" disabled>일괄 [확정 처리]</button>
-      <button class="btn btn-default btn-sm">컬럼 설정 ⚙️</button>
-    </div>
-  </div>
-
-  <!-- TABLE -->
-  <div class="table-wrap">
-  <table>
-    <thead>
-    <tr>
-      <th style="width:32px;"><input type="checkbox"></th>
-      <th>예약번호</th>
-      <th>고객</th>
-      <th>호텔 / 객실</th>
-      <th>투숙 기간</th>
-      <th>rateType</th>
-      <th>항공 연동</th>
-      <th>TMG 상태</th>
-      <th>confirmBefore</th>
-      <th>총 금액</th>
-      <th style="text-align: right;">액션</th>
-    </tr>
-    </thead>
-    <tbody>
-
-    <!-- ROW 1: 항공 연동 O, 항공권 RESERVED, 자동 confirm 대기 -->
-    <tr class="row-main">
-      <td><input type="checkbox"></td>
-      <td>
-        <div class="td-id">RSV-2026051301</div>
-      </td>
-      <td><div class="cell-customer"><span class="name">김민준</span><span class="sub">010-1234-5678</span></div></td>
-      <td><div class="cell-hotel"><span class="name">Vinpearl Resort Nha Trang</span><span class="sub">Deluxe Ocean View · 2박</span></div></td>
-      <td><div class="cell-stay">05-20 → 05-22<div class="nights">2박</div></div></td>
-      <td><span class="tag rt-alm">ALM-DYNAMIC</span></td>
-      <td><div class="air-cell"><span class="tag tag-blue">✈️ 연동 O</span><span class="air-status">항공권 RESERVED ✓</span></div></td>
-      <td><span class="tag tag-blue"><span class="tag-dot blue"></span>TMG_RESERVED</span></td>
-      <td><div class="countdown ok"><span class="icon">⏱</span>11h 24m</div><div class="countdown-sub">계약 요금 / ~05-14 02:00</div></td>
-      <td style="font-family: 'SF Mono', monospace;">2,140,000원</td>
-      <td style="text-align: right;"><button class="btn btn-sm btn-default">자동 처리 대기 →</button></td>
-    </tr>
-
-    <!-- ROW 2: 항공 연동 O, 항공권 미RESERVED, 대기 중 -->
-    <tr class="row-main expanded">
-      <td><input type="checkbox" checked></td>
-      <td><div class="td-id">RSV-2026051302</div></td>
-      <td><div class="cell-customer"><span class="name">이서연</span><span class="sub">010-2345-6789</span></div></td>
-      <td><div class="cell-hotel"><span class="name">JW Marriott Hanoi</span><span class="sub">Executive Suite · 3박</span></div></td>
-      <td><div class="cell-stay">06-01 → 06-04<div class="nights">3박</div></div></td>
-      <td><span class="tag rt-dyn">DYNAMIC</span></td>
-      <td><div class="air-cell"><span class="tag tag-blue">✈️ 연동 O</span><span class="air-status" style="color:#d48806;">항공권 대기 ⏳</span></div></td>
-      <td><span class="tag tag-orange"><span class="tag-dot orange"></span>대기 · 항공권</span></td>
-      <td><div class="countdown danger"><span class="icon">⏱</span>24m 12s</div><div class="countdown-sub" style="color:#cf1322;">다이나믹 / ~13:48</div></td>
-      <td style="font-family: 'SF Mono', monospace;">5,820,000원</td>
-      <td style="text-align: right;"><button class="btn btn-sm btn-default">▼ 펼침</button></td>
-    </tr>
-    <!-- DETAIL PANEL: ROW 2 -->
-    <tr class="row-detail">
-      <td colspan="11">
-        <div class="detail-panel">
-          <div class="detail-grid">
-
-            <!-- 1) 예약 정보 -->
-            <div class="detail-section">
-              <div class="ds-header">
-                <div class="ds-title"><span class="icon">📋</span>예약·TMG 식별 정보</div>
-                <button class="btn btn-sm btn-ghost">📋 복사</button>
-              </div>
-              <div class="ds-body">
-                <div class="kv-row"><div class="kv-key">예약번호</div><div class="kv-val mono">RSV-2026051302</div></div>
-                <div class="kv-row"><div class="kv-key">TMG bookingCode</div><div class="kv-val mono">TMG-HL-7K9M2X-2026</div></div>
-                <div class="kv-row"><div class="kv-key">propertyId</div><div class="kv-val mono">PROP-VN-HN-0042</div></div>
-                <div class="kv-row"><div class="kv-key">rateKey</div><div class="kv-val mono muted">rk_x9a8b7c6...d3e2f1</div></div>
-                <div class="kv-row"><div class="kv-key">roomInfoEncrypted</div><div class="kv-val mono muted">enc_4f5g6h7...m8n9o0</div></div>
-                <div class="kv-row"><div class="kv-key">rateType</div><div class="kv-val"><span class="tag rt-dyn">DYNAMIC</span> <span class="muted" style="margin-left:6px; font-size:11px;">재고 차감 X</span></div></div>
-                <div class="kv-row"><div class="kv-key">생성일시</div><div class="kv-val mono">2026-05-13 13:24:08</div></div>
-                <div class="kv-row"><div class="kv-key">confirmBefore</div><div class="kv-val mono" style="color:#cf1322;">2026-05-13 13:48:20 ⚠️</div></div>
-              </div>
-            </div>
-
-            <!-- 2) Status Timeline -->
-            <div class="detail-section">
-              <div class="ds-header">
-                <div class="ds-title"><span class="icon">📈</span>예약 진행 단계 (Phase 3 → 4)</div>
-                <span class="tag tag-orange">현재: 항공권 RESERVED 대기</span>
-              </div>
-              <div class="ds-body">
-                <div class="timeline">
-                  <div class="tl-item">
-                    <div class="tl-dot done"></div>
-                    <div class="tl-content">
-                      <div class="tl-title">checkAvailability 재조회 (Gate 1/2 통과)</div>
-                      <div class="tl-meta">2026-05-13 13:23:54 · 재고 OK · 가격 동일</div>
-                    </div>
-                  </div>
-                  <div class="tl-item">
-                    <div class="tl-dot done"></div>
-                    <div class="tl-content">
-                      <div class="tl-title">트립스토어 예약 생성 + 결제 완료</div>
-                      <div class="tl-meta">2026-05-13 13:24:01 · 5,820,000원</div>
-                    </div>
-                  </div>
-                  <div class="tl-item">
-                    <div class="tl-dot done"></div>
-                    <div class="tl-content">
-                      <div class="tl-title">reserveBooking 호출 → TMG_RESERVED</div>
-                      <div class="tl-meta">2026-05-13 13:24:08 · bookingCode 발급 · confirmBefore +24m</div>
-                    </div>
-                  </div>
-                  <div class="tl-item">
-                    <div class="tl-dot current"></div>
-                    <div class="tl-content">
-                      <div class="tl-title">[분기 2] 항공권 RESERVED 대기 중 ⏳</div>
-                      <div class="tl-meta">2026-05-13 13:24:08 ~ · 폴링 중 (30s 간격)</div>
-                    </div>
-                  </div>
-                  <div class="tl-item pending">
-                    <div class="tl-dot"></div>
-                    <div class="tl-content">
-                      <div class="tl-title">retrieveBooking 호출 (RESERVED 확인)</div>
-                      <div class="tl-meta">자동 트리거 대기</div>
-                    </div>
-                  </div>
-                  <div class="tl-item pending">
-                    <div class="tl-dot"></div>
-                    <div class="tl-content">
-                      <div class="tl-title">confirmBooking → CONFIRMED</div>
-                      <div class="tl-meta">자동 트리거 대기</div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            <!-- 3) Actions -->
-            <div class="detail-section actions-section">
-              <div class="ds-header">
-                <div class="ds-title"><span class="icon">⚡</span>액션 (운영자)</div>
-              </div>
-              <div class="ds-body">
-                <div class="action-stack">
-                  <div class="action-card enabled">
-                    <div class="action-title">🔍 [상태값 확인]</div>
-                    <div class="action-desc">retrieveBooking 호출 → TMG 실제 상태 즉시 확인 (Phase 5)</div>
-                    <button class="btn btn-primary btn-sm">상태값 확인하기</button>
-                  </div>
-                  <div class="action-card warn">
-                    <div class="action-title">⏰ [재예약 시도]</div>
-                    <div class="action-desc">시한 초과 시 checkAvail → reserve → confirm 일괄 자동 호출. <strong style="color:#d48806">남은 시한: 24m</strong></div>
-                    <button class="btn btn-warn btn-sm" disabled>시한 초과 시 활성화</button>
-                  </div>
-                  <div class="action-card disabled">
-                    <div class="action-title">✋ [숙박권 confirm] (수동)</div>
-                    <div class="action-desc">항공 연동 O 케이스는 자동 처리. 수동 트리거 비활성.</div>
-                    <button class="btn btn-default btn-sm" disabled>항공 연동 X 전용</button>
-                  </div>
-                  <div class="action-card danger">
-                    <div class="action-title">🗑 [숙소 예약 취소하기]</div>
-                    <div class="action-desc">cancelBooking 호출. cancelFees(위약금)는 응답 후 자동 반영.</div>
-                    <button class="btn btn-danger btn-sm">취소하기</button>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-          </div>
-
-          <!-- RAW PAYLOAD (collapsible) -->
-          <div style="margin-top: 16px;">
-            <div style="display:flex; align-items:center; gap:8px; margin-bottom:8px;">
-              <span style="font-size:12px; color:rgba(0,0,0,0.55); font-weight:600;">🔎 마지막 TMG 응답 (reserveBooking)</span>
-              <button class="btn btn-ghost btn-sm">전체 보기</button>
-            </div>
-            <div class="payload"><span class="k">"bookingCode"</span>: <span class="s">"TMG-HL-7K9M2X-2026"</span>,
-<span class="k">"bookingStatus"</span>: <span class="s">"RESERVED"</span>,
-<span class="k">"confirmBefore"</span>: <span class="s">"2026-05-13T13:48:20+07:00"</span>,
-<span class="k">"totalRates"</span>: <span class="n">98640000</span>,
-<span class="k">"currency"</span>: <span class="s">"VND"</span>,
-<span class="k">"cancellationPolicies"</span>: [
-  { <span class="k">"hoursBeforeCheckin"</span>: <span class="n">72</span>, <span class="k">"feePercentage"</span>: <span class="n">0</span> },
-  { <span class="k">"hoursBeforeCheckin"</span>: <span class="n">24</span>, <span class="k">"feePercentage"</span>: <span class="n">50</span> },
-  { <span class="k">"hoursBeforeCheckin"</span>: <span class="n">0</span>, <span class="k">"feePercentage"</span>: <span class="n">100</span> }
-]</div>
-          </div>
-        </div>
-      </td>
-    </tr>
-
-    <!-- ROW 3: 항공 연동 X, 영업실 수동 confirm 대기 -->
-    <tr class="row-main">
-      <td><input type="checkbox"></td>
-      <td><div class="td-id">RSV-2026051303</div></td>
-      <td><div class="cell-customer"><span class="name">박지호</span><span class="sub">010-3456-7890</span></div></td>
-      <td><div class="cell-hotel"><span class="name">InterContinental Danang</span><span class="sub">Sun Peninsula · 4박</span></div></td>
-      <td><div class="cell-stay">07-15 → 07-19<div class="nights">4박</div></div></td>
-      <td><span class="tag rt-static">STATIC</span></td>
-      <td><div class="air-cell"><span class="tag tag-gray">연동 X</span><span class="air-status">숙박 단독</span></div></td>
-      <td><span class="tag tag-blue"><span class="tag-dot blue"></span>TMG_RESERVED</span></td>
-      <td><div class="countdown ok"><span class="icon">⏱</span>9h 12m</div><div class="countdown-sub">계약 요금</div></td>
-      <td style="font-family: 'SF Mono', monospace;">3,480,000원</td>
-      <td style="text-align: right;"><button class="btn btn-primary btn-sm">✋ [숙박권 confirm]</button></td>
-    </tr>
-
-    <!-- ROW 4: 시한 초과 (재예약 시도 필요) -->
-    <tr class="row-main">
-      <td><input type="checkbox"></td>
-      <td><div class="td-id">RSV-2026051304</div></td>
-      <td><div class="cell-customer"><span class="name">최아인</span><span class="sub">010-4567-8901</span></div></td>
-      <td><div class="cell-hotel"><span class="name">Sheraton Saigon</span><span class="sub">Premium Club · 2박</span></div></td>
-      <td><div class="cell-stay">05-25 → 05-27<div class="nights">2박</div></div></td>
-      <td><span class="tag rt-dyn">DYNAMIC</span></td>
-      <td><div class="air-cell"><span class="tag tag-blue">✈️ 연동 O</span><span class="air-status" style="color:#cf1322;">항공권 대기 (지연)</span></div></td>
-      <td><span class="tag tag-red"><span class="tag-dot red"></span>예약 만료</span></td>
-      <td><div class="countdown expired"><span class="icon">⏱</span>-12m 04s</div><div class="countdown-sub" style="color:#cf1322;">홀드 해제됨</div></td>
-      <td style="font-family: 'SF Mono', monospace;">1,920,000원</td>
-      <td style="text-align: right;"><button class="btn btn-warn btn-sm">⏰ [재예약 시도]</button></td>
-    </tr>
-
-    <!-- ROW 5: CONFIRMED 정상 종료 -->
-    <tr class="row-main">
-      <td><input type="checkbox"></td>
-      <td><div class="td-id">RSV-2026051305</div></td>
-      <td><div class="cell-customer"><span class="name">정유나</span><span class="sub">010-5678-9012</span></div></td>
-      <td><div class="cell-hotel"><span class="name">Vinpearl Resort Nha Trang</span><span class="sub">Garden View · 3박</span></div></td>
-      <td><div class="cell-stay">05-18 → 05-21<div class="nights">3박</div></div></td>
-      <td><span class="tag rt-static">STATIC</span></td>
-      <td><div class="air-cell"><span class="tag tag-blue">✈️ 연동 O</span><span class="air-status" style="color:#389e0d;">항공권 CONFIRMED ✓</span></div></td>
-      <td><span class="tag tag-green"><span class="tag-dot green"></span>TMG_CONFIRMED</span></td>
-      <td><span style="color:rgba(0,0,0,0.35); font-size:12px;">—</span></td>
-      <td style="font-family: 'SF Mono', monospace;">2,760,000원</td>
-      <td style="text-align: right;"><button class="btn btn-sm btn-default">🔍 [상태값 확인]</button></td>
-    </tr>
-
-    <!-- ROW 6: UNAVAILABLE 발생 (운영팀 알림 대기) -->
-    <tr class="row-main">
-      <td><input type="checkbox"></td>
-      <td><div class="td-id">RSV-2026051306</div></td>
-      <td><div class="cell-customer"><span class="name">한도윤</span><span class="sub">010-6789-0123</span></div></td>
-      <td><div class="cell-hotel"><span class="name">Pullman Saigon Centre</span><span class="sub">Executive · 2박</span></div></td>
-      <td><div class="cell-stay">06-08 → 06-10<div class="nights">2박</div></div></td>
-      <td><span class="tag rt-alm">ALM-DYNAMIC</span></td>
-      <td><div class="air-cell"><span class="tag tag-gray">연동 X</span><span class="air-status">숙박 단독</span></div></td>
-      <td><span class="tag tag-red"><span class="tag-dot red"></span>UNAVAILABLE</span></td>
-      <td><span style="color:rgba(0,0,0,0.35); font-size:12px;">—</span></td>
-      <td style="font-family: 'SF Mono', monospace;">1,560,000원</td>
-      <td style="text-align: right;"><button class="btn btn-warn btn-sm">⚠️ 운영팀 처리</button></td>
-    </tr>
-
-    <!-- ROW 7: CANCELLED (cancelFees 적용) -->
-    <tr class="row-main">
-      <td><input type="checkbox"></td>
-      <td><div class="td-id">RSV-2026051207</div></td>
-      <td><div class="cell-customer"><span class="name">강서윤</span><span class="sub">010-7890-1234</span></div></td>
-      <td><div class="cell-hotel"><span class="name">JW Marriott Hanoi</span><span class="sub">Deluxe King · 2박</span></div></td>
-      <td><div class="cell-stay">05-22 → 05-24<div class="nights">2박</div></div></td>
-      <td><span class="tag rt-static">STATIC</span></td>
-      <td><div class="air-cell"><span class="tag tag-gray">연동 X</span><span class="air-status">숙박 단독</span></div></td>
-      <td><span class="tag tag-gray"><span class="tag-dot gray"></span>TMG_CANCELLED</span></td>
-      <td><span style="color:rgba(0,0,0,0.35); font-size:12px;">—</span></td>
-      <td style="font-family: 'SF Mono', monospace;"><div>2,180,000원</div><div style="font-size:11px; color:#cf1322;">위약금 50% 적용</div></td>
-      <td style="text-align: right;"><button class="btn btn-sm btn-default">💸 정산 보기</button></td>
-    </tr>
-
-    <!-- ROW 8: 시한 임박 1시간 -->
-    <tr class="row-main">
-      <td><input type="checkbox"></td>
-      <td><div class="td-id">RSV-2026051308</div></td>
-      <td><div class="cell-customer"><span class="name">윤하린</span><span class="sub">010-8901-2345</span></div></td>
-      <td><div class="cell-hotel"><span class="name">Lotte Hotel Hanoi</span><span class="sub">Premier Suite · 3박</span></div></td>
-      <td><div class="cell-stay">06-12 → 06-15<div class="nights">3박</div></div></td>
-      <td><span class="tag rt-alm">ALM-DYNAMIC</span></td>
-      <td><div class="air-cell"><span class="tag tag-gray">연동 X</span><span class="air-status">숙박 단독</span></div></td>
-      <td><span class="tag tag-blue"><span class="tag-dot blue"></span>TMG_RESERVED</span></td>
-      <td><div class="countdown warn"><span class="icon">⏱</span>52m 18s</div><div class="countdown-sub" style="color:#d48806;">계약 요금 / 임박</div></td>
-      <td style="font-family: 'SF Mono', monospace;">4,290,000원</td>
-      <td style="text-align: right;"><button class="btn btn-primary btn-sm">✋ [숙박권 confirm]</button></td>
-    </tr>
-
-    </tbody>
-  </table>
-  </div>
-
-  <!-- PAGINATION -->
-  <div class="pagination">
-    <div>1 – 8 / 총 <strong>247</strong>건</div>
-    <div class="pgn-btns">
-      <button class="pgn-btn">‹</button>
-      <button class="pgn-btn active">1</button>
-      <button class="pgn-btn">2</button>
-      <button class="pgn-btn">3</button>
-      <button class="pgn-btn">…</button>
-      <button class="pgn-btn">13</button>
-      <button class="pgn-btn">›</button>
+  <div class="list-meta">
+    <div>총 <strong>247</strong>건 · 페이지당 <strong>10</strong>건 · <strong>1</strong> ~ <strong>6</strong>번 표시</div>
+    <div class="sort-toggle">
+      <select class="fi fi-md" style="height:28px; font-size:12px;"><option>최신 결제순</option><option>출발일 임박순</option><option>TMG 시한 임박순</option></select>
     </div>
   </div>
 </div>
 
+<!-- ======= RESERVATION CARDS ======= -->
+
+<!-- CARD 1: 항공 RESERVED → TMG 자동 confirm 대기 (정상) -->
+<div class="rsv-card primary">
+  <div class="rsv-head">
+    <div class="rsv-id-block">
+      <div class="rsv-id">#RSV-2026051301</div>
+      <div class="rsv-received">결제 완료 · 09:12</div>
+    </div>
+    <div class="rsv-cust">김민준 <span class="pax">2 PAX</span></div>
+    <div class="rsv-product">
+      <div class="name">Sol by Melia Phu Quoc 4박 5일 · Air+Hotel 패키지</div>
+      <div class="meta">출발 05-20 ICN→PQC · 귀국 05-24 PQC→ICN · 1,840,000원/인</div>
+    </div>
+    <div class="rsv-status-block">
+      <div class="agg-status agg-pending"><span class="agg-dot amber"></span>TMG confirm 대기</div>
+      <div class="rsv-status-line"><span class="air-link-tag has">✈️ 항공 연동 O</span></div>
+    </div>
+  </div>
+  <div class="items-wrap">
+  <table class="items-table">
+    <thead>
+    <tr>
+      <th style="width:170px;">구성</th>
+      <th>공급사 / 코드</th>
+      <th>상세</th>
+      <th>상태</th>
+      <th>잔여 시한</th>
+      <th>증빙</th>
+      <th style="text-align:right;">액션</th>
+    </tr>
+    </thead>
+    <tbody>
+    <tr>
+      <td><div class="type-cell"><div class="type-icon flight">✈️</div><div><div class="type-name">Flight</div><div class="type-sub">왕복 · Economy</div></div></div></td>
+      <td><div class="supplier-cell"><div class="sup-name">VietJet Air</div><div class="sup-code">VJ871 / VJ872</div></div></td>
+      <td><div class="detail-cell"><div class="detail-main">ICN → PQC · 05-20 06:30 · 2 seats</div><div class="detail-sub">PQC → ICN · 05-24 14:50</div></div></td>
+      <td><span class="tag tag-green"><span class="tag-dot green"></span>RESERVED ✓</span></td>
+      <td><span style="color:rgba(0,0,0,0.35); font-size:12px;">—</span></td>
+      <td><div class="doc-cell"><div class="doc-chip attached">📎 <span class="docname">vj_pnr_0520.pdf</span></div></div></td>
+      <td><div class="item-actions"><button class="btn btn-default btn-xs">조회</button></div></td>
+    </tr>
+    <tr>
+      <td><div class="type-cell"><div class="type-icon hotel">🏨</div><div><div class="type-name">Hotel <span class="rt-alm">ALM-DYN</span></div><div class="type-sub">TMG 연동</div></div></div></td>
+      <td><div class="supplier-cell"><div class="sup-name">Sol by Melia Phu Quoc</div><div class="sup-code">TMG · TMG-HL-8N3K7Y-2026</div></div></td>
+      <td><div class="detail-cell"><div class="detail-main">Deluxe Ocean View · 1 room · 4 nights</div><div class="detail-sub">05-20 → 05-24 · 조식 포함</div></div></td>
+      <td><span class="tag tag-blue"><span class="tag-dot blue"></span>TMG_RESERVED</span></td>
+      <td><div class="countdown ok">⏱ 11h 24m</div><div style="font-size:10px; color:rgba(0,0,0,0.45); margin-top:2px;">계약 / ~05-14 02:00</div></td>
+      <td><div class="doc-cell"><div class="doc-chip empty">📎 voucher 첨부</div></div></td>
+      <td><div class="item-actions">
+        <button class="btn btn-default btn-xs">🔍 상태확인</button>
+        <button class="btn btn-default btn-xs" disabled>✋ 수동 confirm</button>
+      </div></td>
+    </tr>
+    </tbody>
+  </table>
+  </div>
+  <div class="rsv-foot">
+    <div class="rsv-foot-msg">
+      <span class="phase-tag">Phase 4</span>
+      <strong>항공권 RESERVED 감지됨</strong> → TMG 숙소 자동 confirm 트리거 예정 (시스템 폴링 30초 주기). 수동 개입 불필요.
+    </div>
+    <div class="rsv-foot-actions">
+      <button class="btn btn-default btn-xs">🔍 전체 상태값 확인</button>
+      <button class="btn btn-danger btn-xs">예약 취소</button>
+    </div>
+  </div>
+</div>
+
+<!-- CARD 2: 항공권 대기 중 → TMG 시한 임박 (위험) -->
+<div class="rsv-card warn">
+  <div class="rsv-head">
+    <div class="rsv-id-block">
+      <div class="rsv-id">#RSV-2026051302</div>
+      <div class="rsv-received">결제 완료 · 13:24</div>
+    </div>
+    <div class="rsv-cust">이서연 <span class="pax">2 PAX</span></div>
+    <div class="rsv-product">
+      <div class="name">JW Marriott Hanoi 3박 4일 · Air+Hotel+Tour 패키지</div>
+      <div class="meta">출발 06-01 ICN→HAN · 귀국 06-04 HAN→ICN · 2,910,000원/인</div>
+    </div>
+    <div class="rsv-status-block">
+      <div class="agg-status agg-partial"><span class="agg-dot purple"></span>항공권 대기 · TMG 시한 임박</div>
+      <div class="rsv-status-line"><span class="air-link-tag has">✈️ 항공 연동 O</span></div>
+    </div>
+  </div>
+  <div class="items-wrap">
+  <table class="items-table">
+    <thead>
+    <tr><th style="width:170px;">구성</th><th>공급사 / 코드</th><th>상세</th><th>상태</th><th>잔여 시한</th><th>증빙</th><th style="text-align:right;">액션</th></tr>
+    </thead>
+    <tbody>
+    <tr>
+      <td><div class="type-cell"><div class="type-icon flight">✈️</div><div><div class="type-name">Flight</div><div class="type-sub">왕복 · Economy</div></div></div></td>
+      <td><div class="supplier-cell"><div class="sup-name">Korean Air</div><div class="sup-code">KE679 / KE680</div></div></td>
+      <td><div class="detail-cell"><div class="detail-main">ICN → HAN · 06-01 09:25 · 2 seats</div><div class="detail-sub">HAN → ICN · 06-04 23:30</div></div></td>
+      <td><span class="tag tag-orange"><span class="tag-dot orange"></span>BOOKING (Checking)</span></td>
+      <td><span style="color:rgba(0,0,0,0.35); font-size:12px;">—</span></td>
+      <td><div class="doc-cell"><div class="doc-chip empty">📎 PNR 첨부</div></div></td>
+      <td><div class="item-actions"><button class="btn btn-default btn-xs">상태조회</button><button class="btn btn-warn btn-xs">긴급 확인</button></div></td>
+    </tr>
+    <tr>
+      <td><div class="type-cell"><div class="type-icon hotel">🏨</div><div><div class="type-name">Hotel <span class="rt-dyn">DYNAMIC</span></div><div class="type-sub">TMG 연동</div></div></div></td>
+      <td><div class="supplier-cell"><div class="sup-name">JW Marriott Hanoi</div><div class="sup-code">TMG · TMG-HL-7K9M2X-2026</div></div></td>
+      <td><div class="detail-cell"><div class="detail-main">Executive Suite · 1 room · 3 nights</div><div class="detail-sub">06-01 → 06-04 · 조식 포함</div></div></td>
+      <td><span class="tag tag-orange"><span class="tag-dot orange"></span>대기 · 항공권 PNR 대기</span></td>
+      <td><div class="countdown danger">⏱ 24m 12s</div><div style="font-size:10px; color:#cf1322; margin-top:2px;">다이나믹 / ~13:48</div></td>
+      <td><div class="doc-cell"><div class="doc-chip empty">📎 voucher 첨부</div></div></td>
+      <td><div class="item-actions">
+        <button class="btn btn-default btn-xs">🔍 상태확인</button>
+        <button class="btn btn-warn btn-xs">⏰ 강제 confirm</button>
+      </div></td>
+    </tr>
+    <tr>
+      <td><div class="type-cell"><div class="type-icon tour">🎫</div><div><div class="type-name">Tour</div><div class="type-sub">옵션</div></div></div></td>
+      <td><div class="supplier-cell"><div class="sup-name">Halong Bay Day Tour</div><div class="sup-code">VINPEARL-TR-2810</div></div></td>
+      <td><div class="detail-cell"><div class="detail-main">06-02 · 2 tickets · 한국어 가이드</div><div class="detail-sub">07:30 픽업 · 18:00 호텔 복귀</div></div></td>
+      <td><span class="tag tag-green"><span class="tag-dot green"></span>CONFIRMED ✓</span></td>
+      <td><span style="color:rgba(0,0,0,0.35); font-size:12px;">—</span></td>
+      <td><div class="doc-cell"><div class="doc-chip attached">📎 <span class="docname">halong_voucher.pdf</span></div></div></td>
+      <td><div class="item-actions"><button class="btn btn-default btn-xs">조회</button></div></td>
+    </tr>
+    </tbody>
+  </table>
+  </div>
+  <div class="rsv-foot">
+    <div class="rsv-foot-msg">
+      <span class="phase-tag warn">Phase 4 ⚠️</span>
+      <strong>TMG confirmBefore 24분 남음</strong> — 항공권 RESERVED 미수신. 시한 초과 시 [재예약 시도]로 일괄 재호출 자동 처리. 항공 PNR 긴급 컨택 필요할 수도.
+    </div>
+    <div class="rsv-foot-actions">
+      <button class="btn btn-default btn-xs">🔍 전체 상태값 확인</button>
+      <button class="btn btn-warn btn-xs">⏰ 재예약 시도 (예약)</button>
+      <button class="btn btn-danger btn-xs">예약 취소</button>
+    </div>
+  </div>
+</div>
+
+<!-- CARD 3: TMG 시한 초과 → 재예약 시도 활성 -->
+<div class="rsv-card danger">
+  <div class="rsv-head">
+    <div class="rsv-id-block">
+      <div class="rsv-id">#RSV-2026051303</div>
+      <div class="rsv-received">결제 완료 · 11:36</div>
+    </div>
+    <div class="rsv-cust">최아인 <span class="pax">2 PAX</span></div>
+    <div class="rsv-product">
+      <div class="name">Sheraton Saigon 2박 3일 · Air+Hotel 패키지</div>
+      <div class="meta">출발 05-25 ICN→SGN · 귀국 05-27 SGN→ICN · 1,580,000원/인</div>
+    </div>
+    <div class="rsv-status-block">
+      <div class="agg-status agg-failed"><span class="agg-dot red"></span>TMG 홀드 만료 → 재예약 필요</div>
+      <div class="rsv-status-line"><span class="air-link-tag has">✈️ 항공 연동 O</span></div>
+    </div>
+  </div>
+  <div class="items-wrap">
+  <table class="items-table">
+    <thead><tr><th style="width:170px;">구성</th><th>공급사 / 코드</th><th>상세</th><th>상태</th><th>잔여 시한</th><th>증빙</th><th style="text-align:right;">액션</th></tr></thead>
+    <tbody>
+    <tr>
+      <td><div class="type-cell"><div class="type-icon flight">✈️</div><div><div class="type-name">Flight</div><div class="type-sub">왕복 · Economy</div></div></div></td>
+      <td><div class="supplier-cell"><div class="sup-name">Asiana Airlines</div><div class="sup-code">OZ731 / OZ732</div></div></td>
+      <td><div class="detail-cell"><div class="detail-main">ICN → SGN · 05-25 18:10 · 2 seats</div><div class="detail-sub">SGN → ICN · 05-27 23:45</div></div></td>
+      <td><span class="tag tag-green"><span class="tag-dot green"></span>RESERVED ✓</span></td>
+      <td><span style="color:rgba(0,0,0,0.35); font-size:12px;">—</span></td>
+      <td><div class="doc-cell"><div class="doc-chip attached">📎 <span class="docname">oz_pnr_0525.pdf</span></div></div></td>
+      <td><div class="item-actions"><button class="btn btn-default btn-xs">조회</button></div></td>
+    </tr>
+    <tr>
+      <td><div class="type-cell"><div class="type-icon hotel">🏨</div><div><div class="type-name">Hotel <span class="rt-dyn">DYNAMIC</span></div><div class="type-sub">TMG 연동</div></div></div></td>
+      <td><div class="supplier-cell"><div class="sup-name">Sheraton Saigon Hotel</div><div class="sup-code">TMG · TMG-HL-3P5L8Q-2026 <span style="color:#cf1322;">(만료)</span></div></div></td>
+      <td><div class="detail-cell"><div class="detail-main">Premium Club Twin · 1 room · 2 nights</div><div class="detail-sub">05-25 → 05-27 · 조식 포함</div></div></td>
+      <td><span class="tag tag-red"><span class="tag-dot red"></span>예약 만료 (홀드 해제)</span></td>
+      <td><div class="countdown expired">⏱ -12m 04s</div><div style="font-size:10px; color:#cf1322; margin-top:2px;">retrieveBooking 폴링 감지</div></td>
+      <td><div class="doc-cell"><div class="doc-chip empty">📎 voucher 첨부</div></div></td>
+      <td><div class="item-actions">
+        <button class="btn btn-warn btn-xs">⏰ 재예약 시도</button>
+      </div></td>
+    </tr>
+    </tbody>
+  </table>
+  </div>
+  <div class="rsv-foot">
+    <div class="rsv-foot-msg">
+      <span class="phase-tag danger">Phase 4 🚨</span>
+      <strong>confirmBefore 시한 초과</strong> — TMG 측 홀드 자동 해제됨. <strong>[재예약 시도]</strong> 클릭 시 checkAvail → reserve → confirm 일괄 자동 호출. 재고/요금 변동 시 운영팀 수동 처리 분기.
+    </div>
+    <div class="rsv-foot-actions">
+      <button class="btn btn-warn">⏰ 재예약 시도 (일괄)</button>
+      <button class="btn btn-default btn-xs">🔍 전체 상태값 확인</button>
+      <button class="btn btn-danger btn-xs">예약 취소</button>
+    </div>
+  </div>
+</div>
+
+<!-- CARD 4: 숙박 단독 → 영업실 수동 confirm 대기 -->
+<div class="rsv-card primary">
+  <div class="rsv-head">
+    <div class="rsv-id-block">
+      <div class="rsv-id">#RSV-2026051304</div>
+      <div class="rsv-received">결제 완료 · 10:08</div>
+    </div>
+    <div class="rsv-cust">박지호 <span class="pax">3 PAX</span></div>
+    <div class="rsv-product">
+      <div class="name">InterContinental Danang 4박 · 숙박 단독</div>
+      <div class="meta">투숙 07-15 → 07-19 · 1,160,000원/인</div>
+    </div>
+    <div class="rsv-status-block">
+      <div class="agg-status agg-pending"><span class="agg-dot amber"></span>영업실 수동 confirm 대기</div>
+      <div class="rsv-status-line"><span class="air-link-tag none">항공 연동 X</span></div>
+    </div>
+  </div>
+  <div class="items-wrap">
+  <table class="items-table">
+    <thead><tr><th style="width:170px;">구성</th><th>공급사 / 코드</th><th>상세</th><th>상태</th><th>잔여 시한</th><th>증빙</th><th style="text-align:right;">액션</th></tr></thead>
+    <tbody>
+    <tr>
+      <td><div class="type-cell"><div class="type-icon hotel">🏨</div><div><div class="type-name">Hotel <span class="rt-static">STATIC</span></div><div class="type-sub">TMG 연동</div></div></div></td>
+      <td><div class="supplier-cell"><div class="sup-name">InterContinental Danang</div><div class="sup-code">TMG · TMG-HL-9R2N4S-2026</div></div></td>
+      <td><div class="detail-cell"><div class="detail-main">Sun Peninsula Suite · 1 room · 4 nights</div><div class="detail-sub">07-15 → 07-19 · 조식 포함 · 풀빌라</div></div></td>
+      <td><span class="tag tag-blue"><span class="tag-dot blue"></span>TMG_RESERVED</span></td>
+      <td><div class="countdown ok">⏱ 9h 12m</div><div style="font-size:10px; color:rgba(0,0,0,0.45); margin-top:2px;">계약 요금</div></td>
+      <td><div class="doc-cell"><div class="doc-chip empty">📎 voucher 첨부</div></div></td>
+      <td><div class="item-actions">
+        <button class="btn btn-default btn-xs">🔍 상태확인</button>
+        <button class="btn btn-primary btn-xs">✋ 숙박권 confirm</button>
+      </div></td>
+    </tr>
+    </tbody>
+  </table>
+  </div>
+  <div class="rsv-foot">
+    <div class="rsv-foot-msg">
+      <span class="phase-tag">Phase 4</span>
+      <strong>숙박 단독 상품 — 영업실 수동 confirm 트리거 필요</strong>. 고객 컨택 + 여정 최종 확인 후 [숙박권 confirm] 클릭 → retrieveBooking → confirmBooking 순차 자동 호출.
+    </div>
+    <div class="rsv-foot-actions">
+      <button class="btn btn-primary">✋ 숙박권 confirm</button>
+      <button class="btn btn-default btn-xs">🔍 전체 상태값 확인</button>
+      <button class="btn btn-danger btn-xs">예약 취소</button>
+    </div>
+  </div>
+</div>
+
+<!-- CARD 5: 전체 CONFIRMED 정상 종료 -->
+<div class="rsv-card success">
+  <div class="rsv-head">
+    <div class="rsv-id-block">
+      <div class="rsv-id">#RSV-2026051205</div>
+      <div class="rsv-received">결제 완료 · 어제 16:48</div>
+    </div>
+    <div class="rsv-cust">정유나 <span class="pax">4 PAX</span></div>
+    <div class="rsv-product">
+      <div class="name">Vinpearl Resort Nha Trang 3박 4일 · Air+Hotel+Ticket 패키지</div>
+      <div class="meta">출발 05-18 ICN→CXR · 귀국 05-21 CXR→ICN · 1,580,000원/인</div>
+    </div>
+    <div class="rsv-status-block">
+      <div class="agg-status agg-confirmed"><span class="agg-dot green"></span>전체 CONFIRMED ✓</div>
+      <div class="rsv-status-line"><span class="air-link-tag has">✈️ 항공 연동 O</span></div>
+    </div>
+  </div>
+  <div class="items-wrap">
+  <table class="items-table">
+    <thead><tr><th style="width:170px;">구성</th><th>공급사 / 코드</th><th>상세</th><th>상태</th><th>잔여 시한</th><th>증빙</th><th style="text-align:right;">액션</th></tr></thead>
+    <tbody>
+    <tr>
+      <td><div class="type-cell"><div class="type-icon flight">✈️</div><div><div class="type-name">Flight</div><div class="type-sub">왕복 · Economy</div></div></div></td>
+      <td><div class="supplier-cell"><div class="sup-name">Vietnam Airlines</div><div class="sup-code">VN417 / VN418</div></div></td>
+      <td><div class="detail-cell"><div class="detail-main">ICN → CXR · 05-18 23:40 · 4 seats</div><div class="detail-sub">CXR → ICN · 05-21 17:30</div></div></td>
+      <td><span class="tag tag-green"><span class="tag-dot green"></span>CONFIRMED ✓</span></td>
+      <td><span style="color:rgba(0,0,0,0.35); font-size:12px;">—</span></td>
+      <td><div class="doc-cell"><div class="doc-chip attached">📎 <span class="docname">vn_eticket_0518.pdf</span></div></div></td>
+      <td><div class="item-actions"><button class="btn btn-default btn-xs">조회</button></div></td>
+    </tr>
+    <tr>
+      <td><div class="type-cell"><div class="type-icon hotel">🏨</div><div><div class="type-name">Hotel <span class="rt-static">STATIC</span></div><div class="type-sub">TMG 연동</div></div></div></td>
+      <td><div class="supplier-cell"><div class="sup-name">Vinpearl Resort Nha Trang</div><div class="sup-code">TMG · TMG-HL-5J8Z1W-2026</div></div></td>
+      <td><div class="detail-cell"><div class="detail-main">Garden View Twin · 2 rooms · 3 nights</div><div class="detail-sub">05-18 → 05-21 · 조식 포함</div></div></td>
+      <td><span class="tag tag-green"><span class="tag-dot green"></span>TMG_CONFIRMED ✓</span></td>
+      <td><span style="color:rgba(0,0,0,0.35); font-size:12px;">—</span></td>
+      <td><div class="doc-cell"><div class="doc-chip attached">📎 <span class="docname">vinpearl_voucher.pdf</span></div></div></td>
+      <td><div class="item-actions"><button class="btn btn-default btn-xs">🔍 상태확인</button></div></td>
+    </tr>
+    <tr>
+      <td><div class="type-cell"><div class="type-icon ticket">🎫</div><div><div class="type-name">Ticket</div><div class="type-sub">옵션</div></div></div></td>
+      <td><div class="supplier-cell"><div class="sup-name">Vinpearl Land 입장권</div><div class="sup-code">VPL-TKT-4421</div></div></td>
+      <td><div class="detail-cell"><div class="detail-main">05-19 · 4 tickets · All Inclusive</div><div class="detail-sub">케이블카 + 워터파크 + 놀이공원</div></div></td>
+      <td><span class="tag tag-green"><span class="tag-dot green"></span>CONFIRMED ✓</span></td>
+      <td><span style="color:rgba(0,0,0,0.35); font-size:12px;">—</span></td>
+      <td><div class="doc-cell"><div class="doc-chip attached">📎 <span class="docname">vpl_tickets.pdf</span></div></div></td>
+      <td><div class="item-actions"><button class="btn btn-default btn-xs">조회</button></div></td>
+    </tr>
+    </tbody>
+  </table>
+  </div>
+  <div class="rsv-foot">
+    <div class="rsv-foot-msg">
+      <span class="phase-tag success">Phase 4 ✓</span>
+      모든 구성요소 <strong>CONFIRMED 완료</strong>. 출발 5일 전 자동 알림 발송 예약됨. 변경 발생 시 [상태값 확인]으로 즉시 동기화.
+    </div>
+    <div class="rsv-foot-actions">
+      <button class="btn btn-default btn-xs">🔍 전체 상태값 확인</button>
+      <button class="btn btn-default btn-xs">📧 고객 알림 재발송</button>
+      <button class="btn btn-danger btn-xs">예약 취소</button>
+    </div>
+  </div>
+</div>
+
+<!-- CARD 6: TMG UNAVAILABLE 발생 → 운영팀 처리 -->
+<div class="rsv-card danger">
+  <div class="rsv-head">
+    <div class="rsv-id-block">
+      <div class="rsv-id">#RSV-2026051306</div>
+      <div class="rsv-received">결제 완료 · 14:02</div>
+    </div>
+    <div class="rsv-cust">한도윤 <span class="pax">2 PAX</span></div>
+    <div class="rsv-product">
+      <div class="name">Pullman Saigon Centre 2박 3일 · Air+Hotel 패키지</div>
+      <div class="meta">출발 06-08 ICN→SGN · 귀국 06-10 SGN→ICN · 1,420,000원/인</div>
+    </div>
+    <div class="rsv-status-block">
+      <div class="agg-status agg-failed"><span class="agg-dot red"></span>UNAVAILABLE — 운영팀 처리 필요</div>
+      <div class="rsv-status-line"><span class="air-link-tag has">✈️ 항공 연동 O</span></div>
+    </div>
+  </div>
+  <div class="items-wrap">
+  <table class="items-table">
+    <thead><tr><th style="width:170px;">구성</th><th>공급사 / 코드</th><th>상세</th><th>상태</th><th>잔여 시한</th><th>증빙</th><th style="text-align:right;">액션</th></tr></thead>
+    <tbody>
+    <tr>
+      <td><div class="type-cell"><div class="type-icon flight">✈️</div><div><div class="type-name">Flight</div><div class="type-sub">왕복 · Economy</div></div></div></td>
+      <td><div class="supplier-cell"><div class="sup-name">Jeju Air</div><div class="sup-code">7C2387 / 7C2388</div></div></td>
+      <td><div class="detail-cell"><div class="detail-main">ICN → SGN · 06-08 22:55 · 2 seats</div><div class="detail-sub">SGN → ICN · 06-10 23:55</div></div></td>
+      <td><span class="tag tag-green"><span class="tag-dot green"></span>RESERVED ✓</span></td>
+      <td><span style="color:rgba(0,0,0,0.35); font-size:12px;">—</span></td>
+      <td><div class="doc-cell"><div class="doc-chip attached">📎 <span class="docname">7c_pnr_0608.pdf</span></div></div></td>
+      <td><div class="item-actions"><button class="btn btn-default btn-xs">조회</button></div></td>
+    </tr>
+    <tr>
+      <td><div class="type-cell"><div class="type-icon hotel">🏨</div><div><div class="type-name">Hotel <span class="rt-alm">ALM-DYN</span></div><div class="type-sub">TMG 연동</div></div></div></td>
+      <td><div class="supplier-cell"><div class="sup-name">Pullman Saigon Centre</div><div class="sup-code">TMG · 응답 errorCode</div></div></td>
+      <td><div class="detail-cell"><div class="detail-main">Executive King · 1 room · 2 nights</div><div class="detail-sub">06-08 → 06-10 · 동시 예약 충돌 감지</div></div></td>
+      <td><span class="tag tag-red"><span class="tag-dot red"></span>UNAVAILABLE</span></td>
+      <td><span style="color:rgba(0,0,0,0.35); font-size:12px;">—</span></td>
+      <td><div class="doc-cell"><div class="doc-chip empty">📎 voucher 미발급</div></div></td>
+      <td><div class="item-actions">
+        <button class="btn btn-warn btn-xs">⚠️ 대체숙소 제안</button>
+        <button class="btn btn-default btn-xs">재시도</button>
+      </div></td>
+    </tr>
+    </tbody>
+  </table>
+  </div>
+  <div class="rsv-foot">
+    <div class="rsv-foot-msg">
+      <span class="phase-tag danger">Phase 3 ⚠️</span>
+      <strong>reserveBooking 응답 UNAVAILABLE</strong> — 항공권은 RESERVED 됐으나 숙소 미확보. <strong>그라운드룰</strong>: 항공권 취소 없이 진행, 관리자가 대체 숙소 제안하여 고객 컨택.
+    </div>
+    <div class="rsv-foot-actions">
+      <button class="btn btn-warn">⚠️ 대체 숙소 제안하기</button>
+      <button class="btn btn-default btn-xs">고객 컨택 기록</button>
+      <button class="btn btn-danger btn-xs">예약 취소 (위약금 처리)</button>
+    </div>
+  </div>
+</div>
+
+<!-- PAGINATION -->
+<div class="pagination">
+  <div>1 – 6 / 총 <strong>247</strong>건</div>
+  <div class="pgn-btns">
+    <button class="pgn-btn">‹</button>
+    <button class="pgn-btn active">1</button>
+    <button class="pgn-btn">2</button>
+    <button class="pgn-btn">3</button>
+    <button class="pgn-btn">…</button>
+    <button class="pgn-btn">25</button>
+    <button class="pgn-btn">›</button>
+  </div>
+</div>
+
 <!-- LEGEND -->
-<div class="card" style="padding: 16px 20px;">
-  <div style="font-size:13px; font-weight:600; margin-bottom:10px;">📖 액션 버튼 가이드 (Phase 4 ~ Phase 6)</div>
-  <div style="display:grid; grid-template-columns: repeat(4, 1fr); gap: 12px; font-size: 12px; color: rgba(0,0,0,0.65); line-height: 1.6;">
-    <div><strong style="color:#1677ff;">🔍 [상태값 확인]</strong><br>retrieveBooking 호출 (Phase 5). 언제든 TMG 실제 상태 즉시 조회. 영업실/CS 공통 사용.</div>
-    <div><strong style="color:#1677ff;">✋ [숙박권 confirm]</strong><br>항공 연동 X 케이스 전용 (Phase 4). 영업실이 항공권/고객 확인 후 수동 클릭 → retrieveBooking → confirmBooking 순차 호출.</div>
-    <div><strong style="color:#d48806;">⏰ [재예약 시도]</strong><br>confirmBefore 시한 초과 시 활성화 (Phase 4). checkAvail → reserve → confirm 일괄 자동 호출.</div>
-    <div><strong style="color:#cf1322;">🗑 [숙소 예약 취소하기]</strong><br>cancelBooking 호출 (Phase 6). cancelFees 응답 후 자동 반영. VND → KRW 환산 후 어드민 노출.</div>
+<div class="legend-card">
+  <div class="legend-title">📖 액션 가이드 — Phase 4~6 운영 (예약 = 상품 단위, 항공+숙박+옵션 통합 관리)</div>
+  <div class="legend-grid">
+    <div><strong style="color:#1677ff;">🔍 [상태값 확인]</strong><br>retrieveBooking 호출 (Phase 5). 각 아이템 또는 전체 단위로 TMG 실제 상태 즉시 조회.</div>
+    <div><strong style="color:#1677ff;">✋ [숙박권 confirm]</strong><br>항공 연동 X 케이스 전용 (Phase 4). 영업실이 고객/여정 확인 후 수동 클릭 → retrieveBooking → confirmBooking 순차 호출.</div>
+    <div><strong style="color:#d48806;">⏰ [재예약 시도]</strong><br>confirmBefore 시한 초과 시 활성 (Phase 4). checkAvail → reserve → confirm 일괄 자동 호출. 재고/요금 변동 시 수동 분기.</div>
+    <div><strong style="color:#cf1322;">⚠️ [대체 숙소 제안]</strong><br>UNAVAILABLE 발생 시 (Phase 3 그라운드룰). 항공권 취소 없이 진행, 관리자가 대체안 제시 후 고객 컨택.</div>
   </div>
 </div>
 
 </div>
 
 <script>
-// 펼침 토글
-document.querySelectorAll('tr.row-main').forEach(tr => {
-  tr.addEventListener('click', e => {
-    if (e.target.closest('input, button, select, a')) return;
-    const next = tr.nextElementSibling;
-    if (next && next.classList.contains('row-detail')) {
-      const isOpen = tr.classList.toggle('expanded');
-      next.style.display = isOpen ? '' : 'none';
-    }
-  });
-});
-// 초기 상태: row 2 펼침, 나머지 닫힘
-document.querySelectorAll('tr.row-detail').forEach((d, i) => {
-  if (i > 0) d.style.display = 'none';
-});
+// 카드별 펼침/접힘 (구성 라인이 많을 때만 유효)
+// 현재는 모두 펼친 상태로 시연
 </script>
 
 </body>
