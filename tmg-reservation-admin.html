@@ -369,6 +369,53 @@ select.fi { padding: 0 28px 0 10px; appearance: none; background-image: url("dat
 .exp-phase-tag.danger { background: #fff1f0; color: #cf1322; }
 .exp-phase-tag.success { background: #f6ffed; color: #389e0d; }
 
+/* 펼침 패널 내부 알림 배너 (숙소 예약 실패/호텔 취소 등) */
+.exp-alert { display: flex; gap: 12px; align-items: center; padding: 14px 16px; border-radius: 10px; margin-bottom: 12px; }
+.exp-alert-danger { background: linear-gradient(180deg, #fff1f0 0%, #fff 100%); border: 1px solid #ffa39e; border-left: 4px solid #f5222d; }
+.exp-alert-warn { background: linear-gradient(180deg, #fff7e6 0%, #fff 100%); border: 1px solid #ffd591; border-left: 4px solid #fa8c16; }
+.exp-alert-icon { font-size: 22px; flex-shrink: 0; line-height: 1; }
+.exp-alert-content { flex: 1; font-size: 12.5px; line-height: 1.6; color: rgba(0,0,0,0.75); }
+.exp-alert-content strong { color: rgba(0,0,0,0.88); font-weight: 700; }
+.exp-alert-danger .exp-alert-content strong { color: #cf1322; }
+.exp-alert-warn .exp-alert-content strong { color: #d48806; }
+.exp-alert .meta-time { font-size: 11px; color: rgba(0,0,0,0.45); margin-top: 4px; }
+
+/* 다른 숙소 대체 모달 — 대형 */
+.modal-box-lg { width: 880px; }
+.alt-hotel-header { background: linear-gradient(180deg, #fff1f0 0%, #fafafa 100%); border-radius: 10px; padding: 14px 16px; margin-bottom: 14px; }
+.alt-hotel-header .ah-top { display: flex; align-items: flex-start; gap: 12px; margin-bottom: 10px; }
+.alt-hotel-header .ah-original-label { font-size: 11px; color: rgba(0,0,0,0.55); font-weight: 600; text-transform: uppercase; letter-spacing: 0.4px; margin-bottom: 4px; }
+.alt-hotel-header .ah-original-name { font-size: 14px; font-weight: 700; }
+.alt-hotel-header .ah-original-sub { font-size: 12px; color: rgba(0,0,0,0.55); margin-top: 3px; }
+.alt-hotel-header .ah-criteria { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; font-size: 11.5px; }
+.alt-hotel-header .ah-criteria-item .lbl { color: rgba(0,0,0,0.55); font-size: 10.5px; }
+.alt-hotel-header .ah-criteria-item .val { font-weight: 600; color: rgba(0,0,0,0.88); margin-top: 2px; }
+
+.alt-filter-bar { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; padding: 10px 0 14px; border-bottom: 1px solid #f0f0f0; margin-bottom: 14px; }
+.alt-filter-bar .label-sm { font-size: 11px; color: rgba(0,0,0,0.55); }
+
+.alt-list { display: flex; flex-direction: column; gap: 10px; max-height: 380px; overflow-y: auto; padding-right: 4px; }
+.alt-item { display: flex; gap: 14px; align-items: center; padding: 12px 14px; border: 1px solid #e8e8e8; border-radius: 8px; transition: all 0.15s; cursor: pointer; background: #fff; }
+.alt-item:hover { border-color: #1677ff; box-shadow: 0 4px 12px rgba(22,119,255,0.06); }
+.alt-item.recommended { border: 1px solid #91caff; background: #f0f7ff; }
+.alt-item .alt-icon { width: 44px; height: 44px; border-radius: 8px; background: #f9f0ff; color: #722ed1; display: flex; align-items: center; justify-content: center; font-size: 20px; flex-shrink: 0; }
+.alt-item .alt-info { flex: 1; min-width: 0; }
+.alt-item .alt-name-row { display: flex; align-items: center; gap: 8px; }
+.alt-item .alt-name { font-size: 13.5px; font-weight: 700; }
+.alt-item .alt-tag { font-size: 10px; font-weight: 600; padding: 1px 6px; border-radius: 3px; }
+.alt-item .alt-tag.rec { background: #fff7e6; color: #d48806; border: 1px solid #ffd591; }
+.alt-item .alt-tag.same { background: #f6ffed; color: #389e0d; border: 1px solid #b7eb8f; }
+.alt-item .alt-meta { font-size: 11.5px; color: rgba(0,0,0,0.55); margin-top: 3px; line-height: 1.6; }
+.alt-item .alt-meta .dot-sep { color: rgba(0,0,0,0.25); margin: 0 6px; }
+.alt-item .alt-price { text-align: right; flex-shrink: 0; }
+.alt-item .alt-price-val { font-size: 14px; font-weight: 700; font-family: 'SF Mono', Monaco, monospace; }
+.alt-item .alt-price-diff { font-size: 11px; margin-top: 2px; font-family: 'SF Mono', Monaco, monospace; }
+.alt-item .alt-price-diff.up { color: #cf1322; }
+.alt-item .alt-price-diff.down { color: #389e0d; }
+.alt-item .alt-price-diff.same { color: rgba(0,0,0,0.45); }
+.alt-item .alt-avail { font-size: 11px; color: rgba(0,0,0,0.55); margin-top: 2px; }
+.alt-item .alt-select { flex-shrink: 0; }
+
 </style>
 </head>
 <body>
@@ -578,8 +625,8 @@ select.fi { padding: 0 28px 0 10px; appearance: none; background-image: url("dat
                   <td><div class="doc-cell"><div class="doc-chip empty">📎 voucher 첨부</div></div></td>
                   <td><div class="item-actions">
                     <button class="btn-policy" onclick="openPolicyModal(this)">📋 위약금</button>
-                    <button class="btn btn-default btn-xs">🔍 상태확인</button>
-                    <button class="btn btn-default btn-xs" disabled>✋ 수동 confirm</button>
+                    <button class="btn btn-default btn-xs">🔍 상태값 확인</button>
+                    <button class="btn btn-danger btn-xs">🗑 숙소 예약 취소</button>
                   </div></td>
                 </tr>
               </tbody>
@@ -663,8 +710,8 @@ select.fi { padding: 0 28px 0 10px; appearance: none; background-image: url("dat
                   <td><div class="doc-cell"><div class="doc-chip empty">📎 voucher 첨부</div></div></td>
                   <td><div class="item-actions">
                     <button class="btn-policy" onclick="openPolicyModal(this)" data-supplier="JW Marriott Hanoi" data-type="hotel-tmg" data-source="api">📋 위약금</button>
-                    <button class="btn btn-default btn-xs">🔍 상태확인</button>
-                    <button class="btn btn-warn btn-xs">⏰ 강제 confirm</button>
+                    <button class="btn btn-default btn-xs">🔍 상태값 확인</button>
+                    <button class="btn btn-danger btn-xs">🗑 숙소 예약 취소</button>
                   </div></td>
                 </tr>
                 <tr>
@@ -759,6 +806,7 @@ select.fi { padding: 0 28px 0 10px; appearance: none; background-image: url("dat
                   <td><div class="item-actions">
                     <button class="btn-policy" onclick="openPolicyModal(this)" data-supplier="Sheraton Saigon Hotel" data-type="hotel-tmg" data-source="api">📋 위약금</button>
                     <button class="btn btn-warn btn-xs">⏰ 재예약 시도</button>
+                    <button class="btn btn-danger btn-xs">🗑 숙소 예약 취소</button>
                   </div></td>
                 </tr>
               </tbody>
@@ -834,8 +882,9 @@ select.fi { padding: 0 28px 0 10px; appearance: none; background-image: url("dat
                   <td><div class="doc-cell"><div class="doc-chip empty">📎 voucher 첨부</div></div></td>
                   <td><div class="item-actions">
                     <button class="btn-policy" onclick="openPolicyModal(this)" data-supplier="InterContinental Danang" data-type="hotel-tmg" data-source="api">📋 위약금</button>
-                    <button class="btn btn-default btn-xs">🔍 상태확인</button>
+                    <button class="btn btn-default btn-xs">🔍 상태값 확인</button>
                     <button class="btn btn-primary btn-xs">✋ 숙박권 confirm</button>
+                    <button class="btn btn-danger btn-xs">🗑 숙소 예약 취소</button>
                   </div></td>
                 </tr>
               </tbody>
@@ -918,7 +967,11 @@ select.fi { padding: 0 28px 0 10px; appearance: none; background-image: url("dat
                   <td><span class="tag tag-green"><span class="tag-dot green"></span>TMG_CONFIRMED ✓</span></td>
                   <td><span style="color:rgba(0,0,0,0.35); font-size:12px;">—</span></td>
                   <td><div class="doc-cell"><div class="doc-chip attached">📎 <span class="docname">vinpearl_voucher.pdf</span></div></div></td>
-                  <td><div class="item-actions"><button class="btn-policy" onclick="openPolicyModal(this)" data-supplier="Vinpearl Resort Nha Trang" data-type="hotel-tmg" data-source="api">📋 위약금</button><button class="btn btn-default btn-xs">🔍 상태확인</button></div></td>
+                  <td><div class="item-actions">
+                    <button class="btn-policy" onclick="openPolicyModal(this)" data-supplier="Vinpearl Resort Nha Trang" data-type="hotel-tmg" data-source="api">📋 위약금</button>
+                    <button class="btn btn-default btn-xs">🔍 상태값 확인</button>
+                    <button class="btn btn-danger btn-xs">🗑 숙소 예약 취소</button>
+                  </div></td>
                 </tr>
                 <tr>
                   <td><div class="type-cell"><div class="type-icon ticket">🎫</div><div><div class="type-name">Ticket <span class="src-badge src-manual">✏️ 수동</span></div><div class="type-sub">옵션</div></div></div></td>
@@ -988,6 +1041,15 @@ select.fi { padding: 0 28px 0 10px; appearance: none; background-image: url("dat
               <span class="air-link-tag has">✈️ 항공 연동 O</span>
             </div>
           </div>
+          <div class="exp-alert exp-alert-danger">
+            <span class="exp-alert-icon">🚨</span>
+            <div class="exp-alert-content">
+              <strong>숙소 예약 실패 — reserveBooking 응답 UNAVAILABLE</strong><br>
+              동일 객실 동시 예약 충돌 감지 (TMG errorCode). <strong>항공권은 이미 RESERVED 완료</strong>되었으므로 항공권 취소 없이 <strong>대체 숙소를 제안</strong>하여 패키지 유지해 주세요.
+              <div class="meta-time">감지 시각: 2026-05-13 14:02:17 · TMG-HL-RESP-ERR-9032</div>
+            </div>
+            <button class="btn btn-warn" onclick="openAltHotelModal(this)">🔄 다른 숙소 대체</button>
+          </div>
           <div class="exp-items-card">
             <div class="exp-title-bar">🧳 구성요소 — 항공권 + TMG 숙박권 <span class="title-sub">· UNAVAILABLE 발생</span></div>
             <table class="items-table">
@@ -1011,8 +1073,8 @@ select.fi { padding: 0 28px 0 10px; appearance: none; background-image: url("dat
                   <td><div class="doc-cell"><div class="doc-chip empty">📎 voucher 미발급</div></div></td>
                   <td><div class="item-actions">
                     <button class="btn-policy" onclick="openPolicyModal(this)" data-supplier="Pullman Saigon Centre" data-type="hotel-tmg" data-source="api">📋 위약금</button>
-                    <button class="btn btn-warn btn-xs">⚠️ 대체숙소 제안</button>
-                    <button class="btn btn-default btn-xs">재시도</button>
+                    <button class="btn btn-warn btn-xs" onclick="openAltHotelModal(this)">🔄 다른 숙소 대체</button>
+                    <button class="btn btn-danger btn-xs">🗑 숙소 예약 취소</button>
                   </div></td>
                 </tr>
               </tbody>
@@ -1030,6 +1092,101 @@ select.fi { padding: 0 28px 0 10px; appearance: none; background-image: url("dat
       </td>
     </tr>
 
+    <!-- ===== ROW 7: CONFIRMED 이후 호텔측 취소 (운영 비상) ===== -->
+    <tr class="adm-row" data-rsv="7" onclick="toggleExpand(7)">
+      <td class="col-expand"><button class="expand-btn" id="exp-btn-7" onclick="event.stopPropagation();toggleExpand(7)"></button></td>
+      <td class="col-channel">트립스토어</td>
+      <td class="col-paytype">전액결제</td>
+      <td class="col-rsvno"><span class="cell-link cell-mono">8368771260854882</span></td>
+      <td class="col-extno"><span class="cell-muted">-</span></td>
+      <td class="col-name">강민서</td>
+      <td class="col-phone cell-mono">010-7890-1234</td>
+      <td class="col-prodcode"><div class="cell-prod-code">TPLTHAN21001<br><span class="sub">TPLTHAN21001-260530A</span></div></td>
+      <td class="col-amt cell-amt">3,180,000</td>
+      <td class="col-amt cell-amt">520,000</td>
+      <td class="col-amt cell-amt">2,660,000</td>
+      <td class="col-amt cell-amt">2,660,000</td>
+      <td class="col-amt-sm cell-amt zero">0</td>
+      <td class="col-paystatus"><span class="pay-badge pay-completed">결제완료</span></td>
+      <td class="col-statechange" onclick="event.stopPropagation()">
+        <div class="statechange-cell">
+          <select class="rsv-state-select s-completed" onchange="updateState(this)">
+            <option value="received">예약접수</option><option value="completed" selected>예약완료</option><option value="departed">출발완료</option><option value="cancel-req">취소요청</option><option value="cancelled">취소완료</option>
+          </select>
+          <button class="btn-cancel-sm">✕ 예약취소</button>
+        </div>
+      </td>
+      <td class="col-date"><div class="cell-date-stack">2026-05-10 18:22<br><span class="sub">2026-05-10 18:24 (트립스토어)</span></div></td>
+      <td class="col-urlsend"><span class="cell-muted">-</span></td>
+      <td class="col-urlvalid"><span class="cell-muted">-</span></td>
+      <td class="col-itinerary"><span class="itinerary-link">📋 일정표 보기</span></td>
+    </tr>
+    <tr class="adm-expand" id="exp-row-7" style="display:none">
+      <td colspan="19">
+        <div class="adm-expand-inner">
+          <div class="exp-header">
+            <div class="exp-header-id">#RSV-2026051007</div>
+            <div class="exp-header-cust">강민서 <span class="pax">2 PAX</span></div>
+            <div class="exp-header-prod">
+              <div class="pname">Lotte Hotel Hanoi 2박 3일 · Air+Hotel 패키지</div>
+              <div class="pmeta">출발 05-30 ICN→HAN · 귀국 06-01 HAN→ICN</div>
+            </div>
+            <div class="exp-header-tags">
+              <div class="agg-status agg-failed"><span class="agg-dot red"></span>호텔측 취소 — 대체 필요</div>
+              <span class="air-link-tag has">✈️ 항공 연동 O</span>
+            </div>
+          </div>
+          <div class="exp-alert exp-alert-danger">
+            <span class="exp-alert-icon">📞</span>
+            <div class="exp-alert-content">
+              <strong>호텔측 일방 취소 통보 (CONFIRMED 이후)</strong><br>
+              TMG가 retrieveBooking 폴링에서 <strong>CANCELLED 상태 감지</strong> — 호텔 오버부킹으로 인한 호텔측 취소. 항공권/투어는 정상 CONFIRMED 유지 중. 고객 컨택 + 대체 숙소 제안 + 위약금 면제 처리 필요.
+              <div class="meta-time">감지 시각: 2026-05-13 11:48:02 · 폴링 주기 60s · note: "Hotel overbooked, cancelled by property"</div>
+            </div>
+            <button class="btn btn-warn" onclick="openAltHotelModal(this)">🔄 다른 숙소 대체</button>
+          </div>
+          <div class="exp-items-card">
+            <div class="exp-title-bar">🧳 구성요소 — 항공권 + TMG 숙박권 <span class="title-sub">· 호텔측 일방 취소 (CONFIRMED 이후)</span></div>
+            <table class="items-table">
+              <thead><tr><th style="width:170px;">구성</th><th>공급사 / 코드</th><th>상세</th><th>상태</th><th>잔여 시한</th><th>증빙</th><th style="text-align:right;">액션</th></tr></thead>
+              <tbody>
+                <tr>
+                  <td><div class="type-cell"><div class="type-icon flight">✈️</div><div><div class="type-name">Flight <span class="src-badge src-api">🔌 API</span></div><div class="type-sub">왕복 · Economy</div></div></div></td>
+                  <td><div class="supplier-cell"><div class="sup-name">Asiana Airlines</div><div class="sup-code">OZ711 / OZ712</div></div></td>
+                  <td><div class="detail-cell"><div class="detail-main">ICN → HAN · 05-30 09:55 · 2 seats</div><div class="detail-sub">HAN → ICN · 06-01 23:30</div></div></td>
+                  <td><span class="tag tag-green"><span class="tag-dot green"></span>CONFIRMED ✓</span></td>
+                  <td><span style="color:rgba(0,0,0,0.35); font-size:12px;">—</span></td>
+                  <td><div class="doc-cell"><div class="doc-chip attached">📎 <span class="docname">oz_eticket_0530.pdf</span></div></div></td>
+                  <td><div class="item-actions"><button class="btn-policy" onclick="openPolicyModal(this)">📋 위약금</button><button class="btn btn-default btn-xs">조회</button></div></td>
+                </tr>
+                <tr>
+                  <td><div class="type-cell"><div class="type-icon hotel">🏨</div><div><div class="type-name">Hotel <span class="rt-static">STATIC</span><span class="src-badge src-api">🔌 API</span></div><div class="type-sub">TMG 연동</div></div></div></td>
+                  <td><div class="supplier-cell"><div class="sup-name">Lotte Hotel Hanoi</div><div class="sup-code">TMG · TMG-HL-2H7Q4R-2026 <span style="color:#cf1322;">(호텔 취소)</span></div></div></td>
+                  <td><div class="detail-cell"><div class="detail-main">Premier King · 1 room · 2 nights</div><div class="detail-sub">05-30 → 06-01 · 조식 포함</div></div></td>
+                  <td><span class="tag tag-red"><span class="tag-dot red"></span>호텔측 CANCELLED</span></td>
+                  <td><span style="color:rgba(0,0,0,0.35); font-size:12px;">—</span></td>
+                  <td><div class="doc-cell"><div class="doc-chip attached" style="background:#fff1f0; color:#cf1322; border-color:#ffa39e;">📎 <span class="docname">lotte_voucher_VOID.pdf</span></div></div></td>
+                  <td><div class="item-actions">
+                    <button class="btn-policy" onclick="openPolicyModal(this)" data-supplier="Lotte Hotel Hanoi" data-type="hotel-tmg" data-source="api">📋 위약금</button>
+                    <button class="btn btn-warn btn-xs" onclick="openAltHotelModal(this)">🔄 다른 숙소 대체</button>
+                    <button class="btn btn-danger btn-xs">🗑 숙소 예약 취소</button>
+                  </div></td>
+                </tr>
+              </tbody>
+            </table>
+            <div class="exp-foot">
+              <div class="exp-foot-msg"><span class="exp-phase-tag danger">Phase 5+ 🚨</span><strong>그라운드룰</strong>: 항공권 정상 CONFIRMED — 패키지 유지 우선. 대체 숙소 제안 후 고객 동의 시 swap, 거절 시 위약금 면제 전체 취소. <strong>호텔측 귀책</strong>이므로 TMG 정산 시 페널티 청구 검토.</div>
+              <div class="exp-foot-actions">
+                <button class="btn btn-warn" onclick="openAltHotelModal(this)">🔄 다른 숙소 대체</button>
+                <button class="btn btn-default btn-xs">📧 고객 컨택 로그</button>
+                <button class="btn btn-danger btn-xs">전체 예약 취소 (위약금 면제)</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </td>
+    </tr>
+
     </tbody>
   </table>
   </div>
@@ -1038,7 +1195,7 @@ select.fi { padding: 0 28px 0 10px; appearance: none; background-image: url("dat
 
 <!-- PAGINATION -->
 <div class="pagination">
-  <div>1 – 6 / 총 <strong>247</strong>건</div>
+  <div>1 – 7 / 총 <strong>247</strong>건</div>
   <div class="pgn-btns">
     <button class="pgn-btn">‹</button>
     <button class="pgn-btn active">1</button>
@@ -1052,15 +1209,156 @@ select.fi { padding: 0 28px 0 10px; appearance: none; background-image: url("dat
 
 <!-- LEGEND -->
 <div class="legend-card">
-  <div class="legend-title">📖 액션 가이드 — Phase 4~6 운영 (예약 = 상품 단위, 항공+숙박+옵션 통합 관리)</div>
+  <div class="legend-title">📖 숙소 관리 액션 가이드 — Phase 3~6 (TMG 숙박권 운영 표준 6종)</div>
   <div class="legend-grid">
-    <div><strong style="color:#1677ff;">🔍 [상태값 확인]</strong><br>retrieveBooking 호출 (Phase 5). 각 아이템 또는 전체 단위로 TMG 실제 상태 즉시 조회.</div>
-    <div><strong style="color:#1677ff;">✋ [숙박권 confirm]</strong><br>항공 연동 X 케이스 전용 (Phase 4). 영업실이 고객/여정 확인 후 수동 클릭 → retrieveBooking → confirmBooking 순차 호출.</div>
-    <div><strong style="color:#d48806;">⏰ [재예약 시도]</strong><br>confirmBefore 시한 초과 시 활성 (Phase 4). checkAvail → reserve → confirm 일괄 자동 호출. 재고/요금 변동 시 수동 분기.</div>
-    <div><strong style="color:#cf1322;">⚠️ [대체 숙소 제안]</strong><br>UNAVAILABLE 발생 시 (Phase 3 그라운드룰). 항공권 취소 없이 진행, 관리자가 대체안 제시 후 고객 컨택.</div>
+    <div><strong style="color:#cf1322;">🚨 [숙소 예약 실패 알림 → 🔄 다른 숙소 대체]</strong><br>reserveBooking UNAVAILABLE 시. 항공권 RESERVED 유지하고 대체 숙소 선택 모달로 패키지 swap.</div>
+    <div><strong style="color:#1677ff;">✋ [숙박권 confirm]</strong><br>항공 연동 X (숙박 단독) 케이스에서만 노출. 영업실 수동 확정 → retrieveBooking → confirmBooking.</div>
+    <div><strong style="color:#d48806;">⏰ [재예약 시도]</strong><br>confirmBefore 시한 초과 시. checkAvail → reserve → confirm 일괄 자동 호출.</div>
+    <div><strong style="color:#cf1322;">📞 [호텔측 취소 통보 → 🔄 다른 숙소 대체]</strong><br>CONFIRMED 이후 호텔이 일방 취소. 항공권 유지, 위약금 면제 + 호텔 페널티 청구.</div>
+    <div><strong style="color:#1677ff;">🔍 [상태값 확인]</strong><br>RESERVED 상태에서 TMG 실제 상태 즉시 조회 (retrieveBooking, Phase 5).</div>
+    <div><strong style="color:#cf1322;">🗑 [숙소 예약 취소하기]</strong><br>cancelBooking (Phase 6). cancelFees 자동 반영, VND→KRW 환산.</div>
   </div>
 </div>
 
+</div>
+
+<!-- ======= 다른 숙소 대체 MODAL ======= -->
+<div class="modal-overlay" id="altHotelModal" onclick="if(event.target===this)closeAltHotelModal()">
+  <div class="modal-box modal-box-lg">
+    <div class="modal-head">
+      <div class="modal-title-wrap">
+        <div class="modal-title">🔄 대체 숙소 선택</div>
+        <div class="modal-sub">동일 일정·동일 인원·동일 등급 이상 기준 자동 추천 (TMG 실시간 가용 객실)</div>
+      </div>
+      <button class="modal-close" onclick="closeAltHotelModal()">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="alt-hotel-header">
+        <div class="ah-top">
+          <div style="flex:1;">
+            <div class="ah-original-label">원래 숙소 (취소/실패)</div>
+            <div class="ah-original-name" id="altOrigName">호텔명</div>
+            <div class="ah-original-sub" id="altOrigSub">객실/일정/금액</div>
+          </div>
+        </div>
+        <div class="ah-criteria">
+          <div class="ah-criteria-item"><div class="lbl">투숙 일정</div><div class="val" id="altCritDate">2026-05-30 → 06-01 (2박)</div></div>
+          <div class="ah-criteria-item"><div class="lbl">인원</div><div class="val" id="altCritPax">2 PAX</div></div>
+          <div class="ah-criteria-item"><div class="lbl">객실 등급</div><div class="val">5★ 이상 / Premier 등급</div></div>
+          <div class="ah-criteria-item"><div class="lbl">예산 한도</div><div class="val">기존 +10% 이내 (운영팀 자동 한도)</div></div>
+        </div>
+      </div>
+      <div class="alt-filter-bar">
+        <span class="label-sm">정렬</span>
+        <select class="fi" style="height:28px; font-size:12px; width:140px;"><option>추천 순</option><option>가격 낮은순</option><option>거리 가까운순</option><option>등급 높은순</option></select>
+        <span class="label-sm">지역</span>
+        <select class="fi" style="height:28px; font-size:12px; width:140px;"><option>동일 지역 (Hanoi 시내)</option><option>전체 베트남</option></select>
+        <span class="label-sm">rateType</span>
+        <select class="fi" style="height:28px; font-size:12px; width:120px;"><option>전체</option><option>STATIC</option><option>ALM-DYNAMIC</option><option>DYNAMIC</option></select>
+        <input class="fi" placeholder="🔍 호텔명 검색" style="margin-left:auto; height:28px; font-size:12px; width:200px;">
+      </div>
+      <div class="alt-list">
+        <!-- 추천 1: 유사 등급, 약간 비쌈 -->
+        <div class="alt-item recommended">
+          <div class="alt-icon">🏨</div>
+          <div class="alt-info">
+            <div class="alt-name-row">
+              <div class="alt-name">Sheraton Hanoi Hotel</div>
+              <span class="alt-tag rec">⭐ 운영팀 추천</span>
+              <span class="rt-static" style="font-size:10px;">STATIC</span>
+              <span class="src-badge src-api">🔌 API</span>
+            </div>
+            <div class="alt-meta">
+              5★ · Premier Twin · 1 room · 2 nights · 조식 포함
+              <span class="dot-sep">·</span> 0.8km from 원래 숙소
+              <span class="dot-sep">·</span> 가용 객실 4실
+            </div>
+          </div>
+          <div class="alt-price">
+            <div class="alt-price-val">2,840,000원</div>
+            <div class="alt-price-diff up">+180,000원 (+6.7%)</div>
+            <div class="alt-avail">cancellationPolicies 동일 등급</div>
+          </div>
+          <div class="alt-select"><button class="btn btn-primary btn-sm">선택 & swap</button></div>
+        </div>
+        <!-- 추천 2: 동일 가격대, 다른 브랜드 -->
+        <div class="alt-item">
+          <div class="alt-icon">🏨</div>
+          <div class="alt-info">
+            <div class="alt-name-row">
+              <div class="alt-name">Pan Pacific Hanoi</div>
+              <span class="alt-tag same">동일 가격대</span>
+              <span class="rt-alm" style="font-size:10px;">ALM-DYN</span>
+              <span class="src-badge src-api">🔌 API</span>
+            </div>
+            <div class="alt-meta">
+              5★ · Deluxe Lake View · 1 room · 2 nights · 조식 포함
+              <span class="dot-sep">·</span> 1.4km · 호안끼엠 호수 인접
+              <span class="dot-sep">·</span> 가용 객실 2실
+            </div>
+          </div>
+          <div class="alt-price">
+            <div class="alt-price-val">2,660,000원</div>
+            <div class="alt-price-diff same">동일</div>
+            <div class="alt-avail">동일 등급 위약금 정책</div>
+          </div>
+          <div class="alt-select"><button class="btn btn-default btn-sm">선택 & swap</button></div>
+        </div>
+        <!-- 추천 3: 저렴, 4★ -->
+        <div class="alt-item">
+          <div class="alt-icon">🏨</div>
+          <div class="alt-info">
+            <div class="alt-name-row">
+              <div class="alt-name">Movenpick Hanoi</div>
+              <span class="rt-dyn" style="font-size:10px;">DYNAMIC</span>
+              <span class="src-badge src-api">🔌 API</span>
+            </div>
+            <div class="alt-meta">
+              4★ · Superior King · 1 room · 2 nights · 조식 포함
+              <span class="dot-sep">·</span> 2.1km · 시내 중심
+              <span class="dot-sep">·</span> 가용 객실 8실
+            </div>
+          </div>
+          <div class="alt-price">
+            <div class="alt-price-val">2,180,000원</div>
+            <div class="alt-price-diff down">-480,000원 (환불)</div>
+            <div class="alt-avail">고객 환불 발생 안내 필요</div>
+          </div>
+          <div class="alt-select"><button class="btn btn-default btn-sm">선택 & swap</button></div>
+        </div>
+        <!-- 추천 4: 같은 브랜드 다른 위치 -->
+        <div class="alt-item">
+          <div class="alt-icon">🏨</div>
+          <div class="alt-info">
+            <div class="alt-name-row">
+              <div class="alt-name">Lotte Hotel Hanoi (West Lake)</div>
+              <span class="alt-tag same">동일 브랜드</span>
+              <span class="rt-static" style="font-size:10px;">STATIC</span>
+              <span class="src-badge src-api">🔌 API</span>
+            </div>
+            <div class="alt-meta">
+              5★ · Premier Twin · 1 room · 2 nights · 조식 포함
+              <span class="dot-sep">·</span> 3.6km · 시내에서 거리 있음
+              <span class="dot-sep">·</span> 가용 객실 6실
+            </div>
+          </div>
+          <div class="alt-price">
+            <div class="alt-price-val">2,720,000원</div>
+            <div class="alt-price-diff up">+60,000원 (+2.3%)</div>
+            <div class="alt-avail">동일 브랜드 보상 차원 추가 혜택 검토</div>
+          </div>
+          <div class="alt-select"><button class="btn btn-default btn-sm">선택 & swap</button></div>
+        </div>
+      </div>
+    </div>
+    <div class="modal-foot">
+      <div class="modal-foot-note">선택 시: 고객 확인 모달 → 동의 시 새 숙소로 reserveBooking → 결제 차액 자동 정산</div>
+      <div style="display:flex; gap:8px;">
+        <button class="btn btn-default btn-xs" onclick="closeAltHotelModal()">취소</button>
+        <button class="btn btn-default btn-xs">📧 고객에게 추천 리스트 전송</button>
+      </div>
+    </div>
+  </div>
 </div>
 
 <!-- ======= 위약금 정책 MODAL ======= -->
@@ -1217,8 +1515,33 @@ function closePolicyModal() {
   document.getElementById('policyModal').classList.remove('show');
 }
 
+// 다른 숙소 대체 모달 — 호텔 컨텍스트 추출
+function openAltHotelModal(btn) {
+  // 호텔 row 찾기 — 버튼이 expand panel 안에 있을 수도 있음
+  let row = btn.closest('tr');
+  if (row && !row.querySelector('.sup-name')) {
+    // expand 패널 내부 버튼 → 같은 expand 패널의 hotel item 찾기
+    const expandTd = btn.closest('.adm-expand-inner');
+    if (expandTd) {
+      const hotelRow = Array.from(expandTd.querySelectorAll('tr')).find(r => r.querySelector('.type-icon.hotel'));
+      if (hotelRow) row = hotelRow;
+    }
+  }
+  if (row && row.querySelector('.sup-name')) {
+    document.getElementById('altOrigName').textContent = row.querySelector('.sup-name').textContent.trim();
+    const detail = row.querySelector('.detail-main')?.textContent?.trim() || '';
+    const sub = row.querySelector('.detail-sub')?.textContent?.trim() || '';
+    document.getElementById('altOrigSub').textContent = detail + ' · ' + sub;
+  }
+  document.getElementById('altHotelModal').classList.add('show');
+}
+
+function closeAltHotelModal() {
+  document.getElementById('altHotelModal').classList.remove('show');
+}
+
 document.addEventListener('keydown', e => {
-  if (e.key === 'Escape') closePolicyModal();
+  if (e.key === 'Escape') { closePolicyModal(); closeAltHotelModal(); }
 });
 </script>
 
