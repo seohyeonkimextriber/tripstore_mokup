@@ -278,6 +278,97 @@ select.fi { padding: 0 28px 0 10px; appearance: none; background-image: url("dat
 .policy-fee.partial { color: #d48806; font-weight: 700; }
 .policy-fee.full { color: #cf1322; font-weight: 700; }
 .policy-warning { background: #fff7e6; border: 1px solid #ffd591; border-radius: 6px; padding: 10px 12px; margin-top: 12px; font-size: 11.5px; color: #ad6800; line-height: 1.6; }
+
+/* ===== ADMIN TABLE (표준 예약 목록) ===== */
+.adm-wrap { background: #fff; border-radius: 10px; box-shadow: 0 1px 3px rgba(0,0,0,0.06); overflow: hidden; margin-bottom: 16px; }
+.adm-scroll { overflow-x: auto; max-width: 100%; }
+.adm-table { width: 100%; min-width: 2300px; border-collapse: collapse; font-size: 12.5px; }
+.adm-table thead th { background: #fafafa; padding: 10px 12px; text-align: left; font-size: 11.5px; font-weight: 600; color: rgba(0,0,0,0.65); border-bottom: 1px solid #e8e8e8; white-space: nowrap; vertical-align: middle; }
+.adm-table thead th .th-help { display: inline-block; width: 13px; height: 13px; line-height: 13px; text-align: center; font-size: 10px; background: #e8e8e8; color: rgba(0,0,0,0.55); border-radius: 50%; margin-left: 4px; cursor: help; }
+.adm-table tbody td { padding: 12px 12px; border-bottom: 1px solid #f0f0f0; vertical-align: middle; font-size: 12.5px; color: rgba(0,0,0,0.85); }
+.adm-table tbody tr.adm-row { cursor: pointer; transition: background 0.12s; }
+.adm-table tbody tr.adm-row:hover td { background: #fafcff; }
+.adm-table tbody tr.adm-row.expanded td { background: #f0f7ff; border-bottom-color: #e6f4ff; }
+
+/* 펼침 아이콘 */
+.expand-btn { width: 22px; height: 22px; border-radius: 4px; border: 1px solid #d9d9d9; background: #fff; color: rgba(0,0,0,0.55); cursor: pointer; font-size: 10px; line-height: 1; display: inline-flex; align-items: center; justify-content: center; transition: all 0.15s; }
+.expand-btn:hover { color: #1677ff; border-color: #1677ff; }
+.expand-btn.opened { background: #1677ff; color: #fff; border-color: #1677ff; transform: rotate(0deg); }
+.expand-btn.opened::before { content: '▼'; }
+.expand-btn::before { content: '▶'; }
+
+/* 컬럼별 너비/스타일 */
+.col-expand { width: 36px; padding-left: 14px; padding-right: 4px; }
+.col-channel { width: 80px; }
+.col-paytype { width: 84px; }
+.col-rsvno { width: 140px; }
+.col-extno { width: 110px; }
+.col-name { width: 90px; }
+.col-phone { width: 130px; }
+.col-prodcode { width: 200px; }
+.col-amt { width: 110px; text-align: right; }
+.col-amt-sm { width: 100px; text-align: right; }
+.col-paystatus { width: 96px; }
+.col-statechange { width: 200px; }
+.col-date { width: 200px; }
+.col-urlsend { width: 110px; }
+.col-urlvalid { width: 120px; }
+.col-itinerary { width: 100px; }
+
+.cell-mono { font-family: 'SF Mono', Monaco, monospace; font-size: 11.5px; }
+.cell-link { color: #1677ff; cursor: pointer; }
+.cell-link:hover { text-decoration: underline; }
+.cell-muted { color: rgba(0,0,0,0.35); font-size: 12px; }
+.cell-amt { font-family: 'SF Mono', Monaco, monospace; font-weight: 500; }
+.cell-amt.zero { color: rgba(0,0,0,0.45); }
+.cell-prod-code { font-family: 'SF Mono', Monaco, monospace; font-size: 11.5px; line-height: 1.5; }
+.cell-prod-code .sub { color: rgba(0,0,0,0.55); }
+.cell-date-stack { font-size: 11.5px; line-height: 1.6; }
+.cell-date-stack .sub { color: rgba(0,0,0,0.55); font-size: 11px; }
+
+/* 결제상태 BADGE */
+.pay-badge { display: inline-flex; align-items: center; gap: 4px; padding: 3px 9px; border-radius: 12px; font-size: 11.5px; font-weight: 600; }
+.pay-completed { background: #f6ffed; color: #389e0d; border: 1px solid #b7eb8f; }
+.pay-pending { background: #fff7e6; color: #d48806; border: 1px solid #ffd591; }
+.pay-failed { background: #fff1f0; color: #cf1322; border: 1px solid #ffa39e; }
+.pay-cancelled { background: #f5f5f5; color: rgba(0,0,0,0.55); border: 1px solid #d9d9d9; }
+
+/* 예약상태 변경 셀 (dropdown + 버튼) */
+.statechange-cell { display: flex; align-items: center; gap: 6px; }
+.statechange-cell .rsv-state-select { font-size: 11.5px; padding: 4px 22px 4px 10px; }
+.btn-cancel-sm { height: 26px; padding: 0 9px; font-size: 11.5px; border-radius: 4px; background: #fff; color: rgba(0,0,0,0.65); border: 1px solid #d9d9d9; cursor: pointer; display: inline-flex; align-items: center; gap: 3px; }
+.btn-cancel-sm:hover { color: #cf1322; border-color: #ffa39e; }
+
+/* 일정표 보기 link */
+.itinerary-link { color: #1677ff; font-size: 11.5px; cursor: pointer; display: inline-flex; align-items: center; gap: 3px; }
+.itinerary-link:hover { text-decoration: underline; }
+
+/* ===== EXPAND PANEL (펼침 영역) ===== */
+.adm-table tbody tr.adm-expand td { padding: 0; background: #f0f7ff; border-bottom: 2px solid #e6f4ff; }
+.adm-expand-inner { padding: 18px 22px 22px; }
+.exp-header { display: flex; gap: 14px; align-items: center; padding: 12px 16px; background: #fff; border-radius: 10px; border: 1px solid #d6e4ff; margin-bottom: 12px; }
+.exp-header-id { font-family: 'SF Mono', Monaco, monospace; font-size: 13px; color: #1677ff; font-weight: 700; }
+.exp-header-cust { font-size: 13.5px; font-weight: 700; }
+.exp-header-cust .pax { font-size: 11px; color: rgba(0,0,0,0.55); font-weight: 500; margin-left: 4px; }
+.exp-header-prod { flex: 1; font-size: 12.5px; color: rgba(0,0,0,0.75); }
+.exp-header-prod .pname { font-weight: 600; color: rgba(0,0,0,0.88); }
+.exp-header-prod .pmeta { font-size: 11px; color: rgba(0,0,0,0.55); margin-top: 2px; }
+.exp-header-tags { display: flex; flex-direction: column; gap: 4px; align-items: flex-end; }
+
+.exp-items-card { background: #fff; border-radius: 10px; border: 1px solid #d6e4ff; overflow: hidden; }
+.exp-items-card .exp-title-bar { padding: 10px 16px; background: #fafafa; border-bottom: 1px solid #f0f0f0; font-size: 12.5px; font-weight: 600; display: flex; align-items: center; gap: 8px; }
+.exp-items-card .exp-title-bar .title-sub { font-size: 11px; color: rgba(0,0,0,0.55); font-weight: 500; }
+
+.exp-foot { padding: 12px 16px; background: #fafafa; border-top: 1px solid #f0f0f0; display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
+.exp-foot-msg { flex: 1; font-size: 12.5px; color: rgba(0,0,0,0.65); min-width: 280px; }
+.exp-foot-msg strong { color: rgba(0,0,0,0.88); }
+.exp-foot-actions { display: flex; gap: 6px; flex-wrap: wrap; }
+
+.exp-phase-tag { display: inline-flex; align-items: center; gap: 4px; padding: 2px 7px; border-radius: 10px; font-size: 11px; font-weight: 600; background: #e6f4ff; color: #1677ff; margin-right: 6px; vertical-align: middle; }
+.exp-phase-tag.warn { background: #fff7e6; color: #d48806; }
+.exp-phase-tag.danger { background: #fff1f0; color: #cf1322; }
+.exp-phase-tag.success { background: #f6ffed; color: #389e0d; }
+
 </style>
 </head>
 <body>
@@ -387,436 +478,563 @@ select.fi { padding: 0 28px 0 10px; appearance: none; background-image: url("dat
   </div>
 </div>
 
-<!-- ======= RESERVATION CARDS ======= -->
-
-<!-- CARD 1: 항공 RESERVED → TMG 자동 confirm 대기 (정상) -->
-<div class="rsv-card primary">
-  <div class="rsv-head">
-    <div class="rsv-id-block">
-      <div class="rsv-id">#RSV-2026051301</div>
-      <div class="rsv-received">결제 완료 · 09:12</div>
-    </div>
-    <div class="rsv-cust">김민준 <span class="pax">2 PAX</span></div>
-    <div class="rsv-product">
-      <div class="name">Sol by Melia Phu Quoc 4박 5일 · Air+Hotel 패키지</div>
-      <div class="meta">출발 05-20 ICN→PQC · 귀국 05-24 PQC→ICN</div>
-    </div>
-    <div class="rsv-status-block">
-      <div class="rsv-state-wrap">
-        <span class="rsv-state-label">예약상태</span>
-        <select class="rsv-state-select s-received" onchange="updateState(this)">
-          <option value="received" selected>예약접수</option>
-          <option value="completed">예약완료</option>
-          <option value="departed">출발완료</option>
-          <option value="cancel-req">취소요청</option>
-          <option value="cancelled">취소완료</option>
-        </select>
-      </div>
-      <div class="agg-status agg-pending"><span class="agg-dot amber"></span>TMG confirm 대기</div>
-      <div class="rsv-status-line"><span class="air-link-tag has">✈️ 항공 연동 O</span></div>
-    </div>
-  </div>
-  <div class="items-wrap">
-  <table class="items-table">
+<!-- ======= ADMIN TABLE (표준 예약 목록 + 펼침) ======= -->
+<div class="adm-wrap">
+  <div class="adm-scroll">
+  <table class="adm-table">
     <thead>
-    <tr>
-      <th style="width:170px;">구성</th>
-      <th>공급사 / 코드</th>
-      <th>상세</th>
-      <th>상태</th>
-      <th>잔여 시한</th>
-      <th>증빙</th>
-      <th style="text-align:right;">액션</th>
-    </tr>
+      <tr>
+        <th class="col-expand"></th>
+        <th class="col-channel">채널명</th>
+        <th class="col-paytype">결제유형</th>
+        <th class="col-rsvno">예약번호</th>
+        <th class="col-extno">채널사 주문번호</th>
+        <th class="col-name">예약자명</th>
+        <th class="col-phone">연락처</th>
+        <th class="col-prodcode">상품코드 / 행사코드</th>
+        <th class="col-amt">총 정가 <span class="th-help">?</span></th>
+        <th class="col-amt">총 할인금</th>
+        <th class="col-amt">총 판매가 <span class="th-help">?</span></th>
+        <th class="col-amt">결제금액 <span class="th-help">?</span></th>
+        <th class="col-amt-sm">미수금액 <span class="th-help">?</span></th>
+        <th class="col-paystatus">결제상태</th>
+        <th class="col-statechange">예약상태 변경</th>
+        <th class="col-date">예약일시<br>예약완료 일시(운영자)</th>
+        <th class="col-urlsend">결제URL 발송</th>
+        <th class="col-urlvalid">결제URL 유효기간<br>여부</th>
+        <th class="col-itinerary">여행 일정표</th>
+      </tr>
     </thead>
     <tbody>
-    <tr>
-      <td><div class="type-cell"><div class="type-icon flight">✈️</div><div><div class="type-name">Flight <span class="src-badge src-api">🔌 API</span></div><div class="type-sub">왕복 · Economy</div></div></div></td>
-      <td><div class="supplier-cell"><div class="sup-name">VietJet Air</div><div class="sup-code">VJ871 / VJ872</div></div></td>
-      <td><div class="detail-cell"><div class="detail-main">ICN → PQC · 05-20 06:30 · 2 seats</div><div class="detail-sub">PQC → ICN · 05-24 14:50</div></div></td>
-      <td><span class="tag tag-green"><span class="tag-dot green"></span>RESERVED ✓</span></td>
-      <td><span style="color:rgba(0,0,0,0.35); font-size:12px;">—</span></td>
-      <td><div class="doc-cell"><div class="doc-chip attached">📎 <span class="docname">vj_pnr_0520.pdf</span></div></div></td>
-      <td><div class="item-actions"><button class="btn-policy" onclick="openPolicyModal(this)" data-supplier="공급사" data-type="generic" data-source="api">📋 위약금</button><button class="btn btn-default btn-xs">조회</button></div></td>
+
+    <!-- ===== ROW 1: 항공 RESERVED → TMG 자동 confirm 대기 (정상) ===== -->
+    <tr class="adm-row" data-rsv="1" onclick="toggleExpand(1)">
+      <td class="col-expand"><button class="expand-btn" id="exp-btn-1" onclick="event.stopPropagation();toggleExpand(1)"></button></td>
+      <td class="col-channel">트립스토어</td>
+      <td class="col-paytype">전액결제</td>
+      <td class="col-rsvno"><span class="cell-link cell-mono">8368771260859228</span></td>
+      <td class="col-extno"><span class="cell-muted">-</span></td>
+      <td class="col-name">김민준</td>
+      <td class="col-phone cell-mono">010-1234-5678</td>
+      <td class="col-prodcode"><div class="cell-prod-code">TPSOLPQC52001<br><span class="sub">TPSOLPQC52001-260520A</span></div></td>
+      <td class="col-amt cell-amt">4,500,000</td>
+      <td class="col-amt cell-amt">820,000</td>
+      <td class="col-amt cell-amt">3,680,000</td>
+      <td class="col-amt cell-amt">3,680,000</td>
+      <td class="col-amt-sm cell-amt zero">0</td>
+      <td class="col-paystatus"><span class="pay-badge pay-completed">결제완료</span></td>
+      <td class="col-statechange" onclick="event.stopPropagation()">
+        <div class="statechange-cell">
+          <select class="rsv-state-select s-received" onchange="updateState(this)">
+            <option value="received" selected>예약접수</option>
+            <option value="completed">예약완료</option>
+            <option value="departed">출발완료</option>
+            <option value="cancel-req">취소요청</option>
+            <option value="cancelled">취소완료</option>
+          </select>
+          <button class="btn-cancel-sm">✕ 예약취소</button>
+        </div>
+      </td>
+      <td class="col-date"><div class="cell-date-stack">2026-05-13 09:08<br><span class="sub">2026-05-13 09:12 (트립스토어)</span></div></td>
+      <td class="col-urlsend"><span class="cell-muted">-</span></td>
+      <td class="col-urlvalid"><span class="cell-muted">-</span></td>
+      <td class="col-itinerary"><span class="itinerary-link">📋 일정표 보기</span></td>
     </tr>
-    <tr>
-      <td><div class="type-cell"><div class="type-icon hotel">🏨</div><div><div class="type-name">Hotel <span class="rt-alm">ALM-DYN</span><span class="src-badge src-api">🔌 API</span></div><div class="type-sub">TMG 연동</div></div></div></td>
-      <td><div class="supplier-cell"><div class="sup-name">Sol by Melia Phu Quoc</div><div class="sup-code">TMG · TMG-HL-8N3K7Y-2026</div></div></td>
-      <td><div class="detail-cell"><div class="detail-main">Deluxe Ocean View · 1 room · 4 nights</div><div class="detail-sub">05-20 → 05-24 · 조식 포함</div></div></td>
-      <td><span class="tag tag-blue"><span class="tag-dot blue"></span>TMG_RESERVED</span></td>
-      <td><div class="countdown ok">⏱ 11h 24m</div><div style="font-size:10px; color:rgba(0,0,0,0.45); margin-top:2px;">계약 / ~05-14 02:00</div></td>
-      <td><div class="doc-cell"><div class="doc-chip empty">📎 voucher 첨부</div></div></td>
-      <td><div class="item-actions">
-        <button class="btn-policy" onclick="openPolicyModal(this)" data-supplier="Sol by Melia Phu Quoc" data-type="hotel-tmg" data-source="api">📋 위약금</button>
-        <button class="btn btn-default btn-xs">🔍 상태확인</button>
-        <button class="btn btn-default btn-xs" disabled>✋ 수동 confirm</button>
-      </div></td>
+    <tr class="adm-expand" id="exp-row-1" style="display:none">
+      <td colspan="19">
+        <div class="adm-expand-inner">
+          <div class="exp-header">
+            <div class="exp-header-id">#RSV-2026051301</div>
+            <div class="exp-header-cust">김민준 <span class="pax">2 PAX</span></div>
+            <div class="exp-header-prod">
+              <div class="pname">Sol by Melia Phu Quoc 4박 5일 · Air+Hotel 패키지</div>
+              <div class="pmeta">출발 05-20 ICN→PQC · 귀국 05-24 PQC→ICN</div>
+            </div>
+            <div class="exp-header-tags">
+              <div class="agg-status agg-pending"><span class="agg-dot amber"></span>TMG confirm 대기</div>
+              <span class="air-link-tag has">✈️ 항공 연동 O</span>
+            </div>
+          </div>
+          <div class="exp-items-card">
+            <div class="exp-title-bar">🧳 구성요소 — 항공권 + TMG 숙박권 <span class="title-sub">· 아이템별 상태/위약금/액션 관리</span></div>
+            <table class="items-table">
+              <thead><tr><th style="width:170px;">구성</th><th>공급사 / 코드</th><th>상세</th><th>상태</th><th>잔여 시한</th><th>증빙</th><th style="text-align:right;">액션</th></tr></thead>
+              <tbody>
+                <tr>
+                  <td><div class="type-cell"><div class="type-icon flight">✈️</div><div><div class="type-name">Flight <span class="src-badge src-api">🔌 API</span></div><div class="type-sub">왕복 · Economy</div></div></div></td>
+                  <td><div class="supplier-cell"><div class="sup-name">VietJet Air</div><div class="sup-code">VJ871 / VJ872</div></div></td>
+                  <td><div class="detail-cell"><div class="detail-main">ICN → PQC · 05-20 06:30 · 2 seats</div><div class="detail-sub">PQC → ICN · 05-24 14:50</div></div></td>
+                  <td><span class="tag tag-green"><span class="tag-dot green"></span>RESERVED ✓</span></td>
+                  <td><span style="color:rgba(0,0,0,0.35); font-size:12px;">—</span></td>
+                  <td><div class="doc-cell"><div class="doc-chip attached">📎 <span class="docname">vj_pnr_0520.pdf</span></div></div></td>
+                  <td><div class="item-actions"><button class="btn-policy" onclick="openPolicyModal(this)">📋 위약금</button><button class="btn btn-default btn-xs">조회</button></div></td>
+                </tr>
+                <tr>
+                  <td><div class="type-cell"><div class="type-icon hotel">🏨</div><div><div class="type-name">Hotel <span class="rt-alm">ALM-DYN</span><span class="src-badge src-api">🔌 API</span></div><div class="type-sub">TMG 연동</div></div></div></td>
+                  <td><div class="supplier-cell"><div class="sup-name">Sol by Melia Phu Quoc</div><div class="sup-code">TMG · TMG-HL-8N3K7Y-2026</div></div></td>
+                  <td><div class="detail-cell"><div class="detail-main">Deluxe Ocean View · 1 room · 4 nights</div><div class="detail-sub">05-20 → 05-24 · 조식 포함</div></div></td>
+                  <td><span class="tag tag-blue"><span class="tag-dot blue"></span>TMG_RESERVED</span></td>
+                  <td><div class="countdown ok">⏱ 11h 24m</div><div style="font-size:10px; color:rgba(0,0,0,0.45); margin-top:2px;">계약 / ~05-14 02:00</div></td>
+                  <td><div class="doc-cell"><div class="doc-chip empty">📎 voucher 첨부</div></div></td>
+                  <td><div class="item-actions">
+                    <button class="btn-policy" onclick="openPolicyModal(this)">📋 위약금</button>
+                    <button class="btn btn-default btn-xs">🔍 상태확인</button>
+                    <button class="btn btn-default btn-xs" disabled>✋ 수동 confirm</button>
+                  </div></td>
+                </tr>
+              </tbody>
+            </table>
+            <div class="exp-foot">
+              <div class="exp-foot-msg"><span class="exp-phase-tag">Phase 4</span><strong>항공권 RESERVED 감지됨</strong> → TMG 숙소 자동 confirm 트리거 예정 (시스템 폴링 30초 주기). 수동 개입 불필요.</div>
+              <div class="exp-foot-actions">
+                <button class="btn btn-default btn-xs">🔍 전체 상태값 확인</button>
+                <button class="btn btn-danger btn-xs">예약 취소</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </td>
     </tr>
+
+    <!-- ===== ROW 2: 항공 PNR 대기 + TMG 시한 임박 ===== -->
+    <tr class="adm-row" data-rsv="2" onclick="toggleExpand(2)">
+      <td class="col-expand"><button class="expand-btn" id="exp-btn-2" onclick="event.stopPropagation();toggleExpand(2)"></button></td>
+      <td class="col-channel">트립스토어</td>
+      <td class="col-paytype">전액결제</td>
+      <td class="col-rsvno"><span class="cell-link cell-mono">8368771260859302</span></td>
+      <td class="col-extno"><span class="cell-muted">-</span></td>
+      <td class="col-name">이서연</td>
+      <td class="col-phone cell-mono">010-2345-6789</td>
+      <td class="col-prodcode"><div class="cell-prod-code">TPJWMHAN73001<br><span class="sub">TPJWMHAN73001-260601A</span></div></td>
+      <td class="col-amt cell-amt">7,200,000</td>
+      <td class="col-amt cell-amt">1,380,000</td>
+      <td class="col-amt cell-amt">5,820,000</td>
+      <td class="col-amt cell-amt">5,820,000</td>
+      <td class="col-amt-sm cell-amt zero">0</td>
+      <td class="col-paystatus"><span class="pay-badge pay-completed">결제완료</span></td>
+      <td class="col-statechange" onclick="event.stopPropagation()">
+        <div class="statechange-cell">
+          <select class="rsv-state-select s-received" onchange="updateState(this)">
+            <option value="received" selected>예약접수</option><option value="completed">예약완료</option><option value="departed">출발완료</option><option value="cancel-req">취소요청</option><option value="cancelled">취소완료</option>
+          </select>
+          <button class="btn-cancel-sm">✕ 예약취소</button>
+        </div>
+      </td>
+      <td class="col-date"><div class="cell-date-stack">2026-05-13 13:22<br><span class="sub">2026-05-13 13:24 (트립스토어)</span></div></td>
+      <td class="col-urlsend"><span class="cell-muted">-</span></td>
+      <td class="col-urlvalid"><span class="cell-muted">-</span></td>
+      <td class="col-itinerary"><span class="itinerary-link">📋 일정표 보기</span></td>
+    </tr>
+    <tr class="adm-expand" id="exp-row-2" style="display:none">
+      <td colspan="19">
+        <div class="adm-expand-inner">
+          <div class="exp-header">
+            <div class="exp-header-id">#RSV-2026051302</div>
+            <div class="exp-header-cust">이서연 <span class="pax">2 PAX</span></div>
+            <div class="exp-header-prod">
+              <div class="pname">JW Marriott Hanoi 3박 4일 · Air+Hotel+Tour 패키지</div>
+              <div class="pmeta">출발 06-01 ICN→HAN · 귀국 06-04 HAN→ICN</div>
+            </div>
+            <div class="exp-header-tags">
+              <div class="agg-status agg-partial"><span class="agg-dot purple"></span>항공권 대기 · TMG 시한 임박</div>
+              <span class="air-link-tag has">✈️ 항공 연동 O</span>
+            </div>
+          </div>
+          <div class="exp-items-card">
+            <div class="exp-title-bar">🧳 구성요소 — 항공권 + TMG 숙박권 + 옵션 <span class="title-sub">· 시한 임박 24분</span></div>
+            <table class="items-table">
+              <thead><tr><th style="width:170px;">구성</th><th>공급사 / 코드</th><th>상세</th><th>상태</th><th>잔여 시한</th><th>증빙</th><th style="text-align:right;">액션</th></tr></thead>
+              <tbody>
+                <tr>
+                  <td><div class="type-cell"><div class="type-icon flight">✈️</div><div><div class="type-name">Flight <span class="src-badge src-api">🔌 API</span></div><div class="type-sub">왕복 · Economy</div></div></div></td>
+                  <td><div class="supplier-cell"><div class="sup-name">Korean Air</div><div class="sup-code">KE679 / KE680</div></div></td>
+                  <td><div class="detail-cell"><div class="detail-main">ICN → HAN · 06-01 09:25 · 2 seats</div><div class="detail-sub">HAN → ICN · 06-04 23:30</div></div></td>
+                  <td><span class="tag tag-orange"><span class="tag-dot orange"></span>BOOKING (Checking)</span></td>
+                  <td><span style="color:rgba(0,0,0,0.35); font-size:12px;">—</span></td>
+                  <td><div class="doc-cell"><div class="doc-chip empty">📎 PNR 첨부</div></div></td>
+                  <td><div class="item-actions"><button class="btn-policy" onclick="openPolicyModal(this)" data-supplier="Korean Air" data-type="flight" data-source="api">📋 위약금</button><button class="btn btn-default btn-xs">상태조회</button><button class="btn btn-warn btn-xs">긴급 확인</button></div></td>
+                </tr>
+                <tr>
+                  <td><div class="type-cell"><div class="type-icon hotel">🏨</div><div><div class="type-name">Hotel <span class="rt-dyn">DYNAMIC</span><span class="src-badge src-api">🔌 API</span></div><div class="type-sub">TMG 연동</div></div></div></td>
+                  <td><div class="supplier-cell"><div class="sup-name">JW Marriott Hanoi</div><div class="sup-code">TMG · TMG-HL-7K9M2X-2026</div></div></td>
+                  <td><div class="detail-cell"><div class="detail-main">Executive Suite · 1 room · 3 nights</div><div class="detail-sub">06-01 → 06-04 · 조식 포함</div></div></td>
+                  <td><span class="tag tag-orange"><span class="tag-dot orange"></span>대기 · 항공권 PNR 대기</span></td>
+                  <td><div class="countdown danger">⏱ 24m 12s</div><div style="font-size:10px; color:#cf1322; margin-top:2px;">다이나믹 / ~13:48</div></td>
+                  <td><div class="doc-cell"><div class="doc-chip empty">📎 voucher 첨부</div></div></td>
+                  <td><div class="item-actions">
+                    <button class="btn-policy" onclick="openPolicyModal(this)" data-supplier="JW Marriott Hanoi" data-type="hotel-tmg" data-source="api">📋 위약금</button>
+                    <button class="btn btn-default btn-xs">🔍 상태확인</button>
+                    <button class="btn btn-warn btn-xs">⏰ 강제 confirm</button>
+                  </div></td>
+                </tr>
+                <tr>
+                  <td><div class="type-cell"><div class="type-icon tour">🎫</div><div><div class="type-name">Tour <span class="src-badge src-manual">✏️ 수동</span></div><div class="type-sub">옵션</div></div></div></td>
+                  <td><div class="supplier-cell"><div class="sup-name">Halong Bay Day Tour</div><div class="sup-code">VINPEARL-TR-2810</div></div></td>
+                  <td><div class="detail-cell"><div class="detail-main">06-02 · 2 tickets · 한국어 가이드</div><div class="detail-sub">07:30 픽업 · 18:00 호텔 복귀</div></div></td>
+                  <td><span class="tag tag-green"><span class="tag-dot green"></span>CONFIRMED ✓</span></td>
+                  <td><span style="color:rgba(0,0,0,0.35); font-size:12px;">—</span></td>
+                  <td><div class="doc-cell"><div class="doc-chip attached">📎 <span class="docname">halong_voucher.pdf</span></div></div></td>
+                  <td><div class="item-actions"><button class="btn-policy" onclick="openPolicyModal(this)">📋 위약금</button><button class="btn btn-default btn-xs">조회</button></div></td>
+                </tr>
+              </tbody>
+            </table>
+            <div class="exp-foot">
+              <div class="exp-foot-msg"><span class="exp-phase-tag warn">Phase 4 ⚠️</span><strong>TMG confirmBefore 24분 남음</strong> — 항공권 RESERVED 미수신. 시한 초과 시 [재예약 시도]로 일괄 재호출 자동 처리. 항공 PNR 긴급 컨택 필요할 수도.</div>
+              <div class="exp-foot-actions">
+                <button class="btn btn-default btn-xs">🔍 전체 상태값 확인</button>
+                <button class="btn btn-warn btn-xs">⏰ 재예약 시도 (예약)</button>
+                <button class="btn btn-danger btn-xs">예약 취소</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </td>
+    </tr>
+
+    <!-- ===== ROW 3: TMG 시한 초과 → 재예약 시도 활성 ===== -->
+    <tr class="adm-row" data-rsv="3" onclick="toggleExpand(3)">
+      <td class="col-expand"><button class="expand-btn" id="exp-btn-3" onclick="event.stopPropagation();toggleExpand(3)"></button></td>
+      <td class="col-channel">트립스토어</td>
+      <td class="col-paytype">전액결제</td>
+      <td class="col-rsvno"><span class="cell-link cell-mono">8368771260858917</span></td>
+      <td class="col-extno"><span class="cell-muted">-</span></td>
+      <td class="col-name">최아인</td>
+      <td class="col-phone cell-mono">010-4567-8901</td>
+      <td class="col-prodcode"><div class="cell-prod-code">TPSHRSGN42001<br><span class="sub">TPSHRSGN42001-260525A</span></div></td>
+      <td class="col-amt cell-amt">3,890,000</td>
+      <td class="col-amt cell-amt">730,000</td>
+      <td class="col-amt cell-amt">3,160,000</td>
+      <td class="col-amt cell-amt">3,160,000</td>
+      <td class="col-amt-sm cell-amt zero">0</td>
+      <td class="col-paystatus"><span class="pay-badge pay-completed">결제완료</span></td>
+      <td class="col-statechange" onclick="event.stopPropagation()">
+        <div class="statechange-cell">
+          <select class="rsv-state-select s-received" onchange="updateState(this)">
+            <option value="received" selected>예약접수</option><option value="completed">예약완료</option><option value="departed">출발완료</option><option value="cancel-req">취소요청</option><option value="cancelled">취소완료</option>
+          </select>
+          <button class="btn-cancel-sm">✕ 예약취소</button>
+        </div>
+      </td>
+      <td class="col-date"><div class="cell-date-stack">2026-05-13 11:34<br><span class="sub">2026-05-13 11:36 (트립스토어)</span></div></td>
+      <td class="col-urlsend"><span class="cell-muted">-</span></td>
+      <td class="col-urlvalid"><span class="cell-muted">-</span></td>
+      <td class="col-itinerary"><span class="itinerary-link">📋 일정표 보기</span></td>
+    </tr>
+    <tr class="adm-expand" id="exp-row-3" style="display:none">
+      <td colspan="19">
+        <div class="adm-expand-inner">
+          <div class="exp-header">
+            <div class="exp-header-id">#RSV-2026051303</div>
+            <div class="exp-header-cust">최아인 <span class="pax">2 PAX</span></div>
+            <div class="exp-header-prod">
+              <div class="pname">Sheraton Saigon 2박 3일 · Air+Hotel 패키지</div>
+              <div class="pmeta">출발 05-25 ICN→SGN · 귀국 05-27 SGN→ICN</div>
+            </div>
+            <div class="exp-header-tags">
+              <div class="agg-status agg-failed"><span class="agg-dot red"></span>TMG 홀드 만료 → 재예약 필요</div>
+              <span class="air-link-tag has">✈️ 항공 연동 O</span>
+            </div>
+          </div>
+          <div class="exp-items-card">
+            <div class="exp-title-bar">🧳 구성요소 — 항공권 + TMG 숙박권 <span class="title-sub">· 시한 초과</span></div>
+            <table class="items-table">
+              <thead><tr><th style="width:170px;">구성</th><th>공급사 / 코드</th><th>상세</th><th>상태</th><th>잔여 시한</th><th>증빙</th><th style="text-align:right;">액션</th></tr></thead>
+              <tbody>
+                <tr>
+                  <td><div class="type-cell"><div class="type-icon flight">✈️</div><div><div class="type-name">Flight <span class="src-badge src-api">🔌 API</span></div><div class="type-sub">왕복 · Economy</div></div></div></td>
+                  <td><div class="supplier-cell"><div class="sup-name">Asiana Airlines</div><div class="sup-code">OZ731 / OZ732</div></div></td>
+                  <td><div class="detail-cell"><div class="detail-main">ICN → SGN · 05-25 18:10 · 2 seats</div><div class="detail-sub">SGN → ICN · 05-27 23:45</div></div></td>
+                  <td><span class="tag tag-green"><span class="tag-dot green"></span>RESERVED ✓</span></td>
+                  <td><span style="color:rgba(0,0,0,0.35); font-size:12px;">—</span></td>
+                  <td><div class="doc-cell"><div class="doc-chip attached">📎 <span class="docname">oz_pnr_0525.pdf</span></div></div></td>
+                  <td><div class="item-actions"><button class="btn-policy" onclick="openPolicyModal(this)">📋 위약금</button><button class="btn btn-default btn-xs">조회</button></div></td>
+                </tr>
+                <tr>
+                  <td><div class="type-cell"><div class="type-icon hotel">🏨</div><div><div class="type-name">Hotel <span class="rt-dyn">DYNAMIC</span><span class="src-badge src-api">🔌 API</span></div><div class="type-sub">TMG 연동</div></div></div></td>
+                  <td><div class="supplier-cell"><div class="sup-name">Sheraton Saigon Hotel</div><div class="sup-code">TMG · TMG-HL-3P5L8Q-2026 <span style="color:#cf1322;">(만료)</span></div></div></td>
+                  <td><div class="detail-cell"><div class="detail-main">Premium Club Twin · 1 room · 2 nights</div><div class="detail-sub">05-25 → 05-27 · 조식 포함</div></div></td>
+                  <td><span class="tag tag-red"><span class="tag-dot red"></span>예약 만료 (홀드 해제)</span></td>
+                  <td><div class="countdown expired">⏱ -12m 04s</div><div style="font-size:10px; color:#cf1322; margin-top:2px;">retrieveBooking 폴링 감지</div></td>
+                  <td><div class="doc-cell"><div class="doc-chip empty">📎 voucher 첨부</div></div></td>
+                  <td><div class="item-actions">
+                    <button class="btn-policy" onclick="openPolicyModal(this)" data-supplier="Sheraton Saigon Hotel" data-type="hotel-tmg" data-source="api">📋 위약금</button>
+                    <button class="btn btn-warn btn-xs">⏰ 재예약 시도</button>
+                  </div></td>
+                </tr>
+              </tbody>
+            </table>
+            <div class="exp-foot">
+              <div class="exp-foot-msg"><span class="exp-phase-tag danger">Phase 4 🚨</span><strong>confirmBefore 시한 초과</strong> — TMG 측 홀드 자동 해제됨. <strong>[재예약 시도]</strong> 클릭 시 checkAvail → reserve → confirm 일괄 자동 호출. 재고/요금 변동 시 운영팀 수동 처리 분기.</div>
+              <div class="exp-foot-actions">
+                <button class="btn btn-warn">⏰ 재예약 시도 (일괄)</button>
+                <button class="btn btn-default btn-xs">🔍 전체 상태값 확인</button>
+                <button class="btn btn-danger btn-xs">예약 취소</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </td>
+    </tr>
+
+    <!-- ===== ROW 4: 숙박 단독 → 영업실 수동 confirm ===== -->
+    <tr class="adm-row" data-rsv="4" onclick="toggleExpand(4)">
+      <td class="col-expand"><button class="expand-btn" id="exp-btn-4" onclick="event.stopPropagation();toggleExpand(4)"></button></td>
+      <td class="col-channel">트립스토어</td>
+      <td class="col-paytype">전액결제</td>
+      <td class="col-rsvno"><span class="cell-link cell-mono">8368771260858824</span></td>
+      <td class="col-extno"><span class="cell-muted">-</span></td>
+      <td class="col-name">박지호</td>
+      <td class="col-phone cell-mono">010-3456-7890</td>
+      <td class="col-prodcode"><div class="cell-prod-code">TPICDAD41001<br><span class="sub">TPICDAD41001-260715A</span></div></td>
+      <td class="col-amt cell-amt">4,180,000</td>
+      <td class="col-amt cell-amt">700,000</td>
+      <td class="col-amt cell-amt">3,480,000</td>
+      <td class="col-amt cell-amt">3,480,000</td>
+      <td class="col-amt-sm cell-amt zero">0</td>
+      <td class="col-paystatus"><span class="pay-badge pay-completed">결제완료</span></td>
+      <td class="col-statechange" onclick="event.stopPropagation()">
+        <div class="statechange-cell">
+          <select class="rsv-state-select s-received" onchange="updateState(this)">
+            <option value="received" selected>예약접수</option><option value="completed">예약완료</option><option value="departed">출발완료</option><option value="cancel-req">취소요청</option><option value="cancelled">취소완료</option>
+          </select>
+          <button class="btn-cancel-sm">✕ 예약취소</button>
+        </div>
+      </td>
+      <td class="col-date"><div class="cell-date-stack">2026-05-13 10:06<br><span class="sub">2026-05-13 10:08 (트립스토어)</span></div></td>
+      <td class="col-urlsend"><span class="cell-muted">-</span></td>
+      <td class="col-urlvalid"><span class="cell-muted">-</span></td>
+      <td class="col-itinerary"><span class="itinerary-link">📋 일정표 보기</span></td>
+    </tr>
+    <tr class="adm-expand" id="exp-row-4" style="display:none">
+      <td colspan="19">
+        <div class="adm-expand-inner">
+          <div class="exp-header">
+            <div class="exp-header-id">#RSV-2026051304</div>
+            <div class="exp-header-cust">박지호 <span class="pax">3 PAX</span></div>
+            <div class="exp-header-prod">
+              <div class="pname">InterContinental Danang 4박 · 숙박 단독</div>
+              <div class="pmeta">투숙 07-15 → 07-19 · Sun Peninsula Suite</div>
+            </div>
+            <div class="exp-header-tags">
+              <div class="agg-status agg-pending"><span class="agg-dot amber"></span>영업실 수동 confirm 대기</div>
+              <span class="air-link-tag none">항공 연동 X</span>
+            </div>
+          </div>
+          <div class="exp-items-card">
+            <div class="exp-title-bar">🧳 구성요소 — TMG 숙박권 단독 <span class="title-sub">· 항공 연동 X = 영업실 수동 트리거</span></div>
+            <table class="items-table">
+              <thead><tr><th style="width:170px;">구성</th><th>공급사 / 코드</th><th>상세</th><th>상태</th><th>잔여 시한</th><th>증빙</th><th style="text-align:right;">액션</th></tr></thead>
+              <tbody>
+                <tr>
+                  <td><div class="type-cell"><div class="type-icon hotel">🏨</div><div><div class="type-name">Hotel <span class="rt-static">STATIC</span><span class="src-badge src-api">🔌 API</span></div><div class="type-sub">TMG 연동</div></div></div></td>
+                  <td><div class="supplier-cell"><div class="sup-name">InterContinental Danang</div><div class="sup-code">TMG · TMG-HL-9R2N4S-2026</div></div></td>
+                  <td><div class="detail-cell"><div class="detail-main">Sun Peninsula Suite · 1 room · 4 nights</div><div class="detail-sub">07-15 → 07-19 · 조식 포함 · 풀빌라</div></div></td>
+                  <td><span class="tag tag-blue"><span class="tag-dot blue"></span>TMG_RESERVED</span></td>
+                  <td><div class="countdown ok">⏱ 9h 12m</div><div style="font-size:10px; color:rgba(0,0,0,0.45); margin-top:2px;">계약 요금</div></td>
+                  <td><div class="doc-cell"><div class="doc-chip empty">📎 voucher 첨부</div></div></td>
+                  <td><div class="item-actions">
+                    <button class="btn-policy" onclick="openPolicyModal(this)" data-supplier="InterContinental Danang" data-type="hotel-tmg" data-source="api">📋 위약금</button>
+                    <button class="btn btn-default btn-xs">🔍 상태확인</button>
+                    <button class="btn btn-primary btn-xs">✋ 숙박권 confirm</button>
+                  </div></td>
+                </tr>
+              </tbody>
+            </table>
+            <div class="exp-foot">
+              <div class="exp-foot-msg"><span class="exp-phase-tag">Phase 4</span><strong>숙박 단독 상품 — 영업실 수동 confirm 트리거 필요</strong>. 고객 컨택 + 여정 최종 확인 후 [숙박권 confirm] 클릭 → retrieveBooking → confirmBooking 순차 자동 호출.</div>
+              <div class="exp-foot-actions">
+                <button class="btn btn-primary">✋ 숙박권 confirm</button>
+                <button class="btn btn-default btn-xs">🔍 전체 상태값 확인</button>
+                <button class="btn btn-danger btn-xs">예약 취소</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </td>
+    </tr>
+
+    <!-- ===== ROW 5: 전체 CONFIRMED ===== -->
+    <tr class="adm-row" data-rsv="5" onclick="toggleExpand(5)">
+      <td class="col-expand"><button class="expand-btn" id="exp-btn-5" onclick="event.stopPropagation();toggleExpand(5)"></button></td>
+      <td class="col-channel">트립스토어</td>
+      <td class="col-paytype">전액결제</td>
+      <td class="col-rsvno"><span class="cell-link cell-mono">8368771260857411</span></td>
+      <td class="col-extno"><span class="cell-muted">-</span></td>
+      <td class="col-name">정유나</td>
+      <td class="col-phone cell-mono">010-5678-9012</td>
+      <td class="col-prodcode"><div class="cell-prod-code">TPVPLCXR31001<br><span class="sub">TPVPLCXR31001-260518A</span></div></td>
+      <td class="col-amt cell-amt">7,820,000</td>
+      <td class="col-amt cell-amt">1,500,000</td>
+      <td class="col-amt cell-amt">6,320,000</td>
+      <td class="col-amt cell-amt">6,320,000</td>
+      <td class="col-amt-sm cell-amt zero">0</td>
+      <td class="col-paystatus"><span class="pay-badge pay-completed">결제완료</span></td>
+      <td class="col-statechange" onclick="event.stopPropagation()">
+        <div class="statechange-cell">
+          <select class="rsv-state-select s-completed" onchange="updateState(this)">
+            <option value="received">예약접수</option><option value="completed" selected>예약완료</option><option value="departed">출발완료</option><option value="cancel-req">취소요청</option><option value="cancelled">취소완료</option>
+          </select>
+          <button class="btn-cancel-sm">✕ 예약취소</button>
+        </div>
+      </td>
+      <td class="col-date"><div class="cell-date-stack">2026-05-12 16:46<br><span class="sub">2026-05-12 16:48 (트립스토어)</span></div></td>
+      <td class="col-urlsend"><span class="cell-muted">-</span></td>
+      <td class="col-urlvalid"><span class="cell-muted">-</span></td>
+      <td class="col-itinerary"><span class="itinerary-link">📋 일정표 보기</span></td>
+    </tr>
+    <tr class="adm-expand" id="exp-row-5" style="display:none">
+      <td colspan="19">
+        <div class="adm-expand-inner">
+          <div class="exp-header">
+            <div class="exp-header-id">#RSV-2026051205</div>
+            <div class="exp-header-cust">정유나 <span class="pax">4 PAX</span></div>
+            <div class="exp-header-prod">
+              <div class="pname">Vinpearl Resort Nha Trang 3박 4일 · Air+Hotel+Ticket 패키지</div>
+              <div class="pmeta">출발 05-18 ICN→CXR · 귀국 05-21 CXR→ICN</div>
+            </div>
+            <div class="exp-header-tags">
+              <div class="agg-status agg-confirmed"><span class="agg-dot green"></span>전체 CONFIRMED ✓</div>
+              <span class="air-link-tag has">✈️ 항공 연동 O</span>
+            </div>
+          </div>
+          <div class="exp-items-card">
+            <div class="exp-title-bar">🧳 구성요소 — 항공권 + TMG 숙박권 + 입장권 <span class="title-sub">· 전체 CONFIRMED</span></div>
+            <table class="items-table">
+              <thead><tr><th style="width:170px;">구성</th><th>공급사 / 코드</th><th>상세</th><th>상태</th><th>잔여 시한</th><th>증빙</th><th style="text-align:right;">액션</th></tr></thead>
+              <tbody>
+                <tr>
+                  <td><div class="type-cell"><div class="type-icon flight">✈️</div><div><div class="type-name">Flight <span class="src-badge src-api">🔌 API</span></div><div class="type-sub">왕복 · Economy</div></div></div></td>
+                  <td><div class="supplier-cell"><div class="sup-name">Vietnam Airlines</div><div class="sup-code">VN417 / VN418</div></div></td>
+                  <td><div class="detail-cell"><div class="detail-main">ICN → CXR · 05-18 23:40 · 4 seats</div><div class="detail-sub">CXR → ICN · 05-21 17:30</div></div></td>
+                  <td><span class="tag tag-green"><span class="tag-dot green"></span>CONFIRMED ✓</span></td>
+                  <td><span style="color:rgba(0,0,0,0.35); font-size:12px;">—</span></td>
+                  <td><div class="doc-cell"><div class="doc-chip attached">📎 <span class="docname">vn_eticket_0518.pdf</span></div></div></td>
+                  <td><div class="item-actions"><button class="btn-policy" onclick="openPolicyModal(this)">📋 위약금</button><button class="btn btn-default btn-xs">조회</button></div></td>
+                </tr>
+                <tr>
+                  <td><div class="type-cell"><div class="type-icon hotel">🏨</div><div><div class="type-name">Hotel <span class="rt-static">STATIC</span><span class="src-badge src-api">🔌 API</span></div><div class="type-sub">TMG 연동</div></div></div></td>
+                  <td><div class="supplier-cell"><div class="sup-name">Vinpearl Resort Nha Trang</div><div class="sup-code">TMG · TMG-HL-5J8Z1W-2026</div></div></td>
+                  <td><div class="detail-cell"><div class="detail-main">Garden View Twin · 2 rooms · 3 nights</div><div class="detail-sub">05-18 → 05-21 · 조식 포함</div></div></td>
+                  <td><span class="tag tag-green"><span class="tag-dot green"></span>TMG_CONFIRMED ✓</span></td>
+                  <td><span style="color:rgba(0,0,0,0.35); font-size:12px;">—</span></td>
+                  <td><div class="doc-cell"><div class="doc-chip attached">📎 <span class="docname">vinpearl_voucher.pdf</span></div></div></td>
+                  <td><div class="item-actions"><button class="btn-policy" onclick="openPolicyModal(this)" data-supplier="Vinpearl Resort Nha Trang" data-type="hotel-tmg" data-source="api">📋 위약금</button><button class="btn btn-default btn-xs">🔍 상태확인</button></div></td>
+                </tr>
+                <tr>
+                  <td><div class="type-cell"><div class="type-icon ticket">🎫</div><div><div class="type-name">Ticket <span class="src-badge src-manual">✏️ 수동</span></div><div class="type-sub">옵션</div></div></div></td>
+                  <td><div class="supplier-cell"><div class="sup-name">Vinpearl Land 입장권</div><div class="sup-code">VPL-TKT-4421</div></div></td>
+                  <td><div class="detail-cell"><div class="detail-main">05-19 · 4 tickets · All Inclusive</div><div class="detail-sub">케이블카 + 워터파크 + 놀이공원</div></div></td>
+                  <td><span class="tag tag-green"><span class="tag-dot green"></span>CONFIRMED ✓</span></td>
+                  <td><span style="color:rgba(0,0,0,0.35); font-size:12px;">—</span></td>
+                  <td><div class="doc-cell"><div class="doc-chip attached">📎 <span class="docname">vpl_tickets.pdf</span></div></div></td>
+                  <td><div class="item-actions"><button class="btn-policy" onclick="openPolicyModal(this)">📋 위약금</button><button class="btn btn-default btn-xs">조회</button></div></td>
+                </tr>
+              </tbody>
+            </table>
+            <div class="exp-foot">
+              <div class="exp-foot-msg"><span class="exp-phase-tag success">Phase 4 ✓</span>모든 구성요소 <strong>CONFIRMED 완료</strong>. 출발 5일 전 자동 알림 발송 예약됨. 변경 발생 시 [상태값 확인]으로 즉시 동기화.</div>
+              <div class="exp-foot-actions">
+                <button class="btn btn-default btn-xs">🔍 전체 상태값 확인</button>
+                <button class="btn btn-default btn-xs">📧 고객 알림 재발송</button>
+                <button class="btn btn-danger btn-xs">예약 취소</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </td>
+    </tr>
+
+    <!-- ===== ROW 6: TMG UNAVAILABLE 발생 ===== -->
+    <tr class="adm-row" data-rsv="6" onclick="toggleExpand(6)">
+      <td class="col-expand"><button class="expand-btn" id="exp-btn-6" onclick="event.stopPropagation();toggleExpand(6)"></button></td>
+      <td class="col-channel">트립스토어</td>
+      <td class="col-paytype">전액결제</td>
+      <td class="col-rsvno"><span class="cell-link cell-mono">8368771260859441</span></td>
+      <td class="col-extno"><span class="cell-muted">-</span></td>
+      <td class="col-name">한도윤</td>
+      <td class="col-phone cell-mono">010-6789-0123</td>
+      <td class="col-prodcode"><div class="cell-prod-code">TPPULSGN21001<br><span class="sub">TPPULSGN21001-260608A</span></div></td>
+      <td class="col-amt cell-amt">3,420,000</td>
+      <td class="col-amt cell-amt">580,000</td>
+      <td class="col-amt cell-amt">2,840,000</td>
+      <td class="col-amt cell-amt">2,840,000</td>
+      <td class="col-amt-sm cell-amt zero">0</td>
+      <td class="col-paystatus"><span class="pay-badge pay-completed">결제완료</span></td>
+      <td class="col-statechange" onclick="event.stopPropagation()">
+        <div class="statechange-cell">
+          <select class="rsv-state-select s-received" onchange="updateState(this)">
+            <option value="received" selected>예약접수</option><option value="completed">예약완료</option><option value="departed">출발완료</option><option value="cancel-req">취소요청</option><option value="cancelled">취소완료</option>
+          </select>
+          <button class="btn-cancel-sm">✕ 예약취소</button>
+        </div>
+      </td>
+      <td class="col-date"><div class="cell-date-stack">2026-05-13 14:00<br><span class="sub">2026-05-13 14:02 (트립스토어)</span></div></td>
+      <td class="col-urlsend"><span class="cell-muted">-</span></td>
+      <td class="col-urlvalid"><span class="cell-muted">-</span></td>
+      <td class="col-itinerary"><span class="itinerary-link">📋 일정표 보기</span></td>
+    </tr>
+    <tr class="adm-expand" id="exp-row-6" style="display:none">
+      <td colspan="19">
+        <div class="adm-expand-inner">
+          <div class="exp-header">
+            <div class="exp-header-id">#RSV-2026051306</div>
+            <div class="exp-header-cust">한도윤 <span class="pax">2 PAX</span></div>
+            <div class="exp-header-prod">
+              <div class="pname">Pullman Saigon Centre 2박 3일 · Air+Hotel 패키지</div>
+              <div class="pmeta">출발 06-08 ICN→SGN · 귀국 06-10 SGN→ICN</div>
+            </div>
+            <div class="exp-header-tags">
+              <div class="agg-status agg-failed"><span class="agg-dot red"></span>UNAVAILABLE — 운영팀 처리 필요</div>
+              <span class="air-link-tag has">✈️ 항공 연동 O</span>
+            </div>
+          </div>
+          <div class="exp-items-card">
+            <div class="exp-title-bar">🧳 구성요소 — 항공권 + TMG 숙박권 <span class="title-sub">· UNAVAILABLE 발생</span></div>
+            <table class="items-table">
+              <thead><tr><th style="width:170px;">구성</th><th>공급사 / 코드</th><th>상세</th><th>상태</th><th>잔여 시한</th><th>증빙</th><th style="text-align:right;">액션</th></tr></thead>
+              <tbody>
+                <tr>
+                  <td><div class="type-cell"><div class="type-icon flight">✈️</div><div><div class="type-name">Flight <span class="src-badge src-api">🔌 API</span></div><div class="type-sub">왕복 · Economy</div></div></div></td>
+                  <td><div class="supplier-cell"><div class="sup-name">Jeju Air</div><div class="sup-code">7C2387 / 7C2388</div></div></td>
+                  <td><div class="detail-cell"><div class="detail-main">ICN → SGN · 06-08 22:55 · 2 seats</div><div class="detail-sub">SGN → ICN · 06-10 23:55</div></div></td>
+                  <td><span class="tag tag-green"><span class="tag-dot green"></span>RESERVED ✓</span></td>
+                  <td><span style="color:rgba(0,0,0,0.35); font-size:12px;">—</span></td>
+                  <td><div class="doc-cell"><div class="doc-chip attached">📎 <span class="docname">7c_pnr_0608.pdf</span></div></div></td>
+                  <td><div class="item-actions"><button class="btn-policy" onclick="openPolicyModal(this)">📋 위약금</button><button class="btn btn-default btn-xs">조회</button></div></td>
+                </tr>
+                <tr>
+                  <td><div class="type-cell"><div class="type-icon hotel">🏨</div><div><div class="type-name">Hotel <span class="rt-alm">ALM-DYN</span><span class="src-badge src-api">🔌 API</span></div><div class="type-sub">TMG 연동</div></div></div></td>
+                  <td><div class="supplier-cell"><div class="sup-name">Pullman Saigon Centre</div><div class="sup-code">TMG · 응답 errorCode</div></div></td>
+                  <td><div class="detail-cell"><div class="detail-main">Executive King · 1 room · 2 nights</div><div class="detail-sub">06-08 → 06-10 · 동시 예약 충돌 감지</div></div></td>
+                  <td><span class="tag tag-red"><span class="tag-dot red"></span>UNAVAILABLE</span></td>
+                  <td><span style="color:rgba(0,0,0,0.35); font-size:12px;">—</span></td>
+                  <td><div class="doc-cell"><div class="doc-chip empty">📎 voucher 미발급</div></div></td>
+                  <td><div class="item-actions">
+                    <button class="btn-policy" onclick="openPolicyModal(this)" data-supplier="Pullman Saigon Centre" data-type="hotel-tmg" data-source="api">📋 위약금</button>
+                    <button class="btn btn-warn btn-xs">⚠️ 대체숙소 제안</button>
+                    <button class="btn btn-default btn-xs">재시도</button>
+                  </div></td>
+                </tr>
+              </tbody>
+            </table>
+            <div class="exp-foot">
+              <div class="exp-foot-msg"><span class="exp-phase-tag danger">Phase 3 ⚠️</span><strong>reserveBooking 응답 UNAVAILABLE</strong> — 항공권은 RESERVED 됐으나 숙소 미확보. <strong>그라운드룰</strong>: 항공권 취소 없이 진행, 관리자가 대체 숙소 제안하여 고객 컨택.</div>
+              <div class="exp-foot-actions">
+                <button class="btn btn-warn">⚠️ 대체 숙소 제안하기</button>
+                <button class="btn btn-default btn-xs">고객 컨택 기록</button>
+                <button class="btn btn-danger btn-xs">예약 취소 (위약금 처리)</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </td>
+    </tr>
+
     </tbody>
   </table>
-  </div>
-  <div class="rsv-foot">
-    <div class="rsv-foot-msg">
-      <span class="phase-tag">Phase 4</span>
-      <strong>항공권 RESERVED 감지됨</strong> → TMG 숙소 자동 confirm 트리거 예정 (시스템 폴링 30초 주기). 수동 개입 불필요.
-    </div>
-    <div class="rsv-foot-actions">
-      <button class="btn btn-default btn-xs">🔍 전체 상태값 확인</button>
-      <button class="btn btn-danger btn-xs">예약 취소</button>
-    </div>
   </div>
 </div>
 
-<!-- CARD 2: 항공권 대기 중 → TMG 시한 임박 (위험) -->
-<div class="rsv-card warn">
-  <div class="rsv-head">
-    <div class="rsv-id-block">
-      <div class="rsv-id">#RSV-2026051302</div>
-      <div class="rsv-received">결제 완료 · 13:24</div>
-    </div>
-    <div class="rsv-cust">이서연 <span class="pax">2 PAX</span></div>
-    <div class="rsv-product">
-      <div class="name">JW Marriott Hanoi 3박 4일 · Air+Hotel+Tour 패키지</div>
-      <div class="meta">출발 06-01 ICN→HAN · 귀국 06-04 HAN→ICN</div>
-    </div>
-    <div class="rsv-status-block">
-      <div class="rsv-state-wrap">
-        <span class="rsv-state-label">예약상태</span>
-        <select class="rsv-state-select s-received" onchange="updateState(this)">
-          <option value="received" selected>예약접수</option>
-          <option value="completed">예약완료</option>
-          <option value="departed">출발완료</option>
-          <option value="cancel-req">취소요청</option>
-          <option value="cancelled">취소완료</option>
-        </select>
-      </div>
-      <div class="agg-status agg-partial"><span class="agg-dot purple"></span>항공권 대기 · TMG 시한 임박</div>
-      <div class="rsv-status-line"><span class="air-link-tag has">✈️ 항공 연동 O</span></div>
-    </div>
-  </div>
-  <div class="items-wrap">
-  <table class="items-table">
-    <thead>
-    <tr><th style="width:170px;">구성</th><th>공급사 / 코드</th><th>상세</th><th>상태</th><th>잔여 시한</th><th>증빙</th><th style="text-align:right;">액션</th></tr>
-    </thead>
-    <tbody>
-    <tr>
-      <td><div class="type-cell"><div class="type-icon flight">✈️</div><div><div class="type-name">Flight <span class="src-badge src-api">🔌 API</span></div><div class="type-sub">왕복 · Economy</div></div></div></td>
-      <td><div class="supplier-cell"><div class="sup-name">Korean Air</div><div class="sup-code">KE679 / KE680</div></div></td>
-      <td><div class="detail-cell"><div class="detail-main">ICN → HAN · 06-01 09:25 · 2 seats</div><div class="detail-sub">HAN → ICN · 06-04 23:30</div></div></td>
-      <td><span class="tag tag-orange"><span class="tag-dot orange"></span>BOOKING (Checking)</span></td>
-      <td><span style="color:rgba(0,0,0,0.35); font-size:12px;">—</span></td>
-      <td><div class="doc-cell"><div class="doc-chip empty">📎 PNR 첨부</div></div></td>
-      <td><div class="item-actions"><button class="btn-policy" onclick="openPolicyModal(this)" data-supplier="Korean Air" data-type="flight" data-source="api">📋 위약금</button><button class="btn btn-default btn-xs">상태조회</button><button class="btn btn-warn btn-xs">긴급 확인</button></div></td>
-    </tr>
-    <tr>
-      <td><div class="type-cell"><div class="type-icon hotel">🏨</div><div><div class="type-name">Hotel <span class="rt-dyn">DYNAMIC</span><span class="src-badge src-api">🔌 API</span></div><div class="type-sub">TMG 연동</div></div></div></td>
-      <td><div class="supplier-cell"><div class="sup-name">JW Marriott Hanoi</div><div class="sup-code">TMG · TMG-HL-7K9M2X-2026</div></div></td>
-      <td><div class="detail-cell"><div class="detail-main">Executive Suite · 1 room · 3 nights</div><div class="detail-sub">06-01 → 06-04 · 조식 포함</div></div></td>
-      <td><span class="tag tag-orange"><span class="tag-dot orange"></span>대기 · 항공권 PNR 대기</span></td>
-      <td><div class="countdown danger">⏱ 24m 12s</div><div style="font-size:10px; color:#cf1322; margin-top:2px;">다이나믹 / ~13:48</div></td>
-      <td><div class="doc-cell"><div class="doc-chip empty">📎 voucher 첨부</div></div></td>
-      <td><div class="item-actions">
-        <button class="btn-policy" onclick="openPolicyModal(this)" data-supplier="JW Marriott Hanoi" data-type="hotel-tmg" data-source="api">📋 위약금</button>
-        <button class="btn btn-default btn-xs">🔍 상태확인</button>
-        <button class="btn btn-warn btn-xs">⏰ 강제 confirm</button>
-      </div></td>
-    </tr>
-    <tr>
-      <td><div class="type-cell"><div class="type-icon tour">🎫</div><div><div class="type-name">Tour <span class="src-badge src-manual">✏️ 수동</span></div><div class="type-sub">옵션</div></div></div></td>
-      <td><div class="supplier-cell"><div class="sup-name">Halong Bay Day Tour</div><div class="sup-code">VINPEARL-TR-2810</div></div></td>
-      <td><div class="detail-cell"><div class="detail-main">06-02 · 2 tickets · 한국어 가이드</div><div class="detail-sub">07:30 픽업 · 18:00 호텔 복귀</div></div></td>
-      <td><span class="tag tag-green"><span class="tag-dot green"></span>CONFIRMED ✓</span></td>
-      <td><span style="color:rgba(0,0,0,0.35); font-size:12px;">—</span></td>
-      <td><div class="doc-cell"><div class="doc-chip attached">📎 <span class="docname">halong_voucher.pdf</span></div></div></td>
-      <td><div class="item-actions"><button class="btn-policy" onclick="openPolicyModal(this)" data-supplier="공급사" data-type="generic" data-source="api">📋 위약금</button><button class="btn btn-default btn-xs">조회</button></div></td>
-    </tr>
-    </tbody>
-  </table>
-  </div>
-  <div class="rsv-foot">
-    <div class="rsv-foot-msg">
-      <span class="phase-tag warn">Phase 4 ⚠️</span>
-      <strong>TMG confirmBefore 24분 남음</strong> — 항공권 RESERVED 미수신. 시한 초과 시 [재예약 시도]로 일괄 재호출 자동 처리. 항공 PNR 긴급 컨택 필요할 수도.
-    </div>
-    <div class="rsv-foot-actions">
-      <button class="btn btn-default btn-xs">🔍 전체 상태값 확인</button>
-      <button class="btn btn-warn btn-xs">⏰ 재예약 시도 (예약)</button>
-      <button class="btn btn-danger btn-xs">예약 취소</button>
-    </div>
-  </div>
-</div>
-
-<!-- CARD 3: TMG 시한 초과 → 재예약 시도 활성 -->
-<div class="rsv-card danger">
-  <div class="rsv-head">
-    <div class="rsv-id-block">
-      <div class="rsv-id">#RSV-2026051303</div>
-      <div class="rsv-received">결제 완료 · 11:36</div>
-    </div>
-    <div class="rsv-cust">최아인 <span class="pax">2 PAX</span></div>
-    <div class="rsv-product">
-      <div class="name">Sheraton Saigon 2박 3일 · Air+Hotel 패키지</div>
-      <div class="meta">출발 05-25 ICN→SGN · 귀국 05-27 SGN→ICN</div>
-    </div>
-    <div class="rsv-status-block">
-      <div class="rsv-state-wrap">
-        <span class="rsv-state-label">예약상태</span>
-        <select class="rsv-state-select s-received" onchange="updateState(this)">
-          <option value="received" selected>예약접수</option>
-          <option value="completed">예약완료</option>
-          <option value="departed">출발완료</option>
-          <option value="cancel-req">취소요청</option>
-          <option value="cancelled">취소완료</option>
-        </select>
-      </div>
-      <div class="agg-status agg-failed"><span class="agg-dot red"></span>TMG 홀드 만료 → 재예약 필요</div>
-      <div class="rsv-status-line"><span class="air-link-tag has">✈️ 항공 연동 O</span></div>
-    </div>
-  </div>
-  <div class="items-wrap">
-  <table class="items-table">
-    <thead><tr><th style="width:170px;">구성</th><th>공급사 / 코드</th><th>상세</th><th>상태</th><th>잔여 시한</th><th>증빙</th><th style="text-align:right;">액션</th></tr></thead>
-    <tbody>
-    <tr>
-      <td><div class="type-cell"><div class="type-icon flight">✈️</div><div><div class="type-name">Flight <span class="src-badge src-api">🔌 API</span></div><div class="type-sub">왕복 · Economy</div></div></div></td>
-      <td><div class="supplier-cell"><div class="sup-name">Asiana Airlines</div><div class="sup-code">OZ731 / OZ732</div></div></td>
-      <td><div class="detail-cell"><div class="detail-main">ICN → SGN · 05-25 18:10 · 2 seats</div><div class="detail-sub">SGN → ICN · 05-27 23:45</div></div></td>
-      <td><span class="tag tag-green"><span class="tag-dot green"></span>RESERVED ✓</span></td>
-      <td><span style="color:rgba(0,0,0,0.35); font-size:12px;">—</span></td>
-      <td><div class="doc-cell"><div class="doc-chip attached">📎 <span class="docname">oz_pnr_0525.pdf</span></div></div></td>
-      <td><div class="item-actions"><button class="btn-policy" onclick="openPolicyModal(this)" data-supplier="공급사" data-type="generic" data-source="api">📋 위약금</button><button class="btn btn-default btn-xs">조회</button></div></td>
-    </tr>
-    <tr>
-      <td><div class="type-cell"><div class="type-icon hotel">🏨</div><div><div class="type-name">Hotel <span class="rt-dyn">DYNAMIC</span><span class="src-badge src-api">🔌 API</span></div><div class="type-sub">TMG 연동</div></div></div></td>
-      <td><div class="supplier-cell"><div class="sup-name">Sheraton Saigon Hotel</div><div class="sup-code">TMG · TMG-HL-3P5L8Q-2026 <span style="color:#cf1322;">(만료)</span></div></div></td>
-      <td><div class="detail-cell"><div class="detail-main">Premium Club Twin · 1 room · 2 nights</div><div class="detail-sub">05-25 → 05-27 · 조식 포함</div></div></td>
-      <td><span class="tag tag-red"><span class="tag-dot red"></span>예약 만료 (홀드 해제)</span></td>
-      <td><div class="countdown expired">⏱ -12m 04s</div><div style="font-size:10px; color:#cf1322; margin-top:2px;">retrieveBooking 폴링 감지</div></td>
-      <td><div class="doc-cell"><div class="doc-chip empty">📎 voucher 첨부</div></div></td>
-      <td><div class="item-actions">
-        <button class="btn-policy" onclick="openPolicyModal(this)" data-supplier="Sheraton Saigon Hotel" data-type="hotel-tmg" data-source="api">📋 위약금</button>
-        <button class="btn btn-warn btn-xs">⏰ 재예약 시도</button>
-      </div></td>
-    </tr>
-    </tbody>
-  </table>
-  </div>
-  <div class="rsv-foot">
-    <div class="rsv-foot-msg">
-      <span class="phase-tag danger">Phase 4 🚨</span>
-      <strong>confirmBefore 시한 초과</strong> — TMG 측 홀드 자동 해제됨. <strong>[재예약 시도]</strong> 클릭 시 checkAvail → reserve → confirm 일괄 자동 호출. 재고/요금 변동 시 운영팀 수동 처리 분기.
-    </div>
-    <div class="rsv-foot-actions">
-      <button class="btn btn-warn">⏰ 재예약 시도 (일괄)</button>
-      <button class="btn btn-default btn-xs">🔍 전체 상태값 확인</button>
-      <button class="btn btn-danger btn-xs">예약 취소</button>
-    </div>
-  </div>
-</div>
-
-<!-- CARD 4: 숙박 단독 → 영업실 수동 confirm 대기 -->
-<div class="rsv-card primary">
-  <div class="rsv-head">
-    <div class="rsv-id-block">
-      <div class="rsv-id">#RSV-2026051304</div>
-      <div class="rsv-received">결제 완료 · 10:08</div>
-    </div>
-    <div class="rsv-cust">박지호 <span class="pax">3 PAX</span></div>
-    <div class="rsv-product">
-      <div class="name">InterContinental Danang 4박 · 숙박 단독</div>
-      <div class="meta">투숙 07-15 → 07-19</div>
-    </div>
-    <div class="rsv-status-block">
-      <div class="rsv-state-wrap">
-        <span class="rsv-state-label">예약상태</span>
-        <select class="rsv-state-select s-received" onchange="updateState(this)">
-          <option value="received" selected>예약접수</option>
-          <option value="completed">예약완료</option>
-          <option value="departed">출발완료</option>
-          <option value="cancel-req">취소요청</option>
-          <option value="cancelled">취소완료</option>
-        </select>
-      </div>
-      <div class="agg-status agg-pending"><span class="agg-dot amber"></span>영업실 수동 confirm 대기</div>
-      <div class="rsv-status-line"><span class="air-link-tag none">항공 연동 X</span></div>
-    </div>
-  </div>
-  <div class="items-wrap">
-  <table class="items-table">
-    <thead><tr><th style="width:170px;">구성</th><th>공급사 / 코드</th><th>상세</th><th>상태</th><th>잔여 시한</th><th>증빙</th><th style="text-align:right;">액션</th></tr></thead>
-    <tbody>
-    <tr>
-      <td><div class="type-cell"><div class="type-icon hotel">🏨</div><div><div class="type-name">Hotel <span class="rt-static">STATIC</span><span class="src-badge src-api">🔌 API</span></div><div class="type-sub">TMG 연동</div></div></div></td>
-      <td><div class="supplier-cell"><div class="sup-name">InterContinental Danang</div><div class="sup-code">TMG · TMG-HL-9R2N4S-2026</div></div></td>
-      <td><div class="detail-cell"><div class="detail-main">Sun Peninsula Suite · 1 room · 4 nights</div><div class="detail-sub">07-15 → 07-19 · 조식 포함 · 풀빌라</div></div></td>
-      <td><span class="tag tag-blue"><span class="tag-dot blue"></span>TMG_RESERVED</span></td>
-      <td><div class="countdown ok">⏱ 9h 12m</div><div style="font-size:10px; color:rgba(0,0,0,0.45); margin-top:2px;">계약 요금</div></td>
-      <td><div class="doc-cell"><div class="doc-chip empty">📎 voucher 첨부</div></div></td>
-      <td><div class="item-actions">
-        <button class="btn-policy" onclick="openPolicyModal(this)" data-supplier="InterContinental Danang" data-type="hotel-tmg" data-source="api">📋 위약금</button>
-        <button class="btn btn-default btn-xs">🔍 상태확인</button>
-        <button class="btn btn-primary btn-xs">✋ 숙박권 confirm</button>
-      </div></td>
-    </tr>
-    </tbody>
-  </table>
-  </div>
-  <div class="rsv-foot">
-    <div class="rsv-foot-msg">
-      <span class="phase-tag">Phase 4</span>
-      <strong>숙박 단독 상품 — 영업실 수동 confirm 트리거 필요</strong>. 고객 컨택 + 여정 최종 확인 후 [숙박권 confirm] 클릭 → retrieveBooking → confirmBooking 순차 자동 호출.
-    </div>
-    <div class="rsv-foot-actions">
-      <button class="btn btn-primary">✋ 숙박권 confirm</button>
-      <button class="btn btn-default btn-xs">🔍 전체 상태값 확인</button>
-      <button class="btn btn-danger btn-xs">예약 취소</button>
-    </div>
-  </div>
-</div>
-
-<!-- CARD 5: 전체 CONFIRMED 정상 종료 -->
-<div class="rsv-card success">
-  <div class="rsv-head">
-    <div class="rsv-id-block">
-      <div class="rsv-id">#RSV-2026051205</div>
-      <div class="rsv-received">결제 완료 · 어제 16:48</div>
-    </div>
-    <div class="rsv-cust">정유나 <span class="pax">4 PAX</span></div>
-    <div class="rsv-product">
-      <div class="name">Vinpearl Resort Nha Trang 3박 4일 · Air+Hotel+Ticket 패키지</div>
-      <div class="meta">출발 05-18 ICN→CXR · 귀국 05-21 CXR→ICN</div>
-    </div>
-    <div class="rsv-status-block">
-      <div class="rsv-state-wrap">
-        <span class="rsv-state-label">예약상태</span>
-        <select class="rsv-state-select s-completed" onchange="updateState(this)">
-          <option value="received">예약접수</option>
-          <option value="completed" selected>예약완료</option>
-          <option value="departed">출발완료</option>
-          <option value="cancel-req">취소요청</option>
-          <option value="cancelled">취소완료</option>
-        </select>
-      </div>
-      <div class="agg-status agg-confirmed"><span class="agg-dot green"></span>전체 CONFIRMED ✓</div>
-      <div class="rsv-status-line"><span class="air-link-tag has">✈️ 항공 연동 O</span></div>
-    </div>
-  </div>
-  <div class="items-wrap">
-  <table class="items-table">
-    <thead><tr><th style="width:170px;">구성</th><th>공급사 / 코드</th><th>상세</th><th>상태</th><th>잔여 시한</th><th>증빙</th><th style="text-align:right;">액션</th></tr></thead>
-    <tbody>
-    <tr>
-      <td><div class="type-cell"><div class="type-icon flight">✈️</div><div><div class="type-name">Flight <span class="src-badge src-api">🔌 API</span></div><div class="type-sub">왕복 · Economy</div></div></div></td>
-      <td><div class="supplier-cell"><div class="sup-name">Vietnam Airlines</div><div class="sup-code">VN417 / VN418</div></div></td>
-      <td><div class="detail-cell"><div class="detail-main">ICN → CXR · 05-18 23:40 · 4 seats</div><div class="detail-sub">CXR → ICN · 05-21 17:30</div></div></td>
-      <td><span class="tag tag-green"><span class="tag-dot green"></span>CONFIRMED ✓</span></td>
-      <td><span style="color:rgba(0,0,0,0.35); font-size:12px;">—</span></td>
-      <td><div class="doc-cell"><div class="doc-chip attached">📎 <span class="docname">vn_eticket_0518.pdf</span></div></div></td>
-      <td><div class="item-actions"><button class="btn-policy" onclick="openPolicyModal(this)" data-supplier="공급사" data-type="generic" data-source="api">📋 위약금</button><button class="btn btn-default btn-xs">조회</button></div></td>
-    </tr>
-    <tr>
-      <td><div class="type-cell"><div class="type-icon hotel">🏨</div><div><div class="type-name">Hotel <span class="rt-static">STATIC</span><span class="src-badge src-api">🔌 API</span></div><div class="type-sub">TMG 연동</div></div></div></td>
-      <td><div class="supplier-cell"><div class="sup-name">Vinpearl Resort Nha Trang</div><div class="sup-code">TMG · TMG-HL-5J8Z1W-2026</div></div></td>
-      <td><div class="detail-cell"><div class="detail-main">Garden View Twin · 2 rooms · 3 nights</div><div class="detail-sub">05-18 → 05-21 · 조식 포함</div></div></td>
-      <td><span class="tag tag-green"><span class="tag-dot green"></span>TMG_CONFIRMED ✓</span></td>
-      <td><span style="color:rgba(0,0,0,0.35); font-size:12px;">—</span></td>
-      <td><div class="doc-cell"><div class="doc-chip attached">📎 <span class="docname">vinpearl_voucher.pdf</span></div></div></td>
-      <td><div class="item-actions"><button class="btn-policy" onclick="openPolicyModal(this)" data-supplier="Vinpearl Resort Nha Trang" data-type="hotel-tmg" data-source="api">📋 위약금</button><button class="btn btn-default btn-xs">🔍 상태확인</button></div></td>
-    </tr>
-    <tr>
-      <td><div class="type-cell"><div class="type-icon ticket">🎫</div><div><div class="type-name">Ticket <span class="src-badge src-manual">✏️ 수동</span></div><div class="type-sub">옵션</div></div></div></td>
-      <td><div class="supplier-cell"><div class="sup-name">Vinpearl Land 입장권</div><div class="sup-code">VPL-TKT-4421</div></div></td>
-      <td><div class="detail-cell"><div class="detail-main">05-19 · 4 tickets · All Inclusive</div><div class="detail-sub">케이블카 + 워터파크 + 놀이공원</div></div></td>
-      <td><span class="tag tag-green"><span class="tag-dot green"></span>CONFIRMED ✓</span></td>
-      <td><span style="color:rgba(0,0,0,0.35); font-size:12px;">—</span></td>
-      <td><div class="doc-cell"><div class="doc-chip attached">📎 <span class="docname">vpl_tickets.pdf</span></div></div></td>
-      <td><div class="item-actions"><button class="btn-policy" onclick="openPolicyModal(this)" data-supplier="공급사" data-type="generic" data-source="api">📋 위약금</button><button class="btn btn-default btn-xs">조회</button></div></td>
-    </tr>
-    </tbody>
-  </table>
-  </div>
-  <div class="rsv-foot">
-    <div class="rsv-foot-msg">
-      <span class="phase-tag success">Phase 4 ✓</span>
-      모든 구성요소 <strong>CONFIRMED 완료</strong>. 출발 5일 전 자동 알림 발송 예약됨. 변경 발생 시 [상태값 확인]으로 즉시 동기화.
-    </div>
-    <div class="rsv-foot-actions">
-      <button class="btn btn-default btn-xs">🔍 전체 상태값 확인</button>
-      <button class="btn btn-default btn-xs">📧 고객 알림 재발송</button>
-      <button class="btn btn-danger btn-xs">예약 취소</button>
-    </div>
-  </div>
-</div>
-
-<!-- CARD 6: TMG UNAVAILABLE 발생 → 운영팀 처리 -->
-<div class="rsv-card danger">
-  <div class="rsv-head">
-    <div class="rsv-id-block">
-      <div class="rsv-id">#RSV-2026051306</div>
-      <div class="rsv-received">결제 완료 · 14:02</div>
-    </div>
-    <div class="rsv-cust">한도윤 <span class="pax">2 PAX</span></div>
-    <div class="rsv-product">
-      <div class="name">Pullman Saigon Centre 2박 3일 · Air+Hotel 패키지</div>
-      <div class="meta">출발 06-08 ICN→SGN · 귀국 06-10 SGN→ICN</div>
-    </div>
-    <div class="rsv-status-block">
-      <div class="rsv-state-wrap">
-        <span class="rsv-state-label">예약상태</span>
-        <select class="rsv-state-select s-received" onchange="updateState(this)">
-          <option value="received" selected>예약접수</option>
-          <option value="completed">예약완료</option>
-          <option value="departed">출발완료</option>
-          <option value="cancel-req">취소요청</option>
-          <option value="cancelled">취소완료</option>
-        </select>
-      </div>
-      <div class="agg-status agg-failed"><span class="agg-dot red"></span>UNAVAILABLE — 운영팀 처리 필요</div>
-      <div class="rsv-status-line"><span class="air-link-tag has">✈️ 항공 연동 O</span></div>
-    </div>
-  </div>
-  <div class="items-wrap">
-  <table class="items-table">
-    <thead><tr><th style="width:170px;">구성</th><th>공급사 / 코드</th><th>상세</th><th>상태</th><th>잔여 시한</th><th>증빙</th><th style="text-align:right;">액션</th></tr></thead>
-    <tbody>
-    <tr>
-      <td><div class="type-cell"><div class="type-icon flight">✈️</div><div><div class="type-name">Flight <span class="src-badge src-api">🔌 API</span></div><div class="type-sub">왕복 · Economy</div></div></div></td>
-      <td><div class="supplier-cell"><div class="sup-name">Jeju Air</div><div class="sup-code">7C2387 / 7C2388</div></div></td>
-      <td><div class="detail-cell"><div class="detail-main">ICN → SGN · 06-08 22:55 · 2 seats</div><div class="detail-sub">SGN → ICN · 06-10 23:55</div></div></td>
-      <td><span class="tag tag-green"><span class="tag-dot green"></span>RESERVED ✓</span></td>
-      <td><span style="color:rgba(0,0,0,0.35); font-size:12px;">—</span></td>
-      <td><div class="doc-cell"><div class="doc-chip attached">📎 <span class="docname">7c_pnr_0608.pdf</span></div></div></td>
-      <td><div class="item-actions"><button class="btn-policy" onclick="openPolicyModal(this)" data-supplier="공급사" data-type="generic" data-source="api">📋 위약금</button><button class="btn btn-default btn-xs">조회</button></div></td>
-    </tr>
-    <tr>
-      <td><div class="type-cell"><div class="type-icon hotel">🏨</div><div><div class="type-name">Hotel <span class="rt-alm">ALM-DYN</span><span class="src-badge src-api">🔌 API</span></div><div class="type-sub">TMG 연동</div></div></div></td>
-      <td><div class="supplier-cell"><div class="sup-name">Pullman Saigon Centre</div><div class="sup-code">TMG · 응답 errorCode</div></div></td>
-      <td><div class="detail-cell"><div class="detail-main">Executive King · 1 room · 2 nights</div><div class="detail-sub">06-08 → 06-10 · 동시 예약 충돌 감지</div></div></td>
-      <td><span class="tag tag-red"><span class="tag-dot red"></span>UNAVAILABLE</span></td>
-      <td><span style="color:rgba(0,0,0,0.35); font-size:12px;">—</span></td>
-      <td><div class="doc-cell"><div class="doc-chip empty">📎 voucher 미발급</div></div></td>
-      <td><div class="item-actions">
-        <button class="btn-policy" onclick="openPolicyModal(this)" data-supplier="Pullman Saigon Centre" data-type="hotel-tmg" data-source="api">📋 위약금</button>
-        <button class="btn btn-warn btn-xs">⚠️ 대체숙소 제안</button>
-        <button class="btn btn-default btn-xs">재시도</button>
-      </div></td>
-    </tr>
-    </tbody>
-  </table>
-  </div>
-  <div class="rsv-foot">
-    <div class="rsv-foot-msg">
-      <span class="phase-tag danger">Phase 3 ⚠️</span>
-      <strong>reserveBooking 응답 UNAVAILABLE</strong> — 항공권은 RESERVED 됐으나 숙소 미확보. <strong>그라운드룰</strong>: 항공권 취소 없이 진행, 관리자가 대체 숙소 제안하여 고객 컨택.
-    </div>
-    <div class="rsv-foot-actions">
-      <button class="btn btn-warn">⚠️ 대체 숙소 제안하기</button>
-      <button class="btn btn-default btn-xs">고객 컨택 기록</button>
-      <button class="btn btn-danger btn-xs">예약 취소 (위약금 처리)</button>
-    </div>
-  </div>
-</div>
 
 <!-- PAGINATION -->
 <div class="pagination">
