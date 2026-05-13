@@ -1112,6 +1112,27 @@ function updateState(sel) {
   sel.classList.add('s-' + sel.value);
 }
 
+// 예약 행 펼침/접힘
+function toggleExpand(id) {
+  const row = document.querySelector('tr.adm-row[data-rsv="' + id + '"]');
+  const expandRow = document.getElementById('exp-row-' + id);
+  const btn = document.getElementById('exp-btn-' + id);
+  if (!expandRow || !btn) return;
+  const isOpen = expandRow.style.display !== 'none';
+  if (isOpen) {
+    expandRow.style.display = 'none';
+    btn.classList.remove('opened');
+    if (row) row.classList.remove('expanded');
+  } else {
+    expandRow.style.display = '';
+    btn.classList.add('opened');
+    if (row) row.classList.add('expanded');
+  }
+}
+
+// 기본: Row 2(시한 임박 시나리오) 펼침
+window.addEventListener('DOMContentLoaded', function() { toggleExpand(2); });
+
 // 위약금 모달 열기 — 클릭한 버튼이 속한 행에서 컨텍스트 추출
 function openPolicyModal(btn) {
   const row = btn.closest('tr');
