@@ -343,8 +343,8 @@ tbody tr:hover td { background: #fafafa; }
     </div>
     <div style="display:flex; align-items:center; gap:12px;">
       <div style="display:flex; flex-direction:column; align-items:flex-end; gap:2px;">
-        <span style="font-size:12px; color:rgba(0,0,0,0.55);">자동 동기화 <span style="color:#52c41a;">●</span> 정상</span>
-        <span style="font-size:11px; color:rgba(0,0,0,0.35);">마지막 webhook: 12분 전 (RATE_UPDATE)</span>
+        <span style="font-size:12px; color:rgba(0,0,0,0.55);">accoms 분산 polling <span style="color:#52c41a;">●</span> 정상</span>
+        <span style="font-size:11px; color:rgba(0,0,0,0.35);">오늘 refresh: <strong>밤 5,200건 + 낮 3,140건 / 10,000</strong> · 잔여 1,660건</span>
       </div>
       <button class="btn btn-default" onclick="if(confirm('전체 요금 데이터를 TMG에서 강제 재동기화합니다.\\n\\n사용 시점:\\n· webhook 장애 후 복구\\n· 데이터 누락 의심 시\\n· 신규 호텔 추가 직후\\n\\n예상 소요: 약 3~5분\\n\\n진행할까요?')) alert('재동기화를 시작합니다.\\n\\nAPI: /getRatesFromTo 전체 호텔 일괄 호출\\n진행 상황은 상단 알림으로 확인할 수 있습니다.')">🔄 전체 강제 재동기화</button>
     </div>
@@ -464,7 +464,7 @@ tbody tr:hover td { background: #fafafa; }
     <div class="tab-content" data-content="static-dynamic" style="display:none;">
       <div class="notice-banner notice-blue">
         <span class="notice-icon">ℹ</span>
-        <div><strong>Static Rate + Dynamic Inventory</strong> · 요금은 TMG 확정값을 그대로 사용합니다. <strong>등록 시 관리자가 30·60·90일 범위를 선택</strong>하면 해당 기간 <code>checkAvailability</code>로 재고를 조회해 일자별 등록합니다. 등록 후에는 자동 polling + 수동 재조회 하이브리드로 update됩니다. <em style="opacity:0.85;">관리자 임의 입력 없음.</em></div>
+        <div><strong>Static Rate + Dynamic Inventory</strong> · 요금은 TMG 확정값을 그대로 사용. 재고는 <strong>accoms 시스템이 D+7~D+90 범위로 분산 사전 조회</strong>해 저장. 등록 시 관리자가 30·60·90 범위 선택하면 저장된 데이터를 즉시 가져옴. 등록 후엔 <strong>매일 10,000개 분산 refresh</strong>(밤 50-60% 일괄 + 낮 30-40% 사용자 PDP 조회 트리거).</div>
       </div>
 
       <div class="filter-bar">
@@ -550,7 +550,7 @@ tbody tr:hover td { background: #fafafa; }
       <div class="notice-banner notice-purple">
         <span class="notice-icon">⚠</span>
         <div>
-          <strong>Dynamic Rate + Dynamic Inventory</strong> · TMG는 요금·재고를 실시간으로만 제공합니다. <strong>등록 시 관리자가 30·60·90일 범위를 선택</strong>하면 해당 기간 <code>checkAvailability</code>로 요금·재고를 조회해 일자별 등록합니다. 등록 후에는 자동 polling + 수동 재조회 하이브리드로 update됩니다.<br>
+          <strong>Dynamic Rate + Dynamic Inventory</strong> · TMG는 요금·재고를 실시간으로만 제공. <strong>accoms 시스템이 D+7~D+90 범위로 분산 사전 조회</strong>해 저장합니다. 등록 시 관리자가 30·60·90 범위 선택하면 저장된 데이터를 즉시 가져옴. 등록 후엔 <strong>매일 10,000개 분산 refresh</strong>(밤 50-60% 일괄 + 낮 30-40% 사용자 PDP 조회 트리거).<br>
           <span style="font-size:12px; opacity:0.85;">예상가/예상재고 수동 입력 제거 · 모든 노출가는 실가 · 표시광고 리스크 해소</span>
         </div>
       </div>
@@ -637,17 +637,17 @@ tbody tr:hover td { background: #fafafa; }
 
   <!-- 사용자 상세페이지 플로우 설명 -->
   <div class="card" style="padding: 24px;">
-    <div style="font-size: 15px; font-weight: 700; margin-bottom: 8px;">📱 사용자 상세페이지 — D+90 저장값 + 2-Gate 결제 체크</div>
+    <div style="font-size: 15px; font-weight: 700; margin-bottom: 8px;">📱 사용자 상세페이지 — accoms 저장값 + 2-Gate 결제 체크</div>
     <div style="font-size: 13px; color: rgba(0,0,0,0.55); margin-bottom: 14px;">
-      리스트·상세 모두 <strong>D+90 저장값</strong>을 실가로 노출합니다. 예상가 표기·표시광고 리스크 없음. 결제 직전에만 <code>checkAvailability</code>를 1회 더 호출해 2-Gate(재고·가격 변동)로 확인합니다.
+      리스트·상세 모두 <strong>accoms 저장값</strong>을 실가로 노출. 예상가 표기·표시광고 리스크 없음. 사용자 PDP 진입 자체가 <strong>낮시간 refresh 트리거(30-40%)</strong> 역할 — 해당 요금표가 오늘 refresh 안 됐으면 PDP 호출 시 갱신됨. 결제 직전엔 2-Gate로 한 번 더 확인.
     </div>
 
     <div class="flow-box">
-      <div class="flow-step"><strong>① 리스트/검색</strong><span>D+90 저장값 그대로 노출 (실가)</span></div>
+      <div class="flow-step"><strong>① 리스트/검색</strong><span>accoms 저장값 그대로 노출 (실가)</span></div>
       <span class="flow-arrow">→</span>
-      <div class="flow-step api"><strong>② 상세 진입</strong><span>checkAvailability 1회 (해당 일자 확인)</span></div>
+      <div class="flow-step api"><strong>② 상세 진입</strong><span>오늘 refresh 안 됐으면 → checkAvail 호출 + 저장값 갱신 (낮시간 refresh)</span></div>
       <span class="flow-arrow">→</span>
-      <div class="flow-step"><strong>③ 변동 동기</strong><span>차이 있으면 저장값 갱신</span></div>
+      <div class="flow-step"><strong>③ 노출 갱신</strong><span>변동 있으면 즉시 PDP 반영</span></div>
       <span class="flow-arrow">→</span>
       <div class="flow-step api"><strong>④ 결제 직전 Gate 1</strong><span>재고 0 → 마감 안내</span></div>
       <span class="flow-arrow">→</span>
@@ -655,16 +655,16 @@ tbody tr:hover td { background: #fafafa; }
     </div>
 
     <div class="preview-frame">
-      <div class="preview-label">사용자 상세페이지 프리뷰 — D+90 저장값 노출</div>
+      <div class="preview-label">사용자 상세페이지 프리뷰 — accoms 저장값 노출</div>
       <div class="preview-device">
         <div class="pv-hotel">Vinpearl Luxury Landmark 81</div>
-        <div class="pv-room">디럭스 시티뷰 · 2인 1박 · 2026-05-15</div>
+        <div class="pv-room">디럭스 시티뷰 · 2인 1박 · 2026-05-22</div>
         <div class="pv-price">
           <span class="pv-amount">₩645,000</span>
           <span class="pv-unit">/ 1박</span>
         </div>
-        <div class="pv-inv">잔여 6실 · D+90 저장값 (최근 갱신 12분 전)</div>
-        <div class="pv-hint" style="margin-top:6px;">실가 노출 · 결제 직전 2-Gate 재확인</div>
+        <div class="pv-inv">잔여 6실 · accoms 저장값 (최근 sync 12분 전)</div>
+        <div class="pv-hint" style="margin-top:6px;">PDP 진입 시점에 오늘 refresh 안 된 요금표면 자동 갱신 (낮시간 30-40%)</div>
       </div>
 
       <div class="preview-device" style="margin-top:14px; border: 1.5px solid #fa8c16;">
@@ -732,7 +732,7 @@ tbody tr:hover td { background: #fafafa; }
     <div class="modal-body">
       <div class="notice-banner notice-blue" style="border-radius:8px; border-left-width:3px; margin-bottom:16px;">
         <span class="notice-icon">ℹ</span>
-        <div>요금은 TMG 확정값을 사용합니다. <strong>조회 범위 선택 → <code>checkAvailability</code> 일괄 호출 → 객실별 결과 확인 → 등록할 객실 선택 → 진행</strong>. 등록 후에는 자동 polling + 수동 재조회로 update됩니다.</div>
+        <div><strong>객실 선택 → 범위 선택 → accoms 사전 조회 데이터 즉시 가져오기 → 결과 확인 → 등록 진행</strong>. 등록 후 refresh = 밤 분산 polling(생성된 요금표만) + 낮 사용자 PDP 조회 트리거. 매일 10,000개 capacity.</div>
       </div>
 
       <div class="form-section">
@@ -874,11 +874,11 @@ tbody tr:hover td { background: #fafafa; }
               <span class="rb-sub">05-21 ~ 08-12 · 84일</span>
             </button>
           </div>
-          <button type="button" class="btn btn-primary" style="height:56px; padding:0 18px; font-size:13px;" onclick="runCheckAvail(this)">🔄 선택 객실 조회</button>
+          <button type="button" class="btn btn-primary" style="height:56px; padding:0 18px; font-size:13px;" onclick="runCheckAvail(this)">📥 accoms 데이터 가져오기</button>
         </div>
-        <div class="form-help" style="margin-top:8px;">조회 범위 정책: <strong>오늘 + 7일 (2026-05-21)</strong> ~ 최대 <strong>D+90 (2026-08-12)</strong> · 요금사용 기한 초과 시 종료일까지로 자동 제한 · 체크된 객실에 한해 호출됩니다.</div>
+        <div class="form-help" style="margin-top:8px;">accoms 시스템이 <strong>D+7 (2026-05-21) ~ D+90 (2026-08-12)</strong> 범위로 분산 사전 조회한 데이터에서 가져옵니다. 체크된 객실만 즉시 표시 · 요금사용 기한 초과 시 자동 제한.</div>
         <div style="margin-top:10px; padding:10px 12px; background:#f6ffed; border:1px solid #b7eb8f; border-radius:6px; font-size:12px; color:#389e0d;">
-          <strong>✓ 3개 객실 조회 완료</strong> · D+60 (05-21 ~ 07-13 · 54일치) · 마지막 조회 방금 전 · 객실 1개 미선택
+          <strong>✓ 3개 객실 데이터 로드 완료</strong> · D+60 (05-21 ~ 07-13 · 54일치) · accoms 최근 sync 8분 전 · 객실 1개 미선택
         </div>
       </div>
     </div>
@@ -905,7 +905,7 @@ tbody tr:hover td { background: #fafafa; }
     <div class="modal-body">
       <div class="notice-banner notice-purple" style="border-radius:8px; border-left-width:3px; margin-bottom:16px;">
         <span class="notice-icon">ℹ</span>
-        <div>TMG는 요금·재고를 실시간으로만 제공합니다. <strong>조회 범위 선택 → <code>checkAvailability</code> 일괄 호출 → 객실별 결과 확인 → 등록할 객실 선택 → 진행</strong>. 등록 후에는 자동 polling + 수동 재조회로 update됩니다.</div>
+        <div>TMG는 요금·재고를 실시간으로만 제공. <strong>객실 선택 → 범위 선택 → accoms 사전 조회 데이터 즉시 가져오기 → 결과 확인 → 등록 진행</strong>. 등록 후 refresh = 밤 분산 polling(생성된 요금표만) + 낮 사용자 PDP 조회 트리거. 매일 10,000개 capacity.</div>
       </div>
 
       <div class="form-section">
@@ -1080,11 +1080,11 @@ tbody tr:hover td { background: #fafafa; }
               <span class="rb-sub">05-21 ~ 08-12 · 84일</span>
             </button>
           </div>
-          <button type="button" class="btn btn-primary" style="height:56px; padding:0 18px; font-size:13px;" onclick="runCheckAvail(this)">🔄 선택 객실 조회</button>
+          <button type="button" class="btn btn-primary" style="height:56px; padding:0 18px; font-size:13px;" onclick="runCheckAvail(this)">📥 accoms 데이터 가져오기</button>
         </div>
-        <div class="form-help" style="margin-top:8px;">조회 범위 정책: <strong>오늘 + 7일 (2026-05-21)</strong> ~ 최대 <strong>D+90 (2026-08-12)</strong> · 체크된 객실에 한해 호출됩니다.</div>
+        <div class="form-help" style="margin-top:8px;">accoms 시스템이 <strong>D+7 (2026-05-21) ~ D+90 (2026-08-12)</strong> 범위로 분산 사전 조회한 데이터에서 가져옵니다. 체크된 객실만 즉시 표시.</div>
         <div style="margin-top:10px; padding:10px 12px; background:#f6ffed; border:1px solid #b7eb8f; border-radius:6px; font-size:12px; color:#389e0d;">
-          <strong>✓ 4개 객실 조회 완료</strong> · D+90 (05-21 ~ 08-12 · 84일치) · 마지막 조회 방금 전 · 미선택 1개 · 응답 없음 1개
+          <strong>✓ 4개 객실 데이터 로드 완료</strong> · D+90 (05-21 ~ 08-12 · 84일치) · accoms 최근 sync 12분 전 · 미선택 1개 · 응답 없음 1개
         </div>
       </div>
     </div>
@@ -1436,13 +1436,13 @@ function updateSelectionCount(modalEl) {
 
 function runCheckAvail(btn) {
   const modalEl = btn.closest('.modal');
-  btn.textContent = '⏳ 조회 중…';
+  btn.textContent = '⏳ accoms 데이터 로드 중…';
   btn.disabled = true;
   setTimeout(() => {
-    btn.textContent = '✓ 조회 완료 · 재조회';
+    btn.textContent = '✓ 로드 완료 · 다시 가져오기';
     btn.disabled = false;
     updateSelectionCount(modalEl);
-  }, 600);
+  }, 400);
 }
 
 function proceedToCreate(rateType, rateId) {
