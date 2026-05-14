@@ -273,6 +273,26 @@ tbody tr:hover td { background: #fafafa; }
 .flow-arrow { color: rgba(0,0,0,0.25); font-size: 14px; }
 .flow-step.api { background: #f9f0ff; border-color: #d3adf7; }
 .flow-step.api strong { color: #722ed1; }
+
+/* RANGE BUTTONS — D+30/60/90 */
+.range-btns { display: flex; gap: 8px; margin-bottom: 8px; }
+.range-btn { flex: 1; height: 56px; border: 1.5px solid #d9d9d9; background: #fff; border-radius: 8px; cursor: pointer; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px; font-family: inherit; transition: all 0.15s; }
+.range-btn:hover { border-color: #91caff; background: #fafcff; }
+.range-btn .rb-main { font-size: 16px; font-weight: 700; color: rgba(0,0,0,0.88); }
+.range-btn .rb-sub { font-size: 11px; color: rgba(0,0,0,0.45); }
+.range-btn.active { border-color: #1677ff; background: #e6f4ff; }
+.range-btn.active .rb-main { color: #1677ff; }
+.range-btn.active .rb-sub { color: #1677ff; }
+
+/* PREVIEW MINI TABLE (registration preview) */
+.preview-table { width: 100%; border-collapse: collapse; font-size: 12px; }
+.preview-table thead th { padding: 8px 10px; background: #fafafa; border-bottom: 1px solid #f0f0f0; text-align: left; font-weight: 600; color: rgba(0,0,0,0.65); position: sticky; top: 0; }
+.preview-table td { padding: 7px 10px; border-bottom: 1px solid #f5f5f5; }
+.preview-table td.num { font-family: 'SF Mono', monospace; text-align: right; font-weight: 600; }
+.preview-wrap { max-height: 260px; overflow: auto; border: 1px solid #f0f0f0; border-radius: 6px; }
+.sync-pill { display: inline-flex; align-items: center; gap: 4px; padding: 2px 8px; border-radius: 10px; font-size: 11px; font-weight: 600; }
+.sync-pill-ok { background: #f6ffed; color: #389e0d; border: 1px solid #b7eb8f; }
+.sync-pill-delay { background: #fff7e6; color: #d48806; border: 1px solid #ffd591; }
 </style>
 </head>
 <body>
@@ -425,7 +445,7 @@ tbody tr:hover td { background: #fafafa; }
     <div class="tab-content" data-content="static-dynamic" style="display:none;">
       <div class="notice-banner notice-blue">
         <span class="notice-icon">ℹ</span>
-        <div><strong>Static Rate + Dynamic Inventory</strong> · 요금은 TMG 데이터를 사용하고, <strong>재고는 관리자가 임의로 등록</strong>합니다. 사용자 상세페이지 진입 시 <code>checkAvailability</code>로 실제 재고를 조회해 덮어씁니다.</div>
+        <div><strong>Static Rate + Dynamic Inventory</strong> · 요금은 TMG 데이터를 사용하고, <strong>재고는 D+90일 <code>checkAvailability</code> 자동 polling 결과를 매일 저장</strong>합니다. 등록 시 30·60·90일 범위를 선택하면 해당 기간 재고가 일자별로 일괄 반영됩니다. <em style="opacity:0.85;">관리자 임의 입력 없음.</em></div>
       </div>
 
       <div class="filter-bar">
@@ -440,9 +460,9 @@ tbody tr:hover td { background: #fafafa; }
       </div>
 
       <div class="action-bar">
-        <div class="action-left">총 <strong>62건</strong> · 임의 재고 미입력 <strong style="color:#fa8c16">8건</strong></div>
+        <div class="action-left">총 <strong>62건</strong> · D+90 동기 정상 <strong style="color:#389e0d">54건</strong> · 동기 지연 <strong style="color:#fa8c16">8건</strong></div>
         <div class="action-right">
-          <button class="btn btn-default btn-sm">🔄 재고 일괄 새로고침</button>
+          <button class="btn btn-default btn-sm">🔄 D+90 강제 재조회</button>
         </div>
       </div>
 
@@ -455,7 +475,7 @@ tbody tr:hover td { background: #fafafa; }
               <th>요금타입</th>
               <th>숙소</th>
               <th>판매기간</th>
-              <th>임의 재고 입력</th>
+              <th>D+90 동기 상태</th>
               <th>카탈로그 매핑</th>
               <th>PB 숙박권</th>
               <th></th>
@@ -468,7 +488,7 @@ tbody tr:hover td { background: #fafafa; }
               <td><span class="tag tag-blue">고정+실시간</span></td>
               <td><div class="hotel-cell"><span class="name" title="Vinpearl Nha Trang Bay">Vinpearl Nha Trang Bay</span><span class="content-link" onclick="openContentModal('synced')">콘텐츠</span></div></td>
               <td style="font-size:12px; color:rgba(0,0,0,0.65);">2026-05-01 ~ 10-31</td>
-              <td><span class="tag tag-green">✓ 입력됨</span></td>
+              <td><span class="sync-pill sync-pill-ok">● D+90 정상</span><div class="sync-time">최근 동기 12분 전</div></td>
               <td><span class="val-ok">✓ 완료 (5/5)</span></td>
               <td><span class="tag tag-green">생성</span></td>
               <td><button class="btn btn-ghost btn-sm">상세</button></td>
@@ -479,7 +499,7 @@ tbody tr:hover td { background: #fafafa; }
               <td><span class="tag tag-blue">고정+실시간</span></td>
               <td><div class="hotel-cell"><span class="name" title="JW Marriott Phu Quoc">JW Marriott Phu Quoc</span><span class="content-link new" onclick="openContentModal('new')">콘텐츠</span></div></td>
               <td style="font-size:12px; color:rgba(0,0,0,0.65);">2026-04-01 ~ 12-31</td>
-              <td><span class="tag tag-green">✓ 입력됨</span></td>
+              <td><span class="sync-pill sync-pill-ok">● D+90 정상</span><div class="sync-time">최근 동기 18분 전</div></td>
               <td><span class="val-ok">✓ 완료 (4/4)</span></td>
               <td><span class="tag tag-gray">미생성</span></td>
               <td><button class="btn btn-primary btn-sm" onclick="goCreate('static-dynamic', '47098')">숙박권 생성</button></td>
@@ -490,7 +510,7 @@ tbody tr:hover td { background: #fafafa; }
               <td><span class="tag tag-blue">고정+실시간</span></td>
               <td><div class="hotel-cell"><span class="name" title="Fusion Resort Cam Ranh">Fusion Resort Cam Ranh</span><span class="content-link changed" onclick="openContentModal('changed')">콘텐츠</span></div></td>
               <td style="font-size:12px; color:rgba(0,0,0,0.65);">2026-06-01 ~ 09-30</td>
-              <td><span class="tag tag-orange">⚠ 미입력</span></td>
+              <td><span class="sync-pill sync-pill-delay">● 동기 지연</span><div class="sync-time">최근 동기 6시간 전</div></td>
               <td><span class="val-ok">✓ 완료 (6/6)</span></td>
               <td><span class="tag tag-gray">미생성</span></td>
               <td><button class="btn btn-primary btn-sm" onclick="goCreate('static-dynamic', '47095')">숙박권 생성</button></td>
@@ -511,8 +531,8 @@ tbody tr:hover td { background: #fafafa; }
       <div class="notice-banner notice-purple">
         <span class="notice-icon">⚠</span>
         <div>
-          <strong>Dynamic Rate + Dynamic Inventory</strong> · TMG에서 요금·재고 모두 제공하지 않습니다. 관리자가 <strong>예상값을 수동 입력</strong>하여 노출하고, 사용자 상세페이지 진입 시 <code>checkAvailability</code>로 실제 요금·재고를 조회해 덮어씁니다.<br>
-          <span style="font-size:12px; opacity:0.85;">⚠ 리스트/검색 노출가는 "예상가" 표기 필수 · 표시광고법 리스크 검토 완료 필요</span>
+          <strong>Dynamic Rate + Dynamic Inventory</strong> · TMG에서 요금·재고를 실시간으로만 제공합니다. <strong>D+90일 <code>checkAvailability</code>를 매일 polling하여 일자별 요금·재고를 저장</strong>하고, 등록 시 30·60·90일 범위를 선택해 해당 기간을 일괄 반영합니다.<br>
+          <span style="font-size:12px; opacity:0.85;">예상가/예상재고 수동 입력 제거 · 모든 노출가는 D+90 저장값 기반 실가</span>
         </div>
       </div>
 
@@ -528,9 +548,9 @@ tbody tr:hover td { background: #fafafa; }
       </div>
 
       <div class="action-bar">
-        <div class="action-left">총 <strong>47건</strong> · 예상값 미입력 <strong style="color:#fa8c16">19건</strong></div>
+        <div class="action-left">총 <strong>47건</strong> · D+90 동기 정상 <strong style="color:#389e0d">28건</strong> · 동기 지연 <strong style="color:#fa8c16">19건</strong></div>
         <div class="action-right">
-          <button class="btn btn-default btn-sm">📝 예상값 일괄 입력</button>
+          <button class="btn btn-default btn-sm">🔄 D+90 강제 재조회</button>
         </div>
       </div>
 
@@ -543,7 +563,7 @@ tbody tr:hover td { background: #fafafa; }
               <th>요금타입</th>
               <th>숙소</th>
               <th>판매기간</th>
-              <th>예상값 입력</th>
+              <th>D+90 동기 상태</th>
               <th>카탈로그 매핑</th>
               <th>PB 숙박권</th>
               <th></th>
@@ -556,7 +576,7 @@ tbody tr:hover td { background: #fafafa; }
               <td><span class="tag tag-purple">실시간+실시간</span></td>
               <td><div class="hotel-cell"><span class="name" title="Vinpearl Luxury Landmark 81">Vinpearl Luxury Landmark 81</span><span class="content-link" onclick="openContentModal('synced')">콘텐츠</span></div></td>
               <td style="font-size:12px; color:rgba(0,0,0,0.65);">2026-04-29 ~ 2031-04-29 <span class="tag tag-gray" style="margin-left:4px;">자동</span></td>
-              <td><span class="tag tag-green">✓ 입력됨</span></td>
+              <td><span class="sync-pill sync-pill-ok">● D+90 정상</span><div class="sync-time">최근 동기 7분 전</div></td>
               <td><span class="val-ok">✓ 완료 (5/5)</span></td>
               <td><span class="tag tag-green">생성</span></td>
               <td><button class="btn btn-ghost btn-sm">상세</button></td>
@@ -567,7 +587,7 @@ tbody tr:hover td { background: #fafafa; }
               <td><span class="tag tag-purple">실시간+실시간</span></td>
               <td><div class="hotel-cell"><span class="name" title="Vinpearl Resort &amp; Spa Long Beach">Vinpearl Resort &amp; Spa Long Beach</span><span class="content-link changed" onclick="openContentModal('changed')">콘텐츠</span></div></td>
               <td style="font-size:12px; color:rgba(0,0,0,0.65);">2026-04-29 ~ 2031-04-29 <span class="tag tag-gray" style="margin-left:4px;">자동</span></td>
-              <td><span class="tag tag-green">✓ 입력됨</span></td>
+              <td><span class="sync-pill sync-pill-ok">● D+90 정상</span><div class="sync-time">최근 동기 14분 전</div></td>
               <td><span class="val-ok">✓ 완료 (6/6)</span></td>
               <td><span class="tag tag-gray">미생성</span></td>
               <td><button class="btn btn-primary btn-sm" onclick="goCreate('dynamic-dynamic', '48198')">숙박권 생성</button></td>
@@ -578,7 +598,7 @@ tbody tr:hover td { background: #fafafa; }
               <td><span class="tag tag-purple">실시간+실시간</span></td>
               <td><div class="hotel-cell"><span class="name" title="Vinpearl Discovery Greenhill">Vinpearl Discovery Greenhill</span><span class="content-link new" onclick="openContentModal('new')">콘텐츠</span></div></td>
               <td style="font-size:12px; color:rgba(0,0,0,0.65);">2026-04-29 ~ 2031-04-29 <span class="tag tag-gray" style="margin-left:4px;">자동</span></td>
-              <td><span class="tag tag-orange">⚠ 미입력</span></td>
+              <td><span class="sync-pill sync-pill-delay">● 동기 지연</span><div class="sync-time">최근 동기 9시간 전</div></td>
               <td><span class="val-ok">✓ 완료 (4/4)</span></td>
               <td><span class="tag tag-gray">미생성</span></td>
               <td><button class="btn btn-primary btn-sm" onclick="goCreate('dynamic-dynamic', '48190')">숙박권 생성</button></td>
@@ -598,48 +618,46 @@ tbody tr:hover td { background: #fafafa; }
 
   <!-- 사용자 상세페이지 플로우 설명 -->
   <div class="card" style="padding: 24px;">
-    <div style="font-size: 15px; font-weight: 700; margin-bottom: 8px;">📱 사용자 상세페이지 — 실시간 조회 플로우</div>
+    <div style="font-size: 15px; font-weight: 700; margin-bottom: 8px;">📱 사용자 상세페이지 — D+90 저장값 + 2-Gate 결제 체크</div>
     <div style="font-size: 13px; color: rgba(0,0,0,0.55); margin-bottom: 14px;">
-      고정+고정 상품은 그대로 노출. 재고/요금이 실시간 타입인 경우 상세페이지 진입 시 <code>checkAvailability</code>로 실제값을 조회해 덮어씁니다.
+      리스트·상세 모두 <strong>D+90 저장값</strong>을 실가로 노출합니다. 예상가 표기·표시광고 리스크 없음. 결제 직전에만 <code>checkAvailability</code>를 1회 더 호출해 2-Gate(재고·가격 변동)로 확인합니다.
     </div>
 
     <div class="flow-box">
-      <div class="flow-step"><strong>① 리스트/검색</strong><span>어드민 입력값 (예상가 or TMG 고정값)</span></div>
+      <div class="flow-step"><strong>① 리스트/검색</strong><span>D+90 저장값 그대로 노출 (실가)</span></div>
       <span class="flow-arrow">→</span>
-      <div class="flow-step"><strong>② 상세 진입</strong><span>날짜·인원 자동 세팅</span></div>
+      <div class="flow-step api"><strong>② 상세 진입</strong><span>checkAvailability 1회 (해당 일자 확인)</span></div>
       <span class="flow-arrow">→</span>
-      <div class="flow-step api"><strong>③ checkAvailability</strong><span>TMG API 호출 (2초 타임아웃)</span></div>
+      <div class="flow-step"><strong>③ 변동 동기</strong><span>차이 있으면 저장값 갱신</span></div>
       <span class="flow-arrow">→</span>
-      <div class="flow-step"><strong>④ 실제값 덮어쓰기</strong><span>요금·재고 업데이트</span></div>
+      <div class="flow-step api"><strong>④ 결제 직전 Gate 1</strong><span>재고 0 → 마감 안내</span></div>
       <span class="flow-arrow">→</span>
-      <div class="flow-step api"><strong>⑤ 결제 직전</strong><span>1회 더 재조회 → 변동시 confirm 모달</span></div>
+      <div class="flow-step api"><strong>⑤ 결제 직전 Gate 2</strong><span>가격 변동(하락·초과 동일) → 안내 + 재결제</span></div>
     </div>
 
     <div class="preview-frame">
-      <div class="preview-label">사용자 상세페이지 프리뷰 — 실시간 조회 중</div>
+      <div class="preview-label">사용자 상세페이지 프리뷰 — D+90 저장값 노출</div>
       <div class="preview-device">
-        <div class="pv-hotel">Vinpearl Luxury Landmark 81</div>
-        <div class="pv-room">디럭스 시티뷰 · 2인 1박 · 2026-05-15</div>
-        <div class="pv-loading">
-          <div class="pv-spinner"></div>
-          <span>실시간 요금·재고 조회 중…</span>
-        </div>
-        <div class="pv-price">
-          <span class="pv-label">예상가 ·</span>
-          <span class="pv-amount" style="font-size:16px; color:rgba(0,0,0,0.35); text-decoration:line-through;">₩680,000</span>
-        </div>
-        <div class="pv-hint">날짜 선택 시 실제 요금이 확정됩니다</div>
-      </div>
-
-      <div class="preview-device" style="margin-top:14px;">
         <div class="pv-hotel">Vinpearl Luxury Landmark 81</div>
         <div class="pv-room">디럭스 시티뷰 · 2인 1박 · 2026-05-15</div>
         <div class="pv-price">
           <span class="pv-amount">₩645,000</span>
           <span class="pv-unit">/ 1박</span>
         </div>
-        <div class="pv-inv">잔여 6실 · 실시간 확인</div>
-        <div class="pv-hint" style="margin-top:6px;">TMG 실시간가 적용 · 결제 직전 재확인됩니다</div>
+        <div class="pv-inv">잔여 6실 · D+90 저장값 (최근 갱신 12분 전)</div>
+        <div class="pv-hint" style="margin-top:6px;">실가 노출 · 결제 직전 2-Gate 재확인</div>
+      </div>
+
+      <div class="preview-device" style="margin-top:14px; border: 1.5px solid #fa8c16;">
+        <div style="font-size:11px; color:#d48806; font-weight:600; margin-bottom:6px;">⚠ 결제 직전 Gate 2 — 가격 변동 안내 모달</div>
+        <div class="pv-hotel">Vinpearl Luxury Landmark 81</div>
+        <div class="pv-room">디럭스 시티뷰 · 2인 1박 · 2026-05-15</div>
+        <div class="pv-price">
+          <span class="pv-label" style="text-decoration:line-through;">₩645,000</span>
+          <span class="pv-amount">₩672,000</span>
+          <span class="pv-unit">/ 1박</span>
+        </div>
+        <div class="pv-hint" style="margin-top:6px;">가격이 변경되었습니다. 변경 금액으로 다시 결제해주세요.<br><em style="color:rgba(0,0,0,0.45);">하락·초과 모두 동일 안내 (회의 결정사항 #1)</em></div>
       </div>
     </div>
   </div>
@@ -695,7 +713,7 @@ tbody tr:hover td { background: #fafafa; }
     <div class="modal-body">
       <div class="notice-banner notice-blue" style="border-radius:8px; border-left-width:3px; margin-bottom:16px;">
         <span class="notice-icon">ℹ</span>
-        <div>요금·판매기간은 TMG 확정값을 그대로 사용합니다. <strong>임의 재고만 관리자가 입력</strong>하며, 사용자 상세페이지 진입 시 <code>checkAvailability</code>로 실제 재고를 조회해 덮어씁니다.</div>
+        <div>요금·판매기간은 TMG 확정값을 그대로 사용합니다. <strong>재고는 D+90 저장값</strong>에서 등록 범위만큼 일자별로 일괄 반영합니다. <em style="opacity:0.85;">관리자 임의 입력 없음.</em></div>
       </div>
 
       <div class="form-section">
@@ -704,21 +722,57 @@ tbody tr:hover td { background: #fafafa; }
           <div class="row"><span class="label">요금 ID</span><span>47098</span></div>
           <div class="row"><span class="label">숙소</span><span>JW Marriott Phu Quoc</span></div>
           <div class="row"><span class="label">요금명</span><span>Best Available Rate</span></div>
-          <div class="row"><span class="label">재고 타입</span><span><span class="live-badge">LIVE</span> 실시간 조회 전용</span></div>
-          <div class="row"><span class="label">판매 시작일</span><span>2026-05-01</span></div>
-          <div class="row"><span class="label">판매 종료일</span><span>2026-07-31</span></div>
+          <div class="row"><span class="label">재고 소스</span><span><span class="live-badge">D+90</span> checkAvailability polling 저장값</span></div>
+          <div class="row"><span class="label">판매 시작일</span><span>2026-05-14 (오늘)</span></div>
+          <div class="row"><span class="label">최대 판매 종료일</span><span>2026-08-12 (D+90)</span></div>
           <div class="row"><span class="label">카탈로그 매핑</span><span class="val-ok">✓ 완료 (4/4 객실)</span></div>
         </div>
-        <div class="form-help" style="margin-top:8px;">일자별 요금은 생성 후 상세 화면에서 캘린더로 확인할 수 있습니다.</div>
       </div>
 
       <div class="form-section">
-        <div class="form-section-title">📝 관리자 입력 (임의 재고)</div>
-        <div class="form-group">
-          <label class="form-label">임의 재고 (실) <span class="required">*</span> <span class="live-badge" style="margin-left:6px;">상세페이지에서 실시간 덮어씀</span></label>
-          <input type="text" class="form-control" value="" placeholder="예: 10">
-          <div class="form-help">리스트/검색 노출용 임의값입니다. 실제 판매 시점의 재고는 TMG <code>checkAvailability</code> 응답을 기준으로 합니다.</div>
+        <div class="form-section-title">📅 등록 범위 선택 <span class="required">*</span></div>
+        <div class="range-btns">
+          <button type="button" class="range-btn" onclick="selectRange(this, 30, 'sd')">
+            <span class="rb-main">D+30</span>
+            <span class="rb-sub">2026-05-14 ~ 06-13</span>
+          </button>
+          <button type="button" class="range-btn active" onclick="selectRange(this, 60, 'sd')">
+            <span class="rb-main">D+60</span>
+            <span class="rb-sub">2026-05-14 ~ 07-13</span>
+          </button>
+          <button type="button" class="range-btn" onclick="selectRange(this, 90, 'sd')">
+            <span class="rb-main">D+90</span>
+            <span class="rb-sub">2026-05-14 ~ 08-12</span>
+          </button>
         </div>
+        <div class="form-help">선택한 기간만큼 D+90 저장된 일자별 재고가 PB 숙박권에 일괄 반영됩니다.</div>
+      </div>
+
+      <div class="form-section">
+        <div class="form-section-title">📊 등록 미리보기 <span class="field-name" style="font-family:'SF Mono',monospace; font-size:11px; color:rgba(0,0,0,0.45); font-weight:500; margin-left:6px;">D+60 · 60일치 · 일부 표시</span></div>
+        <div class="preview-wrap">
+          <table class="preview-table">
+            <thead>
+              <tr>
+                <th>날짜</th>
+                <th>요금 (TMG 고정)</th>
+                <th>재고 (D+90 저장)</th>
+                <th>최근 동기</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr><td>2026-05-14 (수)</td><td class="num">₩425,000</td><td class="num">8실</td><td style="font-size:11px; color:rgba(0,0,0,0.45);">18분 전</td></tr>
+              <tr><td>2026-05-15 (목)</td><td class="num">₩425,000</td><td class="num">6실</td><td style="font-size:11px; color:rgba(0,0,0,0.45);">18분 전</td></tr>
+              <tr><td>2026-05-16 (금)</td><td class="num">₩485,000</td><td class="num">3실</td><td style="font-size:11px; color:rgba(0,0,0,0.45);">18분 전</td></tr>
+              <tr><td>2026-05-17 (토)</td><td class="num">₩525,000</td><td class="num">2실</td><td style="font-size:11px; color:rgba(0,0,0,0.45);">18분 전</td></tr>
+              <tr><td>2026-05-18 (일)</td><td class="num">₩485,000</td><td class="num">5실</td><td style="font-size:11px; color:rgba(0,0,0,0.45);">18분 전</td></tr>
+              <tr><td>2026-05-19 (월)</td><td class="num">₩425,000</td><td class="num">12실</td><td style="font-size:11px; color:rgba(0,0,0,0.45);">18분 전</td></tr>
+              <tr><td>2026-05-20 (화)</td><td class="num">₩425,000</td><td class="num">10실</td><td style="font-size:11px; color:rgba(0,0,0,0.45);">18분 전</td></tr>
+              <tr><td colspan="4" style="text-align:center; color:rgba(0,0,0,0.35); font-size:11px; padding:8px;">… (53건 더)</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="form-help" style="margin-top:6px;">총 <strong>60건</strong>의 일자별 데이터가 PB 숙박권으로 등록됩니다.</div>
       </div>
     </div>
     <div class="modal-footer">
@@ -740,8 +794,8 @@ tbody tr:hover td { background: #fafafa; }
     </div>
     <div class="modal-body">
       <div class="notice-banner notice-purple" style="border-radius:8px; border-left-width:3px; margin-bottom:16px;">
-        <span class="notice-icon">⚠</span>
-        <div>요금·재고 모두 TMG가 제공하지 않습니다. <strong>예상가·예상재고를 수동 입력</strong>하며, 사용자 상세페이지 진입 시 <code>checkAvailability</code>로 실제값이 확정됩니다.</div>
+        <span class="notice-icon">ℹ</span>
+        <div>TMG는 요금·재고를 실시간으로만 제공합니다. <strong>D+90일 <code>checkAvailability</code> polling 결과 저장값</strong>에서 등록 범위만큼 일자별 요금·재고를 일괄 반영합니다. <em style="opacity:0.85;">예상가/예상재고 수동 입력 제거 · 표시광고 리스크 해소.</em></div>
       </div>
 
       <div class="form-section">
@@ -749,30 +803,58 @@ tbody tr:hover td { background: #fafafa; }
         <div class="form-info">
           <div class="row"><span class="label">요금 ID</span><span>48198</span></div>
           <div class="row"><span class="label">숙소</span><span>Vinpearl Resort & Spa Long Beach</span></div>
-          <div class="row"><span class="label">요금</span><span><span class="live-badge">LIVE</span> 실시간 조회 전용</span></div>
-          <div class="row"><span class="label">재고</span><span><span class="live-badge">LIVE</span> 실시간 조회 전용</span></div>
-          <div class="row"><span class="label">판매기간</span><span>오늘 ~ 5년 후 <span class="tag tag-gray" style="margin-left:6px;">자동 설정</span></span></div>
+          <div class="row"><span class="label">요금 소스</span><span><span class="live-badge">D+90</span> checkAvailability polling 저장값</span></div>
+          <div class="row"><span class="label">재고 소스</span><span><span class="live-badge">D+90</span> checkAvailability polling 저장값</span></div>
+          <div class="row"><span class="label">판매 시작일</span><span>2026-05-14 (오늘)</span></div>
+          <div class="row"><span class="label">최대 판매 종료일</span><span>2026-08-12 (D+90)</span></div>
           <div class="row"><span class="label">카탈로그 매핑</span><span class="val-ok">✓ 완료 (6/6 객실)</span></div>
         </div>
       </div>
 
       <div class="form-section">
-        <div class="form-section-title">📝 관리자 입력 (예상값)</div>
-        <div class="form-group">
-          <label class="form-label">예상 요금 (원) <span class="required">*</span> <span class="live-badge" style="margin-left:6px;">상세페이지에서 실시간 덮어씀</span></label>
-          <input type="text" class="form-control" value="" placeholder="예: 425,000">
-          <div class="form-help">최근 30일 유사 상품 평균 또는 전년 동월 기준 입력. 리스트/검색에는 "예상가" 라벨로 노출.</div>
+        <div class="form-section-title">📅 등록 범위 선택 <span class="required">*</span></div>
+        <div class="range-btns">
+          <button type="button" class="range-btn" onclick="selectRange(this, 30, 'dd')">
+            <span class="rb-main">D+30</span>
+            <span class="rb-sub">2026-05-14 ~ 06-13</span>
+          </button>
+          <button type="button" class="range-btn" onclick="selectRange(this, 60, 'dd')">
+            <span class="rb-main">D+60</span>
+            <span class="rb-sub">2026-05-14 ~ 07-13</span>
+          </button>
+          <button type="button" class="range-btn active" onclick="selectRange(this, 90, 'dd')">
+            <span class="rb-main">D+90</span>
+            <span class="rb-sub">2026-05-14 ~ 08-12</span>
+          </button>
         </div>
-        <div class="form-group">
-          <label class="form-label">예상 재고 (실) <span class="required">*</span> <span class="live-badge" style="margin-left:6px;">상세페이지에서 실시간 덮어씀</span></label>
-          <input type="text" class="form-control" value="" placeholder="예: 15">
-          <div class="form-help">리스트/검색 노출용 추정치. 실제 판매는 TMG 실시간 재고 기준.</div>
-        </div>
+        <div class="form-help">선택한 기간만큼 D+90 저장된 일자별 요금·재고가 PB 숙박권에 일괄 반영됩니다.</div>
+      </div>
 
-        <div class="legal-warn">
-          <strong>⚠ 표시광고법 리스크 안내</strong><br>
-          예상가를 "가격"으로 단독 표시하면 안 됩니다. 노출 시 반드시 <strong>"예상가 · 날짜 선택 시 확정"</strong> 문구와 함께 표기되며, 실제 판매 시 예상가와 차이가 클 경우 고객 확인 모달이 자동 노출됩니다.
+      <div class="form-section">
+        <div class="form-section-title">📊 등록 미리보기 <span class="field-name" style="font-family:'SF Mono',monospace; font-size:11px; color:rgba(0,0,0,0.45); font-weight:500; margin-left:6px;">D+90 · 90일치 · 일부 표시</span></div>
+        <div class="preview-wrap">
+          <table class="preview-table">
+            <thead>
+              <tr>
+                <th>날짜</th>
+                <th>요금 (D+90 저장)</th>
+                <th>재고 (D+90 저장)</th>
+                <th>최근 동기</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr><td>2026-05-14 (수)</td><td class="num">₩385,000</td><td class="num">12실</td><td style="font-size:11px; color:rgba(0,0,0,0.45);">14분 전</td></tr>
+              <tr><td>2026-05-15 (목)</td><td class="num">₩385,000</td><td class="num">9실</td><td style="font-size:11px; color:rgba(0,0,0,0.45);">14분 전</td></tr>
+              <tr><td>2026-05-16 (금)</td><td class="num">₩445,000</td><td class="num">4실</td><td style="font-size:11px; color:rgba(0,0,0,0.45);">14분 전</td></tr>
+              <tr><td>2026-05-17 (토)</td><td class="num">₩495,000</td><td class="num">2실</td><td style="font-size:11px; color:rgba(0,0,0,0.45);">14분 전</td></tr>
+              <tr><td>2026-05-18 (일)</td><td class="num">₩445,000</td><td class="num">7실</td><td style="font-size:11px; color:rgba(0,0,0,0.45);">14분 전</td></tr>
+              <tr><td>2026-05-19 (월)</td><td class="num">₩385,000</td><td class="num">15실</td><td style="font-size:11px; color:rgba(0,0,0,0.45);">14분 전</td></tr>
+              <tr><td>2026-05-20 (화)</td><td class="num">₩385,000</td><td class="num">14실</td><td style="font-size:11px; color:rgba(0,0,0,0.45);">14분 전</td></tr>
+              <tr><td colspan="4" style="text-align:center; color:rgba(0,0,0,0.35); font-size:11px; padding:8px;">… (83건 더)</td></tr>
+            </tbody>
+          </table>
         </div>
+        <div class="form-help" style="margin-top:6px;">총 <strong>90건</strong>의 일자별 데이터가 PB 숙박권으로 등록됩니다.</div>
       </div>
     </div>
     <div class="modal-footer">
@@ -1118,6 +1200,19 @@ function openContentModal(state) {
 
 function closeModal() {
   document.querySelectorAll('.modal-overlay').forEach(m => m.classList.remove('show'));
+}
+
+function selectRange(btn, days, scope) {
+  const group = btn.parentElement;
+  group.querySelectorAll('.range-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  const section = btn.closest('.modal-body');
+  const summaryEl = section.querySelector('.preview-table + .form-help strong');
+  const titleEl = section.querySelector('.form-section-title .field-name');
+  if (summaryEl) summaryEl.textContent = `${days}건`;
+  if (titleEl) titleEl.textContent = `D+${days} · ${days}일치 · 일부 표시`;
+  const moreRow = section.querySelector('.preview-table tbody tr:last-child td');
+  if (moreRow && moreRow.colSpan) moreRow.textContent = `… (${days - 7}건 더)`;
 }
 
 document.querySelectorAll('.modal-overlay').forEach(m => {
