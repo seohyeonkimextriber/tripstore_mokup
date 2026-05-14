@@ -293,6 +293,25 @@ tbody tr:hover td { background: #fafafa; }
 .sync-pill { display: inline-flex; align-items: center; gap: 4px; padding: 2px 8px; border-radius: 10px; font-size: 11px; font-weight: 600; }
 .sync-pill-ok { background: #f6ffed; color: #389e0d; border: 1px solid #b7eb8f; }
 .sync-pill-delay { background: #fff7e6; color: #d48806; border: 1px solid #ffd591; }
+
+/* ROOM SELECT CARDS (등록 시 객실 선택) */
+.room-select-list { display: flex; flex-direction: column; gap: 8px; }
+.room-select-card { border: 1.5px solid #e8e8e8; border-radius: 8px; background: #fff; transition: all 0.15s; overflow: hidden; }
+.room-select-card.checked { border-color: #1677ff; background: #fafcff; }
+.room-select-card.disabled { background: #fafafa; opacity: 0.55; }
+.room-select-head { display: flex; align-items: center; gap: 12px; padding: 12px 14px; cursor: pointer; }
+.room-select-check { width: 18px; height: 18px; flex-shrink: 0; }
+.room-select-main { flex: 1; min-width: 0; }
+.room-select-name { font-size: 13px; font-weight: 700; color: rgba(0,0,0,0.88); margin-bottom: 2px; display: flex; align-items: center; gap: 6px; }
+.room-select-name .room-id { font-family: 'SF Mono', monospace; font-size: 11px; color: rgba(0,0,0,0.45); font-weight: 500; background: #f5f5f5; padding: 1px 6px; border-radius: 3px; }
+.room-select-summary { font-size: 12px; color: rgba(0,0,0,0.55); display: flex; gap: 12px; flex-wrap: wrap; }
+.room-select-summary span { display: flex; align-items: center; gap: 4px; }
+.room-select-summary strong { color: rgba(0,0,0,0.88); font-weight: 600; }
+.room-select-toggle { background: transparent; border: none; color: rgba(0,0,0,0.45); cursor: pointer; padding: 6px 8px; font-size: 12px; font-family: inherit; }
+.room-select-toggle:hover { color: #1677ff; }
+.room-select-body { border-top: 1px solid #f0f0f0; max-height: 240px; overflow: auto; display: none; }
+.room-select-card.open .room-select-body { display: block; }
+.room-select-card.disabled .room-select-toggle { display: none; }
 </style>
 </head>
 <body>
@@ -702,164 +721,371 @@ tbody tr:hover td { background: #fafafa; }
 
 <!-- ==================== MODAL: 탭2 (고정+실시간) ==================== -->
 <div class="modal-overlay" id="modal-static-dynamic">
-  <div class="modal">
+  <div class="modal modal-lg">
     <div class="modal-header">
       <div class="modal-title">
         <span class="tag tag-blue">고정+실시간</span>
-        PB 숙박권 생성
+        숙박권 생성 — checkAvailability 조회
       </div>
       <button class="modal-close" onclick="closeModal()">×</button>
     </div>
     <div class="modal-body">
       <div class="notice-banner notice-blue" style="border-radius:8px; border-left-width:3px; margin-bottom:16px;">
         <span class="notice-icon">ℹ</span>
-        <div>요금·판매기간은 TMG 확정값을 그대로 사용합니다. <strong>아래에서 조회 범위를 선택</strong>하면 해당 기간 <code>checkAvailability</code>로 재고를 일괄 조회해 PB 숙박권으로 등록합니다. 등록 후에는 자동 polling + 수동 재조회로 update됩니다. <em style="opacity:0.85;">관리자 임의 입력 없음.</em></div>
+        <div>요금은 TMG 확정값을 사용합니다. <strong>조회 범위 선택 → <code>checkAvailability</code> 일괄 호출 → 객실별 결과 확인 → 등록할 객실 선택 → 진행</strong>. 등록 후에는 자동 polling + 수동 재조회로 update됩니다.</div>
       </div>
 
       <div class="form-section">
-        <div class="form-section-title">📎 TMG 확정 데이터 (자동 적용)</div>
+        <div class="form-section-title">📎 TMG 확정 데이터</div>
         <div class="form-info">
-          <div class="row"><span class="label">요금 ID</span><span>47098</span></div>
+          <div class="row"><span class="label">요금 ID</span><span>47098 · Best Available Rate</span></div>
           <div class="row"><span class="label">숙소</span><span>JW Marriott Phu Quoc</span></div>
-          <div class="row"><span class="label">요금명</span><span>Best Available Rate</span></div>
-          <div class="row"><span class="label">재고 소스</span><span><span class="live-badge">checkAvailability</span> 조회 결과 (등록 시 1회 + 이후 polling)</span></div>
-          <div class="row"><span class="label">판매 시작일</span><span>2026-05-14 (오늘)</span></div>
-          <div class="row"><span class="label">판매 종료일</span><span>2026-07-31 (요금사용 기한)</span></div>
+          <div class="row"><span class="label">판매 시작일 / 종료일</span><span>2026-05-14 / 2026-07-31 (요금사용 기한)</span></div>
           <div class="row"><span class="label">카탈로그 매핑</span><span class="val-ok">✓ 완료 (4/4 객실)</span></div>
         </div>
       </div>
 
       <div class="form-section">
-        <div class="form-section-title">📅 checkAvailability 조회 범위 선택 <span class="required">*</span></div>
-        <div class="range-btns">
-          <button type="button" class="range-btn" onclick="selectRange(this, 30)">
-            <span class="rb-main">D+30</span>
-            <span class="rb-sub">2026-05-14 ~ 06-13</span>
-          </button>
-          <button type="button" class="range-btn active" onclick="selectRange(this, 60)">
-            <span class="rb-main">D+60</span>
-            <span class="rb-sub">2026-05-14 ~ 07-13</span>
-          </button>
-          <button type="button" class="range-btn" onclick="selectRange(this, 90)">
-            <span class="rb-main">D+90</span>
-            <span class="rb-sub">2026-05-14 ~ 08-12</span>
-          </button>
+        <div class="form-section-title">📅 조회 범위 선택 <span class="required">*</span></div>
+        <div style="display:flex; gap:10px; align-items:flex-end;">
+          <div class="range-btns" style="flex:1;">
+            <button type="button" class="range-btn" onclick="selectRange(this, 30)">
+              <span class="rb-main">D+30</span>
+              <span class="rb-sub">2026-05-14 ~ 06-13</span>
+            </button>
+            <button type="button" class="range-btn active" onclick="selectRange(this, 60)">
+              <span class="rb-main">D+60</span>
+              <span class="rb-sub">2026-05-14 ~ 07-13</span>
+            </button>
+            <button type="button" class="range-btn" onclick="selectRange(this, 90)">
+              <span class="rb-main">D+90</span>
+              <span class="rb-sub">2026-05-14 ~ 08-12</span>
+            </button>
+          </div>
+          <button type="button" class="btn btn-primary" style="height:56px; padding:0 18px; font-size:13px;" onclick="runCheckAvail(this)">🔄 checkAvailability 조회</button>
         </div>
-        <div class="form-help">선택한 기간만큼 <code>checkAvailability</code>를 일괄 호출해 일자별 재고를 PB 숙박권으로 등록합니다. (최대 D+90, 요금사용 기한 초과 시 종료일까지로 자동 제한)</div>
+        <div class="form-help" style="margin-top:8px;">최대 D+90, 요금사용 기한 초과 시 종료일까지로 자동 제한.</div>
       </div>
 
       <div class="form-section">
-        <div class="form-section-title">📊 조회 결과 미리보기 <span class="field-name" style="font-family:'SF Mono',monospace; font-size:11px; color:rgba(0,0,0,0.45); font-weight:500; margin-left:6px;">D+60 · 60일치 · 일부 표시</span></div>
-        <div class="preview-wrap">
-          <table class="preview-table">
-            <thead>
-              <tr>
-                <th>날짜</th>
-                <th>요금 (TMG 고정)</th>
-                <th>재고 (checkAvail)</th>
-                <th>등록 후 update</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr><td>2026-05-14 (수)</td><td class="num">₩425,000</td><td class="num">8실</td><td><span class="sync-pill sync-pill-ok">자동 polling</span></td></tr>
-              <tr><td>2026-05-15 (목)</td><td class="num">₩425,000</td><td class="num">6실</td><td><span class="sync-pill sync-pill-ok">자동 polling</span></td></tr>
-              <tr><td>2026-05-16 (금)</td><td class="num">₩485,000</td><td class="num">3실</td><td><span class="sync-pill sync-pill-ok">자동 polling</span></td></tr>
-              <tr><td>2026-05-17 (토)</td><td class="num">₩525,000</td><td class="num">2실</td><td><span class="sync-pill sync-pill-ok">자동 polling</span></td></tr>
-              <tr><td>2026-05-18 (일)</td><td class="num">₩485,000</td><td class="num">5실</td><td><span class="sync-pill sync-pill-ok">자동 polling</span></td></tr>
-              <tr><td>2026-05-19 (월)</td><td class="num">₩425,000</td><td class="num">12실</td><td><span class="sync-pill sync-pill-ok">자동 polling</span></td></tr>
-              <tr><td>2026-05-20 (화)</td><td class="num">₩425,000</td><td class="num">10실</td><td><span class="sync-pill sync-pill-ok">자동 polling</span></td></tr>
-              <tr><td colspan="4" style="text-align:center; color:rgba(0,0,0,0.35); font-size:11px; padding:8px;">… (53건 더)</td></tr>
-            </tbody>
-          </table>
+        <div class="form-section-title">📊 조회 결과 — 등록할 객실 선택 <span class="field-name" style="font-family:'SF Mono',monospace; font-size:11px; color:rgba(0,0,0,0.45); font-weight:500; margin-left:6px;">D+60 · 60일치 · 4개 객실</span></div>
+        <div class="room-select-list">
+
+          <div class="room-select-card checked open">
+            <div class="room-select-head" onclick="toggleRoomCard(event, this)">
+              <input type="checkbox" class="room-select-check" checked onclick="event.stopPropagation(); toggleRoomCheck(this)">
+              <div class="room-select-main">
+                <div class="room-select-name"><span class="room-id">ID:267</span> Deluxe King</div>
+                <div class="room-select-summary">
+                  <span>60건 일자</span>
+                  <span>평균가 <strong>₩425,000</strong></span>
+                  <span>평균 재고 <strong>7실</strong></span>
+                  <span>최저가 ₩425,000 · 최고가 ₩525,000</span>
+                </div>
+              </div>
+              <button type="button" class="room-select-toggle">접기 ▲</button>
+            </div>
+            <div class="room-select-body">
+              <table class="preview-table">
+                <thead>
+                  <tr><th>날짜</th><th>요금 (TMG)</th><th>재고 (checkAvail)</th><th>등록 후 update</th></tr>
+                </thead>
+                <tbody>
+                  <tr><td>2026-05-14 (수)</td><td class="num">₩425,000</td><td class="num">8실</td><td><span class="sync-pill sync-pill-ok">자동 polling</span></td></tr>
+                  <tr><td>2026-05-15 (목)</td><td class="num">₩425,000</td><td class="num">6실</td><td><span class="sync-pill sync-pill-ok">자동 polling</span></td></tr>
+                  <tr><td>2026-05-16 (금)</td><td class="num">₩485,000</td><td class="num">3실</td><td><span class="sync-pill sync-pill-ok">자동 polling</span></td></tr>
+                  <tr><td>2026-05-17 (토)</td><td class="num">₩525,000</td><td class="num">2실</td><td><span class="sync-pill sync-pill-ok">자동 polling</span></td></tr>
+                  <tr><td>2026-05-18 (일)</td><td class="num">₩485,000</td><td class="num">5실</td><td><span class="sync-pill sync-pill-ok">자동 polling</span></td></tr>
+                  <tr><td colspan="4" style="text-align:center; color:rgba(0,0,0,0.35); font-size:11px; padding:8px;">… (55건 더)</td></tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <div class="room-select-card checked">
+            <div class="room-select-head" onclick="toggleRoomCard(event, this)">
+              <input type="checkbox" class="room-select-check" checked onclick="event.stopPropagation(); toggleRoomCheck(this)">
+              <div class="room-select-main">
+                <div class="room-select-name"><span class="room-id">ID:268</span> Deluxe Twin</div>
+                <div class="room-select-summary">
+                  <span>60건 일자</span>
+                  <span>평균가 <strong>₩475,000</strong></span>
+                  <span>평균 재고 <strong>5실</strong></span>
+                </div>
+              </div>
+              <button type="button" class="room-select-toggle">펼치기 ▼</button>
+            </div>
+            <div class="room-select-body">
+              <table class="preview-table">
+                <thead><tr><th>날짜</th><th>요금</th><th>재고</th><th>등록 후</th></tr></thead>
+                <tbody>
+                  <tr><td>2026-05-14 (수)</td><td class="num">₩475,000</td><td class="num">5실</td><td><span class="sync-pill sync-pill-ok">자동 polling</span></td></tr>
+                  <tr><td colspan="4" style="text-align:center; color:rgba(0,0,0,0.35); font-size:11px; padding:8px;">… (59건 더)</td></tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <div class="room-select-card">
+            <div class="room-select-head" onclick="toggleRoomCard(event, this)">
+              <input type="checkbox" class="room-select-check" onclick="event.stopPropagation(); toggleRoomCheck(this)">
+              <div class="room-select-main">
+                <div class="room-select-name"><span class="room-id">ID:269</span> Executive Suite</div>
+                <div class="room-select-summary">
+                  <span>60건 일자</span>
+                  <span>평균가 <strong>₩820,000</strong></span>
+                  <span>평균 재고 <strong>3실</strong></span>
+                  <span style="color:#d48806;">⚠ 체크 시 등록 대상에 포함</span>
+                </div>
+              </div>
+              <button type="button" class="room-select-toggle">펼치기 ▼</button>
+            </div>
+            <div class="room-select-body">
+              <table class="preview-table">
+                <thead><tr><th>날짜</th><th>요금</th><th>재고</th><th>등록 후</th></tr></thead>
+                <tbody>
+                  <tr><td>2026-05-14 (수)</td><td class="num">₩820,000</td><td class="num">3실</td><td><span class="sync-pill sync-pill-ok">자동 polling</span></td></tr>
+                  <tr><td colspan="4" style="text-align:center; color:rgba(0,0,0,0.35); font-size:11px; padding:8px;">… (59건 더)</td></tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <div class="room-select-card checked">
+            <div class="room-select-head" onclick="toggleRoomCard(event, this)">
+              <input type="checkbox" class="room-select-check" checked onclick="event.stopPropagation(); toggleRoomCheck(this)">
+              <div class="room-select-main">
+                <div class="room-select-name"><span class="room-id">ID:270</span> Garden View Villa</div>
+                <div class="room-select-summary">
+                  <span>60건 일자</span>
+                  <span>평균가 <strong>₩650,000</strong></span>
+                  <span>평균 재고 <strong>4실</strong></span>
+                </div>
+              </div>
+              <button type="button" class="room-select-toggle">펼치기 ▼</button>
+            </div>
+            <div class="room-select-body">
+              <table class="preview-table">
+                <thead><tr><th>날짜</th><th>요금</th><th>재고</th><th>등록 후</th></tr></thead>
+                <tbody>
+                  <tr><td>2026-05-14 (수)</td><td class="num">₩650,000</td><td class="num">4실</td><td><span class="sync-pill sync-pill-ok">자동 polling</span></td></tr>
+                  <tr><td colspan="4" style="text-align:center; color:rgba(0,0,0,0.35); font-size:11px; padding:8px;">… (59건 더)</td></tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+
         </div>
-        <div class="form-help" style="margin-top:6px;">총 <strong>60건</strong>의 일자별 데이터가 PB 숙박권으로 등록되고, 이후 자동/수동 하이브리드로 update됩니다.</div>
       </div>
     </div>
     <div class="modal-footer">
+      <div style="margin-right:auto; font-size:13px; color:rgba(0,0,0,0.65);">
+        선택된 객실: <strong style="color:#1677ff;" id="ms-sd-count">3</strong> / 4개 · 등록될 일자 row 총 <strong id="ms-sd-rows">180</strong>건
+      </div>
       <button class="btn btn-default" onclick="closeModal()">취소</button>
-      <button class="btn btn-primary">PB 숙박권 생성</button>
+      <button class="btn btn-primary" onclick="proceedToCreate('static-dynamic', '47098')">선택 객실로 등록 진행 →</button>
     </div>
   </div>
 </div>
 
 <!-- ==================== MODAL: 탭3 (실시간+실시간) ==================== -->
 <div class="modal-overlay" id="modal-dynamic-dynamic">
-  <div class="modal">
+  <div class="modal modal-lg">
     <div class="modal-header">
       <div class="modal-title">
         <span class="tag tag-purple">실시간+실시간</span>
-        PB 숙박권 생성
+        숙박권 생성 — checkAvailability 조회
       </div>
       <button class="modal-close" onclick="closeModal()">×</button>
     </div>
     <div class="modal-body">
       <div class="notice-banner notice-purple" style="border-radius:8px; border-left-width:3px; margin-bottom:16px;">
         <span class="notice-icon">ℹ</span>
-        <div>TMG는 요금·재고를 실시간으로만 제공합니다. <strong>아래에서 조회 범위를 선택</strong>하면 해당 기간 <code>checkAvailability</code>로 요금·재고를 일괄 조회해 PB 숙박권으로 등록합니다. 등록 후에는 자동 polling + 수동 재조회로 update됩니다. <em style="opacity:0.85;">예상가/예상재고 수동 입력 제거 · 모든 노출가는 실가 · 표시광고 리스크 해소.</em></div>
+        <div>TMG는 요금·재고를 실시간으로만 제공합니다. <strong>조회 범위 선택 → <code>checkAvailability</code> 일괄 호출 → 객실별 결과 확인 → 등록할 객실 선택 → 진행</strong>. 등록 후에는 자동 polling + 수동 재조회로 update됩니다.</div>
       </div>
 
       <div class="form-section">
         <div class="form-section-title">📎 TMG 데이터 상태</div>
         <div class="form-info">
-          <div class="row"><span class="label">요금 ID</span><span>48198</span></div>
+          <div class="row"><span class="label">요금 ID</span><span>48198 · Real-time BAR</span></div>
           <div class="row"><span class="label">숙소</span><span>Vinpearl Resort & Spa Long Beach</span></div>
-          <div class="row"><span class="label">요금 소스</span><span><span class="live-badge">checkAvailability</span> 조회 결과 (등록 시 1회 + 이후 polling)</span></div>
-          <div class="row"><span class="label">재고 소스</span><span><span class="live-badge">checkAvailability</span> 조회 결과 (등록 시 1회 + 이후 polling)</span></div>
-          <div class="row"><span class="label">판매 시작일</span><span>2026-05-14 (오늘)</span></div>
-          <div class="row"><span class="label">판매 종료일</span><span>2031-04-29 (자동 5년)</span></div>
+          <div class="row"><span class="label">판매 시작일 / 종료일</span><span>2026-05-14 / 2031-04-29 (자동 5년)</span></div>
           <div class="row"><span class="label">카탈로그 매핑</span><span class="val-ok">✓ 완료 (6/6 객실)</span></div>
         </div>
       </div>
 
       <div class="form-section">
-        <div class="form-section-title">📅 checkAvailability 조회 범위 선택 <span class="required">*</span></div>
-        <div class="range-btns">
-          <button type="button" class="range-btn" onclick="selectRange(this, 30)">
-            <span class="rb-main">D+30</span>
-            <span class="rb-sub">2026-05-14 ~ 06-13</span>
-          </button>
-          <button type="button" class="range-btn" onclick="selectRange(this, 60)">
-            <span class="rb-main">D+60</span>
-            <span class="rb-sub">2026-05-14 ~ 07-13</span>
-          </button>
-          <button type="button" class="range-btn active" onclick="selectRange(this, 90)">
-            <span class="rb-main">D+90</span>
-            <span class="rb-sub">2026-05-14 ~ 08-12</span>
-          </button>
+        <div class="form-section-title">📅 조회 범위 선택 <span class="required">*</span></div>
+        <div style="display:flex; gap:10px; align-items:flex-end;">
+          <div class="range-btns" style="flex:1;">
+            <button type="button" class="range-btn" onclick="selectRange(this, 30)">
+              <span class="rb-main">D+30</span>
+              <span class="rb-sub">2026-05-14 ~ 06-13</span>
+            </button>
+            <button type="button" class="range-btn" onclick="selectRange(this, 60)">
+              <span class="rb-main">D+60</span>
+              <span class="rb-sub">2026-05-14 ~ 07-13</span>
+            </button>
+            <button type="button" class="range-btn active" onclick="selectRange(this, 90)">
+              <span class="rb-main">D+90</span>
+              <span class="rb-sub">2026-05-14 ~ 08-12</span>
+            </button>
+          </div>
+          <button type="button" class="btn btn-primary" style="height:56px; padding:0 18px; font-size:13px;" onclick="runCheckAvail(this)">🔄 checkAvailability 조회</button>
         </div>
-        <div class="form-help">선택한 기간만큼 <code>checkAvailability</code>를 일괄 호출해 일자별 요금·재고를 PB 숙박권으로 등록합니다. (최대 D+90)</div>
+        <div class="form-help" style="margin-top:8px;">최대 D+90.</div>
       </div>
 
       <div class="form-section">
-        <div class="form-section-title">📊 조회 결과 미리보기 <span class="field-name" style="font-family:'SF Mono',monospace; font-size:11px; color:rgba(0,0,0,0.45); font-weight:500; margin-left:6px;">D+90 · 90일치 · 일부 표시</span></div>
-        <div class="preview-wrap">
-          <table class="preview-table">
-            <thead>
-              <tr>
-                <th>날짜</th>
-                <th>요금 (checkAvail)</th>
-                <th>재고 (checkAvail)</th>
-                <th>등록 후 update</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr><td>2026-05-14 (수)</td><td class="num">₩385,000</td><td class="num">12실</td><td><span class="sync-pill sync-pill-ok">자동 polling</span></td></tr>
-              <tr><td>2026-05-15 (목)</td><td class="num">₩385,000</td><td class="num">9실</td><td><span class="sync-pill sync-pill-ok">자동 polling</span></td></tr>
-              <tr><td>2026-05-16 (금)</td><td class="num">₩445,000</td><td class="num">4실</td><td><span class="sync-pill sync-pill-ok">자동 polling</span></td></tr>
-              <tr><td>2026-05-17 (토)</td><td class="num">₩495,000</td><td class="num">2실</td><td><span class="sync-pill sync-pill-ok">자동 polling</span></td></tr>
-              <tr><td>2026-05-18 (일)</td><td class="num">₩445,000</td><td class="num">7실</td><td><span class="sync-pill sync-pill-ok">자동 polling</span></td></tr>
-              <tr><td>2026-05-19 (월)</td><td class="num">₩385,000</td><td class="num">15실</td><td><span class="sync-pill sync-pill-ok">자동 polling</span></td></tr>
-              <tr><td>2026-05-20 (화)</td><td class="num">₩385,000</td><td class="num">14실</td><td><span class="sync-pill sync-pill-ok">자동 polling</span></td></tr>
-              <tr><td colspan="4" style="text-align:center; color:rgba(0,0,0,0.35); font-size:11px; padding:8px;">… (83건 더)</td></tr>
-            </tbody>
-          </table>
+        <div class="form-section-title">📊 조회 결과 — 등록할 객실 선택 <span class="field-name" style="font-family:'SF Mono',monospace; font-size:11px; color:rgba(0,0,0,0.45); font-weight:500; margin-left:6px;">D+90 · 90일치 · 6개 객실</span></div>
+        <div class="room-select-list">
+
+          <div class="room-select-card checked open">
+            <div class="room-select-head" onclick="toggleRoomCard(event, this)">
+              <input type="checkbox" class="room-select-check" checked onclick="event.stopPropagation(); toggleRoomCheck(this)">
+              <div class="room-select-main">
+                <div class="room-select-name"><span class="room-id">ID:301</span> Deluxe Ocean View</div>
+                <div class="room-select-summary">
+                  <span>90건 일자</span>
+                  <span>평균가 <strong>₩385,000</strong></span>
+                  <span>평균 재고 <strong>11실</strong></span>
+                  <span>최저가 ₩385,000 · 최고가 ₩495,000</span>
+                </div>
+              </div>
+              <button type="button" class="room-select-toggle">접기 ▲</button>
+            </div>
+            <div class="room-select-body">
+              <table class="preview-table">
+                <thead><tr><th>날짜</th><th>요금 (checkAvail)</th><th>재고 (checkAvail)</th><th>등록 후 update</th></tr></thead>
+                <tbody>
+                  <tr><td>2026-05-14 (수)</td><td class="num">₩385,000</td><td class="num">12실</td><td><span class="sync-pill sync-pill-ok">자동 polling</span></td></tr>
+                  <tr><td>2026-05-15 (목)</td><td class="num">₩385,000</td><td class="num">9실</td><td><span class="sync-pill sync-pill-ok">자동 polling</span></td></tr>
+                  <tr><td>2026-05-16 (금)</td><td class="num">₩445,000</td><td class="num">4실</td><td><span class="sync-pill sync-pill-ok">자동 polling</span></td></tr>
+                  <tr><td>2026-05-17 (토)</td><td class="num">₩495,000</td><td class="num">2실</td><td><span class="sync-pill sync-pill-ok">자동 polling</span></td></tr>
+                  <tr><td colspan="4" style="text-align:center; color:rgba(0,0,0,0.35); font-size:11px; padding:8px;">… (86건 더)</td></tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <div class="room-select-card checked">
+            <div class="room-select-head" onclick="toggleRoomCard(event, this)">
+              <input type="checkbox" class="room-select-check" checked onclick="event.stopPropagation(); toggleRoomCheck(this)">
+              <div class="room-select-main">
+                <div class="room-select-name"><span class="room-id">ID:302</span> Premier Suite</div>
+                <div class="room-select-summary">
+                  <span>90건 일자</span>
+                  <span>평균가 <strong>₩620,000</strong></span>
+                  <span>평균 재고 <strong>5실</strong></span>
+                </div>
+              </div>
+              <button type="button" class="room-select-toggle">펼치기 ▼</button>
+            </div>
+            <div class="room-select-body">
+              <table class="preview-table">
+                <thead><tr><th>날짜</th><th>요금</th><th>재고</th><th>등록 후</th></tr></thead>
+                <tbody>
+                  <tr><td>2026-05-14 (수)</td><td class="num">₩620,000</td><td class="num">5실</td><td><span class="sync-pill sync-pill-ok">자동 polling</span></td></tr>
+                  <tr><td colspan="4" style="text-align:center; color:rgba(0,0,0,0.35); font-size:11px; padding:8px;">… (89건 더)</td></tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <div class="room-select-card">
+            <div class="room-select-head" onclick="toggleRoomCard(event, this)">
+              <input type="checkbox" class="room-select-check" onclick="event.stopPropagation(); toggleRoomCheck(this)">
+              <div class="room-select-main">
+                <div class="room-select-name"><span class="room-id">ID:303</span> Beachfront Villa</div>
+                <div class="room-select-summary">
+                  <span>90건 일자</span>
+                  <span>평균가 <strong>₩1,250,000</strong></span>
+                  <span>평균 재고 <strong>2실</strong></span>
+                  <span style="color:#d48806;">⚠ 체크 시 등록 대상에 포함</span>
+                </div>
+              </div>
+              <button type="button" class="room-select-toggle">펼치기 ▼</button>
+            </div>
+            <div class="room-select-body">
+              <table class="preview-table">
+                <thead><tr><th>날짜</th><th>요금</th><th>재고</th><th>등록 후</th></tr></thead>
+                <tbody>
+                  <tr><td>2026-05-14 (수)</td><td class="num">₩1,250,000</td><td class="num">2실</td><td><span class="sync-pill sync-pill-ok">자동 polling</span></td></tr>
+                  <tr><td colspan="4" style="text-align:center; color:rgba(0,0,0,0.35); font-size:11px; padding:8px;">… (89건 더)</td></tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <div class="room-select-card checked">
+            <div class="room-select-head" onclick="toggleRoomCard(event, this)">
+              <input type="checkbox" class="room-select-check" checked onclick="event.stopPropagation(); toggleRoomCheck(this)">
+              <div class="room-select-main">
+                <div class="room-select-name"><span class="room-id">ID:304</span> Family Room</div>
+                <div class="room-select-summary">
+                  <span>90건 일자</span>
+                  <span>평균가 <strong>₩520,000</strong></span>
+                  <span>평균 재고 <strong>6실</strong></span>
+                </div>
+              </div>
+              <button type="button" class="room-select-toggle">펼치기 ▼</button>
+            </div>
+            <div class="room-select-body">
+              <table class="preview-table">
+                <thead><tr><th>날짜</th><th>요금</th><th>재고</th><th>등록 후</th></tr></thead>
+                <tbody>
+                  <tr><td>2026-05-14 (수)</td><td class="num">₩520,000</td><td class="num">6실</td><td><span class="sync-pill sync-pill-ok">자동 polling</span></td></tr>
+                  <tr><td colspan="4" style="text-align:center; color:rgba(0,0,0,0.35); font-size:11px; padding:8px;">… (89건 더)</td></tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <div class="room-select-card checked">
+            <div class="room-select-head" onclick="toggleRoomCard(event, this)">
+              <input type="checkbox" class="room-select-check" checked onclick="event.stopPropagation(); toggleRoomCheck(this)">
+              <div class="room-select-main">
+                <div class="room-select-name"><span class="room-id">ID:305</span> Garden Bungalow</div>
+                <div class="room-select-summary">
+                  <span>90건 일자</span>
+                  <span>평균가 <strong>₩440,000</strong></span>
+                  <span>평균 재고 <strong>8실</strong></span>
+                </div>
+              </div>
+              <button type="button" class="room-select-toggle">펼치기 ▼</button>
+            </div>
+            <div class="room-select-body">
+              <table class="preview-table">
+                <thead><tr><th>날짜</th><th>요금</th><th>재고</th><th>등록 후</th></tr></thead>
+                <tbody>
+                  <tr><td>2026-05-14 (수)</td><td class="num">₩440,000</td><td class="num">8실</td><td><span class="sync-pill sync-pill-ok">자동 polling</span></td></tr>
+                  <tr><td colspan="4" style="text-align:center; color:rgba(0,0,0,0.35); font-size:11px; padding:8px;">… (89건 더)</td></tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <div class="room-select-card disabled">
+            <div class="room-select-head" style="cursor:default;">
+              <input type="checkbox" class="room-select-check" disabled>
+              <div class="room-select-main">
+                <div class="room-select-name"><span class="room-id">ID:306</span> Honeymoon Suite</div>
+                <div class="room-select-summary">
+                  <span style="color:#d92d20;">⚠ checkAvailability 응답 없음 (재고 0 또는 매핑 누락)</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
         </div>
-        <div class="form-help" style="margin-top:6px;">총 <strong>90건</strong>의 일자별 데이터가 PB 숙박권으로 등록되고, 이후 자동/수동 하이브리드로 update됩니다.</div>
       </div>
     </div>
     <div class="modal-footer">
+      <div style="margin-right:auto; font-size:13px; color:rgba(0,0,0,0.65);">
+        선택된 객실: <strong style="color:#1677ff;" id="ms-dd-count">4</strong> / 6개 · 등록될 일자 row 총 <strong id="ms-dd-rows">360</strong>건
+      </div>
       <button class="btn btn-default" onclick="closeModal()">취소</button>
-      <button class="btn btn-primary">PB 숙박권 생성</button>
+      <button class="btn btn-primary" onclick="proceedToCreate('dynamic-dynamic', '48198')">선택 객실로 등록 진행 →</button>
     </div>
   </div>
 </div>
@@ -1156,7 +1382,69 @@ function openModal(type) {
 }
 
 function goCreate(rateType, rateId) {
-  window.location.href = `accom-ticket-create.html?rateType=${rateType}&rateId=${rateId}`;
+  // STATIC(고정+고정)은 TMG 확정값 그대로 → 모달 없이 바로 등록 페이지
+  if (rateType === 'static-static') {
+    window.location.href = `accom-ticket-create.html?rateType=${rateType}&rateId=${rateId}`;
+    return;
+  }
+  // ALM-DYNAMIC / DYNAMIC → 모달에서 checkAvailability 조회 + 객실 선택
+  const modal = document.getElementById(`modal-${rateType}`);
+  if (modal) {
+    modal.dataset.rateId = rateId;
+    modal.classList.add('show');
+  }
+}
+
+function toggleRoomCard(e, headEl) {
+  if (e.target.closest('button') && !e.target.classList.contains('room-select-toggle')) return;
+  if (e.target.classList.contains('room-select-check')) return;
+  const card = headEl.closest('.room-select-card');
+  if (card.classList.contains('disabled')) return;
+  card.classList.toggle('open');
+  const toggleBtn = card.querySelector('.room-select-toggle');
+  if (toggleBtn) toggleBtn.textContent = card.classList.contains('open') ? '접기 ▲' : '펼치기 ▼';
+}
+
+function toggleRoomCheck(checkEl) {
+  const card = checkEl.closest('.room-select-card');
+  card.classList.toggle('checked', checkEl.checked);
+  updateSelectionCount(card.closest('.modal'));
+}
+
+function updateSelectionCount(modalEl) {
+  if (!modalEl) return;
+  const checked = modalEl.querySelectorAll('.room-select-card.checked').length;
+  const total = modalEl.querySelectorAll('.room-select-card:not(.disabled)').length;
+  const activeRange = modalEl.querySelector('.range-btn.active .rb-main');
+  const days = activeRange ? parseInt(activeRange.textContent.replace('D+', ''), 10) : 60;
+  const rows = checked * days;
+  const countEl = modalEl.querySelector('[id$="-count"]');
+  const rowsEl = modalEl.querySelector('[id$="-rows"]');
+  if (countEl) countEl.textContent = checked;
+  if (rowsEl) rowsEl.textContent = rows;
+}
+
+function runCheckAvail(btn) {
+  const modalEl = btn.closest('.modal');
+  btn.textContent = '⏳ 조회 중…';
+  btn.disabled = true;
+  setTimeout(() => {
+    btn.textContent = '✓ 조회 완료 · 재조회';
+    btn.disabled = false;
+    updateSelectionCount(modalEl);
+  }, 600);
+}
+
+function proceedToCreate(rateType, rateId) {
+  const modalEl = document.getElementById(`modal-${rateType}`);
+  const checked = modalEl.querySelectorAll('.room-select-card.checked').length;
+  if (checked === 0) {
+    alert('등록할 객실을 1개 이상 선택해주세요.');
+    return;
+  }
+  const activeRange = modalEl.querySelector('.range-btn.active .rb-main');
+  const days = activeRange ? activeRange.textContent.replace('D+', '') : '60';
+  window.location.href = `accom-ticket-create.html?rateType=${rateType}&rateId=${rateId}&range=${days}&rooms=${checked}`;
 }
 
 function openContentModal(state) {
@@ -1202,17 +1490,19 @@ function closeModal() {
   document.querySelectorAll('.modal-overlay').forEach(m => m.classList.remove('show'));
 }
 
-function selectRange(btn, days, scope) {
+function selectRange(btn, days) {
   const group = btn.parentElement;
   group.querySelectorAll('.range-btn').forEach(b => b.classList.remove('active'));
   btn.classList.add('active');
-  const section = btn.closest('.modal-body');
-  const summaryEl = section.querySelector('.preview-table + .form-help strong');
-  const titleEl = section.querySelector('.form-section-title .field-name');
-  if (summaryEl) summaryEl.textContent = `${days}건`;
-  if (titleEl) titleEl.textContent = `D+${days} · ${days}일치 · 일부 표시`;
-  const moreRow = section.querySelector('.preview-table tbody tr:last-child td');
-  if (moreRow && moreRow.colSpan) moreRow.textContent = `… (${days - 7}건 더)`;
+  const modalEl = btn.closest('.modal');
+  if (modalEl) {
+    const fieldName = modalEl.querySelector('.form-section-title .field-name');
+    if (fieldName) {
+      const rooms = fieldName.textContent.match(/\d+개 객실/);
+      fieldName.textContent = `D+${days} · ${days}일치 · ${rooms ? rooms[0] : ''}`;
+    }
+    updateSelectionCount(modalEl);
+  }
 }
 
 document.querySelectorAll('.modal-overlay').forEach(m => {
