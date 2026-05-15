@@ -304,7 +304,7 @@ select.select-mini { height: 30px; padding: 0 30px 0 10px; border: 1px solid #e8
         <label class="form-label">숙소</label>
         <div class="field-with-btn">
           <input type="text" class="form-control" value="2118  JW Marriott Phu Quoc">
-          <button class="btn btn-tmg" onclick="openContentModal()" title="TMG에서 이 숙소의 콘텐츠를 가져옵니다">📄 콘텐츠 조회</button>
+          <button class="btn btn-tmg" onclick="fetchTmgContent()" title="TMG getPropertyContent 호출 → 아래 [TMG 호텔 콘텐츠] 카드에 자동 채움">📥 TMG 콘텐츠 가져오기</button>
         </div>
         <div class="helper">TMG getPropertyContent 호출 후 객실/이미지/정책을 일괄 가져올 수 있습니다.</div>
       </div>
@@ -334,6 +334,145 @@ select.select-mini { height: 30px; padding: 0 30px 0 10px; border: 1px solid #e8
         <label class="form-label">운영명</label>
         <input type="text" class="form-control" value="TMG / JW Marriott Phu Quoc / Best Available Rate">
       </div>
+    </div>
+  </div>
+
+  <!-- ==================== TMG 호텔 콘텐츠 (getPropertyContent) ==================== -->
+  <div class="card" id="tmg-content-card">
+    <div class="card-title-row">
+      <div class="card-title" style="display:flex; align-items:center; gap:8px;">
+        🏨 TMG 호텔 콘텐츠
+        <span class="api-tag">2.6 getPropertyContent</span>
+        <span id="tmg-content-status" style="font-size:11px; color:rgba(0,0,0,0.45); font-weight:400;">아직 가져오지 않음</span>
+      </div>
+      <div class="card-title-actions">
+        <button class="btn btn-sm" onclick="fetchTmgContent()">🔄 다시 가져오기</button>
+      </div>
+    </div>
+
+    <!-- 초기 상태 (미가져옴) -->
+    <div id="tmg-content-empty" style="padding:36px 20px; text-align:center; background:#fafafa; border:1px dashed #e8e8e8; border-radius:10px; color:rgba(0,0,0,0.55); font-size:13px;">
+      위 [📥 TMG 콘텐츠 가져오기] 버튼을 눌러 호텔 콘텐츠를 불러오세요.<br>
+      <span style="font-size:11.5px; color:rgba(0,0,0,0.4);">콘텐츠 · 운영 정보 · 정책 · 객실 정보를 자동으로 가져옵니다.</span>
+    </div>
+
+    <!-- 가져온 후 (시뮬레이션, 초기엔 숨김) -->
+    <div id="tmg-content-loaded" style="display:none;">
+
+      <!-- 호텔 헤더 -->
+      <div style="background:linear-gradient(180deg,#f0f7ff 0%,#fafafa 100%); border-radius:12px; padding:20px; margin-bottom:20px;">
+        <div style="display:flex; align-items:flex-start; gap:16px;">
+          <div style="width:120px; height:90px; border-radius:8px; background:linear-gradient(135deg,#91caff,#1677ff); display:flex; align-items:center; justify-content:center; color:#fff; font-weight:800; font-size:24px; flex-shrink:0;">JW</div>
+          <div style="flex:1;">
+            <div style="font-size:12px; color:#fa8c16; margin-bottom:4px;">★★★★★ <span style="color:rgba(0,0,0,0.55);">5성급</span></div>
+            <div style="font-size:18px; font-weight:700; margin-bottom:4px;">JW Marriott Phu Quoc Emerald Bay Resort</div>
+            <div style="font-size:12.5px; color:rgba(0,0,0,0.55); line-height:1.5;">Bãi Khem, An Thới, Phú Quốc, Kiên Giang, Việt Nam</div>
+            <div style="display:flex; gap:16px; margin-top:12px; flex-wrap:wrap;">
+              <div><span style="font-size:11px; color:rgba(0,0,0,0.45);">호텔 ID</span> <strong style="font-family:'SF Mono',monospace; font-size:13px;">2118</strong></div>
+              <div><span style="font-size:11px; color:rgba(0,0,0,0.45);">위경도</span> <strong style="font-size:13px;">10.04, 103.96</strong></div>
+              <div><span style="font-size:11px; color:rgba(0,0,0,0.45);">평점</span> <strong style="font-size:13px;">9.4 / 526건</strong></div>
+              <div><span style="font-size:11px; color:rgba(0,0,0,0.45);">연락처</span> <strong style="font-size:13px;">+84 297 384 9999</strong></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 3컬럼 그리드: 콘텐츠 / 운영 / 정책 -->
+      <div style="display:grid; grid-template-columns:1.5fr 1fr 1fr; gap:16px; margin-bottom:20px;">
+
+        <!-- 콘텐츠 -->
+        <div style="background:#fff; border:1px solid #f0f0f0; border-radius:10px; padding:16px;">
+          <div style="font-size:13px; font-weight:700; margin-bottom:10px; display:flex; align-items:center; gap:6px;">📝 콘텐츠 <span style="font-family:'SF Mono',monospace; font-size:10px; color:rgba(0,0,0,0.4); font-weight:500;">shortDescription / fullDescription / images</span></div>
+
+          <!-- 이미지 갤러리 -->
+          <div style="display:flex; gap:6px; overflow-x:auto; padding-bottom:6px; margin-bottom:10px;">
+            <div style="width:90px; height:64px; border-radius:6px; background:linear-gradient(135deg,#b5d6ff,#e6f4ff); flex-shrink:0; display:flex; align-items:center; justify-content:center; font-size:10px; color:rgba(0,0,0,0.45);">대표</div>
+            <div style="width:90px; height:64px; border-radius:6px; background:linear-gradient(135deg,#ffd8bf,#fff2e8); flex-shrink:0; display:flex; align-items:center; justify-content:center; font-size:10px; color:rgba(0,0,0,0.45);">로비</div>
+            <div style="width:90px; height:64px; border-radius:6px; background:linear-gradient(135deg,#b7eb8f,#f6ffed); flex-shrink:0; display:flex; align-items:center; justify-content:center; font-size:10px; color:rgba(0,0,0,0.45);">수영장</div>
+            <div style="width:90px; height:64px; border-radius:6px; background:linear-gradient(135deg,#d3adf7,#f9f0ff); flex-shrink:0; display:flex; align-items:center; justify-content:center; font-size:10px; color:rgba(0,0,0,0.45);">레스토랑</div>
+            <div style="width:90px; height:64px; border-radius:6px; background:linear-gradient(135deg,#ffadd2,#fff0f6); flex-shrink:0; display:flex; align-items:center; justify-content:center; font-size:10px; color:rgba(0,0,0,0.45);">바</div>
+            <div style="width:90px; height:64px; border-radius:6px; background:#f5f5f5; flex-shrink:0; display:flex; align-items:center; justify-content:center; font-size:10px; color:rgba(0,0,0,0.45);">+7</div>
+          </div>
+
+          <!-- 짧은 설명 -->
+          <div style="font-size:12px; line-height:1.6; color:rgba(0,0,0,0.75); margin-bottom:8px;">
+            <strong>요약</strong>: 베트남 푸꾸옥 비치 리조트 · 5성급 · 프라이빗 비치 · 야외 수영장 · 12개 다이닝 옵션
+          </div>
+          <!-- 상세 설명 -->
+          <div style="font-size:12px; line-height:1.6; color:rgba(0,0,0,0.65); background:#fafafa; padding:10px 12px; border-radius:6px; max-height:120px; overflow-y:auto;">
+            <strong>JW Marriott Phu Quoc Emerald Bay Resort</strong>은 베트남 푸꾸옥 남단 Khem Bay에 위치한 5성급 럭셔리 리조트입니다. 프랑스 식민지 시대 대학 캠퍼스를 모티브로 한 빌 헤이톤(Bill Bensley)의 독창적 건축이 특징이며, 프라이빗 비치·5개 수영장·12개 레스토랑/바를 보유합니다. 244개의 객실과 빌라가 있으며 신혼여행·가족여행·럭셔리 휴양 모두에 적합합니다.
+          </div>
+        </div>
+
+        <!-- 운영 -->
+        <div style="background:#fff; border:1px solid #f0f0f0; border-radius:10px; padding:16px;">
+          <div style="font-size:13px; font-weight:700; margin-bottom:10px; display:flex; align-items:center; gap:6px;">⏰ 운영 정보 <span style="font-family:'SF Mono',monospace; font-size:10px; color:rgba(0,0,0,0.4); font-weight:500;">checkin/out · class · review</span></div>
+          <div style="display:flex; flex-direction:column; gap:10px; font-size:12.5px;">
+            <div style="display:flex; justify-content:space-between; padding:6px 0; border-bottom:1px dashed #f0f0f0;"><span style="color:rgba(0,0,0,0.55);">체크인</span><strong>15:00</strong></div>
+            <div style="display:flex; justify-content:space-between; padding:6px 0; border-bottom:1px dashed #f0f0f0;"><span style="color:rgba(0,0,0,0.55);">체크아웃</span><strong>12:00</strong></div>
+            <div style="display:flex; justify-content:space-between; padding:6px 0; border-bottom:1px dashed #f0f0f0;"><span style="color:rgba(0,0,0,0.55);">호텔 등급</span><strong>5성급</strong></div>
+            <div style="display:flex; justify-content:space-between; padding:6px 0; border-bottom:1px dashed #f0f0f0;"><span style="color:rgba(0,0,0,0.55);">평점 / 리뷰</span><strong>9.4 / 526건</strong></div>
+            <div style="display:flex; justify-content:space-between; padding:6px 0;"><span style="color:rgba(0,0,0,0.55);">통화</span><strong>VND</strong></div>
+          </div>
+        </div>
+
+        <!-- 정책 -->
+        <div style="background:#fff; border:1px solid #f0f0f0; border-radius:10px; padding:16px;">
+          <div style="font-size:13px; font-weight:700; margin-bottom:10px; display:flex; align-items:center; gap:6px;">📋 정책 <span style="font-family:'SF Mono',monospace; font-size:10px; color:rgba(0,0,0,0.4); font-weight:500;">age · hotelPolicies</span></div>
+
+          <!-- 연령 정책 -->
+          <div style="margin-bottom:12px;">
+            <div style="font-size:11px; color:rgba(0,0,0,0.55); margin-bottom:6px; font-weight:600;">연령 범위</div>
+            <div style="display:flex; flex-direction:column; gap:5px; font-size:12px;">
+              <div style="display:flex; justify-content:space-between; padding:3px 0;"><span style="color:rgba(0,0,0,0.55);">유아 (infant)</span><strong>0 ~ 5세</strong></div>
+              <div style="display:flex; justify-content:space-between; padding:3px 0;"><span style="color:rgba(0,0,0,0.55);">아동 (child)</span><strong>6 ~ 11세</strong></div>
+              <div style="display:flex; justify-content:space-between; padding:3px 0;"><span style="color:rgba(0,0,0,0.55);">청소년 (minor)</span><span style="color:rgba(0,0,0,0.35);">미적용</span></div>
+            </div>
+          </div>
+
+          <!-- 호텔 정책 (hotelPolicies) -->
+          <div>
+            <div style="font-size:11px; color:rgba(0,0,0,0.55); margin-bottom:6px; font-weight:600;">호텔 정책</div>
+            <div style="background:#fafafa; border-radius:6px; padding:10px 12px; font-size:11.5px; line-height:1.5; max-height:130px; overflow-y:auto;">
+              <strong style="font-size:12px;">체크인 안내</strong><br>
+              <span style="color:rgba(0,0,0,0.65);">- 모든 투숙객은 신분증/여권 제시 필수<br>- 디포짓 요구 가능 (신용카드 권장)</span>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- 객실 섹션 -->
+      <div style="background:#fff; border:1px solid #f0f0f0; border-radius:10px; padding:16px;">
+        <div style="font-size:13px; font-weight:700; margin-bottom:12px; display:flex; align-items:center; gap:6px;">🛏 객실 정보 <span style="font-family:'SF Mono',monospace; font-size:10px; color:rgba(0,0,0,0.4); font-weight:500;">rooms[]</span> <span style="font-size:11px; color:rgba(0,0,0,0.45); font-weight:500; margin-left:auto;">총 3개 객실</span></div>
+        <div style="display:grid; grid-template-columns:repeat(3,1fr); gap:10px;">
+          <div style="border:1px solid #f0f0f0; border-radius:8px; padding:10px;">
+            <div style="width:100%; height:80px; border-radius:6px; background:linear-gradient(135deg,#ffadd2,#fff0f6); margin-bottom:8px; display:flex; align-items:center; justify-content:center; font-size:11px; color:rgba(0,0,0,0.45);">객실 이미지</div>
+            <div style="font-size:12.5px; font-weight:600; margin-bottom:3px;">Deluxe King</div>
+            <div style="font-size:11px; color:rgba(0,0,0,0.55);">2A · 최대 4명 (성인 3 + 아동 2)</div>
+            <div style="font-family:'SF Mono',monospace; font-size:10px; color:rgba(0,0,0,0.35); margin-top:4px;">ID: 75944</div>
+          </div>
+          <div style="border:1px solid #f0f0f0; border-radius:8px; padding:10px;">
+            <div style="width:100%; height:80px; border-radius:6px; background:linear-gradient(135deg,#b7eb8f,#f6ffed); margin-bottom:8px; display:flex; align-items:center; justify-content:center; font-size:11px; color:rgba(0,0,0,0.45);">객실 이미지</div>
+            <div style="font-size:12.5px; font-weight:600; margin-bottom:3px;">Deluxe Twin</div>
+            <div style="font-size:11px; color:rgba(0,0,0,0.55);">2A · 최대 5명 (성인 3 + 아동 2)</div>
+            <div style="font-family:'SF Mono',monospace; font-size:10px; color:rgba(0,0,0,0.35); margin-top:4px;">ID: 74617</div>
+          </div>
+          <div style="border:1px solid #f0f0f0; border-radius:8px; padding:10px;">
+            <div style="width:100%; height:80px; border-radius:6px; background:linear-gradient(135deg,#91caff,#e6f4ff); margin-bottom:8px; display:flex; align-items:center; justify-content:center; font-size:11px; color:rgba(0,0,0,0.45);">객실 이미지</div>
+            <div style="font-size:12.5px; font-weight:600; margin-bottom:3px;">Executive Suite</div>
+            <div style="font-size:11px; color:rgba(0,0,0,0.55);">2A · 최대 4명</div>
+            <div style="font-family:'SF Mono',monospace; font-size:10px; color:rgba(0,0,0,0.35); margin-top:4px;">ID: 76812</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 동기 메타 -->
+      <div style="margin-top:14px; padding:10px 14px; background:#fafafa; border-radius:6px; font-size:11.5px; color:rgba(0,0,0,0.55); display:flex; justify-content:space-between; align-items:center;">
+        <span>📡 마지막 조회: <strong>방금 전</strong> · language: <code style="background:#fff; padding:1px 4px; border-radius:3px;">vi</code> (베트남어 원본)</span>
+        <span style="color:rgba(0,0,0,0.4);">⚠ 한국어 노출은 svc_catalog 자체 콘텐츠와 매핑 필요</span>
+      </div>
+
     </div>
   </div>
 
@@ -647,134 +786,21 @@ select.select-mini { height: 30px; padding: 0 30px 0 10px; border: 1px solid #e8
 
 </div>
 
-<!-- ==================== MODAL: TMG 콘텐츠 조회 ==================== -->
-<div class="modal-overlay" id="modal-content">
-  <div class="modal">
-    <div class="modal-header">
-      <div class="modal-title">
-        <span class="tag tag-purple">2.6 getPropertyContent</span>
-        TMG 호텔 콘텐츠 조회
-      </div>
-      <button class="modal-close" onclick="closeModal()">×</button>
-    </div>
-    <div class="modal-body">
-      <div class="content-grid">
-        <div>
-          <!-- 호텔 헤더 -->
-          <div class="hotel-hero">
-            <div class="top">
-              <div class="hotel-avatar">JW</div>
-              <div style="flex:1;">
-                <div class="hotel-stars">★★★★★ 5성급</div>
-                <div class="hotel-name">JW Marriott Phu Quoc Emerald Bay Resort</div>
-                <div class="hotel-addr">Bãi Khem, An Thới, Phú Quốc, Kiên Giang, Việt Nam</div>
-              </div>
-            </div>
-            <div class="hotel-meta">
-              <div class="hotel-meta-item"><span class="k">호텔 ID</span><span class="v" style="font-family:'SF Mono',monospace;">2118</span></div>
-              <div class="hotel-meta-item"><span class="k">체크인</span><span class="v">15:00</span></div>
-              <div class="hotel-meta-item"><span class="k">체크아웃</span><span class="v">12:00</span></div>
-              <div class="hotel-meta-item"><span class="k">평점</span><span class="v">9.4 (526)</span></div>
-              <div class="hotel-meta-item"><span class="k">위경도</span><span class="v">10.04, 103.96</span></div>
-            </div>
-          </div>
-
-          <!-- 이미지 -->
-          <div class="content-section">
-            <div class="content-section-title">📷 이미지 <span class="field">avatar + images[]</span></div>
-            <div class="img-strip">
-              <div class="img-thumb">대표</div>
-              <div class="img-thumb">로비</div>
-              <div class="img-thumb">수영장</div>
-              <div class="img-thumb">레스토랑</div>
-              <div class="img-thumb">바</div>
-              <div class="img-thumb">전경</div>
-              <div class="img-thumb">스파</div>
-            </div>
-          </div>
-
-          <!-- 객실 -->
-          <div class="content-section">
-            <div class="content-section-title">🛏 객실 타입 <span class="field">rooms[]</span></div>
-            <div class="room-list">
-              <div class="room-card-mini">
-                <div class="room-card-mini-name">Deluxe King</div>
-                <div class="room-card-mini-sub">기본 2인 · 표준 2A</div>
-                <div class="room-card-mini-meta">성인 3 · 아동 2 · 최대 4 · 엑베 1</div>
-              </div>
-              <div class="room-card-mini">
-                <div class="room-card-mini-name">Deluxe Twin</div>
-                <div class="room-card-mini-sub">기본 2인 · 표준 2A</div>
-                <div class="room-card-mini-meta">성인 3 · 아동 2 · 최대 4 · 엑베 1</div>
-              </div>
-              <div class="room-card-mini">
-                <div class="room-card-mini-name">Executive Suite</div>
-                <div class="room-card-mini-sub">기본 2인 · 표준 2A</div>
-                <div class="room-card-mini-meta">성인 3 · 아동 2 · 최대 5 · 엑베 1</div>
-              </div>
-              <div class="room-card-mini">
-                <div class="room-card-mini-name">Emerald Suite</div>
-                <div class="room-card-mini-sub">기본 4인 · 표준 4A</div>
-                <div class="room-card-mini-meta">성인 5 · 아동 3 · 최대 8 · 엑베 2</div>
-              </div>
-            </div>
-          </div>
-
-          <!-- 설명 -->
-          <div class="content-section">
-            <div class="content-section-title">📝 호텔 소개 <span class="field">shortDescription · fullDescription</span></div>
-            <div class="html-preview"><strong>한 줄 소개</strong> · Bãi Khem 해변, 프라이빗 비치, 야외 수영장</div>
-            <div class="html-preview" style="margin-top:6px;">콜로니얼 스타일의 럭셔리 리조트. Bill Bensley 설계. 푸꾸옥 남쪽 끝 Bãi Khem 해변에 위치하며 5개 레스토랑, 스파, 키즈클럽 보유...</div>
-          </div>
-
-          <!-- 정책 -->
-          <div class="content-section">
-            <div class="content-section-title">📋 호텔 정책 <span class="field">hotelPolicies[]</span></div>
-            <div class="html-preview"><strong>Hướng dẫn nhận phòng</strong> · 모든 투숙객은 신분증/여권 원본 제시 (베트남 국적 신분증 또는 외국인 여권+비자), iVIVU 예약확인서 지참 필수. 호텔에서 보증금 요구 가능.</div>
-          </div>
-        </div>
-
-        <!-- 사이드: 임포트할 항목 체크 -->
-        <div class="side-panel">
-          <div class="side-panel-title">⬇ 가져올 항목 선택</div>
-          <table class="import-table">
-            <tbody>
-              <tr><td><label><input type="checkbox" class="import-check" checked> 호텔명·주소</label></td><td style="text-align:right;"><span class="tag tag-green">덮어쓰기</span></td></tr>
-              <tr><td><label><input type="checkbox" class="import-check" checked> 체크인/체크아웃 시간</label></td><td style="text-align:right;"><span class="tag tag-green">덮어쓰기</span></td></tr>
-              <tr><td><label><input type="checkbox" class="import-check" checked> 호텔 정책</label></td><td style="text-align:right;"><span class="tag tag-blue">추가</span></td></tr>
-              <tr><td><label><input type="checkbox" class="import-check" checked> 객실 4종</label></td><td style="text-align:right;"><span class="tag tag-blue">매핑</span></td></tr>
-              <tr><td><label><input type="checkbox" class="import-check"> 이미지 7장</label></td><td style="text-align:right;"><span class="tag tag-blue">추가</span></td></tr>
-              <tr><td><label><input type="checkbox" class="import-check"> 호텔 소개 (HTML)</label></td><td style="text-align:right;"><span class="tag tag-blue">추가</span></td></tr>
-              <tr><td><label><input type="checkbox" class="import-check"> 연령 기준</label></td><td style="text-align:right;"><span class="tag tag-green">덮어쓰기</span></td></tr>
-              <tr><td><label><input type="checkbox" class="import-check"> 지역 정보</label></td><td style="text-align:right;"><span class="tag tag-green">덮어쓰기</span></td></tr>
-            </tbody>
-          </table>
-
-          <div class="side-panel-title" style="margin-top:14px;">📡 API 호출</div>
-          <div class="side-row"><span class="k">엔드포인트</span><span class="v" style="font-family:'SF Mono',monospace; font-size:11px;">/getPropertyContent</span></div>
-          <div class="side-row"><span class="k">propertyId</span><span class="v" style="font-family:'SF Mono',monospace;">2118</span></div>
-          <div class="side-row"><span class="k">language</span><span class="v" style="font-family:'SF Mono',monospace;">kr</span></div>
-          <div class="side-row"><span class="k">응답 시각</span><span class="v">2026-05-12 20:48</span></div>
-
-          <div style="font-size:11px; color:rgba(0,0,0,0.55); margin-top:14px; line-height:1.6; padding:10px 12px; background:#fff7e6; border-radius:6px; border:1px solid #ffd591;">
-            ⚠ 체크된 항목은 현재 입력한 폼 값을 <strong>덮어쓰거나 추가</strong>합니다. 적용 전 확인하세요.
-          </div>
-        </div>
-      </div>
-    </div>
-    <div class="modal-footer">
-      <div style="font-size:12px; color:rgba(0,0,0,0.55);">총 4개 항목 선택됨</div>
-      <div style="display:flex; gap:8px;">
-        <button class="btn" onclick="closeModal()">취소</button>
-        <button class="btn btn-tmg" onclick="alert('선택한 항목을 폼에 적용합니다.'); closeModal();">선택 항목 가져오기</button>
-      </div>
-    </div>
-  </div>
-</div>
 
 <script>
-function openContentModal() {
-  document.getElementById('modal-content').classList.add('show');
+function fetchTmgContent() {
+  // 시뮬레이션: TMG getPropertyContent 호출 → 카드 채움
+  const empty = document.getElementById('tmg-content-empty');
+  const loaded = document.getElementById('tmg-content-loaded');
+  const status = document.getElementById('tmg-content-status');
+  status.textContent = '⏳ 가져오는 중...';
+  status.style.color = '#1677ff';
+  setTimeout(() => {
+    empty.style.display = 'none';
+    loaded.style.display = 'block';
+    status.textContent = '✅ 가져옴 (방금 전)';
+    status.style.color = '#389e0d';
+  }, 600);
 }
 function closeModal() {
   document.querySelectorAll('.modal-overlay').forEach(m => m.classList.remove('show'));
