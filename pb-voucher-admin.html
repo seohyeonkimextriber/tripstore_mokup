@@ -1,0 +1,392 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PB 숙박권 관리 — TripStore Admin</title>
+<link href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.6/dist/web/static/pretendard.css" rel="stylesheet">
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: 'Pretendard', 'Apple SD Gothic Neo', -apple-system, sans-serif; font-size: 14px; color: rgba(0,0,0,0.88); background: #f5f6f8; }
+
+/* GNB */
+.gnb { background: #fff; height: 60px; display: flex; align-items: center; padding: 0 24px; border-bottom: 1px solid #f0f0f0; position: sticky; top: 0; z-index: 100; }
+.gnb-logo { display: flex; align-items: center; gap: 8px; margin-right: 32px; }
+.gnb-logo .logo-circle { width: 30px; height: 30px; border-radius: 50%; background: #1a1a1a; color: #fff; display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 14px; }
+.gnb-logo .logo-text { font-size: 13px; line-height: 1.1; }
+.gnb-logo .logo-text strong { display: block; font-weight: 700; color: #1a1a1a; }
+.gnb-logo .logo-text small { font-size: 11px; color: rgba(0,0,0,0.55); }
+.gnb-menu { display: flex; gap: 0; flex: 1; }
+.gnb-item { color: rgba(0,0,0,0.65); padding: 0 14px; height: 60px; display: flex; align-items: center; cursor: pointer; font-size: 13px; font-weight: 500; position: relative; }
+.gnb-item.active { color: #1a1a1a; font-weight: 700; }
+.gnb-user { font-size: 13px; color: rgba(0,0,0,0.65); display: flex; align-items: center; gap: 8px; }
+
+/* LAYOUT */
+.layout { padding: 28px 40px 60px; max-width: 1600px; margin: 0 auto; }
+.page-title { font-size: 24px; font-weight: 800; margin-bottom: 24px; letter-spacing: -0.5px; }
+
+.card { background: #fff; border-radius: 8px; box-shadow: 0 1px 2px rgba(0,0,0,0.04); padding: 0; }
+
+/* FILTER BAR */
+.filter-row { display: flex; align-items: center; gap: 10px; padding: 20px 24px; flex-wrap: wrap; }
+.filter-row .fi { height: 40px; border: 1px solid #e8e8e8; border-radius: 6px; padding: 0 14px; font-size: 13px; font-family: inherit; outline: none; background: #fff; }
+.filter-row .fi:focus { border-color: #1677ff; }
+.filter-row .fi-sm { width: 130px; }
+.filter-row .fi-md { width: 160px; }
+.filter-row .fi-lg { width: 200px; }
+.filter-row .fi-xl { width: 240px; }
+.filter-row select.fi { padding-right: 32px; appearance: none; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='%23999'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 12px center; cursor: pointer; }
+.filter-row .date-range { display: inline-flex; align-items: center; gap: 6px; border: 1px solid #e8e8e8; border-radius: 6px; padding: 0 12px; height: 40px; background: #fff; }
+.filter-row .date-range input { border: none; outline: none; font-size: 13px; font-family: inherit; width: 110px; }
+.filter-row .date-range .arrow { color: rgba(0,0,0,0.35); }
+
+.btn { display: inline-flex; align-items: center; justify-content: center; gap: 5px; height: 40px; padding: 0 16px; border-radius: 6px; font-size: 13px; font-weight: 600; cursor: pointer; border: 1px solid transparent; background: transparent; font-family: inherit; transition: 0.15s; white-space: nowrap; }
+.btn-sm { height: 32px; padding: 0 12px; font-size: 12px; }
+.btn-primary { background: #1a1a1a; color: #fff; }
+.btn-primary:hover { background: #333; }
+.btn-default { border-color: #d9d9d9; color: rgba(0,0,0,0.88); }
+.btn-default:hover { border-color: #1677ff; color: #1677ff; }
+.btn-ghost { color: rgba(0,0,0,0.65); }
+.btn-ghost:hover { color: #1677ff; }
+.btn-danger { background: #fff1f0; border-color: #ffa39e; color: #cf1322; }
+.btn-danger:hover { background: #cf1322; color: #fff; border-color: #cf1322; }
+.btn-warn { background: #fff7e6; border-color: #ffd591; color: #d48806; }
+
+.filter-actions { display: inline-flex; gap: 8px; }
+.filter-spacer { flex: 1; }
+
+/* INFO BANNER */
+.info-banner { padding: 14px 24px; background: #f0f9ff; border-bottom: 1px solid #d9e6f5; font-size: 13px; color: rgba(0,0,0,0.7); line-height: 1.7; }
+.info-banner code { background: rgba(0,0,0,0.06); padding: 1px 5px; border-radius: 3px; font-size: 12px; }
+
+/* ACTION BAR */
+.action-bar { display: flex; align-items: center; justify-content: space-between; padding: 14px 24px; border-top: 1px solid #f0f0f0; border-bottom: 1px solid #f0f0f0; background: #fafafa; }
+.action-stats { font-size: 13px; color: rgba(0,0,0,0.65); }
+.action-stats strong { color: rgba(0,0,0,0.88); margin: 0 2px; }
+.action-buttons { display: inline-flex; gap: 8px; }
+
+/* TABLE */
+.tbl-wrap { overflow-x: auto; }
+table { width: 100%; border-collapse: collapse; font-size: 13px; }
+thead th { padding: 12px 14px; background: #fafafa; border-bottom: 1px solid #f0f0f0; font-weight: 600; color: rgba(0,0,0,0.65); text-align: left; white-space: nowrap; }
+tbody td { padding: 12px 14px; border-bottom: 1px solid #f5f5f5; vertical-align: middle; }
+tbody tr:hover td { background: #fafbfc; }
+tbody tr.row-failed td { background: #fff1f0; }
+tbody tr.row-failed:hover td { background: #ffe0dd; }
+.td-id { font-family: 'SF Mono', monospace; color: rgba(0,0,0,0.65); font-size: 12px; }
+.td-name { font-weight: 500; }
+.td-meta { font-size: 12px; color: rgba(0,0,0,0.65); }
+
+/* TAGS / BADGES */
+.tag { display: inline-flex; align-items: center; gap: 4px; padding: 2px 8px; border-radius: 4px; font-size: 11px; font-weight: 600; line-height: 1.5; white-space: nowrap; }
+.tag-green { background: #f6ffed; color: #389e0d; border: 1px solid #b7eb8f; }
+.tag-yellow { background: #fffbe6; color: #d48806; border: 1px solid #ffe58f; }
+.tag-red { background: #fff1f0; color: #cf1322; border: 1px solid #ffa39e; }
+.tag-blue { background: #e6f4ff; color: #1677ff; border: 1px solid #91caff; }
+.tag-gray { background: #f5f5f5; color: rgba(0,0,0,0.55); border: 1px solid #e8e8e8; }
+.tag-neutral { background: transparent; color: rgba(0,0,0,0.35); border: 1px dashed #e8e8e8; }
+
+/* SYNC STATE PILLS */
+.state-pill { display: inline-flex; align-items: center; gap: 4px; padding: 3px 9px; border-radius: 12px; font-size: 11px; font-weight: 600; line-height: 1.5; }
+.state-pill .dot { width: 6px; height: 6px; border-radius: 50%; }
+.state-wait { background: #f5f5f5; color: rgba(0,0,0,0.55); }
+.state-wait .dot { background: #bfbfbf; }
+.state-progress { background: #e6f4ff; color: #1677ff; }
+.state-progress .dot { background: #1677ff; animation: pulse 1.5s infinite; }
+.state-done { background: #f6ffed; color: #389e0d; }
+.state-done .dot { background: #52c41a; }
+.state-fail { background: #fff1f0; color: #cf1322; }
+.state-fail .dot { background: #ff4d4f; }
+.state-na { color: rgba(0,0,0,0.3); font-size: 12px; }
+@keyframes pulse { 0%,100%{opacity:1;} 50%{opacity:0.4;} }
+
+.last-sync { font-size: 11px; color: rgba(0,0,0,0.45); margin-top: 2px; }
+
+/* STATUS DROPDOWN (운영중) */
+.status-select { display: inline-flex; align-items: center; gap: 4px; padding: 4px 8px; border: 1px solid #e8e8e8; border-radius: 4px; font-size: 12px; font-weight: 500; background: #fff; cursor: pointer; }
+
+/* PAGINATION */
+.pagination { display: flex; justify-content: center; align-items: center; gap: 4px; padding: 20px; border-top: 1px solid #f0f0f0; }
+.page-btn { min-width: 32px; height: 32px; border: 1px solid #e8e8e8; background: #fff; border-radius: 4px; font-size: 13px; cursor: pointer; font-family: inherit; color: rgba(0,0,0,0.65); padding: 0 8px; }
+.page-btn.active { background: #1a1a1a; border-color: #1a1a1a; color: #fff; font-weight: 600; }
+.page-btn:hover:not(.active) { border-color: #1677ff; color: #1677ff; }
+
+/* CHECKBOX */
+.tbl-check { width: 14px; height: 14px; cursor: pointer; }
+
+.help-icon { display: inline-flex; align-items: center; justify-content: center; width: 14px; height: 14px; border-radius: 50%; background: rgba(0,0,0,0.06); color: rgba(0,0,0,0.45); font-size: 10px; font-weight: 700; cursor: help; margin-left: 4px; }
+</style>
+</head>
+<body>
+
+<!-- GNB -->
+<div class="gnb">
+  <div class="gnb-logo">
+    <div class="logo-circle">E</div>
+    <div class="logo-text"><strong>트립스토어</strong><small>관리자</small></div>
+  </div>
+  <div class="gnb-menu">
+    <div class="gnb-item">대시보드</div>
+    <div class="gnb-item">페이지 관리</div>
+    <div class="gnb-item">상품관리</div>
+    <div class="gnb-item">태그</div>
+    <div class="gnb-item">예약 관리</div>
+    <div class="gnb-item active">PB 관리</div>
+    <div class="gnb-item">카탈로그</div>
+    <div class="gnb-item">쿠폰</div>
+    <div class="gnb-item">정산</div>
+    <div class="gnb-item">파트너스관리</div>
+    <div class="gnb-item">후기</div>
+    <div class="gnb-item">사내도구</div>
+    <div class="gnb-item">마케팅</div>
+    <div class="gnb-item">실험실</div>
+  </div>
+  <div class="gnb-user"><strong>김서현</strong> 님 반가워요!</div>
+</div>
+
+<div class="layout">
+  <div class="page-title">PB 숙박권 관리</div>
+
+  <div class="card">
+
+    <!-- 상단 안내 -->
+    <div class="info-banner">
+      📋 등록된 PB 숙박권 목록입니다. <strong>TMG 공급 + 재고변동/다이나믹 요금</strong> 숙박권은 <code>checkAvailability</code>를 통해 재고/요금 조회 상태를 추적합니다. 실패 건은 일괄 재동기화 가능합니다. <span style="color:rgba(0,0,0,0.45);">· 요금사용기한 종료된 숙박권은 자동 refresh에서 제외 (목록에는 그대로 노출)</span>
+    </div>
+
+    <!-- 검색 필터 1줄 -->
+    <div class="filter-row">
+      <input type="text" class="fi fi-sm" placeholder="숙박권 ID">
+      <select class="fi fi-sm"><option>공급사</option><option>TMG</option><option>PL마케팅</option><option>피크타임</option><option>에이앤드티</option></select>
+      <select class="fi fi-sm"><option>여행지</option></select>
+      <input type="text" class="fi fi-md" placeholder="운영명">
+      <select class="fi fi-lg"><option>숙소</option></select>
+      <div class="date-range">
+        <input type="text" placeholder="요금 사용기한"><span class="arrow">→</span><input type="text" placeholder="">📅
+      </div>
+      <select class="fi fi-md"><option>운영중</option><option>운영종료</option><option>전체</option></select>
+      <div class="filter-actions">
+        <button class="btn btn-primary">🔍 검색</button>
+        <button class="btn btn-default">초기화</button>
+      </div>
+      <div class="filter-spacer"></div>
+      <button class="btn btn-primary" style="background:#1677ff;">+ 등록하기</button>
+    </div>
+
+    <!-- 검색 필터 2줄 (재고조회 관련 - 신규) -->
+    <div class="filter-row" style="padding-top:0; border-top:1px dashed #f0f0f0; gap:8px;">
+      <span style="font-size:12px; color:rgba(0,0,0,0.45); margin-right:4px;">재고조회 필터</span>
+      <select class="fi fi-md"><option>요금타입 (전체)</option><option>고정요금</option><option>재고변동요금</option><option>다이나믹요금</option><option>비-TMG (해당없음)</option></select>
+      <select class="fi fi-md"><option>재고조회 상태 (전체)</option><option>대기</option><option>진행 중</option><option>완료</option><option>실패</option></select>
+    </div>
+
+    <!-- 액션 바 -->
+    <div class="action-bar">
+      <div class="action-stats">
+        총 <strong>1,247건</strong> · 운영중 <strong style="color:#52c41a;">1,082</strong> · TMG 숙박권 <strong>248</strong> · <span style="color:#cf1322;">재고조회 실패 <strong>14</strong></span>
+      </div>
+      <div class="action-buttons">
+        <button class="btn btn-danger btn-sm" onclick="alert('재고조회 실패 14건을 일괄 재동기화합니다.\n(checkAvailability 재호출)')">🔄 실패 건 일괄 재동기화</button>
+      </div>
+    </div>
+
+    <!-- 테이블 -->
+    <div class="tbl-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th style="width:32px;"><input type="checkbox" class="tbl-check"></th>
+            <th style="width:60px;">ID ↓</th>
+            <th style="width:110px;">공급사</th>
+            <th>운영명</th>
+            <th>숙소명</th>
+            <th style="width:120px;">요금타입 <span class="help-icon" title="TMG 공급일 때만 표시. rateType 기반 자동 분류">?</span></th>
+            <th style="width:140px;">재고조회 상태 <span class="help-icon" title="대기 / 진행 중 / 완료 / 실패. TMG + 재고변동/다이나믹만 의미 있음">?</span></th>
+            <th style="width:120px;">요금 사용기한</th>
+            <th style="width:90px;">상태</th>
+            <th style="width:80px;">수정</th>
+          </tr>
+        </thead>
+        <tbody>
+
+          <!-- TMG 다이나믹 + 실패 (강조) -->
+          <tr class="row-failed">
+            <td><input type="checkbox" class="tbl-check" checked></td>
+            <td class="td-id">258</td>
+            <td>TMG</td>
+            <td class="td-name">TMG 연동 / Khu nghỉ dưỡng SOL by Meliá Phú Quốc / Giá Chỉ Có Tại iVIVU</td>
+            <td>솔 바이 멜리아 푸꾸옥</td>
+            <td><span class="tag tag-red">다이나믹요금</span></td>
+            <td>
+              <span class="state-pill state-fail"><span class="dot"></span>실패</span>
+              <div class="last-sync">3시간 전 · timeout</div>
+            </td>
+            <td class="td-meta">2027-04-01</td>
+            <td><span class="status-select">운영중 ▾</span></td>
+            <td><button class="btn btn-ghost btn-sm">수정</button></td>
+          </tr>
+
+          <!-- TMG 재고변동 + 진행 중 -->
+          <tr>
+            <td><input type="checkbox" class="tbl-check"></td>
+            <td class="td-id">250</td>
+            <td>TMG</td>
+            <td class="td-name">TMG 연동 / Khu Nghỉ Dưỡng Ocean Bay Phú Quốc / Ưu Đãi Đặc Biệt</td>
+            <td>오션베이 리조트 앤 스파 푸꾸옥</td>
+            <td><span class="tag tag-yellow">재고변동요금</span></td>
+            <td>
+              <span class="state-pill state-progress"><span class="dot"></span>진행 중</span>
+              <div class="last-sync">호출 중 · 1초 전</div>
+            </td>
+            <td class="td-meta">2026-08-01</td>
+            <td><span class="status-select">운영중 ▾</span></td>
+            <td><button class="btn btn-ghost btn-sm">수정</button></td>
+          </tr>
+
+          <!-- TMG 고정요금 + 완료 -->
+          <tr>
+            <td><input type="checkbox" class="tbl-check" disabled title="고정요금은 재고조회 불필요"></td>
+            <td class="td-id">249</td>
+            <td>TMG</td>
+            <td class="td-name">TMG 연동 / Vinpearl Resort Nha Trang / Early Bird</td>
+            <td>빈펄 리조트 나트랑</td>
+            <td><span class="tag tag-green">고정요금</span></td>
+            <td>
+              <span class="state-pill state-done"><span class="dot"></span>완료</span>
+              <div class="last-sync">N/A (TMG 확정값)</div>
+            </td>
+            <td class="td-meta">2026-09-15</td>
+            <td><span class="status-select">운영중 ▾</span></td>
+            <td><button class="btn btn-ghost btn-sm">수정</button></td>
+          </tr>
+
+          <!-- TMG 재고변동 + 완료 -->
+          <tr>
+            <td><input type="checkbox" class="tbl-check"></td>
+            <td class="td-id">247</td>
+            <td>TMG</td>
+            <td class="td-name">TMG 연동 / JW Marriott Phu Quoc / Best Available Rate</td>
+            <td>JW 메리어트 푸꾸옥</td>
+            <td><span class="tag tag-yellow">재고변동요금</span></td>
+            <td>
+              <span class="state-pill state-done"><span class="dot"></span>완료</span>
+              <div class="last-sync">12분 전</div>
+            </td>
+            <td class="td-meta">2026-12-31</td>
+            <td><span class="status-select">운영중 ▾</span></td>
+            <td><button class="btn btn-ghost btn-sm">수정</button></td>
+          </tr>
+
+          <!-- TMG 다이나믹 + 대기 (방금 등록) -->
+          <tr>
+            <td><input type="checkbox" class="tbl-check"></td>
+            <td class="td-id">246</td>
+            <td>TMG</td>
+            <td class="td-name">TMG 연동 / Vinpearl Luxury Landmark 81 / Real-time BAR</td>
+            <td>빈펄 럭셔리 랜드마크 81</td>
+            <td><span class="tag tag-red">다이나믹요금</span></td>
+            <td>
+              <span class="state-pill state-wait"><span class="dot"></span>대기</span>
+              <div class="last-sync">등록 직후 · 첫 조회 예정</div>
+            </td>
+            <td class="td-meta">2027-04-29</td>
+            <td><span class="status-select">운영중 ▾</span></td>
+            <td><button class="btn btn-ghost btn-sm">수정</button></td>
+          </tr>
+
+          <!-- 비-TMG 공급사 (PL마케팅) -->
+          <tr>
+            <td><input type="checkbox" class="tbl-check" disabled title="TMG 공급사만 재고조회 적용"></td>
+            <td class="td-id">213</td>
+            <td>PL마케팅</td>
+            <td class="td-name">PL마케팅 / DAD 리조트 푸꾸옥</td>
+            <td>DAD 리조트 푸꾸옥</td>
+            <td><span class="tag tag-neutral">해당없음</span></td>
+            <td><span class="state-na">— N/A (비-TMG)</span></td>
+            <td class="td-meta">2026-08-20</td>
+            <td><span class="status-select">운영중 ▾</span></td>
+            <td><button class="btn btn-ghost btn-sm">수정</button></td>
+          </tr>
+
+          <!-- TMG 재고변동 + 실패 (체크됨) -->
+          <tr class="row-failed">
+            <td><input type="checkbox" class="tbl-check" checked></td>
+            <td class="td-id">211</td>
+            <td>TMG</td>
+            <td class="td-name">TMG 연동 / Fusion Resort Cam Ranh / Early Bird</td>
+            <td>퓨전 리조트 캄란</td>
+            <td><span class="tag tag-yellow">재고변동요금</span></td>
+            <td>
+              <span class="state-pill state-fail"><span class="dot"></span>실패</span>
+              <div class="last-sync">6시간 전 · 500 error</div>
+            </td>
+            <td class="td-meta">2026-09-30</td>
+            <td><span class="status-select">운영중 ▾</span></td>
+            <td><button class="btn btn-ghost btn-sm">수정</button></td>
+          </tr>
+
+          <!-- 비-TMG (피크타임) -->
+          <tr>
+            <td><input type="checkbox" class="tbl-check" disabled title="TMG 공급사만 재고조회 적용"></td>
+            <td class="td-id">40</td>
+            <td>피크타임</td>
+            <td class="td-name">피크타임 / 뉴월드 리조트 푸꾸옥</td>
+            <td>뉴월드 리조트 푸꾸옥</td>
+            <td><span class="tag tag-neutral">해당없음</span></td>
+            <td><span class="state-na">— N/A (비-TMG)</span></td>
+            <td class="td-meta">2026-10-31</td>
+            <td><span class="status-select">운영중 ▾</span></td>
+            <td><button class="btn btn-ghost btn-sm">수정</button></td>
+          </tr>
+
+          <!-- 비-TMG (에이앤드티) -->
+          <tr>
+            <td><input type="checkbox" class="tbl-check" disabled title="TMG 공급사만 재고조회 적용"></td>
+            <td class="td-id">243</td>
+            <td>에이앤드티</td>
+            <td class="td-name">에이앤드티 / 그란 멜리아 나트랑</td>
+            <td>그란 멜리아 나트랑</td>
+            <td><span class="tag tag-neutral">해당없음</span></td>
+            <td><span class="state-na">— N/A (비-TMG)</span></td>
+            <td class="td-meta">2026-05-31</td>
+            <td><span class="status-select" style="color:#fa8c16;">기한임박 ▾</span></td>
+            <td><button class="btn btn-ghost btn-sm">수정</button></td>
+          </tr>
+
+          <!-- 요금사용기한 종료 (자동 refresh 제외 케이스) -->
+          <tr style="opacity:0.6;">
+            <td><input type="checkbox" class="tbl-check" disabled title="요금사용기한 종료 — refresh 제외"></td>
+            <td class="td-id">198</td>
+            <td>TMG</td>
+            <td class="td-name">TMG 연동 / Pullman Phu Quoc Beach Resort / Summer Promo</td>
+            <td>풀만 푸꾸옥 비치 리조트</td>
+            <td><span class="tag tag-yellow">재고변동요금</span></td>
+            <td>
+              <span class="state-pill state-done"><span class="dot"></span>완료</span>
+              <div class="last-sync" style="color:#cf1322;">요금사용기한 종료 · refresh 제외</div>
+            </td>
+            <td class="td-meta" style="color:#cf1322;">2026-05-10 (종료)</td>
+            <td><span class="status-select">운영종료 ▾</span></td>
+            <td><button class="btn btn-ghost btn-sm">수정</button></td>
+          </tr>
+
+        </tbody>
+      </table>
+    </div>
+
+    <!-- 페이지네이션 -->
+    <div class="pagination">
+      <button class="page-btn">‹</button>
+      <button class="page-btn active">1</button>
+      <button class="page-btn">2</button>
+      <button class="page-btn">3</button>
+      <button class="page-btn">…</button>
+      <button class="page-btn">125</button>
+      <button class="page-btn">›</button>
+    </div>
+
+  </div>
+</div>
+
+</body>
+</html>
