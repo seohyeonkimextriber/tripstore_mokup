@@ -365,6 +365,49 @@
   .attach-item .name { flex: 1; color: #1a1a1a; font-weight: 500; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
   .attach-item .size { color: #888; font-size: 10px; flex-shrink: 0; }
 
+  /* === 하단: 메모/이력/스냅샷 === */
+  .v3-footer-tabs { display: flex; gap: 0; border-bottom: 1px solid #e8e8e8; margin: -20px -20px 20px; padding: 0 20px; }
+  .v3-footer-tab { padding: 14px 18px; font-size: 13px; font-weight: 600; color: #888; cursor: pointer; border-bottom: 2px solid transparent; margin-bottom: -1px; transition: all 0.15s; display: flex; align-items: center; gap: 6px; }
+  .v3-footer-tab:hover { color: #1a1a1a; }
+  .v3-footer-tab.active { color: #1a1a1a; border-bottom-color: #1a1a1a; font-weight: 700; }
+  .v3-footer-tab .tab-count { font-size: 10px; padding: 1px 6px; background: #f0f0f0; color: #666; border-radius: 8px; font-weight: 700; }
+  .v3-footer-tab.active .tab-count { background: #1a1a1a; color: #fff; }
+  .v3-footer-panel { display: none; }
+  .v3-footer-panel.active { display: block; }
+
+  /* 메모 */
+  .memo-list { display: flex; flex-direction: column; gap: 10px; }
+  .memo-item { background: #fafafa; border-left: 3px solid #1565c0; border-radius: 4px; padding: 12px 14px; }
+  .memo-item.urgent { border-left-color: #d32f2f; background: #fff8f8; }
+  .memo-item.system { border-left-color: #9e9e9e; background: #f5f5f5; }
+  .memo-meta { display: flex; align-items: center; gap: 8px; font-size: 11px; color: #888; margin-bottom: 4px; }
+  .memo-author { font-weight: 700; color: #1a1a1a; }
+  .memo-tag { font-size: 10px; padding: 1px 6px; border-radius: 3px; background: #fff; border: 1px solid #e0e0e0; color: #666; }
+  .memo-tag.urgent { background: #ffeaea; color: #d32f2f; border-color: #ffcdd2; }
+  .memo-tag.system { background: #f0f0f0; }
+  .memo-body { font-size: 12px; color: #1a1a1a; line-height: 1.6; }
+  .memo-add { display: flex; gap: 8px; margin-top: 12px; }
+  .memo-input { flex: 1; padding: 8px 12px; border: 1px solid #d0d0d0; border-radius: 6px; font-size: 12px; font-family: inherit; }
+
+  /* 변경 이력 (타임라인) */
+  .history-list { position: relative; padding-left: 24px; }
+  .history-list::before { content: ''; position: absolute; left: 8px; top: 6px; bottom: 6px; width: 2px; background: #e8e8e8; }
+  .history-item { position: relative; padding: 6px 0 14px; }
+  .history-item::before { content: ''; position: absolute; left: -20px; top: 8px; width: 8px; height: 8px; border-radius: 50%; background: #1565c0; border: 2px solid #fff; box-shadow: 0 0 0 1px #1565c0; }
+  .history-item.status::before { background: #2e7d32; box-shadow: 0 0 0 1px #2e7d32; }
+  .history-item.cancel::before { background: #d32f2f; box-shadow: 0 0 0 1px #d32f2f; }
+  .history-time { font-size: 11px; color: #888; }
+  .history-action { font-size: 12px; color: #1a1a1a; font-weight: 600; margin-top: 2px; }
+  .history-detail { font-size: 11px; color: #666; margin-top: 4px; padding: 6px 8px; background: #fafafa; border-radius: 4px; }
+  .history-detail .from { color: #999; text-decoration: line-through; }
+  .history-detail .to { color: #2e7d32; font-weight: 600; }
+  .history-actor { font-size: 11px; color: #1565c0; font-weight: 600; }
+
+  /* 행사 스냅샷 */
+  .snapshot-box { background: #fffbf0; border: 1px solid #ffe082; border-radius: 8px; padding: 12px 14px; margin-bottom: 10px; }
+  .snapshot-box .snap-label { font-size: 11px; font-weight: 700; color: #f57c00; margin-bottom: 6px; }
+  .snapshot-box .snap-content { font-size: 12px; color: #5d4037; line-height: 1.7; white-space: pre-wrap; }
+
   /* 라이프사이클 칩 (5단계) */
   .lifecycle-chip { display: inline-flex; align-items: center; gap: 6px; padding: 5px 12px; border-radius: 14px; font-size: 12px; font-weight: 700; cursor: pointer; transition: filter 0.15s; }
   .lifecycle-chip:hover { filter: brightness(0.95); box-shadow: 0 0 0 3px rgba(0,0,0,0.05); }
@@ -968,10 +1011,147 @@
 
   <!-- ============ 영역 ⑤ 하단: 메모 / 변경이력 / 행사 스냅샷 ============ -->
   <div class="v3-footer-section">
-    <div class="v3-placeholder" style="border:none;background:transparent;padding:24px;">
-      <div class="ph-icon">📝</div>
-      <div class="ph-title">⑤ 하단 · 메모 / 변경이력 / 행사 스냅샷 / 첨부</div>
-      <div class="ph-desc">접힘/펼침 형태로 보조 영역<br>(다음 단계에서 작업)</div>
+    <div class="v3-footer-tabs">
+      <div class="v3-footer-tab active" data-tab="memo">📝 메모 <span class="tab-count">3</span></div>
+      <div class="v3-footer-tab" data-tab="history">🕰 변경 이력 <span class="tab-count">12</span></div>
+      <div class="v3-footer-tab" data-tab="snapshot">📊 행사 스냅샷</div>
+    </div>
+
+    <!-- 📝 메모 패널 -->
+    <div class="v3-footer-panel active" data-panel="memo">
+      <div class="memo-list">
+        <div class="memo-item urgent">
+          <div class="memo-meta">
+            <span class="memo-author">김PM</span>
+            <span class="memo-tag urgent">⚠ 긴급</span>
+            <span>2026-05-13 14:30</span>
+          </div>
+          <div class="memo-body">고객이 아동 여권 만료 가까워서 재발급 진행 중. 여권 사본 받으면 즉시 항공사·호텔에 전달 요망.</div>
+        </div>
+
+        <div class="memo-item">
+          <div class="memo-meta">
+            <span class="memo-author">이OP</span>
+            <span class="memo-tag">일반</span>
+            <span>2026-05-10 11:20</span>
+          </div>
+          <div class="memo-body">호텔 측 객실 업그레이드 확약 받음 (디럭스 → 시뷰 디럭스, 추가 비용 없음). 바우처 발급 시 반영됨.</div>
+        </div>
+
+        <div class="memo-item system">
+          <div class="memo-meta">
+            <span class="memo-author">시스템</span>
+            <span class="memo-tag system">자동</span>
+            <span>2026-04-29 10:05</span>
+          </div>
+          <div class="memo-body">예약 접수 완료. 여행계약서·여권정보 요청 알림톡 자동 발송.</div>
+        </div>
+      </div>
+
+      <div class="memo-add">
+        <input type="text" class="memo-input" placeholder="메모를 입력하세요... (Enter로 전송)">
+        <button class="card-mini-btn add">+ 메모 추가</button>
+      </div>
+    </div>
+
+    <!-- 🕰 변경 이력 패널 -->
+    <div class="v3-footer-panel" data-panel="history">
+      <div class="history-list">
+        <div class="history-item">
+          <div class="history-time">2026-05-13 14:30</div>
+          <div class="history-action">메모 추가 <span class="history-actor">by 김PM</span></div>
+          <div class="history-detail">긴급 메모: "고객이 아동 여권 만료 가까워서 재발급 진행 중..."</div>
+        </div>
+
+        <div class="history-item status">
+          <div class="history-time">2026-05-10 12:00</div>
+          <div class="history-action">숙소 바우처 발송 <span class="history-actor">by 이OP</span></div>
+          <div class="history-detail">파일: 호텔바우처_홍길동_DAD.pdf · 알림톡 발송 완료</div>
+        </div>
+
+        <div class="history-item status">
+          <div class="history-time">2026-05-10 11:55</div>
+          <div class="history-action">숙박권 상태 변경 <span class="history-actor">by 이OP</span></div>
+          <div class="history-detail">예약상태: <span class="from">요청</span> → <span class="to">확약</span></div>
+        </div>
+
+        <div class="history-item status">
+          <div class="history-time">2026-05-10 11:20</div>
+          <div class="history-action">공급사 예약번호 입력 <span class="history-actor">by 이OP</span></div>
+          <div class="history-detail">TMG · TMG-VN-202606-001 · 결제일 06-08 · 환율 1 VND=0.054 KRW</div>
+        </div>
+
+        <div class="history-item">
+          <div class="history-time">2026-05-10 09:30</div>
+          <div class="history-action">항공 e티켓 첨부 <span class="history-actor">by 시스템</span></div>
+          <div class="history-detail">eTicket_KE469_홍길동외2.pdf · 256KB</div>
+        </div>
+
+        <div class="history-item status">
+          <div class="history-time">2026-04-30 16:40</div>
+          <div class="history-action">여권 정보 수령 <span class="history-actor">by 김PM</span></div>
+          <div class="history-detail">홍길동·김영희 여권정보 수령 완료 (홍철수 아동 대기)</div>
+        </div>
+
+        <div class="history-item">
+          <div class="history-time">2026-04-29 10:05</div>
+          <div class="history-action">알림톡 자동 발송 <span class="history-actor">by 시스템</span></div>
+          <div class="history-detail">여행계약서 + 여권정보 요청 알림톡 2건 발송</div>
+        </div>
+
+        <div class="history-item">
+          <div class="history-time">2026-04-29 10:00</div>
+          <div class="history-action">결제 완료 (PG #1) <span class="history-actor">by 고객</span></div>
+          <div class="history-detail">신용카드 · 이니시스 · 일시불 · ₩500,000 (계약금)</div>
+        </div>
+
+        <div class="history-item">
+          <div class="history-time">2026-04-28 17:09</div>
+          <div class="history-action">예약 생성 <span class="history-actor">by 고객</span></div>
+          <div class="history-detail">트립스토어 · 다낭 4박 패키지 · TPBAPQC13341-260726A · 3명</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 📊 행사 스냅샷 패널 -->
+    <div class="v3-footer-panel" data-panel="snapshot">
+      <div style="font-size:11px;color:#888;margin-bottom:10px;line-height:1.6;">
+        💡 예약 시점(2026-04-28)에 저장된 행사 정보 스냅샷입니다. 위약금 분쟁·취소 환불 시 근거 자료로 활용됩니다.
+      </div>
+
+      <div class="snapshot-box">
+        <div class="snap-label">📌 포함 사항</div>
+        <div class="snap-content">• 왕복 항공권 (대한항공 KE469/KE470, 이코노미)
+• 다낭 OO 리조트 4박 (조식 포함)
+• 공항-호텔 왕복 픽업
+• 여행자 보험 (KB)
+• 24시간 한국어 응대</div>
+      </div>
+
+      <div class="snapshot-box">
+        <div class="snap-label">📌 불포함 사항</div>
+        <div class="snap-content">• 점심·저녁 식사
+• 개인 경비 (쇼핑, 음료 등)
+• 선택 관광 (옵션 투어)
+• 가이드 팁</div>
+      </div>
+
+      <div class="snapshot-box">
+        <div class="snap-label">⚠️ 유의 사항</div>
+        <div class="snap-content">• 여권 유효기간 출국일 기준 6개월 이상 필수
+• 만 14세 미만 아동은 법정대리인 동의서 필요
+• 베트남 입국 시 비자 면제 (15일 이내 무비자)</div>
+      </div>
+
+      <div class="snapshot-box" style="background:#ffeaea;border-color:#ffcdd2;">
+        <div class="snap-label" style="color:#d32f2f;">🚫 취소·환불 규정 (예약 시점)</div>
+        <div class="snap-content">• 출발 30일 전까지: 위약금 없음 (전액 환불)
+• 출발 29~21일 전: 결제액의 10%
+• 출발 20~10일 전: 결제액의 30%
+• 출발 9~3일 전: 결제액의 50%
+• 출발 2일 전~당일: 결제액의 100% (환불 불가)
+• 항공권 발권 후 취소 시 항공사 위약금 별도</div>
+      </div>
     </div>
   </div>
 
@@ -979,12 +1159,12 @@
 
 <!-- ==================== 작업 진행 가이드 (개발용 표시) ==================== -->
 <div class="v3-build-guide">
-  <div class="gtitle">🎯 v3 작업 순서</div>
+  <div class="gtitle">🎯 v3 작업 완료 ✨</div>
   <div class="gstep done">✓ ① 상단 헤더</div>
   <div class="gstep done">✓ ② 좌측 · 고객안내 진행도</div>
   <div class="gstep done">✓ ③ 중앙 · 상품 관리</div>
-  <div class="gstep current">▶ ④ 우측 · 결제·여행자 (현재)</div>
-  <div class="gstep">⑤ 하단 · 메모/이력</div>
+  <div class="gstep done">✓ ④ 우측 · 결제·여행자</div>
+  <div class="gstep done">✓ ⑤ 하단 · 메모/이력/스냅샷</div>
 </div>
 
 <!-- ==================== 모달들 ==================== -->
@@ -2537,6 +2717,17 @@
   document.querySelectorAll('.modal-overlay').forEach(overlay => {
     overlay.addEventListener('click', e => {
       if (e.target === overlay) overlay.classList.remove('show');
+    });
+  });
+
+  // ===== 하단 탭 전환 =====
+  document.querySelectorAll('.v3-footer-tab').forEach(tab => {
+    tab.addEventListener('click', () => {
+      const target = tab.dataset.tab;
+      document.querySelectorAll('.v3-footer-tab').forEach(t => t.classList.remove('active'));
+      document.querySelectorAll('.v3-footer-panel').forEach(p => p.classList.remove('active'));
+      tab.classList.add('active');
+      document.querySelector(`.v3-footer-panel[data-panel="${target}"]`)?.classList.add('active');
     });
   });
 
