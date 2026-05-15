@@ -207,6 +207,41 @@
   .btn-mini.outline { color: #1565c0; border-color: #bbdefb; background: #e3f2fd; }
   .track-action .empty-text { font-size: 11px; color: #ccc; font-style: italic; }
 
+  /* === 좌측: 고객안내 진행도 === */
+  .guide-header { padding-bottom: 14px; border-bottom: 1px solid #f0f0f0; margin-bottom: 14px; }
+  .guide-header h3 { font-size: 13px; font-weight: 800; color: #1a1a1a; display: flex; align-items: center; gap: 6px; margin-bottom: 10px; }
+  .progress-bar { height: 6px; background: #f0f0f0; border-radius: 3px; overflow: hidden; margin-bottom: 6px; }
+  .progress-fill { height: 100%; background: linear-gradient(90deg, #2e7d32, #66bb6a); border-radius: 3px; transition: width 0.3s; }
+  .progress-text { font-size: 11px; color: #666; font-weight: 600; display: flex; justify-content: space-between; }
+  .progress-text .ratio { color: #2e7d32; }
+
+  .guide-group { margin-bottom: 14px; }
+  .guide-group-title { font-size: 11px; font-weight: 700; color: #666; margin-bottom: 8px; padding: 0 2px; display: flex; align-items: center; gap: 4px; letter-spacing: 0.2px; }
+  .guide-item { padding: 8px 0; }
+  .guide-item + .guide-item { border-top: 1px solid #f5f5f5; }
+  .item-row { display: flex; justify-content: space-between; align-items: center; gap: 8px; }
+  .item-name { font-size: 12px; color: #1a1a1a; font-weight: 500; flex: 1; min-width: 0; }
+  .item-meta { display: flex; align-items: center; gap: 6px; flex-shrink: 0; }
+  .item-time { font-size: 10px; color: #888; margin-top: 2px; }
+
+  /* 알림톡 발송 항목 */
+  .send-btn { padding: 4px 10px; font-size: 11px; border-radius: 4px; border: 1px solid #1565c0; background: #e3f2fd; color: #1565c0; cursor: pointer; font-weight: 700; }
+  .send-btn:hover { background: #bbdefb; }
+  .send-btn.done { background: #fff; color: #666; border-color: #d0d0d0; font-weight: 500; }
+  .send-btn.done:hover { background: #f5f5f5; }
+  .send-check { color: #2e7d32; font-size: 11px; font-weight: 700; display: inline-flex; align-items: center; gap: 3px; }
+
+  /* 상태 플로우 (대기→요청→확약) */
+  .status-flow { display: flex; gap: 0; margin-top: 6px; align-items: center; }
+  .flow-step { flex: 1; padding: 4px 0; text-align: center; font-size: 10px; font-weight: 600; color: #ccc; background: #f9f9f9; border: 1px solid #f0f0f0; cursor: pointer; transition: all 0.15s; position: relative; }
+  .flow-step:first-child { border-radius: 4px 0 0 4px; }
+  .flow-step:last-child { border-radius: 0 4px 4px 0; }
+  .flow-step + .flow-step { border-left: none; }
+  .flow-step:hover { background: #f0f0f0; color: #666; }
+  .flow-step.done { background: #e8f5e9; color: #2e7d32; border-color: #c8e6c9; }
+  .flow-step.current { background: #1565c0; color: #fff; border-color: #1565c0; font-weight: 700; box-shadow: 0 0 0 2px rgba(21,101,192,0.15); }
+  .flow-step.current::after { content: ''; position: absolute; bottom: -3px; left: 50%; transform: translateX(-50%); width: 0; height: 0; border-left: 3px solid transparent; border-right: 3px solid transparent; border-top: 3px solid #1565c0; }
+
   /* 라이프사이클 칩 (5단계) */
   .lifecycle-chip { display: inline-flex; align-items: center; gap: 6px; padding: 5px 12px; border-radius: 14px; font-size: 12px; font-weight: 700; cursor: pointer; transition: filter 0.15s; }
   .lifecycle-chip:hover { filter: brightness(0.95); box-shadow: 0 0 0 3px rgba(0,0,0,0.05); }
@@ -405,10 +440,137 @@
   <div class="v3-main">
     <!-- 영역 ② 좌측: 고객안내 진행도 -->
     <aside class="v3-aside">
-      <div class="v3-placeholder" style="padding:32px 16px;">
-        <div class="ph-icon">🛂</div>
-        <div class="ph-title">② 좌측 · 고객안내 진행도</div>
-        <div class="ph-desc">booking_managements 7개 상태<br>알림톡 발송 패널<br><br>(다음 단계에서 작업)</div>
+      <div class="guide-header">
+        <h3>🛂 고객안내 진행도</h3>
+        <div class="progress-bar"><div class="progress-fill" style="width: 58%"></div></div>
+        <div class="progress-text"><span>전체 진행률</span><span class="ratio">7 / 12 완료</span></div>
+      </div>
+
+      <!-- 📥 예약접수 -->
+      <div class="guide-group">
+        <div class="guide-group-title">📥 예약접수</div>
+        <div class="guide-item">
+          <div class="item-row">
+            <span class="item-name">여권정보 요청</span>
+            <div class="item-meta">
+              <button class="send-btn done">재발송</button>
+            </div>
+          </div>
+          <div class="item-time">✓ 2026-04-29 10:00 발송</div>
+        </div>
+      </div>
+
+      <!-- ✅ 예약완료 -->
+      <div class="guide-group">
+        <div class="guide-group-title">✅ 예약완료</div>
+        <div class="guide-item">
+          <div class="item-row">
+            <span class="item-name">여행계약서</span>
+            <div class="item-meta">
+              <button class="send-btn done">재발송</button>
+            </div>
+          </div>
+          <div class="item-time">✓ 2026-04-29 10:05 발송</div>
+        </div>
+      </div>
+
+      <!-- ✈️🏨 항공/호텔 -->
+      <div class="guide-group">
+        <div class="guide-group-title">✈️🏨 항공 / 호텔</div>
+        <div class="guide-item">
+          <div class="item-row"><span class="item-name">항공 좌석</span></div>
+          <div class="status-flow">
+            <div class="flow-step done">대기</div>
+            <div class="flow-step done">요청</div>
+            <div class="flow-step current">확약</div>
+          </div>
+        </div>
+        <div class="guide-item">
+          <div class="item-row"><span class="item-name">호텔 객실</span></div>
+          <div class="status-flow">
+            <div class="flow-step done">대기</div>
+            <div class="flow-step done">요청</div>
+            <div class="flow-step current">확약</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 🛂 여권 처리 -->
+      <div class="guide-group">
+        <div class="guide-group-title">🛂 여권 처리</div>
+        <div class="guide-item">
+          <div class="item-row"><span class="item-name">여권 수령</span></div>
+          <div class="status-flow">
+            <div class="flow-step done">대기</div>
+            <div class="flow-step current">수령</div>
+          </div>
+          <div class="item-time">📅 마지막 요청: 2026-05-02 (D+13)</div>
+        </div>
+        <div class="guide-item">
+          <div class="item-row"><span class="item-name">여권정보 항공사 전달</span></div>
+          <div class="status-flow">
+            <div class="flow-step done">대기</div>
+            <div class="flow-step current">전달</div>
+          </div>
+        </div>
+        <div class="guide-item">
+          <div class="item-row"><span class="item-name">여권정보 호텔 전달</span></div>
+          <div class="status-flow">
+            <div class="flow-step current">대기</div>
+            <div class="flow-step">전달</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 🛡️ 여행자보험 -->
+      <div class="guide-group">
+        <div class="guide-group-title">🛡️ 여행자보험</div>
+        <div class="guide-item">
+          <div class="item-row"><span class="item-name">보험 가입</span></div>
+          <div class="status-flow">
+            <div class="flow-step current">대기</div>
+            <div class="flow-step">가입</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 🚀 출발 전 안내 -->
+      <div class="guide-group">
+        <div class="guide-group-title">🚀 출발 전 안내</div>
+        <div class="guide-item">
+          <div class="item-row">
+            <span class="item-name">항공 e티켓</span>
+            <div class="item-meta">
+              <button class="send-btn">발송</button>
+            </div>
+          </div>
+          <div class="item-time" style="color:#d32f2f;">⚠ 미발송 · 출발 D-26</div>
+        </div>
+        <div class="guide-item">
+          <div class="item-row">
+            <span class="item-name">숙소 바우처</span>
+            <div class="item-meta">
+              <button class="send-btn done">재발송</button>
+            </div>
+          </div>
+          <div class="item-time">✓ 2026-05-10 12:00 발송</div>
+        </div>
+        <div class="guide-item">
+          <div class="item-row"><span class="item-name">체크아웃 케어 안내</span></div>
+          <div class="status-flow">
+            <div class="flow-step current">대기</div>
+            <div class="flow-step">안내</div>
+          </div>
+        </div>
+        <div class="guide-item">
+          <div class="item-row">
+            <span class="item-name">픽업 안내</span>
+            <div class="item-meta">
+              <button class="send-btn">발송</button>
+            </div>
+          </div>
+          <div class="item-time">미발송</div>
+        </div>
       </div>
     </aside>
 
@@ -445,8 +607,8 @@
 <!-- ==================== 작업 진행 가이드 (개발용 표시) ==================== -->
 <div class="v3-build-guide">
   <div class="gtitle">🎯 v3 작업 순서</div>
-  <div class="gstep current">▶ ① 상단 헤더 (현재)</div>
-  <div class="gstep">② 좌측 · 고객안내 진행도</div>
+  <div class="gstep done">✓ ① 상단 헤더</div>
+  <div class="gstep current">▶ ② 좌측 · 고객안내 진행도 (현재)</div>
   <div class="gstep">③ 중앙 · 상품 관리</div>
   <div class="gstep">④ 우측 · 결제·여행자</div>
   <div class="gstep">⑤ 하단 · 메모/이력</div>
@@ -1937,6 +2099,24 @@
       e.preventDefault();
       const txt = btn.textContent.trim().replace(/\s+/g, ' ');
       if (txt && txt !== '⋯' && txt !== '×') toast(`"${txt}" 클릭`, '👆');
+    });
+  });
+
+  // ===== 고객안내 flow-step 클릭 (대기/요청/확약 등 상태 변경) =====
+  document.querySelectorAll('.guide-item').forEach(item => {
+    const steps = Array.from(item.querySelectorAll('.flow-step'));
+    if (steps.length === 0) return;
+    steps.forEach((step, idx) => {
+      step.addEventListener('click', () => {
+        const label = step.textContent.trim();
+        const itemName = item.querySelector('.item-name')?.textContent || '';
+        steps.forEach((s, i) => {
+          s.classList.remove('done', 'current');
+          if (i < idx) s.classList.add('done');
+          else if (i === idx) s.classList.add('current');
+        });
+        toast(`${itemName} · "${label}" 상태로 변경`, '✓');
+      });
     });
   });
 
