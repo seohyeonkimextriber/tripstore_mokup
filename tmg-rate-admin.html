@@ -91,7 +91,16 @@ tbody tr:hover td { background: #fafafa; }
 .tag-green { background: #f6ffed; color: #389e0d; border: 1px solid #b7eb8f; }
 .tag-blue { background: #e6f4ff; color: #1677ff; border: 1px solid #91caff; }
 .tag-purple { background: #f9f0ff; color: #722ed1; border: 1px solid #d3adf7; }
+.tag-yellow { background: #fffbe6; color: #d48806; border: 1px solid #ffe58f; }
+.tag-red { background: #fff1f0; color: #cf1322; border: 1px solid #ffa39e; }
 .tag-gray { background: #f5f5f5; color: rgba(0,0,0,0.55); border: 1px solid #e8e8e8; }
+/* TYPE FILTER TOGGLE (탭 대체) */
+.type-filter-bar { display: flex; align-items: center; gap: 8px; padding: 16px 20px; border-bottom: 1px solid #f0f0f0; background: #fafafa; flex-wrap: wrap; }
+.type-filter-btn { display: inline-flex; align-items: center; gap: 6px; padding: 6px 14px; border-radius: 16px; border: 1px solid #e8e8e8; background: #fff; cursor: pointer; font-size: 13px; color: rgba(0,0,0,0.65); transition: all 0.15s; }
+.type-filter-btn:hover { border-color: #1677ff; color: #1677ff; }
+.type-filter-btn.active { background: #1677ff; border-color: #1677ff; color: #fff; font-weight: 600; }
+.type-filter-btn.active .filter-count { background: rgba(255,255,255,0.25); color: #fff; }
+.filter-count { font-size: 11px; background: #f5f5f5; padding: 1px 7px; border-radius: 10px; color: rgba(0,0,0,0.55); }
 .tag-orange { background: #fff7e6; color: #d48806; border: 1px solid #ffd591; }
 
 /* HOTEL LINK + CONTENT BUTTON */
@@ -339,7 +348,7 @@ tbody tr:hover td { background: #fafafa; }
   <div class="page-header">
     <div>
       <div class="page-title">TMG 숙소 요금표 관리</div>
-      <div class="page-sub">요금타입별로 PB 숙박권 생성 방식이 달라집니다. 탭을 확인하세요.</div>
+      <div class="page-sub">요금타입별로 PB 숙박권 생성 방식이 달라집니다. 목록의 타입 배지로 구분됩니다.</div>
     </div>
     <div style="display:flex; align-items:center; gap:12px;">
       <div style="display:flex; flex-direction:column; align-items:flex-end; gap:2px;">
@@ -350,290 +359,219 @@ tbody tr:hover td { background: #fafafa; }
     </div>
   </div>
 
-  <div class="card">
-    <!-- 요금타입 탭 -->
-    <div class="rate-tabs">
-      <div class="rate-tab active" data-tab="static-static" onclick="switchTab('static-static')">
-        <span class="type-dot dot-green"></span>
-        고정요금 + 고정재고
-        <span class="tab-count">184</span>
-      </div>
-      <div class="rate-tab" data-tab="static-dynamic" onclick="switchTab('static-dynamic')">
-        <span class="type-dot dot-blue"></span>
-        고정요금 + 실시간재고
-        <span class="tab-count">62</span>
-      </div>
-      <div class="rate-tab" data-tab="dynamic-dynamic" onclick="switchTab('dynamic-dynamic')">
-        <span class="type-dot dot-purple"></span>
-        실시간요금 + 실시간재고
-        <span class="tab-count">47</span>
-      </div>
-    </div>
-
-    <!-- ==================== 탭1: 고정요금 + 고정재고 ==================== -->
-    <div class="tab-content" data-content="static-static">
-      <div class="notice-banner notice-blue">
-        <span class="notice-icon">✓</span>
-        <div><strong>Static Rate + Static Allotment</strong> · TMG에서 받아온 요금·재고 값을 그대로 사용합니다. 별도 실시간 조회 없이 바로 PB 숙박권으로 등록됩니다.</div>
-      </div>
-
-      <div class="filter-bar">
-        <input type="text" class="fi fi-md" placeholder="TMG 요금표 ID">
-        <input type="text" class="fi fi-md" placeholder="TMG 숙소 ID">
-        <input type="text" class="fi fi-lg" placeholder="TMG 숙소 명">
-        <select class="fi fi-md"><option>숙박권 선택</option></select>
-        <select class="fi fi-md"><option>PB 생성 여부</option></select>
-        <select class="fi fi-md"><option>상태</option></select>
-        <button class="btn btn-primary">검색</button>
-        <button class="btn btn-default">초기화</button>
-      </div>
-
-      <div class="action-bar">
-        <div class="action-left">총 <strong>184건</strong> · PB 미생성 <strong style="color:#fa8c16">23건</strong></div>
-      </div>
-
-      <div class="table-wrap">
-        <table>
-          <thead>
-            <tr>
-              <th>요금 ID</th>
-              <th>요금명</th>
-              <th>요금타입</th>
-              <th>숙소</th>
-              <th>판매기간</th>
-              <th>카탈로그 매핑</th>
-              <th>PB 숙박권</th>
-              <th></th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr>
-              <td class="td-id">46882</td>
-              <td>Ưu Đãi Đặt Trước</td>
-              <td><span class="tag tag-green">고정+고정</span></td>
-              <td><div class="hotel-cell"><span class="name" title="Khu nghỉ dưỡng Grand Ocean Bay Phú Quốc">Khu nghỉ dưỡng Grand Ocean Bay Phú Quốc</span><span class="content-link" onclick="openContentModal('synced')">콘텐츠</span></div></td>
-              <td style="font-size:12px; color:rgba(0,0,0,0.65);">2026-05-01 ~ 07-31</td>
-              <td><span class="val-ok">✓ 완료 (7/7)</span></td>
-              <td><span class="tag tag-green">생성</span></td>
-              <td><button class="btn btn-ghost btn-sm">상세</button></td>
-            </tr>
-            <tr>
-              <td class="td-id">46880</td>
-              <td>Ưu Đãi Đặt Trước</td>
-              <td><span class="tag tag-green">고정+고정</span></td>
-              <td><div class="hotel-cell"><span class="name" title="Vinpearl Resort Nha Trang">Vinpearl Resort Nha Trang</span><span class="content-link new" onclick="openContentModal('new')">콘텐츠</span></div></td>
-              <td style="font-size:12px; color:rgba(0,0,0,0.65);">2026-06-30 ~ 12-31</td>
-              <td><span class="val-ok">✓ 완료 (6/6)</span></td>
-              <td><span class="tag tag-gray">미생성</span></td>
-              <td><button class="btn btn-primary btn-sm" onclick="goCreate('static-static', '46880')">숙박권 생성</button></td>
-            </tr>
-            <tr>
-              <td class="td-id">46879</td>
-              <td>Ưu Đãi Đặc Biệt</td>
-              <td><span class="tag tag-green">고정+고정</span></td>
-              <td><div class="hotel-cell"><span class="name" title="Melia Ho Tram Beach Resort">Melia Ho Tram Beach Resort</span><span class="content-link changed" onclick="openContentModal('changed')">콘텐츠</span></div></td>
-              <td style="font-size:12px; color:rgba(0,0,0,0.65);">2026-04-01 ~ 09-30</td>
-              <td><span class="val-ok">✓ 완료 (7/7)</span></td>
-              <td><span class="tag tag-green">생성</span></td>
-              <td><button class="btn btn-ghost btn-sm">상세</button></td>
-            </tr>
-            <tr>
-              <td class="td-id">46853</td>
-              <td>Ưu Đãi Đặc Biệt</td>
-              <td><span class="tag tag-green">고정+고정</span></td>
-              <td><div class="hotel-cell"><span class="name" title="InterContinental Danang Sun Peninsula">InterContinental Danang Sun Peninsula</span><span class="content-link new" onclick="openContentModal('new')">콘텐츠</span></div></td>
-              <td style="font-size:12px; color:rgba(0,0,0,0.65);">2026-05-15 ~ 11-15</td>
-              <td><span class="val-ok">✓ 완료 (6/6)</span></td>
-              <td><span class="tag tag-gray">미생성</span></td>
-              <td><button class="btn btn-primary btn-sm" onclick="goCreate('static-static', '46853')">숙박권 생성</button></td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
-
-      <div class="pagination">
-        <button class="page-btn">‹</button>
-        <button class="page-btn active">1</button>
-        <button class="page-btn">2</button>
-        <button class="page-btn">3</button>
-        <button class="page-btn">›</button>
-      </div>
-    </div>
-
-    <!-- ==================== 탭2: 고정요금 + 실시간재고 ==================== -->
-    <div class="tab-content" data-content="static-dynamic" style="display:none;">
-      <div class="notice-banner notice-blue">
-        <span class="notice-icon">ℹ</span>
-        <div><strong>Static Rate + Dynamic Inventory</strong> · 요금은 TMG 확정값을 그대로 사용. 재고는 <strong>accoms 시스템이 D+7~D+90 범위로 분산 사전 조회</strong>해 저장. 등록 시 관리자가 30·60·90 범위 선택하면 저장된 데이터를 즉시 가져옴. 등록 후엔 <strong>매일 10,000개 분산 refresh</strong>(밤 50-60% 일괄 + 낮 30-40% 사용자 PDP 조회 트리거).</div>
-      </div>
-
-      <div class="filter-bar">
-        <input type="text" class="fi fi-md" placeholder="TMG 요금표 ID">
-        <input type="text" class="fi fi-md" placeholder="TMG 숙소 ID">
-        <input type="text" class="fi fi-lg" placeholder="TMG 숙소 명">
-        <select class="fi fi-md"><option>숙박권 선택</option></select>
-        <select class="fi fi-md"><option>PB 생성 여부</option></select>
-        <select class="fi fi-md"><option>상태</option></select>
-        <button class="btn btn-primary">검색</button>
-        <button class="btn btn-default">초기화</button>
-      </div>
-
-      <div class="action-bar">
-        <div class="action-left">총 <strong>62건</strong> · D+90 동기 정상 <strong style="color:#389e0d">54건</strong> · 동기 지연 <strong style="color:#fa8c16">8건</strong></div>
-        <div class="action-right">
-          <button class="btn btn-default btn-sm">🔄 D+90 강제 재조회</button>
+  <div class="card" style="padding: 0;">
+    <!-- 통합 안내 배너 -->
+    <div style="padding: 18px 20px; background: #f0f9ff; border-bottom: 1px solid #d9e6f5;">
+      <div style="display:flex; align-items:flex-start; gap:14px;">
+        <div style="font-size:20px;">📋</div>
+        <div style="flex:1; font-size:13px; color:rgba(0,0,0,0.75); line-height:1.8;">
+          TMG 요금표는 <strong>요금·재고 제공 방식</strong>에 따라 3가지 타입으로 자동 분류됩니다 (TMG <code style="background:rgba(0,0,0,0.06); padding:1px 5px; border-radius:3px; font-size:12px;">rateType</code> 기반).<br>
+          · <span class="tag tag-green">고정요금</span> TMG 확정값 그대로 등록 · 별도 조회 없음<br>
+          · <span class="tag tag-yellow">재고변동요금</span> 요금 고정 + 재고는 accoms 사전조회값 (D+5영업일 ~ D+90)<br>
+          · <span class="tag tag-red">다이나믹요금</span> 요금·재고 모두 accoms 사전조회값 (D+5영업일 ~ D+90)<br>
+          <span style="font-size:11.5px; color:rgba(0,0,0,0.5);">→ 등록 후 매일 10,000개 분산 refresh (밤 batch 50-60% + 낮 PDP 트리거 30-40%) · 사용자 PDP 진입 시 checkAvailability 점검</span>
         </div>
       </div>
+    </div>
 
-      <div class="table-wrap">
-        <table>
-          <thead>
-            <tr>
-              <th>요금 ID</th>
-              <th>요금명</th>
-              <th>요금타입</th>
-              <th>숙소</th>
-              <th>판매기간</th>
-              <th>D+90 동기 상태</th>
-              <th>카탈로그 매핑</th>
-              <th>PB 숙박권</th>
-              <th></th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr>
-              <td class="td-id">47102</td>
-              <td>Flexible Rate</td>
-              <td><span class="tag tag-blue">고정+실시간</span></td>
-              <td><div class="hotel-cell"><span class="name" title="Vinpearl Nha Trang Bay">Vinpearl Nha Trang Bay</span><span class="content-link" onclick="openContentModal('synced')">콘텐츠</span></div></td>
-              <td style="font-size:12px; color:rgba(0,0,0,0.65);">2026-05-01 ~ 10-31</td>
-              <td><span class="sync-pill sync-pill-ok">● D+90 정상</span><div class="sync-time">최근 동기 12분 전</div></td>
-              <td><span class="val-ok">✓ 완료 (5/5)</span></td>
-              <td><span class="tag tag-green">생성</span></td>
-              <td><button class="btn btn-ghost btn-sm">상세</button></td>
-            </tr>
-            <tr>
-              <td class="td-id">47098</td>
-              <td>Best Available Rate</td>
-              <td><span class="tag tag-blue">고정+실시간</span></td>
-              <td><div class="hotel-cell"><span class="name" title="JW Marriott Phu Quoc">JW Marriott Phu Quoc</span><span class="content-link new" onclick="openContentModal('new')">콘텐츠</span></div></td>
-              <td style="font-size:12px; color:rgba(0,0,0,0.65);">2026-04-01 ~ 12-31</td>
-              <td><span class="sync-pill sync-pill-ok">● D+90 정상</span><div class="sync-time">최근 동기 18분 전</div></td>
-              <td><span class="val-ok">✓ 완료 (4/4)</span></td>
-              <td><span class="tag tag-gray">미생성</span></td>
-              <td><button class="btn btn-primary btn-sm" onclick="goCreate('static-dynamic', '47098')">숙박권 생성</button></td>
-            </tr>
-            <tr>
-              <td class="td-id">47095</td>
-              <td>Early Bird</td>
-              <td><span class="tag tag-blue">고정+실시간</span></td>
-              <td><div class="hotel-cell"><span class="name" title="Fusion Resort Cam Ranh">Fusion Resort Cam Ranh</span><span class="content-link changed" onclick="openContentModal('changed')">콘텐츠</span></div></td>
-              <td style="font-size:12px; color:rgba(0,0,0,0.65);">2026-06-01 ~ 09-30</td>
-              <td><span class="sync-pill sync-pill-delay">● 동기 지연</span><div class="sync-time">최근 동기 6시간 전</div></td>
-              <td><span class="val-ok">✓ 완료 (6/6)</span></td>
-              <td><span class="tag tag-gray">미생성</span></td>
-              <td><button class="btn btn-primary btn-sm" onclick="goCreate('static-dynamic', '47095')">숙박권 생성</button></td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
+    <!-- 타입 필터 토글 -->
+    <div class="type-filter-bar">
+      <span style="font-size:12px; color:rgba(0,0,0,0.45); margin-right:4px;">타입 필터</span>
+      <button class="type-filter-btn active" onclick="filterByType('all', this)">
+        전체 <span class="filter-count">293</span>
+      </button>
+      <button class="type-filter-btn" onclick="filterByType('static', this)">
+        <span style="display:inline-block; width:8px; height:8px; border-radius:50%; background:#52c41a;"></span>
+        고정요금 <span class="filter-count">184</span>
+      </button>
+      <button class="type-filter-btn" onclick="filterByType('alm-dynamic', this)">
+        <span style="display:inline-block; width:8px; height:8px; border-radius:50%; background:#faad14;"></span>
+        재고변동요금 <span class="filter-count">62</span>
+      </button>
+      <button class="type-filter-btn" onclick="filterByType('dynamic', this)">
+        <span style="display:inline-block; width:8px; height:8px; border-radius:50%; background:#ff4d4f;"></span>
+        다이나믹요금 <span class="filter-count">47</span>
+      </button>
+    </div>
 
-      <div class="pagination">
-        <button class="page-btn">‹</button>
-        <button class="page-btn active">1</button>
-        <button class="page-btn">›</button>
+    <!-- 검색 필터 바 -->
+    <div class="filter-bar">
+      <input type="text" class="fi fi-md" placeholder="TMG 요금표 ID">
+      <input type="text" class="fi fi-md" placeholder="TMG 숙소 ID">
+      <input type="text" class="fi fi-lg" placeholder="TMG 숙소 명">
+      <select class="fi fi-md"><option>숙박권 선택</option></select>
+      <select class="fi fi-md"><option>PB 생성 여부</option></select>
+      <select class="fi fi-md"><option>accoms 동기 상태</option></select>
+      <button class="btn btn-primary">검색</button>
+      <button class="btn btn-default">초기화</button>
+    </div>
+
+    <!-- 액션 바 -->
+    <div class="action-bar">
+      <div class="action-left">총 <strong>293건</strong> · PB 미생성 <strong style="color:#fa8c16">52건</strong> · 동기 지연 <strong style="color:#fa8c16">27건</strong></div>
+      <div class="action-right">
+        <button class="btn btn-default btn-sm" onclick="alert('체크된 항목들을 일괄로 accoms 데이터 가져옵니다.\n(고정요금은 자동 제외)')">📥 선택 항목 accoms 가져오기</button>
+        <button class="btn btn-default btn-sm" onclick="alert('동기 지연된 27건을 일괄 재조회합니다.')">🔄 동기 지연 일괄 재조회</button>
       </div>
     </div>
 
-    <!-- ==================== 탭3: 실시간요금 + 실시간재고 ==================== -->
-    <div class="tab-content" data-content="dynamic-dynamic" style="display:none;">
-      <div class="notice-banner notice-purple">
-        <span class="notice-icon">⚠</span>
-        <div>
-          <strong>Dynamic Rate + Dynamic Inventory</strong> · TMG는 요금·재고를 실시간으로만 제공. <strong>accoms 시스템이 D+7~D+90 범위로 분산 사전 조회</strong>해 저장합니다. 등록 시 관리자가 30·60·90 범위 선택하면 저장된 데이터를 즉시 가져옴. 등록 후엔 <strong>매일 10,000개 분산 refresh</strong>(밤 50-60% 일괄 + 낮 30-40% 사용자 PDP 조회 트리거).<br>
-          <span style="font-size:12px; opacity:0.85;">예상가/예상재고 수동 입력 제거 · 모든 노출가는 실가 · 표시광고 리스크 해소</span>
-        </div>
-      </div>
+    <!-- 통합 테이블 -->
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th style="width:32px;"><input type="checkbox"></th>
+            <th>요금 ID</th>
+            <th>요금명</th>
+            <th>타입</th>
+            <th>숙소</th>
+            <th>판매기간</th>
+            <th>accoms 동기 상태</th>
+            <th>카탈로그 매핑</th>
+            <th>PB 숙박권</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody>
+          <!-- ===== 고정요금 (STATIC) ===== -->
+          <tr data-type="static">
+            <td><input type="checkbox" disabled title="고정요금은 accoms 불필요"></td>
+            <td class="td-id">46882</td>
+            <td>Ưu Đãi Đặt Trước</td>
+            <td><span class="tag tag-green">고정요금</span></td>
+            <td><div class="hotel-cell"><span class="name" title="Khu nghỉ dưỡng Grand Ocean Bay Phú Quốc">Khu nghỉ dưỡng Grand Ocean Bay Phú Quốc</span><span class="content-link" onclick="openContentModal('synced')">콘텐츠</span></div></td>
+            <td style="font-size:12px; color:rgba(0,0,0,0.65);">2026-05-01 ~ 07-31</td>
+            <td><span style="color:rgba(0,0,0,0.35); font-size:12px;">— 해당없음</span></td>
+            <td><span class="val-ok">✓ 완료 (7/7)</span></td>
+            <td><span class="tag tag-green">생성</span></td>
+            <td><button class="btn btn-ghost btn-sm">상세</button></td>
+          </tr>
+          <tr data-type="static">
+            <td><input type="checkbox" disabled title="고정요금은 accoms 불필요"></td>
+            <td class="td-id">46880</td>
+            <td>Ưu Đãi Đặt Trước</td>
+            <td><span class="tag tag-green">고정요금</span></td>
+            <td><div class="hotel-cell"><span class="name" title="Vinpearl Resort Nha Trang">Vinpearl Resort Nha Trang</span><span class="content-link new" onclick="openContentModal('new')">콘텐츠</span></div></td>
+            <td style="font-size:12px; color:rgba(0,0,0,0.65);">2026-06-30 ~ 12-31</td>
+            <td><span style="color:rgba(0,0,0,0.35); font-size:12px;">— 해당없음</span></td>
+            <td><span class="val-ok">✓ 완료 (6/6)</span></td>
+            <td><span class="tag tag-gray">미생성</span></td>
+            <td><button class="btn btn-primary btn-sm" onclick="goCreate('static', '46880')">숙박권 생성</button></td>
+          </tr>
+          <tr data-type="static">
+            <td><input type="checkbox" disabled title="고정요금은 accoms 불필요"></td>
+            <td class="td-id">46879</td>
+            <td>Ưu Đãi Đặc Biệt</td>
+            <td><span class="tag tag-green">고정요금</span></td>
+            <td><div class="hotel-cell"><span class="name" title="Melia Ho Tram Beach Resort">Melia Ho Tram Beach Resort</span><span class="content-link changed" onclick="openContentModal('changed')">콘텐츠</span></div></td>
+            <td style="font-size:12px; color:rgba(0,0,0,0.65);">2026-04-01 ~ 09-30</td>
+            <td><span style="color:rgba(0,0,0,0.35); font-size:12px;">— 해당없음</span></td>
+            <td><span class="val-ok">✓ 완료 (7/7)</span></td>
+            <td><span class="tag tag-green">생성</span></td>
+            <td><button class="btn btn-ghost btn-sm">상세</button></td>
+          </tr>
+          <tr data-type="static">
+            <td><input type="checkbox" disabled title="고정요금은 accoms 불필요"></td>
+            <td class="td-id">46853</td>
+            <td>Ưu Đãi Đặc Biệt</td>
+            <td><span class="tag tag-green">고정요금</span></td>
+            <td><div class="hotel-cell"><span class="name" title="InterContinental Danang Sun Peninsula">InterContinental Danang Sun Peninsula</span><span class="content-link new" onclick="openContentModal('new')">콘텐츠</span></div></td>
+            <td style="font-size:12px; color:rgba(0,0,0,0.65);">2026-05-15 ~ 11-15</td>
+            <td><span style="color:rgba(0,0,0,0.35); font-size:12px;">— 해당없음</span></td>
+            <td><span class="val-ok">✓ 완료 (6/6)</span></td>
+            <td><span class="tag tag-gray">미생성</span></td>
+            <td><button class="btn btn-primary btn-sm" onclick="goCreate('static', '46853')">숙박권 생성</button></td>
+          </tr>
 
-      <div class="filter-bar">
-        <input type="text" class="fi fi-md" placeholder="TMG 요금표 ID">
-        <input type="text" class="fi fi-md" placeholder="TMG 숙소 ID">
-        <input type="text" class="fi fi-lg" placeholder="TMG 숙소 명">
-        <select class="fi fi-md"><option>숙박권 선택</option></select>
-        <select class="fi fi-md"><option>PB 생성 여부</option></select>
-        <select class="fi fi-md"><option>상태</option></select>
-        <button class="btn btn-primary">검색</button>
-        <button class="btn btn-default">초기화</button>
-      </div>
+          <!-- ===== 재고변동요금 (ALM-DYNAMIC) ===== -->
+          <tr data-type="alm-dynamic">
+            <td><input type="checkbox"></td>
+            <td class="td-id">47102</td>
+            <td>Flexible Rate</td>
+            <td><span class="tag tag-yellow">재고변동요금</span></td>
+            <td><div class="hotel-cell"><span class="name" title="Vinpearl Nha Trang Bay">Vinpearl Nha Trang Bay</span><span class="content-link" onclick="openContentModal('synced')">콘텐츠</span></div></td>
+            <td style="font-size:12px; color:rgba(0,0,0,0.65);">2026-05-01 ~ 10-31</td>
+            <td><span class="sync-pill sync-pill-ok">● D+90 정상</span><div class="sync-time">최근 동기 12분 전</div></td>
+            <td><span class="val-ok">✓ 완료 (5/5)</span></td>
+            <td><span class="tag tag-green">생성</span></td>
+            <td><button class="btn btn-ghost btn-sm">상세</button></td>
+          </tr>
+          <tr data-type="alm-dynamic">
+            <td><input type="checkbox"></td>
+            <td class="td-id">47098</td>
+            <td>Best Available Rate</td>
+            <td><span class="tag tag-yellow">재고변동요금</span></td>
+            <td><div class="hotel-cell"><span class="name" title="JW Marriott Phu Quoc">JW Marriott Phu Quoc</span><span class="content-link new" onclick="openContentModal('new')">콘텐츠</span></div></td>
+            <td style="font-size:12px; color:rgba(0,0,0,0.65);">2026-04-01 ~ 12-31</td>
+            <td><span class="sync-pill sync-pill-ok">● D+90 정상</span><div class="sync-time">최근 동기 18분 전</div></td>
+            <td><span class="val-ok">✓ 완료 (4/4)</span></td>
+            <td><span class="tag tag-gray">미생성</span></td>
+            <td><button class="btn btn-primary btn-sm" onclick="goCreate('alm-dynamic', '47098')">📥 accoms+생성</button></td>
+          </tr>
+          <tr data-type="alm-dynamic">
+            <td><input type="checkbox"></td>
+            <td class="td-id">47095</td>
+            <td>Early Bird</td>
+            <td><span class="tag tag-yellow">재고변동요금</span></td>
+            <td><div class="hotel-cell"><span class="name" title="Fusion Resort Cam Ranh">Fusion Resort Cam Ranh</span><span class="content-link changed" onclick="openContentModal('changed')">콘텐츠</span></div></td>
+            <td style="font-size:12px; color:rgba(0,0,0,0.65);">2026-06-01 ~ 09-30</td>
+            <td><span class="sync-pill sync-pill-delay">● 동기 지연</span><div class="sync-time">최근 동기 6시간 전</div></td>
+            <td><span class="val-ok">✓ 완료 (6/6)</span></td>
+            <td><span class="tag tag-gray">미생성</span></td>
+            <td><button class="btn btn-primary btn-sm" onclick="goCreate('alm-dynamic', '47095')">📥 accoms+생성</button></td>
+          </tr>
 
-      <div class="action-bar">
-        <div class="action-left">총 <strong>47건</strong> · D+90 동기 정상 <strong style="color:#389e0d">28건</strong> · 동기 지연 <strong style="color:#fa8c16">19건</strong></div>
-        <div class="action-right">
-          <button class="btn btn-default btn-sm">🔄 D+90 강제 재조회</button>
-        </div>
-      </div>
-
-      <div class="table-wrap">
-        <table>
-          <thead>
-            <tr>
-              <th>요금 ID</th>
-              <th>요금명</th>
-              <th>요금타입</th>
-              <th>숙소</th>
-              <th>판매기간</th>
-              <th>D+90 동기 상태</th>
-              <th>카탈로그 매핑</th>
-              <th>PB 숙박권</th>
-              <th></th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr>
-              <td class="td-id">48205</td>
-              <td>Real-time BAR</td>
-              <td><span class="tag tag-purple">실시간+실시간</span></td>
-              <td><div class="hotel-cell"><span class="name" title="Vinpearl Luxury Landmark 81">Vinpearl Luxury Landmark 81</span><span class="content-link" onclick="openContentModal('synced')">콘텐츠</span></div></td>
-              <td style="font-size:12px; color:rgba(0,0,0,0.65);">2026-04-29 ~ 2031-04-29 <span class="tag tag-gray" style="margin-left:4px;">자동</span></td>
-              <td><span class="sync-pill sync-pill-ok">● D+90 정상</span><div class="sync-time">최근 동기 7분 전</div></td>
-              <td><span class="val-ok">✓ 완료 (5/5)</span></td>
-              <td><span class="tag tag-green">생성</span></td>
-              <td><button class="btn btn-ghost btn-sm">상세</button></td>
-            </tr>
-            <tr>
-              <td class="td-id">48198</td>
-              <td>Real-time BAR</td>
-              <td><span class="tag tag-purple">실시간+실시간</span></td>
-              <td><div class="hotel-cell"><span class="name" title="Vinpearl Resort &amp; Spa Long Beach">Vinpearl Resort &amp; Spa Long Beach</span><span class="content-link changed" onclick="openContentModal('changed')">콘텐츠</span></div></td>
-              <td style="font-size:12px; color:rgba(0,0,0,0.65);">2026-04-29 ~ 2031-04-29 <span class="tag tag-gray" style="margin-left:4px;">자동</span></td>
-              <td><span class="sync-pill sync-pill-ok">● D+90 정상</span><div class="sync-time">최근 동기 14분 전</div></td>
-              <td><span class="val-ok">✓ 완료 (6/6)</span></td>
-              <td><span class="tag tag-gray">미생성</span></td>
-              <td><button class="btn btn-primary btn-sm" onclick="goCreate('dynamic-dynamic', '48198')">숙박권 생성</button></td>
-            </tr>
-            <tr>
-              <td class="td-id">48190</td>
-              <td>Dynamic Package</td>
-              <td><span class="tag tag-purple">실시간+실시간</span></td>
-              <td><div class="hotel-cell"><span class="name" title="Vinpearl Discovery Greenhill">Vinpearl Discovery Greenhill</span><span class="content-link new" onclick="openContentModal('new')">콘텐츠</span></div></td>
-              <td style="font-size:12px; color:rgba(0,0,0,0.65);">2026-04-29 ~ 2031-04-29 <span class="tag tag-gray" style="margin-left:4px;">자동</span></td>
-              <td><span class="sync-pill sync-pill-delay">● 동기 지연</span><div class="sync-time">최근 동기 9시간 전</div></td>
-              <td><span class="val-ok">✓ 완료 (4/4)</span></td>
-              <td><span class="tag tag-gray">미생성</span></td>
-              <td><button class="btn btn-primary btn-sm" onclick="goCreate('dynamic-dynamic', '48190')">숙박권 생성</button></td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
-
-      <div class="pagination">
-        <button class="page-btn">‹</button>
-        <button class="page-btn active">1</button>
-        <button class="page-btn">›</button>
-      </div>
+          <!-- ===== 다이나믹요금 (DYNAMIC) ===== -->
+          <tr data-type="dynamic">
+            <td><input type="checkbox"></td>
+            <td class="td-id">48205</td>
+            <td>Real-time BAR</td>
+            <td><span class="tag tag-red">다이나믹요금</span></td>
+            <td><div class="hotel-cell"><span class="name" title="Vinpearl Luxury Landmark 81">Vinpearl Luxury Landmark 81</span><span class="content-link" onclick="openContentModal('synced')">콘텐츠</span></div></td>
+            <td style="font-size:12px; color:rgba(0,0,0,0.65);">2026-04-29 ~ 2031-04-29 <span class="tag tag-gray" style="margin-left:4px;">자동</span></td>
+            <td><span class="sync-pill sync-pill-ok">● D+90 정상</span><div class="sync-time">최근 동기 7분 전</div></td>
+            <td><span class="val-ok">✓ 완료 (5/5)</span></td>
+            <td><span class="tag tag-green">생성</span></td>
+            <td><button class="btn btn-ghost btn-sm">상세</button></td>
+          </tr>
+          <tr data-type="dynamic">
+            <td><input type="checkbox"></td>
+            <td class="td-id">48198</td>
+            <td>Real-time BAR</td>
+            <td><span class="tag tag-red">다이나믹요금</span></td>
+            <td><div class="hotel-cell"><span class="name" title="Vinpearl Resort &amp; Spa Long Beach">Vinpearl Resort &amp; Spa Long Beach</span><span class="content-link changed" onclick="openContentModal('changed')">콘텐츠</span></div></td>
+            <td style="font-size:12px; color:rgba(0,0,0,0.65);">2026-04-29 ~ 2031-04-29 <span class="tag tag-gray" style="margin-left:4px;">자동</span></td>
+            <td><span class="sync-pill sync-pill-ok">● D+90 정상</span><div class="sync-time">최근 동기 14분 전</div></td>
+            <td><span class="val-ok">✓ 완료 (6/6)</span></td>
+            <td><span class="tag tag-gray">미생성</span></td>
+            <td><button class="btn btn-primary btn-sm" onclick="goCreate('dynamic', '48198')">📥 accoms+생성</button></td>
+          </tr>
+          <tr data-type="dynamic">
+            <td><input type="checkbox"></td>
+            <td class="td-id">48190</td>
+            <td>Dynamic Package</td>
+            <td><span class="tag tag-red">다이나믹요금</span></td>
+            <td><div class="hotel-cell"><span class="name" title="Vinpearl Discovery Greenhill">Vinpearl Discovery Greenhill</span><span class="content-link new" onclick="openContentModal('new')">콘텐츠</span></div></td>
+            <td style="font-size:12px; color:rgba(0,0,0,0.65);">2026-04-29 ~ 2031-04-29 <span class="tag tag-gray" style="margin-left:4px;">자동</span></td>
+            <td><span class="sync-pill sync-pill-delay">● 동기 지연</span><div class="sync-time">최근 동기 9시간 전</div></td>
+            <td><span class="val-ok">✓ 완료 (4/4)</span></td>
+            <td><span class="tag tag-gray">미생성</span></td>
+            <td><button class="btn btn-primary btn-sm" onclick="goCreate('dynamic', '48190')">📥 accoms+생성</button></td>
+          </tr>
+        </tbody>
+      </table>
     </div>
 
+    <!-- 페이지네이션 -->
+    <div class="pagination">
+      <button class="page-btn">‹</button>
+      <button class="page-btn active">1</button>
+      <button class="page-btn">2</button>
+      <button class="page-btn">3</button>
+      <button class="page-btn">›</button>
+    </div>
   </div>
+
 
   <!-- 사용자 상세페이지 플로우 설명 -->
   <div class="card" style="padding: 24px;">
@@ -1378,11 +1316,18 @@ tbody tr:hover td { background: #fafafa; }
 </div>
 
 <script>
-function switchTab(tabId) {
-  document.querySelectorAll('.rate-tab').forEach(t => t.classList.remove('active'));
-  document.querySelector(`.rate-tab[data-tab="${tabId}"]`).classList.add('active');
-  document.querySelectorAll('.tab-content').forEach(c => c.style.display = 'none');
-  document.querySelector(`.tab-content[data-content="${tabId}"]`).style.display = 'block';
+function filterByType(type, btnEl) {
+  // 필터 버튼 active 토글
+  document.querySelectorAll('.type-filter-btn').forEach(b => b.classList.remove('active'));
+  btnEl.classList.add('active');
+  // 행 필터
+  document.querySelectorAll('tbody tr[data-type]').forEach(tr => {
+    if (type === 'all' || tr.dataset.type === type) {
+      tr.style.display = '';
+    } else {
+      tr.style.display = 'none';
+    }
+  });
 }
 
 function openModal(type) {
@@ -1390,16 +1335,20 @@ function openModal(type) {
 }
 
 function goCreate(rateType, rateId) {
-  // STATIC(고정+고정)은 TMG 확정값 그대로 → 모달 없이 바로 등록 페이지
-  if (rateType === 'static-static') {
+  // 고정요금(static)은 accoms 불필요 → 모달 없이 바로 등록 페이지
+  if (rateType === 'static') {
     window.location.href = `accom-ticket-create.html?rateType=${rateType}&rateId=${rateId}`;
     return;
   }
-  // ALM-DYNAMIC / DYNAMIC → 모달에서 checkAvailability 조회 + 객실 선택
-  const modal = document.getElementById(`modal-${rateType}`);
+  // 재고변동요금(alm-dynamic) / 다이나믹요금(dynamic) → 통합 모달에서 accoms 데이터 가져오기 + 객실 선택
+  const modal = document.getElementById('modal-accoms-fetch');
   if (modal) {
     modal.dataset.rateId = rateId;
+    modal.dataset.rateType = rateType;
     modal.classList.add('show');
+  } else {
+    // 모달 미구현 시 임시: 바로 등록 페이지로
+    window.location.href = `accom-ticket-create.html?rateType=${rateType}&rateId=${rateId}`;
   }
 }
 
