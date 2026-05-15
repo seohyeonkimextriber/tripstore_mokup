@@ -277,7 +277,7 @@ select.select-mini { height: 30px; padding: 0 30px 0 10px; border: 1px solid #e8
     <div class="icon">TMG</div>
     <div class="info">
       <div class="title">TMG 요금표에서 진입함 — 기본 정보 자동 채움</div>
-      <div class="desc">아래 필드는 TMG getDetailRates 응답값으로 자동 입력되었습니다. 객실별 판매가/재고는 <strong>30·60·90일 범위 버튼</strong>으로 <code style="background:#fff; padding:1px 5px; border-radius:3px; font-family:'SF Mono',monospace; font-size:11px; color:#722ed1; border:1px solid #d3adf7;">checkAvailability</code>를 일괄 조회해 채웁니다. 관리자 임의 입력 없음.</div>
+      <div class="desc">아래 필드는 TMG getDetailRates 응답값으로 자동 입력되었습니다. 객실별 판매가/재고는 <strong>상단 [재고 갱신] 버튼</strong>으로 <code style="background:#fff; padding:1px 5px; border-radius:3px; font-family:'SF Mono',monospace; font-size:11px; color:#722ed1; border:1px solid #d3adf7;">checkAvailability</code>를 일괄 조회해 채웁니다. 관리자 임의 입력 없음.</div>
       <div class="meta">
         <span>rateType <strong>ALM-DYNAMIC</strong></span>
         <span>rateId <strong>47098</strong></span>
@@ -384,6 +384,7 @@ select.select-mini { height: 30px; padding: 0 30px 0 10px; border: 1px solid #e8
     <div class="card-title-row">
       <div class="card-title">객실/인원 별 판매가</div>
       <div class="card-title-actions">
+        <button class="btn btn-primary btn-sm" onclick="openRefreshModal()" style="background:#1677ff; color:#fff;">🔄 재고 갱신</button>
         <button class="btn btn-sm">🔗 숙소 카탈로그 바로가기</button>
         <button class="btn btn-sm">전 객실 엑셀 일괄 업로드</button>
         <button class="btn btn-sm">전 객실 엑셀 양식 다운로드</button>
@@ -410,16 +411,6 @@ select.select-mini { height: 30px; padding: 0 30px 0 10px; border: 1px solid #e8
         <div></div>
       </div>
 
-      <div class="range-picker">
-        <div class="range-picker-label"><span class="api-tag">checkAvailability</span> 조회 범위</div>
-        <div class="range-btns">
-          <button type="button" class="range-btn-sm" onclick="selectRangeRoom(this, 30)">D+30<span class="sub">05-21~06-13</span></button>
-          <button type="button" class="range-btn-sm active" onclick="selectRangeRoom(this, 60)">D+60<span class="sub">~07-13</span></button>
-          <button type="button" class="range-btn-sm" onclick="selectRangeRoom(this, 90)">D+90<span class="sub">05-21~08-12</span></button>
-        </div>
-        <div class="hint">조회 정책: <strong>오늘 + 7일 (2026-05-21) ~ 최대 D+90</strong>. 선택 범위만큼 <strong>checkAvailability 일괄 조회</strong> → 일자별 판매가·재고 자동 채움. 등록 후 자동 polling + 수동 재조회 하이브리드.</div>
-        <button class="btn btn-dark btn-sm">🔄 조회·갱신</button>
-      </div>
 
       <div class="sub-action-row">
         <div class="left">
@@ -485,17 +476,7 @@ select.select-mini { height: 30px; padding: 0 30px 0 10px; border: 1px solid #e8
         </div>
         <div></div>
       </div>
-      <div class="range-picker">
-        <div class="range-picker-label"><span class="api-tag">checkAvailability</span> 조회 범위</div>
-        <div class="range-btns">
-          <button type="button" class="range-btn-sm" onclick="selectRangeRoom(this, 30)">D+30<span class="sub">05-21~06-13</span></button>
-          <button type="button" class="range-btn-sm" onclick="selectRangeRoom(this, 60)">D+60<span class="sub">05-21~07-13</span></button>
-          <button type="button" class="range-btn-sm" onclick="selectRangeRoom(this, 90)">D+90<span class="sub">05-21~08-12</span></button>
-        </div>
-        <div class="hint">조회 범위를 선택하고 [조회·갱신]을 누르면 일자별 판매가·재고가 채워집니다.</div>
-        <button class="btn btn-dark btn-sm">🔄 조회·갱신</button>
-      </div>
-      <div style="font-size:12px; color:rgba(0,0,0,0.45); padding:6px 0;">아직 조회되지 않았습니다. 위 범위를 선택해주세요.</div>
+      <div style="font-size:12px; color:rgba(0,0,0,0.45); padding:6px 0;">아직 조회되지 않았습니다. 상단 [재고 갱신] 버튼을 눌러주세요.</div>
     </div>
 
     <!-- 객실 3 -->
@@ -1018,7 +999,120 @@ document.querySelectorAll('.onoff-pill').forEach(g => {
     b.classList.add('active');
   }));
 });
+
+// 재고 갱신 모달
+function openRefreshModal() {
+  document.getElementById('modal-refresh').classList.add('show');
+  updateRefreshDateRange();
+}
+function closeRefreshModal() {
+  document.getElementById('modal-refresh').classList.remove('show');
+}
+function setRefreshRange(days) {
+  const today = new Date();
+  const start = new Date(today); start.setDate(today.getDate() + 5); // D+5 영업일 (단순화)
+  const end = new Date(start); end.setDate(start.getDate() + days - 1);
+  document.getElementById('refresh-start').value = start.toISOString().slice(0,10);
+  document.getElementById('refresh-end').value = end.toISOString().slice(0,10);
+  document.querySelectorAll('.preset-btn').forEach(b => b.classList.remove('active'));
+  event.target.classList.add('active');
+  updateRefreshDateRange();
+}
+function updateRefreshDateRange() {
+  const s = document.getElementById('refresh-start').value;
+  const e = document.getElementById('refresh-end').value;
+  if (!s || !e) return;
+  const days = Math.round((new Date(e) - new Date(s)) / 86400000) + 1;
+  const warn = document.getElementById('refresh-warn');
+  if (days > 90) {
+    warn.textContent = `⚠ ${days}일 — 최대 90일까지만 가능합니다`;
+    warn.style.color = '#cf1322';
+  } else if (days < 1) {
+    warn.textContent = `⚠ 종료일이 시작일보다 빠릅니다`;
+    warn.style.color = '#cf1322';
+  } else {
+    warn.textContent = `선택 기간: ${days}일`;
+    warn.style.color = 'rgba(0,0,0,0.55)';
+  }
+}
+function executeRefresh() {
+  const rooms = Array.from(document.querySelectorAll('.refresh-room-check:checked')).map(c => c.dataset.name);
+  const s = document.getElementById('refresh-start').value;
+  const e = document.getElementById('refresh-end').value;
+  if (rooms.length === 0) { alert('조회할 객실을 1개 이상 선택하세요'); return; }
+  if (!s || !e) { alert('조회 기간을 입력하세요'); return; }
+  alert(`checkAvailability 호출\n\n객실: ${rooms.join(', ')}\n기간: ${s} ~ ${e}\n\n조회 후 일자별 판매가·재고가 채워집니다.`);
+  closeRefreshModal();
+}
 </script>
+
+<!-- ==================== MODAL: 재고 갱신 ==================== -->
+<div class="modal-overlay" id="modal-refresh">
+  <div class="modal" style="width:560px;">
+    <div class="modal-header">
+      <div class="modal-title">
+        <span class="tag tag-purple" style="background:#f9f0ff; color:#722ed1; padding:2px 7px; border-radius:4px; font-size:10px; font-weight:600; border:1px solid #d3adf7;">checkAvailability</span>
+        재고 갱신
+      </div>
+      <button class="modal-close" onclick="closeRefreshModal()">×</button>
+    </div>
+    <div class="modal-body">
+      <div style="background:#f0f9ff; border:1px solid #d9e6f5; padding:12px 14px; border-radius:8px; margin-bottom:18px; font-size:12.5px; color:rgba(0,0,0,0.65); line-height:1.6;">
+        📋 조회할 <strong>객실</strong>과 <strong>기간</strong>을 선택하세요. <code style="background:#fff; padding:1px 5px; border-radius:3px; font-size:11px;">checkAvailability</code>가 호출되어 일자별 판매가·재고를 채웁니다.<br>
+        <span style="font-size:11.5px; color:rgba(0,0,0,0.45);">조회 가능 범위: 오늘 + 5 영업일 ~ 최대 90일 (D+90)</span>
+      </div>
+
+      <!-- 객실 선택 -->
+      <div style="margin-bottom:20px;">
+        <div style="font-size:12px; color:rgba(0,0,0,0.55); margin-bottom:10px; font-weight:600;">조회 객실 선택</div>
+        <div style="display:flex; flex-direction:column; gap:8px;">
+          <label style="display:flex; align-items:center; gap:10px; padding:10px 12px; border:1px solid #e8e8e8; border-radius:8px; cursor:pointer;">
+            <input type="checkbox" class="refresh-room-check" data-name="Deluxe King" checked>
+            <span style="flex:1; font-size:13px;"><strong>[ID : 267] Deluxe King</strong> <span style="color:rgba(0,0,0,0.45); font-size:12px;">· 2인 기준</span></span>
+            <span style="font-size:11px; color:rgba(0,0,0,0.45);">마지막 조회 12분 전</span>
+          </label>
+          <label style="display:flex; align-items:center; gap:10px; padding:10px 12px; border:1px solid #e8e8e8; border-radius:8px; cursor:pointer;">
+            <input type="checkbox" class="refresh-room-check" data-name="Deluxe Twin">
+            <span style="flex:1; font-size:13px;"><strong>[ID : 268] Deluxe Twin</strong> <span style="color:rgba(0,0,0,0.45); font-size:12px;">· 2인 기준</span></span>
+            <span style="font-size:11px; color:#fa8c16;">아직 조회 전</span>
+          </label>
+          <label style="display:flex; align-items:center; gap:10px; padding:10px 12px; border:1px solid #e8e8e8; border-radius:8px; cursor:pointer; opacity:0.5;">
+            <input type="checkbox" class="refresh-room-check" data-name="Executive Suite" disabled>
+            <span style="flex:1; font-size:13px;"><strong>[ID : 269] Executive Suite</strong> <span style="color:rgba(0,0,0,0.45); font-size:12px;">· 비활성</span></span>
+            <span style="font-size:11px; color:rgba(0,0,0,0.35);">스위치 꺼짐</span>
+          </label>
+        </div>
+      </div>
+
+      <!-- 기간 입력 -->
+      <div>
+        <div style="font-size:12px; color:rgba(0,0,0,0.55); margin-bottom:10px; font-weight:600;">조회 기간 (최대 90일)</div>
+
+        <!-- 빠른 선택 -->
+        <div style="display:flex; gap:6px; margin-bottom:10px;">
+          <button type="button" class="preset-btn btn btn-sm" onclick="setRefreshRange(30)">D+30</button>
+          <button type="button" class="preset-btn btn btn-sm active" onclick="setRefreshRange(60)" style="background:#1677ff; color:#fff; border-color:#1677ff;">D+60</button>
+          <button type="button" class="preset-btn btn btn-sm" onclick="setRefreshRange(90)">D+90 (최대)</button>
+        </div>
+
+        <!-- 직접 입력 -->
+        <div style="display:flex; align-items:center; gap:10px;">
+          <input type="date" id="refresh-start" class="form-control" style="flex:1;" value="2026-05-20" onchange="updateRefreshDateRange()">
+          <span style="color:rgba(0,0,0,0.35);">→</span>
+          <input type="date" id="refresh-end" class="form-control" style="flex:1;" value="2026-07-18" onchange="updateRefreshDateRange()">
+        </div>
+        <div id="refresh-warn" style="font-size:12px; color:rgba(0,0,0,0.55); margin-top:8px;">선택 기간: 60일</div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <div style="font-size:11.5px; color:rgba(0,0,0,0.45);">⏱ 조회 완료까지 약 5~15초 소요</div>
+      <div style="display:flex; gap:8px;">
+        <button class="btn btn-sm" onclick="closeRefreshModal()">취소</button>
+        <button class="btn btn-primary btn-sm" onclick="executeRefresh()" style="background:#1677ff; color:#fff;">🔄 조회 실행</button>
+      </div>
+    </div>
+  </div>
+</div>
 
 </body>
 </html>
