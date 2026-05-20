@@ -1,0 +1,588 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>윤영희 석사논문 5분 발표</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+KR:wght@400;500;700;900&family=Pretendard:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
+<link rel="stylesheet" as="style" crossorigin href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css" />
+<style>
+  :root{
+    --bg: #f7f4ee;
+    --card: #ffffff;
+    --ink: #1f2937;
+    --ink-soft: #4b5563;
+    --ink-faint: #6b7280;
+    --line: #e5e0d6;
+    --accent: #6b8e7f;       /* sage green */
+    --accent-soft: #e7efe9;
+    --accent-deep: #2f4a3f;
+    --warm: #b9805a;
+    --warm-soft: #f3e6dc;
+    --shadow: 0 20px 60px rgba(31,41,55,.08), 0 4px 12px rgba(31,41,55,.04);
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html,body{height:100%;font-family:'Pretendard','Noto Serif KR',sans-serif;background:var(--bg);color:var(--ink);-webkit-font-smoothing:antialiased}
+  body{display:flex;align-items:center;justify-content:center;overflow:hidden}
+
+  .stage{
+    position:relative;
+    width:min(1280px, 96vw);
+    height:min(720px, 96vh);
+    aspect-ratio:16/9;
+    background:var(--card);
+    border-radius:24px;
+    box-shadow:var(--shadow);
+    overflow:hidden;
+  }
+  .slide{
+    position:absolute;inset:0;
+    padding:64px 72px;
+    display:none;
+    flex-direction:column;
+    opacity:0;
+    transition:opacity .45s ease;
+  }
+  .slide.active{display:flex;opacity:1;animation:fade .55s ease}
+  @keyframes fade{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+
+  .page-num{
+    position:absolute;top:32px;right:40px;
+    font-family:'Noto Serif KR',serif;
+    font-size:13px;color:var(--ink-faint);letter-spacing:.08em;
+  }
+  .eyebrow{
+    font-size:13px;font-weight:600;color:var(--accent);
+    letter-spacing:.18em;text-transform:uppercase;margin-bottom:14px;
+  }
+  h1.title{
+    font-family:'Noto Serif KR',serif;
+    font-weight:700;font-size:42px;line-height:1.35;color:var(--ink);
+  }
+  h2.title{
+    font-family:'Noto Serif KR',serif;
+    font-weight:700;font-size:34px;line-height:1.3;margin-bottom:8px;color:var(--ink);
+  }
+  .subtitle{font-size:16px;color:var(--ink-faint);margin-bottom:36px;font-weight:400;letter-spacing:.01em}
+
+  .progress{
+    position:absolute;left:0;bottom:0;height:3px;background:var(--accent);
+    transition:width .45s ease;
+  }
+  .controls{
+    position:absolute;left:40px;bottom:24px;display:flex;gap:8px;align-items:center;
+  }
+  .dot{
+    width:8px;height:8px;border-radius:50%;background:#d6d1c5;border:none;cursor:pointer;
+    transition:all .2s;
+  }
+  .dot.active{background:var(--accent);width:22px;border-radius:8px}
+  .nav{
+    position:absolute;right:40px;bottom:22px;display:flex;gap:8px;
+  }
+  .nav button{
+    width:34px;height:34px;border-radius:50%;border:1px solid var(--line);
+    background:#fff;cursor:pointer;color:var(--ink-soft);font-size:14px;
+    transition:all .15s;display:flex;align-items:center;justify-content:center;
+  }
+  .nav button:hover{background:var(--accent);color:#fff;border-color:var(--accent)}
+
+  /* ===== Slide 1 Title ===== */
+  .cover{
+    background:
+      radial-gradient(ellipse at top right, rgba(107,142,127,.12), transparent 55%),
+      radial-gradient(ellipse at bottom left, rgba(185,128,90,.08), transparent 50%),
+      var(--card);
+    justify-content:space-between;
+  }
+  .cover .badge{
+    display:inline-block;font-size:12px;letter-spacing:.2em;color:var(--accent);
+    border:1px solid var(--accent);border-radius:99px;padding:6px 14px;font-weight:600;
+    margin-bottom:30px;
+  }
+  .cover h1{
+    font-family:'Noto Serif KR',serif;font-weight:700;
+    font-size:46px;line-height:1.4;color:var(--ink);
+  }
+  .cover h1 .em{color:var(--accent-deep);}
+  .cover .meta{
+    margin-top:42px;
+    display:grid;grid-template-columns:auto 1fr;gap:10px 24px;
+    font-size:15px;color:var(--ink-soft);
+  }
+  .cover .meta strong{color:var(--ink);font-weight:600}
+  .flow{
+    margin-top:36px;padding-top:24px;border-top:1px dashed var(--line);
+    display:flex;gap:14px;align-items:center;font-size:14px;color:var(--ink-faint);
+  }
+  .flow .chip{
+    background:var(--accent-soft);color:var(--accent-deep);
+    padding:8px 16px;border-radius:99px;font-weight:600;font-size:13px;
+  }
+  .flow .arrow{color:var(--accent);font-weight:700}
+
+  /* ===== Slide 2 ===== */
+  .grid-2{display:grid;grid-template-columns:1.1fr 1fr;gap:48px;flex:1;align-items:center;margin-top:8px}
+  .bullets{display:flex;flex-direction:column;gap:18px}
+  .bullets li{
+    list-style:none;padding:18px 22px;background:#fbfaf6;border-left:3px solid var(--accent);
+    border-radius:8px;font-size:16px;line-height:1.6;color:var(--ink-soft);
+  }
+  .keywords{
+    display:flex;flex-direction:column;gap:14px;align-items:center;justify-content:center;
+    background:linear-gradient(180deg,var(--accent-soft),#fff);
+    border-radius:18px;padding:36px 28px;border:1px solid var(--line);
+  }
+  .keywords .kw{
+    font-family:'Noto Serif KR',serif;font-weight:700;font-size:32px;color:var(--accent-deep);
+    letter-spacing:.05em;
+  }
+  .keywords .sep{width:30px;height:1px;background:var(--accent);opacity:.4}
+  .keywords .caption{
+    margin-top:18px;font-size:13px;color:var(--ink-soft);text-align:center;line-height:1.6;
+    font-weight:500;
+  }
+
+  /* ===== Slide 3 ===== */
+  .purpose-card{
+    background:#fbfaf6;border:1px solid var(--line);border-radius:14px;
+    padding:28px 32px;margin-bottom:30px;
+  }
+  .purpose-card .label{font-size:13px;font-weight:600;color:var(--accent);letter-spacing:.1em;margin-bottom:10px}
+  .purpose-card .text{font-size:18px;line-height:1.6;color:var(--ink);font-weight:500}
+  .rq-grid{display:grid;grid-template-columns:1fr 1fr;gap:22px;margin-bottom:24px}
+  .rq{
+    padding:26px 28px;background:#fff;border:1.5px solid var(--accent-soft);border-radius:14px;
+    position:relative;
+  }
+  .rq .num{
+    position:absolute;top:-12px;left:24px;background:var(--accent);color:#fff;
+    font-size:12px;font-weight:700;padding:4px 12px;border-radius:99px;letter-spacing:.1em;
+  }
+  .rq .q{font-size:17px;line-height:1.6;color:var(--ink);font-weight:500;margin-top:8px}
+  .note{
+    margin-top:auto;font-size:14px;color:var(--ink-soft);background:var(--warm-soft);
+    padding:14px 20px;border-radius:10px;line-height:1.6;border-left:3px solid var(--warm);
+  }
+
+  /* ===== Slide 4 ===== */
+  .method-grid{
+    display:grid;grid-template-columns:repeat(3,1fr);gap:18px;margin-bottom:28px;
+  }
+  .method{
+    background:#fff;border:1px solid var(--line);border-radius:12px;padding:18px 20px;
+  }
+  .method .lab{font-size:12px;color:var(--accent);font-weight:700;letter-spacing:.1em;margin-bottom:8px;text-transform:uppercase}
+  .method .val{font-size:15px;color:var(--ink);font-weight:500;line-height:1.5}
+  .stats{display:grid;grid-template-columns:repeat(3,1fr) 1.4fr;gap:18px;align-items:stretch}
+  .stat{
+    background:linear-gradient(180deg,var(--accent-soft),#fff);
+    border-radius:14px;padding:22px;text-align:center;border:1px solid var(--line);
+  }
+  .stat .n{font-family:'Noto Serif KR',serif;font-size:42px;font-weight:700;color:var(--accent-deep);line-height:1}
+  .stat .u{font-size:13px;color:var(--ink-soft);margin-top:6px}
+  .cist-box{
+    background:var(--warm-soft);border-radius:14px;padding:20px 22px;border-left:3px solid var(--warm);
+    display:flex;flex-direction:column;justify-content:center;
+  }
+  .cist-box .ttl{font-size:13px;color:var(--warm);font-weight:700;letter-spacing:.1em;margin-bottom:8px}
+  .cist-box .desc{font-size:13.5px;color:var(--ink-soft);line-height:1.6}
+
+  /* ===== Slide 5 ===== */
+  .flow-steps{
+    display:grid;grid-template-columns:repeat(5,1fr);gap:8px;margin:20px 0 24px;
+  }
+  .step{
+    background:#fff;border:1px solid var(--line);border-radius:12px;padding:18px 14px;
+    text-align:center;position:relative;
+  }
+  .step .icon{
+    width:38px;height:38px;border-radius:50%;background:var(--accent-soft);color:var(--accent-deep);
+    display:flex;align-items:center;justify-content:center;font-weight:700;margin:0 auto 10px;
+    font-family:'Noto Serif KR',serif;font-size:15px;
+  }
+  .step .name{font-size:14px;font-weight:700;color:var(--ink);margin-bottom:4px}
+  .step .sub{font-size:11.5px;color:var(--ink-faint);line-height:1.5}
+  .arrows{display:grid;grid-template-columns:repeat(5,1fr);gap:8px;color:var(--accent);font-weight:700;text-align:center;margin-bottom:12px}
+  .arrows span:last-child{visibility:hidden}
+  .core{
+    background:#fbfaf6;border-radius:14px;padding:18px 24px;border:1px solid var(--line);
+  }
+  .core .ttl{font-size:13px;color:var(--accent);font-weight:700;letter-spacing:.1em;margin-bottom:10px}
+  .core ul{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;list-style:none}
+  .core li{font-size:13.5px;color:var(--ink-soft);line-height:1.5;padding-left:12px;border-left:2px solid var(--accent)}
+
+  /* ===== Slide 6 ===== */
+  .result-grid{display:grid;grid-template-columns:1.2fr 1fr;gap:36px;flex:1;align-items:center}
+  .chart{
+    background:#fff;border:1px solid var(--line);border-radius:16px;padding:24px;height:380px;
+    display:flex;flex-direction:column;
+  }
+  .chart .ttl{font-size:13px;color:var(--ink-faint);font-weight:600;margin-bottom:12px;letter-spacing:.05em}
+  .chart svg{width:100%;flex:1}
+  .legend{display:flex;gap:18px;margin-top:10px;font-size:12px;color:var(--ink-soft)}
+  .legend .swatch{display:inline-block;width:16px;height:3px;vertical-align:middle;margin-right:6px;border-radius:2px}
+  .findings .ttl{font-size:13px;color:var(--accent);font-weight:700;letter-spacing:.1em;margin-bottom:14px}
+  .findings ul{list-style:none;display:flex;flex-direction:column;gap:14px}
+  .findings li{font-size:15px;line-height:1.65;color:var(--ink-soft);padding-left:22px;position:relative}
+  .findings li:before{
+    content:"";position:absolute;left:0;top:10px;width:10px;height:10px;border-radius:50%;
+    background:var(--accent);
+  }
+
+  /* ===== Slide 7 ===== */
+  table.cist{
+    width:100%;border-collapse:separate;border-spacing:0;font-size:13px;
+    margin-top:12px;
+  }
+  table.cist thead th{
+    background:var(--accent-soft);color:var(--accent-deep);font-weight:700;
+    padding:12px 10px;text-align:left;font-size:12.5px;letter-spacing:.03em;
+    border-bottom:2px solid var(--accent);
+  }
+  table.cist thead th:first-child{border-top-left-radius:10px}
+  table.cist thead th:last-child{border-top-right-radius:10px}
+  table.cist td{
+    padding:11px 10px;border-bottom:1px solid var(--line);color:var(--ink-soft);line-height:1.5;
+    vertical-align:middle;
+  }
+  table.cist td.area{font-weight:700;color:var(--ink);background:#fbfaf6}
+  table.cist td.exp{font-family:'Noto Serif KR',serif;color:var(--accent-deep);font-weight:600}
+  table.cist td.ctrl{font-family:'Noto Serif KR',serif;color:var(--ink-faint)}
+  table.cist td.interp{font-size:12.5px;color:var(--ink-soft)}
+  .meta-line{font-size:12px;color:var(--ink-faint);margin-top:10px;letter-spacing:.02em}
+  .highlight-mem td{background:rgba(231,239,233,.55)!important}
+
+  /* ===== Slide 8 ===== */
+  .conclusion{display:grid;grid-template-columns:1fr 1fr 1fr;gap:18px;margin-top:8px;flex:1}
+  .conc{
+    background:#fff;border:1px solid var(--line);border-radius:14px;padding:24px;
+    display:flex;flex-direction:column;
+  }
+  .conc.discussion{border-top:3px solid var(--accent)}
+  .conc.result{border-top:3px solid var(--warm)}
+  .conc.suggest{border-top:3px solid #8a7fb8}
+  .conc .tag{font-size:12px;font-weight:700;letter-spacing:.15em;margin-bottom:14px;text-transform:uppercase}
+  .conc.discussion .tag{color:var(--accent)}
+  .conc.result .tag{color:var(--warm)}
+  .conc.suggest .tag{color:#8a7fb8}
+  .conc ul{list-style:none;display:flex;flex-direction:column;gap:12px;flex:1}
+  .conc li{font-size:13.5px;color:var(--ink-soft);line-height:1.6;padding-left:14px;position:relative}
+  .conc li:before{content:"";position:absolute;left:0;top:8px;width:5px;height:5px;border-radius:50%;background:currentColor;opacity:.5}
+  .closing{
+    margin-top:20px;text-align:center;font-family:'Noto Serif KR',serif;
+    font-size:15px;color:var(--accent-deep);font-weight:500;
+    padding:14px;background:var(--accent-soft);border-radius:10px;
+  }
+  .closing em{font-style:normal;font-weight:700;color:var(--accent)}
+
+  @media (max-width: 900px){
+    .slide{padding:36px 32px}
+    h1.title,.cover h1{font-size:28px!important}
+    h2.title{font-size:24px}
+    .grid-2{grid-template-columns:1fr;gap:20px}
+    .conclusion{grid-template-columns:1fr}
+    .method-grid{grid-template-columns:1fr 1fr}
+    .stats{grid-template-columns:1fr 1fr}
+    .flow-steps,.arrows{grid-template-columns:repeat(2,1fr)}
+    .core ul{grid-template-columns:1fr}
+    .result-grid{grid-template-columns:1fr}
+    .chart{height:280px}
+  }
+</style>
+</head>
+<body>
+<div class="stage" id="stage">
+
+  <!-- ===== 1 / 8 ===== -->
+  <section class="slide cover active" data-idx="1">
+    <span class="page-num">01 / 08</span>
+    <div>
+      <span class="badge">석사학위 청구논문 · 5분 발표</span>
+      <h1>그림책을 활용한 회상 집단미술치료가<br/><span class="em">요양병원 입원 노인의 인지기능</span>에 미치는 효과</h1>
+      <div class="meta">
+        <strong>소속</strong><span>대구대학교 재활과학대학원 미술치료전공</span>
+        <strong>발표자</strong><span>윤영희</span>
+        <strong>지도교수</strong><span>최은영 교수님</span>
+      </div>
+    </div>
+    <div class="flow">
+      <span>발표 흐름</span>
+      <span class="chip">연구방법</span><span class="arrow">→</span>
+      <span class="chip">연구결과</span><span class="arrow">→</span>
+      <span class="chip">논의 및 제언</span>
+    </div>
+  </section>
+
+  <!-- ===== 2 / 8 ===== -->
+  <section class="slide" data-idx="2">
+    <span class="page-num">02 / 08</span>
+    <div class="eyebrow">왜 이 연구가 필요한가</div>
+    <h2 class="title">연구 필요성</h2>
+    <p class="subtitle">요양병원 입원 노인의 인지기능 관리와 비약물적 중재</p>
+    <div class="grid-2">
+      <ul class="bullets">
+        <li>요양병원 입원 노인은 <b>장기 입원</b>으로 활동 범위와 사회적 자극이 제한될 수 있음</li>
+        <li><b>인지기능</b>은 일상생활 수행, 의사소통, 자기표현과 관련됨</li>
+        <li>신체적 부담이 적고 반복 참여가 가능한 <b>비약물적 인지 중재</b>가 필요함</li>
+      </ul>
+      <div class="keywords">
+        <div class="kw">현장</div><div class="sep"></div>
+        <div class="kw">인지</div><div class="sep"></div>
+        <div class="kw">표현</div>
+        <div class="caption">요양병원 현장에 적용 가능한<br/>비약물적 인지 중재 가능성</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== 3 / 8 ===== -->
+  <section class="slide" data-idx="3">
+    <span class="page-num">03 / 08</span>
+    <div class="eyebrow">RESEARCH PURPOSE</div>
+    <h2 class="title">연구 목적 및 연구문제</h2>
+    <p class="subtitle">전체 인지기능과 하위영역 변화를 중심으로</p>
+
+    <div class="purpose-card">
+      <div class="label">연구 목적</div>
+      <div class="text">그림책을 활용한 회상 집단미술치료가 요양병원 입원 노인의 <b>인지기능에 미치는 효과</b>를 알아보고자 함</div>
+    </div>
+
+    <div class="rq-grid">
+      <div class="rq">
+        <span class="num">RQ 1</span>
+        <div class="q"><b>전체 인지기능</b>에<br/>미치는 효과는 어떠한가?</div>
+      </div>
+      <div class="rq">
+        <span class="num">RQ 2</span>
+        <div class="q"><b>인지기능 하위영역</b>에<br/>미치는 효과는 어떠한가?</div>
+      </div>
+    </div>
+
+    <div class="note">
+      발표에서는 <b>“기억력”을 하위영역 중 하나</b>로 두고, 전체 인지기능과 하위영역별 변화 흐름을 함께 제시함
+    </div>
+  </section>
+
+  <!-- ===== 4 / 8 ===== -->
+  <section class="slide" data-idx="4">
+    <span class="page-num">04 / 08</span>
+    <div class="eyebrow">METHOD</div>
+    <h2 class="title">연구방법</h2>
+    <p class="subtitle">누구에게, 무엇을, 얼마나, 어떻게 측정했는가</p>
+
+    <div class="method-grid">
+      <div class="method"><div class="lab">연구대상</div><div class="val">C시 S요양병원 입원 노인 <b>16명</b></div></div>
+      <div class="method"><div class="lab">집단구성</div><div class="val">실험집단 8명 · 통제집단 8명</div></div>
+      <div class="method"><div class="lab">측정도구</div><div class="val">인지선별검사 <b>CIST</b></div></div>
+      <div class="method"><div class="lab">측정시점</div><div class="val">사전 · 사후 · 추후</div></div>
+      <div class="method"><div class="lab">분석방법</div><div class="val">반복측정 분산분석<br/>· 단순 주 효과분석</div></div>
+      <div class="method"><div class="lab">프로그램</div><div class="val">주 2회 · 회기당 90분 · 총 15회기</div></div>
+    </div>
+
+    <div class="stats">
+      <div class="stat"><div class="n">15</div><div class="u">회기</div></div>
+      <div class="stat"><div class="n">90</div><div class="u">분 / 회기</div></div>
+      <div class="stat"><div class="n">3</div><div class="u">측정시점</div></div>
+      <div class="cist-box">
+        <div class="ttl">CIST 사용 의미</div>
+        <div class="desc">진단도구가 아니라, 인지기능 <b>변화</b>를 살펴보기 위한 <b>연구도구</b>로 사용함</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== 5 / 8 ===== -->
+  <section class="slide" data-idx="5">
+    <span class="page-num">05 / 08</span>
+    <div class="eyebrow">PROGRAM</div>
+    <h2 class="title">프로그램 구성</h2>
+    <p class="subtitle">그림책을 단서로 회상하고, 미술활동으로 표현하는 구조 — 구조화된 회기 + 참여자 상태에 따른 유연한 진행</p>
+
+    <div class="flow-steps">
+      <div class="step"><div class="icon">1</div><div class="name">그림책 읽기</div><div class="sub">시각적·이야기적 자료</div></div>
+      <div class="step"><div class="icon">2</div><div class="name">회상 나누기</div><div class="sub">과거 경험 떠올리기</div></div>
+      <div class="step"><div class="icon">3</div><div class="name">미술활동</div><div class="sub">색·형태·작품으로 표현</div></div>
+      <div class="step"><div class="icon">4</div><div class="name">작품 나눔</div><div class="sub">경험과 의미 공유</div></div>
+      <div class="step"><div class="icon">5</div><div class="name">인생그림책</div><div class="sub">활동 결과 재확인</div></div>
+    </div>
+    <div class="arrows"><span>→</span><span>→</span><span>→</span><span>→</span><span></span></div>
+
+    <div class="core">
+      <div class="ttl">프로그램의 핵심 연결</div>
+      <ul>
+        <li><b>그림책</b>은 회상을 시작하게 하는 자료로 활용</li>
+        <li><b>미술활동</b>은 회상한 내용을 손과 작품으로 조직화</li>
+        <li><b>집단 나눔</b>은 언어표현과 사회적 반응을 촉진</li>
+      </ul>
+    </div>
+  </section>
+
+  <!-- ===== 6 / 8 ===== -->
+  <section class="slide" data-idx="6">
+    <span class="page-num">06 / 08</span>
+    <div class="eyebrow">RESULT ①</div>
+    <h2 class="title">연구결과 ① 전체 인지기능</h2>
+    <p class="subtitle">CIST 총점의 사전 · 사후 · 추후 변화</p>
+
+    <div class="result-grid">
+      <div class="chart">
+        <div class="ttl">CIST 총점 변화 추이</div>
+        <svg viewBox="0 0 500 280" preserveAspectRatio="none">
+          <!-- grid -->
+          <line x1="60" y1="40" x2="60" y2="230" stroke="#e5e0d6" stroke-width="1"/>
+          <line x1="60" y1="230" x2="470" y2="230" stroke="#e5e0d6" stroke-width="1"/>
+          <line x1="60" y1="170" x2="470" y2="170" stroke="#f0ece4" stroke-width="1" stroke-dasharray="3,3"/>
+          <line x1="60" y1="110" x2="470" y2="110" stroke="#f0ece4" stroke-width="1" stroke-dasharray="3,3"/>
+          <!-- x labels -->
+          <text x="120" y="252" fill="#6b7280" font-size="12" text-anchor="middle" font-family="Pretendard">사전</text>
+          <text x="265" y="252" fill="#6b7280" font-size="12" text-anchor="middle" font-family="Pretendard">사후</text>
+          <text x="410" y="252" fill="#6b7280" font-size="12" text-anchor="middle" font-family="Pretendard">추후</text>
+          <!-- 실험집단: 상승 후 유지 -->
+          <polyline points="120,180 265,90 410,110" fill="none" stroke="#6b8e7f" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+          <circle cx="120" cy="180" r="6" fill="#6b8e7f"/>
+          <circle cx="265" cy="90" r="6" fill="#6b8e7f"/>
+          <circle cx="410" cy="110" r="6" fill="#6b8e7f"/>
+          <!-- 통제집단: 유지 후 감소 -->
+          <polyline points="120,170 265,170 410,200" fill="none" stroke="#b9805a" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray="6,4"/>
+          <circle cx="120" cy="170" r="6" fill="#b9805a"/>
+          <circle cx="265" cy="170" r="6" fill="#b9805a"/>
+          <circle cx="410" cy="200" r="6" fill="#b9805a"/>
+          <!-- y label -->
+          <text x="30" y="135" fill="#9ca3af" font-size="11" text-anchor="middle" transform="rotate(-90 30 135)" font-family="Pretendard">CIST 총점</text>
+        </svg>
+        <div class="legend">
+          <span><span class="swatch" style="background:#6b8e7f"></span>실험집단</span>
+          <span><span class="swatch" style="background:#b9805a;border:1px dashed #b9805a"></span>통제집단</span>
+        </div>
+      </div>
+
+      <div class="findings">
+        <div class="ttl">핵심 결과</div>
+        <ul>
+          <li><b>실험집단</b>은 사전보다 사후에서 CIST 총점의 점수 차이가 나타남</li>
+          <li>추후검사에서도 사전보다 <b>높은 점수</b>를 보임</li>
+          <li><b>통제집단</b>은 추후 시점에서 감소 양상이 관찰됨</li>
+        </ul>
+        <div class="note" style="margin-top:18px">
+          해석은 단정하지 않고 <b>“변화가 나타남”</b> 중심으로 제시
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== 7 / 8 ===== -->
+  <section class="slide" data-idx="7">
+    <span class="page-num">07 / 08</span>
+    <div class="eyebrow">RESULT ②</div>
+    <h2 class="title">연구결과 ② CIST 하위영역별 평균 점수 변화</h2>
+    <p class="subtitle">기억력만 따로 강조하기보다, 전체 인지기능 결과를 보완하는 하위영역별 변화 양상으로 설명함</p>
+
+    <table class="cist">
+      <thead>
+        <tr>
+          <th style="width:13%">하위영역</th>
+          <th style="width:24%">실험집단 평균(M)<br/><span style="font-weight:400;font-size:11px;color:var(--ink-faint)">사전 → 사후 → 추후</span></th>
+          <th style="width:24%">통제집단 평균(M)<br/><span style="font-weight:400;font-size:11px;color:var(--ink-faint)">사전 → 사후 → 추후</span></th>
+          <th>한눈에 해석</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr><td class="area">지남력</td><td class="exp">3.25 → 4.13 → 4.13</td><td class="ctrl">2.75 → 2.63 → 2.63</td><td class="interp">실험집단에서 변화 양상이 비교적 뚜렷함</td></tr>
+        <tr><td class="area">주의력</td><td class="exp">1.75 → 1.88 → 1.75</td><td class="ctrl">2.00 → 2.00 → 1.50</td><td class="interp">통제집단 추후 감소가 반영되어 해석에 주의 필요</td></tr>
+        <tr><td class="area">시공간</td><td class="exp">0.25 → 0.25 → 0.25</td><td class="ctrl">0.25 → 0.25 → 0.25</td><td class="interp">두 집단 모두 변화가 나타나지 않음</td></tr>
+        <tr><td class="area">집행기능</td><td class="exp">2.75 → 3.63 → 3.38</td><td class="ctrl">2.50 → 2.50 → 2.25</td><td class="interp">사후 증가 후 추후에도 사전보다 높은 점수 양상</td></tr>
+        <tr class="highlight-mem"><td class="area">기억력</td><td class="exp">5.25 → 6.00 → 5.75</td><td class="ctrl">5.38 → 5.38 → 5.00</td><td class="interp">사후 증가, 추후에도 사전보다 높은 점수 양상</td></tr>
+        <tr><td class="area">언어기능</td><td class="exp">3.13 → 3.25 → 3.25</td><td class="ctrl">3.00 → 2.75 → 2.63</td><td class="interp">통제집단 감소가 실험집단에서는 두드러지지 않음</td></tr>
+      </tbody>
+    </table>
+    <div class="meta-line">단위 : 평균 점수 (M, 점) &nbsp;|&nbsp; 각 집단 N = 8 &nbsp;|&nbsp; 표기 순서 : 사전 → 사후 → 추후</div>
+  </section>
+
+  <!-- ===== 8 / 8 ===== -->
+  <section class="slide" data-idx="8">
+    <span class="page-num">08 / 08</span>
+    <div class="eyebrow">DISCUSSION · CONCLUSION · SUGGESTION</div>
+    <h2 class="title">논의 · 결론 · 제언</h2>
+    <p class="subtitle">결과를 현장 적용 가능성과 한계 안에서 조심스럽게 해석</p>
+
+    <div class="conclusion">
+      <div class="conc discussion">
+        <div class="tag">논의</div>
+        <ul>
+          <li>그림책 · 회상 · 미술활동이 <b>기억 회상, 언어표현, 주의집중, 작품 구성</b>과 관련된 참여를 이끌어냄</li>
+          <li>부록의 <b>행동 관찰</b>은 통계 결과를 보완하는 자료로 활용</li>
+        </ul>
+      </div>
+      <div class="conc result">
+        <div class="tag">결론</div>
+        <ul>
+          <li>요양병원 입원 노인의 <b>인지기능 변화</b>를 살펴볼 수 있는 <b>비약물적 중재</b>로 활용될 가능성을 시사함</li>
+          <li>소수 대상자 연구라는 제한점이 있으나 <b>현장 적용 가능성</b>을 탐색함</li>
+        </ul>
+      </div>
+      <div class="conc suggest">
+        <div class="tag">제언</div>
+        <ul>
+          <li>참여자의 <b>신체·인지·정서 상태</b>를 고려한 난이도 조절 필요</li>
+          <li><b>보조진행자 배치</b>와 진행자 교육 필요</li>
+          <li><b>장기 추후검사</b>와 다양한 평가 방식 보완</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="closing">마무리 — <em>“가능성을 시사함”</em> 으로 조심스럽게 정리</div>
+  </section>
+
+  <!-- ===== UI ===== -->
+  <div class="controls" id="dots"></div>
+  <div class="nav">
+    <button id="prev" aria-label="이전">‹</button>
+    <button id="next" aria-label="다음">›</button>
+  </div>
+  <div class="progress" id="progress" style="width:12.5%"></div>
+</div>
+
+<script>
+  const slides = document.querySelectorAll('.slide');
+  const total = slides.length;
+  const dotsWrap = document.getElementById('dots');
+  const progress = document.getElementById('progress');
+  let cur = 0;
+
+  for(let i=0;i<total;i++){
+    const b = document.createElement('button');
+    b.className = 'dot' + (i===0?' active':'');
+    b.setAttribute('aria-label', `${i+1}번 슬라이드`);
+    b.addEventListener('click', ()=>go(i));
+    dotsWrap.appendChild(b);
+  }
+  const dots = dotsWrap.querySelectorAll('.dot');
+
+  function go(idx){
+    if(idx<0||idx>=total) return;
+    slides[cur].classList.remove('active');
+    dots[cur].classList.remove('active');
+    cur = idx;
+    slides[cur].classList.add('active');
+    dots[cur].classList.add('active');
+    progress.style.width = ((cur+1)/total*100)+'%';
+  }
+  document.getElementById('prev').addEventListener('click', ()=>go(cur-1));
+  document.getElementById('next').addEventListener('click', ()=>go(cur+1));
+  document.addEventListener('keydown', e=>{
+    if(e.key==='ArrowRight'||e.key===' '||e.key==='PageDown') go(cur+1);
+    if(e.key==='ArrowLeft'||e.key==='PageUp') go(cur-1);
+    if(e.key==='Home') go(0);
+    if(e.key==='End') go(total-1);
+  });
+  // touch swipe
+  let tx=0;
+  document.addEventListener('touchstart', e=>tx=e.touches[0].clientX);
+  document.addEventListener('touchend', e=>{
+    const dx = e.changedTouches[0].clientX - tx;
+    if(Math.abs(dx)>50) go(cur + (dx<0?1:-1));
+  });
+</script>
+</body>
+</html>
