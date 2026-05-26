@@ -399,13 +399,13 @@ textarea.fi { height: auto; min-height: 60px; padding: 8px 12px; line-height: 1.
     </div>
     <div class="section-body">
       <div class="info-banner blue">
-        💡 <strong>그룹 단위로 묶어야 자동생성 후보로 사용</strong>됩니다 (회의록 수권님 방향). 픽업·샌딩 그룹은 <strong>강제 포함</strong>(에어텔 디폴트), 투어/티켓/패스트트랙은 선택 옵션입니다.
+        💡 <strong>그룹 단위로 묶어야 자동생성 후보로 사용</strong>됩니다 (회의록 수권님 방향). 픽업·샌딩 그룹은 <strong>에어텔 디폴트로 기본 포함</strong>, 투어/티켓/패스트트랙은 선택 옵션입니다.
       </div>
       <div class="section-toolbar">
         <button class="btn btn-primary" onclick="openGroupModal()">+ 그룹 만들기</button>
         <button class="btn" onclick="seedGroupDemo()">📦 데모 데이터 자동 채움</button>
         <div class="section-toolbar-spacer"></div>
-        <span style="font-size:11.5px; color:rgba(0,0,0,0.5);">강제: <strong id="groupForceCount" style="color:#0958d9;">0</strong>개 · 선택: <strong id="groupSelCount" style="color:#389e0d;">0</strong>개</span>
+        <span style="font-size:11.5px; color:rgba(0,0,0,0.5);">픽업: <strong id="groupForceCount" style="color:#0958d9;">0</strong>개 · 기타: <strong id="groupSelCount" style="color:#389e0d;">0</strong>개</span>
       </div>
       <div id="groupList" class="data-grid"></div>
       <div id="groupEmpty" class="empty-state">
@@ -655,7 +655,7 @@ textarea.fi { height: auto; min-height: 60px; padding: 8px 12px; line-height: 1.
     <div class="m-body">
       <label class="form-label">카테고리 <span class="req">*</span></label>
       <div class="cat-pick" id="g_cat_pick">
-        <button class="cat-pick-btn" data-cat="pickup" onclick="pickGCat(this)"><span class="dot" style="background:#389e0d"></span>픽업·샌딩 <span style="font-size:10px;color:#0958d9;margin-left:2px;">(강제)</span></button>
+        <button class="cat-pick-btn" data-cat="pickup" onclick="pickGCat(this)"><span class="dot" style="background:#389e0d"></span>픽업·샌딩</button>
         <button class="cat-pick-btn" data-cat="fasttrack" onclick="pickGCat(this)"><span class="dot" style="background:#d48806"></span>패스트트랙</button>
         <button class="cat-pick-btn active" data-cat="tour" onclick="pickGCat(this)"><span class="dot" style="background:#1677ff"></span>투어</button>
         <button class="cat-pick-btn" data-cat="ticket" onclick="pickGCat(this)"><span class="dot" style="background:#722ed1"></span>티켓</button>
@@ -1074,13 +1074,13 @@ function renderGroups() {
       `).join('');
       return `
         <div class="data-card">
-          <div class="data-card-cat">${g.dest} · ${g.forced ? '강제' : '선택'}</div>
+          <div class="data-card-cat">${g.dest} · ${g.forced ? '에어텔 디폴트' : '선택'}</div>
           <div class="data-card-head">
             <div class="data-card-title">${g.name}<span class="data-card-id">${g.id}</span></div>
             <span class="tag ${catTag[g.cat]}">${catLabel[g.cat]}</span>
           </div>
           <div class="data-card-body">
-            <strong>${g.items.length}개 항목</strong>${g.forced ? ' · <span style="color:#0958d9;font-weight:700;">🔒 강제 포함</span>' : ''}
+            <strong>${g.items.length}개 항목</strong>${g.forced ? ' · <span style="color:#0958d9;font-weight:700;">에어텔 디폴트</span>' : ''}
             ${itemsHtml}
           </div>
           <div class="data-card-foot">
@@ -1270,7 +1270,7 @@ function updateRunBarDesc() {
   const grpSel = state.groups.filter(g => !g.forced).length;
   const c = state.contents.length;
   document.getElementById('runBarDesc').textContent =
-    `항공 ${state.flights.length}편 × 숙박/객실 ${onRooms}개 × 강제그룹 ${grpForced} × 선택그룹 ${grpSel} × 콘텐츠 ${c}개`;
+    `항공 ${state.flights.length}편 × 숙박/객실 ${onRooms}개 × 픽업그룹 ${grpForced} × 선택그룹 ${grpSel} × 콘텐츠 ${c}개`;
 }
 
 function runAutogen() {
@@ -1281,7 +1281,7 @@ function runAutogen() {
   }
   const pickupGrp = state.groups.find(g => g.cat === 'pickup' && g.forced);
   if (!pickupGrp) {
-    if (!confirm('⚠ 픽업·샌딩 그룹(강제)이 없습니다. 그래도 진행할까요?\n실제 운영에서는 픽업 없이는 상품 생성 불가합니다.')) return;
+    if (!confirm('⚠ 픽업·샌딩 그룹이 없습니다. 그래도 진행할까요?\n실제 운영에서는 픽업이 에어텔 디폴트로 권장됩니다.')) return;
   }
 
   // overlay
@@ -1379,7 +1379,7 @@ function addProd(h, r, flight, tourGrp, ticketGrp, pickupGrp, fixed, extra, peak
   combo.push(`${flight.carrier} 왕복`);
   combo.push(`${h.name.split(' ')[0]}`);
   combo.push(`${r.name} (${r.meal})`);
-  if (pickupGrp) combo.push('픽업 강제');
+  if (pickupGrp) combo.push('픽업 포함');
   if (tourGrp) combo.push(`+투어`);
   if (ticketGrp) combo.push(`+티켓`);
 
