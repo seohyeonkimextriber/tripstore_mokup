@@ -227,6 +227,23 @@ tbody tr:hover td { background: #fafafa; }
 .sync-pill-ok { background: #f6ffed; color: #389e0d; border: 1px solid #b7eb8f; }
 .sync-pill-delay { background: #fff7e6; color: #d48806; border: 1px solid #ffd591; }
 
+/* AUTO-GEN TOGGLE SWITCH */
+.autogen-cell { display: flex; align-items: center; gap: 8px; }
+.autogen-switch { position: relative; display: inline-block; width: 36px; height: 20px; flex-shrink: 0; }
+.autogen-switch input { opacity: 0; width: 0; height: 0; }
+.autogen-slider { position: absolute; cursor: pointer; inset: 0; background: #d9d9d9; border-radius: 20px; transition: 0.2s; }
+.autogen-slider::before { content: ''; position: absolute; height: 14px; width: 14px; left: 3px; top: 3px; background: #fff; border-radius: 50%; transition: 0.2s; box-shadow: 0 1px 2px rgba(0,0,0,0.15); }
+.autogen-switch input:checked + .autogen-slider { background: #52c41a; }
+.autogen-switch input:checked + .autogen-slider::before { transform: translateX(16px); }
+.autogen-switch input:disabled + .autogen-slider { background: #f0f0f0; cursor: not-allowed; }
+.autogen-switch input:disabled + .autogen-slider::before { background: #fafafa; }
+.autogen-label { font-size: 12px; font-weight: 500; }
+.autogen-label.on { color: #389e0d; }
+.autogen-label.off { color: rgba(0,0,0,0.45); }
+.autogen-label.na { color: rgba(0,0,0,0.25); font-style: italic; }
+.autogen-meta { font-size: 11px; color: rgba(0,0,0,0.4); margin-top: 4px; }
+.autogen-meta .off-reason { color: #d48806; font-weight: 500; }
+
 /* ROOM SELECT CARDS (등록 시 객실 선택) */
 .room-select-list { display: flex; flex-direction: column; gap: 8px; }
 .room-select-card { border: 1.5px solid #e8e8e8; border-radius: 8px; background: #fff; transition: all 0.15s; overflow: hidden; }
@@ -290,6 +307,9 @@ tbody tr:hover td { background: #fafafa; }
           · <span class="tag tag-yellow">재고변동요금</span> 요금 고정 / 재고는 실시간 — PB 숙박권 등록 후 재고 동기화<br>
           · <span class="tag tag-red">다이나믹요금</span> 요금·재고 모두 실시간 — PB 숙박권 등록 후 동기화<br>
           <span style="font-size:11.5px; color:rgba(0,0,0,0.5);">→ 이 화면은 <strong>TMG 요금표 메타 모니터링 + PB 숙박권 생성 진입점</strong>. 재고/요금 조회 상태는 PB 숙박권 관리 화면에서 확인.</span>
+          <div style="margin-top:10px; padding-top:10px; border-top:1px dashed rgba(22,119,255,0.25); font-size:12.5px; color:rgba(0,0,0,0.75); line-height:1.7;">
+            🎯 <strong>자동생성 대상</strong> — PB 숙박권이 생성된 행은 토글로 <strong>자동 PB 상품 생성 포함 여부</strong>를 제어합니다. ON인 숙박권만 새벽 배치에서 자동 PB 상품 조합에 참여합니다. 미생성 행은 토글 비활성.
+          </div>
         </div>
       </div>
     </div>
@@ -321,13 +341,20 @@ tbody tr:hover td { background: #fafafa; }
       <input type="text" class="fi fi-lg" placeholder="TMG 숙소 명">
       <select class="fi fi-md"><option>숙박권 선택</option></select>
       <select class="fi fi-md"><option>PB 생성 여부</option></select>
+      <select class="fi fi-md"><option>자동생성 상태 전체</option><option>ON</option><option>OFF</option><option>대상 아님(PB 미생성)</option></select>
       <button class="btn btn-primary">검색</button>
       <button class="btn btn-default">초기화</button>
     </div>
 
     <!-- 액션 바 -->
     <div class="action-bar">
-      <div class="action-left">총 <strong>293건</strong> · PB 미생성 <strong style="color:#fa8c16">52건</strong></div>
+      <div class="action-left">
+        총 <strong>293건</strong> · PB 미생성 <strong style="color:#fa8c16">52건</strong> · 자동생성 대상 <strong id="autogenCount" style="color:#389e0d">218건</strong> <span style="color:rgba(0,0,0,0.35); font-size:12px;">(전체 PB 숙박권의 90%)</span>
+      </div>
+      <div class="action-right">
+        <button class="btn btn-default btn-sm" onclick="bulkAutogen(true)">선택 자동생성 ON</button>
+        <button class="btn btn-default btn-sm" onclick="bulkAutogen(false)">선택 자동생성 OFF</button>
+      </div>
     </div>
 
     <!-- 통합 테이블 -->
@@ -335,7 +362,7 @@ tbody tr:hover td { background: #fafafa; }
       <table>
         <thead>
           <tr>
-            <th style="width:32px;"><input type="checkbox"></th>
+            <th style="width:32px;"><input type="checkbox" onclick="toggleSelectAll(this)"></th>
             <th>요금 ID</th>
             <th>요금명</th>
             <th>타입</th>
@@ -343,6 +370,7 @@ tbody tr:hover td { background: #fafafa; }
             <th>판매기간</th>
             <th>카탈로그 매핑</th>
             <th>PB 숙박권</th>
+            <th>자동생성</th>
             <th></th>
           </tr>
         </thead>
@@ -357,6 +385,7 @@ tbody tr:hover td { background: #fafafa; }
             <td style="font-size:12px; color:rgba(0,0,0,0.65);">2026-05-01 ~ 07-31</td>
             <td><span class="val-ok">✓ 완료 (7/7)</span></td>
             <td><span class="tag tag-green">생성</span></td>
+            <td><div class="autogen-cell"><label class="autogen-switch"><input type="checkbox" checked onchange="updateAutogen(this)"><span class="autogen-slider"></span></label><span class="autogen-label on">ON</span></div><div class="autogen-meta">2026-05-20 · 서현</div></td>
             <td><button class="btn btn-ghost btn-sm">상세</button></td>
           </tr>
           <tr data-type="static">
@@ -368,6 +397,7 @@ tbody tr:hover td { background: #fafafa; }
             <td style="font-size:12px; color:rgba(0,0,0,0.65);">2026-06-30 ~ 12-31</td>
             <td><span class="val-ok">✓ 완료 (6/6)</span></td>
             <td><span class="tag tag-gray">미생성</span></td>
+            <td><span class="autogen-label na" title="PB 숙박권을 먼저 생성해야 자동생성 대상으로 지정할 수 있습니다.">— (PB 미생성)</span></td>
             <td><button class="btn btn-primary btn-sm" onclick="goCreate('static', '46880')">숙박권 생성</button></td>
           </tr>
           <tr data-type="static">
@@ -379,6 +409,7 @@ tbody tr:hover td { background: #fafafa; }
             <td style="font-size:12px; color:rgba(0,0,0,0.65);">2026-04-01 ~ 09-30</td>
             <td><span class="val-ok">✓ 완료 (7/7)</span></td>
             <td><span class="tag tag-green">생성</span></td>
+            <td><div class="autogen-cell"><label class="autogen-switch"><input type="checkbox" checked onchange="updateAutogen(this)"><span class="autogen-slider"></span></label><span class="autogen-label on">ON</span></div><div class="autogen-meta">2026-05-20 · 서현</div></td>
             <td><button class="btn btn-ghost btn-sm">상세</button></td>
           </tr>
           <tr data-type="static">
@@ -390,6 +421,7 @@ tbody tr:hover td { background: #fafafa; }
             <td style="font-size:12px; color:rgba(0,0,0,0.65);">2026-05-15 ~ 11-15</td>
             <td><span class="val-ok">✓ 완료 (6/6)</span></td>
             <td><span class="tag tag-gray">미생성</span></td>
+            <td><span class="autogen-label na" title="PB 숙박권을 먼저 생성해야 자동생성 대상으로 지정할 수 있습니다.">— (PB 미생성)</span></td>
             <td><button class="btn btn-primary btn-sm" onclick="goCreate('static', '46853')">숙박권 생성</button></td>
           </tr>
 
@@ -403,6 +435,7 @@ tbody tr:hover td { background: #fafafa; }
             <td style="font-size:12px; color:rgba(0,0,0,0.65);">2026-05-01 ~ 10-31</td>
             <td><span class="val-ok">✓ 완료 (5/5)</span></td>
             <td><span class="tag tag-green">생성</span></td>
+            <td><div class="autogen-cell"><label class="autogen-switch"><input type="checkbox" checked onchange="updateAutogen(this)"><span class="autogen-slider"></span></label><span class="autogen-label on">ON</span></div><div class="autogen-meta">2026-05-20 · 서현</div></td>
             <td><button class="btn btn-ghost btn-sm">상세</button></td>
           </tr>
           <tr data-type="alm-dynamic">
@@ -414,6 +447,7 @@ tbody tr:hover td { background: #fafafa; }
             <td style="font-size:12px; color:rgba(0,0,0,0.65);">2026-04-01 ~ 12-31</td>
             <td><span class="val-ok">✓ 완료 (4/4)</span></td>
             <td><span class="tag tag-gray">미생성</span></td>
+            <td><span class="autogen-label na" title="PB 숙박권을 먼저 생성해야 자동생성 대상으로 지정할 수 있습니다.">— (PB 미생성)</span></td>
             <td><button class="btn btn-primary btn-sm" onclick="goCreate('alm-dynamic', '47098')">숙박권 생성</button></td>
           </tr>
           <tr data-type="alm-dynamic">
@@ -425,11 +459,12 @@ tbody tr:hover td { background: #fafafa; }
             <td style="font-size:12px; color:rgba(0,0,0,0.65);">2026-06-01 ~ 09-30</td>
             <td><span class="val-ok">✓ 완료 (6/6)</span></td>
             <td><span class="tag tag-gray">미생성</span></td>
+            <td><span class="autogen-label na" title="PB 숙박권을 먼저 생성해야 자동생성 대상으로 지정할 수 있습니다.">— (PB 미생성)</span></td>
             <td><button class="btn btn-primary btn-sm" onclick="goCreate('alm-dynamic', '47095')">숙박권 생성</button></td>
           </tr>
 
           <!-- ===== 다이나믹요금 (DYNAMIC) ===== -->
-          <tr data-type="dynamic">
+          <tr data-type="dynamic" data-autogen="off">
             <td><input type="checkbox"></td>
             <td class="td-id">48205</td>
             <td>Real-time BAR</td>
@@ -438,6 +473,7 @@ tbody tr:hover td { background: #fafafa; }
             <td style="font-size:12px; color:rgba(0,0,0,0.65);">2026-04-29 ~ 2031-04-29 <span class="tag tag-gray" style="margin-left:4px;">자동</span></td>
             <td><span class="val-ok">✓ 완료 (5/5)</span></td>
             <td><span class="tag tag-green">생성</span></td>
+            <td><div class="autogen-cell"><label class="autogen-switch"><input type="checkbox" onchange="updateAutogen(this)"><span class="autogen-slider"></span></label><span class="autogen-label off">OFF</span></div><div class="autogen-meta">2026-05-19 · 서현 · <span class="off-reason">예상가 변동성 큼</span></div></td>
             <td><button class="btn btn-ghost btn-sm">상세</button></td>
           </tr>
           <tr data-type="dynamic">
@@ -449,6 +485,7 @@ tbody tr:hover td { background: #fafafa; }
             <td style="font-size:12px; color:rgba(0,0,0,0.65);">2026-04-29 ~ 2031-04-29 <span class="tag tag-gray" style="margin-left:4px;">자동</span></td>
             <td><span class="val-ok">✓ 완료 (6/6)</span></td>
             <td><span class="tag tag-gray">미생성</span></td>
+            <td><span class="autogen-label na" title="PB 숙박권을 먼저 생성해야 자동생성 대상으로 지정할 수 있습니다.">— (PB 미생성)</span></td>
             <td><button class="btn btn-primary btn-sm" onclick="goCreate('dynamic', '48198')">숙박권 생성</button></td>
           </tr>
           <tr data-type="dynamic">
@@ -460,6 +497,7 @@ tbody tr:hover td { background: #fafafa; }
             <td style="font-size:12px; color:rgba(0,0,0,0.65);">2026-04-29 ~ 2031-04-29 <span class="tag tag-gray" style="margin-left:4px;">자동</span></td>
             <td><span class="val-ok">✓ 완료 (4/4)</span></td>
             <td><span class="tag tag-gray">미생성</span></td>
+            <td><span class="autogen-label na" title="PB 숙박권을 먼저 생성해야 자동생성 대상으로 지정할 수 있습니다.">— (PB 미생성)</span></td>
             <td><button class="btn btn-primary btn-sm" onclick="goCreate('dynamic', '48190')">숙박권 생성</button></td>
           </tr>
         </tbody>
@@ -942,6 +980,80 @@ tbody tr:hover td { background: #fafafa; }
 
 
 <script>
+/* ===== 자동생성 토글 ===== */
+function toggleSelectAll(headerCb) {
+  document.querySelectorAll('tbody input[type="checkbox"]:not([disabled])').forEach(cb => { cb.checked = headerCb.checked; });
+}
+
+function updateAutogen(cb) {
+  const cell = cb.closest('.autogen-cell');
+  const label = cell.querySelector('.autogen-label');
+  const meta = cell.parentElement.querySelector('.autogen-meta');
+  const row = cb.closest('tr');
+
+  if (cb.checked) {
+    label.textContent = 'ON';
+    label.classList.remove('off'); label.classList.add('on');
+    row.setAttribute('data-autogen', 'on');
+    meta.innerHTML = '2026-05-22 · 서현';
+  } else {
+    const reason = prompt('자동생성 OFF 사유를 입력해 주세요. (운영팀 공유용)\n예: 예상가 변동성 큼 / 공급사 응대 지연 / 비수기 노출 제외 등', '');
+    if (reason === null) { cb.checked = true; return; }
+    label.textContent = 'OFF';
+    label.classList.remove('on'); label.classList.add('off');
+    row.setAttribute('data-autogen', 'off');
+    meta.innerHTML = '2026-05-22 · 서현 · <span class="off-reason">' + (reason || '사유 미기재') + '</span>';
+  }
+  refreshAutogenCount();
+}
+
+function refreshAutogenCount() {
+  const onCount = document.querySelectorAll('tbody tr .autogen-switch input:checked').length;
+  // 데모용 — 실제는 백엔드에서 전체 카운트 가져옴
+  const visibleTotal = document.querySelectorAll('tbody tr .autogen-switch input').length;
+  const baseLine = 218; // 데모 페이지 전체 ON 카운트 (서버값)
+  const delta = onCount - document.querySelectorAll('tbody tr[data-autogen="on"] .autogen-switch input').length;
+  // 간단 표시
+  const cnt = document.getElementById('autogenCount');
+  if (cnt) cnt.textContent = (baseLine + delta) + '건';
+}
+
+function bulkAutogen(turnOn) {
+  const checked = document.querySelectorAll('tbody input[type="checkbox"]:checked:not([disabled])');
+  const targets = [];
+  checked.forEach(cb => {
+    const tr = cb.closest('tr');
+    if (!tr) return;
+    const switchCb = tr.querySelector('.autogen-switch input');
+    if (switchCb && !switchCb.disabled) targets.push(switchCb);
+  });
+  if (targets.length === 0) { alert('대상 행을 선택해 주세요. (PB 미생성 행은 대상 아님)'); return; }
+  if (!confirm(`선택한 ${targets.length}건의 자동생성을 ${turnOn ? 'ON' : 'OFF'} 처리할까요?`)) return;
+  let reason = '';
+  if (!turnOn) {
+    reason = prompt('OFF 사유 (일괄 적용)', '') || '사유 미기재';
+  }
+  targets.forEach(switchCb => {
+    if (switchCb.checked === turnOn) return;
+    switchCb.checked = turnOn;
+    const cell = switchCb.closest('.autogen-cell');
+    const label = cell.querySelector('.autogen-label');
+    const meta = cell.parentElement.querySelector('.autogen-meta');
+    const row = switchCb.closest('tr');
+    if (turnOn) {
+      label.textContent = 'ON'; label.classList.remove('off'); label.classList.add('on');
+      row.setAttribute('data-autogen', 'on');
+      meta.innerHTML = '2026-05-22 · 서현 · 일괄 ON';
+    } else {
+      label.textContent = 'OFF'; label.classList.remove('on'); label.classList.add('off');
+      row.setAttribute('data-autogen', 'off');
+      meta.innerHTML = '2026-05-22 · 서현 · <span class="off-reason">' + reason + '</span>';
+    }
+  });
+  refreshAutogenCount();
+  alert(`${targets.length}건 ${turnOn ? 'ON' : 'OFF'} 완료`);
+}
+
 function filterByType(type, btnEl) {
   // 필터 버튼 active 토글
   document.querySelectorAll('.type-filter-btn').forEach(b => b.classList.remove('active'));

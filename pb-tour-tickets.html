@@ -1,0 +1,1336 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>투어·티켓 관리 — TripStore Partners</title>
+<link href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.6/dist/web/static/pretendard.css" rel="stylesheet">
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: 'Pretendard', 'Apple SD Gothic Neo', -apple-system, sans-serif; font-size: 14px; color: rgba(0,0,0,0.88); background: #f5f5f5; }
+body.modal-open { overflow: hidden; }
+a { color: inherit; text-decoration: none; }
+button { font-family: inherit; cursor: pointer; }
+
+/* ===== GNB ===== */
+.gnb { background: #f0f5ff; height: 48px; display: flex; align-items: center; position: sticky; top: 0; z-index: 100; padding: 0 20px; border-bottom: 1px solid #d6e4ff; box-shadow: 0 1px 4px rgba(0,0,0,0.06); }
+.gnb-logo { color: #222427; font-weight: 800; font-size: 15px; margin-right: 24px; letter-spacing: -0.3px; }
+.gnb-logo span { color: #1677ff; }
+.gnb-logo .partners-badge { background: #1677ff; color: #fff; font-size: 10px; font-weight: 700; padding: 2px 6px; border-radius: 4px; margin-left: 6px; letter-spacing: 0.3px; vertical-align: middle; }
+.gnb-menu { display: flex; gap: 0; }
+.gnb-item { color: rgba(0,0,0,0.55); padding: 0 14px; height: 48px; display: flex; align-items: center; cursor: pointer; font-size: 13px; white-space: nowrap; position: relative; transition: color 0.15s; font-weight: 500; }
+.gnb-item:hover { color: rgba(0,0,0,0.88); }
+.gnb-item.active { color: #1677ff; }
+.gnb-item.active::after { content: ''; position: absolute; bottom: 0; left: 0; right: 0; height: 2px; background: #1677ff; }
+.gnb-right { margin-left: auto; display: flex; align-items: center; gap: 14px; }
+.gnb-user { font-size: 12px; color: rgba(0,0,0,0.55); display: flex; align-items: center; gap: 6px; }
+.gnb-user-name { font-weight: 600; color: rgba(0,0,0,0.75); }
+.gnb-org-badge { background: #fff; border: 1px solid #d6e4ff; color: #1677ff; font-size: 11px; font-weight: 600; padding: 3px 8px; border-radius: 4px; }
+
+/* ===== BREADCRUMB ===== */
+.breadcrumb { padding: 14px 24px 0; font-size: 12px; color: rgba(0,0,0,0.45); display: flex; align-items: center; gap: 6px; }
+.breadcrumb span:not(.sep) { cursor: pointer; transition: color 0.15s; }
+.breadcrumb span:not(.sep):hover { color: #1677ff; }
+.sep { color: rgba(0,0,0,0.2); cursor: default !important; }
+.bc-current { color: rgba(0,0,0,0.88) !important; cursor: default !important; }
+
+/* ===== LAYOUT ===== */
+.layout { padding: 14px 24px 48px; max-width: 1440px; margin: 0 auto; }
+
+/* ===== PAGE HEADER ===== */
+.page-header { margin: 12px 0 18px; display: flex; align-items: flex-end; justify-content: space-between; gap: 14px; flex-wrap: wrap; }
+.page-title-wrap { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+.page-title { font-size: 22px; font-weight: 700; color: rgba(0,0,0,0.88); letter-spacing: -0.3px; }
+.page-desc { font-size: 13px; color: rgba(0,0,0,0.5); margin-top: 4px; }
+.page-actions { display: flex; gap: 8px; }
+
+/* ===== TOP SCOPE TABS (개별 항목 / 그룹 관리) ===== */
+.top-tabs { display: flex; gap: 0; border-bottom: 2px solid #f0f0f0; margin-bottom: 18px; }
+.top-tab { background: transparent; border: none; padding: 14px 24px; font-size: 15px; font-weight: 700; cursor: pointer; color: rgba(0,0,0,0.5); border-bottom: 3px solid transparent; margin-bottom: -2px; font-family: inherit; display: inline-flex; align-items: center; gap: 8px; transition: all 0.15s; }
+.top-tab:hover { color: rgba(0,0,0,0.88); }
+.top-tab.active { color: #1677ff; border-bottom-color: #1677ff; }
+.top-tab-count { font-size: 12px; padding: 1px 9px; border-radius: 11px; background: rgba(0,0,0,0.06); color: rgba(0,0,0,0.55); font-weight: 700; }
+.top-tab.active .top-tab-count { background: #1677ff; color: #fff; }
+.top-panel { display: none; }
+.top-panel.active { display: block; }
+
+/* ===== CATEGORY CHIPS ===== */
+.cat-chip-row { display: flex; gap: 6px; flex-wrap: wrap; align-items: center; margin-bottom: 14px; padding: 10px 14px; background: #fff; border: 1px solid #f0f0f0; border-radius: 8px; }
+.cat-chip { padding: 6px 14px; border-radius: 16px; border: 1px solid #e8e8e8; background: #fff; color: rgba(0,0,0,0.65); font-size: 12.5px; font-weight: 500; cursor: pointer; font-family: inherit; transition: all 0.15s; display: inline-flex; align-items: center; gap: 4px; }
+.cat-chip:hover { color: #1677ff; border-color: #91caff; }
+.cat-chip.active { color: #1677ff; border-color: #1677ff; background: #e6f4ff; font-weight: 700; }
+.cat-chip-count { font-size: 11px; opacity: 0.7; margin-left: 3px; }
+.cat-chip .dot { width: 7px; height: 7px; border-radius: 50%; }
+.cat-chip .dot.tour { background: #1677ff; }
+.cat-chip .dot.ticket { background: #722ed1; }
+.cat-chip .dot.pickup { background: #389e0d; }
+.cat-chip .dot.fasttrack { background: #d48806; }
+
+/* ===== SUMMARY ===== */
+.summary { background: linear-gradient(135deg, #f6f9ff 0%, #eef4ff 100%); border: 1px solid #d6e4ff; border-radius: 12px; padding: 16px 22px; margin-bottom: 14px; display: flex; align-items: center; gap: 18px; flex-wrap: wrap; }
+.summary-block { display: flex; flex-direction: column; gap: 3px; }
+.summary-label { font-size: 11px; color: rgba(0,0,0,0.5); font-weight: 600; letter-spacing: 0.3px; text-transform: uppercase; }
+.summary-value { font-size: 14px; color: rgba(0,0,0,0.88); font-weight: 600; }
+.summary-value strong { font-size: 18px; color: #1677ff; font-weight: 800; margin-right: 2px; }
+.summary-value .sub { font-size: 11px; color: rgba(0,0,0,0.45); font-weight: 500; margin-left: 4px; }
+.summary-divider { width: 1px; height: 32px; background: #d6e4ff; }
+
+/* ===== FILTER ===== */
+.filter-bar { background: #fff; border: 1px solid #f0f0f0; border-radius: 8px 8px 0 0; padding: 12px 16px; display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+.search-wrap { position: relative; }
+.search-wrap input { height: 32px; border: 1px solid #d9d9d9; border-radius: 6px; padding: 0 12px 0 32px; font-size: 13px; font-family: inherit; outline: none; width: 240px; transition: border 0.2s; background: #fff; color: rgba(0,0,0,0.88); }
+.search-wrap input:focus { border-color: #1677ff; box-shadow: 0 0 0 2px rgba(22,119,255,0.1); }
+.search-wrap input::placeholder { color: rgba(0,0,0,0.25); }
+.search-icon { position: absolute; left: 10px; top: 50%; transform: translateY(-50%); color: rgba(0,0,0,0.3); pointer-events: none; }
+.search-icon svg { width: 14px; height: 14px; display: block; }
+.fi { height: 32px; border: 1px solid #d9d9d9; border-radius: 6px; font-size: 13px; font-family: inherit; color: rgba(0,0,0,0.88); outline: none; background: #fff; padding: 0 28px 0 12px; appearance: none; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='%23bbb'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 10px center; cursor: pointer; transition: border 0.2s; min-width: 130px; }
+.fi:focus, .fi:hover { border-color: #1677ff; }
+.filter-total { margin-left: auto; font-size: 12px; color: rgba(0,0,0,0.55); }
+.filter-total strong { color: #1677ff; font-weight: 700; font-size: 13px; }
+
+/* ===== TABLE ===== */
+.main-card { background: #fff; border: 1px solid #f0f0f0; border-top: none; border-radius: 0 0 8px 8px; overflow: hidden; margin-bottom: 16px; }
+.table-wrap { overflow-x: auto; }
+table.tbl { width: 100%; border-collapse: collapse; }
+table.tbl thead th { padding: 11px 16px; text-align: left; font-size: 11px; font-weight: 700; color: rgba(0,0,0,0.45); letter-spacing: 0.4px; text-transform: uppercase; background: #fafbfc; border-bottom: 1px solid #f0f0f0; white-space: nowrap; }
+table.tbl thead th.right { text-align: right; }
+table.tbl thead th.center { text-align: center; }
+table.tbl tbody td { padding: 13px 16px; font-size: 13px; color: rgba(0,0,0,0.88); border-bottom: 1px solid #f5f5f5; vertical-align: middle; }
+table.tbl tbody tr:last-child td { border-bottom: none; }
+table.tbl tbody tr.clickable { cursor: pointer; transition: background 0.12s; }
+table.tbl tbody tr.clickable:hover td { background: #f0f7ff; }
+
+/* ===== ITEM CELL ===== */
+.item-cell { display: flex; align-items: center; gap: 10px; min-width: 0; }
+.item-thumb { width: 36px; height: 36px; border-radius: 8px; display: flex; align-items: center; justify-content: center; color: #fff; font-size: 16px; flex-shrink: 0; }
+.item-thumb.tour { background: linear-gradient(135deg, #91caff, #1677ff); }
+.item-thumb.ticket { background: linear-gradient(135deg, #d3adf7, #722ed1); }
+.item-thumb.pickup { background: linear-gradient(135deg, #b7eb8f, #389e0d); }
+.item-thumb.fasttrack { background: linear-gradient(135deg, #ffd591, #d48806); }
+.item-info { min-width: 0; }
+.item-name { font-size: 13px; font-weight: 700; color: rgba(0,0,0,0.88); line-height: 1.3; max-width: 260px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.item-meta { font-size: 11px; color: rgba(0,0,0,0.45); margin-top: 2px; display: flex; gap: 6px; align-items: center; }
+.item-meta .id-pill { background: #f5f5f5; padding: 1px 6px; border-radius: 3px; font-family: 'SF Mono', monospace; font-size: 10.5px; color: rgba(0,0,0,0.55); }
+
+/* ===== CATEGORY TAG ===== */
+.cat-tag { display: inline-flex; align-items: center; gap: 4px; padding: 3px 9px; border-radius: 5px; font-size: 11.5px; font-weight: 700; }
+.cat-tag.tour { background: #e6f4ff; color: #0958d9; border: 1px solid #91caff; }
+.cat-tag.ticket { background: #f9f0ff; color: #531dab; border: 1px solid #d3adf7; }
+.cat-tag.pickup { background: #f6ffed; color: #389e0d; border: 1px solid #b7eb8f; }
+.cat-tag.fasttrack { background: #fff7e6; color: #d48806; border: 1px solid #ffd591; }
+.cat-tag .dot { width: 6px; height: 6px; border-radius: 50%; }
+.cat-tag.tour .dot { background: #1677ff; }
+.cat-tag.ticket .dot { background: #722ed1; }
+.cat-tag.pickup .dot { background: #389e0d; }
+.cat-tag.fasttrack .dot { background: #d48806; }
+
+/* ===== PROVIDER PILL ===== */
+.prov-pill { display: inline-flex; align-items: center; gap: 5px; padding: 3px 9px; border-radius: 5px; font-size: 12px; font-weight: 600; background: #f5f5f5; color: rgba(0,0,0,0.65); border: 1px solid #e8e8e8; }
+.prov-pill .pdot { width: 5px; height: 5px; border-radius: 50%; background: rgba(0,0,0,0.4); }
+.prov-pill.kkday { background: #e6f4ff; color: #1677ff; border-color: #91caff; }
+.prov-pill.kkday .pdot { background: #1677ff; }
+.prov-pill.peaktime { background: #fff0f6; color: #c41d7f; border-color: #ffadd2; }
+.prov-pill.peaktime .pdot { background: #c41d7f; }
+.prov-pill.benazza { background: #f9f0ff; color: #722ed1; border-color: #d3adf7; }
+.prov-pill.benazza .pdot { background: #722ed1; }
+
+/* ===== AUTOGEN TOGGLE ===== */
+.autogen-cell { display: flex; flex-direction: column; align-items: center; gap: 4px; }
+.autogen-switch { position: relative; display: inline-block; width: 38px; height: 22px; }
+.autogen-switch input { opacity: 0; width: 0; height: 0; }
+.autogen-slider { position: absolute; cursor: pointer; inset: 0; background: #d9d9d9; border-radius: 22px; transition: 0.2s; }
+.autogen-slider::before { content: ''; position: absolute; height: 16px; width: 16px; left: 3px; top: 3px; background: #fff; border-radius: 50%; transition: 0.2s; box-shadow: 0 1px 2px rgba(0,0,0,0.15); }
+.autogen-switch input:checked + .autogen-slider { background: #52c41a; }
+.autogen-switch input:checked + .autogen-slider::before { transform: translateX(16px); }
+.autogen-switch input:disabled + .autogen-slider { background: #f0f0f0; cursor: not-allowed; }
+.autogen-mini-label { font-size: 10.5px; font-weight: 700; letter-spacing: 0.3px; }
+.autogen-mini-label.on { color: #389e0d; }
+.autogen-mini-label.off { color: rgba(0,0,0,0.4); }
+.autogen-mini-label.forced { color: #0958d9; }
+
+/* ===== GROUP CELL ===== */
+.group-cell { display: flex; align-items: center; gap: 4px; flex-wrap: wrap; }
+.group-pill { display: inline-flex; align-items: center; padding: 3px 9px; border-radius: 4px; font-size: 11.5px; font-weight: 600; background: #e6f4ff; color: #0958d9; border: 1px solid #91caff; cursor: pointer; transition: all 0.15s; }
+.group-pill:hover { background: #1677ff; color: #fff; border-color: #1677ff; }
+.group-pill.unassigned { background: #fff7e6; color: #d48806; border-color: #ffd591; }
+.group-pill .icon { margin-right: 4px; }
+
+/* ===== STATUS DOT ===== */
+.status-dot { display: inline-flex; align-items: center; gap: 6px; font-size: 12px; font-weight: 600; }
+.status-dot::before { content: ''; width: 6px; height: 6px; border-radius: 50%; background: #52c41a; }
+.status-dot.draft { color: rgba(0,0,0,0.55); }
+.status-dot.draft::before { background: #d9d9d9; }
+.status-dot.paused { color: #d48806; }
+.status-dot.paused::before { background: #d48806; }
+
+.price-cell { font-size: 13px; font-weight: 700; color: rgba(0,0,0,0.88); font-variant-numeric: tabular-nums; }
+.price-cell .unit { font-size: 11px; color: rgba(0,0,0,0.4); font-weight: 500; margin-left: 2px; }
+.price-cell .sub { font-size: 11px; color: rgba(0,0,0,0.45); font-weight: 500; }
+
+/* ===== BUTTONS ===== */
+.btn-primary-md { height: 36px; padding: 0 16px; border-radius: 6px; font-size: 13px; font-weight: 600; cursor: pointer; border: 1px solid #1677ff; background: #1677ff; color: #fff; font-family: inherit; display: inline-flex; align-items: center; gap: 6px; transition: all 0.15s; }
+.btn-primary-md:hover { background: #4096ff; }
+.btn-primary-md svg { width: 13px; height: 13px; }
+.btn-ghost-md { height: 36px; padding: 0 14px; border-radius: 6px; font-size: 13px; font-weight: 500; cursor: pointer; border: 1px solid #d9d9d9; background: #fff; color: rgba(0,0,0,0.75); font-family: inherit; display: inline-flex; align-items: center; gap: 6px; transition: all 0.15s; }
+.btn-ghost-md:hover { color: #1677ff; border-color: #1677ff; }
+.btn-rule { height: 28px; padding: 0 12px; border-radius: 6px; font-size: 12px; font-weight: 600; cursor: pointer; border: 1px solid #d9d9d9; background: #fff; color: rgba(0,0,0,0.75); font-family: inherit; display: inline-flex; align-items: center; gap: 4px; transition: all 0.15s; }
+.btn-rule:hover { color: #1677ff; border-color: #1677ff; background: #f0f7ff; }
+.btn-rule svg { width: 11px; height: 11px; }
+
+/* ===== PAGINATION ===== */
+.pagination { padding: 12px 20px; display: flex; align-items: center; justify-content: space-between; border-top: 1px solid #f0f0f0; background: #fafbfc; }
+.pag-info { font-size: 12px; color: rgba(0,0,0,0.55); }
+.pag-controls { display: flex; align-items: center; gap: 4px; }
+.pag-btn { min-width: 28px; height: 28px; padding: 0 8px; border: 1px solid #d9d9d9; background: #fff; border-radius: 5px; font-size: 12px; cursor: pointer; color: rgba(0,0,0,0.65); font-family: inherit; }
+.pag-btn:hover { color: #1677ff; border-color: #1677ff; }
+.pag-btn.active { border-color: #1677ff; color: #1677ff; background: #e6f4ff; font-weight: 700; }
+
+/* ===== FOOTNOTE ===== */
+.footnote { display: flex; align-items: flex-start; gap: 8px; padding: 12px 16px; background: #fff7e6; border: 1px solid #ffd666; border-radius: 8px; font-size: 12px; color: #874d00; line-height: 1.7; }
+.footnote svg { width: 14px; height: 14px; flex-shrink: 0; margin-top: 2px; color: #d48806; }
+
+/* ===== GROUP CARDS ===== */
+.group-section { margin-bottom: 18px; }
+.group-section-head { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; padding: 0 4px; }
+.group-section-dot { width: 8px; height: 8px; border-radius: 50%; }
+.group-section-dot.tour { background: #1677ff; }
+.group-section-dot.ticket { background: #722ed1; }
+.group-section-dot.pickup { background: #389e0d; }
+.group-section-dot.fasttrack { background: #d48806; }
+.group-section-title { font-size: 15px; font-weight: 800; color: rgba(0,0,0,0.88); }
+.group-section-count { font-size: 12px; color: rgba(0,0,0,0.45); background: #f5f5f5; padding: 2px 9px; border-radius: 10px; font-weight: 700; }
+.group-section-desc { font-size: 12px; color: rgba(0,0,0,0.5); margin-left: auto; }
+.group-section-desc strong { color: rgba(0,0,0,0.75); }
+
+.group-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
+@media (max-width: 1100px) { .group-grid { grid-template-columns: repeat(2, 1fr); } }
+@media (max-width: 720px) { .group-grid { grid-template-columns: 1fr; } }
+
+.group-card { background: #fff; border: 1px solid #e8e8e8; border-radius: 10px; padding: 14px 16px; transition: all 0.18s; display: flex; flex-direction: column; gap: 10px; }
+.group-card:hover { border-color: #91caff; box-shadow: 0 4px 14px rgba(22,119,255,0.07); }
+.group-card.forced { border-color: #91caff; background: linear-gradient(180deg, #f0f7ff 0%, #fff 60%); }
+.group-card-head { display: flex; align-items: flex-start; gap: 8px; }
+.group-card-title { flex: 1; min-width: 0; }
+.group-card-name { font-size: 14px; font-weight: 800; color: rgba(0,0,0,0.88); line-height: 1.3; margin-bottom: 4px; }
+.group-card-meta { font-size: 11.5px; color: rgba(0,0,0,0.5); display: flex; gap: 6px; flex-wrap: wrap; }
+.group-card-meta .rule-chip { padding: 1px 7px; border-radius: 3px; background: #f5f5f5; color: rgba(0,0,0,0.65); font-weight: 600; }
+.group-card-meta .rule-chip.forced { background: #e6f4ff; color: #0958d9; }
+.group-card-toggle { flex-shrink: 0; display: flex; flex-direction: column; align-items: center; gap: 2px; }
+
+.group-card-items { background: #fafbfc; border: 1px solid #f0f0f0; border-radius: 6px; padding: 8px 10px; }
+.group-card-items-head { font-size: 10.5px; color: rgba(0,0,0,0.45); font-weight: 700; letter-spacing: 0.3px; text-transform: uppercase; margin-bottom: 6px; display: flex; align-items: center; justify-content: space-between; }
+.group-card-items-head strong { color: rgba(0,0,0,0.75); font-weight: 800; }
+.group-card-items-list { display: flex; flex-direction: column; gap: 4px; max-height: 140px; overflow-y: auto; }
+.group-item-row { display: flex; align-items: center; gap: 6px; font-size: 11.5px; color: rgba(0,0,0,0.7); padding: 3px 6px; background: #fff; border-radius: 4px; border: 1px solid #f0f0f0; }
+.group-item-row .ix { color: rgba(0,0,0,0.3); font-family: 'SF Mono', monospace; font-size: 10px; font-weight: 700; flex-shrink: 0; }
+.group-item-row .nm { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-weight: 500; }
+.group-item-row .pr { color: rgba(0,0,0,0.5); font-family: 'SF Mono', monospace; font-size: 11px; font-weight: 600; flex-shrink: 0; }
+.group-card-foot { display: flex; align-items: center; gap: 6px; justify-content: space-between; padding-top: 4px; border-top: 1px dashed #f0f0f0; font-size: 11px; color: rgba(0,0,0,0.45); }
+.group-card-usage strong { color: #1677ff; font-weight: 800; }
+.group-card-actions { display: flex; gap: 4px; }
+.btn-mini { height: 24px; padding: 0 8px; border-radius: 4px; border: 1px solid #e8e8e8; background: #fff; color: rgba(0,0,0,0.6); font-size: 11px; font-weight: 600; cursor: pointer; font-family: inherit; transition: all 0.15s; }
+.btn-mini:hover { color: #1677ff; border-color: #1677ff; }
+.btn-mini.danger:hover { color: #cf1322; border-color: #ff7875; }
+
+.add-group-card { background: #fafbff; border: 1.5px dashed #91caff; border-radius: 10px; padding: 22px 16px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 8px; cursor: pointer; transition: all 0.15s; text-align: center; min-height: 220px; color: #1677ff; }
+.add-group-card:hover { background: #e6f4ff; border-color: #1677ff; }
+.add-group-card .plus { font-size: 28px; font-weight: 300; line-height: 1; }
+.add-group-card .label { font-size: 13px; font-weight: 700; }
+.add-group-card .sub { font-size: 11px; color: rgba(0,0,0,0.45); font-weight: 500; }
+
+/* ===== MODAL ===== */
+.backdrop { position: fixed; inset: 0; background: rgba(0,21,41,0.45); backdrop-filter: blur(2px); z-index: 1000; display: none; align-items: center; justify-content: center; padding: 32px 24px; animation: fadeIn 0.2s ease-out; }
+.backdrop.active { display: flex; }
+@keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+.modal { background: #fff; border-radius: 14px; box-shadow: 0 20px 60px rgba(0,0,0,0.25); width: 100%; max-width: 720px; max-height: calc(100vh - 64px); display: flex; flex-direction: column; overflow: hidden; animation: slideUp 0.25s ease-out; }
+@keyframes slideUp { from { transform: translateY(20px); opacity: 0.5; } to { transform: translateY(0); opacity: 1; } }
+.m-head { padding: 20px 24px 16px; border-bottom: 1px solid #f0f0f0; display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; }
+.m-title { font-size: 17px; font-weight: 800; display: flex; align-items: center; gap: 10px; }
+.m-sub { font-size: 12px; color: rgba(0,0,0,0.5); margin-top: 4px; }
+.m-close { width: 32px; height: 32px; border-radius: 8px; border: 1px solid transparent; background: transparent; color: rgba(0,0,0,0.45); display: flex; align-items: center; justify-content: center; cursor: pointer; flex-shrink: 0; }
+.m-close:hover { background: #f5f5f5; color: rgba(0,0,0,0.88); }
+.m-close svg { width: 16px; height: 16px; }
+.m-body { padding: 18px 24px; overflow-y: auto; flex: 1; }
+.m-foot { padding: 12px 24px; border-top: 1px solid #f0f0f0; display: flex; align-items: center; justify-content: space-between; background: #fafbfc; }
+.m-foot-info { font-size: 12px; color: rgba(0,0,0,0.5); }
+.btn-modal-close { height: 34px; padding: 0 14px; border-radius: 6px; font-size: 13px; cursor: pointer; border: 1px solid #d9d9d9; background: #fff; color: rgba(0,0,0,0.88); font-family: inherit; font-weight: 500; }
+.btn-modal-close:hover { color: #1677ff; border-color: #1677ff; }
+.btn-modal-primary { height: 34px; padding: 0 18px; border-radius: 6px; font-size: 13px; font-weight: 700; cursor: pointer; border: 1px solid #1677ff; background: #1677ff; color: #fff; font-family: inherit; margin-left: 8px; }
+.btn-modal-primary:hover { background: #4096ff; }
+
+.field-group { margin-bottom: 16px; }
+.field-label { display: block; font-size: 12px; color: rgba(0,0,0,0.65); font-weight: 700; margin-bottom: 7px; }
+.field-label .req { color: #f5222d; margin-left: 2px; }
+.field-label .hint { color: rgba(0,0,0,0.4); font-weight: 500; font-size: 11px; margin-left: 6px; }
+.fi-input { width: 100%; height: 38px; padding: 0 12px; border: 1px solid #d9d9d9; border-radius: 6px; font-size: 13px; font-family: inherit; outline: none; }
+.fi-input:focus { border-color: #1677ff; }
+.cat-pick { display: flex; gap: 6px; flex-wrap: wrap; }
+.cat-pick-btn { padding: 7px 14px; border-radius: 8px; border: 1px solid #e8e8e8; background: #fff; color: rgba(0,0,0,0.65); font-size: 12.5px; font-weight: 600; cursor: pointer; font-family: inherit; display: inline-flex; align-items: center; gap: 6px; }
+.cat-pick-btn:hover { color: #1677ff; border-color: #91caff; }
+.cat-pick-btn.active { background: #e6f4ff; color: #1677ff; border-color: #1677ff; font-weight: 700; }
+.cat-pick-btn .dot { width: 8px; height: 8px; border-radius: 50%; }
+.cat-pick-btn .dot.tour { background: #1677ff; }
+.cat-pick-btn .dot.ticket { background: #722ed1; }
+.cat-pick-btn .dot.pickup { background: #389e0d; }
+.cat-pick-btn .dot.fasttrack { background: #d48806; }
+
+.item-pick-box { background: #fafbfc; border: 1px solid #f0f0f0; border-radius: 8px; padding: 10px 12px; max-height: 220px; overflow-y: auto; }
+.item-pick-row { display: flex; align-items: center; gap: 10px; padding: 7px 8px; border-radius: 4px; cursor: pointer; transition: background 0.1s; }
+.item-pick-row:hover { background: #f0f7ff; }
+.item-pick-row input { accent-color: #1677ff; cursor: pointer; }
+.item-pick-row .nm { flex: 1; font-size: 12.5px; color: rgba(0,0,0,0.85); font-weight: 500; }
+.item-pick-row .meta { font-size: 11px; color: rgba(0,0,0,0.45); }
+.item-pick-row .pr { font-family: 'SF Mono', monospace; font-size: 11.5px; font-weight: 700; color: rgba(0,0,0,0.65); }
+
+</style>
+</head>
+<body>
+
+<!-- ===== GNB ===== -->
+<nav class="gnb">
+  <div class="gnb-logo">Trip<span>Store</span> <span class="partners-badge">PARTNERS</span></div>
+  <div class="gnb-menu">
+    <div class="gnb-item">대시보드</div>
+    <div class="gnb-item">페이지 제작</div>
+    <div class="gnb-item active">상품 관리</div>
+    <div class="gnb-item">예약 관리</div>
+    <div class="gnb-item">PB 관리</div>
+    <div class="gnb-item">카탈로그</div>
+    <div class="gnb-item">쿠폰</div>
+    <div class="gnb-item">정산</div>
+  </div>
+  <div class="gnb-right">
+    <span class="gnb-org-badge">트립스토어</span>
+    <span class="gnb-user"><span class="gnb-user-name">김서현</span>님</span>
+  </div>
+</nav>
+
+<!-- ===== BREADCRUMB ===== -->
+<div class="breadcrumb">
+  <span>상품 관리</span>
+  <span class="sep">/</span>
+  <span class="bc-current">투어·티켓 관리</span>
+</div>
+
+<div class="layout">
+
+  <!-- ===== PAGE HEADER ===== -->
+  <div class="page-header">
+    <div>
+      <div class="page-title-wrap">
+        <div class="page-title">투어·티켓 관리</div>
+      </div>
+      <div class="page-desc">PB 자동생성에 사용되는 투어/티켓/픽업/패스트트랙을 관리합니다. <strong>자동생성 엔진은 개별 항목이 아닌 "그룹" 단위로 후보를 선택</strong>합니다 (회의록 2026-05-21 수권님 방향).</div>
+    </div>
+    <div class="page-actions">
+      <button class="btn-ghost-md">📥 공급사 일괄 가져오기</button>
+      <button class="btn-primary-md" onclick="openCreateItemModal()">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+        개별 항목 등록
+      </button>
+    </div>
+  </div>
+
+  <!-- ===== TOP SCOPE TABS ===== -->
+  <div class="top-tabs">
+    <button class="top-tab active" onclick="switchTop('items', this)">🎟 개별 항목 관리 <span class="top-tab-count">186</span></button>
+    <button class="top-tab" onclick="switchTop('groups', this)">📦 그룹 관리 <span class="top-tab-count">17</span></button>
+  </div>
+
+  <!-- ============== 탭 A: 개별 항목 관리 ============== -->
+  <div id="top-items" class="top-panel active">
+
+    <!-- 카테고리 칩 -->
+    <div class="cat-chip-row">
+      <button class="cat-chip active" onclick="filterCat(this,'all')">전체 <span class="cat-chip-count">186</span></button>
+      <button class="cat-chip" onclick="filterCat(this,'tour')"><span class="dot tour"></span>투어 <span class="cat-chip-count">72</span></button>
+      <button class="cat-chip" onclick="filterCat(this,'ticket')"><span class="dot ticket"></span>티켓 <span class="cat-chip-count">68</span></button>
+      <button class="cat-chip" onclick="filterCat(this,'pickup')"><span class="dot pickup"></span>픽업·샌딩 <span class="cat-chip-count">28</span></button>
+      <button class="cat-chip" onclick="filterCat(this,'fasttrack')"><span class="dot fasttrack"></span>패스트트랙 <span class="cat-chip-count">18</span></button>
+    </div>
+
+    <!-- Summary -->
+    <div class="summary">
+      <div class="summary-block">
+        <div class="summary-label">자동생성 ON</div>
+        <div class="summary-value"><strong>142</strong>건 <span class="sub">/ 186건 중</span></div>
+      </div>
+      <div class="summary-divider"></div>
+      <div class="summary-block">
+        <div class="summary-label">그룹 미배정 (⚠ 주의)</div>
+        <div class="summary-value"><strong style="color:#d48806;">23</strong>건 <span class="sub">ON이지만 그룹 없음 → 자동생성 누락</span></div>
+      </div>
+      <div class="summary-divider"></div>
+      <div class="summary-block">
+        <div class="summary-label">자동생성 OFF</div>
+        <div class="summary-value"><strong style="color:rgba(0,0,0,0.45)">44</strong>건</div>
+      </div>
+      <div class="summary-divider"></div>
+      <div class="summary-block">
+        <div class="summary-label">라이브 PB 상품에 사용중</div>
+        <div class="summary-value"><strong>119</strong>건</div>
+      </div>
+    </div>
+
+    <!-- Filter -->
+    <div class="filter-bar">
+      <div class="search-wrap">
+        <span class="search-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg></span>
+        <input type="text" placeholder="ID · 이름 · 공급사 검색">
+      </div>
+      <select class="fi">
+        <option>공급사 전체</option>
+        <option>KKday</option>
+        <option>피크타임</option>
+        <option>베나자</option>
+        <option>직접 계약</option>
+      </select>
+      <select class="fi">
+        <option>여행지 전체</option>
+        <option>푸꾸옥</option>
+        <option>나트랑</option>
+        <option>다낭</option>
+        <option>호치민</option>
+        <option>하노이</option>
+      </select>
+      <select class="fi">
+        <option>자동생성 상태</option>
+        <option>ON · 그룹 배정</option>
+        <option>ON · 그룹 미배정 (⚠)</option>
+        <option>OFF</option>
+      </select>
+      <select class="fi">
+        <option>그룹 전체</option>
+        <option>그룹 배정됨</option>
+        <option>그룹 미배정</option>
+      </select>
+      <div class="filter-total">총 <strong>186</strong>건</div>
+    </div>
+
+    <!-- Table -->
+    <div class="main-card">
+      <div class="table-wrap">
+        <table class="tbl">
+          <thead>
+            <tr>
+              <th>항목</th>
+              <th>카테고리</th>
+              <th>공급사</th>
+              <th>여행지</th>
+              <th class="right">가격</th>
+              <th class="center">자동생성</th>
+              <th>소속 그룹</th>
+              <th>상태</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody>
+            <!-- 1. 투어 - ON + 그룹 배정 -->
+            <tr class="clickable" data-cat="tour">
+              <td>
+                <div class="item-cell">
+                  <div class="item-thumb tour">🌊</div>
+                  <div class="item-info">
+                    <div class="item-name">푸꾸옥 사파리 + 빈원더스 1일 투어</div>
+                    <div class="item-meta"><span class="id-pill">TR-1042</span><span>한국어 가이드 · 2026.04~12</span></div>
+                  </div>
+                </div>
+              </td>
+              <td><span class="cat-tag tour"><span class="dot"></span>투어</span></td>
+              <td><span class="prov-pill kkday"><span class="pdot"></span>KKday</span></td>
+              <td>푸꾸옥</td>
+              <td class="right"><div class="price-cell">₩85,000<span class="unit">/인</span></div></td>
+              <td>
+                <div class="autogen-cell">
+                  <label class="autogen-switch"><input type="checkbox" checked onchange="toggleAutogen(this)"><span class="autogen-slider"></span></label>
+                  <span class="autogen-mini-label on">ON</span>
+                </div>
+              </td>
+              <td><div class="group-cell"><span class="group-pill"><span class="icon">📦</span>푸꾸옥 자연 투어</span></div></td>
+              <td><span class="status-dot">활성</span></td>
+              <td><button class="btn-rule"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4z"/></svg>편집</button></td>
+            </tr>
+
+            <!-- 2. 티켓 - ON + 그룹 배정 -->
+            <tr class="clickable" data-cat="ticket">
+              <td>
+                <div class="item-cell">
+                  <div class="item-thumb ticket">🎫</div>
+                  <div class="item-info">
+                    <div class="item-name">빈원더스 푸꾸옥 입장권 (성인)</div>
+                    <div class="item-meta"><span class="id-pill">TK-2541</span><span>당일 사용 · 24시간 환불</span></div>
+                  </div>
+                </div>
+              </td>
+              <td><span class="cat-tag ticket"><span class="dot"></span>티켓</span></td>
+              <td><span class="prov-pill peaktime"><span class="pdot"></span>피크타임</span></td>
+              <td>푸꾸옥</td>
+              <td class="right"><div class="price-cell">₩45,000<span class="unit">/인</span></div></td>
+              <td>
+                <div class="autogen-cell">
+                  <label class="autogen-switch"><input type="checkbox" checked onchange="toggleAutogen(this)"><span class="autogen-slider"></span></label>
+                  <span class="autogen-mini-label on">ON</span>
+                </div>
+              </td>
+              <td><div class="group-cell"><span class="group-pill"><span class="icon">📦</span>푸꾸옥 인기 티켓</span></div></td>
+              <td><span class="status-dot">활성</span></td>
+              <td><button class="btn-rule"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4z"/></svg>편집</button></td>
+            </tr>
+
+            <!-- 3. 티켓 - ON + 그룹 미배정 (⚠) -->
+            <tr class="clickable" data-cat="ticket">
+              <td>
+                <div class="item-cell">
+                  <div class="item-thumb ticket">🎫</div>
+                  <div class="item-info">
+                    <div class="item-name">호치민 시티 케이블카 왕복</div>
+                    <div class="item-meta"><span class="id-pill">TK-2598</span><span>왕복 · 시간 제한 없음</span></div>
+                  </div>
+                </div>
+              </td>
+              <td><span class="cat-tag ticket"><span class="dot"></span>티켓</span></td>
+              <td><span class="prov-pill benazza"><span class="pdot"></span>베나자</span></td>
+              <td>호치민</td>
+              <td class="right"><div class="price-cell">₩28,000<span class="unit">/인</span></div></td>
+              <td>
+                <div class="autogen-cell">
+                  <label class="autogen-switch"><input type="checkbox" checked onchange="toggleAutogen(this)"><span class="autogen-slider"></span></label>
+                  <span class="autogen-mini-label on">ON</span>
+                </div>
+              </td>
+              <td><div class="group-cell"><span class="group-pill unassigned" onclick="openAssignGroupModal(this)">⚠ 그룹 미배정</span></div></td>
+              <td><span class="status-dot paused">자동생성 누락</span></td>
+              <td><button class="btn-rule"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4z"/></svg>편집</button></td>
+            </tr>
+
+            <!-- 4. 픽업·샌딩 - 강제 포함 -->
+            <tr class="clickable" data-cat="pickup">
+              <td>
+                <div class="item-cell">
+                  <div class="item-thumb pickup">🚗</div>
+                  <div class="item-info">
+                    <div class="item-name">푸꾸옥 공항 ↔ 호텔 왕복 픽업 (4인 SUV)</div>
+                    <div class="item-meta"><span class="id-pill">PK-3081</span><span>24시간 · 한국어 기사</span></div>
+                  </div>
+                </div>
+              </td>
+              <td><span class="cat-tag pickup"><span class="dot"></span>픽업·샌딩</span></td>
+              <td><span class="prov-pill peaktime"><span class="pdot"></span>피크타임</span></td>
+              <td>푸꾸옥</td>
+              <td class="right"><div class="price-cell">₩55,000<span class="unit">/팀</span></div></td>
+              <td>
+                <div class="autogen-cell">
+                  <label class="autogen-switch"><input type="checkbox" checked disabled><span class="autogen-slider"></span></label>
+                  <span class="autogen-mini-label forced">🔒 강제</span>
+                </div>
+              </td>
+              <td><div class="group-cell"><span class="group-pill"><span class="icon">🔒</span>푸꾸옥 픽업 (강제)</span></div></td>
+              <td><span class="status-dot">활성</span></td>
+              <td><button class="btn-rule"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4z"/></svg>편집</button></td>
+            </tr>
+
+            <!-- 5. 패스트트랙 - ON -->
+            <tr class="clickable" data-cat="fasttrack">
+              <td>
+                <div class="item-cell">
+                  <div class="item-thumb fasttrack">⚡</div>
+                  <div class="item-info">
+                    <div class="item-name">푸꾸옥 공항 패스트트랙 (입국·출국)</div>
+                    <div class="item-meta"><span class="id-pill">FT-4022</span><span>왕복 · 한국어 직원 응대</span></div>
+                  </div>
+                </div>
+              </td>
+              <td><span class="cat-tag fasttrack"><span class="dot"></span>패스트트랙</span></td>
+              <td><span class="prov-pill peaktime"><span class="pdot"></span>피크타임</span></td>
+              <td>푸꾸옥</td>
+              <td class="right"><div class="price-cell">₩35,000<span class="unit">/인</span></div></td>
+              <td>
+                <div class="autogen-cell">
+                  <label class="autogen-switch"><input type="checkbox" checked onchange="toggleAutogen(this)"><span class="autogen-slider"></span></label>
+                  <span class="autogen-mini-label on">ON</span>
+                </div>
+              </td>
+              <td><div class="group-cell"><span class="group-pill"><span class="icon">📦</span>푸꾸옥 패스트트랙</span></div></td>
+              <td><span class="status-dot">활성</span></td>
+              <td><button class="btn-rule"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4z"/></svg>편집</button></td>
+            </tr>
+
+            <!-- 6. 투어 - OFF -->
+            <tr class="clickable" data-cat="tour">
+              <td>
+                <div class="item-cell">
+                  <div class="item-thumb tour">🌊</div>
+                  <div class="item-info">
+                    <div class="item-name">푸꾸옥 야간 낚시 + BBQ 투어</div>
+                    <div class="item-meta"><span class="id-pill">TR-1095</span><span>저녁 출발 · 4시간 진행</span></div>
+                  </div>
+                </div>
+              </td>
+              <td><span class="cat-tag tour"><span class="dot"></span>투어</span></td>
+              <td><span class="prov-pill kkday"><span class="pdot"></span>KKday</span></td>
+              <td>푸꾸옥</td>
+              <td class="right"><div class="price-cell">₩72,000<span class="unit">/인</span></div></td>
+              <td>
+                <div class="autogen-cell">
+                  <label class="autogen-switch"><input type="checkbox" onchange="toggleAutogen(this)"><span class="autogen-slider"></span></label>
+                  <span class="autogen-mini-label off">OFF</span>
+                </div>
+              </td>
+              <td><div class="group-cell"><span style="font-size:11.5px; color:rgba(0,0,0,0.35); font-style:italic;">— (자동생성 OFF)</span></div></td>
+              <td><span class="status-dot draft">대기</span></td>
+              <td><button class="btn-rule"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4z"/></svg>편집</button></td>
+            </tr>
+
+            <!-- 7. 티켓 - 다중 그룹 배정 -->
+            <tr class="clickable" data-cat="ticket">
+              <td>
+                <div class="item-cell">
+                  <div class="item-thumb ticket">🎫</div>
+                  <div class="item-info">
+                    <div class="item-name">나트랑 빈원더스 입장권 (성인)</div>
+                    <div class="item-meta"><span class="id-pill">TK-2602</span><span>당일 사용 · 1일권</span></div>
+                  </div>
+                </div>
+              </td>
+              <td><span class="cat-tag ticket"><span class="dot"></span>티켓</span></td>
+              <td><span class="prov-pill peaktime"><span class="pdot"></span>피크타임</span></td>
+              <td>나트랑</td>
+              <td class="right"><div class="price-cell">₩48,000<span class="unit">/인</span></div></td>
+              <td>
+                <div class="autogen-cell">
+                  <label class="autogen-switch"><input type="checkbox" checked onchange="toggleAutogen(this)"><span class="autogen-slider"></span></label>
+                  <span class="autogen-mini-label on">ON</span>
+                </div>
+              </td>
+              <td>
+                <div class="group-cell">
+                  <span class="group-pill"><span class="icon">📦</span>나트랑 인기 티켓</span>
+                  <span class="group-pill"><span class="icon">📦</span>빈원더스 통합 그룹</span>
+                </div>
+              </td>
+              <td><span class="status-dot">활성</span></td>
+              <td><button class="btn-rule"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4z"/></svg>편집</button></td>
+            </tr>
+
+            <!-- 8. 투어 - ON + 그룹 배정 -->
+            <tr class="clickable" data-cat="tour">
+              <td>
+                <div class="item-cell">
+                  <div class="item-thumb tour">🌊</div>
+                  <div class="item-info">
+                    <div class="item-name">다낭 바나힐 1일 투어 (한국어 가이드)</div>
+                    <div class="item-meta"><span class="id-pill">TR-1133</span><span>전일 · 점심 포함</span></div>
+                  </div>
+                </div>
+              </td>
+              <td><span class="cat-tag tour"><span class="dot"></span>투어</span></td>
+              <td><span class="prov-pill kkday"><span class="pdot"></span>KKday</span></td>
+              <td>다낭</td>
+              <td class="right"><div class="price-cell">₩95,000<span class="unit">/인</span></div></td>
+              <td>
+                <div class="autogen-cell">
+                  <label class="autogen-switch"><input type="checkbox" checked onchange="toggleAutogen(this)"><span class="autogen-slider"></span></label>
+                  <span class="autogen-mini-label on">ON</span>
+                </div>
+              </td>
+              <td><div class="group-cell"><span class="group-pill"><span class="icon">📦</span>다낭 핵심 투어</span></div></td>
+              <td><span class="status-dot">활성</span></td>
+              <td><button class="btn-rule"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4z"/></svg>편집</button></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="pagination">
+        <div class="pag-info">총 <strong style="color:#1677ff;">186</strong>건 중 1 - 8 표시</div>
+        <div class="pag-controls">
+          <button class="pag-btn">‹</button>
+          <button class="pag-btn active">1</button>
+          <button class="pag-btn">2</button>
+          <button class="pag-btn">3</button>
+          <button class="pag-btn">…</button>
+          <button class="pag-btn">24</button>
+          <button class="pag-btn">›</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============== 탭 B: 그룹 관리 ============== -->
+  <div id="top-groups" class="top-panel">
+
+    <!-- 안내 배너 -->
+    <div style="background: linear-gradient(135deg, #f0f7ff 0%, #e6f4ff 100%); border: 1px solid #91caff; border-radius: 10px; padding: 14px 18px; margin-bottom: 14px; font-size: 12.5px; line-height: 1.7; color: #003a8c;">
+      <strong>💡 그룹 관리 핵심 (회의록 5/21 수권님 방향)</strong><br>
+      개별 투어·티켓 항목이 너무 많아 자동생성 엔진이 후보 선택을 못합니다. → <strong>여행지·카테고리·시즌 단위로 묶은 "그룹"만 자동생성에서 후보로 사용</strong>합니다.<br>
+      예: "푸꾸옥 자연 투어 그룹" 안에 빈원더스/사파리/시티투어 등이 들어있고, 자동생성 엔진은 "투어 1개"가 필요할 때 이 그룹 안에서 AI가 선택.
+    </div>
+
+    <!-- Summary -->
+    <div class="summary">
+      <div class="summary-block">
+        <div class="summary-label">전체 그룹</div>
+        <div class="summary-value"><strong>17</strong>개</div>
+      </div>
+      <div class="summary-divider"></div>
+      <div class="summary-block">
+        <div class="summary-label">강제 포함 (픽업·샌딩)</div>
+        <div class="summary-value"><strong style="color:#0958d9;">5</strong>개 <span class="sub">에어텔 디폴트</span></div>
+      </div>
+      <div class="summary-divider"></div>
+      <div class="summary-block">
+        <div class="summary-label">활성 그룹</div>
+        <div class="summary-value"><strong style="color:#389e0d;">14</strong>개</div>
+      </div>
+      <div class="summary-divider"></div>
+      <div class="summary-block">
+        <div class="summary-label">비활성</div>
+        <div class="summary-value"><strong style="color:rgba(0,0,0,0.45)">3</strong>개</div>
+      </div>
+    </div>
+
+    <!-- 필터 + 새 그룹 -->
+    <div class="cat-chip-row">
+      <button class="cat-chip active">전체 <span class="cat-chip-count">17</span></button>
+      <button class="cat-chip"><span class="dot pickup"></span>픽업·샌딩 <span class="cat-chip-count">5</span></button>
+      <button class="cat-chip"><span class="dot fasttrack"></span>패스트트랙 <span class="cat-chip-count">3</span></button>
+      <button class="cat-chip"><span class="dot tour"></span>투어 <span class="cat-chip-count">6</span></button>
+      <button class="cat-chip"><span class="dot ticket"></span>티켓 <span class="cat-chip-count">3</span></button>
+      <div style="margin-left:auto; display:flex; gap:6px;">
+        <select class="fi" style="min-width:140px;">
+          <option>여행지 전체</option>
+          <option>푸꾸옥</option>
+          <option>나트랑</option>
+          <option>다낭</option>
+        </select>
+        <button class="btn-primary-md" onclick="openCreateGroupModal()" style="height:32px; padding:0 14px; font-size:12.5px;">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+          새 그룹 만들기
+        </button>
+      </div>
+    </div>
+
+    <!-- 강제 포함 (픽업) 섹션 -->
+    <div class="group-section">
+      <div class="group-section-head">
+        <span class="group-section-dot pickup"></span>
+        <span class="group-section-title">🚗 픽업·샌딩 그룹</span>
+        <span class="group-section-count">5개</span>
+        <span class="group-section-desc">에어텔 디폴트 — <strong>모든 자동생성 상품에 강제 포함</strong></span>
+      </div>
+      <div class="group-grid">
+        <div class="group-card forced">
+          <div class="group-card-head">
+            <div class="group-card-title">
+              <div class="group-card-name">푸꾸옥 픽업·샌딩</div>
+              <div class="group-card-meta">
+                <span class="rule-chip forced">🔒 강제</span>
+                <span class="rule-chip">여행지=푸꾸옥</span>
+              </div>
+            </div>
+            <div class="group-card-toggle">
+              <label class="autogen-switch"><input type="checkbox" checked disabled><span class="autogen-slider"></span></label>
+              <span class="autogen-mini-label forced" style="font-size:9.5px;">강제</span>
+            </div>
+          </div>
+          <div class="group-card-items">
+            <div class="group-card-items-head"><span>소속 항목 <strong>4개</strong></span><span style="color:rgba(0,0,0,0.45);">차종별 분기</span></div>
+            <div class="group-card-items-list">
+              <div class="group-item-row"><span class="ix">PK-3081</span><span class="nm">공항 ↔ 호텔 (4인 SUV)</span><span class="pr">₩55,000</span></div>
+              <div class="group-item-row"><span class="ix">PK-3082</span><span class="nm">공항 ↔ 호텔 (7인 미니밴)</span><span class="pr">₩72,000</span></div>
+              <div class="group-item-row"><span class="ix">PK-3083</span><span class="nm">공항 ↔ 호텔 (12인 밴)</span><span class="pr">₩98,000</span></div>
+              <div class="group-item-row"><span class="ix">PK-3084</span><span class="nm">공항 ↔ 호텔 (개별 세단)</span><span class="pr">₩42,000</span></div>
+            </div>
+          </div>
+          <div class="group-card-foot">
+            <span class="group-card-usage">자동생성에 <strong>2,841회</strong> 사용 (이달)</span>
+            <div class="group-card-actions">
+              <button class="btn-mini">편집</button>
+              <button class="btn-mini">+ 항목 추가</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="group-card forced">
+          <div class="group-card-head">
+            <div class="group-card-title">
+              <div class="group-card-name">나트랑 픽업·샌딩</div>
+              <div class="group-card-meta">
+                <span class="rule-chip forced">🔒 강제</span>
+                <span class="rule-chip">여행지=나트랑</span>
+              </div>
+            </div>
+            <div class="group-card-toggle">
+              <label class="autogen-switch"><input type="checkbox" checked disabled><span class="autogen-slider"></span></label>
+              <span class="autogen-mini-label forced" style="font-size:9.5px;">강제</span>
+            </div>
+          </div>
+          <div class="group-card-items">
+            <div class="group-card-items-head"><span>소속 항목 <strong>3개</strong></span></div>
+            <div class="group-card-items-list">
+              <div class="group-item-row"><span class="ix">PK-3091</span><span class="nm">공항 ↔ 호텔 (4인 SUV)</span><span class="pr">₩58,000</span></div>
+              <div class="group-item-row"><span class="ix">PK-3092</span><span class="nm">공항 ↔ 호텔 (7인 미니밴)</span><span class="pr">₩78,000</span></div>
+              <div class="group-item-row"><span class="ix">PK-3093</span><span class="nm">공항 ↔ 호텔 (개별 세단)</span><span class="pr">₩48,000</span></div>
+            </div>
+          </div>
+          <div class="group-card-foot">
+            <span class="group-card-usage">자동생성에 <strong>1,492회</strong> 사용</span>
+            <div class="group-card-actions"><button class="btn-mini">편집</button><button class="btn-mini">+ 항목</button></div>
+          </div>
+        </div>
+
+        <div class="group-card forced">
+          <div class="group-card-head">
+            <div class="group-card-title">
+              <div class="group-card-name">다낭 픽업·샌딩</div>
+              <div class="group-card-meta">
+                <span class="rule-chip forced">🔒 강제</span>
+                <span class="rule-chip">여행지=다낭</span>
+              </div>
+            </div>
+            <div class="group-card-toggle">
+              <label class="autogen-switch"><input type="checkbox" checked disabled><span class="autogen-slider"></span></label>
+              <span class="autogen-mini-label forced" style="font-size:9.5px;">강제</span>
+            </div>
+          </div>
+          <div class="group-card-items">
+            <div class="group-card-items-head"><span>소속 항목 <strong>3개</strong></span></div>
+            <div class="group-card-items-list">
+              <div class="group-item-row"><span class="ix">PK-3101</span><span class="nm">공항 ↔ 호텔 (4인 SUV)</span><span class="pr">₩52,000</span></div>
+              <div class="group-item-row"><span class="ix">PK-3102</span><span class="nm">공항 ↔ 호텔 (7인 미니밴)</span><span class="pr">₩68,000</span></div>
+              <div class="group-item-row"><span class="ix">PK-3103</span><span class="nm">호이안 셔틀 (왕복)</span><span class="pr">₩38,000</span></div>
+            </div>
+          </div>
+          <div class="group-card-foot">
+            <span class="group-card-usage">자동생성에 <strong>982회</strong> 사용</span>
+            <div class="group-card-actions"><button class="btn-mini">편집</button><button class="btn-mini">+ 항목</button></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 패스트트랙 섹션 -->
+    <div class="group-section">
+      <div class="group-section-head">
+        <span class="group-section-dot fasttrack"></span>
+        <span class="group-section-title">⚡ 패스트트랙 그룹</span>
+        <span class="group-section-count">3개</span>
+        <span class="group-section-desc">선택 옵션 — AI가 가격대·여행자 프로필 보고 포함 여부 판단</span>
+      </div>
+      <div class="group-grid">
+        <div class="group-card">
+          <div class="group-card-head">
+            <div class="group-card-title">
+              <div class="group-card-name">푸꾸옥 패스트트랙</div>
+              <div class="group-card-meta">
+                <span class="rule-chip">여행지=푸꾸옥</span>
+                <span class="rule-chip">선택</span>
+              </div>
+            </div>
+            <div class="group-card-toggle">
+              <label class="autogen-switch"><input type="checkbox" checked><span class="autogen-slider"></span></label>
+              <span class="autogen-mini-label on" style="font-size:9.5px;">ON</span>
+            </div>
+          </div>
+          <div class="group-card-items">
+            <div class="group-card-items-head"><span>소속 항목 <strong>2개</strong></span></div>
+            <div class="group-card-items-list">
+              <div class="group-item-row"><span class="ix">FT-4022</span><span class="nm">입국·출국 왕복</span><span class="pr">₩35,000</span></div>
+              <div class="group-item-row"><span class="ix">FT-4023</span><span class="nm">입국만 (편도)</span><span class="pr">₩22,000</span></div>
+            </div>
+          </div>
+          <div class="group-card-foot">
+            <span class="group-card-usage">자동생성에 <strong>428회</strong> 사용</span>
+            <div class="group-card-actions"><button class="btn-mini">편집</button><button class="btn-mini">+ 항목</button></div>
+          </div>
+        </div>
+
+        <div class="group-card">
+          <div class="group-card-head">
+            <div class="group-card-title">
+              <div class="group-card-name">나트랑 패스트트랙</div>
+              <div class="group-card-meta">
+                <span class="rule-chip">여행지=나트랑</span>
+                <span class="rule-chip">선택</span>
+              </div>
+            </div>
+            <div class="group-card-toggle">
+              <label class="autogen-switch"><input type="checkbox" checked><span class="autogen-slider"></span></label>
+              <span class="autogen-mini-label on" style="font-size:9.5px;">ON</span>
+            </div>
+          </div>
+          <div class="group-card-items">
+            <div class="group-card-items-head"><span>소속 항목 <strong>1개</strong></span></div>
+            <div class="group-card-items-list">
+              <div class="group-item-row"><span class="ix">FT-4031</span><span class="nm">입국·출국 왕복</span><span class="pr">₩32,000</span></div>
+            </div>
+          </div>
+          <div class="group-card-foot">
+            <span class="group-card-usage">자동생성에 <strong>211회</strong> 사용</span>
+            <div class="group-card-actions"><button class="btn-mini">편집</button><button class="btn-mini">+ 항목</button></div>
+          </div>
+        </div>
+
+        <div class="group-card">
+          <div class="group-card-head">
+            <div class="group-card-title">
+              <div class="group-card-name">다낭 패스트트랙</div>
+              <div class="group-card-meta">
+                <span class="rule-chip">여행지=다낭</span>
+                <span class="rule-chip">선택</span>
+              </div>
+            </div>
+            <div class="group-card-toggle">
+              <label class="autogen-switch"><input type="checkbox" checked><span class="autogen-slider"></span></label>
+              <span class="autogen-mini-label on" style="font-size:9.5px;">ON</span>
+            </div>
+          </div>
+          <div class="group-card-items">
+            <div class="group-card-items-head"><span>소속 항목 <strong>1개</strong></span></div>
+            <div class="group-card-items-list">
+              <div class="group-item-row"><span class="ix">FT-4041</span><span class="nm">입국·출국 왕복</span><span class="pr">₩30,000</span></div>
+            </div>
+          </div>
+          <div class="group-card-foot">
+            <span class="group-card-usage">자동생성에 <strong>187회</strong> 사용</span>
+            <div class="group-card-actions"><button class="btn-mini">편집</button><button class="btn-mini">+ 항목</button></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 투어 섹션 -->
+    <div class="group-section">
+      <div class="group-section-head">
+        <span class="group-section-dot tour"></span>
+        <span class="group-section-title">🌊 투어 그룹</span>
+        <span class="group-section-count">6개</span>
+        <span class="group-section-desc">선택 옵션 (1개만) — AI가 여행자 성향·일정 보고 1개 선택</span>
+      </div>
+      <div class="group-grid">
+        <div class="group-card">
+          <div class="group-card-head">
+            <div class="group-card-title">
+              <div class="group-card-name">푸꾸옥 자연 투어</div>
+              <div class="group-card-meta">
+                <span class="rule-chip">여행지=푸꾸옥</span>
+                <span class="rule-chip">카테고리=자연</span>
+              </div>
+            </div>
+            <div class="group-card-toggle">
+              <label class="autogen-switch"><input type="checkbox" checked><span class="autogen-slider"></span></label>
+              <span class="autogen-mini-label on" style="font-size:9.5px;">ON</span>
+            </div>
+          </div>
+          <div class="group-card-items">
+            <div class="group-card-items-head"><span>소속 항목 <strong>5개</strong></span></div>
+            <div class="group-card-items-list">
+              <div class="group-item-row"><span class="ix">TR-1042</span><span class="nm">사파리 + 빈원더스 1일</span><span class="pr">₩85,000</span></div>
+              <div class="group-item-row"><span class="ix">TR-1043</span><span class="nm">남섬 스노클링</span><span class="pr">₩68,000</span></div>
+              <div class="group-item-row"><span class="ix">TR-1044</span><span class="nm">맹그로브 보트 투어</span><span class="pr">₩52,000</span></div>
+              <div class="group-item-row"><span class="ix">TR-1045</span><span class="nm">진주 양식장 투어</span><span class="pr">₩42,000</span></div>
+              <div class="group-item-row"><span class="ix">TR-1046</span><span class="nm">호수 카약</span><span class="pr">₩38,000</span></div>
+            </div>
+          </div>
+          <div class="group-card-foot">
+            <span class="group-card-usage">자동생성에 <strong>892회</strong> 사용</span>
+            <div class="group-card-actions"><button class="btn-mini">편집</button><button class="btn-mini">+ 항목</button></div>
+          </div>
+        </div>
+
+        <div class="group-card">
+          <div class="group-card-head">
+            <div class="group-card-title">
+              <div class="group-card-name">푸꾸옥 액티비티 투어</div>
+              <div class="group-card-meta">
+                <span class="rule-chip">여행지=푸꾸옥</span>
+                <span class="rule-chip">카테고리=액티비티</span>
+              </div>
+            </div>
+            <div class="group-card-toggle">
+              <label class="autogen-switch"><input type="checkbox" checked><span class="autogen-slider"></span></label>
+              <span class="autogen-mini-label on" style="font-size:9.5px;">ON</span>
+            </div>
+          </div>
+          <div class="group-card-items">
+            <div class="group-card-items-head"><span>소속 항목 <strong>4개</strong></span></div>
+            <div class="group-card-items-list">
+              <div class="group-item-row"><span class="ix">TR-1052</span><span class="nm">제트스키 1시간</span><span class="pr">₩68,000</span></div>
+              <div class="group-item-row"><span class="ix">TR-1053</span><span class="nm">패러글라이딩</span><span class="pr">₩115,000</span></div>
+              <div class="group-item-row"><span class="ix">TR-1054</span><span class="nm">ATV 사파리</span><span class="pr">₩78,000</span></div>
+              <div class="group-item-row"><span class="ix">TR-1055</span><span class="nm">스쿠버 다이빙 체험</span><span class="pr">₩142,000</span></div>
+            </div>
+          </div>
+          <div class="group-card-foot">
+            <span class="group-card-usage">자동생성에 <strong>318회</strong> 사용</span>
+            <div class="group-card-actions"><button class="btn-mini">편집</button><button class="btn-mini">+ 항목</button></div>
+          </div>
+        </div>
+
+        <div class="group-card">
+          <div class="group-card-head">
+            <div class="group-card-title">
+              <div class="group-card-name">다낭 핵심 투어</div>
+              <div class="group-card-meta">
+                <span class="rule-chip">여행지=다낭</span>
+                <span class="rule-chip">카테고리=관광</span>
+              </div>
+            </div>
+            <div class="group-card-toggle">
+              <label class="autogen-switch"><input type="checkbox" checked><span class="autogen-slider"></span></label>
+              <span class="autogen-mini-label on" style="font-size:9.5px;">ON</span>
+            </div>
+          </div>
+          <div class="group-card-items">
+            <div class="group-card-items-head"><span>소속 항목 <strong>4개</strong></span></div>
+            <div class="group-card-items-list">
+              <div class="group-item-row"><span class="ix">TR-1133</span><span class="nm">바나힐 1일 투어</span><span class="pr">₩95,000</span></div>
+              <div class="group-item-row"><span class="ix">TR-1134</span><span class="nm">호이안 야경 투어</span><span class="pr">₩48,000</span></div>
+              <div class="group-item-row"><span class="ix">TR-1135</span><span class="nm">미썬 유적 + 호이안</span><span class="pr">₩82,000</span></div>
+              <div class="group-item-row"><span class="ix">TR-1136</span><span class="nm">손짜반도 1일</span><span class="pr">₩72,000</span></div>
+            </div>
+          </div>
+          <div class="group-card-foot">
+            <span class="group-card-usage">자동생성에 <strong>542회</strong> 사용</span>
+            <div class="group-card-actions"><button class="btn-mini">편집</button><button class="btn-mini">+ 항목</button></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 티켓 섹션 -->
+    <div class="group-section">
+      <div class="group-section-head">
+        <span class="group-section-dot ticket"></span>
+        <span class="group-section-title">🎫 티켓 그룹</span>
+        <span class="group-section-count">3개</span>
+        <span class="group-section-desc">선택 옵션 (1개만) — 투어와 중복 X (회의록 룰)</span>
+      </div>
+      <div class="group-grid">
+        <div class="group-card">
+          <div class="group-card-head">
+            <div class="group-card-title">
+              <div class="group-card-name">푸꾸옥 인기 티켓</div>
+              <div class="group-card-meta">
+                <span class="rule-chip">여행지=푸꾸옥</span>
+              </div>
+            </div>
+            <div class="group-card-toggle">
+              <label class="autogen-switch"><input type="checkbox" checked><span class="autogen-slider"></span></label>
+              <span class="autogen-mini-label on" style="font-size:9.5px;">ON</span>
+            </div>
+          </div>
+          <div class="group-card-items">
+            <div class="group-card-items-head"><span>소속 항목 <strong>3개</strong></span></div>
+            <div class="group-card-items-list">
+              <div class="group-item-row"><span class="ix">TK-2541</span><span class="nm">빈원더스 입장권</span><span class="pr">₩45,000</span></div>
+              <div class="group-item-row"><span class="ix">TK-2543</span><span class="nm">사파리 입장권</span><span class="pr">₩38,000</span></div>
+              <div class="group-item-row"><span class="ix">TK-2546</span><span class="nm">아쿠아토피아 워터파크</span><span class="pr">₩42,000</span></div>
+            </div>
+          </div>
+          <div class="group-card-foot">
+            <span class="group-card-usage">자동생성에 <strong>1,124회</strong> 사용</span>
+            <div class="group-card-actions"><button class="btn-mini">편집</button><button class="btn-mini">+ 항목</button></div>
+          </div>
+        </div>
+
+        <div class="group-card">
+          <div class="group-card-head">
+            <div class="group-card-title">
+              <div class="group-card-name">빈원더스 통합 (전국)</div>
+              <div class="group-card-meta">
+                <span class="rule-chip">여행지=전체</span>
+                <span class="rule-chip">시즌 무관</span>
+              </div>
+            </div>
+            <div class="group-card-toggle">
+              <label class="autogen-switch"><input type="checkbox" checked><span class="autogen-slider"></span></label>
+              <span class="autogen-mini-label on" style="font-size:9.5px;">ON</span>
+            </div>
+          </div>
+          <div class="group-card-items">
+            <div class="group-card-items-head"><span>소속 항목 <strong>4개</strong></span></div>
+            <div class="group-card-items-list">
+              <div class="group-item-row"><span class="ix">TK-2541</span><span class="nm">푸꾸옥 빈원더스</span><span class="pr">₩45,000</span></div>
+              <div class="group-item-row"><span class="ix">TK-2602</span><span class="nm">나트랑 빈원더스</span><span class="pr">₩48,000</span></div>
+              <div class="group-item-row"><span class="ix">TK-2615</span><span class="nm">하노이 빈원더스</span><span class="pr">₩42,000</span></div>
+              <div class="group-item-row"><span class="ix">TK-2618</span><span class="nm">호이안 빈원더스</span><span class="pr">₩40,000</span></div>
+            </div>
+          </div>
+          <div class="group-card-foot">
+            <span class="group-card-usage">자동생성에 <strong>682회</strong> 사용</span>
+            <div class="group-card-actions"><button class="btn-mini">편집</button><button class="btn-mini">+ 항목</button></div>
+          </div>
+        </div>
+
+        <!-- 새 그룹 만들기 카드 -->
+        <div class="add-group-card" onclick="openCreateGroupModal()">
+          <div class="plus">+</div>
+          <div class="label">새 그룹 만들기</div>
+          <div class="sub">여행지·카테고리·시즌 단위로<br>묶어서 자동생성 후보로 사용</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== FOOTNOTE ===== -->
+  <div class="footnote">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+    <div>
+      <strong>자동생성 룰 안내 (회의록 2026-05-21 / 메모리 2026-05-20 반영)</strong><br>
+      · 디폴트 형태 = <strong>에어텔(항공+숙박)</strong> · 강제 포함 = <strong>픽업·샌딩 그룹</strong> (예외 없음)<br>
+      · 선택 조합 = 패스트트랙·투어·티켓 그룹 중 <strong>1~2개</strong> (AI 판단 · 같은 카테고리 중복 X)<br>
+      · 개별 항목 자동생성 ON이어도 <strong>그룹 미배정 시 자동생성에 누락</strong> — 상단 ⚠ 표시로 알림
+    </div>
+  </div>
+
+</div>
+
+<!-- ============================================================ -->
+<!-- ===== MODAL: 새 그룹 만들기 ===== -->
+<!-- ============================================================ -->
+<div class="backdrop" id="createGroupModal" onclick="if(event.target===this) closeCreateGroupModal()">
+  <div class="modal">
+    <div class="m-head">
+      <div>
+        <div class="m-title">📦 새 그룹 만들기</div>
+        <div class="m-sub">자동생성 엔진이 후보로 사용할 투어·티켓 그룹을 생성합니다.</div>
+      </div>
+      <button class="m-close" onclick="closeCreateGroupModal()">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>
+    </div>
+    <div class="m-body">
+
+      <!-- 카테고리 -->
+      <div class="field-group">
+        <label class="field-label">그룹 카테고리 <span class="req">*</span></label>
+        <div class="cat-pick">
+          <button class="cat-pick-btn"><span class="dot pickup"></span>픽업·샌딩 <span style="font-size:10px; color:#0958d9; margin-left:2px;">(강제)</span></button>
+          <button class="cat-pick-btn"><span class="dot fasttrack"></span>패스트트랙</button>
+          <button class="cat-pick-btn active"><span class="dot tour"></span>투어</button>
+          <button class="cat-pick-btn"><span class="dot ticket"></span>티켓</button>
+        </div>
+      </div>
+
+      <!-- 그룹명 -->
+      <div class="field-group">
+        <label class="field-label">그룹 이름 <span class="req">*</span><span class="hint">예: "푸꾸옥 자연 투어", "다낭 핵심 티켓"</span></label>
+        <input type="text" class="fi-input" placeholder="그룹 이름 입력">
+      </div>
+
+      <!-- 적용 룰 -->
+      <div class="field-group">
+        <label class="field-label">적용 룰 <span class="req">*</span><span class="hint">자동생성 엔진이 이 룰에 맞는 상품에 후보로 제공</span></label>
+        <div style="background:#fafbfc; border:1px solid #f0f0f0; border-radius:8px; padding:12px 14px;">
+          <div style="display:grid; grid-template-columns:80px 1fr; gap:10px; align-items:center;">
+            <span style="font-size:12px; color:rgba(0,0,0,0.55); font-weight:600;">여행지</span>
+            <select class="fi-input" style="height:34px;"><option>전체</option><option>푸꾸옥</option><option>나트랑</option><option>다낭</option><option>호치민</option><option>하노이</option></select>
+          </div>
+          <div style="display:grid; grid-template-columns:80px 1fr; gap:10px; align-items:center; margin-top:8px;">
+            <span style="font-size:12px; color:rgba(0,0,0,0.55); font-weight:600;">시즌</span>
+            <select class="fi-input" style="height:34px;"><option>연중</option><option>성수기만</option><option>비수기만</option></select>
+          </div>
+          <div style="display:grid; grid-template-columns:80px 1fr; gap:10px; align-items:center; margin-top:8px;">
+            <span style="font-size:12px; color:rgba(0,0,0,0.55); font-weight:600;">서브 카테고리</span>
+            <select class="fi-input" style="height:34px;"><option>(선택)</option><option>자연</option><option>액티비티</option><option>관광·문화</option><option>식음·쇼핑</option></select>
+          </div>
+        </div>
+      </div>
+
+      <!-- 항목 선택 -->
+      <div class="field-group">
+        <label class="field-label">소속 항목 선택 <span class="req">*</span><span class="hint">위 룰에 맞는 항목만 표시 — 체크해서 그룹에 포함</span></label>
+        <div class="item-pick-box">
+          <div class="item-pick-row"><input type="checkbox" checked><span class="nm">사파리 + 빈원더스 1일 투어</span><span class="meta">TR-1042</span><span class="pr">₩85,000</span></div>
+          <div class="item-pick-row"><input type="checkbox" checked><span class="nm">남섬 스노클링</span><span class="meta">TR-1043</span><span class="pr">₩68,000</span></div>
+          <div class="item-pick-row"><input type="checkbox" checked><span class="nm">맹그로브 보트 투어</span><span class="meta">TR-1044</span><span class="pr">₩52,000</span></div>
+          <div class="item-pick-row"><input type="checkbox"><span class="nm">진주 양식장 투어</span><span class="meta">TR-1045</span><span class="pr">₩42,000</span></div>
+          <div class="item-pick-row"><input type="checkbox"><span class="nm">호수 카약</span><span class="meta">TR-1046</span><span class="pr">₩38,000</span></div>
+          <div class="item-pick-row"><input type="checkbox"><span class="nm">야간 낚시 + BBQ</span><span class="meta">TR-1095</span><span class="pr">₩72,000</span></div>
+        </div>
+      </div>
+
+      <!-- 활성 상태 -->
+      <div class="field-group">
+        <label class="field-label">초기 상태</label>
+        <div style="display:flex; gap:6px;">
+          <button class="cat-pick-btn active">🚀 활성 — 즉시 자동생성 후보로 사용</button>
+          <button class="cat-pick-btn">📝 비활성 — 검토 후 활성화</button>
+        </div>
+      </div>
+    </div>
+    <div class="m-foot">
+      <span class="m-foot-info">그룹은 카탈로그에 저장되고 다음 새벽 배치(03:00)부터 자동생성에 반영됩니다.</span>
+      <div>
+        <button class="btn-modal-close" onclick="closeCreateGroupModal()">취소</button>
+        <button class="btn-modal-primary" onclick="alert('그룹이 생성되었습니다. 다음 새벽 배치(03:00)부터 자동생성에 반영됩니다.'); closeCreateGroupModal();">그룹 생성</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ============================================================ -->
+<!-- ===== MODAL: 그룹 배정 (개별 항목 → 그룹) ===== -->
+<!-- ============================================================ -->
+<div class="backdrop" id="assignGroupModal" onclick="if(event.target===this) closeAssignGroupModal()">
+  <div class="modal">
+    <div class="m-head">
+      <div>
+        <div class="m-title">📦 그룹 배정</div>
+        <div class="m-sub">이 항목을 어떤 그룹에 포함시킬지 선택하세요. 항목은 여러 그룹에 동시 배정될 수 있습니다.</div>
+      </div>
+      <button class="m-close" onclick="closeAssignGroupModal()">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>
+    </div>
+    <div class="m-body">
+      <div style="background:#fff7e6; border:1px solid #ffd591; border-radius:8px; padding:10px 14px; margin-bottom:14px; font-size:12px; color:#874d00; line-height:1.6;">
+        ⚠ <strong>그룹 미배정 항목</strong>은 자동생성에 누락됩니다. 적합한 그룹이 없다면 [+ 새 그룹 만들기]로 생성하세요.
+      </div>
+
+      <div class="field-group">
+        <label class="field-label">기존 그룹에 추가</label>
+        <div class="item-pick-box">
+          <div class="item-pick-row"><input type="checkbox"><span class="nm">📦 호치민 인기 티켓</span><span class="meta">티켓 · 호치민</span><span class="pr">2개</span></div>
+          <div class="item-pick-row"><input type="checkbox"><span class="nm">📦 호치민 관광 패스</span><span class="meta">티켓 · 호치민</span><span class="pr">1개</span></div>
+          <div class="item-pick-row"><input type="checkbox"><span class="nm">📦 빈원더스 통합 (전국)</span><span class="meta">티켓 · 전국</span><span class="pr">4개</span></div>
+        </div>
+      </div>
+
+      <div style="text-align:center; padding:8px 0; color:rgba(0,0,0,0.35); font-size:12px;">— 또는 —</div>
+
+      <button class="btn-primary-md" onclick="closeAssignGroupModal(); openCreateGroupModal();" style="width:100%; justify-content:center;">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+        새 그룹 만들기
+      </button>
+    </div>
+    <div class="m-foot">
+      <span class="m-foot-info"></span>
+      <div>
+        <button class="btn-modal-close" onclick="closeAssignGroupModal()">취소</button>
+        <button class="btn-modal-primary" onclick="alert('그룹에 배정되었습니다.'); closeAssignGroupModal();">배정</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ============================================================ -->
+<!-- ===== MODAL: 개별 항목 등록 ===== -->
+<!-- ============================================================ -->
+<div class="backdrop" id="createItemModal" onclick="if(event.target===this) closeCreateItemModal()">
+  <div class="modal">
+    <div class="m-head">
+      <div>
+        <div class="m-title">+ 개별 항목 등록</div>
+        <div class="m-sub">투어·티켓·픽업·패스트트랙을 개별 등록합니다. 등록 후 그룹에 배정해야 자동생성 후보로 사용됩니다.</div>
+      </div>
+      <button class="m-close" onclick="closeCreateItemModal()">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>
+    </div>
+    <div class="m-body">
+      <div class="field-group">
+        <label class="field-label">카테고리 <span class="req">*</span></label>
+        <div class="cat-pick">
+          <button class="cat-pick-btn active"><span class="dot tour"></span>투어</button>
+          <button class="cat-pick-btn"><span class="dot ticket"></span>티켓</button>
+          <button class="cat-pick-btn"><span class="dot pickup"></span>픽업·샌딩</button>
+          <button class="cat-pick-btn"><span class="dot fasttrack"></span>패스트트랙</button>
+        </div>
+      </div>
+      <div class="field-group">
+        <label class="field-label">항목 이름 <span class="req">*</span></label>
+        <input type="text" class="fi-input" placeholder="예: 푸꾸옥 사파리 + 빈원더스 1일 투어">
+      </div>
+      <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px;">
+        <div class="field-group">
+          <label class="field-label">공급사 <span class="req">*</span></label>
+          <select class="fi-input"><option>KKday</option><option>피크타임</option><option>베나자</option><option>직접 계약</option></select>
+        </div>
+        <div class="field-group">
+          <label class="field-label">여행지 <span class="req">*</span></label>
+          <select class="fi-input"><option>푸꾸옥</option><option>나트랑</option><option>다낭</option><option>호치민</option><option>하노이</option></select>
+        </div>
+      </div>
+      <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px;">
+        <div class="field-group">
+          <label class="field-label">판매가 <span class="req">*</span></label>
+          <input type="text" class="fi-input" placeholder="₩0" style="text-align:right;">
+        </div>
+        <div class="field-group">
+          <label class="field-label">단위</label>
+          <select class="fi-input"><option>1인</option><option>1팀</option><option>1대</option></select>
+        </div>
+      </div>
+      <div class="field-group">
+        <label class="field-label">그룹 배정 <span class="hint">등록 후 따로 배정해도 됩니다</span></label>
+        <select class="fi-input"><option>(나중에 배정)</option><option>📦 푸꾸옥 자연 투어</option><option>📦 푸꾸옥 액티비티 투어</option><option>+ 새 그룹 만들기</option></select>
+      </div>
+    </div>
+    <div class="m-foot">
+      <span class="m-foot-info">자동생성 ON으로 등록되며, 그룹 배정 후 즉시 후보로 사용됩니다.</span>
+      <div>
+        <button class="btn-modal-close" onclick="closeCreateItemModal()">취소</button>
+        <button class="btn-modal-primary" onclick="alert('항목이 등록되었습니다.'); closeCreateItemModal();">등록</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+function switchTop(scope, btn) {
+  document.querySelectorAll('.top-tab').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  document.querySelectorAll('.top-panel').forEach(p => p.classList.remove('active'));
+  document.getElementById('top-' + scope).classList.add('active');
+}
+
+function filterCat(btn, cat) {
+  btn.parentElement.querySelectorAll('.cat-chip').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  document.querySelectorAll('tbody tr[data-cat]').forEach(tr => {
+    if (cat === 'all' || tr.dataset.cat === cat) tr.style.display = '';
+    else tr.style.display = 'none';
+  });
+}
+
+function toggleAutogen(cb) {
+  const cell = cb.closest('.autogen-cell');
+  const label = cell.querySelector('.autogen-mini-label');
+  if (cb.checked) {
+    label.textContent = 'ON'; label.classList.remove('off'); label.classList.add('on');
+  } else {
+    label.textContent = 'OFF'; label.classList.remove('on'); label.classList.add('off');
+  }
+}
+
+function openCreateGroupModal() {
+  document.getElementById('createGroupModal').classList.add('active');
+  document.body.classList.add('modal-open');
+}
+function closeCreateGroupModal() {
+  document.getElementById('createGroupModal').classList.remove('active');
+  if (!document.querySelector('.backdrop.active')) document.body.classList.remove('modal-open');
+}
+
+function openAssignGroupModal(el) {
+  document.getElementById('assignGroupModal').classList.add('active');
+  document.body.classList.add('modal-open');
+}
+function closeAssignGroupModal() {
+  document.getElementById('assignGroupModal').classList.remove('active');
+  if (!document.querySelector('.backdrop.active')) document.body.classList.remove('modal-open');
+}
+
+function openCreateItemModal() {
+  document.getElementById('createItemModal').classList.add('active');
+  document.body.classList.add('modal-open');
+}
+function closeCreateItemModal() {
+  document.getElementById('createItemModal').classList.remove('active');
+  if (!document.querySelector('.backdrop.active')) document.body.classList.remove('modal-open');
+}
+</script>
+</body>
+</html>

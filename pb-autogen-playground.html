@@ -1,0 +1,1673 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PB 자동등록 플레이그라운드 — 한 페이지 통합 시뮬</title>
+<link href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.6/dist/web/static/pretendard.css" rel="stylesheet">
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: 'Pretendard', 'Apple SD Gothic Neo', -apple-system, sans-serif; font-size: 14px; color: rgba(0,0,0,0.88); background: #f5f5f5; }
+body.modal-open { overflow: hidden; }
+button { font-family: inherit; cursor: pointer; }
+input, select, textarea { font-family: inherit; }
+
+/* GNB */
+.gnb { background: #f0f5ff; height: 48px; display: flex; align-items: center; position: sticky; top: 0; z-index: 100; padding: 0 20px; border-bottom: 1px solid #d6e4ff; box-shadow: 0 1px 4px rgba(0,0,0,0.06); }
+.gnb-logo { color: #222427; font-weight: 800; font-size: 15px; margin-right: 24px; letter-spacing: -0.3px; }
+.gnb-logo span { color: #1677ff; }
+.gnb-logo .partners-badge { background: #1677ff; color: #fff; font-size: 10px; font-weight: 700; padding: 2px 6px; border-radius: 4px; margin-left: 6px; }
+.gnb-logo .play-tag { background: #722ed1; color: #fff; font-size: 10px; font-weight: 700; padding: 2px 6px; border-radius: 4px; margin-left: 4px; }
+.gnb-right { margin-left: auto; display: flex; align-items: center; gap: 14px; }
+.gnb-user { font-size: 12px; color: rgba(0,0,0,0.55); }
+.gnb-user-name { font-weight: 700; color: rgba(0,0,0,0.75); }
+.gnb-org-badge { background: #fff; border: 1px solid #d6e4ff; color: #1677ff; font-size: 11px; font-weight: 600; padding: 3px 8px; border-radius: 4px; }
+.gnb-reset-btn { height: 30px; padding: 0 12px; border-radius: 6px; background: #fff; border: 1px solid #d9d9d9; font-size: 11.5px; cursor: pointer; color: rgba(0,0,0,0.65); font-weight: 600; }
+.gnb-reset-btn:hover { color: #cf1322; border-color: #ff7875; }
+
+/* Layout */
+.layout { padding: 18px 24px 60px; max-width: 1280px; margin: 0 auto; }
+
+/* Hero */
+.hero { background: linear-gradient(135deg, #1677ff 0%, #722ed1 100%); border-radius: 14px; padding: 20px 24px; margin-bottom: 18px; color: #fff; position: relative; overflow: hidden; }
+.hero::after { content: '🎮'; position: absolute; right: 24px; top: 50%; transform: translateY(-50%); font-size: 60px; opacity: 0.18; }
+.hero-title { font-size: 22px; font-weight: 800; letter-spacing: -0.3px; margin-bottom: 6px; }
+.hero-desc { font-size: 13px; opacity: 0.88; line-height: 1.6; max-width: 760px; }
+.hero-desc strong { color: #fff; font-weight: 800; }
+
+/* Stepper */
+.stepper { background: #fff; border: 1px solid #f0f0f0; border-radius: 12px; padding: 14px 18px; margin-bottom: 18px; display: flex; align-items: center; gap: 6px; overflow-x: auto; }
+.step-item { display: flex; align-items: center; gap: 8px; flex-shrink: 0; cursor: pointer; padding: 6px 10px; border-radius: 8px; transition: all 0.15s; }
+.step-item:hover { background: #fafbfc; }
+.step-circle { width: 26px; height: 26px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 800; flex-shrink: 0; }
+.step-circle.todo { background: #fafafa; border: 1.5px solid #d9d9d9; color: rgba(0,0,0,0.45); }
+.step-circle.done { background: #52c41a; color: #fff; }
+.step-circle.current { background: #1677ff; color: #fff; box-shadow: 0 0 0 4px rgba(22,119,255,0.15); }
+.step-name { font-size: 12.5px; font-weight: 700; color: rgba(0,0,0,0.65); white-space: nowrap; }
+.step-item.done .step-name { color: #389e0d; }
+.step-item.current .step-name { color: #1677ff; }
+.step-count { font-size: 10.5px; color: rgba(0,0,0,0.4); font-weight: 600; background: #f5f5f5; padding: 1px 6px; border-radius: 10px; }
+.step-arrow { color: rgba(0,0,0,0.2); font-size: 12px; }
+
+/* Section card */
+.section { background: #fff; border: 1px solid #f0f0f0; border-radius: 12px; margin-bottom: 14px; overflow: hidden; transition: all 0.2s; }
+.section.open { border-color: #91caff; box-shadow: 0 4px 16px rgba(22,119,255,0.06); }
+.section-head { padding: 14px 18px; display: flex; align-items: center; gap: 12px; cursor: pointer; transition: background 0.15s; user-select: none; }
+.section-head:hover { background: #fafbfc; }
+.section-num { width: 30px; height: 30px; border-radius: 50%; background: linear-gradient(135deg, #91caff, #1677ff); color: #fff; font-size: 13px; font-weight: 800; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+.section-num.done { background: linear-gradient(135deg, #b7eb8f, #52c41a); }
+.section-num.locked { background: #f5f5f5; color: rgba(0,0,0,0.35); }
+.section-title { font-size: 15.5px; font-weight: 800; color: rgba(0,0,0,0.88); display: flex; align-items: center; gap: 6px; }
+.section-meta { font-size: 11.5px; color: rgba(0,0,0,0.5); margin-top: 2px; }
+.section-meta strong { color: rgba(0,0,0,0.85); font-weight: 700; }
+.section-info { flex: 1; min-width: 0; }
+.section-status { display: flex; align-items: center; gap: 6px; flex-shrink: 0; }
+.section-chev { color: rgba(0,0,0,0.35); transition: transform 0.2s; }
+.section.open .section-chev { transform: rotate(90deg); color: #1677ff; }
+.section-body { display: none; padding: 18px; border-top: 1px solid #f5f5f5; background: #fafbfc; }
+.section.open .section-body { display: block; }
+.section.locked .section-head { opacity: 0.55; cursor: not-allowed; }
+.section.locked .section-head:hover { background: transparent; }
+.section.locked .section-body { display: none !important; }
+
+.complete-pill { display: inline-flex; align-items: center; gap: 4px; padding: 3px 10px; border-radius: 12px; font-size: 11px; font-weight: 800; }
+.complete-pill.done { background: #f6ffed; color: #389e0d; border: 1px solid #b7eb8f; }
+.complete-pill.todo { background: #fff7e6; color: #d48806; border: 1px solid #ffd591; }
+.complete-pill.locked { background: #f5f5f5; color: rgba(0,0,0,0.45); border: 1px solid #e8e8e8; }
+
+/* Toolbar inside section */
+.section-toolbar { display: flex; gap: 8px; align-items: center; margin-bottom: 14px; flex-wrap: wrap; }
+.section-toolbar-spacer { margin-left: auto; }
+
+/* Card grid (data items) */
+.data-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 10px; }
+.data-card { background: #fff; border: 1px solid #e8e8e8; border-radius: 10px; padding: 14px; position: relative; transition: all 0.15s; }
+.data-card:hover { border-color: #91caff; }
+.data-card.locked { background: #fafbfc; opacity: 0.85; }
+.data-card-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 8px; margin-bottom: 8px; }
+.data-card-title { font-size: 13.5px; font-weight: 800; color: rgba(0,0,0,0.88); }
+.data-card-id { font-family: 'SF Mono', monospace; font-size: 10.5px; background: #f5f5f5; padding: 1px 6px; border-radius: 3px; color: rgba(0,0,0,0.55); font-weight: 600; margin-left: 4px; }
+.data-card-cat { font-size: 10.5px; color: rgba(0,0,0,0.5); font-weight: 700; letter-spacing: 0.3px; text-transform: uppercase; margin-bottom: 4px; }
+.data-card-body { font-size: 12px; color: rgba(0,0,0,0.65); line-height: 1.6; }
+.data-card-body strong { color: rgba(0,0,0,0.85); }
+.data-card-foot { display: flex; gap: 4px; align-items: center; margin-top: 10px; padding-top: 10px; border-top: 1px dashed #f0f0f0; }
+.data-card-del { margin-left: auto; }
+
+.empty-state { padding: 30px 16px; text-align: center; background: #fff; border: 1.5px dashed #d9d9d9; border-radius: 10px; color: rgba(0,0,0,0.45); font-size: 12.5px; }
+.empty-state strong { color: rgba(0,0,0,0.65); font-weight: 700; }
+
+/* Tags */
+.tag { display: inline-flex; align-items: center; gap: 4px; padding: 2px 8px; border-radius: 4px; font-size: 11px; font-weight: 700; }
+.tag-green { background: #f6ffed; color: #389e0d; border: 1px solid #b7eb8f; }
+.tag-blue { background: #e6f4ff; color: #0958d9; border: 1px solid #91caff; }
+.tag-orange { background: #fff7e6; color: #d48806; border: 1px solid #ffd591; }
+.tag-red { background: #fff1f0; color: #cf1322; border: 1px solid #ffa39e; }
+.tag-gray { background: #f5f5f5; color: rgba(0,0,0,0.55); border: 1px solid #e8e8e8; }
+.tag-purple { background: #f9f0ff; color: #722ed1; border: 1px solid #d3adf7; }
+.tag-pink { background: #fff0f6; color: #c41d7f; border: 1px solid #ffadd2; }
+
+/* Buttons */
+.btn { height: 32px; padding: 0 12px; border-radius: 6px; font-size: 12.5px; font-weight: 600; cursor: pointer; border: 1px solid #d9d9d9; background: #fff; color: rgba(0,0,0,0.75); display: inline-flex; align-items: center; gap: 5px; transition: all 0.15s; white-space: nowrap; }
+.btn:hover { color: #1677ff; border-color: #1677ff; }
+.btn-primary { background: #1677ff; color: #fff; border-color: #1677ff; }
+.btn-primary:hover { background: #4096ff; }
+.btn-purple { background: #722ed1; color: #fff; border-color: #722ed1; }
+.btn-purple:hover { background: #9254de; }
+.btn-success { background: #52c41a; color: #fff; border-color: #52c41a; }
+.btn-success:hover { background: #389e0d; }
+.btn-danger { color: #cf1322; background: #fff; border-color: #ffccc7; }
+.btn-danger:hover { background: #cf1322; color: #fff; }
+.btn-warn { background: #fa8c16; color: #fff; border-color: #fa8c16; }
+.btn-warn:hover { background: #d48806; }
+.btn-sm { height: 28px; padding: 0 10px; font-size: 11.5px; }
+.btn-lg { height: 42px; padding: 0 22px; font-size: 14px; font-weight: 800; border-radius: 8px; }
+.btn-mini { height: 24px; padding: 0 8px; border-radius: 5px; border: 1px solid #e8e8e8; background: #fff; color: rgba(0,0,0,0.6); font-size: 11px; font-weight: 600; cursor: pointer; }
+.btn-mini:hover { color: #1677ff; border-color: #1677ff; }
+.btn-mini.danger:hover { color: #cf1322; border-color: #ff7875; }
+
+/* Form */
+.form-row { display: grid; gap: 10px; margin-bottom: 10px; }
+.form-row.cols-2 { grid-template-columns: 1fr 1fr; }
+.form-row.cols-3 { grid-template-columns: 1fr 1fr 1fr; }
+.form-row.cols-4 { grid-template-columns: 1fr 1fr 1fr 1fr; }
+.form-label { font-size: 11.5px; color: rgba(0,0,0,0.6); font-weight: 700; margin-bottom: 5px; display: block; }
+.form-label .req { color: #f5222d; margin-left: 2px; }
+.form-label .hint { color: rgba(0,0,0,0.35); font-weight: 500; font-size: 11px; margin-left: 4px; }
+.fi { width: 100%; height: 34px; padding: 0 12px; border: 1px solid #d9d9d9; border-radius: 6px; font-size: 12.5px; outline: none; background: #fff; }
+.fi:focus { border-color: #1677ff; box-shadow: 0 0 0 2px rgba(22,119,255,0.1); }
+select.fi { appearance: none; padding-right: 28px; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='%23bbb'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 10px center; cursor: pointer; }
+textarea.fi { height: auto; min-height: 60px; padding: 8px 12px; line-height: 1.5; resize: vertical; }
+
+/* Cat pick (카테고리 칩) */
+.cat-pick { display: flex; gap: 6px; flex-wrap: wrap; }
+.cat-pick-btn { padding: 6px 12px; border-radius: 8px; border: 1px solid #e8e8e8; background: #fff; color: rgba(0,0,0,0.65); font-size: 11.5px; font-weight: 600; cursor: pointer; font-family: inherit; display: inline-flex; align-items: center; gap: 5px; }
+.cat-pick-btn:hover { color: #1677ff; border-color: #91caff; }
+.cat-pick-btn.active { background: #1677ff; color: #fff; border-color: #1677ff; font-weight: 800; }
+.cat-pick-btn .dot { width: 7px; height: 7px; border-radius: 50%; }
+
+/* Switch */
+.sw { position: relative; display: inline-block; width: 38px; height: 22px; }
+.sw input { opacity: 0; width: 0; height: 0; }
+.sw .sw-slider { position: absolute; cursor: pointer; inset: 0; background: #d9d9d9; border-radius: 22px; transition: 0.2s; }
+.sw .sw-slider::before { content: ''; position: absolute; height: 16px; width: 16px; left: 3px; top: 3px; background: #fff; border-radius: 50%; transition: 0.2s; box-shadow: 0 1px 2px rgba(0,0,0,0.15); }
+.sw input:checked + .sw-slider { background: #52c41a; }
+.sw input:checked + .sw-slider::before { transform: translateX(16px); }
+.sw-cell { display: flex; align-items: center; gap: 5px; }
+.sw-label { font-size: 10.5px; font-weight: 800; }
+.sw-label.on { color: #389e0d; }
+.sw-label.off { color: rgba(0,0,0,0.4); }
+
+/* Info banner */
+.info-banner { padding: 11px 14px; border-radius: 8px; font-size: 12px; line-height: 1.6; margin-bottom: 14px; }
+.info-banner strong { font-weight: 800; }
+.info-banner.blue { background: linear-gradient(135deg, #f0f7ff 0%, #e6f4ff 100%); border: 1px solid #91caff; color: #003a8c; }
+.info-banner.purple { background: linear-gradient(135deg, #f9f0ff 0%, #efdbff 100%); border: 1px solid #d3adf7; color: #531dab; }
+.info-banner.yellow { background: linear-gradient(135deg, #fffbe6 0%, #fff7e6 100%); border: 1px solid #ffd591; color: #874d00; }
+.info-banner.gray { background: #fafbfc; border: 1px solid #e8e8e8; color: rgba(0,0,0,0.65); }
+
+/* RULES panel (자동생성 룰) */
+.rules-panel { background: #fff; border: 1.5px solid #d3adf7; border-radius: 12px; padding: 16px 18px; margin-bottom: 14px; }
+.rules-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 12px; }
+.rule-item { background: #fafbfc; border: 1px solid #f0f0f0; border-radius: 8px; padding: 10px 12px; }
+.rule-key { font-size: 10.5px; color: rgba(0,0,0,0.5); font-weight: 700; letter-spacing: 0.3px; text-transform: uppercase; margin-bottom: 6px; }
+.rule-value { font-size: 14px; font-weight: 800; color: rgba(0,0,0,0.88); display: flex; align-items: center; gap: 8px; }
+.rule-value .unit { font-size: 11px; color: rgba(0,0,0,0.45); font-weight: 600; }
+.rule-value input { height: 28px; width: 60px; padding: 0 8px; border: 1px solid #d9d9d9; border-radius: 5px; font-size: 13px; font-family: inherit; outline: none; font-weight: 700; }
+.rule-value input:focus { border-color: #1677ff; }
+.rule-value select { height: 28px; padding: 0 24px 0 8px; border: 1px solid #d9d9d9; border-radius: 5px; font-size: 12.5px; font-family: inherit; appearance: none; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='%23bbb'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 8px center; cursor: pointer; font-weight: 700; }
+.rule-sub { font-size: 10.5px; color: rgba(0,0,0,0.45); margin-top: 4px; line-height: 1.4; }
+
+.run-bar { background: linear-gradient(135deg, #722ed1 0%, #531dab 100%); border-radius: 12px; padding: 16px 22px; margin-top: 14px; display: flex; align-items: center; gap: 14px; color: #fff; }
+.run-bar-info { flex: 1; }
+.run-bar-title { font-size: 14px; font-weight: 800; }
+.run-bar-desc { font-size: 11.5px; opacity: 0.85; margin-top: 2px; }
+.btn-run { height: 46px; padding: 0 24px; border-radius: 10px; background: #fff; color: #722ed1; border: 1.5px solid #fff; font-size: 14px; font-weight: 800; cursor: pointer; font-family: inherit; display: inline-flex; align-items: center; gap: 8px; transition: all 0.15s; }
+.btn-run:hover { background: #f9f0ff; transform: translateY(-1px); }
+.btn-run .ico { font-size: 18px; }
+
+/* Generated products */
+.prod-grid { display: grid; grid-template-columns: 1fr; gap: 8px; }
+.prod-row { background: #fff; border: 1px solid #e8e8e8; border-radius: 10px; padding: 12px 14px; display: flex; align-items: center; gap: 12px; transition: all 0.15s; }
+.prod-row:hover { border-color: #91caff; box-shadow: 0 2px 8px rgba(22,119,255,0.06); }
+.prod-row.hidden { background: linear-gradient(180deg, #fff7e6 0%, #fff 50%); border-color: #ffd591; }
+.prod-thumb { width: 42px; height: 42px; border-radius: 8px; background: linear-gradient(135deg, #91caff, #1677ff); color: #fff; font-weight: 800; display: flex; align-items: center; justify-content: center; font-size: 11px; letter-spacing: 0.3px; flex-shrink: 0; }
+.prod-thumb.var2 { background: linear-gradient(135deg, #ffadd2, #c41d7f); }
+.prod-thumb.var3 { background: linear-gradient(135deg, #b7eb8f, #389e0d); }
+.prod-thumb.var4 { background: linear-gradient(135deg, #ffd591, #d48806); }
+.prod-thumb.var5 { background: linear-gradient(135deg, #d3adf7, #722ed1); }
+.prod-info { flex: 1; min-width: 0; }
+.prod-name { font-size: 13.5px; font-weight: 800; color: rgba(0,0,0,0.88); line-height: 1.3; }
+.prod-meta { font-size: 11px; color: rgba(0,0,0,0.55); margin-top: 3px; display: flex; gap: 6px; flex-wrap: wrap; }
+.prod-meta .pill { padding: 1px 6px; border-radius: 3px; font-weight: 700; font-size: 10.5px; }
+.prod-meta .pill.airtel { background: #e6f4ff; color: #0958d9; }
+.prod-meta .pill.full { background: #f9f0ff; color: #722ed1; }
+.prod-price { text-align: right; flex-shrink: 0; }
+.prod-price .main { font-size: 16px; font-weight: 800; color: #1677ff; font-variant-numeric: tabular-nums; }
+.prod-price .margin { font-size: 11px; color: rgba(0,0,0,0.55); margin-top: 2px; font-weight: 700; }
+.prod-price .margin.warn { color: #d48806; }
+.prod-actions { display: flex; align-items: center; gap: 6px; flex-shrink: 0; }
+.prod-status-pill { display: inline-flex; align-items: center; gap: 4px; padding: 3px 8px; border-radius: 4px; font-size: 11px; font-weight: 700; }
+.prod-status-pill.live { background: #f6ffed; color: #389e0d; border: 1px solid #b7eb8f; }
+.prod-status-pill.live::before { content: '●'; font-size: 8px; }
+.prod-status-pill.hidden { background: #fff7e6; color: #d48806; border: 1px solid #ffd591; }
+.prod-status-pill.hidden::before { content: '⊘'; }
+.prod-status-pill.reject { background: #fff1f0; color: #cf1322; border: 1px solid #ffa39e; }
+.prod-status-pill.reject::before { content: '⊘'; }
+
+/* RESERVATION (section 7) */
+.reservation-empty { padding: 40px 16px; text-align: center; color: rgba(0,0,0,0.45); font-size: 12.5px; background: #fff; border: 1.5px dashed #d9d9d9; border-radius: 10px; }
+.reservation-empty strong { color: rgba(0,0,0,0.7); font-weight: 700; }
+.reservation-card { background: #fff; border: 1.5px solid #91caff; border-radius: 12px; overflow: hidden; }
+.rsv-head { background: linear-gradient(135deg, #f0f7ff 0%, #e6f4ff 100%); padding: 14px 18px; border-bottom: 1px solid #91caff; display: flex; align-items: center; gap: 14px; }
+.rsv-head-info { flex: 1; }
+.rsv-head-id { font-family: 'SF Mono', monospace; font-size: 11px; color: rgba(0,0,0,0.55); font-weight: 700; }
+.rsv-head-title { font-size: 15px; font-weight: 800; color: rgba(0,0,0,0.88); margin-top: 3px; }
+.rsv-countdown { background: #fff; border: 1.5px solid #ffd591; border-radius: 8px; padding: 8px 14px; }
+.rsv-countdown.urgent { border-color: #ffa39e; }
+.rsv-countdown .label { font-size: 9.5px; color: #874d00; font-weight: 800; letter-spacing: 0.3px; text-transform: uppercase; }
+.rsv-countdown .v { font-size: 20px; font-weight: 800; color: #d48806; font-family: 'SF Mono', monospace; line-height: 1; margin-top: 2px; }
+.rsv-countdown.urgent .v { color: #cf1322; }
+.rsv-body { padding: 14px 18px; display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+@media (max-width: 800px) { .rsv-body { grid-template-columns: 1fr; } }
+.rsv-block { background: #fafbfc; border: 1px solid #f0f0f0; border-radius: 8px; padding: 12px; }
+.rsv-block-title { font-size: 11px; color: rgba(0,0,0,0.5); font-weight: 800; letter-spacing: 0.3px; text-transform: uppercase; margin-bottom: 8px; }
+.rsv-supplier-list { display: flex; flex-direction: column; gap: 6px; }
+.rsv-sup-item { display: flex; align-items: center; gap: 8px; font-size: 12px; padding: 6px 8px; background: #fff; border-radius: 5px; border: 1px solid #f0f0f0; }
+.rsv-sup-item .ico { font-size: 13px; flex-shrink: 0; }
+.rsv-sup-item .nm { flex: 1; min-width: 0; font-weight: 600; color: rgba(0,0,0,0.78); }
+.rsv-sup-item .st { font-size: 10.5px; font-weight: 800; padding: 2px 7px; border-radius: 3px; }
+.rsv-sup-item .st.done { background: #f6ffed; color: #389e0d; }
+.rsv-sup-item .st.wait { background: #fff7e6; color: #d48806; }
+.rsv-sup-item .st.req { background: #e6f4ff; color: #0958d9; }
+.rsv-amount { display: flex; align-items: baseline; gap: 4px; }
+.rsv-amount .v { font-size: 22px; font-weight: 800; color: #1677ff; font-variant-numeric: tabular-nums; }
+.rsv-amount .u { font-size: 11px; color: rgba(0,0,0,0.45); font-weight: 600; }
+.rsv-foot { padding: 12px 18px; background: #fafbfc; border-top: 1px solid #f0f0f0; display: flex; gap: 8px; align-items: center; }
+.rsv-foot-info { flex: 1; font-size: 11px; color: rgba(0,0,0,0.55); }
+
+/* Channel buttons */
+.channel-row { display: flex; gap: 4px; flex-wrap: wrap; margin-top: 6px; }
+.btn-ch { height: 24px; padding: 0 8px; border-radius: 4px; font-size: 10.5px; font-weight: 700; cursor: pointer; border: 1px solid #d9d9d9; background: #fff; color: rgba(0,0,0,0.65); font-family: inherit; }
+.btn-ch.kakao { color: #ad6800; border-color: #ffe58f; background: #fffbe6; }
+.btn-ch.jandi { color: #096dd9; border-color: #91caff; background: #e6f4ff; }
+.btn-ch:hover { transform: translateY(-1px); }
+
+/* Modal */
+.backdrop { position: fixed; inset: 0; background: rgba(0,21,41,0.5); backdrop-filter: blur(2px); z-index: 1000; display: none; align-items: center; justify-content: center; padding: 32px 24px; }
+.backdrop.active { display: flex; }
+.modal { background: #fff; border-radius: 14px; box-shadow: 0 20px 60px rgba(0,0,0,0.25); width: 100%; max-width: 640px; max-height: calc(100vh - 64px); display: flex; flex-direction: column; overflow: hidden; }
+.modal.wide { max-width: 880px; }
+.m-head { padding: 18px 22px 14px; border-bottom: 1px solid #f0f0f0; display: flex; align-items: flex-start; gap: 12px; }
+.m-title { font-size: 16px; font-weight: 800; }
+.m-sub { font-size: 11.5px; color: rgba(0,0,0,0.5); margin-top: 4px; line-height: 1.5; }
+.m-close { width: 30px; height: 30px; border-radius: 8px; border: 1px solid transparent; background: transparent; color: rgba(0,0,0,0.45); display: flex; align-items: center; justify-content: center; cursor: pointer; flex-shrink: 0; font-size: 16px; }
+.m-close:hover { background: #f5f5f5; }
+.m-body { padding: 16px 22px; overflow-y: auto; flex: 1; }
+.m-foot { padding: 12px 22px; border-top: 1px solid #f0f0f0; display: flex; justify-content: flex-end; align-items: center; background: #fafbfc; gap: 8px; }
+
+.items-builder-row { background: #fafbfc; border: 1px solid #f0f0f0; border-radius: 8px; padding: 10px; }
+.item-builder-row { display: flex; gap: 8px; align-items: flex-start; padding: 8px; background: #fff; border: 1px solid #f0f0f0; border-radius: 6px; margin-bottom: 6px; }
+.item-builder-row .num-bg { width: 22px; height: 22px; border-radius: 50%; background: #1677ff; color: #fff; font-size: 11px; font-weight: 800; display: inline-flex; align-items: center; justify-content: center; flex-shrink: 0; margin-top: 4px; }
+.item-builder-row .item-fields { flex: 1; display: flex; flex-direction: column; gap: 5px; }
+.item-builder-row input, .item-builder-row textarea { width: 100%; padding: 6px 8px; border: 1px solid #e8e8e8; border-radius: 4px; font-size: 11.5px; font-family: inherit; outline: none; }
+.item-builder-row input:focus, .item-builder-row textarea:focus { border-color: #1677ff; }
+.item-builder-row textarea { min-height: 36px; resize: vertical; }
+.item-builder-row .del { width: 22px; height: 22px; border-radius: 4px; border: 1px solid #ffa39e; background: #fff1f0; color: #cf1322; cursor: pointer; font-size: 12px; flex-shrink: 0; margin-top: 4px; }
+.add-item-btn { width: 100%; padding: 6px; border: 1.5px dashed #91caff; background: #f0f7ff; color: #1677ff; border-radius: 5px; cursor: pointer; font-family: inherit; font-size: 11.5px; font-weight: 700; margin-top: 2px; }
+.add-item-btn:hover { background: #e6f4ff; border-color: #1677ff; }
+
+.locked-overlay { padding: 18px; text-align: center; background: #fafbfc; border: 1.5px dashed #d9d9d9; border-radius: 10px; color: rgba(0,0,0,0.45); font-size: 12px; }
+.locked-overlay strong { color: rgba(0,0,0,0.6); font-weight: 700; }
+
+/* Toast */
+.toast { position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%); background: rgba(0,0,0,0.85); color: #fff; padding: 12px 20px; border-radius: 8px; font-size: 13px; font-weight: 600; z-index: 2000; opacity: 0; transition: opacity 0.2s; pointer-events: none; }
+.toast.show { opacity: 1; }
+
+.locked-lock { padding: 22px; text-align: center; color: rgba(0,0,0,0.45); font-size: 12px; line-height: 1.6; background: #fafbfc; border: 1.5px dashed #d9d9d9; border-radius: 10px; }
+.locked-lock .lk { font-size: 24px; margin-bottom: 8px; }
+.locked-lock strong { color: rgba(0,0,0,0.7); }
+
+/* Generating overlay */
+.generating { padding: 40px; text-align: center; background: linear-gradient(135deg, #f9f0ff 0%, #efdbff 100%); border-radius: 12px; }
+.gen-spinner { width: 60px; height: 60px; margin: 0 auto 14px; border: 4px solid #d3adf7; border-top-color: #722ed1; border-radius: 50%; animation: spin 0.8s linear infinite; }
+@keyframes spin { to { transform: rotate(360deg); } }
+.gen-title { font-size: 16px; font-weight: 800; color: #531dab; margin-bottom: 6px; }
+.gen-step { font-size: 12px; color: #531dab; opacity: 0.75; margin-top: 4px; line-height: 1.5; }
+
+</style>
+</head>
+<body>
+
+<!-- GNB -->
+<nav class="gnb">
+  <div class="gnb-logo">Trip<span>Store</span> <span class="partners-badge">PARTNERS</span> <span class="play-tag">PLAYGROUND</span></div>
+  <div class="gnb-right">
+    <span class="gnb-org-badge">트립스토어</span>
+    <button class="gnb-reset-btn" onclick="resetAll()">🔄 초기화</button>
+    <span class="gnb-user"><span class="gnb-user-name">김서현</span>님</span>
+  </div>
+</nav>
+
+<div class="layout">
+
+  <!-- Hero -->
+  <div class="hero">
+    <div class="hero-title">🎮 PB 자동등록 플레이그라운드</div>
+    <div class="hero-desc">
+      한 페이지에서 PB 상품 자동등록 전체 흐름을 직접 돌려봅니다 — <strong>숙박권 등록 → 투어/티켓 그룹 → 콘텐츠 연결 → 자동생성 룰 설정 → 자동생성 실행 → 라이브 노출 관리 → 가상 예약</strong>.<br>
+      입력한 데이터는 즉시 다음 단계로 흘러갑니다. <strong>항공권은 미리 등록된 것으로 가정</strong>합니다 (서현님 알바 X 영역).
+    </div>
+  </div>
+
+  <!-- Stepper -->
+  <div class="stepper" id="stepper">
+    <!-- rendered by JS -->
+  </div>
+
+  <!-- ========================================================== -->
+  <!-- SECTION 1: 항공권 (고정 데이터) -->
+  <!-- ========================================================== -->
+  <div class="section open" id="sec-1">
+    <div class="section-head" onclick="toggleSec('sec-1')">
+      <div class="section-num done">1</div>
+      <div class="section-info">
+        <div class="section-title">✈ 항공권 <span style="font-size:11px; background:#f5f5f5; color:rgba(0,0,0,0.55); padding:2px 8px; border-radius:4px; font-weight:600; margin-left:4px;">읽기전용 · 자동 sync</span></div>
+        <div class="section-meta"><strong id="flightCount">4</strong>편 등록 완료 · 새벽 03:00 누아 NDC 자동 sync</div>
+      </div>
+      <div class="section-status">
+        <span class="complete-pill done">✓ 완료</span>
+        <span class="section-chev">▶</span>
+      </div>
+    </div>
+    <div class="section-body">
+      <div class="info-banner gray">
+        💡 <strong>항공권은 매일 새벽 03:00 누아 NDC API에서 자동 sync</strong>됩니다. 이 플레이그라운드에서는 4개 항공편이 미리 등록된 것으로 가정합니다 (서현님 영역 X).
+      </div>
+      <div class="data-grid" id="flightList">
+        <!-- rendered by JS -->
+      </div>
+    </div>
+  </div>
+
+  <!-- ========================================================== -->
+  <!-- SECTION 2: 숙박권 등록 (인터랙티브) -->
+  <!-- ========================================================== -->
+  <div class="section" id="sec-2">
+    <div class="section-head" onclick="toggleSec('sec-2')">
+      <div class="section-num" id="sec-2-num">2</div>
+      <div class="section-info">
+        <div class="section-title">🏨 숙박권 등록 <span style="font-size:11px; background:#e6f4ff; color:#0958d9; padding:2px 8px; border-radius:4px; font-weight:700; margin-left:4px;">인터랙티브</span></div>
+        <div class="section-meta"><strong id="hotelCount">0</strong>개 등록 · 직접 추가/삭제 가능</div>
+      </div>
+      <div class="section-status">
+        <span class="complete-pill todo" id="sec-2-pill">📝 진행 필요</span>
+        <span class="section-chev">▶</span>
+      </div>
+    </div>
+    <div class="section-body">
+      <div class="info-banner blue">
+        💡 PB 자동생성 대상이 될 숙박권을 등록합니다. <strong>한 호텔에 객실 × 식사 조합으로 여러 옵션</strong>을 만들 수 있어요. 자동생성 토글로 이 숙박권을 PB 조합에 포함할지 제어합니다.
+      </div>
+      <div class="section-toolbar">
+        <button class="btn btn-primary" onclick="openHotelModal()">+ 숙박권 추가</button>
+        <button class="btn" onclick="seedHotelDemo()">📦 데모 데이터 자동 채움</button>
+        <div class="section-toolbar-spacer"></div>
+        <span style="font-size:11.5px; color:rgba(0,0,0,0.5);">자동생성 대상: <strong id="hotelAutogenCount" style="color:#389e0d;">0</strong>개</span>
+      </div>
+      <div id="hotelList" class="data-grid"></div>
+      <div id="hotelEmpty" class="empty-state">
+        <strong>숙박권이 없습니다</strong><br>
+        [+ 숙박권 추가] 또는 [데모 데이터 자동 채움]을 눌러 시작하세요.
+      </div>
+    </div>
+  </div>
+
+  <!-- ========================================================== -->
+  <!-- SECTION 3: 투어/티켓 그룹 -->
+  <!-- ========================================================== -->
+  <div class="section" id="sec-3">
+    <div class="section-head" onclick="toggleSec('sec-3')">
+      <div class="section-num" id="sec-3-num">3</div>
+      <div class="section-info">
+        <div class="section-title">🎟 투어·티켓 그룹 <span style="font-size:11px; background:#e6f4ff; color:#0958d9; padding:2px 8px; border-radius:4px; font-weight:700; margin-left:4px;">인터랙티브</span></div>
+        <div class="section-meta"><strong id="groupCount">0</strong>개 그룹 · 자동생성 엔진은 그룹 단위로만 후보 선택 (회의록 5/21)</div>
+      </div>
+      <div class="section-status">
+        <span class="complete-pill todo" id="sec-3-pill">📝 진행 필요</span>
+        <span class="section-chev">▶</span>
+      </div>
+    </div>
+    <div class="section-body">
+      <div class="info-banner blue">
+        💡 <strong>그룹 단위로 묶어야 자동생성 후보로 사용</strong>됩니다 (회의록 수권님 방향). 픽업·샌딩 그룹은 <strong>강제 포함</strong>(에어텔 디폴트), 투어/티켓/패스트트랙은 선택 옵션입니다.
+      </div>
+      <div class="section-toolbar">
+        <button class="btn btn-primary" onclick="openGroupModal()">+ 그룹 만들기</button>
+        <button class="btn" onclick="seedGroupDemo()">📦 데모 데이터 자동 채움</button>
+        <div class="section-toolbar-spacer"></div>
+        <span style="font-size:11.5px; color:rgba(0,0,0,0.5);">강제: <strong id="groupForceCount" style="color:#0958d9;">0</strong>개 · 선택: <strong id="groupSelCount" style="color:#389e0d;">0</strong>개</span>
+      </div>
+      <div id="groupList" class="data-grid"></div>
+      <div id="groupEmpty" class="empty-state">
+        <strong>그룹이 없습니다</strong><br>
+        [+ 그룹 만들기] 또는 [데모 데이터 자동 채움]을 눌러 시작하세요.
+      </div>
+    </div>
+  </div>
+
+  <!-- ========================================================== -->
+  <!-- SECTION 4: 콘텐츠 연결 -->
+  <!-- ========================================================== -->
+  <div class="section" id="sec-4">
+    <div class="section-head" onclick="toggleSec('sec-4')">
+      <div class="section-num" id="sec-4-num">4</div>
+      <div class="section-info">
+        <div class="section-title">📝 콘텐츠 연결 <span style="font-size:11px; background:#f9f0ff; color:#531dab; padding:2px 8px; border-radius:4px; font-weight:700; margin-left:4px;">Rule Engine · 참조 방식</span></div>
+        <div class="section-meta"><strong id="contentCount">0</strong>개 콘텐츠 · 한 콘텐츠에 항목 N개, 수정 시 자동 반영</div>
+      </div>
+      <div class="section-status">
+        <span class="complete-pill todo" id="sec-4-pill">📝 진행 필요</span>
+        <span class="section-chev">▶</span>
+      </div>
+    </div>
+    <div class="section-body">
+      <div class="info-banner purple">
+        💡 콘텐츠는 카탈로그에 저장되고 PB 상품에 <strong>참조</strong>됩니다. 한 콘텐츠에 <strong>여러 항목</strong>을 묶어 등록 가능(회의록). 수정하면 연결된 모든 상품에 자동 반영.
+      </div>
+      <div class="section-toolbar">
+        <button class="btn btn-primary" onclick="openContentModal()">+ 콘텐츠 작성</button>
+        <button class="btn" onclick="seedContentDemo()">📦 데모 데이터 자동 채움</button>
+        <div class="section-toolbar-spacer"></div>
+        <span style="font-size:11.5px; color:rgba(0,0,0,0.5);">전체 적용: <strong id="contentBroadCount" style="color:#0958d9;">0</strong> · 객실 단위: <strong id="contentRoomCount" style="color:#531dab;">0</strong></span>
+      </div>
+      <div id="contentList" class="data-grid"></div>
+      <div id="contentEmpty" class="empty-state">
+        <strong>콘텐츠가 없습니다</strong><br>
+        [+ 콘텐츠 작성] 또는 [데모 데이터 자동 채움]을 눌러 시작하세요.
+      </div>
+    </div>
+  </div>
+
+  <!-- ========================================================== -->
+  <!-- SECTION 5: 자동생성 룰 + 실행 -->
+  <!-- ========================================================== -->
+  <div class="section" id="sec-5">
+    <div class="section-head" onclick="toggleSec('sec-5')">
+      <div class="section-num" id="sec-5-num">5</div>
+      <div class="section-info">
+        <div class="section-title">⚙️ 자동생성 룰 + 실행 <span style="font-size:11px; background:#f9f0ff; color:#531dab; padding:2px 8px; border-radius:4px; font-weight:700; margin-left:4px;">AI 조합 엔진</span></div>
+        <div class="section-meta">위 데이터(항공·숙박·그룹·콘텐츠)를 조합해 PB 상품을 생성합니다</div>
+      </div>
+      <div class="section-status">
+        <span class="complete-pill todo" id="sec-5-pill">⚡ 실행 대기</span>
+        <span class="section-chev">▶</span>
+      </div>
+    </div>
+    <div class="section-body">
+      <div class="info-banner yellow">
+        💡 <strong>2-Layer 마진 + 게이트 정책</strong> (메모리 2026-04-08 / 2026-05-20): 원가 → 고정마진 5% → 추가마진(경쟁가 기반) → 정가마진. 노출 게이트 R1·R2·R3.
+      </div>
+
+      <div class="rules-panel">
+        <div style="font-size: 13px; font-weight: 800; margin-bottom: 12px;">⚙️ 자동생성 룰 (직접 조정 가능)</div>
+        <div class="rules-grid">
+          <div class="rule-item">
+            <div class="rule-key">고정마진</div>
+            <div class="rule-value"><input type="number" id="r_fixed" value="5" min="0" max="50"> <span class="unit">% 고정</span></div>
+            <div class="rule-sub">결제·운영 비용 (4/8 대표님 결정)</div>
+          </div>
+          <div class="rule-item">
+            <div class="rule-key">추가마진 (최대)</div>
+            <div class="rule-value"><input type="number" id="r_extra" value="10" min="0" max="50"> <span class="unit">% 상한</span></div>
+            <div class="rule-sub">경쟁가 기반 자동 산출</div>
+          </div>
+          <div class="rule-item">
+            <div class="rule-key">정가마진 (성수기)</div>
+            <div class="rule-value"><input type="number" id="r_peak" value="5" min="0" max="30"> <span class="unit">% 추가</span></div>
+            <div class="rule-sub">2단계 (성수기/비수기)</div>
+          </div>
+          <div class="rule-item">
+            <div class="rule-key">조합 다양성</div>
+            <div class="rule-value">
+              <select id="r_diversity">
+                <option value="full">전체 (최다)</option>
+                <option value="balanced" selected>균형</option>
+                <option value="curated">큐레이션</option>
+              </select>
+            </div>
+            <div class="rule-sub">투어/티켓 조합 수 제어</div>
+          </div>
+          <div class="rule-item">
+            <div class="rule-key">최저가 공격 모드</div>
+            <div class="rule-value">
+              <select id="r_attack">
+                <option value="on" selected>ON (경쟁 최저가 -1%)</option>
+                <option value="off">OFF</option>
+              </select>
+            </div>
+            <div class="rule-sub">최대 마진 도달 시 발동</div>
+          </div>
+          <div class="rule-item">
+            <div class="rule-key">노출 게이트</div>
+            <div class="rule-value" style="font-size:13px;">R1·R2·R3 활성</div>
+            <div class="rule-sub">자동 탈락 후 Reject Pool</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="run-bar">
+        <div class="run-bar-info">
+          <div class="run-bar-title">⚡ 자동생성 실행 준비</div>
+          <div class="run-bar-desc" id="runBarDesc">위 데이터로 PB 상품을 조합합니다. 항공×숙박×그룹×콘텐츠 조합 → 마진 계산 → 게이트 통과 → 라이브 노출</div>
+        </div>
+        <button class="btn-run" id="runBtn" onclick="runAutogen()"><span class="ico">🚀</span> 자동생성 실행</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ========================================================== -->
+  <!-- SECTION 6: 생성된 라이브 상품 -->
+  <!-- ========================================================== -->
+  <div class="section locked" id="sec-6">
+    <div class="section-head" onclick="toggleSec('sec-6')">
+      <div class="section-num locked" id="sec-6-num">6</div>
+      <div class="section-info">
+        <div class="section-title">🎯 생성된 라이브 상품 + 노출 관리</div>
+        <div class="section-meta" id="sec-6-meta">자동생성을 먼저 실행해 주세요</div>
+      </div>
+      <div class="section-status">
+        <span class="complete-pill locked" id="sec-6-pill">🔒 잠김</span>
+        <span class="section-chev">▶</span>
+      </div>
+    </div>
+    <div class="section-body">
+      <div class="info-banner gray">
+        💡 자동생성 결과입니다. <strong>토글로 노출/미노출</strong>을 직접 조정해보세요. 미노출(R3) 상품은 노란 배경으로 표시됩니다.
+      </div>
+      <div class="section-toolbar">
+        <span style="font-size:12px; color:rgba(0,0,0,0.55);">
+          전체 <strong id="prodTotal" style="color:#1677ff;">0</strong>건 ·
+          라이브 <strong id="prodLive" style="color:#389e0d;">0</strong> ·
+          미노출 <strong id="prodHidden" style="color:#d48806;">0</strong> ·
+          탈락 <strong id="prodReject" style="color:#cf1322;">0</strong>
+        </span>
+        <div class="section-toolbar-spacer"></div>
+        <button class="btn btn-sm" onclick="reRunAutogen()">🔁 다시 생성</button>
+      </div>
+      <div id="prodList" class="prod-grid"></div>
+    </div>
+  </div>
+
+  <!-- ========================================================== -->
+  <!-- SECTION 7: 가상 예약 시뮬레이션 -->
+  <!-- ========================================================== -->
+  <div class="section locked" id="sec-7">
+    <div class="section-head" onclick="toggleSec('sec-7')">
+      <div class="section-num locked" id="sec-7-num">7</div>
+      <div class="section-info">
+        <div class="section-title">🎫 가상 예약 시뮬레이션</div>
+        <div class="section-meta" id="sec-7-meta">라이브 상품을 먼저 만들어 주세요</div>
+      </div>
+      <div class="section-status">
+        <span class="complete-pill locked" id="sec-7-pill">🔒 잠김</span>
+        <span class="section-chev">▶</span>
+      </div>
+    </div>
+    <div class="section-body">
+      <div class="info-banner yellow">
+        💡 라이브 상품에서 <strong>[예약 시뮬]</strong> 버튼을 클릭하면 30분 홀드 카운트다운 + 공급사 채널 자동 전송 시뮬이 동작합니다 (회의록 5/21 정책).
+      </div>
+      <div id="reservationArea">
+        <div class="reservation-empty">
+          <strong>예약된 건이 없습니다.</strong><br>
+          섹션 6에서 라이브 상품의 [🎫 예약 시뮬] 버튼을 눌러보세요.
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<!-- ============================================================ -->
+<!-- MODAL: 숙박권 추가 -->
+<!-- ============================================================ -->
+<div class="backdrop" id="hotelModal" onclick="if(event.target===this) closeModal('hotelModal')">
+  <div class="modal">
+    <div class="m-head">
+      <div style="flex:1;">
+        <div class="m-title">🏨 숙박권 추가</div>
+        <div class="m-sub">호텔 정보 + 객실 × 식사 옵션을 한 번에 등록합니다.</div>
+      </div>
+      <button class="m-close" onclick="closeModal('hotelModal')">✕</button>
+    </div>
+    <div class="m-body">
+      <div class="form-row cols-2">
+        <div>
+          <label class="form-label">호텔명 <span class="req">*</span></label>
+          <input class="fi" id="h_name" placeholder="예: 솔바이멜리아 푸꾸옥">
+        </div>
+        <div>
+          <label class="form-label">여행지 <span class="req">*</span></label>
+          <select class="fi" id="h_dest">
+            <option>푸꾸옥</option><option>나트랑</option><option>다낭</option><option>호치민</option><option>하노이</option>
+          </select>
+        </div>
+      </div>
+      <div class="form-row cols-2">
+        <div>
+          <label class="form-label">공급사</label>
+          <select class="fi" id="h_prov">
+            <option>TMG (자동)</option><option>Sol by Melia</option><option>직접 계약</option>
+          </select>
+        </div>
+        <div>
+          <label class="form-label">요금타입</label>
+          <select class="fi" id="h_rate">
+            <option value="static">고정요금</option><option value="alm">재고변동요금</option><option value="dynamic">다이나믹요금</option>
+          </select>
+        </div>
+      </div>
+      <label class="form-label" style="margin-top:10px;">객실 × 식사 옵션 <span class="req">*</span><span class="hint">한 호텔에 여러 옵션</span></label>
+      <div class="items-builder-row" id="roomBuilder">
+        <!-- room rows added by JS -->
+      </div>
+      <button class="add-item-btn" onclick="addRoomRow()">+ 객실/식사 옵션 추가</button>
+    </div>
+    <div class="m-foot">
+      <button class="btn" onclick="closeModal('hotelModal')">취소</button>
+      <button class="btn btn-primary" onclick="saveHotel()">+ 추가</button>
+    </div>
+  </div>
+</div>
+
+<!-- ============================================================ -->
+<!-- MODAL: 그룹 만들기 -->
+<!-- ============================================================ -->
+<div class="backdrop" id="groupModal" onclick="if(event.target===this) closeModal('groupModal')">
+  <div class="modal">
+    <div class="m-head">
+      <div style="flex:1;">
+        <div class="m-title">📦 그룹 만들기</div>
+        <div class="m-sub">자동생성 엔진은 그룹 단위로만 후보를 선택합니다.</div>
+      </div>
+      <button class="m-close" onclick="closeModal('groupModal')">✕</button>
+    </div>
+    <div class="m-body">
+      <label class="form-label">카테고리 <span class="req">*</span></label>
+      <div class="cat-pick" id="g_cat_pick">
+        <button class="cat-pick-btn" data-cat="pickup" onclick="pickGCat(this)"><span class="dot" style="background:#389e0d"></span>픽업·샌딩 <span style="font-size:10px;color:#0958d9;margin-left:2px;">(강제)</span></button>
+        <button class="cat-pick-btn" data-cat="fasttrack" onclick="pickGCat(this)"><span class="dot" style="background:#d48806"></span>패스트트랙</button>
+        <button class="cat-pick-btn active" data-cat="tour" onclick="pickGCat(this)"><span class="dot" style="background:#1677ff"></span>투어</button>
+        <button class="cat-pick-btn" data-cat="ticket" onclick="pickGCat(this)"><span class="dot" style="background:#722ed1"></span>티켓</button>
+      </div>
+      <div class="form-row cols-2" style="margin-top:14px;">
+        <div>
+          <label class="form-label">그룹명 <span class="req">*</span></label>
+          <input class="fi" id="g_name" placeholder="예: 푸꾸옥 자연 투어">
+        </div>
+        <div>
+          <label class="form-label">여행지</label>
+          <select class="fi" id="g_dest">
+            <option>전체</option><option>푸꾸옥</option><option>나트랑</option><option>다낭</option><option>호치민</option><option>하노이</option>
+          </select>
+        </div>
+      </div>
+      <label class="form-label" style="margin-top:10px;">소속 항목 <span class="req">*</span></label>
+      <div class="items-builder-row" id="itemBuilder">
+        <!-- item rows added by JS -->
+      </div>
+      <button class="add-item-btn" onclick="addGItemRow()">+ 항목 추가</button>
+    </div>
+    <div class="m-foot">
+      <button class="btn" onclick="closeModal('groupModal')">취소</button>
+      <button class="btn btn-primary" onclick="saveGroup()">+ 그룹 추가</button>
+    </div>
+  </div>
+</div>
+
+<!-- ============================================================ -->
+<!-- MODAL: 콘텐츠 작성 -->
+<!-- ============================================================ -->
+<div class="backdrop" id="contentModal" onclick="if(event.target===this) closeModal('contentModal')">
+  <div class="modal">
+    <div class="m-head">
+      <div style="flex:1;">
+        <div class="m-title">📝 콘텐츠 작성</div>
+        <div class="m-sub">한 콘텐츠에 항목 N개. 카탈로그에 저장 + 룰 매칭 상품에 참조 연결.</div>
+      </div>
+      <button class="m-close" onclick="closeModal('contentModal')">✕</button>
+    </div>
+    <div class="m-body">
+      <label class="form-label">카테고리 <span class="req">*</span></label>
+      <div class="cat-pick" id="c_cat_pick">
+        <button class="cat-pick-btn active" data-cat="intro" onclick="pickCCat(this)">🏨 소개</button>
+        <button class="cat-pick-btn" data-cat="key" onclick="pickCCat(this)">⭐ 핵심 포인트</button>
+        <button class="cat-pick-btn" data-cat="benefit" onclick="pickCCat(this)">🎁 스페셜 혜택</button>
+        <button class="cat-pick-btn" data-cat="notice" onclick="pickCCat(this)">📋 유의사항</button>
+        <button class="cat-pick-btn" data-cat="predep" onclick="pickCCat(this)">✈ 출발 전 안내</button>
+      </div>
+      <div class="form-row cols-2" style="margin-top:14px;">
+        <div>
+          <label class="form-label">콘텐츠 이름 <span class="req">*</span></label>
+          <input class="fi" id="c_name" placeholder="예: 스페셜 패키지 혜택 (3종)">
+        </div>
+        <div>
+          <label class="form-label">적용 스코프 <span class="req">*</span></label>
+          <select class="fi" id="c_scope">
+            <option value="broad">이 숙박권 전체</option>
+            <option value="room">특정 객실/식사</option>
+          </select>
+        </div>
+      </div>
+      <label class="form-label" style="margin-top:10px;">항목 <span class="req">*</span><span class="hint">N개 가능</span></label>
+      <div class="items-builder-row" id="contentItemBuilder">
+        <!-- content items by JS -->
+      </div>
+      <button class="add-item-btn" onclick="addCItemRow()">+ 항목 추가</button>
+    </div>
+    <div class="m-foot">
+      <button class="btn" onclick="closeModal('contentModal')">취소</button>
+      <button class="btn btn-primary" onclick="saveContent()">+ 추가</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+/* =========================================================
+   STATE
+   ========================================================= */
+const state = {
+  flights: [
+    { id: 'FL-VJ8801', name: 'VJ8801 인천→푸꾸옥', dest: '푸꾸옥', dep: '06.05 09:25', price: 320000, carrier: 'VJ' },
+    { id: 'FL-VJ8802', name: 'VJ8802 푸꾸옥→인천', dest: '푸꾸옥', dep: '06.09 14:50', price: 320000, carrier: 'VJ' },
+    { id: 'FL-KE423', name: 'KE423 인천→나트랑', dest: '나트랑', dep: '06.12 10:40', price: 480000, carrier: 'KE' },
+    { id: 'FL-7C2851', name: '7C2851 인천→다낭', dest: '다낭', dep: '06.20 11:15', price: 280000, carrier: '7C' }
+  ],
+  hotels: [],   // { id, name, dest, prov, rate, rooms: [{name, meal, price, autogen: true}] }
+  groups: [],   // { id, cat, name, dest, items: [{name, price}], forced }
+  contents: [], // { id, cat, name, scope, items: [{title, content}] }
+  products: [], // generated
+  reservation: null
+};
+
+let _hotelSeq = 1, _groupSeq = 1, _contentSeq = 1, _roomTempSeq = 1, _gItemTempSeq = 1, _cItemTempSeq = 1, _prodSeq = 1;
+let _selectedGCat = 'tour', _selectedCCat = 'intro';
+let _rsvCountdown = null;
+
+/* =========================================================
+   STEPPER
+   ========================================================= */
+function renderStepper() {
+  const steps = [
+    { n: 1, name: '항공권', done: state.flights.length > 0 },
+    { n: 2, name: '숙박권', done: state.hotels.length > 0, count: state.hotels.length },
+    { n: 3, name: '그룹', done: state.groups.length > 0, count: state.groups.length },
+    { n: 4, name: '콘텐츠', done: state.contents.length > 0, count: state.contents.length },
+    { n: 5, name: '자동생성', done: state.products.length > 0 },
+    { n: 6, name: '노출 관리', done: state.products.length > 0, count: state.products.filter(p => p.status === 'live').length },
+    { n: 7, name: '예약', done: state.reservation !== null }
+  ];
+  // current = first not done after first done
+  let current = 1;
+  for (let i = 0; i < steps.length; i++) {
+    if (!steps[i].done) { current = steps[i].n; break; }
+    if (i === steps.length - 1) current = steps[i].n;
+  }
+  const html = steps.map((s, i) => {
+    const cls = s.done ? 'done' : (s.n === current ? 'current' : 'todo');
+    const arrow = i < steps.length - 1 ? '<span class="step-arrow">›</span>' : '';
+    const cnt = s.count !== undefined ? `<span class="step-count">${s.count}</span>` : '';
+    return `<div class="step-item ${cls}" onclick="scrollToSec(${s.n})">
+      <div class="step-circle ${cls}">${s.done ? '✓' : s.n}</div>
+      <div><div class="step-name">${s.name}</div></div>
+      ${cnt}
+    </div>${arrow}`;
+  }).join('');
+  document.getElementById('stepper').innerHTML = html;
+}
+
+function scrollToSec(n) {
+  const el = document.getElementById('sec-' + n);
+  if (el) {
+    if (!el.classList.contains('open') && !el.classList.contains('locked')) el.classList.add('open');
+    el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }
+}
+
+function toggleSec(id) {
+  const el = document.getElementById(id);
+  if (el.classList.contains('locked')) return;
+  el.classList.toggle('open');
+}
+
+/* =========================================================
+   TOAST
+   ========================================================= */
+function toast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 2200);
+}
+
+/* =========================================================
+   SECTION 1: 항공권 (read-only)
+   ========================================================= */
+function renderFlights() {
+  document.getElementById('flightCount').textContent = state.flights.length;
+  const html = state.flights.map(f => `
+    <div class="data-card locked">
+      <div class="data-card-cat">왕복 / 편도 항공</div>
+      <div class="data-card-head">
+        <div class="data-card-title">${f.name}<span class="data-card-id">${f.id}</span></div>
+      </div>
+      <div class="data-card-body">
+        <strong>${f.dest}</strong> · ${f.dep}<br>
+        단가 <strong>₩${f.price.toLocaleString()}</strong> · 캐리어 ${f.carrier}
+      </div>
+      <div class="data-card-foot">
+        <span class="tag tag-blue">자동 sync</span>
+        <span class="tag tag-gray">읽기전용</span>
+      </div>
+    </div>
+  `).join('');
+  document.getElementById('flightList').innerHTML = html;
+}
+
+/* =========================================================
+   SECTION 2: 숙박권
+   ========================================================= */
+function addRoomRow(defaultData) {
+  const idx = document.querySelectorAll('#roomBuilder .item-builder-row').length + 1;
+  const data = defaultData || { name: '', meal: 'BB', price: '' };
+  const row = document.createElement('div');
+  row.className = 'item-builder-row';
+  row.innerHTML = `
+    <span class="num-bg">${idx}</span>
+    <div class="item-fields">
+      <input type="text" placeholder="객실명 (예: 디럭스 오션뷰)" value="${data.name}">
+      <div style="display:grid; grid-template-columns: 1fr 1fr; gap:6px;">
+        <select>
+          <option value="BB">BB (조식)</option>
+          <option value="HB">HB (조·석식)</option>
+          <option value="FB">FB (3식)</option>
+          <option value="AI">AI (올인클루시브)</option>
+        </select>
+        <input type="number" placeholder="1박 단가 (₩)" value="${data.price}">
+      </div>
+    </div>
+    <button class="del" onclick="this.parentElement.remove(); renumberBuilder('roomBuilder');">×</button>
+  `;
+  if (data.meal) row.querySelector('select').value = data.meal;
+  document.getElementById('roomBuilder').appendChild(row);
+}
+
+function renumberBuilder(id) {
+  document.querySelectorAll('#' + id + ' .num-bg').forEach((el, i) => el.textContent = i + 1);
+}
+
+function openHotelModal() {
+  document.getElementById('h_name').value = '';
+  document.getElementById('h_dest').value = '푸꾸옥';
+  document.getElementById('h_prov').value = 'TMG (자동)';
+  document.getElementById('h_rate').value = 'static';
+  document.getElementById('roomBuilder').innerHTML = '';
+  addRoomRow();
+  document.getElementById('hotelModal').classList.add('active');
+  document.body.classList.add('modal-open');
+}
+
+function closeModal(id) {
+  document.getElementById(id).classList.remove('active');
+  document.body.classList.remove('modal-open');
+}
+
+function saveHotel() {
+  const name = document.getElementById('h_name').value.trim();
+  if (!name) { alert('호텔명을 입력해 주세요'); return; }
+  const dest = document.getElementById('h_dest').value;
+  const prov = document.getElementById('h_prov').value;
+  const rate = document.getElementById('h_rate').value;
+  const rooms = [];
+  document.querySelectorAll('#roomBuilder .item-builder-row').forEach(row => {
+    const inputs = row.querySelectorAll('input');
+    const sel = row.querySelector('select');
+    const rn = inputs[0].value.trim();
+    const rp = parseInt(inputs[1].value) || 0;
+    if (rn && rp > 0) rooms.push({ name: rn, meal: sel.value, price: rp, autogen: true });
+  });
+  if (rooms.length === 0) { alert('객실 옵션을 1개 이상 입력해 주세요'); return; }
+  const hotel = { id: 'HTL-' + String(40000 + _hotelSeq++).padStart(5,'0'), name, dest, prov, rate, rooms };
+  state.hotels.push(hotel);
+  closeModal('hotelModal');
+  renderHotels();
+  toast(`✓ ${name} 추가됨 (${rooms.length}개 옵션)`);
+}
+
+function delHotel(id) {
+  if (!confirm('이 숙박권을 삭제할까요?')) return;
+  state.hotels = state.hotels.filter(h => h.id !== id);
+  renderHotels();
+  toast('삭제됨');
+}
+
+function toggleHotelRoom(hid, ridx) {
+  const h = state.hotels.find(x => x.id === hid);
+  if (h && h.rooms[ridx]) h.rooms[ridx].autogen = !h.rooms[ridx].autogen;
+  renderHotels();
+}
+
+function renderHotels() {
+  document.getElementById('hotelCount').textContent = state.hotels.length;
+  const autogenCount = state.hotels.reduce((sum, h) => sum + h.rooms.filter(r => r.autogen).length, 0);
+  document.getElementById('hotelAutogenCount').textContent = autogenCount;
+
+  if (state.hotels.length === 0) {
+    document.getElementById('hotelEmpty').style.display = 'block';
+    document.getElementById('hotelList').innerHTML = '';
+  } else {
+    document.getElementById('hotelEmpty').style.display = 'none';
+    document.getElementById('hotelList').innerHTML = state.hotels.map(h => {
+      const rateTag = { static: '<span class="tag tag-green">고정요금</span>', alm: '<span class="tag tag-orange">재고변동</span>', dynamic: '<span class="tag tag-red">다이나믹</span>' }[h.rate];
+      const onCount = h.rooms.filter(r => r.autogen).length;
+      const roomsHtml = h.rooms.map((r, i) => `
+        <div style="display:flex; align-items:center; gap:8px; padding:6px 8px; background:#fafbfc; border-radius:5px; font-size:11.5px; margin-top:4px;">
+          <span style="flex:1;"><strong>${r.name}</strong> · ${r.meal} · ₩${r.price.toLocaleString()}</span>
+          <label class="sw"><input type="checkbox" ${r.autogen?'checked':''} onchange="toggleHotelRoom('${h.id}', ${i})"><span class="sw-slider"></span></label>
+        </div>
+      `).join('');
+      return `
+        <div class="data-card" style="grid-column: span 2;">
+          <div class="data-card-cat">숙박권 · ${h.dest}</div>
+          <div class="data-card-head">
+            <div class="data-card-title">${h.name} <span class="data-card-id">${h.id}</span></div>
+            ${rateTag}
+          </div>
+          <div class="data-card-body">
+            <span class="tag tag-gray">${h.prov}</span>
+            <span style="margin-left:6px; font-size:11px;">객실/식사 옵션 <strong>${h.rooms.length}개</strong> · ON <strong style="color:#389e0d;">${onCount}개</strong></span>
+            ${roomsHtml}
+          </div>
+          <div class="data-card-foot">
+            <span class="tag tag-blue">자동생성 대상 ${onCount}개</span>
+            <button class="btn-mini danger data-card-del" onclick="delHotel('${h.id}')">삭제</button>
+          </div>
+        </div>
+      `;
+    }).join('');
+  }
+
+  updateSectionPills();
+  renderStepper();
+}
+
+function seedHotelDemo() {
+  if (state.hotels.length > 0) { if (!confirm('기존 숙박권을 초기화하고 데모로 채울까요?')) return; state.hotels = []; }
+  state.hotels.push({
+    id: 'HTL-40001', name: '솔바이멜리아 푸꾸옥', dest: '푸꾸옥', prov: 'TMG (자동)', rate: 'static',
+    rooms: [
+      { name: '디럭스 시티뷰', meal: 'BB', price: 520000, autogen: true },
+      { name: '디럭스 오션뷰', meal: 'BB', price: 580000, autogen: true },
+      { name: '디럭스 오션뷰', meal: 'HB', price: 680000, autogen: true },
+      { name: '패밀리 스위트', meal: 'BB', price: 780000, autogen: true },
+      { name: '프레지덴셜 빌라', meal: 'AI', price: 1950000, autogen: false }
+    ]
+  });
+  state.hotels.push({
+    id: 'HTL-40002', name: 'JW Marriott 푸꾸옥', dest: '푸꾸옥', prov: 'TMG (자동)', rate: 'alm',
+    rooms: [
+      { name: '디럭스 가든뷰', meal: 'BB', price: 620000, autogen: true },
+      { name: '디럭스 비치프론트', meal: 'HB', price: 820000, autogen: true }
+    ]
+  });
+  _hotelSeq = 3;
+  renderHotels();
+  toast('✓ 데모 숙박권 2개 추가');
+}
+
+/* =========================================================
+   SECTION 3: 그룹
+   ========================================================= */
+function addGItemRow(defaultData) {
+  const idx = document.querySelectorAll('#itemBuilder .item-builder-row').length + 1;
+  const data = defaultData || { name: '', price: '' };
+  const row = document.createElement('div');
+  row.className = 'item-builder-row';
+  row.innerHTML = `
+    <span class="num-bg">${idx}</span>
+    <div class="item-fields">
+      <input type="text" placeholder="항목명 (예: 빈원더스 입장권)" value="${data.name}">
+      <input type="number" placeholder="단가 (₩)" value="${data.price}">
+    </div>
+    <button class="del" onclick="this.parentElement.remove(); renumberBuilder('itemBuilder');">×</button>
+  `;
+  document.getElementById('itemBuilder').appendChild(row);
+}
+
+function pickGCat(btn) {
+  document.querySelectorAll('#g_cat_pick .cat-pick-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  _selectedGCat = btn.dataset.cat;
+}
+
+function openGroupModal() {
+  document.getElementById('g_name').value = '';
+  document.getElementById('g_dest').value = '푸꾸옥';
+  document.querySelectorAll('#g_cat_pick .cat-pick-btn').forEach(b => b.classList.remove('active'));
+  document.querySelector('#g_cat_pick [data-cat="tour"]').classList.add('active');
+  _selectedGCat = 'tour';
+  document.getElementById('itemBuilder').innerHTML = '';
+  addGItemRow();
+  document.getElementById('groupModal').classList.add('active');
+  document.body.classList.add('modal-open');
+}
+
+function saveGroup() {
+  const name = document.getElementById('g_name').value.trim();
+  if (!name) { alert('그룹명을 입력해 주세요'); return; }
+  const dest = document.getElementById('g_dest').value;
+  const items = [];
+  document.querySelectorAll('#itemBuilder .item-builder-row').forEach(row => {
+    const inputs = row.querySelectorAll('input');
+    const n = inputs[0].value.trim();
+    const p = parseInt(inputs[1].value) || 0;
+    if (n && p > 0) items.push({ name: n, price: p });
+  });
+  if (items.length === 0) { alert('항목을 1개 이상 입력해 주세요'); return; }
+  const group = {
+    id: 'GRP-' + String(20000 + _groupSeq++).padStart(5,'0'),
+    cat: _selectedGCat, name, dest, items,
+    forced: _selectedGCat === 'pickup'
+  };
+  state.groups.push(group);
+  closeModal('groupModal');
+  renderGroups();
+  toast(`✓ ${name} 그룹 추가 (${items.length}개 항목)`);
+}
+
+function delGroup(id) {
+  if (!confirm('이 그룹을 삭제할까요?')) return;
+  state.groups = state.groups.filter(g => g.id !== id);
+  renderGroups();
+}
+
+function renderGroups() {
+  document.getElementById('groupCount').textContent = state.groups.length;
+  document.getElementById('groupForceCount').textContent = state.groups.filter(g => g.forced).length;
+  document.getElementById('groupSelCount').textContent = state.groups.filter(g => !g.forced).length;
+
+  if (state.groups.length === 0) {
+    document.getElementById('groupEmpty').style.display = 'block';
+    document.getElementById('groupList').innerHTML = '';
+  } else {
+    document.getElementById('groupEmpty').style.display = 'none';
+    const catLabel = { pickup: '🚗 픽업', fasttrack: '⚡ 패스트트랙', tour: '🌊 투어', ticket: '🎫 티켓' };
+    const catTag = { pickup: 'tag-green', fasttrack: 'tag-orange', tour: 'tag-blue', ticket: 'tag-purple' };
+    document.getElementById('groupList').innerHTML = state.groups.map(g => {
+      const itemsHtml = g.items.map((it, i) => `
+        <div style="display:flex; justify-content:space-between; padding:4px 8px; background:#fff; border-radius:4px; font-size:11px; margin-top:3px; border:1px solid #f0f0f0;">
+          <span style="color:rgba(0,0,0,0.7);"><strong>${i+1}.</strong> ${it.name}</span>
+          <span style="font-family:'SF Mono',monospace; color:rgba(0,0,0,0.55); font-weight:700;">₩${it.price.toLocaleString()}</span>
+        </div>
+      `).join('');
+      return `
+        <div class="data-card">
+          <div class="data-card-cat">${g.dest} · ${g.forced ? '강제' : '선택'}</div>
+          <div class="data-card-head">
+            <div class="data-card-title">${g.name}<span class="data-card-id">${g.id}</span></div>
+            <span class="tag ${catTag[g.cat]}">${catLabel[g.cat]}</span>
+          </div>
+          <div class="data-card-body">
+            <strong>${g.items.length}개 항목</strong>${g.forced ? ' · <span style="color:#0958d9;font-weight:700;">🔒 강제 포함</span>' : ''}
+            ${itemsHtml}
+          </div>
+          <div class="data-card-foot">
+            <button class="btn-mini danger data-card-del" onclick="delGroup('${g.id}')">삭제</button>
+          </div>
+        </div>
+      `;
+    }).join('');
+  }
+
+  updateSectionPills();
+  renderStepper();
+}
+
+function seedGroupDemo() {
+  if (state.groups.length > 0) { if (!confirm('기존 그룹을 초기화하고 데모로 채울까요?')) return; state.groups = []; }
+  state.groups.push({
+    id: 'GRP-20001', cat: 'pickup', name: '푸꾸옥 픽업·샌딩', dest: '푸꾸옥', forced: true,
+    items: [
+      { name: '공항↔호텔 4인 SUV', price: 55000 },
+      { name: '공항↔호텔 7인 미니밴', price: 72000 }
+    ]
+  });
+  state.groups.push({
+    id: 'GRP-20002', cat: 'tour', name: '푸꾸옥 자연 투어', dest: '푸꾸옥', forced: false,
+    items: [
+      { name: '사파리 + 빈원더스 1일', price: 85000 },
+      { name: '남섬 스노클링', price: 68000 },
+      { name: '맹그로브 보트 투어', price: 52000 }
+    ]
+  });
+  state.groups.push({
+    id: 'GRP-20003', cat: 'ticket', name: '푸꾸옥 인기 티켓', dest: '푸꾸옥', forced: false,
+    items: [
+      { name: '빈원더스 입장권', price: 45000 },
+      { name: '사파리 입장권', price: 38000 }
+    ]
+  });
+  state.groups.push({
+    id: 'GRP-20004', cat: 'fasttrack', name: '푸꾸옥 패스트트랙', dest: '푸꾸옥', forced: false,
+    items: [{ name: '입국·출국 왕복', price: 35000 }]
+  });
+  _groupSeq = 5;
+  renderGroups();
+  toast('✓ 데모 그룹 4개 추가');
+}
+
+/* =========================================================
+   SECTION 4: 콘텐츠
+   ========================================================= */
+function addCItemRow(defaultData) {
+  const idx = document.querySelectorAll('#contentItemBuilder .item-builder-row').length + 1;
+  const data = defaultData || { title: '', content: '' };
+  const row = document.createElement('div');
+  row.className = 'item-builder-row';
+  row.innerHTML = `
+    <span class="num-bg">${idx}</span>
+    <div class="item-fields">
+      <input type="text" placeholder="항목 제목 (예: 왕복 공항 픽업)" value="${data.title}">
+      <textarea placeholder="항목 내용 (상세 설명)">${data.content}</textarea>
+    </div>
+    <button class="del" onclick="this.parentElement.remove(); renumberBuilder('contentItemBuilder');">×</button>
+  `;
+  document.getElementById('contentItemBuilder').appendChild(row);
+}
+
+function pickCCat(btn) {
+  document.querySelectorAll('#c_cat_pick .cat-pick-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  _selectedCCat = btn.dataset.cat;
+}
+
+function openContentModal() {
+  document.getElementById('c_name').value = '';
+  document.getElementById('c_scope').value = 'broad';
+  document.querySelectorAll('#c_cat_pick .cat-pick-btn').forEach(b => b.classList.remove('active'));
+  document.querySelector('#c_cat_pick [data-cat="intro"]').classList.add('active');
+  _selectedCCat = 'intro';
+  document.getElementById('contentItemBuilder').innerHTML = '';
+  addCItemRow();
+  document.getElementById('contentModal').classList.add('active');
+  document.body.classList.add('modal-open');
+}
+
+function saveContent() {
+  const name = document.getElementById('c_name').value.trim();
+  if (!name) { alert('콘텐츠 이름을 입력해 주세요'); return; }
+  const scope = document.getElementById('c_scope').value;
+  const items = [];
+  document.querySelectorAll('#contentItemBuilder .item-builder-row').forEach(row => {
+    const title = row.querySelector('input').value.trim();
+    const content = row.querySelector('textarea').value.trim();
+    if (title) items.push({ title, content });
+  });
+  if (items.length === 0) { alert('항목을 1개 이상 입력해 주세요'); return; }
+  const content = {
+    id: 'POST-' + String(3000 + _contentSeq++).padStart(4,'0'),
+    cat: _selectedCCat, name, scope, items
+  };
+  state.contents.push(content);
+  closeModal('contentModal');
+  renderContents();
+  toast(`✓ ${name} 콘텐츠 추가 (${items.length}개 항목)`);
+}
+
+function delContent(id) {
+  if (!confirm('이 콘텐츠를 삭제할까요?')) return;
+  state.contents = state.contents.filter(c => c.id !== id);
+  renderContents();
+}
+
+function renderContents() {
+  document.getElementById('contentCount').textContent = state.contents.length;
+  document.getElementById('contentBroadCount').textContent = state.contents.filter(c => c.scope === 'broad').length;
+  document.getElementById('contentRoomCount').textContent = state.contents.filter(c => c.scope === 'room').length;
+
+  if (state.contents.length === 0) {
+    document.getElementById('contentEmpty').style.display = 'block';
+    document.getElementById('contentList').innerHTML = '';
+  } else {
+    document.getElementById('contentEmpty').style.display = 'none';
+    const catLabel = { intro: '🏨 소개', key: '⭐ 핵심포인트', benefit: '🎁 스페셜 혜택', notice: '📋 유의사항', predep: '✈ 출발 전' };
+    const catTag = { intro: 'tag-blue', key: 'tag-orange', benefit: 'tag-pink', notice: 'tag-gray', predep: 'tag-purple' };
+    document.getElementById('contentList').innerHTML = state.contents.map(c => {
+      const itemsHtml = c.items.map((it, i) => `
+        <div style="padding:6px 8px; background:#fff; border-radius:5px; margin-top:4px; border:1px solid #f0f0f0; font-size:11px;">
+          <div style="font-weight:700; color:rgba(0,0,0,0.85);">${i+1}. ${it.title}</div>
+          ${it.content ? `<div style="color:rgba(0,0,0,0.55); margin-top:2px; line-height:1.4;">${it.content}</div>` : ''}
+        </div>
+      `).join('');
+      return `
+        <div class="data-card" style="grid-column: span 2;">
+          <div class="data-card-cat">콘텐츠 · ${c.scope === 'broad' ? '숙박권 전체' : '객실/식사 단위'}</div>
+          <div class="data-card-head">
+            <div class="data-card-title">${c.name}<span class="data-card-id">${c.id}</span></div>
+            <span class="tag ${catTag[c.cat]}">${catLabel[c.cat]}</span>
+          </div>
+          <div class="data-card-body">
+            <strong>${c.items.length}개 항목</strong>
+            ${itemsHtml}
+          </div>
+          <div class="data-card-foot">
+            <span class="tag tag-purple">참조 방식</span>
+            <button class="btn-mini danger data-card-del" onclick="delContent('${c.id}')">삭제</button>
+          </div>
+        </div>
+      `;
+    }).join('');
+  }
+
+  updateSectionPills();
+  renderStepper();
+}
+
+function seedContentDemo() {
+  if (state.contents.length > 0) { if (!confirm('기존 콘텐츠를 초기화하고 데모로 채울까요?')) return; state.contents = []; }
+  state.contents.push({
+    id: 'POST-3001', cat: 'intro', name: '솔바이멜리아 리조트 소개', scope: 'broad',
+    items: [{ title: '리조트 소개', content: '푸꾸옥 청정 자연 속 5성급 리조트. 1.5km 프라이빗 비치, 6개 다이닝.' }]
+  });
+  state.contents.push({
+    id: 'POST-3002', cat: 'benefit', name: '스페셜 패키지 혜택 (3종)', scope: 'broad',
+    items: [
+      { title: '왕복 공항 픽업/샌딩 무료', content: '투숙 첫날 호텔 도착 시 공항↔호텔 무료 (3박 이상)' },
+      { title: '빈원더스 1회권 제공', content: '투숙 기간 중 1회 이용 가능 · 7월 1~30일 미제공' },
+      { title: '조식 2회 + 미니바 무료', content: '투숙 기간 중 조식 2회 무료 + 미니바 일부 무료' }
+    ]
+  });
+  state.contents.push({
+    id: 'POST-3003', cat: 'notice', name: '체크인 안내', scope: 'broad',
+    items: [
+      { title: '체크인 16:00 / 체크아웃 12:00', content: '얼리 체크인은 현지 사정에 따라 유료' },
+      { title: '신용카드 사전 인증', content: 'USD 100/박 보증금 필요' }
+    ]
+  });
+  _contentSeq = 4;
+  renderContents();
+  toast('✓ 데모 콘텐츠 3개 추가');
+}
+
+/* =========================================================
+   SECTION 5-6: 자동생성
+   ========================================================= */
+function updateRunBarDesc() {
+  const onRooms = state.hotels.reduce((s, h) => s + h.rooms.filter(r => r.autogen).length, 0);
+  const grpForced = state.groups.filter(g => g.forced).length;
+  const grpSel = state.groups.filter(g => !g.forced).length;
+  const c = state.contents.length;
+  document.getElementById('runBarDesc').textContent =
+    `항공 ${state.flights.length}편 × 숙박/객실 ${onRooms}개 × 강제그룹 ${grpForced} × 선택그룹 ${grpSel} × 콘텐츠 ${c}개`;
+}
+
+function runAutogen() {
+  const onRooms = state.hotels.reduce((s, h) => s + h.rooms.filter(r => r.autogen).length, 0);
+  if (state.flights.length === 0 || onRooms === 0) {
+    alert('항공권 및 자동생성 ON 숙박권/객실이 필요합니다.');
+    return;
+  }
+  const pickupGrp = state.groups.find(g => g.cat === 'pickup' && g.forced);
+  if (!pickupGrp) {
+    if (!confirm('⚠ 픽업·샌딩 그룹(강제)이 없습니다. 그래도 진행할까요?\n실제 운영에서는 픽업 없이는 상품 생성 불가합니다.')) return;
+  }
+
+  // overlay
+  const list = document.getElementById('prodList');
+  list.innerHTML = `<div class="generating">
+    <div class="gen-spinner"></div>
+    <div class="gen-title">⚡ AI 조합 엔진 실행 중</div>
+    <div class="gen-step" id="genStep">데이터 수집 중...</div>
+  </div>`;
+
+  // unlock section 6 immediately
+  unlockSec(6);
+
+  const steps = [
+    '데이터 수집: 항공 × 숙박 × 그룹 × 콘텐츠',
+    '조합 생성: 가능한 모든 패키지 조합 산출',
+    '마진 계산: 고정 5% + 추가마진(경쟁가 기반)',
+    'G1·G2·G3·G4 생성 게이트 통과 검증',
+    'R1·R2·R3 노출 게이트 적용',
+    '라이브 노출 결정 + 콘텐츠 참조 연결'
+  ];
+  let stepIdx = 0;
+  const stepEl = document.getElementById('genStep');
+  const stepInterval = setInterval(() => {
+    if (stepIdx < steps.length) {
+      stepEl.textContent = `(${stepIdx+1}/${steps.length}) ${steps[stepIdx]}`;
+      stepIdx++;
+    } else {
+      clearInterval(stepInterval);
+      finishAutogen();
+    }
+  }, 350);
+}
+
+function finishAutogen() {
+  // 자동 조합 생성
+  state.products = [];
+  _prodSeq = 1;
+  const fixed = parseInt(document.getElementById('r_fixed').value) || 5;
+  const extra = parseInt(document.getElementById('r_extra').value) || 10;
+  const peak = parseInt(document.getElementById('r_peak').value) || 5;
+  const diversity = document.getElementById('r_diversity').value;
+
+  const pickupGrp = state.groups.find(g => g.cat === 'pickup' && g.forced);
+  const tourGrps = state.groups.filter(g => g.cat === 'tour');
+  const ticketGrps = state.groups.filter(g => g.cat === 'ticket');
+
+  // 각 호텔의 자동생성 ON 객실 × 항공(왕복 가정) → 조합
+  state.hotels.forEach(h => {
+    const outFlight = state.flights.find(f => f.dest === h.dest);
+    if (!outFlight) return; // 매칭 항공 없으면 스킵
+    h.rooms.filter(r => r.autogen).forEach(r => {
+      // 1. 기본 에어텔
+      addProd(h, r, outFlight, null, null, pickupGrp, fixed, extra, peak);
+      // 2. + 투어 (선택 옵션, diversity에 따라)
+      if (diversity !== 'curated' && tourGrps.length > 0) {
+        addProd(h, r, outFlight, tourGrps[0], null, pickupGrp, fixed, extra, peak);
+      }
+      // 3. + 티켓
+      if (diversity === 'full' && ticketGrps.length > 0) {
+        addProd(h, r, outFlight, null, ticketGrps[0], pickupGrp, fixed, extra, peak);
+      }
+      // 4. + 투어 + 티켓 (full만)
+      if (diversity === 'full' && tourGrps.length > 0 && ticketGrps.length > 0) {
+        addProd(h, r, outFlight, tourGrps[0], ticketGrps[0], pickupGrp, fixed, extra, peak);
+      }
+    });
+  });
+
+  renderProducts();
+  unlockSec(6);
+  scrollToSec(6);
+  toast(`✓ ${state.products.length}개 PB 상품 생성 완료`);
+}
+
+function addProd(h, r, flight, tourGrp, ticketGrp, pickupGrp, fixed, extra, peak) {
+  const baseAir = flight.price * 2; // 왕복 가정
+  const baseHotel = r.price * 4; // 4박 가정
+  const basePickup = pickupGrp ? pickupGrp.items[0].price : 0;
+  const baseTour = tourGrp ? tourGrp.items[0].price * 2 : 0; // 2인 가정
+  const baseTicket = ticketGrp ? ticketGrp.items[0].price * 2 : 0;
+  const cost = baseAir + baseHotel + basePickup + baseTour + baseTicket;
+  const sale = Math.round(cost * (1 + (fixed + extra + peak) / 100) / 1000) * 1000;
+  const marginPct = ((sale - cost) / sale * 100);
+
+  // 게이트 시뮬: 마진 너무 낮으면 reject
+  let status = 'live';
+  let rejectReason = null;
+  if (marginPct < 3) { status = 'reject'; rejectReason = 'G2 NEGATIVE_MARGIN'; }
+  else if (marginPct < 5 && Math.random() < 0.3) { status = 'reject'; rejectReason = 'R2 MARGIN_FLOOR_UNREACHABLE'; }
+  // 5% 확률 R1 below competition
+  else if (Math.random() < 0.08) { status = 'reject'; rejectReason = 'R1 BELOW_COMPETITION'; }
+
+  const combo = [];
+  combo.push(`${flight.carrier} 왕복`);
+  combo.push(`${h.name.split(' ')[0]}`);
+  combo.push(`${r.name} (${r.meal})`);
+  if (pickupGrp) combo.push('픽업 강제');
+  if (tourGrp) combo.push(`+투어`);
+  if (ticketGrp) combo.push(`+티켓`);
+
+  const productId = 'PB-' + String(58000 + _prodSeq++).padStart(5, '0');
+
+  state.products.push({
+    id: productId,
+    name: `${h.dest} ${h.name} 5일 (${r.name} ${r.meal})${tourGrp ? '+' + tourGrp.name.split(' ').slice(-2)[0] : ''}${ticketGrp ? '+티켓' : ''}`,
+    dest: h.dest,
+    hotelId: h.id,
+    roomName: r.name,
+    flight: flight.id,
+    pickup: pickupGrp ? pickupGrp.id : null,
+    tour: tourGrp ? tourGrp.id : null,
+    ticket: ticketGrp ? ticketGrp.id : null,
+    cost, sale,
+    marginPct,
+    combo,
+    isFullCombo: !!(tourGrp || ticketGrp),
+    status, rejectReason,
+    contentRefs: state.contents.map(c => c.id)
+  });
+}
+
+function reRunAutogen() {
+  if (state.products.length > 0 && !confirm('기존 상품을 초기화하고 다시 생성할까요?')) return;
+  runAutogen();
+}
+
+function unlockSec(n) {
+  const sec = document.getElementById('sec-' + n);
+  sec.classList.remove('locked');
+  sec.classList.add('open');
+  document.getElementById('sec-' + n + '-num').classList.remove('locked');
+  document.getElementById('sec-' + n + '-num').classList.add('done');
+  document.getElementById('sec-' + n + '-pill').className = 'complete-pill done';
+  document.getElementById('sec-' + n + '-pill').textContent = '✓ 완료';
+  if (n === 6) document.getElementById('sec-6-meta').textContent = `${state.products.length}개 상품 생성됨 · 직접 토글로 노출 관리`;
+  if (n === 7) document.getElementById('sec-7-meta').textContent = `예약 시뮬 가능`;
+}
+
+function renderProducts() {
+  const colorVar = ['', 'var2', 'var3', 'var4', 'var5'];
+  const html = state.products.map((p, i) => {
+    if (p.status === 'reject') {
+      return `
+        <div class="prod-row" style="opacity:0.65;">
+          <div class="prod-thumb ${colorVar[i % 5]}">${p.dest.slice(0,2)}</div>
+          <div class="prod-info">
+            <div class="prod-name" style="text-decoration:line-through; color:rgba(0,0,0,0.55);">${p.name}</div>
+            <div class="prod-meta">
+              <span class="pill ${p.isFullCombo ? 'full' : 'airtel'}">${p.isFullCombo ? '에어텔+α' : '에어텔'}</span>
+              <span style="color:#cf1322; font-weight:700;">⊘ ${p.rejectReason}</span>
+            </div>
+          </div>
+          <div class="prod-price">
+            <div class="main" style="color:rgba(0,0,0,0.45);">₩${p.sale.toLocaleString()}</div>
+            <div class="margin danger">마진 ${p.marginPct.toFixed(1)}%</div>
+          </div>
+          <div class="prod-actions">
+            <span class="prod-status-pill reject">탈락</span>
+          </div>
+        </div>
+      `;
+    }
+    const isHidden = p.status === 'hidden';
+    return `
+      <div class="prod-row ${isHidden ? 'hidden' : ''}">
+        <div class="prod-thumb ${colorVar[i % 5]}">${p.dest.slice(0,2)}</div>
+        <div class="prod-info">
+          <div class="prod-name">${p.name}<span class="data-card-id">${p.id}</span></div>
+          <div class="prod-meta">
+            <span class="pill ${p.isFullCombo ? 'full' : 'airtel'}">${p.isFullCombo ? '에어텔+α' : '에어텔'}</span>
+            <span>${p.combo.join(' · ')}</span>
+          </div>
+        </div>
+        <div class="prod-price">
+          <div class="main">₩${p.sale.toLocaleString()}</div>
+          <div class="margin ${p.marginPct < 8 ? 'warn' : ''}">마진 ${p.marginPct.toFixed(1)}%</div>
+        </div>
+        <div class="prod-actions">
+          <span class="prod-status-pill ${p.status}">${p.status === 'live' ? '라이브' : '미노출'}</span>
+          <div class="sw-cell">
+            <label class="sw"><input type="checkbox" ${p.status === 'live' ? 'checked' : ''} onchange="toggleProd('${p.id}')"><span class="sw-slider"></span></label>
+          </div>
+          <button class="btn btn-sm btn-primary" onclick="simulateReservation('${p.id}')">🎫 예약 시뮬</button>
+        </div>
+      </div>
+    `;
+  }).join('');
+  document.getElementById('prodList').innerHTML = html;
+
+  document.getElementById('prodTotal').textContent = state.products.length;
+  document.getElementById('prodLive').textContent = state.products.filter(p => p.status === 'live').length;
+  document.getElementById('prodHidden').textContent = state.products.filter(p => p.status === 'hidden').length;
+  document.getElementById('prodReject').textContent = state.products.filter(p => p.status === 'reject').length;
+
+  renderStepper();
+}
+
+function toggleProd(pid) {
+  const p = state.products.find(x => x.id === pid);
+  if (!p || p.status === 'reject') return;
+  p.status = p.status === 'live' ? 'hidden' : 'live';
+  renderProducts();
+  toast(`${pid} ${p.status === 'live' ? '✓ 노출' : '⊘ 미노출'}`);
+}
+
+/* =========================================================
+   SECTION 7: 예약 시뮬
+   ========================================================= */
+function simulateReservation(pid) {
+  const p = state.products.find(x => x.id === pid);
+  if (!p || p.status !== 'live') { alert('라이브 상태 상품만 예약 가능합니다.'); return; }
+  state.reservation = {
+    id: 'RV-' + new Date().toISOString().slice(2,10).replace(/-/g,'') + '-' + String(Math.floor(Math.random()*9999)).padStart(4,'0'),
+    productId: p.id, productName: p.name, amount: p.sale,
+    customer: '김민지 (2인)',
+    suppliers: [
+      { ico: '✈', nm: '누아 NDC (항공)', st: 'req', stLabel: '예약 요청' },
+      { ico: '🏨', nm: 'TMG (숙박)', st: 'wait', stLabel: '응대 대기' },
+      ...(p.pickup ? [{ ico: '🚗', nm: '피크타임 (픽업)', st: 'req', stLabel: '요청 발송' }] : []),
+      ...(p.tour ? [{ ico: '🌊', nm: '베나자 (투어)', st: 'req', stLabel: '요청 발송' }] : []),
+      ...(p.ticket ? [{ ico: '🎫', nm: '베나자 (티켓)', st: 'req', stLabel: '요청 발송' }] : [])
+    ],
+    timeLeft: 30 * 60
+  };
+  unlockSec(7);
+  renderReservation();
+  scrollToSec(7);
+  toast(`✓ ${p.id} 예약 시뮬 시작`);
+  startCountdown();
+}
+
+function renderReservation() {
+  const r = state.reservation;
+  if (!r) {
+    document.getElementById('reservationArea').innerHTML = `<div class="reservation-empty"><strong>예약된 건이 없습니다.</strong></div>`;
+    return;
+  }
+  const supHtml = r.suppliers.map(s => `
+    <div class="rsv-sup-item">
+      <span class="ico">${s.ico}</span>
+      <span class="nm">${s.nm}</span>
+      <span class="st ${s.st}">${s.stLabel}</span>
+    </div>
+  `).join('');
+
+  const m = Math.floor(r.timeLeft / 60), sec = r.timeLeft % 60;
+  const cdStr = `${String(m).padStart(2,'0')}:${String(sec).padStart(2,'0')}`;
+  const isUrgent = r.timeLeft < 5 * 60;
+
+  document.getElementById('reservationArea').innerHTML = `
+    <div class="reservation-card">
+      <div class="rsv-head">
+        <div class="rsv-head-info">
+          <div class="rsv-head-id">${r.id} · 결제 완료</div>
+          <div class="rsv-head-title">${r.productName}</div>
+        </div>
+        <div class="rsv-countdown ${isUrgent ? 'urgent' : ''}">
+          <div class="label">⏰ 고객 확정까지</div>
+          <div class="v" id="rsvCountdownVal">${cdStr}</div>
+        </div>
+      </div>
+      <div class="rsv-body">
+        <div class="rsv-block">
+          <div class="rsv-block-title">👥 고객 / 결제</div>
+          <div style="font-size:13px; margin-bottom:8px;"><strong>${r.customer}</strong></div>
+          <div class="rsv-amount"><span class="v">₩${r.amount.toLocaleString()}</span><span class="u">결제완료 · KB국민카드</span></div>
+          <div style="margin-top:12px; padding:10px; background:#fff7e6; border:1px solid #ffd591; border-radius:6px; font-size:11.5px; color:#874d00; line-height:1.55;">
+            💡 <strong>30분 홀드 비동기 확정</strong> (회의록 5/21)<br>
+            고객 확정 클릭 → 항공 자동 발권 + 숙소/공급사 확정 진행
+          </div>
+        </div>
+        <div class="rsv-block">
+          <div class="rsv-block-title">🔄 공급사 진행</div>
+          <div class="rsv-supplier-list">${supHtml}</div>
+          <div class="channel-row">
+            <span style="font-size:10.5px;color:rgba(0,0,0,0.5);font-weight:700;letter-spacing:0.3px;text-transform:uppercase;">채널 전송</span>
+            <button class="btn-ch kakao" onclick="toast('카톡 일괄 전송 완료')">💬 카톡 일괄</button>
+            <button class="btn-ch jandi" onclick="toast('잔디 일괄 전송 완료')">🟦 잔디</button>
+          </div>
+        </div>
+      </div>
+      <div class="rsv-foot">
+        <div class="rsv-foot-info">활동 이력 + 공급사 자동 전송 + 비동기 확정 처리 (한 화면 IA)</div>
+        <button class="btn btn-success" onclick="confirmReservation()">✅ 고객 확정</button>
+        <button class="btn btn-danger btn-sm" onclick="cancelReservation()">취소</button>
+      </div>
+    </div>
+  `;
+}
+
+function startCountdown() {
+  if (_rsvCountdown) clearInterval(_rsvCountdown);
+  _rsvCountdown = setInterval(() => {
+    if (!state.reservation || state.reservation.timeLeft <= 0) {
+      clearInterval(_rsvCountdown);
+      return;
+    }
+    state.reservation.timeLeft--;
+    const m = Math.floor(state.reservation.timeLeft / 60);
+    const s = state.reservation.timeLeft % 60;
+    const el = document.getElementById('rsvCountdownVal');
+    if (el) el.textContent = `${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
+    if (state.reservation.timeLeft === 5*60) renderReservation(); // urgent class
+  }, 1000);
+}
+
+function confirmReservation() {
+  if (!state.reservation) return;
+  state.reservation.suppliers.forEach(s => { s.st = 'done'; s.stLabel = '✓ 확정'; });
+  if (_rsvCountdown) clearInterval(_rsvCountdown);
+  renderReservation();
+  toast('✓ 예약 확정 완료 · 모든 공급사 처리됨');
+}
+
+function cancelReservation() {
+  if (!confirm('예약을 취소할까요?')) return;
+  state.reservation = null;
+  if (_rsvCountdown) clearInterval(_rsvCountdown);
+  document.getElementById('sec-7').classList.add('locked');
+  document.getElementById('sec-7-num').classList.add('locked');
+  document.getElementById('sec-7-num').classList.remove('done');
+  document.getElementById('sec-7-pill').className = 'complete-pill locked';
+  document.getElementById('sec-7-pill').textContent = '🔒 잠김';
+  renderReservation();
+  renderStepper();
+  toast('예약 취소됨');
+}
+
+/* =========================================================
+   COMMON
+   ========================================================= */
+function updateSectionPills() {
+  // sec-2 (hotels)
+  const h = state.hotels.length;
+  document.getElementById('sec-2-num').className = h > 0 ? 'section-num done' : 'section-num';
+  document.getElementById('sec-2-pill').className = h > 0 ? 'complete-pill done' : 'complete-pill todo';
+  document.getElementById('sec-2-pill').textContent = h > 0 ? `✓ ${h}개 등록` : '📝 진행 필요';
+  // sec-3
+  const g = state.groups.length;
+  document.getElementById('sec-3-num').className = g > 0 ? 'section-num done' : 'section-num';
+  document.getElementById('sec-3-pill').className = g > 0 ? 'complete-pill done' : 'complete-pill todo';
+  document.getElementById('sec-3-pill').textContent = g > 0 ? `✓ ${g}개 그룹` : '📝 진행 필요';
+  // sec-4
+  const c = state.contents.length;
+  document.getElementById('sec-4-num').className = c > 0 ? 'section-num done' : 'section-num';
+  document.getElementById('sec-4-pill').className = c > 0 ? 'complete-pill done' : 'complete-pill todo';
+  document.getElementById('sec-4-pill').textContent = c > 0 ? `✓ ${c}개 콘텐츠` : '📝 진행 필요';
+  // sec-5
+  document.getElementById('sec-5-pill').className = state.products.length > 0 ? 'complete-pill done' : 'complete-pill todo';
+  document.getElementById('sec-5-pill').textContent = state.products.length > 0 ? `✓ ${state.products.length}개 생성` : '⚡ 실행 대기';
+  document.getElementById('sec-5-num').className = state.products.length > 0 ? 'section-num done' : 'section-num';
+  updateRunBarDesc();
+}
+
+function resetAll() {
+  if (!confirm('모든 데이터를 초기화할까요?')) return;
+  state.hotels = []; state.groups = []; state.contents = []; state.products = []; state.reservation = null;
+  if (_rsvCountdown) clearInterval(_rsvCountdown);
+  document.getElementById('sec-6').classList.add('locked');
+  document.getElementById('sec-7').classList.add('locked');
+  document.getElementById('sec-6-num').classList.add('locked');
+  document.getElementById('sec-7-num').classList.add('locked');
+  document.getElementById('sec-6-num').classList.remove('done');
+  document.getElementById('sec-7-num').classList.remove('done');
+  document.getElementById('sec-6-pill').className = 'complete-pill locked';
+  document.getElementById('sec-6-pill').textContent = '🔒 잠김';
+  document.getElementById('sec-7-pill').className = 'complete-pill locked';
+  document.getElementById('sec-7-pill').textContent = '🔒 잠김';
+  document.getElementById('sec-6-meta').textContent = '자동생성을 먼저 실행해 주세요';
+  document.getElementById('sec-7-meta').textContent = '라이브 상품을 먼저 만들어 주세요';
+  document.getElementById('prodList').innerHTML = '';
+  renderHotels(); renderGroups(); renderContents(); renderReservation();
+  toast('✓ 초기화 완료');
+}
+
+/* =========================================================
+   INIT
+   ========================================================= */
+window.addEventListener('DOMContentLoaded', () => {
+  renderFlights();
+  renderHotels();
+  renderGroups();
+  renderContents();
+  renderStepper();
+});
+</script>
+</body>
+</html>

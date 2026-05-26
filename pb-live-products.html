@@ -1,0 +1,1165 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>라이브 상품 노출 관리 — TripStore Partners</title>
+<link href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.6/dist/web/static/pretendard.css" rel="stylesheet">
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: 'Pretendard', 'Apple SD Gothic Neo', -apple-system, sans-serif; font-size: 14px; color: rgba(0,0,0,0.88); background: #f5f5f5; }
+body.modal-open { overflow: hidden; }
+a { color: inherit; text-decoration: none; }
+button { font-family: inherit; cursor: pointer; }
+
+/* GNB */
+.gnb { background: #f0f5ff; height: 48px; display: flex; align-items: center; position: sticky; top: 0; z-index: 100; padding: 0 20px; border-bottom: 1px solid #d6e4ff; box-shadow: 0 1px 4px rgba(0,0,0,0.06); }
+.gnb-logo { color: #222427; font-weight: 800; font-size: 15px; margin-right: 24px; letter-spacing: -0.3px; }
+.gnb-logo span { color: #1677ff; }
+.gnb-logo .partners-badge { background: #1677ff; color: #fff; font-size: 10px; font-weight: 700; padding: 2px 6px; border-radius: 4px; margin-left: 6px; letter-spacing: 0.3px; vertical-align: middle; }
+.gnb-menu { display: flex; gap: 0; }
+.gnb-item { color: rgba(0,0,0,0.55); padding: 0 14px; height: 48px; display: flex; align-items: center; cursor: pointer; font-size: 13px; white-space: nowrap; position: relative; font-weight: 500; }
+.gnb-item:hover { color: rgba(0,0,0,0.88); }
+.gnb-item.active { color: #1677ff; }
+.gnb-item.active::after { content: ''; position: absolute; bottom: 0; left: 0; right: 0; height: 2px; background: #1677ff; }
+.gnb-right { margin-left: auto; display: flex; align-items: center; gap: 14px; }
+.gnb-user { font-size: 12px; color: rgba(0,0,0,0.55); }
+.gnb-user-name { font-weight: 600; color: rgba(0,0,0,0.75); }
+.gnb-org-badge { background: #fff; border: 1px solid #d6e4ff; color: #1677ff; font-size: 11px; font-weight: 600; padding: 3px 8px; border-radius: 4px; }
+
+/* Breadcrumb */
+.breadcrumb { padding: 14px 24px 0; font-size: 12px; color: rgba(0,0,0,0.45); display: flex; align-items: center; gap: 6px; }
+.breadcrumb span:not(.sep) { cursor: pointer; }
+.breadcrumb span:not(.sep):hover { color: #1677ff; }
+.sep { color: rgba(0,0,0,0.2); cursor: default !important; }
+.bc-current { color: rgba(0,0,0,0.88) !important; cursor: default !important; }
+
+/* Layout */
+.layout { padding: 14px 24px 48px; max-width: 1480px; margin: 0 auto; }
+.page-header { margin: 12px 0 18px; display: flex; align-items: flex-end; justify-content: space-between; gap: 14px; flex-wrap: wrap; }
+.page-title { font-size: 22px; font-weight: 700; color: rgba(0,0,0,0.88); }
+.page-desc { font-size: 13px; color: rgba(0,0,0,0.5); margin-top: 4px; line-height: 1.6; }
+.page-desc code { background: #f5f5f5; padding: 1px 6px; border-radius: 3px; font-size: 11.5px; color: #722ed1; font-family: 'SF Mono', monospace; }
+.page-actions { display: flex; gap: 8px; }
+
+/* KPI Cards */
+.kpi-row { display: grid; grid-template-columns: repeat(5, 1fr); gap: 12px; margin-bottom: 16px; }
+.kpi-card { background: #fff; border: 1px solid #f0f0f0; border-radius: 10px; padding: 14px 16px; transition: all 0.15s; cursor: pointer; }
+.kpi-card:hover { border-color: #91caff; box-shadow: 0 2px 8px rgba(22,119,255,0.06); }
+.kpi-card.active { border-color: #1677ff; background: #f0f7ff; }
+.kpi-card.warn { border-color: #ffd591; background: linear-gradient(135deg, #fffbe6 0%, #fff7e6 100%); }
+.kpi-card.danger { border-color: #ffa39e; background: linear-gradient(135deg, #fff1f0 0%, #ffe4e1 100%); }
+.kpi-label { font-size: 11px; color: rgba(0,0,0,0.5); font-weight: 700; letter-spacing: 0.3px; text-transform: uppercase; margin-bottom: 6px; display: flex; align-items: center; gap: 5px; }
+.kpi-value { font-size: 24px; font-weight: 800; color: rgba(0,0,0,0.88); letter-spacing: -0.5px; font-variant-numeric: tabular-nums; }
+.kpi-value.warn { color: #d48806; }
+.kpi-value.danger { color: #cf1322; }
+.kpi-value.success { color: #389e0d; }
+.kpi-sub { font-size: 11px; color: rgba(0,0,0,0.5); margin-top: 4px; }
+.kpi-sub strong { color: rgba(0,0,0,0.75); font-weight: 700; }
+.kpi-delta { display: inline-flex; align-items: center; gap: 2px; padding: 1px 6px; border-radius: 3px; font-size: 10.5px; font-weight: 700; margin-left: 6px; }
+.kpi-delta.up { background: #f6ffed; color: #389e0d; }
+.kpi-delta.down { background: #fff1f0; color: #cf1322; }
+
+/* Sub Nav (상태 탭) */
+.subnav-card { background: #fff; border: 1px solid #f0f0f0; border-radius: 8px; padding: 4px; margin-bottom: 14px; display: inline-flex; }
+.subnav-item { padding: 8px 16px; font-size: 13px; font-weight: 500; color: rgba(0,0,0,0.55); cursor: pointer; border-radius: 6px; border: none; background: transparent; font-family: inherit; display: inline-flex; align-items: center; gap: 6px; }
+.subnav-item:hover { color: rgba(0,0,0,0.88); }
+.subnav-item.active { color: #1677ff; background: #e6f4ff; font-weight: 700; }
+.subnav-count { font-size: 11px; padding: 1px 7px; border-radius: 10px; background: rgba(0,0,0,0.06); color: rgba(0,0,0,0.55); font-weight: 700; }
+.subnav-item.active .subnav-count { background: #1677ff; color: #fff; }
+.subnav-item.danger.active { color: #cf1322; background: #fff1f0; }
+.subnav-item.danger.active .subnav-count { background: #cf1322; }
+.subnav-item.warn.active { color: #d48806; background: #fff7e6; }
+.subnav-item.warn.active .subnav-count { background: #d48806; }
+
+/* Filter */
+.filter-bar { background: #fff; border: 1px solid #f0f0f0; border-radius: 8px 8px 0 0; padding: 12px 16px; display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+.search-wrap { position: relative; }
+.search-wrap input { height: 32px; border: 1px solid #d9d9d9; border-radius: 6px; padding: 0 12px 0 32px; font-size: 13px; font-family: inherit; outline: none; width: 280px; background: #fff; }
+.search-wrap input:focus { border-color: #1677ff; box-shadow: 0 0 0 2px rgba(22,119,255,0.1); }
+.search-icon { position: absolute; left: 10px; top: 50%; transform: translateY(-50%); color: rgba(0,0,0,0.3); pointer-events: none; }
+.search-icon svg { width: 14px; height: 14px; display: block; }
+.fi { height: 32px; border: 1px solid #d9d9d9; border-radius: 6px; font-size: 13px; font-family: inherit; color: rgba(0,0,0,0.88); outline: none; background: #fff; padding: 0 28px 0 12px; appearance: none; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='%23bbb'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 10px center; cursor: pointer; min-width: 130px; }
+.fi:hover, .fi:focus { border-color: #1677ff; }
+.filter-total { margin-left: auto; font-size: 12px; color: rgba(0,0,0,0.55); }
+.filter-total strong { color: #1677ff; font-weight: 700; font-size: 13px; }
+
+/* Bulk action bar */
+.bulk-bar { background: linear-gradient(135deg, #f0f7ff 0%, #e6f4ff 100%); border: 1px solid #91caff; border-top: none; padding: 10px 16px; display: none; align-items: center; gap: 10px; font-size: 12.5px; color: #003a8c; }
+.bulk-bar.show { display: flex; }
+.bulk-bar strong { font-weight: 800; }
+.bulk-bar .bulk-actions { margin-left: auto; display: flex; gap: 6px; }
+.btn-bulk { height: 28px; padding: 0 12px; border-radius: 5px; font-size: 12px; font-weight: 600; cursor: pointer; border: 1px solid #d9d9d9; background: #fff; color: rgba(0,0,0,0.75); font-family: inherit; }
+.btn-bulk:hover { color: #1677ff; border-color: #1677ff; }
+.btn-bulk.danger:hover { color: #cf1322; border-color: #ff7875; background: #fff1f0; }
+
+/* Table */
+.main-card { background: #fff; border: 1px solid #f0f0f0; border-top: none; border-radius: 0 0 8px 8px; overflow: hidden; margin-bottom: 16px; }
+.table-wrap { overflow-x: auto; }
+table.tbl { width: 100%; border-collapse: collapse; }
+table.tbl thead th { padding: 11px 14px; text-align: left; font-size: 11px; font-weight: 700; color: rgba(0,0,0,0.45); letter-spacing: 0.4px; text-transform: uppercase; background: #fafbfc; border-bottom: 1px solid #f0f0f0; white-space: nowrap; }
+table.tbl thead th.center { text-align: center; }
+table.tbl thead th.right { text-align: right; }
+table.tbl tbody td { padding: 12px 14px; font-size: 13px; color: rgba(0,0,0,0.88); border-bottom: 1px solid #f5f5f5; vertical-align: middle; }
+table.tbl tbody tr:hover td { background: #fafbff; }
+table.tbl tbody tr.selected td { background: #f0f7ff; }
+table.tbl tbody tr:last-child td { border-bottom: none; }
+
+/* Product cell */
+.product-cell { display: flex; align-items: center; gap: 10px; min-width: 0; }
+.product-thumb { width: 44px; height: 44px; border-radius: 8px; background: linear-gradient(135deg, #91caff, #1677ff); display: flex; align-items: center; justify-content: center; color: #fff; font-weight: 800; font-size: 11px; flex-shrink: 0; letter-spacing: 0.3px; }
+.product-thumb.danang { background: linear-gradient(135deg, #ffadd2, #c41d7f); }
+.product-thumb.nhatrang { background: linear-gradient(135deg, #b7eb8f, #389e0d); }
+.product-thumb.hochiminh { background: linear-gradient(135deg, #ffd591, #d48806); }
+.product-thumb.hanoi { background: linear-gradient(135deg, #d3adf7, #722ed1); }
+.product-info { min-width: 0; }
+.product-name { font-size: 13px; font-weight: 700; color: rgba(0,0,0,0.88); line-height: 1.3; max-width: 280px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.product-meta { font-size: 11px; color: rgba(0,0,0,0.45); margin-top: 2px; display: flex; gap: 6px; align-items: center; flex-wrap: wrap; }
+.product-meta .id-pill { background: #f5f5f5; padding: 1px 6px; border-radius: 3px; font-family: 'SF Mono', monospace; font-size: 10.5px; color: rgba(0,0,0,0.55); }
+.product-meta .combo-pill { padding: 1px 6px; border-radius: 3px; font-size: 10.5px; font-weight: 600; }
+.product-meta .combo-pill.airtel { background: #e6f4ff; color: #0958d9; }
+.product-meta .combo-pill.full { background: #f9f0ff; color: #722ed1; }
+
+/* Date cell */
+.date-cell { font-size: 12px; font-variant-numeric: tabular-nums; line-height: 1.5; }
+.date-cell strong { font-weight: 700; }
+.date-cell .nights { font-size: 10.5px; color: rgba(0,0,0,0.45); font-weight: 600; background: #f5f5f5; padding: 1px 6px; border-radius: 3px; margin-left: 4px; }
+.date-cell .dleft { font-size: 10.5px; color: #d48806; font-weight: 600; }
+.date-cell .dleft.soon { color: #cf1322; }
+
+/* Price cell */
+.price-cell { font-variant-numeric: tabular-nums; text-align: right; }
+.price-main { font-size: 14px; font-weight: 800; color: rgba(0,0,0,0.88); }
+.price-margin { font-size: 11px; color: rgba(0,0,0,0.55); margin-top: 2px; font-weight: 600; }
+.price-margin.warn { color: #d48806; }
+.price-margin.danger { color: #cf1322; }
+
+/* Metric cell (조회수/전환율) */
+.metric-cell { display: flex; flex-direction: column; align-items: center; gap: 3px; }
+.metric-value { font-size: 13px; font-weight: 800; color: rgba(0,0,0,0.88); font-variant-numeric: tabular-nums; }
+.metric-value.warn { color: #d48806; }
+.metric-value.danger { color: #cf1322; }
+.metric-value.success { color: #389e0d; }
+.metric-trend { font-size: 10.5px; color: rgba(0,0,0,0.5); font-weight: 600; display: inline-flex; align-items: center; gap: 2px; }
+.metric-trend.up { color: #389e0d; }
+.metric-trend.down { color: #cf1322; }
+.spark { width: 72px; height: 18px; }
+.spark path { fill: none; stroke-width: 1.5; }
+.spark.up path { stroke: #52c41a; }
+.spark.down path { stroke: #ff4d4f; }
+.spark.flat path { stroke: #bfbfbf; }
+.spark.danger path { stroke: #cf1322; }
+
+/* Status pill */
+.status-pill { display: inline-flex; align-items: center; gap: 5px; padding: 4px 9px; border-radius: 5px; font-size: 11.5px; font-weight: 700; }
+.status-pill .sdot { width: 6px; height: 6px; border-radius: 50%; }
+.status-pill.live { background: #f6ffed; color: #389e0d; border: 1px solid #b7eb8f; }
+.status-pill.live .sdot { background: #52c41a; animation: blink 1.5s infinite; }
+.status-pill.hidden { background: #fff7e6; color: #d48806; border: 1px solid #ffd591; }
+.status-pill.hidden .sdot { background: #d48806; }
+.status-pill.banned { background: #fff1f0; color: #cf1322; border: 1px solid #ffa39e; }
+.status-pill.banned .sdot { background: #cf1322; }
+.status-pill.review { background: #f0f7ff; color: #0958d9; border: 1px solid #91caff; }
+.status-pill.review .sdot { background: #1677ff; }
+@keyframes blink { 0%, 60% { opacity: 1; } 80% { opacity: 0.3; } 100% { opacity: 1; } }
+
+/* Reason badge */
+.reason-row { font-size: 11px; color: rgba(0,0,0,0.55); margin-top: 4px; padding: 4px 8px; background: #fafafa; border-radius: 4px; line-height: 1.4; display: flex; align-items: center; gap: 5px; flex-wrap: wrap; }
+.reason-code { display: inline-flex; align-items: center; gap: 3px; padding: 1px 6px; border-radius: 3px; font-size: 10px; font-weight: 800; letter-spacing: 0.3px; font-family: 'SF Mono', monospace; }
+.reason-code.r3 { background: #fff7e6; color: #d48806; border: 1px solid #ffd591; }
+.reason-code.r1 { background: #fff0f6; color: #c41d7f; border: 1px solid #ffadd2; }
+.reason-code.r2 { background: #f9f0ff; color: #722ed1; border: 1px solid #d3adf7; }
+.reason-code.g4 { background: #fff1f0; color: #cf1322; border: 1px solid #ffa39e; }
+.reason-code.l1 { background: #e6fffb; color: #006d75; border: 1px solid #87e8de; }
+.reason-code.l2 { background: #f6ffed; color: #389e0d; border: 1px solid #b7eb8f; }
+.reason-row strong { color: rgba(0,0,0,0.85); font-weight: 700; }
+
+/* Action buttons */
+.action-cell { display: flex; gap: 4px; justify-content: flex-end; }
+.btn-act { height: 28px; padding: 0 10px; border-radius: 5px; font-size: 11.5px; font-weight: 600; cursor: pointer; border: 1px solid #d9d9d9; background: #fff; color: rgba(0,0,0,0.65); font-family: inherit; display: inline-flex; align-items: center; gap: 4px; transition: all 0.15s; }
+.btn-act:hover { color: #1677ff; border-color: #1677ff; }
+.btn-act.warn { color: #d48806; border-color: #ffd591; background: #fffbe6; }
+.btn-act.warn:hover { background: #d48806; color: #fff; border-color: #d48806; }
+.btn-act.danger { color: #cf1322; border-color: #ffccc7; background: #fff; }
+.btn-act.danger:hover { background: #cf1322; color: #fff; border-color: #cf1322; }
+.btn-act.success { color: #389e0d; border-color: #b7eb8f; background: #fff; }
+.btn-act.success:hover { background: #389e0d; color: #fff; border-color: #389e0d; }
+
+/* Pagination */
+.pagination { padding: 12px 20px; display: flex; align-items: center; justify-content: space-between; border-top: 1px solid #f0f0f0; background: #fafbfc; }
+.pag-info { font-size: 12px; color: rgba(0,0,0,0.55); }
+.pag-controls { display: flex; align-items: center; gap: 4px; }
+.pag-btn { min-width: 28px; height: 28px; padding: 0 8px; border: 1px solid #d9d9d9; background: #fff; border-radius: 5px; font-size: 12px; cursor: pointer; color: rgba(0,0,0,0.65); font-family: inherit; }
+.pag-btn:hover { color: #1677ff; border-color: #1677ff; }
+.pag-btn.active { border-color: #1677ff; color: #1677ff; background: #e6f4ff; font-weight: 700; }
+
+/* Footnote */
+.footnote { display: flex; align-items: flex-start; gap: 8px; padding: 12px 16px; background: #fff7e6; border: 1px solid #ffd666; border-radius: 8px; font-size: 12px; color: #874d00; line-height: 1.7; }
+.footnote svg { width: 14px; height: 14px; flex-shrink: 0; margin-top: 2px; color: #d48806; }
+.footnote code { background: #fff; padding: 1px 6px; border-radius: 3px; font-size: 11.5px; color: #722ed1; font-family: 'SF Mono', monospace; }
+
+/* Buttons */
+.btn-primary-md { height: 36px; padding: 0 16px; border-radius: 6px; font-size: 13px; font-weight: 600; cursor: pointer; border: 1px solid #1677ff; background: #1677ff; color: #fff; font-family: inherit; display: inline-flex; align-items: center; gap: 6px; }
+.btn-primary-md:hover { background: #4096ff; }
+.btn-primary-md svg { width: 13px; height: 13px; }
+.btn-ghost-md { height: 36px; padding: 0 14px; border-radius: 6px; font-size: 13px; font-weight: 500; cursor: pointer; border: 1px solid #d9d9d9; background: #fff; color: rgba(0,0,0,0.75); font-family: inherit; display: inline-flex; align-items: center; gap: 6px; }
+.btn-ghost-md:hover { color: #1677ff; border-color: #1677ff; }
+
+/* Modal */
+.backdrop { position: fixed; inset: 0; background: rgba(0,21,41,0.45); backdrop-filter: blur(2px); z-index: 1000; display: none; align-items: center; justify-content: center; padding: 32px 24px; }
+.backdrop.active { display: flex; }
+.modal { background: #fff; border-radius: 14px; box-shadow: 0 20px 60px rgba(0,0,0,0.25); width: 100%; max-width: 640px; max-height: calc(100vh - 64px); display: flex; flex-direction: column; overflow: hidden; }
+.modal.wide { max-width: 920px; }
+.m-head { padding: 20px 24px 14px; border-bottom: 1px solid #f0f0f0; display: flex; align-items: flex-start; gap: 14px; }
+.m-head-icon { width: 44px; height: 44px; border-radius: 50%; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+.m-head-icon.warn { background: #fff7e6; color: #d48806; border: 1px solid #ffd591; }
+.m-head-icon.danger { background: #fff1f0; color: #cf1322; border: 1px solid #ffa39e; }
+.m-head-icon svg { width: 22px; height: 22px; }
+.m-title-wrap { flex: 1; min-width: 0; }
+.m-title { font-size: 17px; font-weight: 800; color: rgba(0,0,0,0.88); }
+.m-sub { font-size: 12px; color: rgba(0,0,0,0.5); margin-top: 4px; line-height: 1.5; }
+.m-close { width: 32px; height: 32px; border-radius: 8px; border: 1px solid transparent; background: transparent; color: rgba(0,0,0,0.45); display: flex; align-items: center; justify-content: center; cursor: pointer; flex-shrink: 0; }
+.m-close:hover { background: #f5f5f5; color: rgba(0,0,0,0.88); }
+.m-close svg { width: 16px; height: 16px; }
+.m-body { padding: 18px 24px; overflow-y: auto; flex: 1; }
+.m-foot { padding: 14px 24px; border-top: 1px solid #f0f0f0; display: flex; align-items: center; justify-content: space-between; background: #fafbfc; gap: 8px; }
+.m-foot-info { font-size: 12px; color: rgba(0,0,0,0.5); }
+.btn-modal-close { height: 34px; padding: 0 14px; border-radius: 6px; font-size: 13px; cursor: pointer; border: 1px solid #d9d9d9; background: #fff; color: rgba(0,0,0,0.88); font-family: inherit; font-weight: 500; }
+.btn-modal-close:hover { color: #1677ff; border-color: #1677ff; }
+.btn-modal-warn { height: 34px; padding: 0 18px; border-radius: 6px; font-size: 13px; font-weight: 700; cursor: pointer; border: 1px solid #d48806; background: #d48806; color: #fff; font-family: inherit; display: inline-flex; align-items: center; gap: 5px; }
+.btn-modal-warn:hover { background: #ad6800; }
+.btn-modal-danger { height: 34px; padding: 0 18px; border-radius: 6px; font-size: 13px; font-weight: 700; cursor: pointer; border: 1px solid #cf1322; background: #cf1322; color: #fff; font-family: inherit; }
+.btn-modal-danger:hover { background: #a8071a; }
+.btn-modal-primary { height: 34px; padding: 0 18px; border-radius: 6px; font-size: 13px; font-weight: 700; cursor: pointer; border: 1px solid #1677ff; background: #1677ff; color: #fff; font-family: inherit; }
+
+/* Modal — 미노출 처리 */
+.target-banner { background: linear-gradient(135deg, #fff7e6 0%, #fffbe6 100%); border: 1px solid #ffe58f; border-radius: 10px; padding: 12px 14px; margin-bottom: 16px; display: flex; align-items: center; gap: 12px; }
+.target-banner .pid { font-family: 'SF Mono', monospace; font-size: 11px; background: rgba(255,255,255,0.7); padding: 2px 7px; border-radius: 3px; color: rgba(0,0,0,0.65); font-weight: 600; }
+.target-banner .pname { font-size: 13.5px; font-weight: 800; color: rgba(0,0,0,0.88); }
+.target-banner .pmeta { font-size: 11px; color: #874d00; margin-top: 2px; }
+
+.action-type-row { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 14px; }
+.action-type-btn { padding: 12px 14px; border: 1.5px solid #e8e8e8; border-radius: 10px; background: #fff; cursor: pointer; font-family: inherit; text-align: left; transition: all 0.15s; display: flex; gap: 10px; align-items: flex-start; }
+.action-type-btn:hover { border-color: #91caff; background: #fafcff; }
+.action-type-btn.active { border-color: #1677ff; background: #f0f7ff; }
+.action-type-btn .ico { width: 32px; height: 32px; border-radius: 8px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+.action-type-btn[data-type="hide"] .ico { background: #fff7e6; color: #d48806; }
+.action-type-btn[data-type="ban"] .ico { background: #fff1f0; color: #cf1322; }
+.action-type-btn .ico svg { width: 16px; height: 16px; }
+.action-type-btn .at-title { font-size: 13px; font-weight: 800; color: rgba(0,0,0,0.88); }
+.action-type-btn .at-code { font-family: 'SF Mono', monospace; font-size: 10.5px; color: rgba(0,0,0,0.5); margin-left: 4px; font-weight: 700; }
+.action-type-btn .at-desc { font-size: 11.5px; color: rgba(0,0,0,0.55); margin-top: 3px; line-height: 1.5; }
+
+.field-label { display: block; font-size: 12px; color: rgba(0,0,0,0.65); font-weight: 700; margin-bottom: 8px; }
+.field-label .req { color: #f5222d; margin-left: 2px; }
+.field-label .hint { color: rgba(0,0,0,0.4); font-weight: 500; font-size: 11px; margin-left: 6px; }
+
+.reason-chips { display: flex; flex-wrap: wrap; gap: 5px; margin-bottom: 12px; }
+.reason-chip { padding: 6px 11px; border-radius: 14px; border: 1px solid #e8e8e8; background: #fff; color: rgba(0,0,0,0.65); font-size: 11.5px; font-weight: 500; cursor: pointer; font-family: inherit; }
+.reason-chip:hover { color: #1677ff; border-color: #91caff; background: #f0f7ff; }
+.reason-chip.active { color: #1677ff; border-color: #1677ff; background: #e6f4ff; font-weight: 700; }
+
+.reason-ta { width: 100%; min-height: 80px; padding: 10px 12px; border: 1px solid #d9d9d9; border-radius: 8px; font-size: 13px; font-family: inherit; outline: none; resize: vertical; line-height: 1.6; }
+.reason-ta:focus { border-color: #1677ff; box-shadow: 0 0 0 2px rgba(22,119,255,0.1); }
+
+.duration-row { display: flex; gap: 6px; margin-top: 8px; }
+.duration-btn { padding: 6px 12px; border: 1px solid #e8e8e8; background: #fff; border-radius: 6px; font-size: 11.5px; font-weight: 600; cursor: pointer; color: rgba(0,0,0,0.65); font-family: inherit; }
+.duration-btn:hover { color: #1677ff; border-color: #1677ff; }
+.duration-btn.active { background: #1677ff; color: #fff; border-color: #1677ff; }
+
+/* Detail Modal — 시계열 */
+.detail-grid { display: grid; grid-template-columns: 1.4fr 1fr; gap: 14px; margin-bottom: 16px; }
+.detail-block { background: #fafbfc; border: 1px solid #f0f0f0; border-radius: 10px; padding: 14px; }
+.detail-block-title { font-size: 12px; color: rgba(0,0,0,0.65); font-weight: 700; margin-bottom: 10px; letter-spacing: 0.2px; }
+.metric-large { font-size: 24px; font-weight: 800; color: rgba(0,0,0,0.88); }
+.metric-large .unit { font-size: 12px; color: rgba(0,0,0,0.45); font-weight: 600; margin-left: 4px; }
+.metric-sub-row { display: flex; gap: 14px; margin-top: 8px; }
+.metric-sub-item { font-size: 11px; color: rgba(0,0,0,0.5); }
+.metric-sub-item strong { color: rgba(0,0,0,0.88); font-size: 13px; font-weight: 700; margin-right: 3px; }
+.timeline-chart { height: 160px; background: #fff; border: 1px solid #f0f0f0; border-radius: 8px; padding: 12px; display: flex; align-items: flex-end; gap: 4px; justify-content: space-around; }
+.timeline-bar { width: 22px; background: linear-gradient(180deg, #91caff, #1677ff); border-radius: 3px 3px 0 0; position: relative; min-height: 4px; }
+.timeline-bar.warn { background: linear-gradient(180deg, #ffd591, #d48806); }
+.timeline-bar.danger { background: linear-gradient(180deg, #ffa39e, #cf1322); }
+.timeline-bar .lbl { position: absolute; bottom: -18px; left: 50%; transform: translateX(-50%); font-size: 9.5px; color: rgba(0,0,0,0.45); white-space: nowrap; font-variant-numeric: tabular-nums; font-weight: 600; }
+.timeline-bar .val { position: absolute; top: -18px; left: 50%; transform: translateX(-50%); font-size: 10px; color: rgba(0,0,0,0.65); white-space: nowrap; font-weight: 700; }
+.combo-list { display: flex; flex-direction: column; gap: 6px; }
+.combo-item { padding: 7px 10px; background: #fff; border: 1px solid #f0f0f0; border-radius: 6px; font-size: 12px; display: flex; justify-content: space-between; align-items: center; }
+.combo-item .ck { color: rgba(0,0,0,0.7); display: flex; gap: 6px; align-items: center; flex: 1; min-width: 0; }
+.combo-item .ck strong { color: rgba(0,0,0,0.88); font-weight: 700; }
+.combo-item .ck-icon { font-size: 14px; }
+.combo-item .pr { font-size: 11px; color: rgba(0,0,0,0.5); font-variant-numeric: tabular-nums; font-weight: 600; font-family: 'SF Mono', monospace; }
+.history-list { display: flex; flex-direction: column; gap: 8px; }
+.history-item { padding: 8px 10px; background: #fff; border: 1px solid #f0f0f0; border-radius: 6px; font-size: 12px; display: flex; align-items: center; gap: 8px; }
+.history-item .when { font-family: 'SF Mono', monospace; font-size: 10.5px; color: rgba(0,0,0,0.45); flex-shrink: 0; font-weight: 600; }
+.history-item .what { flex: 1; color: rgba(0,0,0,0.75); }
+.history-item .what strong { color: rgba(0,0,0,0.88); font-weight: 700; }
+.history-item .who { font-size: 10.5px; color: #1677ff; font-weight: 600; }
+
+</style>
+</head>
+<body>
+
+<!-- GNB -->
+<nav class="gnb">
+  <div class="gnb-logo">Trip<span>Store</span> <span class="partners-badge">PARTNERS</span></div>
+  <div class="gnb-menu">
+    <div class="gnb-item">대시보드</div>
+    <div class="gnb-item">페이지 제작</div>
+    <div class="gnb-item">상품 관리</div>
+    <div class="gnb-item">예약 관리</div>
+    <div class="gnb-item active">PB 관리</div>
+    <div class="gnb-item">카탈로그</div>
+    <div class="gnb-item">쿠폰</div>
+    <div class="gnb-item">정산</div>
+  </div>
+  <div class="gnb-right">
+    <span class="gnb-org-badge">트립스토어</span>
+    <span class="gnb-user"><span class="gnb-user-name">김서현</span>님</span>
+  </div>
+</nav>
+
+<!-- Breadcrumb -->
+<div class="breadcrumb">
+  <span>PB 관리</span>
+  <span class="sep">/</span>
+  <span class="bc-current">라이브 상품 노출 관리</span>
+</div>
+
+<div class="layout">
+
+  <!-- Page Header -->
+  <div class="page-header">
+    <div>
+      <div class="page-title">라이브 상품 노출 관리</div>
+      <div class="page-desc">
+        자동생성 후 <strong>노출 중인 PB 상품</strong>을 검토하고 미노출 처리합니다. <code>MANUAL_BLOCK_TEMP</code>(R3) 진입점 — 미노출 처리 시 자동으로 Reject Pool로 이동합니다.<br>
+        <span style="font-size:11.5px; color:rgba(0,0,0,0.45);">관리 흐름: 라이브 상품 검증 → 미노출 처리(R3) → Reject Pool 이동 → 사유 검토 후 재노출 또는 영구 제외(G4)</span>
+      </div>
+    </div>
+    <div class="page-actions">
+      <button class="btn-ghost-md" onclick="window.open('autogen-reject-pool.html', '_blank')">🚫 Reject Pool →</button>
+      <button class="btn-ghost-md" onclick="window.open('autogen-monitoring.html', '_blank')">📊 모니터링 대시보드 →</button>
+      <button class="btn-ghost-md" onclick="window.open('autogen-gate-policy.html', '_blank')">📋 게이트 정책</button>
+    </div>
+  </div>
+
+  <!-- KPI Row -->
+  <div class="kpi-row">
+    <div class="kpi-card active" onclick="switchSubnav('live')">
+      <div class="kpi-label">🟢 라이브 노출 중</div>
+      <div class="kpi-value">1,465</div>
+      <div class="kpi-sub"><span class="kpi-delta up">▲ 42</span> 전일 대비</div>
+    </div>
+    <div class="kpi-card warn" onclick="switchSubnav('no-booking')">
+      <div class="kpi-label">⏰ 7일 무예약</div>
+      <div class="kpi-value warn">245</div>
+      <div class="kpi-sub">전체의 <strong>16.7%</strong> · 검토 권장</div>
+    </div>
+    <div class="kpi-card danger" onclick="switchSubnav('view-drop')">
+      <div class="kpi-label">📉 조회수 급감</div>
+      <div class="kpi-value danger">32</div>
+      <div class="kpi-sub">전주 대비 <strong>−50% 이상</strong></div>
+    </div>
+    <div class="kpi-card danger" onclick="switchSubnav('margin-warn')">
+      <div class="kpi-label">⚠ 마진 경고</div>
+      <div class="kpi-value danger">18</div>
+      <div class="kpi-sub">실시간 마진 <strong>3% 미만</strong></div>
+    </div>
+    <div class="kpi-card" onclick="switchSubnav('hidden')">
+      <div class="kpi-label">⊘ 미노출 (R3)</div>
+      <div class="kpi-value">87</div>
+      <div class="kpi-sub">PM이 일시 미노출 처리</div>
+    </div>
+  </div>
+
+  <!-- Sub Nav (상태별) -->
+  <div class="subnav-card">
+    <button class="subnav-item active" onclick="switchSubnav('live', this)">🟢 라이브 (1,465) <span class="subnav-count">1,465</span></button>
+    <button class="subnav-item warn" onclick="switchSubnav('warn', this)">⚠ 검토 필요 <span class="subnav-count">295</span></button>
+    <button class="subnav-item danger" onclick="switchSubnav('hidden', this)">⊘ 미노출 (R3) <span class="subnav-count">87</span></button>
+    <button class="subnav-item" onclick="switchSubnav('all', this)">전체 <span class="subnav-count">1,847</span></button>
+  </div>
+
+  <!-- Filter -->
+  <div class="filter-bar">
+    <div class="search-wrap">
+      <span class="search-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg></span>
+      <input type="text" placeholder="상품 ID · 이름 · 숙소 검색">
+    </div>
+    <select class="fi"><option>여행지 전체</option><option>푸꾸옥</option><option>나트랑</option><option>다낭</option><option>호치민</option><option>하노이</option></select>
+    <select class="fi"><option>출발 월 전체</option><option>2026.06</option><option>2026.07</option><option>2026.08</option><option>2026.09</option></select>
+    <select class="fi"><option>마진율</option><option>5% 미만 (위험)</option><option>5-10%</option><option>10% 이상</option></select>
+    <select class="fi"><option>조회수 추이</option><option>상승</option><option>유지</option><option>하락</option><option>급감 (−50% ↓)</option></select>
+    <select class="fi"><option>전환율</option><option>1% 이상</option><option>0.5-1%</option><option>0.5% 미만</option><option>0건</option></select>
+    <select class="fi"><option>조합 타입</option><option>에어텔</option><option>에어텔+투어</option><option>에어텔+티켓</option><option>에어텔+티켓+투어</option></select>
+    <div class="filter-total">총 <strong>1,465</strong>건</div>
+  </div>
+
+  <!-- Bulk action bar -->
+  <div class="bulk-bar" id="bulkBar">
+    <strong id="bulkCount">0</strong>건 선택됨
+    <div class="bulk-actions">
+      <button class="btn-bulk warn" onclick="openBulkHideModal()">⊘ 선택 미노출 처리</button>
+      <button class="btn-bulk" onclick="alert('정가마진 일괄 조정 — 사유 입력 후 진행')">💰 마진 조정</button>
+      <button class="btn-bulk danger" onclick="alert('영구 블랙리스트는 신중하게 — 확인 모달 필요')">🚫 영구 제외</button>
+      <button class="btn-bulk" onclick="clearSel()">선택 해제</button>
+    </div>
+  </div>
+
+  <!-- Table -->
+  <div class="main-card">
+    <div class="table-wrap">
+      <table class="tbl">
+        <thead>
+          <tr>
+            <th style="width:32px;"><input type="checkbox" onclick="toggleAll(this)"></th>
+            <th>상품</th>
+            <th>출발 / 일정</th>
+            <th class="right">판매가 · 마진</th>
+            <th class="center">조회수 (7d)</th>
+            <th class="center">예약 / 전환율</th>
+            <th>노출 상태</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody>
+          <!-- 1. 라이브 — 양호 -->
+          <tr>
+            <td><input type="checkbox" onclick="toggleRow(this)"></td>
+            <td>
+              <div class="product-cell">
+                <div class="product-thumb">PQ</div>
+                <div class="product-info">
+                  <div class="product-name">푸꾸옥 솔바이멜리아 5일 (오션뷰 BB)</div>
+                  <div class="product-meta">
+                    <span class="id-pill">PB-58241</span>
+                    <span class="combo-pill airtel">에어텔</span>
+                    <span>VJ 인천-푸꾸옥</span>
+                  </div>
+                </div>
+              </div>
+            </td>
+            <td>
+              <div class="date-cell">
+                <strong>2026.06.05</strong> 출발 <span class="nights">4박 5일</span><br>
+                <span class="dleft">D-10</span>
+              </div>
+            </td>
+            <td class="price-cell">
+              <div class="price-main">₩892,000</div>
+              <div class="price-margin">마진 12.4%</div>
+            </td>
+            <td>
+              <div class="metric-cell">
+                <div class="metric-value">1,243</div>
+                <svg class="spark up" viewBox="0 0 72 18"><path d="M0,14 L9,12 L18,10 L27,8 L36,11 L45,6 L54,7 L63,4 L72,3"/></svg>
+                <div class="metric-trend up">▲ 18%</div>
+              </div>
+            </td>
+            <td>
+              <div class="metric-cell">
+                <div class="metric-value success">18건</div>
+                <div class="metric-trend">전환 <strong>1.45%</strong></div>
+              </div>
+            </td>
+            <td><span class="status-pill live"><span class="sdot"></span>라이브</span></td>
+            <td>
+              <div class="action-cell">
+                <button class="btn-act" onclick="openDetailModal()">📊 상세</button>
+                <button class="btn-act warn" onclick="openHideModal('PB-58241', '푸꾸옥 솔바이멜리아 5일')">⊘ 미노출</button>
+              </div>
+            </td>
+          </tr>
+
+          <!-- 2. 라이브 — 조회수 급감 ⚠ -->
+          <tr>
+            <td><input type="checkbox" onclick="toggleRow(this)"></td>
+            <td>
+              <div class="product-cell">
+                <div class="product-thumb nhatrang">NT</div>
+                <div class="product-info">
+                  <div class="product-name">나트랑 빈펄 리조트 4일 (시티뷰 BB)</div>
+                  <div class="product-meta">
+                    <span class="id-pill">PB-58102</span>
+                    <span class="combo-pill airtel">에어텔</span>
+                    <span>KE 인천-나트랑</span>
+                  </div>
+                </div>
+              </div>
+            </td>
+            <td>
+              <div class="date-cell">
+                <strong>2026.06.12</strong> 출발 <span class="nights">3박 4일</span><br>
+                <span class="dleft">D-17</span>
+              </div>
+            </td>
+            <td class="price-cell">
+              <div class="price-main">₩1,148,000</div>
+              <div class="price-margin">마진 9.2%</div>
+            </td>
+            <td>
+              <div class="metric-cell">
+                <div class="metric-value danger">186</div>
+                <svg class="spark danger" viewBox="0 0 72 18"><path d="M0,4 L9,5 L18,7 L27,9 L36,11 L45,13 L54,14 L63,15 L72,16"/></svg>
+                <div class="metric-trend down">▼ 62%</div>
+              </div>
+            </td>
+            <td>
+              <div class="metric-cell">
+                <div class="metric-value warn">2건</div>
+                <div class="metric-trend">전환 <strong>1.07%</strong></div>
+              </div>
+            </td>
+            <td>
+              <span class="status-pill live"><span class="sdot"></span>라이브</span>
+              <div class="reason-row" style="margin-top:6px;">
+                <strong>경고:</strong> 조회수 7일 −62%, <span class="reason-code l2">L2 LOW_VIEW</span> 후보
+              </div>
+            </td>
+            <td>
+              <div class="action-cell">
+                <button class="btn-act" onclick="openDetailModal()">📊 상세</button>
+                <button class="btn-act warn" onclick="openHideModal('PB-58102', '나트랑 빈펄 리조트 4일')">⊘ 미노출</button>
+              </div>
+            </td>
+          </tr>
+
+          <!-- 3. 라이브 — 7일 무예약 ⚠ -->
+          <tr>
+            <td><input type="checkbox" onclick="toggleRow(this)"></td>
+            <td>
+              <div class="product-cell">
+                <div class="product-thumb danang">DN</div>
+                <div class="product-info">
+                  <div class="product-name">다낭 인터컨티넨탈 5일 (오션뷰 HB + 바나힐)</div>
+                  <div class="product-meta">
+                    <span class="id-pill">PB-58367</span>
+                    <span class="combo-pill full">에어텔+투어</span>
+                    <span>7C 인천-다낭</span>
+                  </div>
+                </div>
+              </div>
+            </td>
+            <td>
+              <div class="date-cell">
+                <strong>2026.06.20</strong> 출발 <span class="nights">4박 5일</span><br>
+                <span class="dleft">D-25</span>
+              </div>
+            </td>
+            <td class="price-cell">
+              <div class="price-main">₩2,184,000</div>
+              <div class="price-margin">마진 14.8%</div>
+            </td>
+            <td>
+              <div class="metric-cell">
+                <div class="metric-value warn">412</div>
+                <svg class="spark flat" viewBox="0 0 72 18"><path d="M0,10 L9,9 L18,11 L27,10 L36,12 L45,9 L54,11 L63,10 L72,11"/></svg>
+                <div class="metric-trend">유지</div>
+              </div>
+            </td>
+            <td>
+              <div class="metric-cell">
+                <div class="metric-value danger">0건</div>
+                <div class="metric-trend down">전환 <strong>0%</strong></div>
+              </div>
+            </td>
+            <td>
+              <span class="status-pill live"><span class="sdot"></span>라이브</span>
+              <div class="reason-row" style="margin-top:6px;">
+                <strong>주의:</strong> 7일 예약 0건 (조회 412)
+              </div>
+            </td>
+            <td>
+              <div class="action-cell">
+                <button class="btn-act" onclick="openDetailModal()">📊 상세</button>
+                <button class="btn-act warn" onclick="openHideModal('PB-58367', '다낭 인터컨티넨탈 5일')">⊘ 미노출</button>
+              </div>
+            </td>
+          </tr>
+
+          <!-- 4. 라이브 — 마진 경고 -->
+          <tr>
+            <td><input type="checkbox" onclick="toggleRow(this)"></td>
+            <td>
+              <div class="product-cell">
+                <div class="product-thumb">PQ</div>
+                <div class="product-info">
+                  <div class="product-name">푸꾸옥 JW Marriott 4일 (디럭스 BB)</div>
+                  <div class="product-meta">
+                    <span class="id-pill">PB-58459</span>
+                    <span class="combo-pill airtel">에어텔</span>
+                    <span>VJ 인천-푸꾸옥</span>
+                  </div>
+                </div>
+              </div>
+            </td>
+            <td>
+              <div class="date-cell">
+                <strong>2026.06.10</strong> 출발 <span class="nights">3박 4일</span><br>
+                <span class="dleft soon">D-15</span>
+              </div>
+            </td>
+            <td class="price-cell">
+              <div class="price-main">₩1,876,000</div>
+              <div class="price-margin danger">마진 2.8% ⚠</div>
+            </td>
+            <td>
+              <div class="metric-cell">
+                <div class="metric-value">894</div>
+                <svg class="spark up" viewBox="0 0 72 18"><path d="M0,12 L9,10 L18,11 L27,8 L36,9 L45,6 L54,5 L63,7 L72,4"/></svg>
+                <div class="metric-trend up">▲ 24%</div>
+              </div>
+            </td>
+            <td>
+              <div class="metric-cell">
+                <div class="metric-value success">12건</div>
+                <div class="metric-trend">전환 <strong>1.34%</strong></div>
+              </div>
+            </td>
+            <td>
+              <span class="status-pill live"><span class="sdot"></span>라이브</span>
+              <div class="reason-row" style="margin-top:6px;">
+                <strong>경고:</strong> 실시간 마진 <span class="reason-code r2">R2</span> 후보, 항공 유류할증 인상 의심
+              </div>
+            </td>
+            <td>
+              <div class="action-cell">
+                <button class="btn-act" onclick="openDetailModal()">📊 상세</button>
+                <button class="btn-act warn" onclick="openHideModal('PB-58459', '푸꾸옥 JW Marriott 4일')">⊘ 미노출</button>
+              </div>
+            </td>
+          </tr>
+
+          <!-- 5. 미노출 (R3) — PM 처리 -->
+          <tr style="background:#fffbe6;">
+            <td><input type="checkbox" disabled></td>
+            <td>
+              <div class="product-cell">
+                <div class="product-thumb hochiminh">HC</div>
+                <div class="product-info">
+                  <div class="product-name">호치민 시티 3일 + 빈원더스 (시티뷰 BB)</div>
+                  <div class="product-meta">
+                    <span class="id-pill">PB-58521</span>
+                    <span class="combo-pill full">에어텔+티켓</span>
+                    <span>OZ 인천-호치민</span>
+                  </div>
+                </div>
+              </div>
+            </td>
+            <td>
+              <div class="date-cell">
+                <strong>2026.07.04</strong> 출발 <span class="nights">2박 3일</span><br>
+                <span class="dleft">D-39</span>
+              </div>
+            </td>
+            <td class="price-cell">
+              <div class="price-main">₩724,000</div>
+              <div class="price-margin">마진 11.0%</div>
+            </td>
+            <td>
+              <div class="metric-cell">
+                <div class="metric-value">— </div>
+                <div class="metric-trend">미노출</div>
+              </div>
+            </td>
+            <td>
+              <div class="metric-cell">
+                <div class="metric-value">— </div>
+                <div class="metric-trend">미노출</div>
+              </div>
+            </td>
+            <td>
+              <span class="status-pill hidden"><span class="sdot"></span>미노출 (R3)</span>
+              <div class="reason-row" style="margin-top:6px;">
+                <span class="reason-code r3">R3 MANUAL_BLOCK_TEMP</span> 빈원더스 7월 미제공 안내 추가 후 재노출 — 서현 2026-05-25
+              </div>
+            </td>
+            <td>
+              <div class="action-cell">
+                <button class="btn-act" onclick="openDetailModal()">📊 상세</button>
+                <button class="btn-act success" onclick="reactivate('PB-58521')">🔄 재노출</button>
+              </div>
+            </td>
+          </tr>
+
+          <!-- 6. 라이브 — 양호 (다낭 핵심) -->
+          <tr>
+            <td><input type="checkbox" onclick="toggleRow(this)"></td>
+            <td>
+              <div class="product-cell">
+                <div class="product-thumb danang">DN</div>
+                <div class="product-info">
+                  <div class="product-name">다낭 풀만 4일 (시티뷰 BB + 호이안)</div>
+                  <div class="product-meta">
+                    <span class="id-pill">PB-58612</span>
+                    <span class="combo-pill full">에어텔+투어</span>
+                    <span>TW 인천-다낭</span>
+                  </div>
+                </div>
+              </div>
+            </td>
+            <td>
+              <div class="date-cell">
+                <strong>2026.06.18</strong> 출발 <span class="nights">3박 4일</span><br>
+                <span class="dleft">D-23</span>
+              </div>
+            </td>
+            <td class="price-cell">
+              <div class="price-main">₩1,492,000</div>
+              <div class="price-margin">마진 13.6%</div>
+            </td>
+            <td>
+              <div class="metric-cell">
+                <div class="metric-value">2,184</div>
+                <svg class="spark up" viewBox="0 0 72 18"><path d="M0,14 L9,13 L18,11 L27,10 L36,8 L45,7 L54,5 L63,4 L72,2"/></svg>
+                <div class="metric-trend up">▲ 31%</div>
+              </div>
+            </td>
+            <td>
+              <div class="metric-cell">
+                <div class="metric-value success">42건</div>
+                <div class="metric-trend">전환 <strong>1.92%</strong></div>
+              </div>
+            </td>
+            <td><span class="status-pill live"><span class="sdot"></span>라이브</span></td>
+            <td>
+              <div class="action-cell">
+                <button class="btn-act" onclick="openDetailModal()">📊 상세</button>
+                <button class="btn-act warn" onclick="openHideModal('PB-58612', '다낭 풀만 4일')">⊘ 미노출</button>
+              </div>
+            </td>
+          </tr>
+
+          <!-- 7. 라이브 — 조회수 급감 -->
+          <tr>
+            <td><input type="checkbox" onclick="toggleRow(this)"></td>
+            <td>
+              <div class="product-cell">
+                <div class="product-thumb hanoi">HN</div>
+                <div class="product-info">
+                  <div class="product-name">하노이 인터컨티넨탈 4일 (하노이 시내 투어)</div>
+                  <div class="product-meta">
+                    <span class="id-pill">PB-58701</span>
+                    <span class="combo-pill full">에어텔+투어</span>
+                    <span>VN 인천-하노이</span>
+                  </div>
+                </div>
+              </div>
+            </td>
+            <td>
+              <div class="date-cell">
+                <strong>2026.07.12</strong> 출발 <span class="nights">3박 4일</span><br>
+                <span class="dleft">D-47</span>
+              </div>
+            </td>
+            <td class="price-cell">
+              <div class="price-main">₩1,628,000</div>
+              <div class="price-margin">마진 10.2%</div>
+            </td>
+            <td>
+              <div class="metric-cell">
+                <div class="metric-value danger">94</div>
+                <svg class="spark danger" viewBox="0 0 72 18"><path d="M0,2 L9,4 L18,6 L27,8 L36,11 L45,13 L54,15 L63,14 L72,15"/></svg>
+                <div class="metric-trend down">▼ 78%</div>
+              </div>
+            </td>
+            <td>
+              <div class="metric-cell">
+                <div class="metric-value danger">0건</div>
+                <div class="metric-trend">전환 <strong>0%</strong></div>
+              </div>
+            </td>
+            <td>
+              <span class="status-pill live"><span class="sdot"></span>라이브</span>
+              <div class="reason-row" style="margin-top:6px;">
+                <strong>경고:</strong> 조회 −78% + 예약 0건, 미노출 검토 권장
+              </div>
+            </td>
+            <td>
+              <div class="action-cell">
+                <button class="btn-act" onclick="openDetailModal()">📊 상세</button>
+                <button class="btn-act warn" onclick="openHideModal('PB-58701', '하노이 인터컨티넨탈 4일')">⊘ 미노출</button>
+              </div>
+            </td>
+          </tr>
+
+          <!-- 8. 미노출 (R3) -->
+          <tr style="background:#fffbe6;">
+            <td><input type="checkbox" disabled></td>
+            <td>
+              <div class="product-cell">
+                <div class="product-thumb">PQ</div>
+                <div class="product-info">
+                  <div class="product-name">푸꾸옥 빈펄 디스커버리 그린힐 4일</div>
+                  <div class="product-meta">
+                    <span class="id-pill">PB-58818</span>
+                    <span class="combo-pill airtel">에어텔</span>
+                    <span>VJ 인천-푸꾸옥</span>
+                  </div>
+                </div>
+              </div>
+            </td>
+            <td>
+              <div class="date-cell">
+                <strong>2026.06.28</strong> 출발 <span class="nights">3박 4일</span><br>
+                <span class="dleft">D-33</span>
+              </div>
+            </td>
+            <td class="price-cell">
+              <div class="price-main">₩982,000</div>
+              <div class="price-margin">마진 8.4%</div>
+            </td>
+            <td><div class="metric-cell"><div class="metric-value">—</div><div class="metric-trend">미노출</div></div></td>
+            <td><div class="metric-cell"><div class="metric-value">—</div><div class="metric-trend">미노출</div></div></td>
+            <td>
+              <span class="status-pill hidden"><span class="sdot"></span>미노출 (R3)</span>
+              <div class="reason-row" style="margin-top:6px;">
+                <span class="reason-code r3">R3</span> 빈펄 디스커버리 동적 요금 + 변동성 큼 — 7월 재검토 — 서현 2026-05-22
+              </div>
+            </td>
+            <td>
+              <div class="action-cell">
+                <button class="btn-act" onclick="openDetailModal()">📊 상세</button>
+                <button class="btn-act success" onclick="reactivate('PB-58818')">🔄 재노출</button>
+                <button class="btn-act danger" onclick="confirmBan('PB-58818')">🚫 영구</button>
+              </div>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="pagination">
+      <div class="pag-info">총 <strong style="color:#1677ff;">1,465</strong>건 중 1 - 8 표시 · <select style="height:24px; border:1px solid #d9d9d9; border-radius:4px; padding:0 24px 0 8px; font-size:11.5px; margin-left:6px;"><option>50개</option><option>100개</option><option>200개</option></select></div>
+      <div class="pag-controls">
+        <button class="pag-btn">‹</button>
+        <button class="pag-btn active">1</button>
+        <button class="pag-btn">2</button>
+        <button class="pag-btn">3</button>
+        <button class="pag-btn">…</button>
+        <button class="pag-btn">183</button>
+        <button class="pag-btn">›</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Footnote -->
+  <div class="footnote">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+    <div>
+      <strong>사유 코드 (메모리 2026-05-20 / autogen-gate-policy v2.1)</strong><br>
+      · <strong>Stage 1 (생성)</strong>: <code>G1 NO_INVENTORY</code> · <code>G2 NEGATIVE_MARGIN</code> · <code>G3 COMBINATION_LIMIT</code> · <code>G4 MANUAL_BLOCK_PERM</code><br>
+      · <strong>Stage 2 (노출)</strong>: <code>R1 BELOW_COMPETITION</code> · <code>R2 MARGIN_FLOOR_UNREACHABLE</code> · <strong><code>R3 MANUAL_BLOCK_TEMP</code> ← 이 화면 진입점</strong><br>
+      · <strong>Stage 3 (라이브 동적 컷)</strong>: <code>L1 STOCK_DEPLETED</code> · <code>L2 LOW_VIEW</code> · <code>L3 ZERO_CONV</code> · <code>L4 MARGIN_DRIFT</code> · <code>L5 DEPARTURE_GUARD</code>
+    </div>
+  </div>
+
+</div>
+
+
+<!-- ============================================================ -->
+<!-- ===== MODAL: 미노출 처리 (R3) ===== -->
+<!-- ============================================================ -->
+<div class="backdrop" id="hideModal" onclick="if(event.target===this) closeHideModal()">
+  <div class="modal">
+    <div class="m-head">
+      <div class="m-head-icon warn">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"/><line x1="1" y1="1" x2="23" y2="23"/></svg>
+      </div>
+      <div class="m-title-wrap">
+        <div class="m-title">라이브 상품 미노출 처리</div>
+        <div class="m-sub">선택한 상품을 일시 미노출 처리합니다. 사유는 운영팀에 공유되며 변경 이력으로 영구 저장됩니다.</div>
+      </div>
+      <button class="m-close" onclick="closeHideModal()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
+    </div>
+
+    <div class="m-body">
+      <!-- 대상 -->
+      <div class="target-banner">
+        <svg viewBox="0 0 24 24" fill="none" stroke="#d48806" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="width:18px;height:18px;flex-shrink:0;"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+        <div style="flex:1;">
+          <span class="pid" id="hideTargetId">PB-58241</span>
+          <div class="pname" id="hideTargetName" style="margin-top:4px;">푸꾸옥 솔바이멜리아 5일</div>
+          <div class="pmeta">미노출 시 사용자 검색·리스트·PDP 직접 진입 모두 차단됩니다.</div>
+        </div>
+      </div>
+
+      <!-- 처리 타입 -->
+      <label class="field-label">처리 타입 <span class="req">*</span></label>
+      <div class="action-type-row">
+        <button class="action-type-btn active" data-type="hide" onclick="pickType(this)">
+          <div class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94"/><line x1="1" y1="1" x2="23" y2="23"/></svg></div>
+          <div>
+            <div class="at-title">일시 미노출 <span class="at-code">R3 MANUAL_BLOCK_TEMP</span></div>
+            <div class="at-desc">검토 후 재노출 가능. Reject Pool로 이동.</div>
+          </div>
+        </button>
+        <button class="action-type-btn" data-type="ban" onclick="pickType(this)">
+          <div class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="4.93" y1="4.93" x2="19.07" y2="19.07"/></svg></div>
+          <div>
+            <div class="at-title">영구 제외 <span class="at-code">G4 MANUAL_BLOCK_PERM</span></div>
+            <div class="at-desc">다음 생성 배치에서도 영구 제외. 신중히 사용.</div>
+          </div>
+        </button>
+      </div>
+
+      <!-- 사유 카테고리 칩 -->
+      <label class="field-label">사유 카테고리 <span class="hint">클릭하면 입력란에 채워집니다</span></label>
+      <div class="reason-chips">
+        <button class="reason-chip" onclick="pickReason(this, '경쟁가 미달 후속 — 가격 재검토 필요')">경쟁가 미달 (R1 후속)</button>
+        <button class="reason-chip" onclick="pickReason(this, '실시간 마진 5% 이하 — 항공/숙소 원가 변동 확인 필요')">실시간 마진 경고</button>
+        <button class="reason-chip" onclick="pickReason(this, '조회수 −50% 이상 급감 — 페르소나 미스매치 의심')">조회수 급감</button>
+        <button class="reason-chip" onclick="pickReason(this, '7일 이상 예약 0건 — 전환율 부진')">전환율 부진</button>
+        <button class="reason-chip" onclick="pickReason(this, '연결된 콘텐츠(POST) 누락 또는 오류 — 콘텐츠 수정 후 재노출')">콘텐츠 이슈</button>
+        <button class="reason-chip" onclick="pickReason(this, '공급사 응대 지연 / 항공편 운휴 / 숙소 재고 변동')">공급사 이슈</button>
+        <button class="reason-chip" onclick="pickReason(this, '성수기 단가 변동 — 가격 정책 재검토 후 재노출')">성수기 가격 변동</button>
+        <button class="reason-chip" onclick="pickReason(this, '예상가 변동성 큼 (±15% 이상) — 법무 검토 대기')">예상가 변동성</button>
+      </div>
+
+      <!-- 상세 사유 -->
+      <label class="field-label">상세 사유 <span class="req">*</span></label>
+      <textarea class="reason-ta" id="hideReasonText" placeholder="예: 빈원더스 7월 미제공 안내 추가 후 재노출 / 항공 유류할증 인상으로 마진 2.8% — 정가마진 조정 후 재노출"></textarea>
+
+      <!-- 재검토 기한 -->
+      <label class="field-label" style="margin-top:14px;">재검토 기한 <span class="hint">Reject Pool 알림 트리거</span></label>
+      <div class="duration-row">
+        <button class="duration-btn" onclick="pickDur(this)">3일</button>
+        <button class="duration-btn active" onclick="pickDur(this)">7일</button>
+        <button class="duration-btn" onclick="pickDur(this)">14일</button>
+        <button class="duration-btn" onclick="pickDur(this)">30일</button>
+        <button class="duration-btn" onclick="pickDur(this)">출발일까지</button>
+      </div>
+    </div>
+
+    <div class="m-foot">
+      <div class="m-foot-info">변경 이력은 <strong>이 상품 활동 로그</strong>에 영구 보존됩니다.</div>
+      <div style="display:flex; gap:8px;">
+        <button class="btn-modal-close" onclick="closeHideModal()">취소</button>
+        <button class="btn-modal-warn" onclick="applyHide()">⊘ 미노출 적용</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+<!-- ============================================================ -->
+<!-- ===== MODAL: 상세 검증 (시계열) ===== -->
+<!-- ============================================================ -->
+<div class="backdrop" id="detailModal" onclick="if(event.target===this) closeDetailModal()">
+  <div class="modal wide">
+    <div class="m-head">
+      <div style="display:flex; align-items:center; gap:10px; flex:1;">
+        <div class="product-thumb">PQ</div>
+        <div>
+          <div class="m-title">푸꾸옥 솔바이멜리아 5일 (오션뷰 BB) <span style="font-family:'SF Mono',monospace; font-size:12px; background:#f5f5f5; padding:2px 8px; border-radius:4px; color:rgba(0,0,0,0.55); margin-left:6px;">PB-58241</span></div>
+          <div class="m-sub">2026.06.05 출발 · 4박 5일 · VJ 인천-푸꾸옥 · 솔바이멜리아 푸꾸옥 (오션뷰 BB)</div>
+        </div>
+      </div>
+      <button class="m-close" onclick="closeDetailModal()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
+    </div>
+
+    <div class="m-body">
+      <!-- 핵심 지표 -->
+      <div class="detail-grid">
+        <div class="detail-block">
+          <div class="detail-block-title">📊 7일 조회수 추이</div>
+          <div class="metric-large">1,243<span class="unit">조회</span></div>
+          <div class="metric-sub-row">
+            <div class="metric-sub-item"><strong style="color:#389e0d;">▲ 18%</strong> 전주 대비</div>
+            <div class="metric-sub-item"><strong>178</strong> 일 평균</div>
+            <div class="metric-sub-item"><strong>22</strong> 위시리스트</div>
+          </div>
+          <div class="timeline-chart" style="margin-top:20px;">
+            <div class="timeline-bar" style="height:60%"><span class="val">142</span><span class="lbl">05.19</span></div>
+            <div class="timeline-bar" style="height:75%"><span class="val">168</span><span class="lbl">05.20</span></div>
+            <div class="timeline-bar" style="height:50%"><span class="val">112</span><span class="lbl">05.21</span></div>
+            <div class="timeline-bar" style="height:85%"><span class="val">192</span><span class="lbl">05.22</span></div>
+            <div class="timeline-bar" style="height:78%"><span class="val">175</span><span class="lbl">05.23</span></div>
+            <div class="timeline-bar" style="height:92%"><span class="val">208</span><span class="lbl">05.24</span></div>
+            <div class="timeline-bar" style="height:100%"><span class="val">246</span><span class="lbl">05.25</span></div>
+          </div>
+        </div>
+
+        <div class="detail-block">
+          <div class="detail-block-title">💰 마진 · 전환</div>
+          <div style="display:grid; grid-template-columns:1fr 1fr; gap:14px;">
+            <div>
+              <div class="metric-large success">12.4<span class="unit">%</span></div>
+              <div class="metric-sub-item">실시간 마진 · 안정</div>
+            </div>
+            <div>
+              <div class="metric-large">1.45<span class="unit">%</span></div>
+              <div class="metric-sub-item">전환율 · <strong>18건</strong> 예약</div>
+            </div>
+          </div>
+          <div style="margin-top:14px; padding-top:12px; border-top:1px dashed #f0f0f0;">
+            <div class="detail-block-title" style="margin-bottom:6px;">경쟁가 분석</div>
+            <div style="font-size:11.5px; color:rgba(0,0,0,0.65); line-height:1.6;">
+              평균가 <strong>₩924k</strong> · 최저가 <strong>₩872k</strong><br>
+              현재가 <strong>₩892k</strong> — 평균 대비 <strong style="color:#389e0d;">−3.5% 우위</strong>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 조합 분석 -->
+      <div class="detail-block" style="margin-bottom:14px;">
+        <div class="detail-block-title">🧩 상품 조합 (자동생성 룰 v2)</div>
+        <div class="combo-list">
+          <div class="combo-item"><div class="ck"><span class="ck-icon">✈</span><strong>VJ8801</strong> · 인천(ICN) → 푸꾸옥(PQC) · 06.05 09:25 출발</div><div class="pr">₩342,000</div></div>
+          <div class="combo-item"><div class="ck"><span class="ck-icon">🏨</span><strong>솔바이멜리아 푸꾸옥</strong> · 오션뷰 (BB · 4박)</div><div class="pr">₩384,000</div></div>
+          <div class="combo-item"><div class="ck"><span class="ck-icon">🚗</span><strong>푸꾸옥 픽업·샌딩</strong> · 공항 ↔ 호텔 (4인 SUV) <span style="color:#0958d9;">🔒 강제</span></div><div class="pr">₩55,000</div></div>
+          <div class="combo-item"><div class="ck"><span class="ck-icon">✈</span><strong>VJ8802</strong> · 푸꾸옥(PQC) → 인천(ICN) · 06.09 14:50 출발</div><div class="pr">₩342,000</div></div>
+        </div>
+      </div>
+
+      <!-- 변경 이력 -->
+      <div class="detail-block">
+        <div class="detail-block-title">📜 변경 이력</div>
+        <div class="history-list">
+          <div class="history-item">
+            <span class="when">05.25 14:32</span>
+            <span class="what">조회수 일 246회 기록 — 출시 후 최고치</span>
+            <span class="who">시스템</span>
+          </div>
+          <div class="history-item">
+            <span class="when">05.22 09:14</span>
+            <span class="what">자동생성 룰 v2 — 가격 <strong>₩908k → ₩892k</strong> 조정 (경쟁가 분석)</span>
+            <span class="who">자동</span>
+          </div>
+          <div class="history-item">
+            <span class="when">05.20 03:00</span>
+            <span class="what"><strong>라이브 노출</strong> 시작 (Stage 2 게이트 통과 — 4개 R 조건 만족)</span>
+            <span class="who">자동</span>
+          </div>
+          <div class="history-item">
+            <span class="when">05.20 02:58</span>
+            <span class="what">자동생성 — 솔바이멜리아 오션뷰 BB × VJ × 6월 1주차</span>
+            <span class="who">자동</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="m-foot">
+      <div class="m-foot-info">자동생성된 상품의 모든 활동은 영구 기록됩니다.</div>
+      <div style="display:flex; gap:8px;">
+        <button class="btn-modal-close" onclick="closeDetailModal()">닫기</button>
+        <button class="btn-modal-warn" onclick="closeDetailModal(); openHideModal('PB-58241', '푸꾸옥 솔바이멜리아 5일');">⊘ 미노출 처리</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+<script>
+let _selectedRows = 0;
+
+function switchSubnav(scope, btn) {
+  if (btn) {
+    btn.parentElement.querySelectorAll('.subnav-item').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+  }
+}
+
+function toggleRow(cb) {
+  const tr = cb.closest('tr');
+  if (cb.checked) {
+    tr.classList.add('selected');
+    _selectedRows++;
+  } else {
+    tr.classList.remove('selected');
+    _selectedRows--;
+  }
+  refreshBulk();
+}
+
+function toggleAll(headCb) {
+  document.querySelectorAll('tbody input[type="checkbox"]:not([disabled])').forEach(cb => {
+    cb.checked = headCb.checked;
+    const tr = cb.closest('tr');
+    if (headCb.checked) { tr.classList.add('selected'); }
+    else { tr.classList.remove('selected'); }
+  });
+  _selectedRows = headCb.checked ? document.querySelectorAll('tbody input[type="checkbox"]:not([disabled])').length : 0;
+  refreshBulk();
+}
+
+function refreshBulk() {
+  const bar = document.getElementById('bulkBar');
+  document.getElementById('bulkCount').textContent = _selectedRows;
+  if (_selectedRows > 0) bar.classList.add('show');
+  else bar.classList.remove('show');
+}
+
+function clearSel() {
+  document.querySelectorAll('tbody input[type="checkbox"]:checked').forEach(cb => { cb.checked = false; cb.closest('tr').classList.remove('selected'); });
+  const h = document.querySelector('thead input[type="checkbox"]'); if (h) h.checked = false;
+  _selectedRows = 0;
+  refreshBulk();
+}
+
+function openHideModal(pid, pname) {
+  document.getElementById('hideTargetId').textContent = pid;
+  document.getElementById('hideTargetName').textContent = pname;
+  document.getElementById('hideReasonText').value = '';
+  document.querySelectorAll('#hideModal .reason-chip').forEach(c => c.classList.remove('active'));
+  document.getElementById('hideModal').classList.add('active');
+  document.body.classList.add('modal-open');
+}
+function closeHideModal() {
+  document.getElementById('hideModal').classList.remove('active');
+  document.body.classList.remove('modal-open');
+}
+function pickType(btn) {
+  btn.parentElement.querySelectorAll('.action-type-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+}
+function pickReason(btn, text) {
+  document.querySelectorAll('#hideModal .reason-chip').forEach(c => c.classList.remove('active'));
+  btn.classList.add('active');
+  document.getElementById('hideReasonText').value = text;
+}
+function pickDur(btn) {
+  btn.parentElement.querySelectorAll('.duration-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+}
+function applyHide() {
+  const val = document.getElementById('hideReasonText').value.trim();
+  if (!val) { alert('사유를 입력해 주세요.'); return; }
+  const type = document.querySelector('#hideModal .action-type-btn.active').dataset.type;
+  alert(`${type === 'hide' ? 'R3 일시 미노출' : 'G4 영구 제외'} 처리 완료\n사유: ${val}\n\n→ Reject Pool로 이동됨 · 변경 이력 저장`);
+  closeHideModal();
+}
+
+function openBulkHideModal() {
+  if (_selectedRows === 0) return;
+  document.getElementById('hideTargetId').textContent = `${_selectedRows}건 일괄`;
+  document.getElementById('hideTargetName').textContent = `선택한 ${_selectedRows}개 상품에 동일 사유로 일괄 적용`;
+  document.getElementById('hideReasonText').value = '';
+  document.querySelectorAll('#hideModal .reason-chip').forEach(c => c.classList.remove('active'));
+  document.getElementById('hideModal').classList.add('active');
+  document.body.classList.add('modal-open');
+}
+
+function openDetailModal() {
+  document.getElementById('detailModal').classList.add('active');
+  document.body.classList.add('modal-open');
+}
+function closeDetailModal() {
+  document.getElementById('detailModal').classList.remove('active');
+  document.body.classList.remove('modal-open');
+}
+
+function reactivate(pid) {
+  if (!confirm(`${pid} — 재노출 처리할까요?\n\n다음 정기 노출 배치(다음 시간 단위)부터 라이브에 표시됩니다.`)) return;
+  alert(`${pid} 재노출 처리 완료. 변경 이력 저장.`);
+}
+
+function confirmBan(pid) {
+  if (!confirm(`${pid} — G4 영구 제외 처리할까요?\n\n⚠ 다음 생성 배치에서도 영구 제외됩니다. 신중히 진행하세요.`)) return;
+  alert(`${pid} 영구 제외(G4 MANUAL_BLOCK_PERM) 완료.`);
+}
+</script>
+</body>
+</html>

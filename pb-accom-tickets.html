@@ -1,0 +1,1506 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>숙박권 관리 — TripStore Partners</title>
+<link href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.6/dist/web/static/pretendard.css" rel="stylesheet">
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: 'Pretendard', 'Apple SD Gothic Neo', -apple-system, sans-serif; font-size: 14px; color: rgba(0,0,0,0.88); background: #f5f5f5; }
+body.modal-open { overflow: hidden; }
+a { color: inherit; text-decoration: none; }
+button { font-family: inherit; cursor: pointer; }
+
+/* ===== GNB ===== */
+.gnb { background: #f0f5ff; height: 48px; display: flex; align-items: center; position: sticky; top: 0; z-index: 100; padding: 0 20px; border-bottom: 1px solid #d6e4ff; box-shadow: 0 1px 4px rgba(0,0,0,0.06); }
+.gnb-logo { color: #222427; font-weight: 800; font-size: 15px; margin-right: 24px; letter-spacing: -0.3px; }
+.gnb-logo span { color: #1677ff; }
+.gnb-logo .partners-badge { background: #1677ff; color: #fff; font-size: 10px; font-weight: 700; padding: 2px 6px; border-radius: 4px; margin-left: 6px; letter-spacing: 0.3px; vertical-align: middle; }
+.gnb-menu { display: flex; gap: 0; }
+.gnb-item { color: rgba(0,0,0,0.55); padding: 0 14px; height: 48px; display: flex; align-items: center; cursor: pointer; font-size: 13px; white-space: nowrap; position: relative; transition: color 0.15s; font-weight: 500; }
+.gnb-item:hover { color: rgba(0,0,0,0.88); }
+.gnb-item.active { color: #1677ff; }
+.gnb-item.active::after { content: ''; position: absolute; bottom: 0; left: 0; right: 0; height: 2px; background: #1677ff; }
+.gnb-right { margin-left: auto; display: flex; align-items: center; gap: 14px; }
+.gnb-user { font-size: 12px; color: rgba(0,0,0,0.55); display: flex; align-items: center; gap: 6px; }
+.gnb-user-name { font-weight: 600; color: rgba(0,0,0,0.75); }
+.gnb-org-badge { background: #fff; border: 1px solid #d6e4ff; color: #1677ff; font-size: 11px; font-weight: 600; padding: 3px 8px; border-radius: 4px; }
+
+/* ===== BREADCRUMB ===== */
+.breadcrumb { padding: 14px 24px 0; font-size: 12px; color: rgba(0,0,0,0.45); display: flex; align-items: center; gap: 6px; }
+.breadcrumb span:not(.sep) { cursor: pointer; transition: color 0.15s; }
+.breadcrumb span:not(.sep):hover { color: #1677ff; }
+.sep { color: rgba(0,0,0,0.2); cursor: default !important; }
+.bc-current { color: rgba(0,0,0,0.88) !important; cursor: default !important; }
+
+/* ===== LAYOUT ===== */
+.layout { padding: 14px 24px 48px; max-width: 1440px; margin: 0 auto; }
+
+/* ===== PAGE HEADER ===== */
+.page-header { margin: 12px 0 18px; display: flex; align-items: flex-end; justify-content: space-between; gap: 14px; flex-wrap: wrap; }
+.page-title-wrap { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+.page-title { font-size: 22px; font-weight: 700; color: rgba(0,0,0,0.88); letter-spacing: -0.3px; }
+.page-desc { font-size: 13px; color: rgba(0,0,0,0.5); margin-top: 4px; }
+.page-actions { display: flex; gap: 8px; }
+
+/* ===== SUB NAV ===== */
+.subnav-card { background: #fff; border: 1px solid #f0f0f0; border-radius: 8px; padding: 4px; margin-bottom: 14px; display: inline-flex; }
+.subnav-item { padding: 8px 18px; font-size: 13px; font-weight: 500; color: rgba(0,0,0,0.55); cursor: pointer; border-radius: 6px; transition: all 0.15s; white-space: nowrap; border: none; background: transparent; font-family: inherit; display: inline-flex; align-items: center; gap: 8px; }
+.subnav-item:hover { color: rgba(0,0,0,0.88); }
+.subnav-item.active { color: #1677ff; background: #e6f4ff; font-weight: 600; }
+.subnav-count { font-size: 11px; padding: 1px 7px; border-radius: 10px; background: rgba(0,0,0,0.05); color: rgba(0,0,0,0.45); font-weight: 700; }
+.subnav-item.active .subnav-count { background: #1677ff; color: #fff; }
+
+/* ===== SUMMARY BANNER ===== */
+.summary { background: linear-gradient(135deg, #f6f9ff 0%, #eef4ff 100%); border: 1px solid #d6e4ff; border-radius: 12px; padding: 16px 22px; margin-bottom: 14px; display: flex; align-items: center; gap: 18px; flex-wrap: wrap; }
+.summary-block { display: flex; flex-direction: column; gap: 3px; }
+.summary-label { font-size: 11px; color: rgba(0,0,0,0.5); font-weight: 600; letter-spacing: 0.3px; text-transform: uppercase; }
+.summary-value { font-size: 14px; color: rgba(0,0,0,0.88); font-weight: 600; }
+.summary-value strong { font-size: 18px; color: #1677ff; font-weight: 800; margin-right: 2px; }
+.summary-value .sub { font-size: 11px; color: rgba(0,0,0,0.45); font-weight: 500; margin-left: 4px; }
+.summary-divider { width: 1px; height: 32px; background: #d6e4ff; }
+.summary .sync-info { margin-left: auto; font-size: 11.5px; color: rgba(0,0,0,0.5); }
+.summary .sync-info strong { color: #1677ff; font-weight: 700; }
+
+/* ===== FILTER ===== */
+.filter-bar { background: #fff; border: 1px solid #f0f0f0; border-radius: 8px 8px 0 0; padding: 12px 16px; display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+.search-wrap { position: relative; }
+.search-wrap input { height: 32px; border: 1px solid #d9d9d9; border-radius: 6px; padding: 0 12px 0 32px; font-size: 13px; font-family: inherit; outline: none; width: 240px; transition: border 0.2s; background: #fff; color: rgba(0,0,0,0.88); }
+.search-wrap input:focus { border-color: #1677ff; box-shadow: 0 0 0 2px rgba(22,119,255,0.1); }
+.search-wrap input::placeholder { color: rgba(0,0,0,0.25); }
+.search-icon { position: absolute; left: 10px; top: 50%; transform: translateY(-50%); color: rgba(0,0,0,0.3); pointer-events: none; }
+.search-icon svg { width: 14px; height: 14px; display: block; }
+.fi { height: 32px; border: 1px solid #d9d9d9; border-radius: 6px; font-size: 13px; font-family: inherit; color: rgba(0,0,0,0.88); outline: none; background: #fff; padding: 0 28px 0 12px; appearance: none; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='%23bbb'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 10px center; cursor: pointer; transition: border 0.2s; min-width: 130px; }
+.fi:focus, .fi:hover { border-color: #1677ff; }
+.filter-total { margin-left: auto; font-size: 12px; color: rgba(0,0,0,0.55); }
+.filter-total strong { color: #1677ff; font-weight: 700; font-size: 13px; }
+
+/* ===== TABLE ===== */
+.main-card { background: #fff; border: 1px solid #f0f0f0; border-top: none; border-radius: 0 0 8px 8px; overflow: hidden; margin-bottom: 16px; }
+.table-wrap { overflow-x: auto; }
+table.tbl { width: 100%; border-collapse: collapse; }
+table.tbl thead th { padding: 11px 16px; text-align: left; font-size: 11px; font-weight: 700; color: rgba(0,0,0,0.45); letter-spacing: 0.4px; text-transform: uppercase; background: #fafbfc; border-bottom: 1px solid #f0f0f0; white-space: nowrap; }
+table.tbl thead th.right { text-align: right; }
+table.tbl thead th.center { text-align: center; }
+table.tbl tbody td { padding: 13px 16px; font-size: 13px; color: rgba(0,0,0,0.88); border-bottom: 1px solid #f5f5f5; vertical-align: middle; }
+table.tbl tbody tr:last-child td { border-bottom: none; }
+table.tbl tbody tr.clickable { cursor: pointer; transition: background 0.12s; }
+table.tbl tbody tr.clickable:hover td { background: #f0f7ff; }
+
+/* ===== HOTEL CELL ===== */
+.hotel-cell { display: flex; align-items: center; gap: 10px; min-width: 0; }
+.hotel-thumb { width: 36px; height: 36px; border-radius: 8px; background: linear-gradient(135deg, #91caff, #1677ff); display: flex; align-items: center; justify-content: center; color: #fff; font-size: 12px; font-weight: 800; flex-shrink: 0; letter-spacing: 0.3px; }
+.hotel-info { min-width: 0; }
+.hotel-name { font-size: 13px; font-weight: 700; color: rgba(0,0,0,0.88); line-height: 1.3; max-width: 220px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.hotel-meta { font-size: 11px; color: rgba(0,0,0,0.45); margin-top: 2px; display: flex; gap: 6px; align-items: center; }
+.hotel-meta .id-pill { background: #f5f5f5; padding: 1px 6px; border-radius: 3px; font-family: 'SF Mono', monospace; font-size: 10.5px; color: rgba(0,0,0,0.55); }
+
+/* ===== PROVIDER PILL ===== */
+.prov-pill { display: inline-flex; align-items: center; gap: 5px; padding: 3px 9px; border-radius: 5px; font-size: 12px; font-weight: 600; }
+.prov-pill .pdot { width: 6px; height: 6px; border-radius: 50%; }
+.prov-pill.tmg { background: #f6ffed; color: #389e0d; border: 1px solid #b7eb8f; }
+.prov-pill.tmg .pdot { background: #389e0d; }
+.prov-pill.sbm { background: #fff7e6; color: #d48806; border: 1px solid #ffd591; }
+.prov-pill.sbm .pdot { background: #d48806; }
+.prov-pill.direct { background: #f5f5f5; color: rgba(0,0,0,0.65); border: 1px solid #e8e8e8; }
+.prov-pill.direct .pdot { background: rgba(0,0,0,0.45); }
+
+/* ===== METHOD BADGE (자동/수동) ===== */
+.method-badge { display: inline-flex; align-items: center; gap: 5px; padding: 4px 10px; border-radius: 5px; font-size: 12px; font-weight: 600; letter-spacing: 0.1px; }
+.method-badge.auto { background: #e6f4ff; color: #0958d9; border: 1px solid #91caff; }
+.method-badge.manual { background: #f9f0ff; color: #722ed1; border: 1px solid #d3adf7; }
+.method-badge svg { width: 11px; height: 11px; }
+
+/* ===== ROOM COUNT CELL ===== */
+.room-count-cell { display: flex; flex-direction: column; align-items: center; gap: 2px; }
+.room-count-main { font-size: 13px; font-weight: 700; color: rgba(0,0,0,0.88); font-variant-numeric: tabular-nums; }
+.room-count-sub { font-size: 10.5px; color: rgba(0,0,0,0.45); font-weight: 500; }
+.room-count-sub strong { color: #389e0d; font-weight: 700; }
+
+/* ===== RATE COUNT CELL ===== */
+.rate-count-cell { display: inline-flex; align-items: center; gap: 6px; }
+.rate-count-num { font-size: 14px; font-weight: 800; color: rgba(0,0,0,0.88); font-variant-numeric: tabular-nums; }
+.rate-count-types { display: flex; gap: 3px; }
+.rate-dot { width: 7px; height: 7px; border-radius: 50%; }
+.rate-dot.static { background: #52c41a; }
+.rate-dot.alm { background: #faad14; }
+.rate-dot.dynamic { background: #ff4d4f; }
+
+/* ===== AUTOGEN STATUS CELL ===== */
+.autogen-status { display: flex; flex-direction: column; align-items: center; gap: 4px; }
+.autogen-ratio { font-size: 13px; font-weight: 700; font-variant-numeric: tabular-nums; }
+.autogen-ratio.full { color: #389e0d; }
+.autogen-ratio.partial { color: #d48806; }
+.autogen-ratio.none { color: rgba(0,0,0,0.35); }
+.autogen-bar { width: 64px; height: 4px; background: #f0f0f0; border-radius: 2px; overflow: hidden; }
+.autogen-bar-fill { height: 100%; background: linear-gradient(90deg, #52c41a, #389e0d); transition: width 0.3s; }
+.autogen-bar-fill.partial { background: linear-gradient(90deg, #faad14, #d48806); }
+.autogen-bar-fill.none { background: rgba(0,0,0,0.15); }
+
+/* ===== STATUS DOT ===== */
+.status-dot { display: inline-flex; align-items: center; gap: 6px; font-size: 12px; font-weight: 600; }
+.status-dot::before { content: ''; width: 6px; height: 6px; border-radius: 50%; background: #52c41a; }
+.status-dot.live::before { background: #52c41a; animation: blink 1.5s infinite; }
+.status-dot.draft { color: rgba(0,0,0,0.55); }
+.status-dot.draft::before { background: #d9d9d9; }
+.status-dot.paused { color: #d48806; }
+.status-dot.paused::before { background: #d48806; }
+@keyframes blink { 0%, 60% { opacity: 1; } 80% { opacity: 0.3; } 100% { opacity: 1; } }
+
+/* ===== PERIOD CELL ===== */
+.period-cell { font-size: 12px; color: rgba(0,0,0,0.65); font-variant-numeric: tabular-nums; white-space: nowrap; line-height: 1.4; }
+.period-cell strong { color: rgba(0,0,0,0.88); font-weight: 600; }
+.period-d { font-size: 10.5px; color: rgba(0,0,0,0.4); }
+
+/* ===== BUTTONS ===== */
+.btn-primary-md { height: 36px; padding: 0 16px; border-radius: 6px; font-size: 13px; font-weight: 600; cursor: pointer; border: 1px solid #1677ff; background: #1677ff; color: #fff; font-family: inherit; display: inline-flex; align-items: center; gap: 6px; transition: all 0.15s; }
+.btn-primary-md:hover { background: #4096ff; }
+.btn-primary-md svg { width: 13px; height: 13px; }
+.btn-ghost-md { height: 36px; padding: 0 14px; border-radius: 6px; font-size: 13px; font-weight: 500; cursor: pointer; border: 1px solid #d9d9d9; background: #fff; color: rgba(0,0,0,0.75); font-family: inherit; display: inline-flex; align-items: center; gap: 6px; transition: all 0.15s; }
+.btn-ghost-md:hover { color: #1677ff; border-color: #1677ff; }
+.btn-ghost-md svg { width: 13px; height: 13px; }
+.btn-rule { height: 28px; padding: 0 12px; border-radius: 6px; font-size: 12px; font-weight: 600; cursor: pointer; border: 1px solid #d9d9d9; background: #fff; color: rgba(0,0,0,0.75); font-family: inherit; display: inline-flex; align-items: center; gap: 4px; transition: all 0.15s; }
+.btn-rule:hover { color: #1677ff; border-color: #1677ff; background: #f0f7ff; }
+.btn-rule svg { width: 11px; height: 11px; }
+.icon-btn { width: 28px; height: 28px; border-radius: 6px; border: 1px solid transparent; background: transparent; color: rgba(0,0,0,0.45); display: inline-flex; align-items: center; justify-content: center; cursor: pointer; transition: all 0.15s; }
+.icon-btn:hover { background: #f0f5ff; color: #1677ff; }
+.icon-btn svg { width: 14px; height: 14px; }
+
+/* ===== PAGINATION ===== */
+.pagination { padding: 12px 20px; display: flex; align-items: center; justify-content: space-between; border-top: 1px solid #f0f0f0; background: #fafbfc; }
+.pag-info { font-size: 12px; color: rgba(0,0,0,0.55); }
+.pag-controls { display: flex; align-items: center; gap: 4px; }
+.pag-btn { min-width: 28px; height: 28px; padding: 0 8px; border: 1px solid #d9d9d9; background: #fff; border-radius: 5px; font-size: 12px; cursor: pointer; color: rgba(0,0,0,0.65); font-family: inherit; }
+.pag-btn:hover { color: #1677ff; border-color: #1677ff; }
+.pag-btn.active { border-color: #1677ff; color: #1677ff; background: #e6f4ff; font-weight: 700; }
+.pag-size { height: 28px; padding: 0 24px 0 8px; border: 1px solid #d9d9d9; background: #fff; border-radius: 5px; font-size: 12px; color: rgba(0,0,0,0.65); appearance: none; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='8' height='5'%3E%3Cpath d='M0 0l4 5 4-5z' fill='%23bbb'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 8px center; }
+
+/* ===== FOOTNOTE ===== */
+.footnote { display: flex; align-items: flex-start; gap: 8px; padding: 12px 16px; background: #fff7e6; border: 1px solid #ffd666; border-radius: 8px; font-size: 12px; color: #874d00; line-height: 1.7; }
+.footnote svg { width: 14px; height: 14px; flex-shrink: 0; margin-top: 2px; color: #d48806; }
+
+/* ===== MODAL ===== */
+.backdrop { position: fixed; inset: 0; background: rgba(0,21,41,0.45); backdrop-filter: blur(2px); z-index: 1000; display: none; align-items: center; justify-content: center; padding: 32px 24px; animation: fadeIn 0.2s ease-out; }
+.backdrop.active { display: flex; }
+@keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+.modal { background: #fff; border-radius: 14px; box-shadow: 0 20px 60px rgba(0,0,0,0.25); width: 100%; max-width: 960px; max-height: calc(100vh - 64px); display: flex; flex-direction: column; overflow: hidden; animation: slideUp 0.25s ease-out; }
+@keyframes slideUp { from { transform: translateY(20px); opacity: 0.5; } to { transform: translateY(0); opacity: 1; } }
+.m-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 16px; padding: 22px 24px 16px; border-bottom: 1px solid #f0f0f0; }
+.m-title-wrap { display: flex; flex-direction: column; gap: 4px; flex: 1; min-width: 0; }
+.m-title { font-size: 18px; font-weight: 700; color: rgba(0,0,0,0.88); letter-spacing: -0.3px; display: flex; align-items: center; gap: 10px; }
+.m-title svg { width: 18px; height: 18px; color: #1677ff; flex-shrink: 0; }
+.m-sub { font-size: 12px; color: rgba(0,0,0,0.5); }
+.m-close { width: 32px; height: 32px; border-radius: 8px; border: 1px solid transparent; background: transparent; color: rgba(0,0,0,0.45); display: flex; align-items: center; justify-content: center; cursor: pointer; transition: all 0.15s; flex-shrink: 0; }
+.m-close:hover { background: #f5f5f5; color: rgba(0,0,0,0.88); }
+.m-close svg { width: 16px; height: 16px; }
+.m-meta-row { display: flex; align-items: center; gap: 14px; padding: 12px 24px; background: #fafbfc; border-bottom: 1px solid #f0f0f0; font-size: 12px; flex-wrap: wrap; }
+.m-meta-item { display: flex; align-items: center; gap: 6px; }
+.m-meta-label { color: rgba(0,0,0,0.5); font-weight: 600; letter-spacing: 0.2px; }
+.m-meta-value { color: rgba(0,0,0,0.88); font-weight: 600; }
+.m-meta-divider { width: 1px; height: 14px; background: #e8e8e8; }
+.m-body { overflow-y: auto; flex: 1; padding: 16px 24px; }
+.m-foot { padding: 14px 24px; border-top: 1px solid #f0f0f0; display: flex; align-items: center; justify-content: space-between; background: #fafbfc; }
+.m-foot-info { font-size: 12px; color: rgba(0,0,0,0.55); }
+.m-foot-info strong { color: #1677ff; font-weight: 700; }
+.btn-modal-close { height: 34px; padding: 0 14px; border-radius: 6px; font-size: 13px; cursor: pointer; border: 1px solid #d9d9d9; background: #fff; color: rgba(0,0,0,0.88); font-family: inherit; font-weight: 500; transition: all 0.15s; }
+.btn-modal-close:hover { color: #1677ff; border-color: #1677ff; }
+.btn-modal-primary { height: 34px; padding: 0 18px; border-radius: 6px; font-size: 13px; font-weight: 600; cursor: pointer; border: 1px solid #1677ff; background: #1677ff; color: #fff; font-family: inherit; transition: all 0.15s; margin-left: 8px; }
+.btn-modal-primary:hover { background: #4096ff; }
+
+/* ===== RULE MODAL — 요금표/객실 ===== */
+.bulk-action-bar { background: linear-gradient(135deg, #fffbe6 0%, #fff7e6 100%); border: 1px solid #ffd666; border-radius: 10px; padding: 12px 16px; margin-bottom: 14px; display: flex; align-items: center; gap: 14px; flex-wrap: wrap; }
+.bulk-action-info { font-size: 12.5px; color: #874d00; line-height: 1.5; }
+.bulk-action-info strong { color: #ad6800; font-weight: 800; }
+.bulk-action-right { margin-left: auto; display: flex; gap: 6px; }
+.btn-bulk { height: 30px; padding: 0 12px; border-radius: 6px; font-size: 12px; font-weight: 600; cursor: pointer; border: 1px solid #d9d9d9; background: #fff; color: rgba(0,0,0,0.75); font-family: inherit; transition: all 0.15s; display: inline-flex; align-items: center; gap: 4px; }
+.btn-bulk:hover { color: #1677ff; border-color: #1677ff; }
+.btn-bulk.on:hover { color: #389e0d; border-color: #389e0d; background: #f6ffed; }
+.btn-bulk.off:hover { color: #d48806; border-color: #d48806; background: #fff7e6; }
+
+/* 요금표 카드 */
+.rate-card { background: #fff; border: 1px solid #e8e8e8; border-radius: 10px; margin-bottom: 12px; overflow: hidden; transition: border 0.15s; }
+.rate-card.open { border-color: #91caff; box-shadow: 0 2px 8px rgba(22,119,255,0.06); }
+.rate-card-head { padding: 14px 16px; display: flex; align-items: center; gap: 12px; cursor: pointer; user-select: none; transition: background 0.15s; }
+.rate-card-head:hover { background: #fafbff; }
+.rate-chev { color: rgba(0,0,0,0.35); transition: transform 0.2s; flex-shrink: 0; }
+.rate-card.open .rate-chev { transform: rotate(90deg); color: #1677ff; }
+.rate-chev svg { width: 14px; height: 14px; display: block; }
+.rate-card-main { flex: 1; min-width: 0; }
+.rate-card-title-row { display: flex; align-items: center; gap: 8px; margin-bottom: 4px; flex-wrap: wrap; }
+.rate-name { font-size: 14px; font-weight: 700; color: rgba(0,0,0,0.88); }
+.rate-id-pill { background: #f5f5f5; padding: 1px 7px; border-radius: 3px; font-family: 'SF Mono', monospace; font-size: 10.5px; color: rgba(0,0,0,0.55); font-weight: 500; }
+.rate-type-tag { display: inline-flex; align-items: center; gap: 4px; padding: 2px 8px; border-radius: 4px; font-size: 11px; font-weight: 700; }
+.rate-type-tag.static { background: #f6ffed; color: #389e0d; border: 1px solid #b7eb8f; }
+.rate-type-tag.alm { background: #fffbe6; color: #d48806; border: 1px solid #ffe58f; }
+.rate-type-tag.dynamic { background: #fff1f0; color: #cf1322; border: 1px solid #ffa39e; }
+.rate-card-meta { display: flex; gap: 12px; font-size: 11.5px; color: rgba(0,0,0,0.5); flex-wrap: wrap; }
+.rate-card-meta span { display: flex; align-items: center; gap: 4px; }
+.rate-card-meta strong { color: rgba(0,0,0,0.75); font-weight: 600; }
+.rate-card-summary { font-size: 11.5px; color: rgba(0,0,0,0.55); flex-shrink: 0; text-align: right; }
+.rate-card-summary strong { color: #389e0d; font-weight: 800; font-size: 13px; }
+.rate-card-summary .of { color: rgba(0,0,0,0.4); font-weight: 500; }
+.rate-bulk-btns { display: flex; gap: 5px; flex-shrink: 0; }
+.btn-rate-bulk { height: 26px; padding: 0 10px; border-radius: 5px; font-size: 11.5px; font-weight: 600; cursor: pointer; border: 1px solid #e8e8e8; background: #fff; color: rgba(0,0,0,0.65); font-family: inherit; transition: all 0.15s; }
+.btn-rate-bulk:hover { color: #1677ff; border-color: #1677ff; }
+.rate-card-body { display: none; border-top: 1px solid #f0f0f0; }
+.rate-card.open .rate-card-body { display: block; }
+
+/* 객실 룰 테이블 */
+.room-rule-table { width: 100%; border-collapse: collapse; }
+.room-rule-table thead th { padding: 9px 14px; background: #fafbfc; font-size: 10.5px; font-weight: 700; color: rgba(0,0,0,0.45); text-align: left; letter-spacing: 0.4px; text-transform: uppercase; border-bottom: 1px solid #f0f0f0; }
+.room-rule-table thead th.center { text-align: center; }
+.room-rule-table thead th.right { text-align: right; }
+.room-rule-table tbody td { padding: 11px 14px; font-size: 12.5px; color: rgba(0,0,0,0.88); border-bottom: 1px solid #f5f5f5; vertical-align: middle; }
+.room-rule-table tbody tr:last-child td { border-bottom: none; }
+.room-rule-table tbody tr:hover td { background: #fafbff; }
+.room-name { font-size: 13px; font-weight: 700; color: rgba(0,0,0,0.88); }
+.room-sub { font-size: 11px; color: rgba(0,0,0,0.45); margin-top: 2px; }
+.meal-pill { display: inline-block; padding: 2px 7px; border-radius: 3px; font-size: 11px; font-weight: 600; background: #f5f5f5; color: rgba(0,0,0,0.65); }
+.meal-pill.bb { background: #e6f4ff; color: #1677ff; }
+.meal-pill.hb { background: #f9f0ff; color: #722ed1; }
+.meal-pill.fb { background: #fff7e6; color: #d48806; }
+.meal-pill.ai { background: #fff1f0; color: #cf1322; }
+.price-cell { font-size: 13px; font-weight: 700; color: rgba(0,0,0,0.88); font-variant-numeric: tabular-nums; text-align: right; }
+.price-cell .unit { font-size: 10.5px; color: rgba(0,0,0,0.4); font-weight: 500; margin-left: 2px; }
+
+/* AUTOGEN TOGGLE SWITCH */
+.autogen-cell { display: flex; flex-direction: column; align-items: center; gap: 4px; }
+.autogen-switch { position: relative; display: inline-block; width: 38px; height: 22px; }
+.autogen-switch input { opacity: 0; width: 0; height: 0; }
+.autogen-slider { position: absolute; cursor: pointer; inset: 0; background: #d9d9d9; border-radius: 22px; transition: 0.2s; }
+.autogen-slider::before { content: ''; position: absolute; height: 16px; width: 16px; left: 3px; top: 3px; background: #fff; border-radius: 50%; transition: 0.2s; box-shadow: 0 1px 2px rgba(0,0,0,0.15); }
+.autogen-switch input:checked + .autogen-slider { background: #52c41a; }
+.autogen-switch input:checked + .autogen-slider::before { transform: translateX(16px); }
+.autogen-switch input:disabled + .autogen-slider { background: #f0f0f0; cursor: not-allowed; }
+.autogen-mini-label { font-size: 10.5px; font-weight: 700; letter-spacing: 0.3px; }
+.autogen-mini-label.on { color: #389e0d; }
+.autogen-mini-label.off { color: rgba(0,0,0,0.4); }
+.autogen-reason { font-size: 11px; color: #d48806; font-style: italic; margin-top: 4px; padding: 4px 8px; background: #fff7e6; border-radius: 4px; display: inline-block; max-width: 220px; line-height: 1.4; }
+
+/* ===== OFF REASON MODAL ===== */
+.backdrop.layer-2 { z-index: 1100; background: rgba(0,21,41,0.55); }
+.modal.sm { max-width: 520px; }
+.off-modal-icon { width: 44px; height: 44px; border-radius: 50%; background: #fff7e6; border: 1px solid #ffd591; display: flex; align-items: center; justify-content: center; color: #d48806; flex-shrink: 0; }
+.off-modal-icon svg { width: 22px; height: 22px; }
+.off-target-banner { background: linear-gradient(135deg, #fffbe6 0%, #fff7e6 100%); border: 1px solid #ffe58f; border-radius: 10px; padding: 12px 14px; margin-bottom: 18px; display: flex; align-items: center; gap: 12px; }
+.off-target-banner .ot-label { font-size: 10.5px; color: #874d00; font-weight: 700; letter-spacing: 0.4px; text-transform: uppercase; margin-bottom: 3px; }
+.off-target-banner .ot-value { font-size: 13.5px; color: rgba(0,0,0,0.88); font-weight: 700; }
+.off-target-banner .ot-count { font-size: 12px; color: #d48806; font-weight: 600; margin-top: 2px; }
+
+.reason-section-label { font-size: 12px; color: rgba(0,0,0,0.65); font-weight: 700; margin-bottom: 8px; display: flex; align-items: center; gap: 6px; }
+.reason-section-label .req { color: #f5222d; font-weight: 600; }
+.reason-section-label .hint { color: rgba(0,0,0,0.4); font-weight: 500; font-size: 11px; margin-left: auto; }
+
+.reason-chips { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 14px; }
+.reason-chip { padding: 6px 12px; border-radius: 16px; border: 1px solid #e8e8e8; background: #fff; color: rgba(0,0,0,0.65); font-size: 12px; font-weight: 500; cursor: pointer; font-family: inherit; transition: all 0.15s; }
+.reason-chip:hover { color: #1677ff; border-color: #91caff; background: #f0f7ff; }
+.reason-chip.active { color: #1677ff; border-color: #1677ff; background: #e6f4ff; font-weight: 600; }
+
+.reason-textarea { width: 100%; min-height: 80px; padding: 10px 12px; border: 1px solid #d9d9d9; border-radius: 8px; font-size: 13px; font-family: inherit; color: rgba(0,0,0,0.88); outline: none; resize: vertical; line-height: 1.6; background: #fff; transition: border 0.15s, box-shadow 0.15s; }
+.reason-textarea:focus { border-color: #1677ff; box-shadow: 0 0 0 2px rgba(22,119,255,0.1); }
+.reason-textarea::placeholder { color: rgba(0,0,0,0.3); }
+.reason-helper { font-size: 11.5px; color: rgba(0,0,0,0.45); margin-top: 6px; line-height: 1.5; display: flex; align-items: flex-start; gap: 4px; }
+
+.btn-modal-warn { height: 34px; padding: 0 18px; border-radius: 6px; font-size: 13px; font-weight: 600; cursor: pointer; border: 1px solid #d48806; background: #d48806; color: #fff; font-family: inherit; transition: all 0.15s; margin-left: 8px; display: inline-flex; align-items: center; gap: 5px; }
+.btn-modal-warn:hover { background: #ad6800; }
+.btn-modal-warn svg { width: 13px; height: 13px; }
+
+</style>
+</head>
+<body>
+
+<!-- ===== GNB ===== -->
+<nav class="gnb">
+  <div class="gnb-logo">Trip<span>Store</span> <span class="partners-badge">PARTNERS</span></div>
+  <div class="gnb-menu">
+    <div class="gnb-item">대시보드</div>
+    <div class="gnb-item">페이지 제작</div>
+    <div class="gnb-item active">상품 관리</div>
+    <div class="gnb-item">예약 관리</div>
+    <div class="gnb-item">PB 관리</div>
+    <div class="gnb-item">카탈로그</div>
+    <div class="gnb-item">쿠폰</div>
+    <div class="gnb-item">정산</div>
+  </div>
+  <div class="gnb-right">
+    <span class="gnb-org-badge">트립스토어</span>
+    <span class="gnb-user"><span class="gnb-user-name">김서현</span>님</span>
+  </div>
+</nav>
+
+<!-- ===== BREADCRUMB ===== -->
+<div class="breadcrumb">
+  <span>상품 관리</span>
+  <span class="sep">/</span>
+  <span class="bc-current">숙박권 관리</span>
+</div>
+
+<div class="layout">
+
+  <!-- ===== PAGE HEADER ===== -->
+  <div class="page-header">
+    <div>
+      <div class="page-title-wrap">
+        <div class="page-title">숙박권 관리</div>
+      </div>
+      <div class="page-desc">PB 자동생성 대상이 되는 숙박권을 관리합니다. 요금표 × 객실 단위로 자동생성 룰을 설정할 수 있습니다.</div>
+    </div>
+    <div class="page-actions">
+      <button class="btn-ghost-md" onclick="alert('새벽 sync 이력 화면 — 매일 03:00 TMG 메타 sync 결과')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+        새벽 sync 이력
+      </button>
+      <a class="btn-primary-md" href="accom-ticket-create.html" style="text-decoration:none;">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+        숙박권 직접 등록
+      </a>
+    </div>
+  </div>
+
+  <!-- ===== SUB NAV ===== -->
+  <div class="subnav-card">
+    <button class="subnav-item active" onclick="switchMethod(this,'all')">전체 <span class="subnav-count">342</span></button>
+    <button class="subnav-item" onclick="switchMethod(this,'auto')">🤖 자동생성 <span class="subnav-count">285</span></button>
+    <button class="subnav-item" onclick="switchMethod(this,'manual')">✋ 수동등록 <span class="subnav-count">57</span></button>
+  </div>
+
+  <!-- ===== SUMMARY ===== -->
+  <div class="summary">
+    <div class="summary-block">
+      <div class="summary-label">자동생성 대상 ON</div>
+      <div class="summary-value"><strong>218</strong>건 <span class="sub">/ 객실룰 1,247개</span></div>
+    </div>
+    <div class="summary-divider"></div>
+    <div class="summary-block">
+      <div class="summary-label">일부 OFF (혼합)</div>
+      <div class="summary-value"><strong style="color:#d48806">67</strong>건 <span class="sub">/ 사유 보기</span></div>
+    </div>
+    <div class="summary-divider"></div>
+    <div class="summary-block">
+      <div class="summary-label">전체 OFF (대기)</div>
+      <div class="summary-value"><strong style="color:rgba(0,0,0,0.45)">57</strong>건</div>
+    </div>
+    <div class="summary-divider"></div>
+    <div class="summary-block">
+      <div class="summary-label">라이브 PB 상품에 적용중</div>
+      <div class="summary-value"><strong>192</strong>건</div>
+    </div>
+    <div class="sync-info">
+      마지막 sync <strong>2026-05-22 03:00</strong><br>
+      <span style="font-size:10.5px; color:rgba(0,0,0,0.4);">새벽 배치 — 매일 03:00 자동 실행</span>
+    </div>
+  </div>
+
+  <!-- ===== FILTER ===== -->
+  <div class="filter-bar">
+    <div class="search-wrap">
+      <span class="search-icon">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+      </span>
+      <input type="text" placeholder="숙박권 ID · 숙소명 검색">
+    </div>
+    <select class="fi">
+      <option>공급사 전체</option>
+      <option>TMG (자동 sync)</option>
+      <option>Sol by Melia</option>
+      <option>직접 계약</option>
+    </select>
+    <select class="fi">
+      <option>여행지 전체</option>
+      <option>푸꾸옥</option>
+      <option>나트랑</option>
+      <option>다낭</option>
+      <option>호치민</option>
+      <option>하노이</option>
+    </select>
+    <select class="fi">
+      <option>등록방식 전체</option>
+      <option>자동생성</option>
+      <option>수동등록</option>
+    </select>
+    <select class="fi">
+      <option>자동생성 상태</option>
+      <option>전체 ON</option>
+      <option>일부 OFF</option>
+      <option>전체 OFF</option>
+    </select>
+    <select class="fi">
+      <option>요금타입 전체</option>
+      <option>고정요금</option>
+      <option>재고변동요금</option>
+      <option>다이나믹요금</option>
+    </select>
+    <div class="filter-total">총 <strong>342</strong>건</div>
+  </div>
+
+  <!-- ===== TABLE ===== -->
+  <div class="main-card">
+    <div class="table-wrap">
+      <table class="tbl">
+        <thead>
+          <tr>
+            <th>숙박권</th>
+            <th>공급사</th>
+            <th>등록방식</th>
+            <th class="center">요금표</th>
+            <th class="center">객실</th>
+            <th class="center">자동생성 ON 비율</th>
+            <th>판매기간</th>
+            <th>상태</th>
+            <th class="center"></th>
+          </tr>
+        </thead>
+        <tbody>
+          <!-- 1. TMG 자동 — 전체 ON -->
+          <tr class="clickable">
+            <td>
+              <div class="hotel-cell">
+                <div class="hotel-thumb">VL</div>
+                <div class="hotel-info">
+                  <div class="hotel-name">Vinpearl Luxury Landmark 81</div>
+                  <div class="hotel-meta"><span class="id-pill">ACT-48205</span><span>호치민</span></div>
+                </div>
+              </div>
+            </td>
+            <td><span class="prov-pill tmg"><span class="pdot"></span>TMG</span></td>
+            <td>
+              <span class="method-badge auto">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 9 6 9 3 15 3 15 6 21 6"/><path d="M5 6v12a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V6"/></svg>
+                자동생성
+              </span>
+            </td>
+            <td style="text-align:center;">
+              <div class="rate-count-cell">
+                <span class="rate-count-num">3</span>
+                <span class="rate-count-types">
+                  <span class="rate-dot static" title="고정요금"></span>
+                  <span class="rate-dot dynamic" title="다이나믹요금"></span>
+                  <span class="rate-dot dynamic" title="다이나믹요금"></span>
+                </span>
+              </div>
+            </td>
+            <td>
+              <div class="room-count-cell">
+                <div class="room-count-main">15개</div>
+                <div class="room-count-sub"><strong>15 ON</strong></div>
+              </div>
+            </td>
+            <td>
+              <div class="autogen-status">
+                <div class="autogen-ratio full">100%</div>
+                <div class="autogen-bar"><div class="autogen-bar-fill" style="width:100%"></div></div>
+              </div>
+            </td>
+            <td>
+              <div class="period-cell">
+                <strong>2026.04.29 ~ 2031.04.29</strong>
+                <span class="period-d">D+5년 자동</span>
+              </div>
+            </td>
+            <td><span class="status-dot live">라이브</span></td>
+            <td style="text-align:center;">
+              <button class="btn-rule" onclick="openRuleModal('Vinpearl Luxury Landmark 81', 'ACT-48205', 'TMG', 'auto')">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4z"/></svg>
+                룰 관리
+              </button>
+            </td>
+          </tr>
+
+          <!-- 2. TMG 자동 — 부분 OFF -->
+          <tr class="clickable">
+            <td>
+              <div class="hotel-cell">
+                <div class="hotel-thumb" style="background:linear-gradient(135deg,#ffa39e,#cf1322);">VR</div>
+                <div class="hotel-info">
+                  <div class="hotel-name">Vinpearl Resort &amp; Spa Long Beach</div>
+                  <div class="hotel-meta"><span class="id-pill">ACT-48198</span><span>푸꾸옥</span></div>
+                </div>
+              </div>
+            </td>
+            <td><span class="prov-pill tmg"><span class="pdot"></span>TMG</span></td>
+            <td><span class="method-badge auto"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><polyline points="3 6 9 6 9 3 15 3 15 6 21 6"/><path d="M5 6v12a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V6"/></svg> 자동생성</span></td>
+            <td style="text-align:center;">
+              <div class="rate-count-cell">
+                <span class="rate-count-num">5</span>
+                <span class="rate-count-types">
+                  <span class="rate-dot static"></span><span class="rate-dot static"></span>
+                  <span class="rate-dot alm"></span><span class="rate-dot dynamic"></span><span class="rate-dot dynamic"></span>
+                </span>
+              </div>
+            </td>
+            <td>
+              <div class="room-count-cell">
+                <div class="room-count-main">22개</div>
+                <div class="room-count-sub"><strong>17 ON</strong> / 5 OFF</div>
+              </div>
+            </td>
+            <td>
+              <div class="autogen-status">
+                <div class="autogen-ratio partial">77%</div>
+                <div class="autogen-bar"><div class="autogen-bar-fill partial" style="width:77%"></div></div>
+              </div>
+            </td>
+            <td>
+              <div class="period-cell">
+                <strong>2026.05.01 ~ 12.31</strong>
+                <span class="period-d">D+8개월</span>
+              </div>
+            </td>
+            <td><span class="status-dot live">라이브</span></td>
+            <td style="text-align:center;">
+              <button class="btn-rule" onclick="openRuleModal('Vinpearl Resort &amp; Spa Long Beach', 'ACT-48198', 'TMG', 'auto')">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4z"/></svg>
+                룰 관리
+              </button>
+            </td>
+          </tr>
+
+          <!-- 3. TMG 자동 — 전체 OFF -->
+          <tr class="clickable">
+            <td>
+              <div class="hotel-cell">
+                <div class="hotel-thumb" style="background:linear-gradient(135deg,#ffe58f,#d48806);">VD</div>
+                <div class="hotel-info">
+                  <div class="hotel-name">Vinpearl Discovery Greenhill</div>
+                  <div class="hotel-meta"><span class="id-pill">ACT-48190</span><span>푸꾸옥</span></div>
+                </div>
+              </div>
+            </td>
+            <td><span class="prov-pill tmg"><span class="pdot"></span>TMG</span></td>
+            <td><span class="method-badge auto"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><polyline points="3 6 9 6 9 3 15 3 15 6 21 6"/><path d="M5 6v12a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V6"/></svg> 자동생성</span></td>
+            <td style="text-align:center;">
+              <div class="rate-count-cell">
+                <span class="rate-count-num">2</span>
+                <span class="rate-count-types"><span class="rate-dot dynamic"></span><span class="rate-dot dynamic"></span></span>
+              </div>
+            </td>
+            <td>
+              <div class="room-count-cell">
+                <div class="room-count-main">8개</div>
+                <div class="room-count-sub">0 ON / 8 OFF</div>
+              </div>
+            </td>
+            <td>
+              <div class="autogen-status">
+                <div class="autogen-ratio none">0%</div>
+                <div class="autogen-bar"><div class="autogen-bar-fill none" style="width:100%"></div></div>
+              </div>
+            </td>
+            <td>
+              <div class="period-cell">
+                <strong>2026.06.01 ~ 09.30</strong>
+                <span class="period-d">D+4개월</span>
+              </div>
+            </td>
+            <td><span class="status-dot paused">노출중단</span></td>
+            <td style="text-align:center;">
+              <button class="btn-rule" onclick="openRuleModal('Vinpearl Discovery Greenhill', 'ACT-48190', 'TMG', 'auto')">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4z"/></svg>
+                룰 관리
+              </button>
+            </td>
+          </tr>
+
+          <!-- 4. Sol by Melia — 수동 -->
+          <tr class="clickable">
+            <td>
+              <div class="hotel-cell">
+                <div class="hotel-thumb" style="background:linear-gradient(135deg,#d3adf7,#722ed1);">SM</div>
+                <div class="hotel-info">
+                  <div class="hotel-name">Sol by Melia Phu Quoc</div>
+                  <div class="hotel-meta"><span class="id-pill">ACT-30142</span><span>푸꾸옥</span></div>
+                </div>
+              </div>
+            </td>
+            <td><span class="prov-pill sbm"><span class="pdot"></span>Sol by Melia</span></td>
+            <td><span class="method-badge manual"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4z"/></svg> 수동등록</span></td>
+            <td style="text-align:center;">
+              <div class="rate-count-cell">
+                <span class="rate-count-num">2</span>
+                <span class="rate-count-types"><span class="rate-dot static"></span><span class="rate-dot static"></span></span>
+              </div>
+            </td>
+            <td>
+              <div class="room-count-cell">
+                <div class="room-count-main">6개</div>
+                <div class="room-count-sub"><strong>6 ON</strong></div>
+              </div>
+            </td>
+            <td>
+              <div class="autogen-status">
+                <div class="autogen-ratio full">100%</div>
+                <div class="autogen-bar"><div class="autogen-bar-fill" style="width:100%"></div></div>
+              </div>
+            </td>
+            <td>
+              <div class="period-cell">
+                <strong>2026.05.15 ~ 10.31</strong>
+                <span class="period-d">D+5개월</span>
+              </div>
+            </td>
+            <td><span class="status-dot live">라이브</span></td>
+            <td style="text-align:center;">
+              <button class="btn-rule" onclick="openRuleModal('Sol by Melia Phu Quoc', 'ACT-30142', 'Sol by Melia', 'manual')">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4z"/></svg>
+                룰 관리
+              </button>
+            </td>
+          </tr>
+
+          <!-- 5. TMG 자동 — 전체 ON -->
+          <tr class="clickable">
+            <td>
+              <div class="hotel-cell">
+                <div class="hotel-thumb">JW</div>
+                <div class="hotel-info">
+                  <div class="hotel-name">JW Marriott Phu Quoc</div>
+                  <div class="hotel-meta"><span class="id-pill">ACT-47098</span><span>푸꾸옥</span></div>
+                </div>
+              </div>
+            </td>
+            <td><span class="prov-pill tmg"><span class="pdot"></span>TMG</span></td>
+            <td><span class="method-badge auto"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><polyline points="3 6 9 6 9 3 15 3 15 6 21 6"/><path d="M5 6v12a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V6"/></svg> 자동생성</span></td>
+            <td style="text-align:center;">
+              <div class="rate-count-cell">
+                <span class="rate-count-num">4</span>
+                <span class="rate-count-types"><span class="rate-dot static"></span><span class="rate-dot static"></span><span class="rate-dot alm"></span><span class="rate-dot alm"></span></span>
+              </div>
+            </td>
+            <td>
+              <div class="room-count-cell">
+                <div class="room-count-main">12개</div>
+                <div class="room-count-sub"><strong>12 ON</strong></div>
+              </div>
+            </td>
+            <td>
+              <div class="autogen-status">
+                <div class="autogen-ratio full">100%</div>
+                <div class="autogen-bar"><div class="autogen-bar-fill" style="width:100%"></div></div>
+              </div>
+            </td>
+            <td>
+              <div class="period-cell">
+                <strong>2026.04.01 ~ 12.31</strong>
+                <span class="period-d">D+8개월</span>
+              </div>
+            </td>
+            <td><span class="status-dot live">라이브</span></td>
+            <td style="text-align:center;">
+              <button class="btn-rule" onclick="openRuleModal('JW Marriott Phu Quoc', 'ACT-47098', 'TMG', 'auto')">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4z"/></svg>
+                룰 관리
+              </button>
+            </td>
+          </tr>
+
+          <!-- 6. TMG 자동 — 부분 OFF -->
+          <tr class="clickable">
+            <td>
+              <div class="hotel-cell">
+                <div class="hotel-thumb" style="background:linear-gradient(135deg,#87e8de,#08979c);">FR</div>
+                <div class="hotel-info">
+                  <div class="hotel-name">Fusion Resort Cam Ranh</div>
+                  <div class="hotel-meta"><span class="id-pill">ACT-47095</span><span>나트랑</span></div>
+                </div>
+              </div>
+            </td>
+            <td><span class="prov-pill tmg"><span class="pdot"></span>TMG</span></td>
+            <td><span class="method-badge auto"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><polyline points="3 6 9 6 9 3 15 3 15 6 21 6"/><path d="M5 6v12a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V6"/></svg> 자동생성</span></td>
+            <td style="text-align:center;">
+              <div class="rate-count-cell">
+                <span class="rate-count-num">3</span>
+                <span class="rate-count-types"><span class="rate-dot alm"></span><span class="rate-dot alm"></span><span class="rate-dot dynamic"></span></span>
+              </div>
+            </td>
+            <td>
+              <div class="room-count-cell">
+                <div class="room-count-main">9개</div>
+                <div class="room-count-sub"><strong>6 ON</strong> / 3 OFF</div>
+              </div>
+            </td>
+            <td>
+              <div class="autogen-status">
+                <div class="autogen-ratio partial">67%</div>
+                <div class="autogen-bar"><div class="autogen-bar-fill partial" style="width:67%"></div></div>
+              </div>
+            </td>
+            <td>
+              <div class="period-cell">
+                <strong>2026.06.01 ~ 09.30</strong>
+                <span class="period-d">D+4개월</span>
+              </div>
+            </td>
+            <td><span class="status-dot live">라이브</span></td>
+            <td style="text-align:center;">
+              <button class="btn-rule" onclick="openRuleModal('Fusion Resort Cam Ranh', 'ACT-47095', 'TMG', 'auto')">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4z"/></svg>
+                룰 관리
+              </button>
+            </td>
+          </tr>
+
+          <!-- 7. TMG 자동 — 전체 ON -->
+          <tr class="clickable">
+            <td>
+              <div class="hotel-cell">
+                <div class="hotel-thumb" style="background:linear-gradient(135deg,#ffadd2,#c41d7f);">IC</div>
+                <div class="hotel-info">
+                  <div class="hotel-name">InterContinental Danang Sun Peninsula</div>
+                  <div class="hotel-meta"><span class="id-pill">ACT-46853</span><span>다낭</span></div>
+                </div>
+              </div>
+            </td>
+            <td><span class="prov-pill tmg"><span class="pdot"></span>TMG</span></td>
+            <td><span class="method-badge auto"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><polyline points="3 6 9 6 9 3 15 3 15 6 21 6"/><path d="M5 6v12a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V6"/></svg> 자동생성</span></td>
+            <td style="text-align:center;">
+              <div class="rate-count-cell">
+                <span class="rate-count-num">3</span>
+                <span class="rate-count-types"><span class="rate-dot static"></span><span class="rate-dot static"></span><span class="rate-dot static"></span></span>
+              </div>
+            </td>
+            <td>
+              <div class="room-count-cell">
+                <div class="room-count-main">10개</div>
+                <div class="room-count-sub"><strong>10 ON</strong></div>
+              </div>
+            </td>
+            <td>
+              <div class="autogen-status">
+                <div class="autogen-ratio full">100%</div>
+                <div class="autogen-bar"><div class="autogen-bar-fill" style="width:100%"></div></div>
+              </div>
+            </td>
+            <td>
+              <div class="period-cell">
+                <strong>2026.05.15 ~ 11.15</strong>
+                <span class="period-d">D+6개월</span>
+              </div>
+            </td>
+            <td><span class="status-dot live">라이브</span></td>
+            <td style="text-align:center;">
+              <button class="btn-rule" onclick="openRuleModal('InterContinental Danang Sun Peninsula', 'ACT-46853', 'TMG', 'auto')">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4z"/></svg>
+                룰 관리
+              </button>
+            </td>
+          </tr>
+
+          <!-- 8. 직접계약 — 수동 -->
+          <tr class="clickable">
+            <td>
+              <div class="hotel-cell">
+                <div class="hotel-thumb" style="background:linear-gradient(135deg,#bfbfbf,#595959);">SH</div>
+                <div class="hotel-info">
+                  <div class="hotel-name">Soneva Hideaway Phu Quoc</div>
+                  <div class="hotel-meta"><span class="id-pill">ACT-20881</span><span>푸꾸옥</span></div>
+                </div>
+              </div>
+            </td>
+            <td><span class="prov-pill direct"><span class="pdot"></span>직접 계약</span></td>
+            <td><span class="method-badge manual"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4z"/></svg> 수동등록</span></td>
+            <td style="text-align:center;">
+              <div class="rate-count-cell">
+                <span class="rate-count-num">1</span>
+                <span class="rate-count-types"><span class="rate-dot static"></span></span>
+              </div>
+            </td>
+            <td>
+              <div class="room-count-cell">
+                <div class="room-count-main">4개</div>
+                <div class="room-count-sub">0 ON / 4 OFF</div>
+              </div>
+            </td>
+            <td>
+              <div class="autogen-status">
+                <div class="autogen-ratio none">0%</div>
+                <div class="autogen-bar"><div class="autogen-bar-fill none" style="width:100%"></div></div>
+              </div>
+            </td>
+            <td>
+              <div class="period-cell">
+                <strong>2026.07.01 ~ 12.31</strong>
+                <span class="period-d">D+6개월</span>
+              </div>
+            </td>
+            <td><span class="status-dot draft">검토중</span></td>
+            <td style="text-align:center;">
+              <button class="btn-rule" onclick="openRuleModal('Soneva Hideaway Phu Quoc', 'ACT-20881', '직접 계약', 'manual')">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4z"/></svg>
+                룰 관리
+              </button>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- ===== PAGINATION ===== -->
+    <div class="pagination">
+      <div class="pag-info">
+        총 <strong style="color:#1677ff;">342</strong>건 중 1 - 8 표시
+        <select class="pag-size" style="margin-left:10px;">
+          <option>50개씩 보기</option>
+          <option>20개씩 보기</option>
+          <option>100개씩 보기</option>
+        </select>
+      </div>
+      <div class="pag-controls">
+        <button class="pag-btn">‹</button>
+        <button class="pag-btn active">1</button>
+        <button class="pag-btn">2</button>
+        <button class="pag-btn">3</button>
+        <button class="pag-btn">…</button>
+        <button class="pag-btn">43</button>
+        <button class="pag-btn">›</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== FOOTNOTE ===== -->
+  <div class="footnote">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+    <div>
+      <strong>자동생성 룰 관리 안내</strong><br>
+      · 자동생성 = 매일 03:00 새벽 배치로 TMG/공급사 API에서 받아온 숙박권을 자동 등록<br>
+      · 수동등록 = Sol by Melia, 직접 계약 호텔 등 운영자가 직접 등록한 숙박권<br>
+      · 등록방식과 무관하게 모든 숙박권은 <strong>요금표 × 객실 × 식사 단위</strong>로 자동생성 대상 여부를 토글할 수 있음<br>
+      · 룰 변경 시 다음 배치(03:00)부터 PB 자동생성 상품 조합에 반영
+    </div>
+  </div>
+
+</div>
+
+<!-- ============================================================ -->
+<!-- ===== RULE MODAL: 요금표 × 객실 자동생성 룰 ===== -->
+<!-- ============================================================ -->
+<div class="backdrop" id="ruleModal" onclick="if(event.target===this) closeRuleModal()">
+  <div class="modal">
+    <div class="m-head">
+      <div class="m-title-wrap">
+        <div class="m-title">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7h18M3 12h18M3 17h18"/></svg>
+          <span id="ruleHotelName">호텔명</span>
+        </div>
+        <div class="m-sub">요금표 × 객실 × 식사 단위로 PB 자동생성 대상 여부를 설정합니다. 변경 사항은 다음 새벽 배치(03:00)부터 반영됩니다.</div>
+      </div>
+      <button class="m-close" onclick="closeRuleModal()">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>
+    </div>
+
+    <div class="m-meta-row">
+      <div class="m-meta-item">
+        <span class="m-meta-label">숙박권 ID</span>
+        <span class="m-meta-value" id="ruleAcctId">ACT-48198</span>
+      </div>
+      <div class="m-meta-divider"></div>
+      <div class="m-meta-item">
+        <span class="m-meta-label">공급사</span>
+        <span class="m-meta-value" id="ruleProvider">TMG</span>
+      </div>
+      <div class="m-meta-divider"></div>
+      <div class="m-meta-item">
+        <span class="m-meta-label">등록방식</span>
+        <span class="m-meta-value" id="ruleMethod">자동생성</span>
+      </div>
+      <div class="m-meta-divider"></div>
+      <div class="m-meta-item">
+        <span class="m-meta-label">마지막 룰 변경</span>
+        <span class="m-meta-value">2026-05-20 14:32 · 서현</span>
+      </div>
+    </div>
+
+    <div class="m-body">
+
+      <!-- 일괄 액션 바 -->
+      <div class="bulk-action-bar">
+        <div class="bulk-action-info">
+          <strong>5개 요금표</strong> · 총 <strong>22개 객실 룰</strong>이 등록되어 있습니다.<br>
+          현재 <strong style="color:#389e0d;">17개 ON</strong> · <strong style="color:#d48806;">5개 OFF</strong>
+        </div>
+        <div class="bulk-action-right">
+          <button class="btn-bulk on" onclick="bulkAllRooms(true)">⚡ 전체 ON</button>
+          <button class="btn-bulk off" onclick="bulkAllRooms(false)">⊘ 전체 OFF</button>
+        </div>
+      </div>
+
+      <!-- ============================================ -->
+      <!-- 요금표 카드 1 — 고정요금 (펼침) -->
+      <!-- ============================================ -->
+      <div class="rate-card open">
+        <div class="rate-card-head" onclick="toggleRateCard(this)">
+          <span class="rate-chev"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg></span>
+          <div class="rate-card-main">
+            <div class="rate-card-title-row">
+              <span class="rate-name">Ưu Đãi Đặt Trước</span>
+              <span class="rate-id-pill">RP-46882</span>
+              <span class="rate-type-tag static">● 고정요금</span>
+            </div>
+            <div class="rate-card-meta">
+              <span>판매기간 <strong>2026.05.01 ~ 07.31</strong></span>
+              <span>객실 <strong>5개</strong></span>
+              <span>1박 단가 평균 <strong>₩612,000</strong></span>
+            </div>
+          </div>
+          <div class="rate-card-summary">
+            <strong>5</strong><span class="of"> / 5 ON</span>
+          </div>
+          <div class="rate-bulk-btns" onclick="event.stopPropagation()">
+            <button class="btn-rate-bulk" onclick="bulkRateCard(this, true)">ON</button>
+            <button class="btn-rate-bulk" onclick="bulkRateCard(this, false)">OFF</button>
+          </div>
+        </div>
+        <div class="rate-card-body">
+          <table class="room-rule-table">
+            <thead>
+              <tr>
+                <th>객실</th>
+                <th>인원</th>
+                <th>식사</th>
+                <th class="right">1박 단가</th>
+                <th class="center">자동생성</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>
+                  <div class="room-name">디럭스 시티뷰</div>
+                  <div class="room-sub">35㎡ · 킹베드 / 트윈 선택</div>
+                </td>
+                <td>2인 (+1 가능)</td>
+                <td><span class="meal-pill bb">BB 조식</span></td>
+                <td class="price-cell">₩520,000<span class="unit">/박</span></td>
+                <td><div class="autogen-cell"><label class="autogen-switch"><input type="checkbox" checked onchange="toggleRoom(this)"><span class="autogen-slider"></span></label><span class="autogen-mini-label on">ON</span></div></td>
+              </tr>
+              <tr>
+                <td>
+                  <div class="room-name">디럭스 오션뷰</div>
+                  <div class="room-sub">38㎡ · 킹베드</div>
+                </td>
+                <td>2인 (+1 가능)</td>
+                <td><span class="meal-pill bb">BB 조식</span></td>
+                <td class="price-cell">₩580,000<span class="unit">/박</span></td>
+                <td><div class="autogen-cell"><label class="autogen-switch"><input type="checkbox" checked onchange="toggleRoom(this)"><span class="autogen-slider"></span></label><span class="autogen-mini-label on">ON</span></div></td>
+              </tr>
+              <tr>
+                <td>
+                  <div class="room-name">디럭스 오션뷰</div>
+                  <div class="room-sub">38㎡ · 킹베드</div>
+                </td>
+                <td>2인 (+1 가능)</td>
+                <td><span class="meal-pill hb">HB 조·석식</span></td>
+                <td class="price-cell">₩680,000<span class="unit">/박</span></td>
+                <td><div class="autogen-cell"><label class="autogen-switch"><input type="checkbox" checked onchange="toggleRoom(this)"><span class="autogen-slider"></span></label><span class="autogen-mini-label on">ON</span></div></td>
+              </tr>
+              <tr>
+                <td>
+                  <div class="room-name">패밀리 스위트</div>
+                  <div class="room-sub">62㎡ · 1킹 + 1트윈</div>
+                </td>
+                <td>4인</td>
+                <td><span class="meal-pill bb">BB 조식</span></td>
+                <td class="price-cell">₩780,000<span class="unit">/박</span></td>
+                <td><div class="autogen-cell"><label class="autogen-switch"><input type="checkbox" checked onchange="toggleRoom(this)"><span class="autogen-slider"></span></label><span class="autogen-mini-label on">ON</span></div></td>
+              </tr>
+              <tr>
+                <td>
+                  <div class="room-name">프레지덴셜 빌라</div>
+                  <div class="room-sub">120㎡ · 풀빌라 (개인 수영장)</div>
+                </td>
+                <td>4인 (+2 가능)</td>
+                <td><span class="meal-pill ai">AI 올인클루시브</span></td>
+                <td class="price-cell">₩1,950,000<span class="unit">/박</span></td>
+                <td><div class="autogen-cell"><label class="autogen-switch"><input type="checkbox" checked onchange="toggleRoom(this)"><span class="autogen-slider"></span></label><span class="autogen-mini-label on">ON</span></div></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- ============================================ -->
+      <!-- 요금표 카드 2 — 고정요금 (펼침, 일부 OFF) -->
+      <!-- ============================================ -->
+      <div class="rate-card open">
+        <div class="rate-card-head" onclick="toggleRateCard(this)">
+          <span class="rate-chev"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg></span>
+          <div class="rate-card-main">
+            <div class="rate-card-title-row">
+              <span class="rate-name">Ưu Đãi Đặc Biệt</span>
+              <span class="rate-id-pill">RP-46881</span>
+              <span class="rate-type-tag static">● 고정요금</span>
+            </div>
+            <div class="rate-card-meta">
+              <span>판매기간 <strong>2026.08.01 ~ 12.31</strong></span>
+              <span>객실 <strong>5개</strong></span>
+              <span>1박 단가 평균 <strong>₩720,000</strong></span>
+            </div>
+          </div>
+          <div class="rate-card-summary">
+            <strong>3</strong><span class="of"> / 5 ON</span>
+          </div>
+          <div class="rate-bulk-btns" onclick="event.stopPropagation()">
+            <button class="btn-rate-bulk" onclick="bulkRateCard(this, true)">ON</button>
+            <button class="btn-rate-bulk" onclick="bulkRateCard(this, false)">OFF</button>
+          </div>
+        </div>
+        <div class="rate-card-body">
+          <table class="room-rule-table">
+            <thead>
+              <tr>
+                <th>객실</th>
+                <th>인원</th>
+                <th>식사</th>
+                <th class="right">1박 단가</th>
+                <th class="center">자동생성</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><div class="room-name">디럭스 시티뷰</div><div class="room-sub">35㎡ · 킹베드</div></td>
+                <td>2인</td>
+                <td><span class="meal-pill bb">BB</span></td>
+                <td class="price-cell">₩620,000<span class="unit">/박</span></td>
+                <td><div class="autogen-cell"><label class="autogen-switch"><input type="checkbox" checked onchange="toggleRoom(this)"><span class="autogen-slider"></span></label><span class="autogen-mini-label on">ON</span></div></td>
+              </tr>
+              <tr>
+                <td><div class="room-name">디럭스 오션뷰</div><div class="room-sub">38㎡ · 킹베드</div></td>
+                <td>2인</td>
+                <td><span class="meal-pill bb">BB</span></td>
+                <td class="price-cell">₩680,000<span class="unit">/박</span></td>
+                <td>
+                  <div class="autogen-cell"><label class="autogen-switch"><input type="checkbox" onchange="toggleRoom(this)"><span class="autogen-slider"></span></label><span class="autogen-mini-label off">OFF</span></div>
+                  <div class="autogen-reason">성수기 대비 단가 낮음 — 7월 재검토</div>
+                </td>
+              </tr>
+              <tr>
+                <td><div class="room-name">디럭스 오션뷰</div><div class="room-sub">38㎡ · 킹베드</div></td>
+                <td>2인</td>
+                <td><span class="meal-pill hb">HB</span></td>
+                <td class="price-cell">₩780,000<span class="unit">/박</span></td>
+                <td><div class="autogen-cell"><label class="autogen-switch"><input type="checkbox" checked onchange="toggleRoom(this)"><span class="autogen-slider"></span></label><span class="autogen-mini-label on">ON</span></div></td>
+              </tr>
+              <tr>
+                <td><div class="room-name">패밀리 스위트</div><div class="room-sub">62㎡ · 1킹 + 1트윈</div></td>
+                <td>4인</td>
+                <td><span class="meal-pill bb">BB</span></td>
+                <td class="price-cell">₩880,000<span class="unit">/박</span></td>
+                <td><div class="autogen-cell"><label class="autogen-switch"><input type="checkbox" checked onchange="toggleRoom(this)"><span class="autogen-slider"></span></label><span class="autogen-mini-label on">ON</span></div></td>
+              </tr>
+              <tr>
+                <td><div class="room-name">프레지덴셜 빌라</div><div class="room-sub">120㎡ · 풀빌라</div></td>
+                <td>4인</td>
+                <td><span class="meal-pill ai">AI</span></td>
+                <td class="price-cell">₩2,100,000<span class="unit">/박</span></td>
+                <td>
+                  <div class="autogen-cell"><label class="autogen-switch"><input type="checkbox" onchange="toggleRoom(this)"><span class="autogen-slider"></span></label><span class="autogen-mini-label off">OFF</span></div>
+                  <div class="autogen-reason">최저가 공격 마진 미달 — 직접 영업 채널 우선</div>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- ============================================ -->
+      <!-- 요금표 카드 3 — 재고변동요금 (접힘) -->
+      <!-- ============================================ -->
+      <div class="rate-card">
+        <div class="rate-card-head" onclick="toggleRateCard(this)">
+          <span class="rate-chev"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg></span>
+          <div class="rate-card-main">
+            <div class="rate-card-title-row">
+              <span class="rate-name">Flexible Rate</span>
+              <span class="rate-id-pill">RP-47102</span>
+              <span class="rate-type-tag alm">● 재고변동요금</span>
+            </div>
+            <div class="rate-card-meta">
+              <span>판매기간 <strong>2026.05.01 ~ 10.31</strong></span>
+              <span>객실 <strong>4개</strong></span>
+              <span>요금 평균 <strong>₩650,000</strong> · 재고 매일 갱신</span>
+            </div>
+          </div>
+          <div class="rate-card-summary">
+            <strong>4</strong><span class="of"> / 4 ON</span>
+          </div>
+          <div class="rate-bulk-btns" onclick="event.stopPropagation()">
+            <button class="btn-rate-bulk" onclick="bulkRateCard(this, true)">ON</button>
+            <button class="btn-rate-bulk" onclick="bulkRateCard(this, false)">OFF</button>
+          </div>
+        </div>
+        <div class="rate-card-body">
+          <table class="room-rule-table">
+            <thead><tr><th>객실</th><th>인원</th><th>식사</th><th class="right">1박 단가</th><th class="center">자동생성</th></tr></thead>
+            <tbody>
+              <tr>
+                <td><div class="room-name">디럭스 시티뷰</div><div class="room-sub">35㎡</div></td>
+                <td>2인</td><td><span class="meal-pill bb">BB</span></td><td class="price-cell">₩560,000<span class="unit">/박</span></td>
+                <td><div class="autogen-cell"><label class="autogen-switch"><input type="checkbox" checked onchange="toggleRoom(this)"><span class="autogen-slider"></span></label><span class="autogen-mini-label on">ON</span></div></td>
+              </tr>
+              <tr>
+                <td><div class="room-name">디럭스 오션뷰</div><div class="room-sub">38㎡</div></td>
+                <td>2인</td><td><span class="meal-pill bb">BB</span></td><td class="price-cell">₩640,000<span class="unit">/박</span></td>
+                <td><div class="autogen-cell"><label class="autogen-switch"><input type="checkbox" checked onchange="toggleRoom(this)"><span class="autogen-slider"></span></label><span class="autogen-mini-label on">ON</span></div></td>
+              </tr>
+              <tr>
+                <td><div class="room-name">패밀리 스위트</div><div class="room-sub">62㎡</div></td>
+                <td>4인</td><td><span class="meal-pill bb">BB</span></td><td class="price-cell">₩820,000<span class="unit">/박</span></td>
+                <td><div class="autogen-cell"><label class="autogen-switch"><input type="checkbox" checked onchange="toggleRoom(this)"><span class="autogen-slider"></span></label><span class="autogen-mini-label on">ON</span></div></td>
+              </tr>
+              <tr>
+                <td><div class="room-name">프레지덴셜 빌라</div><div class="room-sub">120㎡</div></td>
+                <td>4인</td><td><span class="meal-pill ai">AI</span></td><td class="price-cell">₩2,000,000<span class="unit">/박</span></td>
+                <td><div class="autogen-cell"><label class="autogen-switch"><input type="checkbox" checked onchange="toggleRoom(this)"><span class="autogen-slider"></span></label><span class="autogen-mini-label on">ON</span></div></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- ============================================ -->
+      <!-- 요금표 카드 4 — 다이나믹요금 (접힘, 부분 OFF) -->
+      <!-- ============================================ -->
+      <div class="rate-card">
+        <div class="rate-card-head" onclick="toggleRateCard(this)">
+          <span class="rate-chev"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg></span>
+          <div class="rate-card-main">
+            <div class="rate-card-title-row">
+              <span class="rate-name">Real-time BAR</span>
+              <span class="rate-id-pill">RP-48205</span>
+              <span class="rate-type-tag dynamic">● 다이나믹요금</span>
+            </div>
+            <div class="rate-card-meta">
+              <span>판매기간 <strong>D+5년 자동 연장</strong></span>
+              <span>객실 <strong>4개</strong></span>
+              <span><span style="color:#cf1322;">⚠ 예상가 라벨 노출</span></span>
+            </div>
+          </div>
+          <div class="rate-card-summary">
+            <strong>2</strong><span class="of"> / 4 ON</span>
+          </div>
+          <div class="rate-bulk-btns" onclick="event.stopPropagation()">
+            <button class="btn-rate-bulk" onclick="bulkRateCard(this, true)">ON</button>
+            <button class="btn-rate-bulk" onclick="bulkRateCard(this, false)">OFF</button>
+          </div>
+        </div>
+        <div class="rate-card-body">
+          <table class="room-rule-table">
+            <thead><tr><th>객실</th><th>인원</th><th>식사</th><th class="right">예상 단가</th><th class="center">자동생성</th></tr></thead>
+            <tbody>
+              <tr>
+                <td><div class="room-name">디럭스 시티뷰</div><div class="room-sub">35㎡</div></td>
+                <td>2인</td><td><span class="meal-pill bb">BB</span></td><td class="price-cell">~₩590,000<span class="unit">/박</span></td>
+                <td><div class="autogen-cell"><label class="autogen-switch"><input type="checkbox" checked onchange="toggleRoom(this)"><span class="autogen-slider"></span></label><span class="autogen-mini-label on">ON</span></div></td>
+              </tr>
+              <tr>
+                <td><div class="room-name">디럭스 오션뷰</div><div class="room-sub">38㎡</div></td>
+                <td>2인</td><td><span class="meal-pill bb">BB</span></td><td class="price-cell">~₩670,000<span class="unit">/박</span></td>
+                <td>
+                  <div class="autogen-cell"><label class="autogen-switch"><input type="checkbox" onchange="toggleRoom(this)"><span class="autogen-slider"></span></label><span class="autogen-mini-label off">OFF</span></div>
+                  <div class="autogen-reason">예상가 변동성 큼 (±15%)</div>
+                </td>
+              </tr>
+              <tr>
+                <td><div class="room-name">패밀리 스위트</div><div class="room-sub">62㎡</div></td>
+                <td>4인</td><td><span class="meal-pill bb">BB</span></td><td class="price-cell">~₩850,000<span class="unit">/박</span></td>
+                <td><div class="autogen-cell"><label class="autogen-switch"><input type="checkbox" checked onchange="toggleRoom(this)"><span class="autogen-slider"></span></label><span class="autogen-mini-label on">ON</span></div></td>
+              </tr>
+              <tr>
+                <td><div class="room-name">프레지덴셜 빌라</div><div class="room-sub">120㎡</div></td>
+                <td>4인</td><td><span class="meal-pill ai">AI</span></td><td class="price-cell">~₩2,200,000<span class="unit">/박</span></td>
+                <td>
+                  <div class="autogen-cell"><label class="autogen-switch"><input type="checkbox" onchange="toggleRoom(this)"><span class="autogen-slider"></span></label><span class="autogen-mini-label off">OFF</span></div>
+                  <div class="autogen-reason">법무 검토 대기 — 예상가 라벨 리스크</div>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- ============================================ -->
+      <!-- 요금표 카드 5 — 다이나믹요금 (접힘, 모두 OFF) -->
+      <!-- ============================================ -->
+      <div class="rate-card">
+        <div class="rate-card-head" onclick="toggleRateCard(this)">
+          <span class="rate-chev"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg></span>
+          <div class="rate-card-main">
+            <div class="rate-card-title-row">
+              <span class="rate-name">Dynamic Package</span>
+              <span class="rate-id-pill">RP-48190</span>
+              <span class="rate-type-tag dynamic">● 다이나믹요금</span>
+            </div>
+            <div class="rate-card-meta">
+              <span>판매기간 <strong>D+5년 자동 연장</strong></span>
+              <span>객실 <strong>4개</strong></span>
+              <span style="color:#cf1322;">⚠ 전체 OFF — 사유 일괄</span>
+            </div>
+          </div>
+          <div class="rate-card-summary">
+            <strong style="color:rgba(0,0,0,0.45)">0</strong><span class="of"> / 4 ON</span>
+          </div>
+          <div class="rate-bulk-btns" onclick="event.stopPropagation()">
+            <button class="btn-rate-bulk" onclick="bulkRateCard(this, true)">ON</button>
+            <button class="btn-rate-bulk" onclick="bulkRateCard(this, false)">OFF</button>
+          </div>
+        </div>
+        <div class="rate-card-body">
+          <table class="room-rule-table">
+            <thead><tr><th>객실</th><th>인원</th><th>식사</th><th class="right">예상 단가</th><th class="center">자동생성</th></tr></thead>
+            <tbody>
+              <tr><td colspan="5" style="padding:20px;text-align:center;color:rgba(0,0,0,0.5);font-size:12.5px;">⚠ 이 요금표는 패키지용 다이나믹이라 PB 단독 노출 부적합으로 일괄 OFF 상태입니다. 검토 후 개별 ON 필요.</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+    </div>
+
+    <div class="m-foot">
+      <div class="m-foot-info">
+        변경사항은 <strong>다음 새벽 배치(03:00)</strong>부터 PB 자동생성 상품 조합에 반영됩니다.
+      </div>
+      <div>
+        <button class="btn-modal-close" onclick="closeRuleModal()">취소</button>
+        <button class="btn-modal-primary" onclick="saveRules()">변경사항 저장</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ============================================================ -->
+<!-- ===== OFF REASON MODAL ===== -->
+<!-- ============================================================ -->
+<div class="backdrop layer-2" id="offReasonModal" onclick="if(event.target===this) cancelOffReason()">
+  <div class="modal sm">
+    <div class="m-head">
+      <div style="display:flex; align-items:center; gap:14px; flex:1;">
+        <div class="off-modal-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+        </div>
+        <div class="m-title-wrap">
+          <div class="m-title">자동생성 OFF 사유 입력</div>
+          <div class="m-sub">사유는 운영팀 전체에 공유되며 변경 이력으로 영구 보존됩니다.</div>
+        </div>
+      </div>
+      <button class="m-close" onclick="cancelOffReason()">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>
+    </div>
+
+    <div class="m-body" style="padding:18px 24px 8px;">
+      <!-- 적용 대상 배너 -->
+      <div class="off-target-banner">
+        <svg viewBox="0 0 24 24" fill="none" stroke="#d48806" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="width:18px;height:18px;flex-shrink:0;"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+        <div style="flex:1; min-width:0;">
+          <div class="ot-label">OFF 적용 대상</div>
+          <div class="ot-value" id="offReasonTarget">—</div>
+          <div class="ot-count" id="offReasonCount" style="display:none;">—</div>
+        </div>
+      </div>
+
+      <!-- 자주 쓰는 사유 칩 -->
+      <div class="reason-section-label">
+        자주 쓰는 사유 <span class="hint">클릭하면 입력란에 채워집니다</span>
+      </div>
+      <div class="reason-chips" id="reasonChips">
+        <button class="reason-chip" onclick="pickReasonChip(this,'예상가 변동성 큼 (±15% 이상)')">예상가 변동성 큼</button>
+        <button class="reason-chip" onclick="pickReasonChip(this,'최저가 공격 마진 미달')">최저가 공격 마진 미달</button>
+        <button class="reason-chip" onclick="pickReasonChip(this,'성수기 대비 단가 낮음 — 재검토 필요')">성수기 단가 낮음</button>
+        <button class="reason-chip" onclick="pickReasonChip(this,'법무 검토 대기 — 예상가 라벨 리스크')">법무 검토 대기</button>
+        <button class="reason-chip" onclick="pickReasonChip(this,'직접 영업 채널 우선 — PB 노출 보류')">직접 영업 채널 우선</button>
+        <button class="reason-chip" onclick="pickReasonChip(this,'비수기 노출 제외')">비수기 노출 제외</button>
+        <button class="reason-chip" onclick="pickReasonChip(this,'공급사 응대 지연 — 운영팀 검증 후 재오픈')">공급사 응대 지연</button>
+        <button class="reason-chip" onclick="pickReasonChip(this,'재고 부족 우려 — 직판 우선 배정')">재고 부족 우려</button>
+      </div>
+
+      <!-- 사유 입력 -->
+      <div class="reason-section-label">상세 사유 <span class="req">*</span></div>
+      <textarea class="reason-textarea" id="offReasonInput" placeholder="예: 예상가 변동성이 커서 사용자 클레임 우려 — 7월 재검토 예정"></textarea>
+      <div class="reason-helper">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="width:13px;height:13px;flex-shrink:0;margin-top:1px;"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
+        <span>사유는 다른 운영자가 이 OFF의 맥락을 빠르게 이해할 수 있도록 구체적으로 적어주세요.</span>
+      </div>
+    </div>
+
+    <div class="m-foot">
+      <div class="m-foot-info">변경 이력은 <strong>이 숙박권 활동 로그</strong>에서 확인 가능합니다.</div>
+      <div>
+        <button class="btn-modal-close" onclick="cancelOffReason()">취소</button>
+        <button class="btn-modal-warn" onclick="applyOffReason()">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+          OFF 적용
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+/* ===== OFF Reason Modal — Promise 기반 ===== */
+let _offReasonResolver = null;
+
+function openOffReasonModal(targetText, countText) {
+  return new Promise((resolve) => {
+    _offReasonResolver = resolve;
+    document.getElementById('offReasonTarget').textContent = targetText || '—';
+    const countEl = document.getElementById('offReasonCount');
+    if (countText) { countEl.textContent = countText; countEl.style.display = 'block'; }
+    else { countEl.style.display = 'none'; }
+    document.getElementById('offReasonInput').value = '';
+    document.querySelectorAll('#reasonChips .reason-chip').forEach(c => c.classList.remove('active'));
+    document.getElementById('offReasonModal').classList.add('active');
+    document.body.classList.add('modal-open');
+    setTimeout(() => document.getElementById('offReasonInput').focus(), 80);
+  });
+}
+
+function pickReasonChip(btn, text) {
+  document.querySelectorAll('#reasonChips .reason-chip').forEach(c => c.classList.remove('active'));
+  btn.classList.add('active');
+  document.getElementById('offReasonInput').value = text;
+  document.getElementById('offReasonInput').focus();
+}
+
+function applyOffReason() {
+  const val = document.getElementById('offReasonInput').value.trim();
+  if (!val) { alert('사유를 입력해 주세요.'); return; }
+  document.getElementById('offReasonModal').classList.remove('active');
+  // ruleModal이 여전히 열려있으면 modal-open 유지
+  if (!document.querySelector('.backdrop.active')) document.body.classList.remove('modal-open');
+  if (_offReasonResolver) { _offReasonResolver(val); _offReasonResolver = null; }
+}
+
+function cancelOffReason() {
+  document.getElementById('offReasonModal').classList.remove('active');
+  if (!document.querySelector('.backdrop.active')) document.body.classList.remove('modal-open');
+  if (_offReasonResolver) { _offReasonResolver(null); _offReasonResolver = null; }
+}
+
+function switchMethod(btn, method) {
+  btn.parentElement.querySelectorAll('.subnav-item').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  // 데모 — 실제는 백엔드 필터 호출
+}
+
+function openRuleModal(hotelName, acctId, provider, method) {
+  document.getElementById('ruleHotelName').textContent = hotelName;
+  document.getElementById('ruleAcctId').textContent = acctId;
+  document.getElementById('ruleProvider').textContent = provider;
+  document.getElementById('ruleMethod').textContent = method === 'auto' ? '자동생성' : '수동등록';
+  document.getElementById('ruleModal').classList.add('active');
+  document.body.classList.add('modal-open');
+}
+
+function closeRuleModal() {
+  document.getElementById('ruleModal').classList.remove('active');
+  document.body.classList.remove('modal-open');
+}
+
+function toggleRateCard(headEl) {
+  headEl.parentElement.classList.toggle('open');
+}
+
+async function toggleRoom(cb) {
+  const cell = cb.closest('.autogen-cell');
+  const label = cell.querySelector('.autogen-mini-label');
+  if (cb.checked) {
+    label.textContent = 'ON';
+    label.classList.remove('off'); label.classList.add('on');
+    const reasonEl = cell.parentElement.querySelector('.autogen-reason');
+    if (reasonEl) reasonEl.remove();
+  } else {
+    const tr = cb.closest('tr');
+    const roomName = tr.querySelector('.room-name')?.textContent || '객실';
+    const roomSub = tr.querySelector('.room-sub')?.textContent || '';
+    const mealName = tr.querySelector('.meal-pill')?.textContent || '';
+    const target = `${roomName}${mealName ? ' · ' + mealName : ''}${roomSub ? ' (' + roomSub + ')' : ''}`;
+    const reason = await openOffReasonModal(target);
+    if (reason === null) {
+      cb.checked = true;
+      label.textContent = 'ON'; label.classList.remove('off'); label.classList.add('on');
+      return;
+    }
+    label.textContent = 'OFF';
+    label.classList.remove('on'); label.classList.add('off');
+    const td = cell.parentElement;
+    const existing = td.querySelector('.autogen-reason');
+    if (existing) existing.remove();
+    const r = document.createElement('div');
+    r.className = 'autogen-reason';
+    r.textContent = reason;
+    td.appendChild(r);
+  }
+}
+
+async function bulkRateCard(btn, turnOn) {
+  const card = btn.closest('.rate-card');
+  const inputs = card.querySelectorAll('.autogen-switch input');
+  const willChange = Array.from(inputs).filter(cb => cb.checked !== turnOn);
+  if (willChange.length === 0) return;
+
+  let reason = '';
+  if (!turnOn) {
+    const rateName = card.querySelector('.rate-name')?.textContent || '요금표';
+    const rateId = card.querySelector('.rate-id-pill')?.textContent || '';
+    reason = await openOffReasonModal(`${rateName} ${rateId}`, `${willChange.length}개 객실 룰에 일괄 적용됩니다`);
+    if (reason === null) return;
+  }
+  willChange.forEach(cb => {
+    cb.checked = turnOn;
+    const cell = cb.closest('.autogen-cell');
+    const label = cell.querySelector('.autogen-mini-label');
+    const td = cell.parentElement;
+    label.textContent = turnOn ? 'ON' : 'OFF';
+    label.classList.toggle('on', turnOn); label.classList.toggle('off', !turnOn);
+    const existing = td.querySelector('.autogen-reason');
+    if (existing) existing.remove();
+    if (!turnOn && reason) {
+      const r = document.createElement('div');
+      r.className = 'autogen-reason';
+      r.textContent = reason;
+      td.appendChild(r);
+    }
+  });
+}
+
+async function bulkAllRooms(turnOn) {
+  const inputs = document.querySelectorAll('#ruleModal .autogen-switch input');
+  const willChange = Array.from(inputs).filter(cb => cb.checked !== turnOn);
+  if (willChange.length === 0) {
+    alert(`이미 모든 객실이 ${turnOn ? 'ON' : 'OFF'} 상태입니다.`);
+    return;
+  }
+  if (!confirm(`이 숙박권의 ${willChange.length}개 객실 룰을 일괄 ${turnOn ? 'ON' : 'OFF'} 처리할까요?`)) return;
+
+  let reason = '';
+  if (!turnOn) {
+    const hotelName = document.getElementById('ruleHotelName').textContent;
+    reason = await openOffReasonModal(`${hotelName} — 전체 객실 일괄`, `${willChange.length}개 객실 룰에 동일 사유로 일괄 적용됩니다`);
+    if (reason === null) return;
+  }
+  willChange.forEach(cb => {
+    cb.checked = turnOn;
+    const cell = cb.closest('.autogen-cell');
+    const label = cell.querySelector('.autogen-mini-label');
+    const td = cell.parentElement;
+    label.textContent = turnOn ? 'ON' : 'OFF';
+    label.classList.toggle('on', turnOn); label.classList.toggle('off', !turnOn);
+    const existing = td.querySelector('.autogen-reason');
+    if (existing) existing.remove();
+    if (!turnOn && reason) {
+      const r = document.createElement('div');
+      r.className = 'autogen-reason';
+      r.textContent = reason;
+      td.appendChild(r);
+    }
+  });
+}
+
+function saveRules() {
+  alert('변경사항이 저장되었습니다. 다음 새벽 배치(03:00)부터 PB 자동생성에 반영됩니다.');
+  closeRuleModal();
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,599 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>노출 게이트 정책 — TripStore AutoGen Admin</title>
+<link href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.6/dist/web/static/pretendard.css" rel="stylesheet">
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: 'Pretendard', -apple-system, sans-serif; font-size: 14px; color: rgba(0,0,0,0.88); background: #f0f2f5; display: flex; min-height: 100vh; }
+
+/* SIDEBAR */
+.sidebar { width: 220px; background: #1b1f3b; color: #fff; padding: 20px 0; position: fixed; top: 0; left: 0; bottom: 0; overflow-y: auto; z-index: 100; }
+.sidebar-logo { padding: 0 20px 24px; font-size: 14px; font-weight: 700; display: flex; align-items: center; gap: 8px; }
+.sidebar-logo .dot { width: 8px; height: 8px; background: #52c41a; border-radius: 50%; }
+.sidebar-logo span { color: #4096ff; }
+.sidebar-group { padding: 16px 20px 6px; font-size: 11px; color: rgba(255,255,255,0.35); font-weight: 600; letter-spacing: 0.5px; text-transform: uppercase; }
+.sidebar-item { display: flex; align-items: center; gap: 10px; padding: 10px 20px; font-size: 13px; color: rgba(255,255,255,0.65); cursor: pointer; transition: all 0.15s; border-left: 3px solid transparent; text-decoration: none; }
+.sidebar-item:hover { color: #fff; background: rgba(255,255,255,0.06); }
+.sidebar-item.active { color: #fff; background: rgba(64,150,255,0.15); border-left-color: #4096ff; }
+.sidebar-item .icon { width: 18px; text-align: center; font-size: 14px; }
+.sidebar-badge { background: #722ed1; color: #fff; font-size: 10px; font-weight: 700; padding: 1px 6px; border-radius: 10px; margin-left: auto; }
+
+/* MAIN */
+.main { margin-left: 220px; flex: 1; padding: 24px 28px 60px; }
+.top-bar { display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px; }
+.page-title { font-size: 20px; font-weight: 700; }
+.page-title .tag-new { font-size: 11px; font-weight: 500; color: #722ed1; background: #f9f0ff; padding: 3px 8px; border-radius: 4px; margin-left: 8px; }
+.page-meta { font-size: 12px; color: rgba(0,0,0,0.45); margin-top: 4px; }
+.user-info { display: flex; align-items: center; gap: 10px; font-size: 13px; color: rgba(0,0,0,0.65); }
+.avatar { width: 32px; height: 32px; background: #1677ff; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: #fff; font-size: 12px; font-weight: 700; }
+
+/* 정책 배너 */
+.policy-banner { background: linear-gradient(135deg, #f6ffed 0%, #e6f4ff 100%); border: 1px solid #b7eb8f; border-radius: 10px; padding: 16px 20px; margin-bottom: 20px; display: flex; align-items: flex-start; gap: 14px; }
+.policy-banner .icon { font-size: 24px; }
+.policy-banner .title { font-size: 14px; font-weight: 700; color: #389e0d; margin-bottom: 6px; }
+.policy-banner .desc { font-size: 12px; color: rgba(0,0,0,0.7); line-height: 1.7; }
+.policy-banner .desc strong { color: rgba(0,0,0,0.88); }
+
+/* KPI */
+.kpi-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-bottom: 24px; }
+.kpi-card { background: #fff; border-radius: 10px; padding: 16px 18px; box-shadow: 0 1px 3px rgba(0,0,0,0.08); position: relative; overflow: hidden; }
+.kpi-card::before { content: ''; position: absolute; top: 0; left: 0; width: 4px; height: 100%; }
+.kpi-card.gray::before { background: #8c8c8c; }
+.kpi-card.red::before { background: #f5222d; }
+.kpi-card.orange::before { background: #fa8c16; }
+.kpi-card.green::before { background: #52c41a; }
+.kpi-label { font-size: 11px; color: rgba(0,0,0,0.45); font-weight: 600; text-transform: uppercase; letter-spacing: 0.3px; margin-bottom: 6px; }
+.kpi-value { font-size: 26px; font-weight: 800; letter-spacing: -1px; }
+.kpi-card.gray .kpi-value { color: #595959; }
+.kpi-card.red .kpi-value { color: #f5222d; }
+.kpi-card.orange .kpi-value { color: #fa8c16; }
+.kpi-card.green .kpi-value { color: #52c41a; }
+.kpi-sub { font-size: 11px; color: rgba(0,0,0,0.45); margin-top: 4px; }
+
+/* 3-STAGE FLOW (가로) */
+.flow-wrap { background: #fff; border-radius: 12px; box-shadow: 0 1px 3px rgba(0,0,0,0.08); padding: 24px; margin-bottom: 20px; }
+.flow-title { font-size: 15px; font-weight: 700; margin-bottom: 4px; }
+.flow-subtitle { font-size: 12px; color: rgba(0,0,0,0.55); margin-bottom: 20px; }
+.flow-row { display: flex; align-items: stretch; gap: 0; }
+.flow-step { flex: 1; background: #fafafa; border: 2px solid #e8e8e8; border-radius: 10px; padding: 16px; position: relative; cursor: pointer; transition: all 0.2s; }
+.flow-step:hover { transform: translateY(-2px); box-shadow: 0 4px 12px rgba(0,0,0,0.08); }
+.flow-step.stage-1 { border-color: #ffa39e; background: linear-gradient(135deg, #fff1f0 0%, #fff5f5 100%); }
+.flow-step.stage-2 { border-color: #ffd591; background: linear-gradient(135deg, #fff7e6 0%, #fffbe6 100%); }
+.flow-step.stage-3 { border-color: #91d5ff; background: linear-gradient(135deg, #e6f4ff 0%, #f0f7ff 100%); }
+.flow-step.stage-final { border-color: #b7eb8f; background: linear-gradient(135deg, #f6ffed 0%, #f0fff4 100%); }
+.flow-step .stage-num { display: inline-block; width: 24px; height: 24px; border-radius: 50%; line-height: 24px; text-align: center; font-size: 11px; font-weight: 700; color: #fff; margin-bottom: 8px; }
+.flow-step.stage-1 .stage-num { background: #f5222d; }
+.flow-step.stage-2 .stage-num { background: #fa8c16; }
+.flow-step.stage-3 .stage-num { background: #1677ff; }
+.flow-step.stage-final .stage-num { background: #52c41a; }
+.flow-step .step-title { font-size: 13px; font-weight: 700; margin-bottom: 4px; }
+.flow-step .step-desc { font-size: 11px; color: rgba(0,0,0,0.6); line-height: 1.5; margin-bottom: 10px; }
+.flow-step .step-stats { display: flex; gap: 12px; padding-top: 10px; border-top: 1px dashed rgba(0,0,0,0.08); }
+.flow-step .step-stat { font-size: 11px; }
+.flow-step .step-stat .num { font-weight: 800; font-size: 16px; color: rgba(0,0,0,0.85); }
+.flow-step .step-stat .label { color: rgba(0,0,0,0.45); font-size: 10px; }
+.flow-arrow { display: flex; align-items: center; justify-content: center; width: 32px; color: #bfbfbf; font-size: 20px; }
+
+/* GATE SECTION */
+.gate-section { margin-bottom: 24px; }
+.gate-section-header { display: flex; align-items: center; gap: 12px; margin-bottom: 14px; padding: 0 2px; }
+.gate-section-tag { display: inline-flex; align-items: center; gap: 6px; padding: 4px 10px; border-radius: 6px; font-size: 11px; font-weight: 700; }
+.gate-section-tag.t1 { background: #fff1f0; color: #cf1322; }
+.gate-section-tag.t2 { background: #fff7e6; color: #d46b08; }
+.gate-section-tag.t3 { background: #e6f4ff; color: #0958d9; }
+.gate-section-tag .num { background: rgba(255,255,255,0.7); padding: 1px 5px; border-radius: 3px; }
+.gate-section-title { font-size: 16px; font-weight: 700; }
+.gate-section-sub { font-size: 12px; color: rgba(0,0,0,0.5); margin-left: 8px; }
+
+.gate-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
+.gate-card { background: #fff; border-radius: 10px; padding: 16px 18px; box-shadow: 0 1px 3px rgba(0,0,0,0.06); border-left: 3px solid #d9d9d9; transition: all 0.15s; }
+.gate-card:hover { box-shadow: 0 4px 12px rgba(0,0,0,0.1); transform: translateY(-1px); }
+.gate-card.stage-1 { border-left-color: #f5222d; }
+.gate-card.stage-2 { border-left-color: #fa8c16; }
+.gate-card.stage-3 { border-left-color: #1677ff; }
+.gate-card-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px; }
+.gate-code { font-family: 'SF Mono', 'Monaco', monospace; font-size: 11px; font-weight: 700; color: rgba(0,0,0,0.85); background: rgba(0,0,0,0.04); padding: 2px 8px; border-radius: 4px; }
+.gate-id { font-size: 10px; font-weight: 700; color: rgba(0,0,0,0.35); }
+.gate-card.stage-1 .gate-code { background: #fff1f0; color: #cf1322; }
+.gate-card.stage-2 .gate-code { background: #fff7e6; color: #d46b08; }
+.gate-card.stage-3 .gate-code { background: #e6f4ff; color: #0958d9; }
+.gate-title { font-size: 13px; font-weight: 700; margin-bottom: 6px; color: rgba(0,0,0,0.88); }
+.gate-cond { font-size: 12px; color: rgba(0,0,0,0.65); line-height: 1.55; margin-bottom: 10px; }
+.gate-action { font-size: 11px; color: rgba(0,0,0,0.5); padding-top: 8px; border-top: 1px dashed rgba(0,0,0,0.08); display: flex; align-items: center; gap: 6px; }
+.gate-action .label { color: rgba(0,0,0,0.35); font-weight: 600; }
+.gate-badge { display: inline-block; font-size: 10px; font-weight: 600; padding: 1px 6px; border-radius: 4px; margin-left: 6px; }
+.gate-badge.new { background: #f9f0ff; color: #722ed1; }
+.gate-badge.display-only { background: #e6fffb; color: #08979c; }
+
+/* 라이브 동적 컷 (3-stage 다른 레이아웃) */
+.live-cuts { background: #fff; border-radius: 10px; box-shadow: 0 1px 3px rgba(0,0,0,0.08); overflow: hidden; }
+.live-cuts table { width: 100%; border-collapse: collapse; }
+.live-cuts th { padding: 10px 16px; text-align: left; font-weight: 600; font-size: 11px; color: rgba(0,0,0,0.55); background: #fafafa; border-bottom: 1px solid #f0f0f0; text-transform: uppercase; letter-spacing: 0.3px; }
+.live-cuts td { padding: 12px 16px; font-size: 13px; border-bottom: 1px solid #f5f5f5; }
+.live-cuts tr:last-child td { border-bottom: none; }
+.live-cuts .trigger-tag { display: inline-block; padding: 2px 8px; border-radius: 4px; font-size: 11px; font-weight: 600; }
+.live-cuts .trigger-tag.warn { background: #fff7e6; color: #d46b08; }
+.live-cuts .trigger-tag.ok { background: #f6ffed; color: #389e0d; }
+.live-cuts .trigger-tag.err { background: #fff1f0; color: #cf1322; }
+
+/* GUARANTEE BOX */
+.guarantee-box { background: linear-gradient(135deg, #f6ffed 0%, #f0fff4 100%); border: 1px solid #b7eb8f; border-radius: 12px; padding: 20px 24px; margin-bottom: 24px; }
+.guarantee-box .gb-title { font-size: 14px; font-weight: 700; color: #389e0d; margin-bottom: 8px; display: flex; align-items: center; gap: 8px; }
+.guarantee-box .gb-title .badge { font-size: 10px; background: #52c41a; color: #fff; padding: 2px 8px; border-radius: 10px; font-weight: 700; letter-spacing: 0.3px; }
+.guarantee-box .gb-list { font-size: 12px; color: rgba(0,0,0,0.7); line-height: 1.8; padding-left: 4px; }
+.guarantee-box .gb-list li { list-style: none; position: relative; padding-left: 18px; }
+.guarantee-box .gb-list li::before { content: '✓'; position: absolute; left: 0; color: #52c41a; font-weight: 700; }
+
+/* 의사결정 패널 */
+.decision-panel { background: #fff; border-radius: 12px; box-shadow: 0 1px 3px rgba(0,0,0,0.08); padding: 24px; margin-bottom: 20px; }
+.decision-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 6px; }
+.decision-title { font-size: 15px; font-weight: 700; }
+.decision-badge { font-size: 10px; background: #fff2e8; color: #d4380d; padding: 3px 8px; border-radius: 4px; font-weight: 700; }
+.decision-sub { font-size: 12px; color: rgba(0,0,0,0.55); margin-bottom: 18px; }
+.decision-grid { display: grid; grid-template-columns: 1fr; gap: 16px; }
+.decision-card { padding: 16px; border: 1px solid #f0f0f0; border-radius: 10px; background: #fafafa; }
+.decision-card-title { font-size: 12px; font-weight: 700; margin-bottom: 4px; color: rgba(0,0,0,0.85); }
+.decision-card-code { font-family: 'SF Mono', monospace; font-size: 10px; color: rgba(0,0,0,0.4); margin-bottom: 12px; }
+.decision-card-q { font-size: 11px; color: rgba(0,0,0,0.6); line-height: 1.5; margin-bottom: 14px; }
+
+.slider-wrap { background: #fff; padding: 12px 14px; border-radius: 8px; border: 1px solid #e8e8e8; }
+.slider-row { display: flex; align-items: center; gap: 10px; margin-bottom: 6px; }
+.slider-row label { font-size: 11px; color: rgba(0,0,0,0.55); min-width: 60px; }
+.slider-row input[type="range"] { flex: 1; accent-color: #1677ff; }
+.slider-row .val { font-weight: 700; font-size: 14px; color: #1677ff; min-width: 40px; text-align: right; }
+.slider-marks { display: flex; justify-content: space-between; font-size: 9px; color: rgba(0,0,0,0.35); padding: 0 60px 0 70px; }
+
+.preset-row { display: flex; gap: 6px; margin-top: 8px; }
+.preset-btn { padding: 4px 10px; font-size: 11px; border: 1px solid #d9d9d9; background: #fff; border-radius: 4px; cursor: pointer; color: rgba(0,0,0,0.65); }
+.preset-btn:hover { border-color: #1677ff; color: #1677ff; }
+.preset-btn.active { background: #e6f4ff; border-color: #1677ff; color: #1677ff; font-weight: 600; }
+
+/* 처리 결과 시뮬레이션 */
+.sim-result { margin-top: 16px; padding: 12px 14px; background: #fafafa; border-radius: 8px; font-size: 11px; color: rgba(0,0,0,0.55); line-height: 1.7; }
+.sim-result strong { color: #1677ff; font-size: 13px; }
+
+/* TEXTAREA */
+.note-textarea { width: 100%; min-height: 60px; padding: 8px 10px; border: 1px solid #e8e8e8; border-radius: 6px; font-family: inherit; font-size: 11px; resize: vertical; outline: none; }
+.note-textarea:focus { border-color: #1677ff; }
+
+/* 처리 흐름 다이어그램 (각 게이트가 어디 단계에서 동작하는지) */
+.gate-flow-diagram { background: #fff; border-radius: 10px; padding: 20px; box-shadow: 0 1px 3px rgba(0,0,0,0.08); margin-bottom: 24px; overflow-x: auto; }
+.gate-flow-diagram .title { font-size: 14px; font-weight: 700; margin-bottom: 14px; }
+
+</style>
+</head>
+<body>
+
+<!-- SIDEBAR -->
+<aside class="sidebar">
+  <div class="sidebar-logo">
+    <span class="dot"></span>
+    Trip<span>Store</span> AutoGen
+  </div>
+  <div class="sidebar-group">자동생성 관리</div>
+  <a class="sidebar-item" href="autogen-rule-v2.html"><span class="icon">⚙️</span>규칙 관리 (v2)</a>
+  <a class="sidebar-item" href="autogen-monitoring.html"><span class="icon">📊</span>모니터링</a>
+  <a class="sidebar-item" href="autogen-reject-pool.html"><span class="icon">🚫</span>탈락 상품 풀</a>
+  <a class="sidebar-item" href="#"><span class="icon">📦</span>라이브 상품 관리<span class="sidebar-badge" style="background:#52c41a;">NEW</span></a>
+  <a class="sidebar-item active" href="autogen-gate-policy.html"><span class="icon">🎚️</span>노출 게이트 정책<span class="sidebar-badge">NEW</span></a>
+  <div class="sidebar-group">예약 / 결제</div>
+  <a class="sidebar-item" href="autogen-reservation.html"><span class="icon">📋</span>예약 관리</a>
+  <a class="sidebar-item" href="autogen-booking.html"><span class="icon">💳</span>결제 플로우</a>
+  <div class="sidebar-group">TMG 숙소</div>
+  <a class="sidebar-item" href="tmg-rate-admin.html"><span class="icon">🏨</span>요금표 어드민</a>
+  <a class="sidebar-item" href="tmg-reservation-admin.html"><span class="icon">📑</span>예약 어드민</a>
+</aside>
+
+<!-- MAIN -->
+<main class="main">
+
+  <!-- TOP -->
+  <div class="top-bar">
+    <div>
+      <h1 class="page-title">노출 게이트 정책 <span class="tag-new">NEW · v2.1</span></h1>
+      <div class="page-meta">생성 → 노출 → 라이브 3단계 게이트 매트릭스 · 회의록(2026-05-20) 반영</div>
+    </div>
+    <div class="user-info">
+      <span>김서현 PM</span>
+      <div class="avatar">서</div>
+    </div>
+  </div>
+
+  <!-- 정책 배너 -->
+  <div class="policy-banner">
+    <div class="icon">📐</div>
+    <div>
+      <div class="title">전체 조합 생성 → 사후 노출 결정 원칙</div>
+      <div class="desc">
+        AI는 가능한 <strong>모든 조합을 우선 생성</strong>합니다. 그 다음 두 단계의 필터를 거쳐 노출이 결정됩니다.
+        <strong>① 생성 게이트</strong>는 만들기 전에 차단(오류·정책 위반), <strong>② 노출 게이트</strong>는 만든 뒤 숨김(가격·인기도·리스크).
+        라이브 중에도 <strong>③ 동적 컷</strong>이 동작합니다. <span style="color:#cf1322; font-weight:700;">관리자 검수 게이트는 없습니다</span> (회의 결정).
+      </div>
+    </div>
+  </div>
+
+  <!-- KPI -->
+  <div class="kpi-grid">
+    <div class="kpi-card gray">
+      <div class="kpi-label">전체 시도 조합</div>
+      <div class="kpi-value">4,820</div>
+      <div class="kpi-sub">최근 배치 (run_2026-05-20-v3)</div>
+    </div>
+    <div class="kpi-card red">
+      <div class="kpi-label">① 생성 차단 (오류)</div>
+      <div class="kpi-value">1,247</div>
+      <div class="kpi-sub">25.9% · 로그만 남김</div>
+    </div>
+    <div class="kpi-card orange">
+      <div class="kpi-label">② 노출 탈락 (Reject Pool)</div>
+      <div class="kpi-value">2,108</div>
+      <div class="kpi-sub">43.7% · PM 검토 가능</div>
+    </div>
+    <div class="kpi-card green">
+      <div class="kpi-label">라이브 노출 중</div>
+      <div class="kpi-value">1,465</div>
+      <div class="kpi-sub">30.4% · 평균 마진 12.3%</div>
+    </div>
+  </div>
+
+  <!-- 어떤 상품이 만들어지나 -->
+  <div style="background:#fff; border-radius:12px; box-shadow:0 1px 3px rgba(0,0,0,0.08); padding:24px; margin-bottom:20px;">
+    <div style="font-size:15px; font-weight:700; margin-bottom:4px;">📦 어떤 상품들이 만들어지나</div>
+    <div style="font-size:12px; color:rgba(0,0,0,0.55); margin-bottom:18px;">입력 풀 × 조합 룰 = 생성되는 상품 형태</div>
+
+    <!-- 입력 풀 -->
+    <div style="display:grid; grid-template-columns:repeat(3, 1fr); gap:12px; margin-bottom:18px;">
+      <div style="border:1px solid #91d5ff; background:#e6f4ff; border-radius:10px; padding:14px;">
+        <div style="font-size:11px; color:#0958d9; font-weight:700; margin-bottom:6px;">INPUT 1 · 숙박권 풀</div>
+        <div style="font-size:22px; font-weight:800; color:#0958d9; line-height:1;">12</div>
+        <div style="font-size:11px; color:rgba(0,0,0,0.55); margin-top:4px;">푸꾸옥 등록 숙박권 (객실 타입 포함)</div>
+        <div style="font-size:10px; color:rgba(0,0,0,0.4); margin-top:6px; line-height:1.5;">예: Sol by Melia · 빈펄 · 풀만 · 머벤픽 · 노보텔...</div>
+      </div>
+      <div style="border:1px solid #ffd591; background:#fff7e6; border-radius:10px; padding:14px;">
+        <div style="font-size:11px; color:#d46b08; font-weight:700; margin-bottom:6px;">INPUT 2 · 항공권 풀 (왕복 단위)</div>
+        <div style="font-size:22px; font-weight:800; color:#d46b08; line-height:1;">8</div>
+        <div style="font-size:11px; color:rgba(0,0,0,0.55); margin-top:4px;">인천 ↔ 푸꾸옥 왕복권</div>
+        <div style="font-size:10px; color:rgba(0,0,0,0.4); margin-top:6px; line-height:1.5;">예: 비엣젯 · 베트남항공 · 진에어 · 티웨이...</div>
+      </div>
+      <div style="border:1px solid #b7eb8f; background:#f6ffed; border-radius:10px; padding:14px;">
+        <div style="font-size:11px; color:#389e0d; font-weight:700; margin-bottom:6px;">INPUT 3 · 투어/티켓 풀</div>
+        <div style="font-size:22px; font-weight:800; color:#389e0d; line-height:1;">15</div>
+        <div style="font-size:11px; color:rgba(0,0,0,0.55); margin-top:4px;">투어 6종 · 티켓 9종 (선택 옵션)</div>
+        <div style="font-size:10px; color:rgba(0,0,0,0.4); margin-top:6px; line-height:1.5;">예: 호핑투어 · 빈펄랜드 · 케이블카 · 머드스파...</div>
+      </div>
+    </div>
+
+    <!-- 조합 룰 (재정의 v2) -->
+    <div style="background:#fafafa; border-radius:8px; padding:16px 18px; margin-bottom:18px;">
+      <div style="font-size:11px; color:rgba(0,0,0,0.5); font-weight:700; margin-bottom:12px;">⚙️ 조합 룰</div>
+
+      <!-- 디폴트 형태 -->
+      <div style="display:flex; align-items:center; gap:10px; margin-bottom:10px;">
+        <span style="background:#1677ff; color:#fff; font-size:10px; font-weight:700; padding:3px 8px; border-radius:4px; min-width:70px; text-align:center;">디폴트</span>
+        <span style="font-size:12px; color:rgba(0,0,0,0.85);"><strong>에어텔</strong> (항공 + 숙박) — 모든 자동생성 상품의 기본 형태</span>
+      </div>
+
+      <!-- 강제 조합 -->
+      <div style="display:flex; align-items:center; gap:10px; margin-bottom:10px;">
+        <span style="background:#f5222d; color:#fff; font-size:10px; font-weight:700; padding:3px 8px; border-radius:4px; min-width:70px; text-align:center;">강제 포함</span>
+        <span style="font-size:12px; color:rgba(0,0,0,0.85);"><strong>픽업/샌딩</strong> — 모든 상품에 자동 포함 (예외 없음)</span>
+      </div>
+
+      <!-- 선택 조합 -->
+      <div style="display:flex; align-items:flex-start; gap:10px; margin-bottom:10px;">
+        <span style="background:#fa8c16; color:#fff; font-size:10px; font-weight:700; padding:3px 8px; border-radius:4px; min-width:70px; text-align:center;">선택 조합</span>
+        <div style="font-size:12px; color:rgba(0,0,0,0.85); line-height:1.6;">
+          <strong>패스트트랙 · 투어 · 티켓</strong> 중 <strong style="color:#fa8c16;">1~2개 또는 조합 구성</strong>으로 (AI가 판단해서 묶음)<br/>
+          <span style="font-size:11px; color:rgba(0,0,0,0.5);">예: 패스트트랙만 / 패스트트랙+투어 / 투어+티켓 / 패스트트랙+투어+티켓</span>
+        </div>
+      </div>
+
+      <!-- 일정 -->
+      <div style="display:flex; align-items:center; gap:10px; margin-bottom:10px;">
+        <span style="background:#52c41a; color:#fff; font-size:10px; font-weight:700; padding:3px 8px; border-radius:4px; min-width:70px; text-align:center;">일정</span>
+        <span style="font-size:12px; color:rgba(0,0,0,0.85);">우리가 보유한 <strong>항공편 출발·도착 기준으로 자동 결정</strong> (3박5일/4박6일 등)</span>
+      </div>
+
+      <!-- 객실 타입 -->
+      <div style="display:flex; align-items:center; gap:10px;">
+        <span style="background:#722ed1; color:#fff; font-size:10px; font-weight:700; padding:3px 8px; border-radius:4px; min-width:70px; text-align:center;">객실 타입</span>
+        <span style="font-size:12px; color:rgba(0,0,0,0.85);"><strong>숙박권 등록 시점에 PM이 정한 대로 다 만듦</strong> (자동생성 단계에서 별도 제한 없음)</span>
+      </div>
+    </div>
+
+    <!-- 실제 생성 규모 -->
+    <div style="display:flex; align-items:center; gap:14px; padding:14px 16px; background:linear-gradient(90deg, #e6f4ff 0%, #f6ffed 100%); border-radius:8px; margin-bottom:18px; font-size:12px;">
+      <span style="color:rgba(0,0,0,0.6);">AI 실제 시도</span>
+      <strong style="font-size:20px; color:#1677ff;">~4,820</strong>
+      <span style="color:rgba(0,0,0,0.45); font-size:11px;">건/배치</span>
+      <span style="color:rgba(0,0,0,0.3);">·</span>
+      <span style="color:rgba(0,0,0,0.6);">3-stage 게이트 통과 후</span>
+      <strong style="font-size:20px; color:#52c41a;">~1,465</strong>
+      <span style="color:rgba(0,0,0,0.45); font-size:11px;">건 라이브 (생존율 30%)</span>
+    </div>
+
+    <!-- 생성 예시 카드 -->
+    <div style="font-size:11px; color:rgba(0,0,0,0.5); font-weight:700; margin-bottom:8px;">📋 생성된 상품 예시 (랜덤 샘플 4개)</div>
+    <div style="display:grid; grid-template-columns:repeat(2, 1fr); gap:10px;">
+      <div style="border:1px solid #f0f0f0; border-radius:8px; padding:12px 14px; background:#fff;">
+        <div style="font-size:12px; font-weight:700; margin-bottom:4px;">[비엣젯 + Sol by Melia 오션뷰] 에어텔 3박5일</div>
+        <div style="font-size:11px; color:rgba(0,0,0,0.55);"><span style="color:#f5222d;">●</span> 픽업/샌딩 <span style="color:rgba(0,0,0,0.3);">|</span> <span style="color:#fa8c16;">●</span> 패스트트랙 + 호핑투어 · BB</div>
+        <div style="font-size:11px; margin-top:6px;"><span style="color:#52c41a; font-weight:700;">₩890,000</span> <span style="color:rgba(0,0,0,0.35); text-decoration:line-through;">₩1,090,000</span> <span style="background:#f6ffed; color:#389e0d; padding:1px 6px; border-radius:3px; margin-left:4px;">LIVE</span></div>
+      </div>
+      <div style="border:1px solid #f0f0f0; border-radius:8px; padding:12px 14px; background:#fff;">
+        <div style="font-size:12px; font-weight:700; margin-bottom:4px;">[베트남항공 + 빈펄 디럭스] 에어텔 4박6일</div>
+        <div style="font-size:11px; color:rgba(0,0,0,0.55);"><span style="color:#f5222d;">●</span> 픽업/샌딩 <span style="color:rgba(0,0,0,0.3);">|</span> <span style="color:#fa8c16;">●</span> 빈펄랜드 티켓 · HB</div>
+        <div style="font-size:11px; margin-top:6px;"><span style="color:#52c41a; font-weight:700;">₩1,290,000</span> <span style="color:rgba(0,0,0,0.35); text-decoration:line-through;">₩1,490,000</span> <span style="background:#f6ffed; color:#389e0d; padding:1px 6px; border-radius:3px; margin-left:4px;">LIVE</span></div>
+      </div>
+      <div style="border:1px solid #f0f0f0; border-radius:8px; padding:12px 14px; background:#fff;">
+        <div style="font-size:12px; font-weight:700; margin-bottom:4px;">[진에어 + 풀만 가든뷰] 에어텔 3박5일</div>
+        <div style="font-size:11px; color:rgba(0,0,0,0.55);"><span style="color:#f5222d;">●</span> 픽업/샌딩 <span style="color:rgba(0,0,0,0.3);">|</span> 선택 옵션 없음 · BB</div>
+        <div style="font-size:11px; margin-top:6px;"><span style="color:#fa8c16; font-weight:700;">₩720,000</span> <span style="background:#fff7e6; color:#d46b08; padding:1px 6px; border-radius:3px; margin-left:4px;">탈락 · R1 (경쟁가 미달)</span></div>
+      </div>
+      <div style="border:1px solid #f0f0f0; border-radius:8px; padding:12px 14px; background:#fff;">
+        <div style="font-size:12px; font-weight:700; margin-bottom:4px;">[티웨이 + 머벤픽 스위트] 에어텔 5박7일</div>
+        <div style="font-size:11px; color:rgba(0,0,0,0.55);"><span style="color:#f5222d;">●</span> 픽업/샌딩 <span style="color:rgba(0,0,0,0.3);">|</span> <span style="color:#fa8c16;">●</span> 패스트트랙 + 호핑투어 + 케이블카 · AI</div>
+        <div style="font-size:11px; margin-top:6px;"><span style="color:#52c41a; font-weight:700;">₩2,180,000</span> <span style="color:rgba(0,0,0,0.35); text-decoration:line-through;">₩2,490,000</span> <span style="background:#f6ffed; color:#389e0d; padding:1px 6px; border-radius:3px; margin-left:4px;">LIVE</span></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 3-STAGE FLOW (가로 LR) -->
+  <div class="flow-wrap">
+    <div class="flow-title">처리 흐름</div>
+    <div class="flow-subtitle">왼쪽에서 오른쪽으로. 각 단계마다 다른 사유 코드가 동작합니다.</div>
+    <div class="flow-row">
+      <div class="flow-step stage-1" onclick="document.getElementById('gate-1').scrollIntoView({behavior:'smooth'})">
+        <div class="stage-num">1</div>
+        <div class="step-title">생성 게이트</div>
+        <div class="step-desc">애초에 안 만든다.<br/>오류·정책 위반·블랙리스트.</div>
+        <div class="step-stats">
+          <div class="step-stat"><div class="num">4</div><div class="label">사유 코드</div></div>
+          <div class="step-stat"><div class="num">1,247</div><div class="label">차단</div></div>
+        </div>
+      </div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-step stage-2" onclick="document.getElementById('gate-2').scrollIntoView({behavior:'smooth'})">
+        <div class="stage-num">2</div>
+        <div class="step-title">노출 게이트</div>
+        <div class="step-desc">만들어놓고 숨긴다.<br/>가격·인기도·리스크.</div>
+        <div class="step-stats">
+          <div class="step-stat"><div class="num">3</div><div class="label">사유 코드</div></div>
+          <div class="step-stat"><div class="num">2,108</div><div class="label">Reject Pool</div></div>
+        </div>
+      </div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-step stage-3" onclick="document.getElementById('gate-3').scrollIntoView({behavior:'smooth'})">
+        <div class="stage-num">3</div>
+        <div class="step-title">라이브 동적 컷</div>
+        <div class="step-desc">노출 중 변동 대응.<br/>재고·가격·취소 기준일.</div>
+        <div class="step-stats">
+          <div class="step-stat"><div class="num">5</div><div class="label">트리거</div></div>
+          <div class="step-stat"><div class="num">23</div><div class="label">금일 발동</div></div>
+        </div>
+      </div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-step stage-final">
+        <div class="stage-num">✓</div>
+        <div class="step-title">고객 PDP 노출</div>
+        <div class="step-desc">리스트·검색·PDP까지<br/>즉시 노출 (정가마진 사후 조정 가능).</div>
+        <div class="step-stats">
+          <div class="step-stat"><div class="num">1,465</div><div class="label">라이브</div></div>
+          <div class="step-stat"><div class="num">30.4%</div><div class="label">생존율</div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ① 생성 게이트 -->
+  <div class="gate-section" id="gate-1">
+    <div class="gate-section-header">
+      <span class="gate-section-tag t1">STAGE <span class="num">1</span></span>
+      <div class="gate-section-title">생성 게이트 — "오류로 안 만든다"</div>
+      <div class="gate-section-sub">로그만 남기고 상품 자체를 만들지 않음. PM에게 노출되지 않음 (오류 모니터링 별도).</div>
+    </div>
+    <div class="gate-grid">
+      <div class="gate-card stage-1">
+        <div class="gate-card-header">
+          <span class="gate-code">NO_INVENTORY</span>
+          <span class="gate-id">G1</span>
+        </div>
+        <div class="gate-title">재고 없음</div>
+        <div class="gate-cond">항공 좌석 0 또는 숙소 객실 0. 인벤토리 자체가 비어 있는 경우.</div>
+        <div class="gate-action"><span class="label">처리</span> 로그 → 다음 배치까지 보류</div>
+      </div>
+      <div class="gate-card stage-1">
+        <div class="gate-card-header">
+          <span class="gate-code">NEGATIVE_MARGIN</span>
+          <span class="gate-id">G2</span>
+        </div>
+        <div class="gate-title">역마진 확정</div>
+        <div class="gate-cond">판매가 &lt; 원가. 고정마진=0% 케이스에서만 드물게 발생.</div>
+        <div class="gate-action"><span class="label">처리</span> 원가 재협 요청 알림</div>
+      </div>
+      <div class="gate-card stage-1">
+        <div class="gate-card-header">
+          <span class="gate-code">COMBINATION_LIMIT</span>
+          <span class="gate-id">G3</span>
+        </div>
+        <div class="gate-title">조합 정책 위반</div>
+        <div class="gate-cond">디폴트 형태 = <strong>에어텔(항공+숙박)</strong>. 강제 포함 <strong>픽업/샌딩</strong> 누락 X. 같은 카테고리 중복 X (투어 2개 / 티켓 2개).</div>
+        <div class="gate-action"><span class="label">처리</span> 조합 단계에서 스킵</div>
+      </div>
+      <div class="gate-card stage-1">
+        <div class="gate-card-header">
+          <span class="gate-code">MANUAL_BLOCK_PERM</span>
+          <span class="gate-id">G4</span>
+        </div>
+        <div class="gate-title">PM 영구 블랙리스트</div>
+        <div class="gate-cond">PM이 영구 제외 등록한 조합 (특정 숙소 · 항공사 · 룸타입 조합).</div>
+        <div class="gate-action"><span class="label">처리</span> 블랙리스트 룰 매칭 시 차단</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ② 노출 게이트 -->
+  <div class="gate-section" id="gate-2">
+    <div class="gate-section-header">
+      <span class="gate-section-tag t2">STAGE <span class="num">2</span></span>
+      <div class="gate-section-title">노출 게이트 — "만들었지만 안 보임 (Reject Pool)"</div>
+      <div class="gate-section-sub">상품은 생성되지만 노출 단계에서 자동 탈락. PM이 Reject Pool에서 검토·강제 부활 가능.</div>
+    </div>
+    <div class="gate-grid">
+      <div class="gate-card stage-2">
+        <div class="gate-card-header">
+          <span class="gate-code">BELOW_COMPETITION</span>
+          <span class="gate-id">R1</span>
+        </div>
+        <div class="gate-title">경쟁가 미달</div>
+        <div class="gate-cond">추가마진 학습 경쟁가 × 0.95 초과. svc.inventory 1~3순위 폴백으로 산출.</div>
+        <div class="gate-action"><span class="label">PM 액션</span> 마진 재조정 · 영구 제외 · 강제 노출</div>
+      </div>
+      <div class="gate-card stage-2">
+        <div class="gate-card-header">
+          <span class="gate-code">MARGIN_FLOOR_UNREACHABLE</span>
+          <span class="gate-id">R2</span>
+        </div>
+        <div class="gate-title">최저%하한 미달</div>
+        <div class="gate-cond">최저가 공격해도 최저%하한(10%) 못 맞춤. 경쟁가 도달 불가.</div>
+        <div class="gate-action"><span class="label">PM 액션</span> 원가 재협 요청 · 영구 제외</div>
+      </div>
+      <div class="gate-card stage-2">
+        <div class="gate-card-header">
+          <span class="gate-code">MANUAL_BLOCK_TEMP</span>
+          <span class="gate-id">R3</span>
+        </div>
+        <div class="gate-title">PM 일시 미노출</div>
+        <div class="gate-cond">PM이 사유 메모와 함께 일시 미노출 처리.</div>
+        <div class="gate-action"><span class="label">PM 액션</span> 사유 검토 · 재노출</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ③ 라이브 동적 컷 -->
+  <div class="gate-section" id="gate-3">
+    <div class="gate-section-header">
+      <span class="gate-section-tag t3">STAGE <span class="num">3</span></span>
+      <div class="gate-section-title">라이브 동적 컷 — "노출 중 변동 대응"</div>
+      <div class="gate-section-sub">PDP 진입·결제 시점·시간 경과에 따른 실시간 처리.</div>
+    </div>
+    <div class="live-cuts">
+      <table>
+        <thead>
+          <tr>
+            <th style="width:60px;">#</th>
+            <th>트리거</th>
+            <th>조건</th>
+            <th>처리</th>
+            <th style="width:120px;">고객 영향</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>L1</strong></td>
+            <td><span class="trigger-tag err">재고 0</span></td>
+            <td><code>checkAvailability</code> 응답에서 재고 사라짐</td>
+            <td>즉시 리스트에서 제거</td>
+            <td>없음</td>
+          </tr>
+          <tr>
+            <td><strong>L2</strong></td>
+            <td><span class="trigger-tag ok">가격 변동 (마진 내)</span></td>
+            <td>마진 범위 이내 상승</td>
+            <td>자동 흡수, 안내 없음</td>
+            <td>없음</td>
+          </tr>
+          <tr>
+            <td><strong>L3</strong></td>
+            <td><span class="trigger-tag warn">가격 변동 (마진 초과)</span></td>
+            <td>마진 범위 초과 상승</td>
+            <td>안내 모달 → 고객 선택 (수락/포기)</td>
+            <td>안내</td>
+          </tr>
+          <tr>
+            <td><strong>L4</strong></td>
+            <td><span class="trigger-tag err">결제 후 가격 뒤집기</span></td>
+            <td>결제 완료 후 가격 인상 발견</td>
+            <td>절대 안 함 (트립스토어 흡수)</td>
+            <td>없음</td>
+          </tr>
+          <tr>
+            <td><strong>L5</strong></td>
+            <td><span class="trigger-tag warn">취소 기준일 도래</span></td>
+            <td>숙소별 취소 가능 기준일 D-day</td>
+            <td>자동 미노출 전환 (위약금 리스크 차단)</td>
+            <td>없음</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- 라이브 상품 관리 툴 -->
+  <div style="background:#fff; border:2px solid #52c41a; border-radius:12px; padding:20px 24px; margin-bottom:20px; position:relative;">
+    <span style="position:absolute; top:-10px; right:20px; background:#52c41a; color:#fff; font-size:10px; font-weight:700; padding:3px 10px; border-radius:10px; letter-spacing:0.3px;">NEEDED · 신규 화면</span>
+    <div style="font-size:14px; font-weight:700; margin-bottom:8px; color:#389e0d;">📦 라이브 상품 검증·미노출 관리 툴</div>
+    <div style="font-size:12px; color:rgba(0,0,0,0.65); line-height:1.7; margin-bottom:14px;">
+      <strong>Reject Pool은 탈락된 상품만 보여줌</strong>. 노출 중인 라이브 상품(현재 1,465건)을 PM이 직접 검토·미노출 처리하는 화면이 별도로 필요합니다. <code style="background:#f0f0f0; padding:1px 5px; border-radius:3px; font-size:11px;">MANUAL_BLOCK_TEMP</code>(R3) 사유 코드 진입점.
+    </div>
+    <div style="display:grid; grid-template-columns:repeat(3, 1fr); gap:12px;">
+      <div style="background:#fafafa; padding:12px 14px; border-radius:8px;">
+        <div style="font-size:11px; font-weight:700; color:rgba(0,0,0,0.65); margin-bottom:4px;">1. 리스트 뷰</div>
+        <div style="font-size:11px; color:rgba(0,0,0,0.55); line-height:1.5;">라이브 상품 전체 리스트 + 필터(여행지·항공사·숙소·일정·마진율·노출일수)</div>
+      </div>
+      <div style="background:#fafafa; padding:12px 14px; border-radius:8px;">
+        <div style="font-size:11px; font-weight:700; color:rgba(0,0,0,0.65); margin-bottom:4px;">2. 상세 검증</div>
+        <div style="font-size:11px; color:rgba(0,0,0,0.55); line-height:1.5;">상품 클릭 시 조회수·전환율·마진 시계열 + AI rationale + 가격 변동 이력</div>
+      </div>
+      <div style="background:#fafafa; padding:12px 14px; border-radius:8px;">
+        <div style="font-size:11px; font-weight:700; color:rgba(0,0,0,0.65); margin-bottom:4px;">3. 액션</div>
+        <div style="font-size:11px; color:rgba(0,0,0,0.55); line-height:1.5;">미노출 처리(사유 메모 필수) · 정가마진(할인) 조정 · 영구 블랙리스트 등록</div>
+      </div>
+    </div>
+    <div style="margin-top:14px; padding:10px 14px; background:#e6fffb; border-radius:6px; font-size:11px; color:#08979c;">
+      💡 <strong>관리 흐름:</strong> 라이브 상품 관리 → 미노출 처리 → Reject Pool로 이동(R3 코드) → 사유 검토 후 재노출 또는 영구 제외
+    </div>
+  </div>
+
+  <!-- Phase 2 보류 박스 -->
+  <div style="background: #f0f0f0; border: 1px dashed #bfbfbf; border-radius: 12px; padding: 18px 22px; margin-bottom: 20px;">
+    <div style="font-size:13px; font-weight:700; color:rgba(0,0,0,0.55); margin-bottom:8px;">⏸ Phase 2 보류 (지금당장 X)</div>
+    <ul style="list-style:none; font-size:12px; color:rgba(0,0,0,0.55); line-height:1.8;">
+      <li>• <strong>LOW_DEMAND_SIGNAL</strong> (학습 인기도 미달) — 푸꾸옥 첫 배치는 학습 데이터 미축적 → Phase 2 학습 데이터 충분 시 도입</li>
+      <li>• <strong>MARKET_PRICE_DROP</strong> (하드블록 시장가 폴링) — 외부 시세 트래킹 시스템 별도 구축 필요</li>
+      <li>• <strong>SIMILAR_OVERPRICED</strong> (유사 매트릭스 뷰) — 매트릭스 신규 화면 구축 필요</li>
+      <li>• <strong>페르소나 변수 프론팅</strong> — 신규 시장(일본·중국) 확장 단계에서 도입</li>
+    </ul>
+  </div>
+
+  <!-- 무조건 노출 보장 박스 -->
+  <div class="guarantee-box">
+    <div class="gb-title">
+      <span>무조건 노출 보장 케이스</span>
+      <span class="badge">FORCE-LIVE</span>
+    </div>
+    <ul class="gb-list">
+      <li><strong>블루오션 조합</strong> (동일·유사 비교 대상 없음) → R1(경쟁가) 자동 통과. R2(역마진 보호)는 그대로 적용.</li>
+      <li><strong>PM 강제 노출 플래그</strong>(`manual_override`) → 모든 Stage 2 게이트 통과. 사유 메모 필수.</li>
+    </ul>
+  </div>
+
+  <!-- 핵심 메시지 -->
+  <div style="background: linear-gradient(135deg, #e6f4ff 0%, #f0f7ff 100%); border: 1px solid #91d5ff; border-radius: 12px; padding: 18px 22px; margin-bottom: 20px;">
+    <div style="font-size:13px; font-weight:700; color:#0958d9; margin-bottom:6px;">💡 핵심 정리</div>
+    <div style="font-size:12px; color:rgba(0,0,0,0.7); line-height:1.7;">
+      "오류 상품 안 만들기"는 별도 게이트가 필요 없음 — <strong>G1(재고)·G2(역마진)·G3(조합제한)</strong>만으로 커버됨.<br/>
+      투어·항공 시간 미스매치는 <strong>일정표 자동생성 로직</strong>이 2일차 배치 등으로 해결, 식사·룸타입은 <strong>TMG 요금표 단위</strong>로 조합하면 자동 해결. 별도 룰셋 정의 불필요.
+    </div>
+  </div>
+
+</main>
+
+<script>
+</script>
+
+</body>
+</html>

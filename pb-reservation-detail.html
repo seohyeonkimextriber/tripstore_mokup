@@ -1,0 +1,714 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>예약 상세 — TripStore Partners</title>
+<link href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.6/dist/web/static/pretendard.css" rel="stylesheet">
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: 'Pretendard', 'Apple SD Gothic Neo', -apple-system, sans-serif; font-size: 14px; color: rgba(0,0,0,0.88); background: #f5f5f5; }
+body.modal-open { overflow: hidden; }
+a { color: inherit; text-decoration: none; }
+button { font-family: inherit; cursor: pointer; }
+
+/* GNB */
+.gnb { background: #f0f5ff; height: 48px; display: flex; align-items: center; position: sticky; top: 0; z-index: 100; padding: 0 20px; border-bottom: 1px solid #d6e4ff; box-shadow: 0 1px 4px rgba(0,0,0,0.06); }
+.gnb-logo { color: #222427; font-weight: 800; font-size: 15px; margin-right: 24px; letter-spacing: -0.3px; }
+.gnb-logo span { color: #1677ff; }
+.gnb-logo .partners-badge { background: #1677ff; color: #fff; font-size: 10px; font-weight: 700; padding: 2px 6px; border-radius: 4px; margin-left: 6px; letter-spacing: 0.3px; vertical-align: middle; }
+.gnb-menu { display: flex; gap: 0; }
+.gnb-item { color: rgba(0,0,0,0.55); padding: 0 14px; height: 48px; display: flex; align-items: center; cursor: pointer; font-size: 13px; white-space: nowrap; position: relative; font-weight: 500; }
+.gnb-item:hover { color: rgba(0,0,0,0.88); }
+.gnb-item.active { color: #1677ff; }
+.gnb-item.active::after { content: ''; position: absolute; bottom: 0; left: 0; right: 0; height: 2px; background: #1677ff; }
+.gnb-right { margin-left: auto; display: flex; align-items: center; gap: 14px; }
+.gnb-user { font-size: 12px; color: rgba(0,0,0,0.55); }
+.gnb-user-name { font-weight: 600; color: rgba(0,0,0,0.75); }
+.gnb-org-badge { background: #fff; border: 1px solid #d6e4ff; color: #1677ff; font-size: 11px; font-weight: 600; padding: 3px 8px; border-radius: 4px; }
+
+/* Breadcrumb */
+.breadcrumb { padding: 14px 24px 0; font-size: 12px; color: rgba(0,0,0,0.45); display: flex; align-items: center; gap: 6px; }
+.breadcrumb span:not(.sep) { cursor: pointer; }
+.breadcrumb span:not(.sep):hover { color: #1677ff; }
+.sep { color: rgba(0,0,0,0.2); cursor: default !important; }
+.bc-current { color: rgba(0,0,0,0.88) !important; cursor: default !important; }
+
+.layout { padding: 14px 24px 48px; max-width: 1480px; margin: 0 auto; }
+
+/* ===== STATUS HEADER (예약 상태 + 카운트다운) ===== */
+.status-header { background: #fff; border: 1px solid #91caff; border-radius: 12px; padding: 18px 22px; margin-bottom: 14px; display: flex; align-items: center; gap: 20px; }
+.status-header.urgent { border-color: #ffa39e; background: linear-gradient(90deg, #fff1f0 0%, #fff 60%); animation: urgentPulse 2.5s infinite; }
+.status-header.completed { border-color: #b7eb8f; background: linear-gradient(90deg, #f6ffed 0%, #fff 60%); }
+@keyframes urgentPulse { 0%, 100% { box-shadow: 0 0 0 0 rgba(255,77,79,0.4); } 50% { box-shadow: 0 0 0 6px rgba(255,77,79,0); } }
+.status-left { display: flex; align-items: center; gap: 14px; }
+.status-icon { width: 52px; height: 52px; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 22px; flex-shrink: 0; }
+.status-icon.hold { background: #fff7e6; color: #d48806; border: 1.5px solid #ffd591; }
+.status-icon.proc { background: #e6f4ff; color: #0958d9; border: 1.5px solid #91caff; }
+.status-icon.done { background: #f6ffed; color: #389e0d; border: 1.5px solid #b7eb8f; }
+.status-icon.fail { background: #fff1f0; color: #cf1322; border: 1.5px solid #ffa39e; }
+.status-info { flex: 1; min-width: 0; }
+.status-rid { font-family: 'SF Mono', monospace; font-size: 12px; color: rgba(0,0,0,0.55); font-weight: 600; }
+.status-title { font-size: 18px; font-weight: 800; color: rgba(0,0,0,0.88); margin-top: 3px; display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+.status-stage-pill { display: inline-flex; align-items: center; gap: 5px; padding: 3px 10px; border-radius: 5px; font-size: 11.5px; font-weight: 700; }
+.status-stage-pill.hold { background: #fff7e6; color: #d48806; border: 1px solid #ffd591; }
+.status-stage-pill.confirm { background: #e6f4ff; color: #0958d9; border: 1px solid #91caff; }
+.status-stage-pill.done { background: #f6ffed; color: #389e0d; border: 1px solid #b7eb8f; }
+.status-stage-pill .sdot { width: 6px; height: 6px; border-radius: 50%; }
+.status-stage-pill.hold .sdot { background: #d48806; animation: blink 1.5s infinite; }
+.status-stage-pill.confirm .sdot { background: #1677ff; animation: blink 1.5s infinite; }
+.status-stage-pill.done .sdot { background: #52c41a; }
+@keyframes blink { 0%, 60% { opacity: 1; } 80% { opacity: 0.3; } 100% { opacity: 1; } }
+.status-meta { font-size: 12px; color: rgba(0,0,0,0.55); margin-top: 4px; display: flex; gap: 14px; flex-wrap: wrap; }
+.status-meta strong { color: rgba(0,0,0,0.85); font-weight: 700; }
+
+.countdown-card { background: linear-gradient(135deg, #fffbe6 0%, #fff7e6 100%); border: 1.5px solid #ffd591; border-radius: 10px; padding: 12px 18px; min-width: 240px; }
+.countdown-card.urgent { background: linear-gradient(135deg, #fff1f0 0%, #ffe4e1 100%); border-color: #ffa39e; }
+.countdown-label { font-size: 10.5px; color: #874d00; font-weight: 700; letter-spacing: 0.4px; text-transform: uppercase; margin-bottom: 4px; }
+.countdown-card.urgent .countdown-label { color: #a8071a; }
+.countdown-value { font-size: 28px; font-weight: 800; color: #d48806; font-family: 'SF Mono', monospace; letter-spacing: -0.5px; line-height: 1; }
+.countdown-card.urgent .countdown-value { color: #cf1322; }
+.countdown-sub { font-size: 11px; color: rgba(0,0,0,0.55); margin-top: 4px; }
+.countdown-sub strong { color: rgba(0,0,0,0.85); font-weight: 700; }
+
+.status-actions { display: flex; gap: 8px; align-items: center; }
+
+/* ===== LAYOUT: 2-COLUMN ===== */
+.detail-grid { display: grid; grid-template-columns: 380px 1fr; gap: 14px; align-items: flex-start; }
+@media (max-width: 1100px) { .detail-grid { grid-template-columns: 1fr; } }
+
+/* ===== CARD ===== */
+.card { background: #fff; border: 1px solid #f0f0f0; border-radius: 10px; margin-bottom: 12px; overflow: hidden; }
+.card-head { padding: 12px 16px; border-bottom: 1px solid #f5f5f5; display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+.card-title { font-size: 14px; font-weight: 800; color: rgba(0,0,0,0.88); display: flex; align-items: center; gap: 7px; }
+.card-title .icon { font-size: 14px; }
+.card-actions { display: flex; gap: 4px; }
+.card-body { padding: 12px 16px; }
+
+/* ===== KV LIST ===== */
+.kv-list { display: flex; flex-direction: column; gap: 8px; }
+.kv-row { display: flex; align-items: flex-start; gap: 10px; font-size: 12.5px; line-height: 1.5; }
+.kv-row .k { color: rgba(0,0,0,0.5); font-weight: 500; min-width: 78px; flex-shrink: 0; }
+.kv-row .v { color: rgba(0,0,0,0.88); font-weight: 600; flex: 1; }
+.kv-row .v.large { font-size: 14px; font-weight: 800; }
+.kv-row .v .sub { color: rgba(0,0,0,0.45); font-size: 11px; font-weight: 500; margin-left: 4px; }
+.kv-row .v .currency { color: rgba(0,0,0,0.45); font-size: 11px; font-weight: 600; margin-left: 2px; }
+.kv-divider { height: 1px; background: #f5f5f5; margin: 4px 0; }
+
+/* ===== AMOUNT ===== */
+.amount-row { display: flex; align-items: flex-start; padding: 8px 0; }
+.amount-row .k { color: rgba(0,0,0,0.55); font-size: 12px; flex: 1; }
+.amount-row .v { font-size: 13px; font-weight: 700; font-variant-numeric: tabular-nums; }
+.amount-row.total { border-top: 1.5px solid #e8e8e8; margin-top: 4px; padding-top: 12px; }
+.amount-row.total .k { font-size: 13px; font-weight: 700; color: rgba(0,0,0,0.88); }
+.amount-row.total .v { font-size: 18px; font-weight: 800; color: #1677ff; }
+
+/* ===== TAG ===== */
+.tag { display: inline-flex; align-items: center; gap: 4px; padding: 2px 8px; border-radius: 4px; font-size: 11px; font-weight: 600; }
+.tag-green { background: #f6ffed; color: #389e0d; border: 1px solid #b7eb8f; }
+.tag-blue { background: #e6f4ff; color: #0958d9; border: 1px solid #91caff; }
+.tag-orange { background: #fff7e6; color: #d48806; border: 1px solid #ffd591; }
+.tag-red { background: #fff1f0; color: #cf1322; border: 1px solid #ffa39e; }
+.tag-gray { background: #f5f5f5; color: rgba(0,0,0,0.55); border: 1px solid #e8e8e8; }
+.tag-purple { background: #f9f0ff; color: #722ed1; border: 1px solid #d3adf7; }
+
+/* ===== SUPPLIER CARDS (한 화면 핵심) ===== */
+.supplier-grid { display: grid; grid-template-columns: 1fr; gap: 10px; }
+.supplier-card { background: #fff; border: 1px solid #e8e8e8; border-radius: 10px; padding: 14px 16px; transition: all 0.15s; }
+.supplier-card:hover { border-color: #91caff; }
+.supplier-card.done { border-color: #b7eb8f; background: linear-gradient(180deg, #f6ffed 0%, #fff 50%); }
+.supplier-card.pending { border-color: #ffd591; background: linear-gradient(180deg, #fff7e6 0%, #fff 50%); }
+.supplier-card.urgent { border-color: #ffa39e; background: linear-gradient(180deg, #fff1f0 0%, #fff 50%); }
+
+.supplier-head { display: flex; align-items: center; gap: 12px; margin-bottom: 10px; }
+.supplier-icon { width: 38px; height: 38px; border-radius: 9px; display: flex; align-items: center; justify-content: center; font-size: 17px; flex-shrink: 0; }
+.supplier-icon.flight { background: #f0f7ff; color: #1677ff; border: 1px solid #91caff; }
+.supplier-icon.hotel { background: #fff0f6; color: #c41d7f; border: 1px solid #ffadd2; }
+.supplier-icon.pickup { background: #f6ffed; color: #389e0d; border: 1px solid #b7eb8f; }
+.supplier-icon.tour { background: #fff7e6; color: #d48806; border: 1px solid #ffd591; }
+.supplier-icon.ticket { background: #f9f0ff; color: #722ed1; border: 1px solid #d3adf7; }
+.supplier-meta { flex: 1; min-width: 0; }
+.supplier-cat { font-size: 10.5px; color: rgba(0,0,0,0.5); font-weight: 700; letter-spacing: 0.3px; text-transform: uppercase; }
+.supplier-name { font-size: 14px; font-weight: 800; color: rgba(0,0,0,0.88); margin-top: 2px; }
+.supplier-name .pid { font-family: 'SF Mono', monospace; font-size: 10.5px; background: #f5f5f5; padding: 1px 6px; border-radius: 3px; color: rgba(0,0,0,0.55); margin-left: 6px; font-weight: 600; }
+.supplier-prov { font-size: 11px; color: rgba(0,0,0,0.5); margin-top: 3px; display: flex; align-items: center; gap: 6px; }
+.supplier-prov .prov-pill { display: inline-flex; align-items: center; gap: 4px; padding: 2px 8px; border-radius: 4px; font-size: 11px; font-weight: 700; }
+.supplier-prov .prov-pill.tmg { background: #f6ffed; color: #389e0d; border: 1px solid #b7eb8f; }
+.supplier-prov .prov-pill.peaktime { background: #fff0f6; color: #c41d7f; border: 1px solid #ffadd2; }
+.supplier-prov .prov-pill.benazza { background: #f9f0ff; color: #722ed1; border: 1px solid #d3adf7; }
+.supplier-prov .prov-pill.nuua { background: #e6fffb; color: #006d75; border: 1px solid #87e8de; }
+
+.supplier-status { display: flex; align-items: center; gap: 8px; flex-shrink: 0; }
+.supplier-stage-pill { display: inline-flex; align-items: center; gap: 5px; padding: 4px 10px; border-radius: 5px; font-size: 11.5px; font-weight: 700; white-space: nowrap; }
+.supplier-stage-pill.idle { background: #f5f5f5; color: rgba(0,0,0,0.55); border: 1px solid #e8e8e8; }
+.supplier-stage-pill.requested { background: #e6f4ff; color: #0958d9; border: 1px solid #91caff; }
+.supplier-stage-pill.waiting { background: #fff7e6; color: #d48806; border: 1px solid #ffd591; }
+.supplier-stage-pill.confirmed { background: #f6ffed; color: #389e0d; border: 1px solid #b7eb8f; }
+.supplier-stage-pill.error { background: #fff1f0; color: #cf1322; border: 1px solid #ffa39e; }
+.supplier-stage-pill .stage-dot { width: 6px; height: 6px; border-radius: 50%; }
+.supplier-stage-pill.idle .stage-dot { background: rgba(0,0,0,0.35); }
+.supplier-stage-pill.requested .stage-dot { background: #1677ff; animation: blink 1.5s infinite; }
+.supplier-stage-pill.waiting .stage-dot { background: #d48806; animation: blink 1.5s infinite; }
+.supplier-stage-pill.confirmed .stage-dot { background: #52c41a; }
+.supplier-stage-pill.error .stage-dot { background: #cf1322; }
+
+.supplier-body { padding: 10px 12px; background: #fafbfc; border-radius: 8px; font-size: 12px; line-height: 1.6; color: rgba(0,0,0,0.7); margin-bottom: 10px; display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 8px 16px; }
+.supplier-body .sb-row { display: flex; flex-direction: column; gap: 2px; }
+.supplier-body .sb-k { font-size: 10.5px; color: rgba(0,0,0,0.45); font-weight: 700; letter-spacing: 0.2px; text-transform: uppercase; }
+.supplier-body .sb-v { color: rgba(0,0,0,0.85); font-weight: 700; }
+.supplier-body .sb-v.muted { color: rgba(0,0,0,0.5); font-weight: 500; font-style: italic; }
+.supplier-body .sb-v code { font-family: 'SF Mono', monospace; font-size: 11px; background: rgba(0,0,0,0.04); padding: 1px 5px; border-radius: 3px; color: #722ed1; font-weight: 600; }
+
+/* 채널 전송 버튼들 */
+.channel-row { display: flex; gap: 6px; flex-wrap: wrap; align-items: center; padding-top: 10px; border-top: 1px dashed #f0f0f0; }
+.channel-row .label { font-size: 10.5px; color: rgba(0,0,0,0.5); font-weight: 700; letter-spacing: 0.3px; text-transform: uppercase; margin-right: 4px; }
+.btn-channel { height: 30px; padding: 0 12px; border-radius: 6px; font-size: 11.5px; font-weight: 700; cursor: pointer; border: 1px solid #d9d9d9; background: #fff; color: rgba(0,0,0,0.75); font-family: inherit; display: inline-flex; align-items: center; gap: 5px; transition: all 0.15s; }
+.btn-channel:hover { transform: translateY(-1px); }
+.btn-channel.kakao { color: #ad6800; border-color: #ffe58f; background: #fffbe6; }
+.btn-channel.kakao:hover { background: #fff7e6; border-color: #faad14; }
+.btn-channel.jandi { color: #096dd9; border-color: #91caff; background: #e6f4ff; }
+.btn-channel.jandi:hover { background: #bae0ff; border-color: #1677ff; }
+.btn-channel.email { color: rgba(0,0,0,0.65); border-color: #d9d9d9; }
+.btn-channel.email:hover { color: #1677ff; border-color: #1677ff; }
+.btn-channel.cafe24 { color: #c41d7f; border-color: #ffadd2; background: #fff0f6; }
+.btn-channel.cafe24:hover { background: #ffd6e7; }
+.btn-channel .last-sent { margin-left: 4px; font-size: 10px; opacity: 0.7; font-weight: 600; }
+.btn-channel.disabled { opacity: 0.5; cursor: not-allowed; }
+.channel-actions-right { margin-left: auto; display: flex; gap: 4px; }
+.btn-mini { height: 28px; padding: 0 10px; border-radius: 5px; border: 1px solid #e8e8e8; background: #fff; font-size: 11px; font-weight: 600; cursor: pointer; color: rgba(0,0,0,0.65); font-family: inherit; }
+.btn-mini:hover { color: #1677ff; border-color: #1677ff; }
+.btn-mini.success { color: #389e0d; border-color: #b7eb8f; background: #f6ffed; }
+.btn-mini.success:hover { background: #389e0d; color: #fff; border-color: #389e0d; }
+.btn-mini.danger:hover { color: #cf1322; border-color: #ff7875; }
+
+/* ===== ACTIVITY LOG ===== */
+.activity-list { display: flex; flex-direction: column; gap: 0; }
+.activity-item { display: flex; gap: 12px; padding: 12px 0; border-bottom: 1px solid #f5f5f5; align-items: flex-start; }
+.activity-item:last-child { border-bottom: none; }
+.activity-time { font-family: 'SF Mono', monospace; font-size: 10.5px; color: rgba(0,0,0,0.45); flex-shrink: 0; width: 80px; line-height: 1.4; padding-top: 2px; font-weight: 600; }
+.activity-time strong { color: rgba(0,0,0,0.65); display: block; }
+.activity-dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; margin-top: 5px; }
+.activity-dot.green { background: #52c41a; }
+.activity-dot.blue { background: #1677ff; }
+.activity-dot.yellow { background: #faad14; }
+.activity-dot.red { background: #ff4d4f; }
+.activity-dot.gray { background: #d9d9d9; }
+.activity-body { flex: 1; min-width: 0; font-size: 12.5px; line-height: 1.5; color: rgba(0,0,0,0.75); }
+.activity-body strong { color: rgba(0,0,0,0.88); font-weight: 700; }
+.activity-body .who { font-size: 10.5px; color: #1677ff; font-weight: 700; margin-left: 4px; }
+.activity-body .meta { font-size: 11px; color: rgba(0,0,0,0.45); margin-top: 3px; }
+
+/* ===== BUTTONS ===== */
+.btn { height: 32px; padding: 0 14px; border-radius: 6px; font-size: 13px; font-weight: 600; cursor: pointer; border: 1px solid #d9d9d9; background: #fff; color: rgba(0,0,0,0.75); font-family: inherit; display: inline-flex; align-items: center; gap: 5px; }
+.btn:hover { color: #1677ff; border-color: #1677ff; }
+.btn-primary { background: #1677ff; color: #fff; border-color: #1677ff; }
+.btn-primary:hover { background: #4096ff; }
+.btn-success { background: #52c41a; color: #fff; border-color: #52c41a; }
+.btn-success:hover { background: #389e0d; }
+.btn-warn { background: #fa8c16; color: #fff; border-color: #fa8c16; }
+.btn-warn:hover { background: #d48806; }
+.btn-danger { background: #fff; color: #cf1322; border-color: #ffccc7; }
+.btn-danger:hover { background: #cf1322; color: #fff; border-color: #cf1322; }
+.btn-lg { height: 38px; padding: 0 18px; font-size: 13.5px; font-weight: 800; }
+
+/* ===== Mode strip (즉시확정관/일반) ===== */
+.mode-strip { background: linear-gradient(90deg, #f0f7ff 0%, #e6f4ff 100%); border: 1px solid #91caff; border-radius: 8px; padding: 10px 14px; font-size: 12px; color: #003a8c; line-height: 1.6; margin-bottom: 14px; display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+.mode-strip strong { font-weight: 800; }
+.mode-strip code { background: rgba(255,255,255,0.8); padding: 1px 6px; border-radius: 3px; font-family: 'SF Mono', monospace; font-size: 11px; color: #722ed1; font-weight: 700; }
+
+/* ===== ITINERARY ===== */
+.itin-row { display: flex; align-items: center; gap: 10px; padding: 8px 0; font-size: 12px; }
+.itin-row + .itin-row { border-top: 1px dashed #f5f5f5; }
+.itin-time { font-family: 'SF Mono', monospace; font-size: 11px; font-weight: 700; color: #1677ff; min-width: 64px; }
+.itin-icon { font-size: 14px; }
+.itin-text { flex: 1; color: rgba(0,0,0,0.75); }
+.itin-text strong { color: rgba(0,0,0,0.88); }
+
+/* ===== MODAL ===== */
+.backdrop { position: fixed; inset: 0; background: rgba(0,21,41,0.5); backdrop-filter: blur(2px); z-index: 1000; display: none; align-items: center; justify-content: center; padding: 32px 24px; }
+.backdrop.active { display: flex; }
+.modal { background: #fff; border-radius: 14px; box-shadow: 0 20px 60px rgba(0,0,0,0.25); width: 100%; max-width: 720px; max-height: calc(100vh - 64px); display: flex; flex-direction: column; overflow: hidden; }
+.m-head { padding: 18px 22px 14px; border-bottom: 1px solid #f0f0f0; display: flex; align-items: flex-start; gap: 12px; }
+.m-title { font-size: 16px; font-weight: 800; display: flex; align-items: center; gap: 8px; }
+.m-sub { font-size: 12px; color: rgba(0,0,0,0.5); margin-top: 4px; line-height: 1.5; }
+.m-close { width: 32px; height: 32px; border-radius: 8px; border: 1px solid transparent; background: transparent; color: rgba(0,0,0,0.45); display: flex; align-items: center; justify-content: center; cursor: pointer; flex-shrink: 0; }
+.m-close:hover { background: #f5f5f5; }
+.m-close svg { width: 16px; height: 16px; }
+.m-body { padding: 16px 22px; overflow-y: auto; flex: 1; }
+.m-foot { padding: 12px 22px; border-top: 1px solid #f0f0f0; display: flex; justify-content: space-between; align-items: center; background: #fafbfc; gap: 8px; }
+.m-foot-info { font-size: 11.5px; color: rgba(0,0,0,0.5); }
+
+.msg-preview { background: #fff7e6; border: 1px dashed #ffd591; border-radius: 8px; padding: 12px 14px; font-size: 12px; line-height: 1.65; color: #874d00; white-space: pre-wrap; font-family: 'Pretendard', monospace; max-height: 240px; overflow-y: auto; }
+.msg-preview strong { color: #ad6800; }
+.field-label { font-size: 12px; color: rgba(0,0,0,0.65); font-weight: 700; margin: 14px 0 7px; display: block; }
+.fi-input { width: 100%; height: 36px; padding: 0 12px; border: 1px solid #d9d9d9; border-radius: 6px; font-size: 13px; font-family: inherit; outline: none; }
+.fi-input:focus { border-color: #1677ff; box-shadow: 0 0 0 2px rgba(22,119,255,0.1); }
+
+</style>
+</head>
+<body>
+
+<!-- GNB -->
+<nav class="gnb">
+  <div class="gnb-logo">Trip<span>Store</span> <span class="partners-badge">PARTNERS</span></div>
+  <div class="gnb-menu">
+    <div class="gnb-item">대시보드</div>
+    <div class="gnb-item">페이지 제작</div>
+    <div class="gnb-item">상품 관리</div>
+    <div class="gnb-item active">예약 관리</div>
+    <div class="gnb-item">PB 관리</div>
+    <div class="gnb-item">카탈로그</div>
+    <div class="gnb-item">쿠폰</div>
+    <div class="gnb-item">정산</div>
+  </div>
+  <div class="gnb-right">
+    <span class="gnb-org-badge">트립스토어</span>
+    <span class="gnb-user"><span class="gnb-user-name">김서현</span>님</span>
+  </div>
+</nav>
+
+<!-- Breadcrumb -->
+<div class="breadcrumb">
+  <span>예약 관리</span><span class="sep">/</span>
+  <span>예약 목록</span><span class="sep">/</span>
+  <span class="bc-current">RV-26052612-0741</span>
+</div>
+
+<div class="layout">
+
+  <!-- Mode strip (회의록 핵심: 한 화면 + 비동기 확정) -->
+  <div class="mode-strip">
+    🎯 <strong>한 화면 IA</strong> — 트립스토어 예약 + 공급사 부킹을 한 화면에 통합 (회의록 2026-05-21 수권님 방향). 탭 폐기, 공급사별 카드와 채널 전송을 한눈에.
+    <code>운영 정책: 30분 홀드 비동기 확정</code>
+  </div>
+
+  <!-- ============ STATUS HEADER + COUNTDOWN ============ -->
+  <div class="status-header">
+    <div class="status-left">
+      <div class="status-icon hold">⏳</div>
+      <div class="status-info">
+        <div class="status-rid">RV-26052612-0741 · 결제 완료 2026-05-26 12:42</div>
+        <div class="status-title">
+          푸꾸옥 솔바이멜리아 5일 (오션뷰 BB)
+          <span class="status-stage-pill hold"><span class="sdot"></span>고객 확정 대기</span>
+        </div>
+        <div class="status-meta">
+          <span>고객 <strong>김민지</strong> · 성인 2명</span>
+          <span>출발 <strong>2026.06.05</strong> · D-10</span>
+          <span>상품 <strong>PB-58241</strong></span>
+        </div>
+      </div>
+    </div>
+    <div class="countdown-card" id="countdownCard">
+      <div class="countdown-label">⏰ 고객 확정 클릭까지</div>
+      <div class="countdown-value" id="countdownValue">28:42</div>
+      <div class="countdown-sub">알림톡 발송 <strong>12:42</strong> · 만료 <strong>13:12</strong></div>
+    </div>
+    <div class="status-actions">
+      <button class="btn">📞 고객 연락</button>
+      <button class="btn-primary btn-lg" onclick="openConfirmPushModal()">🔔 알림 재발송</button>
+    </div>
+  </div>
+
+  <!-- ============ MAIN 2-COLUMN GRID ============ -->
+  <div class="detail-grid">
+
+    <!-- ===== LEFT COLUMN ===== -->
+    <div>
+
+      <!-- 고객 정보 -->
+      <div class="card">
+        <div class="card-head">
+          <div class="card-title"><span class="icon">👤</span> 고객 정보</div>
+          <div class="card-actions"><button class="btn-mini">편집</button></div>
+        </div>
+        <div class="card-body">
+          <div class="kv-list">
+            <div class="kv-row"><span class="k">이름</span><span class="v large">김민지 <span class="sub">/ KIM MINJI</span></span></div>
+            <div class="kv-row"><span class="k">연락처</span><span class="v">010-2841-0428 · minji.kim@gmail.com</span></div>
+            <div class="kv-row"><span class="k">탑승자</span><span class="v">2명 (성인) · 영문명 ✓ 생년월일 ✓ <span class="tag tag-orange" style="margin-left:6px;">여권 미입력</span></span></div>
+            <div class="kv-divider"></div>
+            <div class="kv-row"><span class="k">예약 채널</span><span class="v">웹 · tripstore.kr · iOS Safari</span></div>
+            <div class="kv-row"><span class="k">유입</span><span class="v">자동생성 · 푸꾸옥 검색</span></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 일정 -->
+      <div class="card">
+        <div class="card-head">
+          <div class="card-title"><span class="icon">📅</span> 일정</div>
+        </div>
+        <div class="card-body" style="padding: 6px 16px 12px;">
+          <div class="itin-row"><span class="itin-time">06.05 09:25</span><span class="itin-icon">✈</span><span class="itin-text"><strong>VJ8801</strong> 인천 → 푸꾸옥</span></div>
+          <div class="itin-row"><span class="itin-time">06.05 13:20</span><span class="itin-icon">🚗</span><span class="itin-text">공항 픽업 (4인 SUV)</span></div>
+          <div class="itin-row"><span class="itin-time">06.05 14:30</span><span class="itin-icon">🏨</span><span class="itin-text"><strong>솔바이멜리아 푸꾸옥</strong> 체크인 (오션뷰 BB)</span></div>
+          <div class="itin-row"><span class="itin-time">06.09 12:00</span><span class="itin-icon">🏨</span><span class="itin-text">체크아웃</span></div>
+          <div class="itin-row"><span class="itin-time">06.09 12:45</span><span class="itin-icon">🚗</span><span class="itin-text">호텔 → 공항 샌딩</span></div>
+          <div class="itin-row"><span class="itin-time">06.09 14:50</span><span class="itin-icon">✈</span><span class="itin-text"><strong>VJ8802</strong> 푸꾸옥 → 인천</span></div>
+        </div>
+      </div>
+
+      <!-- 결제 정보 -->
+      <div class="card">
+        <div class="card-head">
+          <div class="card-title"><span class="icon">💳</span> 결제</div>
+          <div class="card-actions"><button class="btn-mini">결제 상세</button></div>
+        </div>
+        <div class="card-body">
+          <div class="amount-row"><span class="k">항공 (왕복 2인)</span><span class="v">₩684,000</span></div>
+          <div class="amount-row"><span class="k">숙박 (4박 1실)</span><span class="v">₩384,000</span></div>
+          <div class="amount-row"><span class="k">픽업·샌딩 (왕복)</span><span class="v">₩55,000</span></div>
+          <div class="amount-row" style="border-top:1px dashed #f0f0f0; padding-top:8px; margin-top:4px;"><span class="k" style="font-size:11.5px; color:rgba(0,0,0,0.45);">트립스토어 마진 12.4%</span><span class="v" style="font-size:11.5px; color:rgba(0,0,0,0.5); font-weight:600;">+ ₩98,500</span></div>
+          <div class="amount-row total"><span class="k">최종 결제액</span><span class="v">₩892,000</span></div>
+          <div class="kv-divider"></div>
+          <div class="kv-list">
+            <div class="kv-row"><span class="k">결제수단</span><span class="v">KB국민카드 (4321-****-****-1234)</span></div>
+            <div class="kv-row"><span class="k">결제일시</span><span class="v">2026-05-26 12:42:18</span></div>
+            <div class="kv-row"><span class="k">결제상태</span><span class="v"><span class="tag tag-green">결제 완료</span></span></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 즉시확정관 알림 -->
+      <div class="card" style="background: linear-gradient(135deg, #f0f7ff 0%, #e6f4ff 100%); border-color: #91caff;">
+        <div class="card-body" style="font-size:11.5px; line-height:1.7; color:#003a8c;">
+          ⚡ <strong>즉시확정관 운영 중</strong> — 전액결제 즉시 확정 모드. 항공 발권은 사용자 확정 클릭 + 여권정보 입력 후 자동 진행.<br>
+          현재 단계: 30분 홀드 (회의록 5/21 정책)
+        </div>
+      </div>
+
+    </div>
+
+    <!-- ===== RIGHT COLUMN — 공급사 카드 + 이력 ===== -->
+    <div>
+
+      <!-- ============ 공급사 카드들 (회의록 핵심) ============ -->
+      <div class="card">
+        <div class="card-head">
+          <div class="card-title"><span class="icon">🔄</span> 공급사 진행 현황 <span style="font-size:11px; color:rgba(0,0,0,0.45); font-weight:500; margin-left:6px;">한 화면에 모든 공급사 통합</span></div>
+          <div class="card-actions">
+            <button class="btn-mini" onclick="alert('모든 공급사에 한 번에 요청 전송 (회의록 수권님 제안)')">📤 일괄 요청</button>
+            <button class="btn-mini">새로고침</button>
+          </div>
+        </div>
+        <div class="card-body" style="padding: 12px 14px;">
+          <div class="supplier-grid">
+
+            <!-- 항공 - 누아 (확정 완료) -->
+            <div class="supplier-card done">
+              <div class="supplier-head">
+                <div class="supplier-icon flight">✈</div>
+                <div class="supplier-meta">
+                  <div class="supplier-cat">왕복 항공</div>
+                  <div class="supplier-name">VJ8801 인천→푸꾸옥 / VJ8802 푸꾸옥→인천 <span class="pid">FLT-58241-A</span></div>
+                  <div class="supplier-prov">공급사 <span class="prov-pill nuua"><span style="width:5px;height:5px;border-radius:50%;background:currentColor;"></span>누아 NDC</span> · 자동 발권 대상</div>
+                </div>
+                <div class="supplier-status">
+                  <span class="supplier-stage-pill confirmed"><span class="stage-dot"></span>예약 확정</span>
+                </div>
+              </div>
+              <div class="supplier-body">
+                <div class="sb-row"><span class="sb-k">Order ID</span><span class="sb-v"><code>NUUA-X8421-VJ</code></span></div>
+                <div class="sb-row"><span class="sb-k">예약 상태</span><span class="sb-v">RESERVED</span></div>
+                <div class="sb-row"><span class="sb-k">발권 데드라인</span><span class="sb-v" style="color:#d48806;">2026-05-26 23:50</span></div>
+                <div class="sb-row"><span class="sb-k">여권 입력</span><span class="sb-v muted">대기 중 (자동 발권 트리거)</span></div>
+              </div>
+              <div class="channel-row">
+                <span class="label">📡 채널</span>
+                <button class="btn-channel disabled" disabled>📧 누아 API 직접 호출 (자동)</button>
+                <div class="channel-actions-right">
+                  <button class="btn-mini success">✓ 예약 확정됨</button>
+                  <button class="btn-mini danger">취소</button>
+                </div>
+              </div>
+            </div>
+
+            <!-- 숙박 - TMG (확정 대기, 응대 진행 중) -->
+            <div class="supplier-card pending">
+              <div class="supplier-head">
+                <div class="supplier-icon hotel">🏨</div>
+                <div class="supplier-meta">
+                  <div class="supplier-cat">숙박 4박</div>
+                  <div class="supplier-name">솔바이멜리아 푸꾸옥 · 오션뷰 BB <span class="pid">HTL-58241-A</span></div>
+                  <div class="supplier-prov">공급사 <span class="prov-pill tmg"><span style="width:5px;height:5px;border-radius:50%;background:currentColor;"></span>TMG</span> · 고정요금</div>
+                </div>
+                <div class="supplier-status">
+                  <span class="supplier-stage-pill waiting"><span class="stage-dot"></span>응대 대기</span>
+                </div>
+              </div>
+              <div class="supplier-body">
+                <div class="sb-row"><span class="sb-k">Booking Code</span><span class="sb-v"><code>TMG-BK-92841</code></span></div>
+                <div class="sb-row"><span class="sb-k">상태</span><span class="sb-v">RESERVED (홀드 중)</span></div>
+                <div class="sb-row"><span class="sb-k">confirmBefore</span><span class="sb-v" style="color:#cf1322;">2026-05-26 18:42 (D-5h)</span></div>
+                <div class="sb-row"><span class="sb-k">요청 발송</span><span class="sb-v">12:43:02 · 1분 전</span></div>
+              </div>
+              <div class="channel-row">
+                <span class="label">📡 채널</span>
+                <button class="btn-channel kakao" onclick="openChannelModal('카카오톡 · TMG 베트남')">💬 카톡 (TMG-VN)<span class="last-sent">12:43 발송</span></button>
+                <button class="btn-channel jandi" onclick="openChannelModal('잔디 · TMG 채널')">🟦 잔디</button>
+                <button class="btn-channel email" onclick="openChannelModal('이메일 · loc@tmg.vn')">📧 이메일</button>
+                <div class="channel-actions-right">
+                  <button class="btn-mini">📋 메시지 복사</button>
+                  <button class="btn-mini success" onclick="markConfirmed(this)">응답 받음 (수동)</button>
+                </div>
+              </div>
+            </div>
+
+            <!-- 픽업·샌딩 - 피크타임 (요청 발송) -->
+            <div class="supplier-card pending">
+              <div class="supplier-head">
+                <div class="supplier-icon pickup">🚗</div>
+                <div class="supplier-meta">
+                  <div class="supplier-cat">픽업·샌딩 (왕복)</div>
+                  <div class="supplier-name">공항 ↔ 호텔 (4인 SUV · 한국어 기사) <span class="pid">PCK-58241-A</span></div>
+                  <div class="supplier-prov">공급사 <span class="prov-pill peaktime"><span style="width:5px;height:5px;border-radius:50%;background:currentColor;"></span>피크타임</span> · 강제 포함</div>
+                </div>
+                <div class="supplier-status">
+                  <span class="supplier-stage-pill requested"><span class="stage-dot"></span>요청 발송</span>
+                </div>
+              </div>
+              <div class="supplier-body">
+                <div class="sb-row"><span class="sb-k">요청 발송</span><span class="sb-v">12:43:02 · 1분 전</span></div>
+                <div class="sb-row"><span class="sb-k">채널</span><span class="sb-v">카톡 · 피크타임 푸꾸옥</span></div>
+                <div class="sb-row"><span class="sb-k">예상 응답</span><span class="sb-v muted">평균 12분 (오늘 기준)</span></div>
+                <div class="sb-row"><span class="sb-k">픽업 시간</span><span class="sb-v">06.05 13:20 (도착 후)</span></div>
+              </div>
+              <div class="channel-row">
+                <span class="label">📡 채널</span>
+                <button class="btn-channel kakao" onclick="openChannelModal('카카오톡 · 피크타임')">💬 카톡 (피크타임)<span class="last-sent">12:43 발송</span></button>
+                <button class="btn-channel jandi" onclick="openChannelModal('잔디 · 피크타임')">🟦 잔디</button>
+                <button class="btn-channel email" onclick="openChannelModal('이메일 · ops@peaktime.vn')">📧 이메일</button>
+                <div class="channel-actions-right">
+                  <button class="btn-mini">🔁 재발송</button>
+                  <button class="btn-mini success" onclick="markConfirmed(this)">응답 받음</button>
+                </div>
+              </div>
+            </div>
+
+            <!-- 투어 - 미요청 (선택 옵션) -->
+            <div class="supplier-card">
+              <div class="supplier-head">
+                <div class="supplier-icon tour">🌊</div>
+                <div class="supplier-meta">
+                  <div class="supplier-cat">투어 (선택 옵션)</div>
+                  <div class="supplier-name" style="color:rgba(0,0,0,0.45); font-weight:600;">미포함 · 자동생성 룰에서 제외됨</div>
+                  <div class="supplier-prov">이 상품은 에어텔 기본 조합 — 투어 미포함</div>
+                </div>
+                <div class="supplier-status">
+                  <span class="supplier-stage-pill idle"><span class="stage-dot"></span>해당 없음</span>
+                </div>
+              </div>
+            </div>
+
+          </div>
+        </div>
+      </div>
+
+      <!-- ============ 활동 이력 ============ -->
+      <div class="card">
+        <div class="card-head">
+          <div class="card-title"><span class="icon">📜</span> 활동 이력 <span style="font-size:11px; color:rgba(0,0,0,0.45); font-weight:500; margin-left:6px;">누가 언제 무엇을 했는지</span></div>
+          <div class="card-actions"><button class="btn-mini">전체 보기</button></div>
+        </div>
+        <div class="card-body">
+          <div class="activity-list">
+            <div class="activity-item">
+              <div class="activity-time"><strong>12:44</strong>2026-05-26</div>
+              <div class="activity-dot blue"></div>
+              <div class="activity-body">
+                <strong>피크타임</strong>(카톡)에 픽업 요청 발송 <span class="who">자동</span>
+                <div class="meta">메시지 ID kakao-#48421 · 4인 SUV · 06.05 13:20 픽업</div>
+              </div>
+            </div>
+            <div class="activity-item">
+              <div class="activity-time"><strong>12:43</strong>2026-05-26</div>
+              <div class="activity-dot blue"></div>
+              <div class="activity-body">
+                <strong>TMG</strong>(카톡)에 숙박 확정 요청 발송 <span class="who">자동</span>
+                <div class="meta">메시지 ID kakao-#48420 · Booking TMG-BK-92841 · confirmBefore 18:42</div>
+              </div>
+            </div>
+            <div class="activity-item">
+              <div class="activity-time"><strong>12:43</strong>2026-05-26</div>
+              <div class="activity-dot green"></div>
+              <div class="activity-body">
+                <strong>누아 NDC</strong> 항공 예약 확정 (RESERVED) <span class="who">자동</span>
+                <div class="meta">Order NUUA-X8421-VJ · 발권 데드라인 23:50</div>
+              </div>
+            </div>
+            <div class="activity-item">
+              <div class="activity-time"><strong>12:42</strong>2026-05-26</div>
+              <div class="activity-dot green"></div>
+              <div class="activity-body">
+                <strong>고객 결제 완료</strong> ₩892,000 (KB국민카드) · 30분 홀드 시작 <span class="who">시스템</span>
+                <div class="meta">결제 PG: NICEPAY · TID NICE-5821-92841 · 알림톡 발송 (확정 클릭 안내)</div>
+              </div>
+            </div>
+            <div class="activity-item">
+              <div class="activity-time"><strong>12:41</strong>2026-05-26</div>
+              <div class="activity-dot gray"></div>
+              <div class="activity-body">
+                <strong>예약 접수</strong> · 가용성 재확인(checkAvailability) 통과 <span class="who">시스템</span>
+                <div class="meta">항공 · 숙박 · 픽업 모두 가용 — 가격 변동 없음</div>
+              </div>
+            </div>
+            <div class="activity-item">
+              <div class="activity-time"><strong>12:38</strong>2026-05-26</div>
+              <div class="activity-dot gray"></div>
+              <div class="activity-body">
+                <strong>고객 결제 시도</strong> — 영문명·생년월일 입력 완료 <span class="who">고객</span>
+                <div class="meta">탑승자 2명 · KIM MINJI / KIM JIWOO</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+</div>
+
+<!-- ============================================================ -->
+<!-- ===== MODAL: 채널 메시지 (자동 전송 미리보기) ===== -->
+<!-- ============================================================ -->
+<div class="backdrop" id="channelModal" onclick="if(event.target===this) closeChannelModal()">
+  <div class="modal">
+    <div class="m-head">
+      <div style="flex:1;">
+        <div class="m-title"><span id="channelTitle">💬 카카오톡 · TMG 베트남</span></div>
+        <div class="m-sub">예약 정보를 포맷에 맞춰 자동 작성 → 전송. 회의록 5/21 정재현·수권 제안 (재상별 채널 명확 → 버튼 클릭으로 자동 전송).</div>
+      </div>
+      <button class="m-close" onclick="closeChannelModal()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
+    </div>
+    <div class="m-body">
+      <label class="field-label">수신자</label>
+      <input class="fi-input" value="TMG-VN-Booking (loc@tmg.vn · 카톡 채널)" readonly>
+
+      <label class="field-label">메시지 미리보기 (자동 작성)</label>
+      <div class="msg-preview">[숙박 예약 요청 · RV-26052612-0741]
+
+<strong>고객</strong> KIM MINJI (1인 1실, 성인 2명)
+<strong>체크인</strong> 2026-06-05 14:30
+<strong>체크아웃</strong> 2026-06-09 12:00 (4박)
+
+<strong>호텔</strong> 솔바이멜리아 푸꾸옥
+<strong>객실</strong> 오션뷰 디럭스 · BB (조식 포함)
+
+<strong>Booking Code</strong> TMG-BK-92841
+<strong>rateKey</strong> TMG-RK-OCEAN-BB-92841
+
+<strong>요청사항</strong>
+- 한국어 가이드 응대 가능 (체크인 시점)
+- 공항 픽업 분리 발권 (피크타임 진행 중)
+
+위 예약 confirm 부탁드립니다.
+confirmBefore 만료: 2026-05-26 18:42 (현지시간)
+
+— TripStore JV 운영팀 김서현</div>
+
+      <label class="field-label">전송 옵션</label>
+      <div style="display:flex; gap:6px; align-items:center;">
+        <button class="btn-mini">📋 메시지 복사</button>
+        <button class="btn-mini">✏ 메시지 편집</button>
+        <button class="btn-mini">🔔 알림 트래킹</button>
+      </div>
+    </div>
+    <div class="m-foot">
+      <span class="m-foot-info">메시지는 활동 이력에 기록됩니다 · 응답 자동 감지 시 다음 단계 진행</span>
+      <div style="display:flex; gap:8px;">
+        <button class="btn" onclick="closeChannelModal()">취소</button>
+        <button class="btn-primary btn-lg" onclick="alert('카카오톡 전송 완료. 활동 이력에 기록됨.'); closeChannelModal();">📤 전송</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+<!-- ============================================================ -->
+<!-- ===== MODAL: 알림 재발송 ===== -->
+<!-- ============================================================ -->
+<div class="backdrop" id="confirmPushModal" onclick="if(event.target===this) closeConfirmPushModal()">
+  <div class="modal">
+    <div class="m-head">
+      <div style="flex:1;">
+        <div class="m-title">🔔 고객 확정 알림톡 재발송</div>
+        <div class="m-sub">고객이 알림을 받지 못한 경우 재발송합니다. 홀드 만료 5분 전 자동 재발송도 동작 중입니다.</div>
+      </div>
+      <button class="m-close" onclick="closeConfirmPushModal()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
+    </div>
+    <div class="m-body">
+      <div class="msg-preview">[<strong>TripStore</strong>] 예약 확정 요청
+
+김민지 님, 푸꾸옥 솔바이멜리아 5일 예약이 진행 중입니다.
+
+<strong>아래 버튼을 눌러 예약을 확정해 주세요.</strong>
+확정 후 항공·숙소가 즉시 발권됩니다.
+
+⏰ 만료 시간: 2026-05-26 13:12 (남은 시간 약 29분)
+
+[ ✅ 예약 확정하기 ]
+
+만료 시 자동으로 취소되며, 결제 금액은 영업일 기준 3-5일 이내 환불됩니다.</div>
+    </div>
+    <div class="m-foot">
+      <span class="m-foot-info">SMS 백업 발송 옵션 활성화 중</span>
+      <div style="display:flex; gap:8px;">
+        <button class="btn" onclick="closeConfirmPushModal()">취소</button>
+        <button class="btn-primary btn-lg" onclick="alert('알림톡 재발송 완료. 활동 이력에 기록됨.'); closeConfirmPushModal();">📱 재발송</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+<script>
+/* Countdown */
+let _secLeft = 28 * 60 + 42;
+function tickCountdown() {
+  if (_secLeft <= 0) return;
+  _secLeft--;
+  const m = Math.floor(_secLeft / 60);
+  const s = _secLeft % 60;
+  const v = `${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
+  const el = document.getElementById('countdownValue');
+  if (el) el.textContent = v;
+  if (_secLeft < 5 * 60) {
+    document.getElementById('countdownCard').classList.add('urgent');
+    document.querySelector('.status-header').classList.add('urgent');
+  }
+}
+setInterval(tickCountdown, 1000);
+
+function openChannelModal(title) {
+  document.getElementById('channelTitle').textContent = '💬 ' + title;
+  document.getElementById('channelModal').classList.add('active');
+  document.body.classList.add('modal-open');
+}
+function closeChannelModal() {
+  document.getElementById('channelModal').classList.remove('active');
+  document.body.classList.remove('modal-open');
+}
+
+function openConfirmPushModal() {
+  document.getElementById('confirmPushModal').classList.add('active');
+  document.body.classList.add('modal-open');
+}
+function closeConfirmPushModal() {
+  document.getElementById('confirmPushModal').classList.remove('active');
+  document.body.classList.remove('modal-open');
+}
+
+function markConfirmed(btn) {
+  const card = btn.closest('.supplier-card');
+  const pill = card.querySelector('.supplier-stage-pill');
+  pill.className = 'supplier-stage-pill confirmed';
+  pill.innerHTML = '<span class="stage-dot"></span>예약 확정';
+  card.classList.remove('pending', 'urgent');
+  card.classList.add('done');
+  alert('공급사 응답 수동 기록 완료. 활동 이력에 추가됨.');
+}
+</script>
+</body>
+</html>
