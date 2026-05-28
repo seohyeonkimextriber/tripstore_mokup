@@ -628,30 +628,6 @@
     </div>
   </div>
 
-  <!-- ============ 30분 홀드 배너 (PB 자동생성 회의록 5/21) ============ -->
-  <div class="hold-banner" id="holdBanner">
-    <div class="hold-banner-icon">⏳</div>
-    <div class="hold-banner-info">
-      <div class="hold-banner-title">
-        <span class="pb-pill">PB 자동생성</span>
-        30분 홀드 비동기 확정 진행 중
-      </div>
-      <div class="hold-banner-desc">
-        결제 완료 → <strong>고객 확정 클릭 대기 중</strong>. 만료 시 자동 취소 + 결제 금액 영업일 3-5일 내 전액 환불.<br>
-        ※ 회의록 5/21 정책 — 30분 내 미확정 시 항공·숙소 홀드 해제됩니다.
-      </div>
-    </div>
-    <div class="hold-countdown" id="holdCd">
-      <div class="lbl">⏰ 고객 확정까지</div>
-      <div class="v" id="holdCdVal">28:42</div>
-      <div class="sub">알림톡 12:42 발송 · 만료 13:12</div>
-    </div>
-    <div class="hold-actions">
-      <button class="btn-hold-action" onclick="document.getElementById('alimtalkResendModal')?.classList.add('show'); alert('🔔 알림톡 재발송 — 우측 사이드의 알림톡 미리보기 확인');">🔔 알림톡 재발송</button>
-      <button class="btn-hold-action btn-confirm-success" onclick="confirmHoldManually()">✅ 고객 확정 처리</button>
-    </div>
-  </div>
-
   <!-- ============ 영역 ① 상단 헤더 ============ -->
   <div class="rsv-header">
     <!-- 1행: 예약번호 + 상태 + 액션 -->
@@ -1252,45 +1228,6 @@
           <div class="traveler-meta">
             🛂 여권 <span class="miss">⚠ 미수령</span><br>
             🎂 2018-04-10
-          </div>
-        </div>
-      </div>
-
-      <!-- 📱 알림톡 미리보기 (PB 30분 홀드) -->
-      <div class="side-section">
-        <div class="side-section-title">📱 알림톡 미리보기 <span class="side-action" onclick="alert('알림톡 템플릿 편집 — 카탈로그 메뉴로 이동')">템플릿 편집 →</span></div>
-        <div class="alimtalk-card">
-          <div class="alimtalk-card-head">
-            <span class="badge">PB</span> 30분 홀드 시나리오 3종
-          </div>
-          <div class="alimtalk-tabs">
-            <button class="alimtalk-tab active" onclick="switchAlimtalk(this, 'tpl-hold')">① 홀드 시작</button>
-            <button class="alimtalk-tab" onclick="switchAlimtalk(this, 'tpl-5min')">② 5분 전</button>
-            <button class="alimtalk-tab" onclick="switchAlimtalk(this, 'tpl-confirmed')">③ 확정 완료</button>
-          </div>
-          <div class="alimtalk-preview" id="alimtalkPreview"><strong>[트립스토어] 예약 확정 안내</strong>
-
-홍길동 님 안녕하세요.
-"다낭 4박 패키지" 예약이 접수되었습니다.
-
-⏰ 30분 내 [예약 확정] 버튼 클릭이 필요합니다.
-
-✅ 확정 누르시면
-   · 항공·숙소가 즉시 발권됩니다
-   · 발권 후 취소 시 약관에 따라 위약금 발생
-
-🕐 만료: 2026-05-26 13:12
-   (남은 시간: <strong>28분</strong>)
-
-[ 👉 예약 확정하기 ]
-[ 💬 채널톡 문의 ]
-
-⚠ 30분 내 미확정 시 자동 취소되며,
-   결제 금액은 영업일 3-5일 이내
-   전액 환불됩니다.</div>
-          <div class="alimtalk-foot">
-            <button class="btn-alimtalk" onclick="alert('마지막 발송: 12:42 (3분 전)')">📜 발송 이력</button>
-            <button class="btn-alimtalk primary" onclick="alert('알림톡 재발송 완료. 활동 이력에 기록.')">📤 지금 발송</button>
           </div>
         </div>
       </div>
@@ -3066,92 +3003,7 @@
   console.log('[v3] 인터랙션 로드 완료');
 })();
 
-/* ========== PB 30분 홀드 카운트다운 + 알림톡 (회의록 5/21) ========== */
-let _holdSec = 28 * 60 + 42;
-function tickHold() {
-  if (_holdSec <= 0) return;
-  _holdSec--;
-  const m = Math.floor(_holdSec / 60), s = _holdSec % 60;
-  const el = document.getElementById('holdCdVal');
-  if (el) el.textContent = `${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
-  if (_holdSec < 5 * 60) {
-    document.getElementById('holdBanner')?.classList.add('urgent');
-  }
-}
-setInterval(tickHold, 1000);
-
-function confirmHoldManually() {
-  if (!confirm('고객 확정을 수동으로 처리할까요?\n\n→ 항공 발권 + 숙소 confirmBooking 즉시 진행됩니다.')) return;
-  document.getElementById('holdBanner').style.background = 'linear-gradient(135deg, #f6ffed 0%, #d9f7be 100%)';
-  document.getElementById('holdBanner').style.borderColor = '#52c41a';
-  document.getElementById('holdBanner').classList.remove('urgent');
-  document.getElementById('holdCdVal').textContent = '✓';
-  document.getElementById('holdCdVal').style.color = '#389e0d';
-  document.querySelector('.hold-banner-title').innerHTML = '<span class="pb-pill">PB 자동생성</span> ✅ 고객 확정 완료 — 발권 진행 중';
-  _holdSec = 0;
-  alert('✅ 확정 완료. 항공 발권 + 숙소 confirmBooking 자동 진행 — 활동 이력에 기록.');
-}
-
-/* 알림톡 미리보기 3종 */
-const _alimtalkTemplates = {
-  'tpl-hold': `<strong>[트립스토어] 예약 확정 안내</strong>
-
-홍길동 님 안녕하세요.
-"다낭 4박 패키지" 예약이 접수되었습니다.
-
-⏰ 30분 내 [예약 확정] 버튼 클릭이 필요합니다.
-
-✅ 확정 누르시면
-   · 항공·숙소가 즉시 발권됩니다
-   · 발권 후 취소 시 약관에 따라 위약금 발생
-
-🕐 만료: 2026-05-26 13:12
-   (남은 시간: <strong>28분</strong>)
-
-[ 👉 예약 확정하기 ]
-[ 💬 채널톡 문의 ]
-
-⚠ 30분 내 미확정 시 자동 취소되며,
-   결제 금액은 영업일 3-5일 이내
-   전액 환불됩니다.`,
-  'tpl-5min': `<strong>⚠ 예약 확정 5분 남았습니다</strong>
-
-홍길동 님, 다낭 4박 패키지 예약이
-<strong>5분 후 자동 취소</strong>됩니다.
-
-🕐 만료: 2026-05-26 13:12
-   (남은 시간: <strong>5분</strong>)
-
-지금 클릭하지 않으면
-이미 잡아놓은 항공·숙소가 해제됩니다.
-
-[ 👉 지금 예약 확정하기 ]
-[ 💬 채널톡 즉시 문의 ]`,
-  'tpl-confirmed': `<strong>✅ 예약 확정 완료!</strong>
-
-홍길동 님, 다낭 4박 패키지
-예약이 성공적으로 확정되었습니다.
-
-📋 예약번호: RV-260526-0741
-📅 출발: 2026년 6월 10일 (D-15)
-✈️ KE469 인천 09:25 출발
-🏨 다낭 OO 리조트 (디럭스 트윈)
-
-📎 항공 e티켓·숙소 바우처는
-   곧 발급되어 안내드립니다.
-
-[ 📋 예약 상세 보기 ]
-[ 💬 채널톡 문의 ]`
-};
-
-function switchAlimtalk(btn, key) {
-  btn.parentElement.querySelectorAll('.alimtalk-tab').forEach(b => b.classList.remove('active'));
-  btn.classList.add('active');
-  const preview = document.getElementById('alimtalkPreview');
-  if (preview && _alimtalkTemplates[key]) {
-    preview.innerHTML = _alimtalkTemplates[key];
-  }
-}
+/* 회의록 5/26: 즉시확정관으로 변경되며 30분 홀드 + 고객 확정 프로세스 제거 */
 </script>
 
 </body>
