@@ -465,11 +465,11 @@
   .case-chip.alt:hover { background: #b5f5ec; }
   .case-chip.alt.active { background: #08979c; color: #fff; border-color: #08979c; }
 
-  /* skip(해당없음) 단계 */
-  .rsv-step.skip .circle { background: #f5f5f5; border-color: #d9d9d9; color: rgba(0,0,0,0.3); border-style: dashed; }
-  .rsv-step.skip .label { color: rgba(0,0,0,0.35); text-decoration: line-through; }
-  .rsv-step.skip .sub { color: rgba(0,0,0,0.35); }
-  .rsv-step.skip .line { background: #f0f0f0; border-top: 1px dashed #d9d9d9; height: 0; }
+  /* manual(수동 처리 대기) 단계 */
+  .rsv-step.manual .circle { background: #fff7e6; border-color: #faad14; color: #d48806; border-style: dashed; }
+  .rsv-step.manual .label { color: #d48806; font-weight: 800; }
+  .rsv-step.manual .sub { color: #d48806; font-weight: 700; }
+  .rsv-step.manual .line { background: #ffd591; }
 
   /* 실패 시 운영자 액션 박스 */
   .fail-action-row { display: none; margin-top: 16px; padding: 12px 16px; background: linear-gradient(135deg, #fff1f0 0%, #ffe4e1 100%); border: 1px solid #ffa39e; border-radius: 10px; align-items: center; gap: 12px; flex-wrap: wrap; }
@@ -683,8 +683,8 @@
     <button class="case-chip" onclick="setCase(6, this)">✅ 출발 완료</button>
     <button class="case-chip fail" onclick="setFailedCase(0, this)">❌ 항공 발권 실패</button>
     <button class="case-chip fail" onclick="setFailedCase(1, this)">❌ 숙박 예약 실패</button>
-    <button class="case-chip alt" onclick="setHotelOnlyCase(1, this)">🏨 숙소 단품 (항공 없음 · 숙박부터)</button>
-    <button class="case-chip alt" onclick="setHotelOnlyCase(2, this)">🏨 숙소 단품 · 숙박 완료</button>
+    <button class="case-chip alt" onclick="setManualFlightCase(1, this)">✋ 항공 수동 + 숙소 자동 (C)</button>
+    <button class="case-chip alt" onclick="setManualFlightCase(2, this)">✋ 항공 수동 · 숙소 완료</button>
   </div>
 
   <!-- ============ 예약 진행 프로그래스 (6단계) ============ -->
@@ -3227,22 +3227,22 @@ function setFailedCase(failedIdx, btn) {
   document.getElementById('failDesc').textContent = descs[failedIdx];
 }
 
-function setHotelOnlyCase(currentIdx, btn) {
+function setManualFlightCase(currentIdx, btn) {
   document.querySelectorAll('.case-chip').forEach(c => c.classList.remove('active'));
   btn?.classList.add('active');
   document.getElementById('failActionRow')?.classList.remove('show');
 
   const steps = document.querySelectorAll('#progSteps .rsv-step');
   steps.forEach((step, i) => {
-    step.classList.remove('done', 'current', 'failed', 'blocked', 'skip');
+    step.classList.remove('done', 'current', 'failed', 'blocked', 'skip', 'manual');
     const circle = step.querySelector('.circle');
     const sub = step.querySelector('.sub');
 
     if (i === 0) {
-      // 항공 단계 = 해당없음
-      step.classList.add('skip');
-      circle.innerHTML = '—';
-      sub.innerHTML = '해당없음<br>항공 없는 상품';
+      // 항공 단계 = 수동 처리 대기 (C 케이스)
+      step.classList.add('manual');
+      circle.innerHTML = '<span class="step-icon">✋</span>';
+      sub.innerHTML = '수동 처리 대기<br>파트너스 확인 필요';
     } else if (i < currentIdx) {
       step.classList.add('done');
       circle.innerHTML = '<span class="check-mark">✓</span>';
@@ -3258,12 +3258,12 @@ function setHotelOnlyCase(currentIdx, btn) {
     }
   });
 
-  // 진행률 (5단계만 — 항공 제외)
+  // 진행률: 항공이 수동 처리 대기 = 0건 완료로 시작
   const doneCount = currentIdx > 0 ? currentIdx - 1 : 0;
-  const pct = (doneCount / 5) * 100;
-  document.getElementById('progFill').style.background = 'linear-gradient(90deg, #08979c, #1677ff)';
+  const pct = (doneCount / 6) * 100;
+  document.getElementById('progFill').style.background = 'linear-gradient(90deg, #faad14, #1677ff)';
   document.getElementById('progFill').style.width = pct + '%';
-  document.getElementById('progRatio').innerHTML = `<strong style="color:#08979c;">🏨 숙소 단품</strong> · ${doneCount} / 5 단계 완료 · 다음: ${_stepLabels[currentIdx]}`;
+  document.getElementById('progRatio').innerHTML = `<strong style="color:#d48806;">✋ C 케이스 — 항공 수동 + 숙소 자동</strong> · 항공은 파트너스 수동 처리 필요`;
 }
 
 // 정상 케이스 → 실패 박스 숨김 + 그라데이션 복구
