@@ -427,6 +427,13 @@
   .v3-main { display: grid; grid-template-columns: 280px minmax(0, 1fr) 320px; gap: 16px; align-items: start; }
   .v3-aside { background: #fff; border-radius: 12px; border: 1px solid #e8e8e8; padding: 18px; position: sticky; top: 16px; max-height: calc(100vh - 32px); overflow-y: auto; }
 
+  /* ===== 케이스 셀렉터 (시뮬용) ===== */
+  .case-selector { display: flex; gap: 6px; flex-wrap: wrap; align-items: center; margin-bottom: 10px; padding: 10px 14px; background: linear-gradient(135deg, #f9f0ff 0%, #f0f7ff 100%); border: 1px dashed #91caff; border-radius: 8px; }
+  .case-selector .case-label { font-size: 11px; color: #531dab; font-weight: 800; letter-spacing: 0.2px; text-transform: uppercase; margin-right: 4px; }
+  .case-chip { padding: 5px 11px; border-radius: 14px; border: 1px solid #d3adf7; background: #fff; color: #531dab; font-size: 11.5px; font-weight: 700; cursor: pointer; font-family: inherit; transition: all 0.15s; }
+  .case-chip:hover { background: #f9f0ff; }
+  .case-chip.active { background: #722ed1; color: #fff; border-color: #722ed1; }
+
   /* ===== 예약 진행 프로그래스 바 (6단계) ===== */
   .rsv-progress { background: #fff; border: 1px solid #e8e8e8; border-radius: 12px; padding: 18px 24px 16px; margin-bottom: 14px; }
   .rsv-progress-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 18px; }
@@ -631,48 +638,60 @@
     </div>
   </div>
 
+  <!-- ============ 케이스 셀렉터 (시뮬용) ============ -->
+  <div class="case-selector">
+    <span class="case-label">🧪 케이스 시뮬</span>
+    <button class="case-chip" onclick="setCase(0, this)">① 시작 (항공부터)</button>
+    <button class="case-chip" onclick="setCase(1, this)">② 항공 완료 (숙소부터)</button>
+    <button class="case-chip active" onclick="setCase(2, this)">③ 숙소 완료 (티켓부터)</button>
+    <button class="case-chip" onclick="setCase(3, this)">④ 티켓 완료 (보험부터)</button>
+    <button class="case-chip" onclick="setCase(4, this)">⑤ 보험 완료 (출발확정부터)</button>
+    <button class="case-chip" onclick="setCase(5, this)">⑥ 출발확정 완료 (출발만)</button>
+    <button class="case-chip" onclick="setCase(6, this)">✅ 출발 완료</button>
+  </div>
+
   <!-- ============ 예약 진행 프로그래스 (6단계) ============ -->
   <div class="rsv-progress">
     <div class="rsv-progress-head">
       <div class="rsv-progress-title">📋 예약 진행 상태</div>
-      <div class="rsv-progress-ratio"><strong>3</strong> / 6 단계 완료 · 다음: 투어/티켓 등록</div>
+      <div class="rsv-progress-ratio" id="progRatio"><strong>2</strong> / 6 단계 완료 · 다음: 투어/티켓 등록</div>
     </div>
-    <div class="rsv-progress-overall"><div class="fill" style="width: 42%"></div></div>
-    <div class="rsv-steps">
-      <div class="rsv-step done">
-        <div class="circle"><span class="check-mark">✓</span></div>
+    <div class="rsv-progress-overall"><div class="fill" id="progFill" style="width: 33%"></div></div>
+    <div class="rsv-steps" id="progSteps">
+      <div class="rsv-step" data-step="0">
+        <div class="circle"></div>
         <div class="line"></div>
         <div class="label">항공권 발권 완료</div>
-        <div class="sub">05-26 12:48<br>KE469 외 1편</div>
+        <div class="sub" data-done="05-26 12:48&lt;br&gt;KE469 외 1편" data-current="진행 중&lt;br&gt;누아 NDC 호출">대기<br>예정</div>
       </div>
-      <div class="rsv-step done">
-        <div class="circle"><span class="check-mark">✓</span></div>
+      <div class="rsv-step" data-step="1">
+        <div class="circle"></div>
         <div class="line"></div>
         <div class="label">숙박권 예약 완료</div>
-        <div class="sub">05-26 13:02<br>TMG confirmed</div>
+        <div class="sub" data-done="05-26 13:02&lt;br&gt;TMG confirmed" data-current="진행 중&lt;br&gt;TMG 응대 대기">대기<br>예정</div>
       </div>
-      <div class="rsv-step current">
-        <div class="circle"><span class="step-icon">🎟</span></div>
+      <div class="rsv-step" data-step="2">
+        <div class="circle"></div>
         <div class="line"></div>
         <div class="label">투어/티켓 완료</div>
-        <div class="sub">진행 중<br>피크타임 응대 대기</div>
+        <div class="sub" data-done="05-27 09:30&lt;br&gt;피크타임 confirm" data-current="진행 중&lt;br&gt;피크타임 응대 대기">대기<br>예정</div>
       </div>
-      <div class="rsv-step">
-        <div class="circle">4</div>
+      <div class="rsv-step" data-step="3">
+        <div class="circle"></div>
         <div class="line"></div>
         <div class="label">보험 등록 완료</div>
-        <div class="sub">대기<br>3명 분 가입 예정</div>
+        <div class="sub" data-done="05-27 14:20&lt;br&gt;3명 분 가입" data-current="진행 중&lt;br&gt;3명 분 가입 진행">대기<br>3명 분 예정</div>
       </div>
-      <div class="rsv-step">
-        <div class="circle">5</div>
+      <div class="rsv-step" data-step="4">
+        <div class="circle"></div>
         <div class="line"></div>
         <div class="label">출발 확정</div>
-        <div class="sub">대기<br>06-09까지</div>
+        <div class="sub" data-done="06-08 10:00&lt;br&gt;출발 안내 발송" data-current="진행 중&lt;br&gt;출발 D-1 점검 중">대기<br>06-09까지</div>
       </div>
-      <div class="rsv-step">
-        <div class="circle">6</div>
+      <div class="rsv-step" data-step="5">
+        <div class="circle"></div>
         <div class="label">출발 완료</div>
-        <div class="sub">예정<br>06-15 귀국</div>
+        <div class="sub" data-done="06-15 20:30&lt;br&gt;귀국 완료" data-current="진행 중&lt;br&gt;여행 중">대기<br>06-15 예정</div>
       </div>
     </div>
   </div>
@@ -3053,6 +3072,58 @@
 })();
 
 /* 회의록 5/26: 즉시확정관으로 변경되며 30분 홀드 + 고객 확정 프로세스 제거 */
+
+/* ===== 케이스별 프로그래스 바 시뮬 ===== */
+const _stepLabels = ['항공권 발권', '숙박권 예약', '투어/티켓', '보험 등록', '출발 확정', '출발 완료'];
+
+function setCase(currentIdx, btn) {
+  // 칩 active
+  document.querySelectorAll('.case-chip').forEach(c => c.classList.remove('active'));
+  btn?.classList.add('active');
+
+  const steps = document.querySelectorAll('#progSteps .rsv-step');
+  steps.forEach((step, i) => {
+    step.classList.remove('done', 'current');
+    const circle = step.querySelector('.circle');
+    const sub = step.querySelector('.sub');
+    const doneText = sub.dataset.done;
+    const currentText = sub.dataset.current;
+
+    if (i < currentIdx) {
+      // 완료
+      step.classList.add('done');
+      circle.innerHTML = '<span class="check-mark">✓</span>';
+      sub.innerHTML = doneText;
+    } else if (i === currentIdx) {
+      // 진행 중
+      step.classList.add('current');
+      const icons = ['✈', '🏨', '🎟', '🛡', '🚀', '🎯'];
+      circle.innerHTML = `<span class="step-icon">${icons[i]}</span>`;
+      sub.innerHTML = currentText;
+    } else {
+      // 대기
+      circle.innerHTML = String(i + 1);
+      sub.innerHTML = '대기<br>' + (i === 5 ? '06-15 예정' : '예정');
+    }
+  });
+
+  // 진행률 + 다음 단계 안내
+  const doneCount = currentIdx > 6 ? 6 : currentIdx;
+  const pct = (doneCount / 6) * 100;
+  document.getElementById('progFill').style.width = pct + '%';
+  let nextText;
+  if (currentIdx >= 6) {
+    nextText = '<strong style="color:#389e0d;">6</strong> / 6 단계 완료 · 모든 단계 완료';
+  } else {
+    nextText = `<strong>${doneCount}</strong> / 6 단계 완료 · 다음: ${_stepLabels[currentIdx]}`;
+  }
+  document.getElementById('progRatio').innerHTML = nextText;
+}
+
+// 초기 상태: 케이스 ③ (숙소 완료, 티켓부터)
+window.addEventListener('DOMContentLoaded', () => {
+  setCase(2, document.querySelectorAll('.case-chip')[2]);
+});
 </script>
 
 </body>
