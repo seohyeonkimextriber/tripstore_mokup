@@ -1,0 +1,729 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>포트원 PG 정산 시스템 연동 — 개발 리뷰</title>
+<link href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.6/dist/web/static/pretendard.css" rel="stylesheet">
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; }
+body { font-family: 'Pretendard', 'Apple SD Gothic Neo', -apple-system, sans-serif; font-size: 15px; color: rgba(0,0,0,0.88); background: #f5f6fa; line-height: 1.6; }
+a { color: inherit; }
+
+.app { display: grid; grid-template-columns: 280px 1fr; min-height: 100vh; }
+
+.sidebar { background: linear-gradient(180deg, #0c4a6e 0%, #075985 100%); color: #fff; padding: 28px 22px; position: sticky; top: 0; height: 100vh; overflow-y: auto; }
+.sidebar-brand { font-size: 13px; opacity: 0.7; letter-spacing: 0.4px; text-transform: uppercase; font-weight: 700; margin-bottom: 6px; }
+.sidebar-title { font-size: 19px; font-weight: 800; margin-bottom: 4px; letter-spacing: -0.3px; line-height: 1.3; }
+.sidebar-sub { font-size: 12px; opacity: 0.6; margin-bottom: 24px; }
+.sidebar-meta { display: flex; gap: 5px; margin-bottom: 24px; flex-wrap: wrap; }
+.sidebar-meta .pill { background: rgba(255,255,255,0.12); padding: 3px 9px; border-radius: 10px; font-size: 10.5px; font-weight: 600; letter-spacing: 0.2px; }
+.toc-list { display: flex; flex-direction: column; gap: 2px; }
+.toc-item { display: flex; align-items: center; gap: 9px; padding: 9px 11px; border-radius: 8px; font-size: 13px; color: rgba(255,255,255,0.75); cursor: pointer; transition: all 0.15s; text-decoration: none; }
+.toc-item:hover { background: rgba(255,255,255,0.08); color: #fff; }
+.toc-item.active { background: #fbbf24; color: #0c4a6e; font-weight: 800; }
+.toc-num { width: 22px; height: 22px; border-radius: 50%; background: rgba(255,255,255,0.1); display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 800; flex-shrink: 0; }
+.toc-item.active .toc-num { background: #0c4a6e; color: #fbbf24; }
+
+.sidebar-foot { margin-top: 26px; padding-top: 18px; border-top: 1px solid rgba(255,255,255,0.12); font-size: 11px; opacity: 0.7; line-height: 1.55; }
+.sidebar-foot a { color: #fbbf24; text-decoration: none; }
+
+.main { padding: 0 56px; }
+.slide { min-height: 100vh; padding: 64px 0; display: flex; flex-direction: column; justify-content: center; }
+.slide-num { font-size: 12px; color: rgba(0,0,0,0.4); font-weight: 800; letter-spacing: 2px; margin-bottom: 10px; }
+.slide-title { font-size: 38px; font-weight: 800; letter-spacing: -0.8px; margin-bottom: 8px; line-height: 1.15; }
+.slide-subtitle { font-size: 16px; color: rgba(0,0,0,0.55); margin-bottom: 36px; line-height: 1.55; }
+
+.cover { background: linear-gradient(135deg, #0c4a6e 0%, #0369a1 50%, #0ea5e9 100%); color: #fff; margin: 0 -56px; padding: 120px 56px; }
+.cover .badge { display: inline-block; background: rgba(255,255,255,0.16); padding: 6px 16px; border-radius: 20px; font-size: 12px; font-weight: 700; letter-spacing: 0.4px; margin-bottom: 18px; }
+.cover h1 { font-size: 52px; font-weight: 900; letter-spacing: -1.5px; line-height: 1.15; margin-bottom: 18px; }
+.cover h1 .accent { color: #fbbf24; }
+.cover .lead { font-size: 19px; opacity: 0.88; line-height: 1.65; max-width: 760px; }
+.cover .meta { margin-top: 36px; display: flex; gap: 26px; flex-wrap: wrap; padding-top: 26px; border-top: 1px solid rgba(255,255,255,0.18); }
+.cover .meta-item { font-size: 13px; }
+.cover .meta-item .k { opacity: 0.55; margin-bottom: 3px; font-size: 11px; letter-spacing: 0.4px; text-transform: uppercase; font-weight: 700; }
+.cover .meta-item .v { font-weight: 700; }
+
+.card { background: #fff; border-radius: 14px; padding: 26px 30px; box-shadow: 0 2px 12px rgba(0,0,0,0.05); margin-bottom: 18px; }
+.card-title { font-size: 16px; font-weight: 800; margin-bottom: 14px; display: flex; align-items: center; gap: 8px; letter-spacing: -0.2px; }
+.card-title .num { background: #0369a1; color: #fff; width: 22px; height: 22px; border-radius: 50%; font-size: 11px; font-weight: 800; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+.card-row { font-size: 14px; line-height: 1.8; color: rgba(0,0,0,0.78); }
+.card-row strong { color: rgba(0,0,0,0.92); font-weight: 800; }
+.card-row code { background: #f1f5f9; padding: 2px 7px; border-radius: 4px; font-size: 13px; color: #0369a1; font-family: 'SF Mono', monospace; font-weight: 600; }
+.card-row ul { margin-left: 18px; margin-top: 6px; }
+.card-row li { margin-bottom: 4px; }
+
+.highlight { background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%); border: 1.5px solid #f59e0b; border-radius: 12px; padding: 18px 22px; margin: 14px 0; }
+.highlight.blue { background: linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%); border-color: #3b82f6; }
+.highlight.red { background: linear-gradient(135deg, #fee2e2 0%, #fecaca 100%); border-color: #ef4444; }
+.highlight.green { background: linear-gradient(135deg, #d1fae5 0%, #a7f3d0 100%); border-color: #10b981; }
+.highlight-title { font-size: 13px; font-weight: 800; letter-spacing: 0.3px; margin-bottom: 8px; color: #92400e; }
+.highlight.blue .highlight-title { color: #1e3a8a; }
+.highlight.red .highlight-title { color: #991b1b; }
+.highlight.green .highlight-title { color: #064e3b; }
+.highlight-body { font-size: 14px; line-height: 1.75; }
+.highlight-body code { background: rgba(255,255,255,0.6); padding: 2px 6px; border-radius: 4px; font-family: 'SF Mono', monospace; font-size: 12.5px; font-weight: 700; }
+
+.grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+.grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 14px; }
+.grid-4 { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; }
+
+.stat { background: #fff; border-radius: 12px; padding: 18px 20px; text-align: left; border: 1px solid #e2e8f0; }
+.stat .lab { font-size: 11px; font-weight: 700; color: rgba(0,0,0,0.55); letter-spacing: 0.4px; text-transform: uppercase; margin-bottom: 6px; }
+.stat .val { font-size: 22px; font-weight: 800; color: #0c4a6e; letter-spacing: -0.4px; margin-bottom: 4px; }
+.stat .sub { font-size: 12px; color: rgba(0,0,0,0.55); }
+
+table.tbl { width: 100%; background: #fff; border-collapse: collapse; border-radius: 10px; overflow: hidden; font-size: 13px; box-shadow: 0 2px 12px rgba(0,0,0,0.04); }
+table.tbl th { background: #0c4a6e; color: #fff; text-align: left; padding: 11px 14px; font-weight: 700; font-size: 12px; letter-spacing: 0.2px; }
+table.tbl td { padding: 11px 14px; border-bottom: 1px solid #e2e8f0; vertical-align: top; line-height: 1.6; }
+table.tbl tr:last-child td { border-bottom: none; }
+table.tbl td code { background: #f1f5f9; padding: 1px 6px; border-radius: 3px; font-size: 12px; color: #0369a1; font-family: 'SF Mono', monospace; }
+table.tbl .status { display: inline-block; padding: 2px 8px; border-radius: 10px; font-size: 11px; font-weight: 700; }
+table.tbl .status.matched { background: #d1fae5; color: #064e3b; }
+table.tbl .status.notmatched { background: #fee2e2; color: #991b1b; }
+table.tbl .status.notcollected { background: #fef3c7; color: #92400e; }
+table.tbl .status.incomparable { background: #e0e7ff; color: #3730a3; }
+
+.task-card { background: #fff; border-left: 4px solid #0369a1; border-radius: 10px; padding: 18px 22px; margin-bottom: 12px; box-shadow: 0 1px 6px rgba(0,0,0,0.04); }
+.task-card .t { font-size: 14px; font-weight: 800; margin-bottom: 6px; color: #0c4a6e; display: flex; align-items: center; gap: 10px; }
+.task-card .t .badge { background: #0369a1; color: #fff; padding: 2px 8px; border-radius: 4px; font-size: 10.5px; font-weight: 700; letter-spacing: 0.4px; }
+.task-card .d { font-size: 13.5px; color: rgba(0,0,0,0.72); line-height: 1.75; }
+.task-card.alt { border-left-color: #f59e0b; }
+.task-card.alt .t { color: #92400e; }
+.task-card.alt .t .badge { background: #f59e0b; }
+.task-card.danger { border-left-color: #ef4444; }
+.task-card.danger .t { color: #991b1b; }
+.task-card.danger .t .badge { background: #ef4444; }
+
+.flow { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 22px 26px; background: #fff; border-radius: 12px; border: 1px solid #e2e8f0; margin: 12px 0; }
+.flow-step { flex: 1; text-align: center; padding: 14px 8px; border-radius: 8px; background: #f1f5f9; }
+.flow-step .icon { font-size: 22px; margin-bottom: 6px; }
+.flow-step .lab { font-size: 12px; font-weight: 800; color: #0c4a6e; }
+.flow-step .desc { font-size: 11px; color: rgba(0,0,0,0.55); margin-top: 3px; }
+.flow-arrow { font-size: 20px; color: #0369a1; font-weight: 800; }
+
+.summary-box { background: linear-gradient(135deg, #0c4a6e 0%, #075985 100%); color: #fff; border-radius: 14px; padding: 28px 32px; margin-top: 18px; }
+.summary-box h3 { font-size: 18px; font-weight: 800; margin-bottom: 14px; letter-spacing: -0.3px; }
+.summary-box ul { padding-left: 20px; line-height: 1.9; font-size: 14.5px; }
+.summary-box ul li::marker { color: #fbbf24; }
+.summary-box code { background: rgba(255,255,255,0.15); padding: 2px 7px; border-radius: 4px; color: #fbbf24; font-family: 'SF Mono', monospace; font-size: 13px; }
+
+@media (max-width: 1024px) {
+  .app { grid-template-columns: 1fr; }
+  .sidebar { position: relative; height: auto; }
+  .main { padding: 0 24px; }
+  .cover { margin: 0 -24px; padding: 80px 24px; }
+  .cover h1 { font-size: 36px; }
+  .slide-title { font-size: 28px; }
+}
+</style>
+</head>
+<body>
+<div class="app">
+
+<aside class="sidebar">
+  <div class="sidebar-brand">PG 정산 시스템</div>
+  <div class="sidebar-title">포트원 PG 정산<br>시스템 연동</div>
+  <div class="sidebar-sub">개발 리뷰 자료 · 2026-05-29</div>
+  <div class="sidebar-meta">
+    <span class="pill">결제/정산</span>
+    <span class="pill">진행중</span>
+    <span class="pill">P0</span>
+  </div>
+  <nav class="toc-list">
+    <a href="#s0" class="toc-item active"><span class="toc-num">0</span>커버 & 개요</a>
+    <a href="#s1" class="toc-item"><span class="toc-num">1</span>전체 작업 요약</a>
+    <a href="#s2" class="toc-item"><span class="toc-num">2</span>DB 컬럼 추가</a>
+    <a href="#s3" class="toc-item"><span class="toc-num">3</span>ledgers 매핑</a>
+    <a href="#s4" class="toc-item"><span class="toc-num">4</span>settlements 매핑</a>
+    <a href="#s5" class="toc-item"><span class="toc-num">5</span>reconciliation_status 운영</a>
+    <a href="#s6" class="toc-item"><span class="toc-num">6</span>슬랙 알림 배치</a>
+    <a href="#s7" class="toc-item"><span class="toc-num">7</span>데이터 백필</a>
+    <a href="#s8" class="toc-item"><span class="toc-num">8</span>기존 NICEPAY와 차이</a>
+    <a href="#s9" class="toc-item"><span class="toc-num">9</span>참조 문서</a>
+  </nav>
+  <div class="sidebar-foot">
+    <strong style="color:#fff">📋 원문</strong><br>
+    <a href="https://www.notion.so/tripstore/4-PG-34186ade8e77803d8f98cf1db40bad12">노션 — 4. 포트원 PG 정산 시스템 연동</a><br><br>
+    PM 김서현 · soyhoney@tripstore.kr
+  </div>
+</aside>
+
+<main class="main">
+
+<!-- ============ 0. COVER ============ -->
+<section class="slide" id="s0">
+  <div class="cover">
+    <div class="badge">🏦 PG 정산 시스템 마이그레이션 · 개발 리뷰</div>
+    <h1>포트원 PG 정산<br><span class="accent">시스템 연동</span></h1>
+    <p class="lead">
+      기존 <strong>NICEPAY 직연동</strong> 거래대사 → <strong>포트원 V2 API</strong> 전환.<br>
+      `payment-reconciliations` 응답을 기반으로 거래대사 신규 운영체계를 도입합니다.<br>
+      이 문서는 <strong>개발자가 무엇을 만들어야 하는지</strong>를 작업 단위로 정리한 리뷰 자료입니다.
+    </p>
+    <div class="meta">
+      <div class="meta-item"><div class="k">Epic</div><div class="v">결제/정산</div></div>
+      <div class="meta-item"><div class="k">상태</div><div class="v">진행중</div></div>
+      <div class="meta-item"><div class="k">기간</div><div class="v">2026-05-26 → 2026-06-30</div></div>
+      <div class="meta-item"><div class="k">백필 D-Day</div><div class="v">2026-06-03 이후</div></div>
+      <div class="meta-item"><div class="k">PG 거래 시작일</div><div class="v">2026-05-11 (토스페이먼츠 오픈)</div></div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ 1. 전체 작업 요약 ============ -->
+<section class="slide" id="s1">
+  <div class="slide-num">SECTION 01</div>
+  <h2 class="slide-title">전체 작업 요약</h2>
+  <p class="slide-subtitle">포트원 V2 거래대사 API 연동을 위해 개발이 손대야 할 6개 영역</p>
+
+  <div class="grid-3">
+    <div class="task-card">
+      <div class="t"><span class="badge">TASK 1</span></div>
+      <div class="d"><strong>DB 컬럼 추가</strong><br>
+        `reconciliation_status`, `not_matched_reasons`, `anomaly_amount`, `tax_free_amount`, `is_escrow` — 5개 컬럼 신규 추가
+      </div>
+    </div>
+    <div class="task-card">
+      <div class="t"><span class="badge">TASK 2</span></div>
+      <div class="d"><strong>ledgers 적재 로직</strong><br>
+        `pg_settlement_ledgers` (raw) — 포트원 응답 필드를 컬럼에 매핑하여 적재
+      </div>
+    </div>
+    <div class="task-card">
+      <div class="t"><span class="badge">TASK 3</span></div>
+      <div class="d"><strong>settlements 가공 로직</strong><br>
+        `pg_settlements` (가공) — payment_code 단위로 집계/가공
+      </div>
+    </div>
+    <div class="task-card alt">
+      <div class="t"><span class="badge">TASK 4</span></div>
+      <div class="d"><strong>reconciliation_status 운영</strong><br>
+        4종 상태값 처리 (MATCHED / NOT_MATCHED / NOT_COLLECTED / INCOMPARABLE) + 어드민 노출명 매핑
+      </div>
+    </div>
+    <div class="task-card alt">
+      <div class="t"><span class="badge">TASK 5</span></div>
+      <div class="d"><strong>슬랙 알림 배치</strong><br>
+        일배치 1회 (전일자 → 익일 13:00). `#알림_결제오류확인` 채널로 코드블록 테이블 전송
+      </div>
+    </div>
+    <div class="task-card danger">
+      <div class="t"><span class="badge">TASK 6</span></div>
+      <div class="d"><strong>데이터 백필 마이그레이션</strong><br>
+        2026-05-11 (토스페이먼츠 실결제 시작일) 이후 전체 거래 → 포트원 거래대사로 업데이트
+      </div>
+    </div>
+  </div>
+
+  <div class="highlight blue" style="margin-top:20px">
+    <div class="highlight-title">📌 작업 성격</div>
+    <div class="highlight-body">
+      <strong>신규 작업 아님</strong>. 기존 NICEPAY 직연동을 포트원 V2 API로 갈아끼우는 마이그레이션. 정책·플로우는 기존 운영 기획서를 유지하고, 응답 스키마와 상태값 의미만 새로 매핑하는 것이 핵심입니다.
+    </div>
+  </div>
+</section>
+
+<!-- ============ 2. DB 컬럼 추가 ============ -->
+<section class="slide" id="s2">
+  <div class="slide-num">SECTION 02 · TASK 1</div>
+  <h2 class="slide-title">DB 컬럼 추가</h2>
+  <p class="slide-subtitle">신규 컬럼 5종 — 포트원 거래대사 응답을 받기 위한 스키마 변경</p>
+
+  <table class="tbl">
+    <thead>
+      <tr>
+        <th style="width:24%">대상 테이블</th>
+        <th style="width:22%">컬럼</th>
+        <th style="width:14%">타입</th>
+        <th>정의 / 값</th>
+        <th style="width:14%">어드민 노출</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><code>pg_settlement_ledgers</code><br><code>pg_settlements</code></td>
+        <td><code>reconciliation_status</code></td>
+        <td>enum</td>
+        <td>대사상태 4종: <code>MATCHED</code> / <code>NOT_MATCHED</code> / <code>INCOMPARABLE</code> / <code>NOT_COLLECTED</code></td>
+        <td><strong>표시 O</strong></td>
+      </tr>
+      <tr>
+        <td><code>pg_settlement_ledgers</code></td>
+        <td><code>not_matched_reasons</code></td>
+        <td>json</td>
+        <td>NotMatchedReason 배열 — 불일치 사유 6종 중 다중 가능</td>
+        <td>—</td>
+      </tr>
+      <tr>
+        <td><code>pg_settlement_ledgers</code></td>
+        <td><code>anomaly_amount</code></td>
+        <td>int</td>
+        <td>이상 금액 (status별 의미 다름 — 다음 슬라이드 참고)</td>
+        <td>—</td>
+      </tr>
+      <tr>
+        <td><code>pg_settlement_ledgers</code></td>
+        <td><code>tax_free_amount</code></td>
+        <td>int</td>
+        <td>면세금액 (세금계산서 정정 시 사용)</td>
+        <td>—</td>
+      </tr>
+      <tr>
+        <td><code>pg_settlement_ledgers</code></td>
+        <td><code>is_escrow</code></td>
+        <td>tinyint</td>
+        <td>에스크로 거래 여부 — true=에스크로(구매확정 후 입금) / false=일반(즉시 입금)</td>
+        <td>—</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <div class="card" style="margin-top:18px">
+    <div class="card-title"><span class="num">⚠️</span>anomaly_amount 계산 룰 (status에 따라 의미 다름)</div>
+    <table class="tbl" style="margin-top:8px">
+      <thead><tr><th>status</th><th>의미</th><th>계산식</th></tr></thead>
+      <tbody>
+        <tr><td><span class="status notmatched">NOT_MATCHED</span></td><td>PG ↔ 포트원 <strong>차액</strong></td><td><code>paymentAmount - portonePaymentAmount</code></td></tr>
+        <tr><td><span class="status incomparable">INCOMPARABLE</span></td><td>거래금액 <strong>절대값</strong> (paymentAmount=0)</td><td><code>|portonePaymentAmount|</code></td></tr>
+        <tr><td><span class="status notcollected">NOT_COLLECTED</span></td><td>거래금액 <strong>절대값</strong> (portonePaymentAmount=0)</td><td><code>|paymentAmount|</code></td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="highlight">
+    <div class="highlight-title">🔑 핵심 — 기존 컬럼과 병존</div>
+    <div class="highlight-body">
+      기존 <code>pg_settlement_fetch_status</code>(우리 시스템 진행상태: READY/COMPLETED/EXCLUDED)는 그대로 유지.<br>
+      새 <code>reconciliation_status</code>(포트원 대사 결과)는 별도 컬럼으로 추가합니다. <strong>두 컬럼은 의미가 다르므로 합치지 않음</strong>.
+    </div>
+  </div>
+</section>
+
+<!-- ============ 3. ledgers 매핑 ============ -->
+<section class="slide" id="s3">
+  <div class="slide-num">SECTION 03 · TASK 2</div>
+  <h2 class="slide-title"><code style="background:#f1f5f9;color:#0369a1;padding:2px 10px;border-radius:6px;font-size:30px">pg_settlement_ledgers</code> 매핑</h2>
+  <p class="slide-subtitle">포트원 거래대사 API 응답 (raw) → ledgers 컬럼으로 1:1 적재</p>
+
+  <table class="tbl">
+    <thead><tr><th style="width:34%">포트원 필드</th><th style="width:24%">ledgers 컬럼</th><th>매핑 룰 · 메모</th></tr></thead>
+    <tbody>
+      <tr><td><code>pgTxId</code></td><td><code>tid</code></td><td>—</td></tr>
+      <tr><td><code>pgSpecifier.pgMerchantId</code><br><code>pgSpecifier.pgProvider</code></td><td><code>pg</code><br><code>mid</code></td><td>—</td></tr>
+      <tr><td><code>actionType</code></td><td><code>transaction_type</code></td>
+        <td><strong>매핑룰:</strong><br>
+          승인 → 승인 / 전체취소·부분취소·기타취소 → 취소<br>
+          <strong style="color:#d97706">정산후 보정 → "정산후보정" (신규 값)</strong>
+        </td></tr>
+      <tr><td><code>paymentId</code></td><td><code>payment_code</code></td><td>—</td></tr>
+      <tr><td><code>transactionId</code></td><td><code>hosting_payment_code</code><br><code>merchant_payment_code</code></td><td>—</td></tr>
+      <tr><td><code>paymentMethod.type</code></td><td><code>payment_method</code></td>
+        <td>CARD → 카드 / VIRTUAL_ACCOUNT → 가상계좌(계좌이체) / EASY_PAY → 간편결제</td></tr>
+      <tr><td><code>paymentMethod.provider</code></td><td><code>customer_payment_method</code></td>
+        <td><strong>EASY_PAY 한정</strong> — 간편결제사 (네이버페이/카카오페이/토스페이)</td></tr>
+      <tr><td><code>paymentMethod.method.type</code></td><td><code>easy_payment_method</code></td>
+        <td><strong>EASY_PAY 한정</strong> — 간편결제 내부 실제 결제수단</td></tr>
+      <tr><td><code>paymentMethod.issuer</code> (CARD&EASY_PAY)<br><code>paymentMethod.bank</code> (VIRTUAL_ACCOUNT)</td>
+        <td><code>financial_institution</code></td>
+        <td>CARD: CardCompany 60+종 (예: <code>LOTTE_CARD</code>)<br>계좌: Bank 70+종 (예: <code>KOOKMIN</code>, <code>NONGHYUP</code>)</td></tr>
+      <tr><td><code>paymentMethod.method.installmentMonth</code></td><td><code>installment_months</code></td>
+        <td>0 = 일시불. CARD 또는 EASY_PAY+method.type=CARD에서만 유효</td></tr>
+      <tr><td><code>paymentAmount</code></td><td><code>transaction_amount</code></td><td>—</td></tr>
+      <tr><td><code>settlement.feeAmount</code> / <code>feeVatAmount</code> / <code>settlementAmount</code> / <code>freeInterestFee</code> / <code>settlementDate</code></td>
+        <td><code>fee_amount</code> / <code>vat_amount</code> / <code>settlement_amount</code> / <code>no_interest_fee</code> / <code>settlement_date</code></td>
+        <td>—</td></tr>
+      <tr><td><code>paidAt</code></td><td><code>transaction_date</code></td><td>—</td></tr>
+    </tbody>
+  </table>
+</section>
+
+<!-- ============ 4. settlements 매핑 ============ -->
+<section class="slide" id="s4">
+  <div class="slide-num">SECTION 04 · TASK 3</div>
+  <h2 class="slide-title"><code style="background:#f1f5f9;color:#0369a1;padding:2px 10px;border-radius:6px;font-size:30px">pg_settlements</code> 매핑</h2>
+  <p class="slide-subtitle">ledgers(raw) → settlements(가공). payment_code 단위로 집계</p>
+
+  <table class="tbl">
+    <thead><tr><th style="width:32%">포트원 필드</th><th style="width:26%">settlements 컬럼</th><th>메모</th></tr></thead>
+    <tbody>
+      <tr><td><code>paymentId</code></td><td><code>payment_code</code></td><td>—</td></tr>
+      <tr><td><code>transactionId</code></td><td><code>hosting_payment_code</code></td><td>—</td></tr>
+      <tr><td><code>pgTxId</code> / <code>pgSpecifier.pgProvider</code> / <code>pgSpecifier.pgMerchantId</code></td>
+        <td><code>tid</code> / <code>pg_settlement_mid</code> / <code>pg</code></td><td>—</td></tr>
+      <tr><td><code>actionType</code></td><td><code>transaction_type</code></td>
+        <td><strong>매핑룰:</strong> 승인→승인 / 전체·부분·기타취소→취소 / <strong style="color:#d97706">정산후 보정 → "정산후보정" (신규)</strong><br>
+          → 정산후 보정은 PG사와 직접 소통하며 처리 방식이 케이스별로 달라, "정산후보정" 값으로만 정리하고 <strong>이슈 발생 시 수동 처리</strong>
+        </td></tr>
+      <tr><td><code>paymentMethod</code></td><td><code>payment_method</code></td><td>—</td></tr>
+      <tr><td><code>paymentAmount</code> / <code>supplyAmount</code> / <code>vatAmount</code></td>
+        <td><code>transaction_amount</code> / <code>supply_amount</code> / <code>vat_amount</code></td><td>—</td></tr>
+      <tr><td><code>settlement.feeAmount</code> / <code>feeVatAmount</code> / <code>settlementAmount</code> / <code>settlementDate</code></td>
+        <td><code>pg_fee_amount</code> / <code>pg_vat_amount</code> / <code>pg_settlement_amount</code> / <code>pg_settlement_date</code></td>
+        <td>—</td></tr>
+      <tr><td><code>paidAt</code></td><td><code>paid_at</code>, <code>transacted_at</code></td><td>—</td></tr>
+    </tbody>
+  </table>
+
+  <div class="highlight green" style="margin-top:18px">
+    <div class="highlight-title">✅ 데이터 흐름</div>
+    <div class="highlight-body">
+      <div class="flow" style="margin-top:8px;background:transparent;border:none;padding:0">
+        <div class="flow-step">
+          <div class="icon">📡</div>
+          <div class="lab">포트원 V2 API</div>
+          <div class="desc">GET /payment-reconciliations</div>
+        </div>
+        <div class="flow-arrow">→</div>
+        <div class="flow-step" style="background:#fef3c7">
+          <div class="icon">📥</div>
+          <div class="lab">ledgers (raw)</div>
+          <div class="desc">건별 원시 적재</div>
+        </div>
+        <div class="flow-arrow">→</div>
+        <div class="flow-step" style="background:#d1fae5">
+          <div class="icon">⚙️</div>
+          <div class="lab">settlements (가공)</div>
+          <div class="desc">payment_code 단위 집계</div>
+        </div>
+        <div class="flow-arrow">→</div>
+        <div class="flow-step" style="background:#dbeafe">
+          <div class="icon">🖥️</div>
+          <div class="lab">어드민 + 슬랙</div>
+          <div class="desc">PG 정산관리 화면 + 알림</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ 5. reconciliation_status 운영 ============ -->
+<section class="slide" id="s5">
+  <div class="slide-num">SECTION 05 · TASK 4</div>
+  <h2 class="slide-title">reconciliation_status 4종 운영</h2>
+  <p class="slide-subtitle">포트원이 알려주는 거래대사 결과 — 상태별 운영 액션과 어드민 노출명 (확정 2026-05-27)</p>
+
+  <table class="tbl">
+    <thead>
+      <tr>
+        <th style="width:14%">신규 status</th>
+        <th style="width:30%">발생 케이스</th>
+        <th>운영 및 개발 프로세스</th>
+        <th style="width:10%">어드민 노출명</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><span class="status matched">MATCHED</span></td>
+        <td>정상 승인 거래 — PG ↔ 포트원 거래금액·결제수단·승인일자 등 모든 필드 일치</td>
+        <td>알림 없음 (정상 처리)</td>
+        <td><strong>정상</strong></td>
+      </tr>
+      <tr>
+        <td><span class="status notmatched">NOT_MATCHED</span></td>
+        <td>PG ↔ 포트원 거래정보 불일치<br>
+          <code>notMatchedReasons</code> 6종 중 하나 이상:<br>
+          ① PAYMENT_AMOUNT_NOT_MATCHED (금액)<br>
+          ② PAYMENT_DATE_NOT_MATCHED (일자)<br>
+          ③ VAT_AMOUNT_NOT_MATCHED (부가세)<br>
+          ④ TAX_FREE_AMOUNT_NOT_MATCHED (면세)<br>
+          ⑤ INSTALLMENT_MONTH_NOT_MATCHED (할부)<br>
+          ⑥ ESCROW_NOT_MATCHED (에스크로)
+        </td>
+        <td>
+          <strong>슬랙 알림 ✅</strong><br>
+          채널: <code>#알림_결제오류확인</code><br>
+          주기: 일배치 1회 (전일자 → 익일 13:00 이후)<br>
+          그룹핑: status 단위 + 사유(6종) 서브그룹<br>
+          ━━━━━━<br>
+          <strong>운영 액션</strong><br>
+          • 포트원 문의<br>
+          • 해결 후 PG 정산관리 화면에서 <strong>수동 재패치</strong>
+        </td>
+        <td><strong>불일치</strong></td>
+      </tr>
+      <tr>
+        <td><span class="status notcollected">NOT_COLLECTED</span></td>
+        <td>PG 정산 내역만 수집되고 거래내역은 수집되지 않은 건<br>
+          ① 도입 초기 (시간 지나면 0건)<br>
+          ② 지속 발생 시 → 포트원 거래 수집 누락 의심
+        </td>
+        <td>
+          <strong>슬랙 알림 ✅</strong><br>
+          채널: <code>#알림_결제오류확인</code> (C0AMKAK6VAN)<br>
+          주기: 일배치 1회<br>
+          ━━━━━━<br>
+          <strong>운영 액션</strong><br>
+          • 수동 재패치<br>
+          • 지속 시 포트원 CS 티켓
+        </td>
+        <td><strong>조회불가</strong></td>
+      </tr>
+      <tr>
+        <td><span class="status incomparable">INCOMPARABLE</span></td>
+        <td>PG 거래내역은 있지만 포트원엔 없음<br>
+          ① PG 어드민 직접 취소 (webhook 누락)<br>
+          ② PG/카드사 장애<br>
+          ③ PG 어드민 수기 결제 (추정)<br>
+          ④ 기타 PG에만 존재하는 케이스
+        </td>
+        <td>
+          <strong>슬랙 알림 ✅</strong><br>
+          채널: <code>#알림_결제오류확인</code><br>
+          주기: 일배치 1회<br>
+          ━━━━━━<br>
+          <strong>운영 액션</strong><br>
+          • 포트원에 결제 내역 webhook/업데이트 요청<br>
+          • 이후 수동 재패치
+        </td>
+        <td><strong>미수집</strong></td>
+      </tr>
+    </tbody>
+  </table>
+
+  <div class="highlight blue" style="margin-top:16px">
+    <div class="highlight-title">💡 예외 케이스</div>
+    <div class="highlight-body">
+      <strong>당일 전체취소</strong> (거래대사 API 한정) — 승인 row + 취소 row 모두 일치 → <code>MATCHED</code>로 들어오지만, <strong>정산내역 API 응답에는 누락</strong>됨 (정산 대상이 아니므로). 이 케이스는 <code>fetch_status = EXCLUDED</code>로 처리.
+    </div>
+  </div>
+</section>
+
+<!-- ============ 6. 슬랙 알림 배치 ============ -->
+<section class="slide" id="s6">
+  <div class="slide-num">SECTION 06 · TASK 5</div>
+  <h2 class="slide-title">슬랙 알림 배치 구현</h2>
+  <p class="slide-subtitle">일배치 1회, <code style="background:#f1f5f9;color:#0369a1;padding:2px 8px;border-radius:6px;font-size:14px">#알림_결제오류확인</code> 채널로 코드블록 테이블 전송</p>
+
+  <table class="tbl">
+    <thead><tr><th style="width:22%">항목</th><th>작업 내용</th></tr></thead>
+    <tbody>
+      <tr>
+        <td><strong>발송 조건</strong></td>
+        <td>
+          ① <code>actionType = 정산후보정</code> 인 경우<br>
+          ② <code>reconciliation_status ≠ MATCHED</code> 인 경우
+        </td>
+      </tr>
+      <tr>
+        <td><strong>발송 시간</strong></td>
+        <td>PG 정산 스케줄러 연동 후, 발송 조건 충족 시 발송 (일배치 1회 — 전일자 → 익일 13:00 이후)</td>
+      </tr>
+      <tr>
+        <td><strong>발송 형태</strong></td>
+        <td>슬랙 <strong>코드블록 테이블</strong> (요약 + status별 상세)</td>
+      </tr>
+      <tr>
+        <td><strong>발송 채널</strong></td>
+        <td><code>#알림_결제오류확인</code> (C0AMKAK6VAN)</td>
+      </tr>
+      <tr>
+        <td><strong>그룹핑</strong></td>
+        <td>
+          • status별 (<code>NOT_MATCHED</code>는 <code>notMatchedReasons</code> 서브그룹)<br>
+          • <code>actionType = 정산후보정</code> 케이스
+        </td>
+      </tr>
+      <tr>
+        <td><strong>메시지 본문 (예시)</strong></td>
+        <td>
+          <code>[포트원 PG정산 확인 필요 케이스 발생 알림]</code><br>
+          ◦ <code>NOT_MATCHED</code> 결제건<br>
+          ◦ 슬랙 코드블록 테이블 — 컬럼:<br>
+          <code>transaction_type, pg, mid, tid, payment_code, payment_method, hosting_payment_code, transaction_amount, fee_amount, vat_amount, settlement_amount, settlement_date, transaction_date</code>
+        </td>
+      </tr>
+    </tbody>
+  </table>
+</section>
+
+<!-- ============ 7. 데이터 백필 ============ -->
+<section class="slide" id="s7">
+  <div class="slide-num">SECTION 07 · TASK 6</div>
+  <h2 class="slide-title">데이터 백필 마이그레이션</h2>
+  <p class="slide-subtitle">기존 거래 데이터를 포트원 거래대사 데이터로 일괄 업데이트</p>
+
+  <div class="grid-4" style="margin-bottom:16px">
+    <div class="stat">
+      <div class="lab">백필 기준일</div>
+      <div class="val">2026-05-11</div>
+      <div class="sub">토스페이먼츠 실결제 시작</div>
+    </div>
+    <div class="stat">
+      <div class="lab">대상 PG</div>
+      <div class="val">2종</div>
+      <div class="sub">토스페이먼츠 + 나이스페이</div>
+    </div>
+    <div class="stat">
+      <div class="lab">잡 실행 시점</div>
+      <div class="val">~2026-06-03</div>
+      <div class="sub">포트원 채널키 이슈 개선 후</div>
+    </div>
+    <div class="stat">
+      <div class="lab">조회 단위</div>
+      <div class="val">3개월</div>
+      <div class="sub">1회 + 페이지네이션 커서</div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-title"><span class="num">🔄</span>백필 정책</div>
+    <div class="card-row">
+      <strong>토스페이먼츠 실결제 발생일 (2026-05-11)부터의 모든 거래</strong>에 대해<br>
+      → 토스페이먼츠 + 나이스 모든 결제 거래 데이터를<br>
+      → 포트원 PG 정산대사 데이터로 <strong>전체 업데이트</strong>
+    </div>
+  </div>
+
+  <div class="highlight red">
+    <div class="highlight-title">⏰ 실행 시점 제약</div>
+    <div class="highlight-body">
+      포트원 측 <strong>채널키 이슈</strong>가 개선 완료된 후 (~2026-06-03)에 백필 잡 실행. 그 이전엔 응답 데이터 신뢰도가 떨어져 백필해도 다시 돌려야 함.
+    </div>
+  </div>
+
+  <div class="highlight blue">
+    <div class="highlight-title">📌 API 호출 제약 — 개발 시 주의</div>
+    <div class="highlight-body">
+      • <strong>조회 권장 시점</strong>: 전일자 데이터는 <strong>익일 12:00 이후</strong>부터 조회 가능<br>
+      • <strong>조회 범위</strong>: 1회 최대 3개월 + 페이지네이션 (커서 방식)<br>
+      • <strong>인증</strong>: V2 API Secret을 <code>Authorization</code> 헤더에 담아 호출<br>
+      • <strong>엔드포인트</strong>: <code>GET /payment-reconciliations</code> (건별), 별도 API (거래일별·정산일별 합산 요약)
+    </div>
+  </div>
+</section>
+
+<!-- ============ 8. 기존 NICEPAY와 차이 ============ -->
+<section class="slide" id="s8">
+  <div class="slide-num">SECTION 08</div>
+  <h2 class="slide-title">기존 NICEPAY 직연동과의 차이</h2>
+  <p class="slide-subtitle">개발 시 가장 큰 변경점 — 엔드포인트, 상태 enum, 호출 단위가 모두 바뀜</p>
+
+  <table class="tbl">
+    <thead>
+      <tr>
+        <th style="width:18%">항목</th>
+        <th style="width:36%">기존 (NICEPAY 직연동)</th>
+        <th>신규 (포트원 V2)</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><strong>API 엔드포인트</strong></td>
+        <td><code>data.nicepay.co.kr/recon/api</code> (sid 0301003)</td>
+        <td><code>GET /payment-reconciliations</code></td>
+      </tr>
+      <tr>
+        <td><strong>지원 PG</strong></td>
+        <td>NICE 단독</td>
+        <td>전체 (NICE / INICIS / KCP / KAKAOPAY / NAVERPAY ...)</td>
+      </tr>
+      <tr>
+        <td><strong>호출 단위</strong></td>
+        <td>MID 단위, 일자별 일괄</td>
+        <td>가맹점 전체, 페이지네이션 (커서)</td>
+      </tr>
+      <tr>
+        <td><strong>건수 제한</strong></td>
+        <td>실시간 10,000건/일</td>
+        <td>1회 최대 3개월 + 페이지네이션</td>
+      </tr>
+      <tr>
+        <td><strong>조회 권장 시점</strong></td>
+        <td>다음 영업일 08시 이후</td>
+        <td>전일자는 <strong>익일 12:00 이후</strong></td>
+      </tr>
+      <tr>
+        <td><strong>상태 enum</strong></td>
+        <td><code>대기</code> / <code>완료</code> / <code>실패</code> / <code>제외</code></td>
+        <td><code>MATCHED</code> / <code>NOT_MATCHED</code> / <code>INCOMPARABLE</code> / <code>NOT_COLLECTED</code></td>
+      </tr>
+      <tr>
+        <td><strong>불일치 검증</strong></td>
+        <td>우리 자체 검증</td>
+        <td>포트원 사전 대사 + <code>notMatchedReasons</code> 6종</td>
+      </tr>
+      <tr>
+        <td><strong>거래구분</strong></td>
+        <td><code>0</code> (승인) / <code>2</code> (취소)</td>
+        <td><code>APPROVAL</code> / <code>FULL_CANCEL</code> / <code>PARTIAL_CANCEL</code> / <code>UNCLASSIFIED_CANCEL</code> / <code>POST_CORRECTION</code></td>
+      </tr>
+      <tr>
+        <td><strong>결제수단 코드</strong></td>
+        <td><code>svcCd 01</code> / <code>03</code></td>
+        <td><code>CARD</code> / <code>EASY_PAY</code> / <code>VIRTUAL_ACCOUNT</code> ... 9종</td>
+      </tr>
+      <tr>
+        <td><strong>거래형태 (에스크로)</strong></td>
+        <td><code>0</code> / <code>1</code></td>
+        <td><code>isEscrow</code> boolean</td>
+      </tr>
+    </tbody>
+  </table>
+</section>
+
+<!-- ============ 9. 참조 ============ -->
+<section class="slide" id="s9">
+  <div class="slide-num">SECTION 09</div>
+  <h2 class="slide-title">참조 문서 & 다음 단계</h2>
+  <p class="slide-subtitle">개발 진행 시 1차 소스로 사용할 문서들</p>
+
+  <div class="card">
+    <div class="card-title"><span class="num">📖</span>1차 소스 (API 스펙)</div>
+    <div class="card-row">
+      • <a href="https://portone.notion.site/PG-API-d8a4ab35472e44338713391b8d14de5d" style="color:#0369a1;font-weight:700">포트원 V2 PG 거래대사 API 안내문서</a><br>
+      • <a href="https://docs.google.com/spreadsheets/d/1JjzPGV9Q3hUr85tFl-hTWQC7JOZG54zA1ht91QtrCTo/edit" style="color:#0369a1;font-weight:700">포트원 정산 거래대사 데이터 샘플 (Google Sheets)</a>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-title"><span class="num">📋</span>기존 운영 기획서 (2025-01 오픈)</div>
+    <div class="card-row">
+      • 관리자 "PG 정산관리" 화면 (Notion)<br>
+      • 관리자 "PG 정산 데이터 조회" 화면 (Notion)
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-title"><span class="num">🗄️</span>운영 DB 스키마</div>
+    <div class="card-row">
+      • <code>svc_settlement.pg_settlement_ledgers</code> — 거래대사 raw<br>
+      • <code>svc_settlement.pg_settlements</code> — 가공된 정산<br>
+      • <code>svc_payments.payments</code> — 결제<br>
+      • <code>svc_payments.payment_cancels</code> — 취소
+    </div>
+  </div>
+
+  <div class="summary-box">
+    <h3>🎯 개발 리뷰 시 확정해야 할 항목</h3>
+    <ul>
+      <li><strong>DB 컬럼 5종 추가 PR</strong> — <code>reconciliation_status</code>, <code>not_matched_reasons</code>, <code>anomaly_amount</code>, <code>tax_free_amount</code>, <code>is_escrow</code></li>
+      <li><strong>ledgers 적재 로직 + settlements 가공 로직</strong> 분리 구조 확정 (raw → 가공 2-step)</li>
+      <li><strong>스케줄러 트리거 시점</strong> — 익일 13:00 이후 (포트원 권장 12:00 + 안전 마진)</li>
+      <li><strong>슬랙 알림 모듈</strong> — 기존 알림 모듈 재사용 vs 신규 모듈 (그룹핑·코드블록 테이블 포맷 합의 필요)</li>
+      <li><strong>백필 잡 실행 일정</strong> — 포트원 채널키 이슈 개선 완료 후 (2026-06-03 전후)</li>
+      <li><strong>POST_CORRECTION 케이스</strong> — "정산후보정" 신규 enum 값 추가 + 수동 처리 UI 합의</li>
+    </ul>
+  </div>
+</section>
+
+</main>
+</div>
+
+<script>
+const items = document.querySelectorAll('.toc-item');
+const sections = document.querySelectorAll('.slide');
+const observer = new IntersectionObserver((entries) => {
+  entries.forEach(entry => {
+    if (entry.isIntersecting) {
+      const id = entry.target.id;
+      items.forEach(i => i.classList.toggle('active', i.getAttribute('href') === '#' + id));
+    }
+  });
+}, { rootMargin: '-30% 0px -60% 0px' });
+sections.forEach(s => observer.observe(s));
+</script>
+
+</body>
+</html>
