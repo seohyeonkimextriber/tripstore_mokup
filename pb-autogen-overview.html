@@ -1,0 +1,735 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PB 상품 자동생성 — 통합 플로우 (2026-05-29 ver)</title>
+<link href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.6/dist/web/static/pretendard.css" rel="stylesheet">
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  :root {
+    --c-text: #1a1a1a;
+    --c-sub: #666;
+    --c-mute: #999;
+    --c-line: #e8e8e8;
+    --c-bg: #f5f5f5;
+    --c-card: #fff;
+    --c-blue: #1565c0;
+    --c-blue-bg: #e3f2fd;
+    --c-orange: #e65100;
+    --c-orange-bg: #fff3e0;
+    --c-purple: #6a1b9a;
+    --c-purple-bg: #f3e5f5;
+    --c-green: #2e7d32;
+    --c-green-bg: #e8f5e9;
+    --c-red: #d32f2f;
+    --c-red-bg: #ffeaea;
+    --c-yellow-bg: #fffde7;
+  }
+  body { font-family: 'Pretendard', -apple-system, sans-serif; background: var(--c-bg); color: var(--c-text); font-size: 13px; line-height: 1.55; }
+
+  /* Header */
+  .header { background: linear-gradient(135deg, #0d1b2a 0%, #1b263b 100%); color: #fff; padding: 32px 40px; }
+  .header-inner { max-width: 1320px; margin: 0 auto; }
+  .doc-tag { display: inline-block; padding: 4px 10px; background: rgba(255,255,255,0.12); border-radius: 6px; font-size: 11px; letter-spacing: 0.3px; margin-bottom: 12px; font-weight: 600; }
+  .header h1 { font-size: 28px; font-weight: 800; letter-spacing: -0.5px; margin-bottom: 8px; }
+  .header .subtitle { font-size: 14px; color: rgba(255,255,255,0.7); margin-bottom: 16px; }
+  .header-meta { display: flex; gap: 24px; font-size: 12px; color: rgba(255,255,255,0.65); flex-wrap: wrap; }
+  .header-meta .item b { color: #fff; font-weight: 600; margin-right: 6px; }
+  .header-links { margin-top: 16px; display: flex; gap: 8px; flex-wrap: wrap; }
+  .header-links a { display: inline-flex; align-items: center; gap: 6px; padding: 6px 12px; background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.15); border-radius: 6px; color: #fff; text-decoration: none; font-size: 12px; transition: background 0.15s; }
+  .header-links a:hover { background: rgba(255,255,255,0.18); }
+
+  /* Layout */
+  .page { max-width: 1320px; margin: 0 auto; padding: 24px 40px 80px; }
+
+  /* Navigation tabs (4 areas) */
+  .area-nav { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-bottom: 24px; }
+  .area-tab { background: #fff; border: 2px solid var(--c-line); border-radius: 12px; padding: 16px 18px; position: relative; }
+  .area-tab.current { border-color: #0d1b2a; box-shadow: 0 4px 12px rgba(13,27,42,0.08); }
+  .area-tab.upcoming { opacity: 0.6; }
+  .area-tab .area-no { font-size: 11px; font-weight: 700; color: var(--c-mute); letter-spacing: 0.5px; }
+  .area-tab .area-name { font-size: 16px; font-weight: 800; margin: 4px 0; }
+  .area-tab .area-desc { font-size: 11px; color: var(--c-sub); line-height: 1.5; }
+  .area-tab .area-status { position: absolute; top: 12px; right: 12px; font-size: 10px; font-weight: 700; padding: 2px 7px; border-radius: 10px; }
+  .area-tab.current .area-status { background: #0d1b2a; color: #fff; }
+  .area-tab.upcoming .area-status { background: #f0f0f0; color: var(--c-mute); }
+
+  /* Decision summary */
+  .decision-bar { background: #fff8e1; border: 1px solid #ffe082; border-radius: 12px; padding: 18px 22px; margin-bottom: 24px; }
+  .decision-bar h2 { font-size: 14px; font-weight: 800; color: #bf360c; margin-bottom: 10px; display: flex; align-items: center; gap: 8px; }
+  .decision-bar h2 .meeting-tag { font-size: 10px; padding: 2px 7px; background: #bf360c; color: #fff; border-radius: 10px; font-weight: 700; }
+  .decision-list { display: grid; grid-template-columns: 1fr 1fr; gap: 6px 24px; font-size: 12px; color: #6d4c00; }
+  .decision-list li { padding: 4px 0; padding-left: 16px; position: relative; }
+  .decision-list li::before { content: '•'; position: absolute; left: 4px; color: #bf360c; font-weight: 700; }
+  .decision-list b { color: #bf360c; }
+
+  /* Section */
+  .section { background: #fff; border-radius: 14px; border: 1px solid var(--c-line); margin-bottom: 20px; overflow: hidden; }
+  .section-head { padding: 18px 24px; border-bottom: 1px solid #f0f0f0; display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+  .section-head h2 { font-size: 16px; font-weight: 800; display: flex; align-items: center; gap: 10px; }
+  .section-head .sec-no { display: inline-flex; align-items: center; justify-content: center; width: 26px; height: 26px; border-radius: 50%; background: #0d1b2a; color: #fff; font-size: 12px; font-weight: 800; }
+  .section-head .sec-sub { font-size: 12px; color: var(--c-sub); font-weight: 500; }
+  .section-body { padding: 22px 24px; }
+
+  /* Stage diagram (전체 4-step) */
+  .stages { display: grid; grid-template-columns: repeat(4, 1fr); gap: 0; margin-top: 4px; }
+  .stage { position: relative; padding: 18px 20px 18px 24px; background: #fafafa; border-top: 1px solid var(--c-line); border-bottom: 1px solid var(--c-line); }
+  .stage:first-child { border-left: 1px solid var(--c-line); border-radius: 10px 0 0 10px; padding-left: 20px; }
+  .stage:last-child { border-right: 1px solid var(--c-line); border-radius: 0 10px 10px 0; }
+  .stage::after { content: ''; position: absolute; right: -12px; top: 50%; transform: translateY(-50%) rotate(-45deg); width: 22px; height: 22px; background: #fafafa; border-top: 1px solid var(--c-line); border-right: 1px solid var(--c-line); z-index: 1; }
+  .stage:last-child::after { display: none; }
+  .stage.curr { background: #fff8e1; border-color: #ffe082; }
+  .stage.curr::after { background: #fff8e1; border-color: #ffe082; }
+  .stage .stage-no { font-size: 10px; font-weight: 700; color: var(--c-mute); margin-bottom: 4px; }
+  .stage.curr .stage-no { color: #bf360c; }
+  .stage .stage-title { font-size: 14px; font-weight: 800; }
+  .stage .stage-desc { font-size: 11px; color: var(--c-sub); margin-top: 4px; line-height: 1.5; }
+
+  /* Color system rows */
+  .legend { display: flex; gap: 14px; padding: 10px 14px; background: #fafafa; border-radius: 8px; font-size: 11px; margin-bottom: 18px; flex-wrap: wrap; align-items: center; }
+  .legend .item { display: inline-flex; align-items: center; gap: 6px; }
+  .legend .swatch { width: 14px; height: 14px; border-radius: 4px; border: 1px solid rgba(0,0,0,0.1); }
+
+  /* Sourcing methods */
+  .source-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; }
+  .source-card { border: 1px solid var(--c-line); border-radius: 12px; padding: 0; overflow: hidden; }
+  .source-card .src-head { padding: 14px 16px; border-bottom: 1px solid #f0f0f0; display: flex; align-items: center; justify-content: space-between; }
+  .source-card .src-head .src-name { font-size: 13px; font-weight: 700; display: flex; align-items: center; gap: 8px; }
+  .source-card .src-icon { width: 30px; height: 30px; border-radius: 8px; display: inline-flex; align-items: center; justify-content: center; font-size: 14px; }
+  .source-card.flight .src-icon { background: var(--c-blue-bg); color: var(--c-blue); }
+  .source-card.hotel .src-icon { background: var(--c-purple-bg); color: var(--c-purple); }
+  .source-card.tour .src-icon { background: var(--c-orange-bg); color: var(--c-orange); }
+  .src-body { padding: 14px 16px; }
+  .src-method { padding: 10px 0; border-bottom: 1px dashed #f0f0f0; }
+  .src-method:last-child { border-bottom: none; }
+  .src-method-name { font-size: 12px; font-weight: 700; display: flex; align-items: center; gap: 6px; margin-bottom: 4px; }
+  .src-method-name .pill { font-size: 10px; padding: 1px 7px; border-radius: 8px; font-weight: 700; }
+  .pill.auto { background: var(--c-blue-bg); color: var(--c-blue); }
+  .pill.manual { background: var(--c-orange-bg); color: var(--c-orange); }
+  .src-method-desc { font-size: 11px; color: var(--c-sub); line-height: 1.5; }
+  .src-method-links { display: flex; gap: 6px; margin-top: 6px; flex-wrap: wrap; }
+  .src-link { font-size: 10px; padding: 2px 7px; background: #f5f5f5; color: #555; border-radius: 4px; text-decoration: none; transition: background 0.15s; }
+  .src-link:hover { background: #e0e0e0; color: #333; }
+
+  /* Sub-flow card */
+  .subflow { background: #fafafa; border-radius: 10px; padding: 16px 18px; margin-top: 14px; }
+  .subflow-title { font-size: 12px; font-weight: 700; color: var(--c-sub); margin-bottom: 10px; display: flex; align-items: center; gap: 6px; }
+  .subflow-title .lbl { background: #fff; padding: 2px 7px; border-radius: 4px; font-size: 10px; color: #444; border: 1px solid #ddd; }
+
+  /* Mini flowchart (SVG-like with HTML boxes) */
+  .miniflow { display: flex; align-items: center; gap: 0; overflow-x: auto; padding: 6px 0; }
+  .mf-node { background: #fff; border: 1.5px solid var(--c-line); border-radius: 8px; padding: 8px 12px; font-size: 11px; font-weight: 600; min-width: 110px; text-align: center; flex-shrink: 0; line-height: 1.4; }
+  .mf-node.start { background: var(--c-blue-bg); border-color: #90caf9; color: var(--c-blue); }
+  .mf-node.end { background: var(--c-green-bg); border-color: #a5d6a7; color: var(--c-green); }
+  .mf-node.user { background: #ffebee; border-color: #ef9a9a; color: var(--c-red); }
+  .mf-node.system { background: #fafafa; border-color: #d0d0d0; color: #444; }
+  .mf-node.trp { background: #ede7f6; border-color: #b39ddb; color: #4527a0; }
+  .mf-node.admin { background: var(--c-blue-bg); border-color: #90caf9; color: var(--c-blue); }
+  .mf-node.diamond { transform: rotate(45deg); width: 80px; height: 80px; display: flex; align-items: center; justify-content: center; border-radius: 8px; background: var(--c-orange-bg); border-color: #ffcc80; color: var(--c-orange); padding: 0; min-width: 0; }
+  .mf-node.diamond > span { transform: rotate(-45deg); font-size: 10px; padding: 0 4px; }
+  .mf-arrow { display: flex; align-items: center; flex-shrink: 0; margin: 0 4px; color: #999; font-size: 18px; }
+  .mf-arrow-label { font-size: 10px; color: var(--c-sub); margin-top: 2px; text-align: center; min-width: 50px; }
+
+  /* Rule list */
+  .rule-block { background: #fafafa; border-left: 3px solid var(--c-blue); border-radius: 0 8px 8px 0; padding: 12px 16px; margin: 10px 0; }
+  .rule-block.warn { background: #fff8e1; border-color: var(--c-orange); }
+  .rule-block.danger { background: #ffebee; border-color: var(--c-red); }
+  .rule-title { font-size: 12px; font-weight: 700; margin-bottom: 6px; }
+  .rule-desc { font-size: 12px; color: #555; line-height: 1.6; }
+  .rule-desc ul { margin: 4px 0 0 18px; }
+  .rule-desc li { margin: 2px 0; }
+
+  /* Content matrix */
+  .content-matrix { width: 100%; border-collapse: collapse; font-size: 12px; }
+  .content-matrix th, .content-matrix td { padding: 10px 12px; text-align: left; border-bottom: 1px solid #f0f0f0; vertical-align: top; }
+  .content-matrix th { background: #fafafa; font-weight: 700; color: #555; font-size: 11px; }
+  .content-matrix .src-tag { display: inline-block; padding: 2px 7px; border-radius: 4px; font-size: 10px; font-weight: 700; }
+  .src-tag.auto-pull { background: var(--c-blue-bg); color: var(--c-blue); }
+  .src-tag.post { background: var(--c-purple-bg); color: var(--c-purple); }
+  .src-tag.manual-set { background: var(--c-orange-bg); color: var(--c-orange); }
+
+  /* Mockup gallery */
+  .mockup-gallery { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
+  .mockup-card { background: #fff; border: 1px solid var(--c-line); border-radius: 10px; padding: 14px 16px; transition: all 0.15s; }
+  .mockup-card:hover { border-color: #0d1b2a; box-shadow: 0 4px 12px rgba(0,0,0,0.06); }
+  .mockup-card .mc-area { font-size: 10px; color: var(--c-mute); font-weight: 600; letter-spacing: 0.4px; }
+  .mockup-card .mc-name { font-size: 13px; font-weight: 700; margin: 4px 0 6px; }
+  .mockup-card .mc-desc { font-size: 11px; color: var(--c-sub); line-height: 1.5; margin-bottom: 10px; }
+  .mockup-card .mc-link { display: inline-flex; align-items: center; gap: 4px; font-size: 11px; font-weight: 600; color: var(--c-blue); text-decoration: none; }
+  .mockup-card .mc-link:hover { text-decoration: underline; }
+
+  /* Coming soon */
+  .coming { background: #fafafa; border: 1px dashed #d0d0d0; border-radius: 12px; padding: 32px 24px; text-align: center; }
+  .coming h3 { font-size: 14px; font-weight: 700; color: var(--c-sub); margin-bottom: 6px; }
+  .coming p { font-size: 12px; color: var(--c-mute); }
+
+  /* Two col */
+  .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+  .three-col { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; }
+
+  /* Highlight callout */
+  .callout { background: #e8eaf6; border: 1px solid #c5cae9; border-radius: 10px; padding: 14px 16px; margin: 12px 0; font-size: 12px; color: #283593; line-height: 1.6; }
+  .callout b { color: #1a237e; }
+  .callout.warn { background: #fff8e1; border-color: #ffe082; color: #bf360c; }
+  .callout.warn b { color: #6d2c00; }
+
+  /* Footer */
+  .footer { margin-top: 40px; padding: 20px; background: #fff; border: 1px solid var(--c-line); border-radius: 12px; font-size: 11px; color: var(--c-mute); text-align: center; }
+  .footer a { color: var(--c-blue); text-decoration: none; }
+  .footer a:hover { text-decoration: underline; }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="header-inner">
+    <div class="doc-tag">📘 INTERNAL — TRIPSTORE PB</div>
+    <h1>PB 상품 자동생성 — 통합 플로우</h1>
+    <div class="subtitle">상품 등록 / 자동 조합 / 예약 / 예약 관리 4단계 정리 · 공유용 문서</div>
+    <div class="header-meta">
+      <span class="item"><b>버전</b>2026-05-29 회의 반영</span>
+      <span class="item"><b>PM</b>김서현 → 강동재 인수인계 진행</span>
+      <span class="item"><b>이해관계자</b>영업실 / 개발 / CS / 경지실</span>
+    </div>
+    <div class="header-links">
+      <a href="https://www.figma.com/board/cvHtVkQp8DNsA0mH32ueD2/PB-%EC%83%81%ED%92%88-%EC%9E%90%EB%8F%99%EC%83%9D%EC%84%B1-%ED%86%B5%ED%95%A9-%ED%94%8C%EB%A1%9C%EC%9A%B0--%EC%A0%95%EB%A6%AC%EC%A4%91-?node-id=480-14464" target="_blank">🎨 Figma 보드 원본</a>
+      <a href="./pb-reservation-cases.html" target="_blank">📦 예약 처리 4 케이스</a>
+      <a href="./reservation-detail-v4.html" target="_blank">📋 예약 상세 v4</a>
+      <a href="./tmg-rate-admin.html" target="_blank">🏨 TMG 요금표 관리</a>
+    </div>
+  </div>
+</div>
+
+<div class="page">
+
+  <!-- 4 영역 네비 -->
+  <div class="area-nav">
+    <div class="area-tab current">
+      <div class="area-status">이번 정리</div>
+      <div class="area-no">AREA 1</div>
+      <div class="area-name">상품 생성</div>
+      <div class="area-desc">상품 등록(소싱) → 자동 조합 → 노출 관리</div>
+    </div>
+    <div class="area-tab upcoming">
+      <div class="area-status">예정</div>
+      <div class="area-no">AREA 2</div>
+      <div class="area-name">상품 조회</div>
+      <div class="area-desc">사용자 조회 시점 재고/가격 업데이트</div>
+    </div>
+    <div class="area-tab upcoming">
+      <div class="area-status">예정</div>
+      <div class="area-no">AREA 3</div>
+      <div class="area-name">상품 예약</div>
+      <div class="area-desc">4 케이스별 예약 처리 (인디비/수동 조합)</div>
+    </div>
+    <div class="area-tab upcoming">
+      <div class="area-status">예정</div>
+      <div class="area-no">AREA 4</div>
+      <div class="area-name">예약 관리</div>
+      <div class="area-desc">어드민 처리 · 취소 · 정산</div>
+    </div>
+  </div>
+
+  <!-- 회의 결정사항 -->
+  <div class="decision-bar">
+    <h2><span class="meeting-tag">2026-05-29 회의</span> 핵심 결정 사항 (Area 1 관련)</h2>
+    <ul class="decision-list">
+      <li><b>구성 요소 4종</b> — 항공권 · 숙박권 · 투어/티켓 · 보험</li>
+      <li><b>등록 방식 2종</b> — 인디비(API 연동) / 수동</li>
+      <li>항공 인디비 = <b>누아 API</b>, 숙박 인디비 = <b>TMG</b></li>
+      <li>투어/티켓은 <b>수기 등록만</b> 지원, 단 <b>투어 그룹(=일정표)</b> 컨셉 도입</li>
+      <li>누아 항공 동기화: <b>매일 일별 갱신</b> (60일 범위 · 조건당 60콜 = 안전)</li>
+      <li>TMG 숙박: 고정요금+고정재고 / 고정요금+실시간재고 / 실시간+실시간 <b>3 rateType</b></li>
+      <li>TMG는 <b>웹훅</b>으로 변경 푸시 → 별도 정기 배치 불필요</li>
+      <li>자동 조합 대상 여부 = <b>각 자원의 ON/OFF 플래그</b>로만 관리</li>
+      <li>노출 컷 = <b>마진 양수 + 경쟁가 이내 + 미노출 처리 안 함</b></li>
+      <li>유사도 4-tier 자동 노출 컷 룰 <b>폐기</b> (2026-05-20) → 매핑+가격 정리 뷰만</li>
+    </ul>
+  </div>
+
+  <!-- 전체 4단계 다이어그램 -->
+  <div class="section">
+    <div class="section-head">
+      <h2><span class="sec-no">0</span> 전체 4단계 흐름</h2>
+      <div class="sec-sub">상품 자동생성 = ① 소싱 ② 조합 ③ 노출 ④ 운영</div>
+    </div>
+    <div class="section-body">
+      <div class="stages">
+        <div class="stage curr">
+          <div class="stage-no">STAGE 1 — 상품 등록</div>
+          <div class="stage-title">소싱 / 자원 확보</div>
+          <div class="stage-desc">누아·TMG 인디비 + 수동 자원 등록</div>
+        </div>
+        <div class="stage curr">
+          <div class="stage-no">STAGE 2 — 자동 조합</div>
+          <div class="stage-title">상품 생성</div>
+          <div class="stage-desc">ON 자원들끼리 카르테시안 결합, 콘텐츠 자동 채움</div>
+        </div>
+        <div class="stage curr">
+          <div class="stage-no">STAGE 3 — 노출 관리</div>
+          <div class="stage-title">게이트 / 노출 컷</div>
+          <div class="stage-desc">마진·경쟁가·운영자 사유로 노출/미노출 결정</div>
+        </div>
+        <div class="stage">
+          <div class="stage-no">STAGE 4 — 운영</div>
+          <div class="stage-title">조회 → 예약 → 관리</div>
+          <div class="stage-desc">사용자 조회 시 재고/가격 갱신 · 예약 4 케이스</div>
+        </div>
+      </div>
+      <div class="callout">
+        <b>이 문서가 다루는 범위:</b> STAGE 1~3 (상품 생성까지). STAGE 4의 예약 4 케이스는
+        <a href="./pb-reservation-cases.html" target="_blank">예약 처리 4 케이스 시안</a>에서 별도로 정리되어 있습니다.
+      </div>
+    </div>
+  </div>
+
+  <!-- STAGE 1: 상품 등록 -->
+  <div class="section">
+    <div class="section-head">
+      <h2><span class="sec-no">1</span> STAGE 1 · 상품 등록 (소싱)</h2>
+      <div class="sec-sub">자원 4종 × 등록 방식 2종</div>
+    </div>
+    <div class="section-body">
+      <div class="legend">
+        <div class="item"><span class="swatch" style="background:#e3f2fd;border-color:#90caf9"></span> 인디비 (API 자동 연동)</div>
+        <div class="item"><span class="swatch" style="background:#fff3e0;border-color:#ffcc80"></span> 수동 (어드민 수기 등록)</div>
+        <div class="item"><span class="swatch" style="background:#ede7f6;border-color:#b39ddb"></span> TRP 시스템</div>
+        <div class="item"><span class="swatch" style="background:#fafafa;border-color:#d0d0d0"></span> 트립스토어 시스템</div>
+        <div class="item"><span class="swatch" style="background:#ffebee;border-color:#ef9a9a"></span> 사용자</div>
+      </div>
+
+      <div class="source-grid">
+
+        <!-- 항공권 -->
+        <div class="source-card flight">
+          <div class="src-head">
+            <div class="src-name"><span class="src-icon">✈️</span> 항공권</div>
+          </div>
+          <div class="src-body">
+            <div class="src-method">
+              <div class="src-method-name"><span class="pill auto">인디비</span> 누아 API</div>
+              <div class="src-method-desc">검색 조건(출발/도착 공항, 기간, 좌석등급) 설정 → 누아 에어쇼핑 호출 → 자동 항공권 생성. 사용자가 콘텐츠만 보강.</div>
+              <div class="src-method-links">
+                <a class="src-link" href="https://www.notion.so/tripstore/" target="_blank">📘 누아 연동 정책</a>
+              </div>
+            </div>
+            <div class="src-method">
+              <div class="src-method-name"><span class="pill manual">수동</span> 어드민 직접 등록</div>
+              <div class="src-method-desc">차터/특가편 등 누아에 없는 항공권. CS가 항공사 어드민(GDS) 직접 조회로 예약 처리.</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 숙박권 -->
+        <div class="source-card hotel">
+          <div class="src-head">
+            <div class="src-name"><span class="src-icon">🏨</span> 숙박권</div>
+          </div>
+          <div class="src-body">
+            <div class="src-method">
+              <div class="src-method-name"><span class="pill auto">인디비</span> TMG API</div>
+              <div class="src-method-desc">3 rateType (고정+고정 / 고정+실시간 / 실시간+실시간) 자동 분류. 오늘+7일~+90일 분산 사전 조회. 매일 1만 건 분산 refresh.</div>
+              <div class="src-method-links">
+                <a class="src-link" href="./tmg-rate-admin.html" target="_blank">🛠 요금표 관리</a>
+                <a class="src-link" href="./pb-accom-create.html" target="_blank">📋 숙박권 만들기</a>
+              </div>
+            </div>
+            <div class="src-method">
+              <div class="src-method-name"><span class="pill manual">수동</span> 어드민 직접 등록</div>
+              <div class="src-method-desc">TMG에 없는 공급사 또는 협상가 별도 객실. CS가 공급사에 수기 가능 여부 확인.</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 투어/티켓 -->
+        <div class="source-card tour">
+          <div class="src-head">
+            <div class="src-name"><span class="src-icon">🎟️</span> 투어 / 티켓</div>
+          </div>
+          <div class="src-body">
+            <div class="src-method">
+              <div class="src-method-name"><span class="pill manual">수동만</span> 개별 + 그룹</div>
+              <div class="src-method-desc">개별 투어/티켓 등록(현행) + <b>투어 그룹(=일정표)</b> 신규. 그룹별 ON/OFF로 상품 조합 단위 통제.</div>
+              <div class="src-method-links">
+                <a class="src-link" href="./pb-tour-tickets.html" target="_blank">🎟 투어/티켓</a>
+              </div>
+            </div>
+            <div class="src-method">
+              <div class="src-method-name">투어 그룹 컨셉</div>
+              <div class="src-method-desc">3박5일 일정에 들어갈 투어 세트. 적용 가능 항공 시간대/숙소 지역 메타도 함께 정의 → 자동 조합 시 항공·숙소 매칭에 사용.</div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- 인디비 항공 누아 동기화 미니 플로우 -->
+      <div class="subflow">
+        <div class="subflow-title">
+          <span class="lbl">SUB-FLOW</span> 누아 항공 인디비 동기화 (매일)
+        </div>
+        <div class="miniflow">
+          <div class="mf-node admin">검색조건 설정<br><span style="font-size:9px;color:#666">출/도/기간/좌석</span></div>
+          <div class="mf-arrow">→</div>
+          <div class="mf-node system">AirShopping<br>호출</div>
+          <div class="mf-arrow">→</div>
+          <div class="mf-node start">항공권<br>조회 결과</div>
+          <div class="mf-arrow">→</div>
+          <div class="mf-node admin">자동 항공권<br>생성</div>
+          <div class="mf-arrow">→</div>
+          <div class="mf-node diamond"><span>매일 갱신<br>ON?</span></div>
+          <div class="mf-arrow">→</div>
+          <div class="mf-node end">재고/가격<br>최신화</div>
+        </div>
+        <div class="callout">
+          <b>제약:</b> 누아 API는 검색조건 1건당 매일 60콜(60일 범위). 400콜 초과 시 페널티(건당 약 10원), 1,000콜 초과 시 공급 제한.
+          → 초기에는 인기 노선 1조건만 운영, 예약 전환 보면서 확장.
+        </div>
+      </div>
+
+      <!-- TMG 숙박 미니 플로우 -->
+      <div class="subflow">
+        <div class="subflow-title">
+          <span class="lbl">SUB-FLOW</span> TMG 숙박 인디비 등록 + Refresh
+        </div>
+        <div class="miniflow">
+          <div class="mf-node system">TMG Webhook<br>RATE_INIT/UPDATE</div>
+          <div class="mf-arrow">→</div>
+          <div class="mf-node system">getDetailRates<br>호출</div>
+          <div class="mf-arrow">→</div>
+          <div class="mf-node diamond"><span>rateType<br>분류</span></div>
+          <div class="mf-arrow">→</div>
+          <div class="mf-node trp">STATIC / <br>ALM-DYNAMIC / <br>DYNAMIC</div>
+          <div class="mf-arrow">→</div>
+          <div class="mf-node admin">어드민<br>요금타입별 표시</div>
+          <div class="mf-arrow">→</div>
+          <div class="mf-node end">PB 숙박권<br>생성</div>
+        </div>
+        <div class="rule-block">
+          <div class="rule-title">📌 rateType별 처리</div>
+          <div class="rule-desc">
+            <ul>
+              <li><b>STATIC</b> — 고정요금 + 고정재고. 확정된 것만 전달받음. 별도 갱신 불필요.</li>
+              <li><b>ALM-DYNAMIC</b> — 고정요금 + 실시간재고. checkAvailability로 재고 확인 (오늘+7일~+90일).</li>
+              <li><b>DYNAMIC</b> — 실시간요금 + 실시간재고. 매일 새벽 분산 batch + 낮 PDP 트리거 분산 처리.</li>
+            </ul>
+          </div>
+        </div>
+        <div class="rule-block warn">
+          <div class="rule-title">⚠️ 변경된 정책</div>
+          <div class="rule-desc">TMG가 변경사항을 <b>웹훅</b>으로 푸시하므로, 별도 일별 배치는 <b>실시간 요금표만</b> 대상으로 새벽 1회. 가지고 있는 데이터가 항상 최신.</div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- STAGE 2: 자동 조합 -->
+  <div class="section">
+    <div class="section-head">
+      <h2><span class="sec-no">2</span> STAGE 2 · 자동 조합 (상품 생성)</h2>
+      <div class="sec-sub">ON 자원들끼리 카르테시안 결합 + 콘텐츠 자동 채움</div>
+    </div>
+    <div class="section-body">
+
+      <div class="rule-block">
+        <div class="rule-title">🔧 조합 룰 (회의 확정)</div>
+        <div class="rule-desc">
+          <ul>
+            <li>각 항공권 / 숙박권 / 투어그룹에 <b>자동 생성 대상 ON/OFF</b> 플래그를 둠</li>
+            <li>매일 새벽 시스템이 ON인 자원들로 <b>모든 조합을 자동 생성</b></li>
+            <li>4박5일 외 일정은 일단 제외 (차터편 등 예외만 일정표 그룹으로 별도 운영)</li>
+            <li>유사도 4-tier 자동 노출 컷은 <b>도입하지 않음</b> (2026-05-20 의사결정) → 사람이 그룹핑·정리</li>
+          </ul>
+        </div>
+      </div>
+
+      <!-- 조합 미니 플로우 -->
+      <div class="miniflow" style="margin: 16px 0">
+        <div class="mf-node admin">항공권<br><span style="font-size:9px">ON × N</span></div>
+        <div class="mf-arrow">×</div>
+        <div class="mf-node admin">숙박권<br><span style="font-size:9px">ON × M</span></div>
+        <div class="mf-arrow">×</div>
+        <div class="mf-node admin">투어 그룹<br><span style="font-size:9px">ON × K</span></div>
+        <div class="mf-arrow">→</div>
+        <div class="mf-node system">자동<br>카르테시안 결합</div>
+        <div class="mf-arrow">→</div>
+        <div class="mf-node trp">PB 상품 후보<br><span style="font-size:9px">N × M × K 건</span></div>
+        <div class="mf-arrow">→</div>
+        <div class="mf-node start">STAGE 3<br>노출 게이트</div>
+      </div>
+
+      <h3 style="font-size:14px;font-weight:700;margin:20px 0 10px">콘텐츠 자동 채움 룰</h3>
+
+      <table class="content-matrix">
+        <thead>
+          <tr>
+            <th style="width:22%">상품 콘텐츠 항목</th>
+            <th style="width:18%">데이터 소스</th>
+            <th>설명</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><b>스페셜 혜택</b></td>
+            <td><span class="src-tag auto-pull">자원에서 끌고</span></td>
+            <td>각 숙박권·항공권·투어/티켓에서 끌고옴. 프로모션은 운영자가 상품관리에서 부착 (편의기능: 상품 선택 → 혜택 일괄 추가).</td>
+          </tr>
+          <tr>
+            <td><b>소개</b></td>
+            <td><span class="src-tag auto-pull">자원에서 끌고</span></td>
+            <td>각 자원 콘텐츠 끌고오기로 충분.</td>
+          </tr>
+          <tr>
+            <td><b>핵심포인트</b></td>
+            <td><span class="src-tag auto-pull">자원에서 끌고</span></td>
+            <td>각 자원에서 끌고오기.</td>
+          </tr>
+          <tr>
+            <td><b>포함사항 / 불포함사항 / 유의사항</b></td>
+            <td><span class="src-tag auto-pull">자원에서 끌고</span></td>
+            <td>각 자원에서 끌고오기.</td>
+          </tr>
+          <tr>
+            <td><b>안내사항 (예약진행 안내)</b></td>
+            <td><span class="src-tag post">POST 공통</span></td>
+            <td>POST(공통 정책) 모듈에 전사 공통 안내를 등록 → 자동 부착.</td>
+          </tr>
+          <tr>
+            <td><b>여권 정보 안내</b></td>
+            <td><span class="src-tag auto-pull">항공권</span></td>
+            <td>앞으로 항공권에서 관리.</td>
+          </tr>
+          <tr>
+            <td><b>보험 안내사항</b></td>
+            <td><span class="src-tag post">POST 공통</span></td>
+            <td>보험 POST로 관리.</td>
+          </tr>
+          <tr>
+            <td><b>수하물 규정</b></td>
+            <td><span class="src-tag auto-pull">항공권</span></td>
+            <td>항공권에서 운영 (누아는 자동 등록됨).</td>
+          </tr>
+          <tr>
+            <td><b>자주묻는질문</b></td>
+            <td><span class="src-tag post">POST 공통</span></td>
+            <td>POST 공통 모듈에 등록.</td>
+          </tr>
+          <tr>
+            <td><b>취소환불규정</b></td>
+            <td><span class="src-tag post">POST 공통</span></td>
+            <td>전상품 / 에어텔·패키지 타입별 분기. POST로 묶어서 붙임.</td>
+          </tr>
+          <tr>
+            <td><b>탑승객 정보 입력</b></td>
+            <td><span class="src-tag manual-set">조건부 필수</span></td>
+            <td>누아 항공권 = 필수 / TMG 숙소 연동 = 필수 / 그 외 = 선택 입력 영역으로 표시.</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <div class="callout warn" style="margin-top:14px">
+        <b>POST(Public Object/Standard Template) 컨셉:</b> 전사 공통으로 적용되는 안내·정책 모듈. 상품 생성 시 자동으로 부착되며, 한 곳에서 수정하면 모든 상품에 반영. 회의에서 "POST에 전체 공통 상품에 필수로 들어가는 건으로 생성" 표현.
+      </div>
+
+    </div>
+  </div>
+
+  <!-- STAGE 3: 노출 게이트 -->
+  <div class="section">
+    <div class="section-head">
+      <h2><span class="sec-no">3</span> STAGE 3 · 노출 게이트 (노출/미노출 결정)</h2>
+      <div class="sec-sub">생성된 N×M×K 후보 중 실제 노출할 것 선별</div>
+    </div>
+    <div class="section-body">
+
+      <div class="rule-block">
+        <div class="rule-title">✅ 노출 조건 (모두 충족 시 노출)</div>
+        <div class="rule-desc">
+          <ul>
+            <li>마진 양수 (마이너스 마진 자동 제외)</li>
+            <li>재고 보유 (라이브 노출 가능)</li>
+            <li>경쟁사 상품 대비 <b>경쟁가 이내</b></li>
+            <li>운영자가 <b>미노출 처리하지 않은</b> 상품</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="rule-block warn">
+        <div class="rule-title">⚙️ 운영자 미노출 처리 (수동)</div>
+        <div class="rule-desc">
+          상품 단위로 미노출 토글 + 사유 관리. <b>회의 의사결정:</b> 상품을 만든 다음에 일괄 마진 조정하지 말고, 등록 시점에 자원별로 마진 정책을 잘 잡아두기로 함. (만들고 나서 수정하는 운영은 매번 마다 사람이 개입해야 하므로 비효율)
+        </div>
+      </div>
+
+      <!-- 게이트 미니 플로우 -->
+      <div class="miniflow">
+        <div class="mf-node start">PB 상품 후보<br>(전체)</div>
+        <div class="mf-arrow">→</div>
+        <div class="mf-node diamond"><span>마진<br>양수?</span></div>
+        <div class="mf-arrow">→</div>
+        <div class="mf-node diamond"><span>재고<br>있음?</span></div>
+        <div class="mf-arrow">→</div>
+        <div class="mf-node diamond"><span>경쟁가<br>이내?</span></div>
+        <div class="mf-arrow">→</div>
+        <div class="mf-node diamond"><span>미노출<br>해제?</span></div>
+        <div class="mf-arrow">→</div>
+        <div class="mf-node end">노출<br>(라이브)</div>
+      </div>
+
+      <div class="two-col" style="margin-top:18px">
+        <div class="rule-block">
+          <div class="rule-title">📊 노출 상품 관리 화면</div>
+          <div class="rule-desc">전체 상품 + 자동/수동 분류 + 마진 + 경쟁가 비교 + 노출 토글</div>
+          <div style="margin-top:8px">
+            <a class="src-link" href="./pb-live-products.html" target="_blank">→ pb-live-products.html</a>
+            <a class="src-link" href="./pb-items.html" target="_blank">→ pb-items.html</a>
+            <a class="src-link" href="./autogen-gate-policy.html" target="_blank">→ autogen-gate-policy.html</a>
+          </div>
+        </div>
+        <div class="rule-block">
+          <div class="rule-title">🚫 미노출 풀 관리 화면</div>
+          <div class="rule-desc">미노출 사유별 분류 + 다시 노출 트리거</div>
+          <div style="margin-top:8px">
+            <a class="src-link" href="./autogen-reject-pool.html" target="_blank">→ autogen-reject-pool.html</a>
+            <a class="src-link" href="./autogen-monitoring.html" target="_blank">→ autogen-monitoring.html</a>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- 관련 목업 갤러리 -->
+  <div class="section">
+    <div class="section-head">
+      <h2><span class="sec-no">📂</span> 관련 목업 모음</h2>
+      <div class="sec-sub">STAGE 1~3 관련 화면</div>
+    </div>
+    <div class="section-body">
+      <div class="mockup-gallery">
+        <div class="mockup-card">
+          <div class="mc-area">STAGE 1 · 항공</div>
+          <div class="mc-name">누아 항공 동기화 정책</div>
+          <div class="mc-desc">검색조건 / 동기화 범위 / 일별 갱신 ON/OFF</div>
+          <a class="mc-link" href="./autogen-rule-v2.html" target="_blank">바로가기 →</a>
+        </div>
+        <div class="mockup-card">
+          <div class="mc-area">STAGE 1 · 숙박</div>
+          <div class="mc-name">TMG 요금표 관리</div>
+          <div class="mc-desc">rateType 분류, 90일 분산 조회, refresh 정책</div>
+          <a class="mc-link" href="./tmg-rate-admin.html" target="_blank">바로가기 →</a>
+        </div>
+        <div class="mockup-card">
+          <div class="mc-area">STAGE 1 · 숙박</div>
+          <div class="mc-name">PB 숙박권 만들기</div>
+          <div class="mc-desc">인디비 자동 + 수동 등록 UI</div>
+          <a class="mc-link" href="./pb-accom-create.html" target="_blank">바로가기 →</a>
+        </div>
+        <div class="mockup-card">
+          <div class="mc-area">STAGE 1 · 숙박</div>
+          <div class="mc-name">PB 숙박권 목록</div>
+          <div class="mc-desc">전체 등록된 숙박권 자원 리스트</div>
+          <a class="mc-link" href="./pb-accom-tickets.html" target="_blank">바로가기 →</a>
+        </div>
+        <div class="mockup-card">
+          <div class="mc-area">STAGE 1 · 투어</div>
+          <div class="mc-name">투어/티켓 + 그룹</div>
+          <div class="mc-desc">개별 등록 + 투어 그룹(일정표) 관리</div>
+          <a class="mc-link" href="./pb-tour-tickets.html" target="_blank">바로가기 →</a>
+        </div>
+        <div class="mockup-card">
+          <div class="mc-area">STAGE 2 · 조합</div>
+          <div class="mc-name">자동생성 룰 (v2)</div>
+          <div class="mc-desc">자원 ON/OFF · 조합 룰 · 콘텐츠 매핑</div>
+          <a class="mc-link" href="./autogen-rule-v2.html" target="_blank">바로가기 →</a>
+        </div>
+        <div class="mockup-card">
+          <div class="mc-area">STAGE 2 · 조합</div>
+          <div class="mc-name">자동생성 플레이그라운드</div>
+          <div class="mc-desc">조건별 결과 미리보기</div>
+          <a class="mc-link" href="./pb-autogen-playground.html" target="_blank">바로가기 →</a>
+        </div>
+        <div class="mockup-card">
+          <div class="mc-area">STAGE 3 · 노출</div>
+          <div class="mc-name">노출 게이트 정책</div>
+          <div class="mc-desc">노출 컷 룰 · 미노출 사유 코드</div>
+          <a class="mc-link" href="./autogen-gate-policy.html" target="_blank">바로가기 →</a>
+        </div>
+        <div class="mockup-card">
+          <div class="mc-area">STAGE 3 · 노출</div>
+          <div class="mc-name">노출 / 미노출 상품 관리</div>
+          <div class="mc-desc">라이브 상품 + 미노출 풀</div>
+          <a class="mc-link" href="./pb-live-products.html" target="_blank">바로가기 →</a>
+        </div>
+        <div class="mockup-card">
+          <div class="mc-area">STAGE 3 · 노출</div>
+          <div class="mc-name">미노출 풀</div>
+          <div class="mc-desc">사유별 분류, 재노출 트리거</div>
+          <a class="mc-link" href="./autogen-reject-pool.html" target="_blank">바로가기 →</a>
+        </div>
+        <div class="mockup-card">
+          <div class="mc-area">STAGE 3 · 노출</div>
+          <div class="mc-name">자동생성 모니터링</div>
+          <div class="mc-desc">매일 생성된 상품 수, 노출/제외 통계</div>
+          <a class="mc-link" href="./autogen-monitoring.html" target="_blank">바로가기 →</a>
+        </div>
+        <div class="mockup-card">
+          <div class="mc-area">참고</div>
+          <div class="mc-name">자동생성 발표 자료</div>
+          <div class="mc-desc">상품 자동생성 컨셉 발표용</div>
+          <a class="mc-link" href="./pb-autogen-presentation.html" target="_blank">바로가기 →</a>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 다음 영역 placeholder -->
+  <div class="section">
+    <div class="section-head">
+      <h2 style="color:var(--c-mute)"><span class="sec-no" style="background:#bbb">2</span> AREA 2 · 상품 조회 / 재고 갱신</h2>
+      <div class="sec-sub">사용자 상세 진입 시점 처리</div>
+    </div>
+    <div class="section-body">
+      <div class="coming">
+        <h3>다음 라운드에 정리 예정</h3>
+        <p>사용자 PDP 진입 → 여행사 시스템에 재고/금액 리프레시 요청 → 행사 금액 변경/마감 처리</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-head">
+      <h2 style="color:var(--c-mute)"><span class="sec-no" style="background:#bbb">3</span> AREA 3 · 상품 예약</h2>
+      <div class="sec-sub">4 케이스 처리 흐름</div>
+    </div>
+    <div class="section-body">
+      <div class="callout">
+        <b>이미 별도 시안이 있습니다 →</b> <a href="./pb-reservation-cases.html" target="_blank">예약 처리 4 케이스 시안</a> (인디×인디 / 인디×수동 / 수동×인디 / 수동×수동). 본 통합 문서로 옮겨와 정리할 예정.
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-head">
+      <h2 style="color:var(--c-mute)"><span class="sec-no" style="background:#bbb">4</span> AREA 4 · 예약 관리 / 취소 / 정산</h2>
+      <div class="sec-sub">어드민 운영 + 환불 규정</div>
+    </div>
+    <div class="section-body">
+      <div class="coming">
+        <h3>다음 라운드에 정리 예정</h3>
+        <p>예약 상세 어드민 화면 일원화 (어드민 ↔ 파트너스 권한 분리), 취소 위약금(고객 환불 ≠ 공급사 환급), 정산 흐름</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="footer">
+    📘 PB 상품 자동생성 통합 플로우 · 2026-05-29 회의 반영 · PM 김서현 → 강동재 인수인계 중<br>
+    Figma 보드 원본: <a href="https://www.figma.com/board/cvHtVkQp8DNsA0mH32ueD2/PB-%EC%83%81%ED%92%88-%EC%9E%90%EB%8F%99%EC%83%9D%EC%84%B1-%ED%86%B5%ED%95%A9-%ED%94%8C%EB%A1%9C%EC%9A%B0--%EC%A0%95%EB%A6%AC%EC%A4%91-?node-id=480-14464" target="_blank">PB 상품 자동생성 통합 플로우 (정리중)</a>
+  </div>
+
+</div>
+
+</body>
+</html>
