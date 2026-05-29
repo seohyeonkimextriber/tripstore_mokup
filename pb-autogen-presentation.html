@@ -1,0 +1,1071 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PB 상품 자동생성 — 통합 플로우 & 정책 발표 자료</title>
+<link href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.6/dist/web/static/pretendard.css" rel="stylesheet">
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; }
+body { font-family: 'Pretendard', 'Apple SD Gothic Neo', -apple-system, sans-serif; font-size: 15px; color: rgba(0,0,0,0.88); background: #f5f6fa; line-height: 1.6; }
+button { font-family: inherit; cursor: pointer; }
+a { color: inherit; }
+
+/* Layout */
+.app { display: grid; grid-template-columns: 280px 1fr; min-height: 100vh; }
+
+/* Sidebar */
+.sidebar { background: linear-gradient(180deg, #1e1b4b 0%, #312e81 100%); color: #fff; padding: 28px 22px; position: sticky; top: 0; height: 100vh; overflow-y: auto; }
+.sidebar-brand { font-size: 13px; opacity: 0.7; letter-spacing: 0.4px; text-transform: uppercase; font-weight: 700; margin-bottom: 6px; }
+.sidebar-title { font-size: 19px; font-weight: 800; margin-bottom: 4px; letter-spacing: -0.3px; line-height: 1.3; }
+.sidebar-sub { font-size: 12px; opacity: 0.6; margin-bottom: 24px; }
+.sidebar-meta { display: flex; gap: 5px; margin-bottom: 24px; flex-wrap: wrap; }
+.sidebar-meta .pill { background: rgba(255,255,255,0.12); padding: 3px 9px; border-radius: 10px; font-size: 10.5px; font-weight: 600; letter-spacing: 0.2px; }
+.toc-list { display: flex; flex-direction: column; gap: 2px; }
+.toc-item { display: flex; align-items: center; gap: 9px; padding: 9px 11px; border-radius: 8px; font-size: 13px; color: rgba(255,255,255,0.75); cursor: pointer; transition: all 0.15s; text-decoration: none; }
+.toc-item:hover { background: rgba(255,255,255,0.08); color: #fff; }
+.toc-item.active { background: #fbbf24; color: #1e1b4b; font-weight: 800; }
+.toc-num { width: 22px; height: 22px; border-radius: 50%; background: rgba(255,255,255,0.1); display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 800; flex-shrink: 0; }
+.toc-item.active .toc-num { background: #1e1b4b; color: #fbbf24; }
+
+.sidebar-foot { margin-top: 26px; padding-top: 18px; border-top: 1px solid rgba(255,255,255,0.12); font-size: 11px; opacity: 0.55; line-height: 1.55; }
+.sidebar-foot a { color: #fbbf24; text-decoration: none; }
+.sidebar-foot strong { color: #fff; font-weight: 700; }
+
+/* Main */
+.main { padding: 0 56px; }
+.slide { min-height: 100vh; padding: 64px 0; display: flex; flex-direction: column; justify-content: center; }
+.slide-num { font-size: 12px; color: rgba(0,0,0,0.4); font-weight: 800; letter-spacing: 2px; margin-bottom: 10px; }
+.slide-title { font-size: 38px; font-weight: 800; letter-spacing: -0.8px; margin-bottom: 8px; line-height: 1.15; }
+.slide-subtitle { font-size: 16px; color: rgba(0,0,0,0.55); margin-bottom: 36px; line-height: 1.55; }
+
+/* Cover */
+.cover { background: linear-gradient(135deg, #1e1b4b 0%, #4f46e5 50%, #818cf8 100%); color: #fff; margin: 0 -56px; padding: 120px 56px; }
+.cover .badge { display: inline-block; background: rgba(255,255,255,0.16); backdrop-filter: blur(4px); padding: 6px 16px; border-radius: 20px; font-size: 12px; font-weight: 700; letter-spacing: 0.4px; margin-bottom: 18px; }
+.cover h1 { font-size: 56px; font-weight: 900; letter-spacing: -1.5px; line-height: 1.1; margin-bottom: 18px; }
+.cover h1 .accent { color: #fbbf24; }
+.cover .lead { font-size: 19px; opacity: 0.85; line-height: 1.65; max-width: 720px; }
+.cover .meta { margin-top: 36px; display: flex; gap: 26px; flex-wrap: wrap; padding-top: 26px; border-top: 1px solid rgba(255,255,255,0.18); }
+.cover .meta-item { font-size: 13px; }
+.cover .meta-item .k { opacity: 0.55; margin-bottom: 3px; font-size: 11px; letter-spacing: 0.4px; text-transform: uppercase; font-weight: 700; }
+.cover .meta-item .v { font-weight: 700; }
+
+/* Section card */
+.card { background: #fff; border-radius: 14px; padding: 26px 30px; box-shadow: 0 2px 12px rgba(0,0,0,0.05); margin-bottom: 18px; }
+.card-title { font-size: 16px; font-weight: 800; margin-bottom: 14px; display: flex; align-items: center; gap: 8px; letter-spacing: -0.2px; }
+.card-title .num { background: #4f46e5; color: #fff; width: 22px; height: 22px; border-radius: 50%; font-size: 11px; font-weight: 800; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+.card-row { font-size: 14px; line-height: 1.75; color: rgba(0,0,0,0.78); }
+.card-row strong { color: rgba(0,0,0,0.92); font-weight: 800; }
+.card-row code { background: #f1f5f9; padding: 2px 7px; border-radius: 4px; font-size: 13px; color: #4f46e5; font-family: 'SF Mono', monospace; font-weight: 600; }
+
+/* Highlight box */
+.highlight { background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%); border: 1.5px solid #f59e0b; border-radius: 12px; padding: 18px 22px; margin: 14px 0; }
+.highlight.blue { background: linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%); border-color: #3b82f6; }
+.highlight.purple { background: linear-gradient(135deg, #ede9fe 0%, #ddd6fe 100%); border-color: #8b5cf6; }
+.highlight.red { background: linear-gradient(135deg, #fee2e2 0%, #fecaca 100%); border-color: #ef4444; }
+.highlight.green { background: linear-gradient(135deg, #d1fae5 0%, #a7f3d0 100%); border-color: #10b981; }
+.highlight-title { font-size: 13px; font-weight: 800; letter-spacing: 0.3px; text-transform: uppercase; margin-bottom: 8px; color: #92400e; }
+.highlight.blue .highlight-title { color: #1e3a8a; }
+.highlight.purple .highlight-title { color: #5b21b6; }
+.highlight.red .highlight-title { color: #991b1b; }
+.highlight.green .highlight-title { color: #064e3b; }
+.highlight-body { font-size: 14px; line-height: 1.75; }
+
+/* Grid */
+.grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+.grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 14px; }
+.grid-4 { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; }
+
+/* Stat card */
+.stat { background: #fff; border-radius: 12px; padding: 20px 22px; box-shadow: 0 2px 8px rgba(0,0,0,0.04); }
+.stat-label { font-size: 11.5px; color: rgba(0,0,0,0.55); font-weight: 700; letter-spacing: 0.3px; text-transform: uppercase; margin-bottom: 8px; }
+.stat-value { font-size: 28px; font-weight: 900; color: #1e1b4b; letter-spacing: -0.8px; font-variant-numeric: tabular-nums; }
+.stat-value.accent { color: #f59e0b; }
+.stat-value.blue { color: #3b82f6; }
+.stat-value.green { color: #10b981; }
+.stat-value.red { color: #ef4444; }
+.stat-sub { font-size: 11.5px; color: rgba(0,0,0,0.5); margin-top: 4px; font-weight: 600; }
+
+/* Flow diagram */
+.flow { display: flex; align-items: stretch; gap: 0; flex-wrap: wrap; }
+.flow-step { background: #fff; border: 2px solid #e0e7ff; border-radius: 12px; padding: 14px 18px; flex: 1; min-width: 140px; position: relative; }
+.flow-step.active { border-color: #4f46e5; background: linear-gradient(135deg, #eef2ff 0%, #fff 60%); }
+.flow-step.done { border-color: #10b981; background: linear-gradient(135deg, #d1fae5 0%, #fff 60%); }
+.flow-step-num { font-size: 10px; font-weight: 800; color: #4f46e5; letter-spacing: 1px; }
+.flow-step-title { font-size: 14px; font-weight: 800; margin-top: 4px; color: rgba(0,0,0,0.88); }
+.flow-step-desc { font-size: 11.5px; color: rgba(0,0,0,0.55); margin-top: 4px; line-height: 1.5; }
+.flow-arrow { display: flex; align-items: center; justify-content: center; color: #c7d2fe; font-size: 22px; flex-shrink: 0; padding: 0 8px; }
+
+/* Timeline */
+.timeline { position: relative; padding-left: 28px; }
+.timeline::before { content: ''; position: absolute; left: 8px; top: 8px; bottom: 8px; width: 2px; background: linear-gradient(180deg, #4f46e5, #fbbf24, #10b981); }
+.timeline-item { position: relative; padding-bottom: 24px; padding-left: 4px; }
+.timeline-item::before { content: ''; position: absolute; left: -25px; top: 6px; width: 14px; height: 14px; border-radius: 50%; background: #fff; border: 3px solid #4f46e5; }
+.timeline-date { font-size: 12px; font-weight: 800; color: #4f46e5; letter-spacing: 0.3px; margin-bottom: 4px; }
+.timeline-title { font-size: 15px; font-weight: 800; margin-bottom: 5px; }
+.timeline-desc { font-size: 13px; color: rgba(0,0,0,0.65); line-height: 1.65; }
+
+/* Table */
+.t { width: 100%; border-collapse: collapse; background: #fff; border-radius: 10px; overflow: hidden; box-shadow: 0 1px 6px rgba(0,0,0,0.04); }
+.t th { background: #f8fafc; padding: 12px 14px; text-align: left; font-size: 11.5px; font-weight: 800; color: rgba(0,0,0,0.55); letter-spacing: 0.3px; text-transform: uppercase; border-bottom: 1px solid #e2e8f0; }
+.t td { padding: 12px 14px; font-size: 13px; border-bottom: 1px solid #f1f5f9; color: rgba(0,0,0,0.78); vertical-align: top; }
+.t tr:last-child td { border-bottom: none; }
+.t tr:hover td { background: #fafbff; }
+.t .pill { display: inline-block; padding: 1px 8px; border-radius: 4px; font-size: 11px; font-weight: 700; }
+.t .pill.blue { background: #dbeafe; color: #1e40af; }
+.t .pill.green { background: #d1fae5; color: #065f46; }
+.t .pill.red { background: #fee2e2; color: #991b1b; }
+.t .pill.yellow { background: #fef3c7; color: #92400e; }
+.t .pill.purple { background: #ede9fe; color: #5b21b6; }
+.t .pill.gray { background: #f1f5f9; color: rgba(0,0,0,0.55); }
+.t strong { font-weight: 800; color: rgba(0,0,0,0.92); }
+
+/* Link card */
+.link-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 12px; }
+.link-card { background: #fff; border: 1px solid #e2e8f0; border-radius: 12px; padding: 16px 18px; transition: all 0.18s; text-decoration: none; color: inherit; display: block; }
+.link-card:hover { border-color: #4f46e5; box-shadow: 0 4px 16px rgba(79,70,229,0.12); transform: translateY(-2px); }
+.link-card .ico { font-size: 22px; margin-bottom: 8px; }
+.link-card .nm { font-size: 14px; font-weight: 800; color: rgba(0,0,0,0.88); margin-bottom: 4px; }
+.link-card .desc { font-size: 11.5px; color: rgba(0,0,0,0.55); line-height: 1.55; margin-bottom: 8px; }
+.link-card .url { font-size: 10.5px; color: #4f46e5; font-family: 'SF Mono', monospace; word-break: break-all; }
+
+/* Compare table */
+.compare { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+.compare-col { background: #fff; border-radius: 12px; padding: 18px 20px; border: 1.5px solid #e2e8f0; }
+.compare-col.old { border-color: #fca5a5; background: linear-gradient(180deg, #fef2f2 0%, #fff 60%); }
+.compare-col.new { border-color: #6ee7b7; background: linear-gradient(180deg, #ecfdf5 0%, #fff 60%); }
+.compare-col-tag { display: inline-block; padding: 3px 10px; border-radius: 4px; font-size: 10.5px; font-weight: 800; letter-spacing: 0.4px; margin-bottom: 10px; }
+.compare-col.old .compare-col-tag { background: #fecaca; color: #991b1b; }
+.compare-col.new .compare-col-tag { background: #a7f3d0; color: #064e3b; }
+.compare-col h4 { font-size: 14px; font-weight: 800; margin-bottom: 10px; color: rgba(0,0,0,0.85); }
+.compare-col ul { list-style: none; }
+.compare-col li { font-size: 13px; padding: 5px 0; color: rgba(0,0,0,0.7); line-height: 1.65; }
+.compare-col li::before { content: '·'; color: rgba(0,0,0,0.35); margin-right: 6px; font-weight: 800; }
+
+/* Footer / nav */
+.bottom-nav { position: fixed; bottom: 24px; right: 24px; display: flex; gap: 8px; z-index: 50; }
+.nav-btn { background: #1e1b4b; color: #fff; border: none; width: 44px; height: 44px; border-radius: 50%; font-size: 18px; cursor: pointer; box-shadow: 0 4px 12px rgba(0,0,0,0.2); display: flex; align-items: center; justify-content: center; font-weight: 700; }
+.nav-btn:hover { background: #4f46e5; }
+.nav-progress { position: fixed; top: 0; left: 280px; right: 0; height: 3px; background: rgba(0,0,0,0.06); z-index: 100; }
+.nav-progress-fill { height: 100%; background: linear-gradient(90deg, #4f46e5, #fbbf24); transition: width 0.2s; width: 0%; }
+
+/* Inline code */
+.kbd { background: #1e1b4b; color: #fbbf24; padding: 2px 7px; border-radius: 4px; font-family: 'SF Mono', monospace; font-size: 12px; font-weight: 700; }
+
+/* Print */
+@media print {
+  .sidebar, .bottom-nav, .nav-progress { display: none; }
+  .app { display: block; }
+  .slide { page-break-after: always; min-height: auto; padding: 30px 0; }
+  body { background: #fff; }
+}
+</style>
+</head>
+<body>
+
+<div class="nav-progress"><div class="nav-progress-fill" id="progressFill"></div></div>
+
+<div class="app">
+  <!-- ============= SIDEBAR ============= -->
+  <aside class="sidebar">
+    <div class="sidebar-brand">TripStore PB</div>
+    <div class="sidebar-title">상품 자동생성<br>통합 플로우 & 정책</div>
+    <div class="sidebar-sub">발표 자료 · 김서현 PM · 2026-05-29</div>
+    <div class="sidebar-meta">
+      <span class="pill">v3.0</span>
+      <span class="pill">5/29 단순화</span>
+      <span class="pill">PB</span>
+    </div>
+
+    <nav class="toc-list" id="toc">
+      <a class="toc-item active" href="#s0"><span class="toc-num">0</span> 표지</a>
+      <a class="toc-item" href="#s1"><span class="toc-num">1</span> 회의록 타임라인</a>
+      <a class="toc-item" href="#s2"><span class="toc-num">2</span> 핵심 의사결정</a>
+      <a class="toc-item" href="#s3"><span class="toc-num">3</span> 전체 데이터 흐름</a>
+      <a class="toc-item" href="#s4"><span class="toc-num">4</span> 조합 룰</a>
+      <a class="toc-item" href="#s5"><span class="toc-num">5</span> 가격 정책</a>
+      <a class="toc-item" href="#s6"><span class="toc-num">6</span> 노출/미노출 정책</a>
+      <a class="toc-item" href="#s7"><span class="toc-num">7</span> 콘텐츠 Rule Engine</a>
+      <a class="toc-item" href="#s8"><span class="toc-num">8</span> 예약 시스템</a>
+      <a class="toc-item" href="#s9"><span class="toc-num">9</span> 케이스 분기 A·B·C·D</a>
+      <a class="toc-item" href="#s10"><span class="toc-num">10</span> 화면 데모</a>
+      <a class="toc-item" href="#s11"><span class="toc-num">11</span> 인수인계 항목</a>
+      <a class="toc-item" href="#s12"><span class="toc-num">12</span> Q&A · 다음 단계</a>
+    </nav>
+
+    <div class="sidebar-foot">
+      📁 Figma 통합 플로우<br>
+      <a href="https://www.figma.com/board/cvHtVkQp8DNsA0mH32ueD2/" target="_blank">cvHtVkQp8DNsA0mH32ueD2</a><br>
+      <br>
+      🔗 목업 저장소<br>
+      <a href="https://seohyeonkimextriber.github.io/tripstore_mokup/" target="_blank">seohyeonkimextriber.github.io/<br>tripstore_mokup</a><br>
+      <br>
+      <strong>← / → / ↑ / ↓</strong> 슬라이드 이동
+    </div>
+  </aside>
+
+  <!-- ============= MAIN ============= -->
+  <main class="main">
+
+    <!-- ============= S0 표지 ============= -->
+    <section class="slide" id="s0">
+      <div class="cover">
+        <div class="badge">📌 인수인계 · 발표 자료</div>
+        <h1>PB 상품 <span class="accent">자동생성</span><br>통합 플로우 & 정책</h1>
+        <div class="lead">
+          숙박권·항공권·투어/티켓을 기반으로 모든 조합을 자동 생성하고, 게이트 정책으로 경쟁력 있는 상품만 노출하는 시스템.<br>
+          <strong style="color:#fbbf24;">"다 만들어놓고 경쟁력 없는 애 탈락"</strong> — 2026-04-08 대표님 확정 원칙.
+        </div>
+        <div class="meta">
+          <div class="meta-item"><div class="k">진행 기간</div><div class="v">2026-04 ~ 진행 중</div></div>
+          <div class="meta-item"><div class="k">담당</div><div class="v">김서현 PM</div></div>
+          <div class="meta-item"><div class="k">개발</div><div class="v">김수권 · 김정재</div></div>
+          <div class="meta-item"><div class="k">1차 대상</div><div class="v">푸꾸옥 MVP</div></div>
+          <div class="meta-item"><div class="k">상태</div><div class="v">정책 정리 완료 · 개발 중</div></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============= S1 타임라인 ============= -->
+    <section class="slide" id="s1">
+      <div class="slide-num">01</div>
+      <h2 class="slide-title">회의록 타임라인</h2>
+      <p class="slide-subtitle">2개월간 정책이 어떻게 단순화되어 왔는지</p>
+
+      <div class="card">
+        <div class="timeline">
+          <div class="timeline-item">
+            <div class="timeline-date">2026-04-08 · 대표님 회의</div>
+            <div class="timeline-title">"다 만들어놓고 탈락" 원칙 확정</div>
+            <div class="timeline-desc">
+              · 전액결제 확정 (예약금 제거)<br>
+              · 고정마진 최소 5% 이상<br>
+              · 경쟁가 관점 전환 — 다 만들고 탈락시키는 방식<br>
+              · 숙소 취소 시 취소 요청 상태 → 운영팀 대응
+            </div>
+          </div>
+          <div class="timeline-item">
+            <div class="timeline-date">2026-04-15 · 누아 기술 협의</div>
+            <div class="timeline-title">항공 API 기술 정책</div>
+            <div class="timeline-desc">
+              · 가격 변동: 베이스 운임 당일 보장, 세금/유류할증 자정 환율 변동<br>
+              · 타임 리밋: 티웨이 NDC 20분(부적합), 일반 24시간+<br>
+              · 1차 판매 범위: changeAPIS 지원 + 타임 리밋 여유 항공사
+            </div>
+          </div>
+          <div class="timeline-item">
+            <div class="timeline-date">2026-05-21 · 김수권↔김서현</div>
+            <div class="timeline-title">UX/콘텐츠 전면 단순화</div>
+            <div class="timeline-desc">
+              · 항공권/숙박권/투어티켓 별도 페이지 X → 토글만 추가<br>
+              · 누아 항공권 새벽 배치 자동 등록<br>
+              · 포스트(콘텐츠) = 참조 방식, 카피·고정 X<br>
+              · 한 포스트에 여러 항목 묶어 등록<br>
+              · 투어/티켓 그룹 관리 (그룹 단위 자동생성)<br>
+              · 예약 화면 한 화면 IA + 공급사 채널 자동 전송
+            </div>
+          </div>
+          <div class="timeline-item">
+            <div class="timeline-date">2026-05-26 · 정책 정비</div>
+            <div class="timeline-title">즉시확정관 + 케이스 분기</div>
+            <div class="timeline-desc">
+              · <strong>항공 발권 완료 = 예약 완료</strong> 베이스 룰 채택<br>
+              · 4가지 케이스 분기 (자동/수동 조합)<br>
+              · 즉시확정관 — 자동×자동만 즉시 확정<br>
+              · 11:30~12:00 시스템 점검 시간 신설<br>
+              · 항공 실패 → 숙소 자동 취소 정책
+            </div>
+          </div>
+          <div class="timeline-item">
+            <div class="timeline-date">2026-05-29 · 최종 단순화</div>
+            <div class="timeline-title">사유 코드 단순화 · 영구 제외 폐기</div>
+            <div class="timeline-desc">
+              · <strong>미노출 사유 8개 → 3개</strong> (운영자 일시 미노출 + 시스템 자동 2종)<br>
+              · 영구 제외 (G4 MANUAL_BLOCK_PERM) 폐기<br>
+              · 콘텐츠 이슈·공급사 응대 지연 사유 폐기 (상위 자동생성 중단으로 처리)<br>
+              · 경쟁가 × 0.95 → <strong>× 0.97</strong>, 비교 대상 없으면 +9% 고정<br>
+              · 검토 필요 탭·재검토 기한 폐기<br>
+              · 학습 기반 사유 (조회수/전환율) Phase 2 보류
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============= S2 핵심 의사결정 ============= -->
+    <section class="slide" id="s2">
+      <div class="slide-num">02</div>
+      <h2 class="slide-title">핵심 의사결정 요약</h2>
+      <p class="slide-subtitle">한 화면에 보는 5가지 베이스 룰</p>
+
+      <div class="grid-2">
+        <div class="card">
+          <div class="card-title"><span class="num">1</span> 다 만들고 탈락</div>
+          <div class="card-row">
+            모든 가능한 조합을 일단 다 생성하고, 게이트 통과 못 한 것만 미노출 / Reject Pool로.<br>
+            <code>"가격/경쟁력은 다음 단계로"</code>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-title"><span class="num">2</span> 항공 발권 = 예약 완료</div>
+          <div class="card-row">
+            <strong>베이스 룰</strong>: 항공 발권 완료 시점 = 예약 완료. 숙소는 후속 처리.<br>
+            고객 화면은 항공권 기준.
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-title"><span class="num">3</span> 즉시확정관</div>
+          <div class="card-row">
+            자동×자동 조합 = 결제 즉시 확정. <br>
+            <strong>11:30까지 무료 취소</strong> 가능. (이전 30분 홀드 정책에서 변경)
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-title"><span class="num">4</span> 콘텐츠 참조 방식</div>
+          <div class="card-row">
+            카피·고정 X → <strong>참조(불러오기)</strong>. 한 콘텐츠에 항목 N개 묶기.<br>
+            수정 시 연결된 모든 상품에 자동 반영.
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-title"><span class="num">5</span> 사유 단순화</div>
+          <div class="card-row">
+            8개 사유 → <strong>3개</strong>로 축소. 영구 제외 폐기.<br>
+            학습 기반 사유는 Phase 2 보류.
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-title"><span class="num">6</span> 11:30~12:00 점검</div>
+          <div class="card-row">
+            자정 환율 변동 대비 시스템 리프레시 시간.<br>
+            이 시간 예약 = 홀드 후 12시 자동 확정.
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============= S3 데이터 흐름 ============= -->
+    <section class="slide" id="s3">
+      <div class="slide-num">03</div>
+      <h2 class="slide-title">전체 데이터 흐름</h2>
+      <p class="slide-subtitle">재료 소싱 → 생성 → 노출 → 예약</p>
+
+      <div class="card" style="padding: 30px;">
+        <div style="margin-bottom: 20px; font-size: 13px; font-weight: 800; color: rgba(0,0,0,0.55); letter-spacing: 0.3px;">📥 입력 (재료 소싱)</div>
+        <div class="grid-3">
+          <div class="stat"><div class="stat-label">🏨 TMG 숙소 API</div><div class="stat-value blue">자동 sync</div><div class="stat-sub">checkAvailability · 매일 03:00</div></div>
+          <div class="stat"><div class="stat-label">✈ 누아 항공 NDC</div><div class="stat-value blue">자동 sync</div><div class="stat-sub">D+90 분산 호출</div></div>
+          <div class="stat"><div class="stat-label">🎟 어드민 수동</div><div class="stat-value accent">PM 등록</div><div class="stat-sub">투어/티켓 · 픽업</div></div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="flow">
+          <div class="flow-step done">
+            <div class="flow-step-num">① 트리거</div>
+            <div class="flow-step-title">새벽 배치</div>
+            <div class="flow-step-desc">매일 03:00 자동 실행</div>
+          </div>
+          <div class="flow-arrow">→</div>
+          <div class="flow-step done">
+            <div class="flow-step-num">② 조합 생성</div>
+            <div class="flow-step-title">전수 생성</div>
+            <div class="flow-step-desc">항공×숙박×옵션 모든 조합</div>
+          </div>
+          <div class="flow-arrow">→</div>
+          <div class="flow-step active">
+            <div class="flow-step-num">③ 생성 게이트</div>
+            <div class="flow-step-title">Stage 1</div>
+            <div class="flow-step-desc">재고·역마진·조합룰 검증</div>
+          </div>
+          <div class="flow-arrow">→</div>
+          <div class="flow-step active">
+            <div class="flow-step-num">④ 가격 계산</div>
+            <div class="flow-step-title">2-Layer 마진</div>
+            <div class="flow-step-desc">고정·추가·정가</div>
+          </div>
+        </div>
+        <div class="flow" style="margin-top: 12px;">
+          <div class="flow-step">
+            <div class="flow-step-num">⑤ 경쟁가 분석</div>
+            <div class="flow-step-title">svc.inventory</div>
+            <div class="flow-step-desc">폴백 1~3순위 × 0.97</div>
+          </div>
+          <div class="flow-arrow">→</div>
+          <div class="flow-step">
+            <div class="flow-step-num">⑥ 노출 게이트</div>
+            <div class="flow-step-title">Stage 2</div>
+            <div class="flow-step-desc">경쟁가·마진 하한 검증</div>
+          </div>
+          <div class="flow-arrow">→</div>
+          <div class="flow-step">
+            <div class="flow-step-num">⑦ 콘텐츠 매칭</div>
+            <div class="flow-step-title">Rule Engine</div>
+            <div class="flow-step-desc">AND 조건, 모두 노출</div>
+          </div>
+          <div class="flow-arrow">→</div>
+          <div class="flow-step" style="border-color:#fbbf24; background:linear-gradient(135deg,#fef3c7 0%, #fff 60%);">
+            <div class="flow-step-num">⑧ 라이브 노출</div>
+            <div class="flow-step-title">PB 카탈로그</div>
+            <div class="flow-step-desc">고객 PDP 노출</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="highlight">
+        <div class="highlight-title">🚫 미노출 분기 (R3 진입점)</div>
+        <div class="highlight-body">
+          노출 게이트 통과 못한 상품은 <strong>Reject Pool</strong>로 이동.<br>
+          운영자가 검토 후 <strong>재노출</strong> 또는 운영자 사유 <strong>일시 미노출</strong> 결정.
+        </div>
+      </div>
+    </section>
+
+    <!-- ============= S4 조합 룰 ============= -->
+    <section class="slide" id="s4">
+      <div class="slide-num">04</div>
+      <h2 class="slide-title">조합 룰</h2>
+      <p class="slide-subtitle">어떤 조합으로 PB 상품을 만드는가</p>
+
+      <div class="card" style="padding:36px 40px;">
+        <div style="font-size:18px; font-weight:800; margin-bottom: 6px; color: #4f46e5;">디폴트 = <span style="color:#1e1b4b;">에어텔 (항공 + 숙박)</span></div>
+        <div style="font-size: 13px; color: rgba(0,0,0,0.55);">모든 PB 상품의 기본 형태</div>
+
+        <div style="margin-top:32px; padding-top:32px; border-top:1px dashed #e2e8f0; font-size:18px; font-weight:800; margin-bottom: 10px; color: #f59e0b;">선택 = <span style="color:#1e1b4b;">패스트트랙·투어·티켓 중 1~2개</span></div>
+        <div style="font-size:13px; color: rgba(0,0,0,0.55); margin-bottom:14px;">AI가 여행자 프로필 기반 판단 · 같은 카테고리 중복 X</div>
+
+        <div class="grid-4" style="margin-top:14px;">
+          <div class="stat" style="text-align:center;"><div style="font-size:30px; margin-bottom:6px;">🚗</div><div class="stat-label">픽업·샌딩</div><div style="font-size:11.5px;color:rgba(0,0,0,0.55);margin-top:3px;">에어텔 디폴트</div></div>
+          <div class="stat" style="text-align:center;"><div style="font-size:30px; margin-bottom:6px;">⚡</div><div class="stat-label">패스트트랙</div><div style="font-size:11.5px;color:rgba(0,0,0,0.55);margin-top:3px;">선택</div></div>
+          <div class="stat" style="text-align:center;"><div style="font-size:30px; margin-bottom:6px;">🌊</div><div class="stat-label">투어 (1개)</div><div style="font-size:11.5px;color:rgba(0,0,0,0.55);margin-top:3px;">선택 · 중복 X</div></div>
+          <div class="stat" style="text-align:center;"><div style="font-size:30px; margin-bottom:6px;">🎫</div><div class="stat-label">티켓 (1개)</div><div style="font-size:11.5px;color:rgba(0,0,0,0.55);margin-top:3px;">선택 · 중복 X</div></div>
+        </div>
+      </div>
+
+      <div class="highlight blue">
+        <div class="highlight-title">🎯 자동생성 대상</div>
+        <div class="highlight-body">
+          PB 자동생성 엔진은 다음 데이터만 입력으로 사용합니다:<br>
+          <strong>자동생성 대상 객실요금표 + 항공권 + 투어/티켓 그룹</strong> (자동생성 ON 토글된 것만)
+        </div>
+      </div>
+
+      <div class="compare">
+        <div class="compare-col old">
+          <span class="compare-col-tag">❌ 이전 정책 (폐기)</span>
+          <h4>강제 포함 (개념 자체)</h4>
+          <ul>
+            <li>픽업·샌딩 = 강제 포함 (예외 없음)</li>
+            <li>패스트트랙도 강제 포함</li>
+            <li>객실 3종 제한 (디폴트/편리/하이엔드)</li>
+            <li>다이나믹 패키지 X</li>
+          </ul>
+        </div>
+        <div class="compare-col new">
+          <span class="compare-col-tag">✅ 최종 정책 (5/29)</span>
+          <h4>유연한 디폴트·선택 구조</h4>
+          <ul>
+            <li>픽업·샌딩 = 에어텔 디폴트 (기본 포함)</li>
+            <li>패스트트랙·투어·티켓 = 모두 선택</li>
+            <li>객실 제한 X (PM 등록 그대로)</li>
+            <li>다이나믹 = PDP UX 정책으로 분리</li>
+          </ul>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============= S5 가격 정책 ============= -->
+    <section class="slide" id="s5">
+      <div class="slide-num">05</div>
+      <h2 class="slide-title">가격 정책</h2>
+      <p class="slide-subtitle">2-Layer 마진 + 경쟁가 분석 + 블루오션</p>
+
+      <div class="card">
+        <div class="card-title"><span class="num">1</span> 2-Layer 마진 구조</div>
+        <div class="flow">
+          <div class="flow-step done">
+            <div class="flow-step-num">원가</div>
+            <div class="flow-step-title">항공+숙박+옵션</div>
+            <div class="flow-step-desc">공급가 합산</div>
+          </div>
+          <div class="flow-arrow">+</div>
+          <div class="flow-step active">
+            <div class="flow-step-num">고정 마진</div>
+            <div class="flow-step-title">5% (고정)</div>
+            <div class="flow-step-desc">결제·운영 비용</div>
+          </div>
+          <div class="flow-arrow">+</div>
+          <div class="flow-step">
+            <div class="flow-step-num">추가 마진</div>
+            <div class="flow-step-title">경쟁가 기반</div>
+            <div class="flow-step-desc">상한 10%</div>
+          </div>
+          <div class="flow-arrow">+</div>
+          <div class="flow-step" style="border-color:#fbbf24;background:linear-gradient(135deg,#fef3c7 0%,#fff 60%);">
+            <div class="flow-step-num">정가 마진</div>
+            <div class="flow-step-title">5% (성수기)</div>
+            <div class="flow-step-desc">2단계 (성/비)</div>
+          </div>
+        </div>
+        <div style="margin-top:14px; padding:10px 14px; background:#f8fafc; border-radius:8px; font-size:12.5px; color:rgba(0,0,0,0.65);">
+          ★ 전체 마진율 합 ≤ <strong>50%</strong> (지나치게 높은 가격 방지)
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-title"><span class="num">2</span> 경쟁가 분석 — svc.inventory 폴백</div>
+        <div class="card-row" style="margin-bottom:14px;">트립스토어가 보유한 다른 여행사 상품 데이터(svc.inventory) 기준. 외부 시세 X.</div>
+        <table class="t">
+          <thead><tr><th style="width:80px;">순위</th><th>조건</th><th style="width:120px;">비교 강도</th></tr></thead>
+          <tbody>
+            <tr><td><strong>1순위</strong></td><td>여행지 + 상품타입 + 항공사 + 숙소 + 출발일 + 투어/티켓 + 옵션 <strong>완전 일치</strong></td><td><span class="pill blue">완전 쌍둥이</span></td></tr>
+            <tr><td><strong>2순위</strong></td><td>여행지 + 출발일 + 숙소 + 항공사</td><td><span class="pill purple">닮은꼴</span></td></tr>
+            <tr><td><strong>3순위</strong></td><td>(여행지+출발일+숙소+상품타입) <strong>OR</strong> (여행지+출발일+항공사+상품타입)</td><td><span class="pill gray">광범위</span></td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="grid-2">
+        <div class="highlight blue">
+          <div class="highlight-title">💰 가격 책정 룰</div>
+          <div class="highlight-body">
+            <strong>비교 대상 평균가 × 0.97</strong> (3% 할인)<br>
+            우리 가격 > 기준 → <strong style="color:#ef4444;">미노출</strong> (R1)<br>
+            우리 가격 < 기준 → 추가 마진율 컨트롤로 가격 조정
+          </div>
+        </div>
+        <div class="highlight green">
+          <div class="highlight-title">💎 블루오션 (비교 대상 없음)</div>
+          <div class="highlight-body">
+            1~3순위 폴백 모두 없는 새 조합<br>
+            → <strong>추가 마진 +9% 고정</strong>으로 판매가 설정<br>
+            → R1 게이트 자동 통과
+          </div>
+        </div>
+      </div>
+
+      <div class="highlight">
+        <div class="highlight-title">⏰ 11:30~12:00 시스템 점검</div>
+        <div class="highlight-body">
+          자정 환율 변동 대비 시스템 리프레시 시간. 이 시간대 예약 = <strong>숙소·항공 홀드</strong> → 12시 자동 확정 처리.<br>
+          전체 예약의 약 7.5% (1일 200건 중 15건, PB는 3-4건) → 영향 작음.
+        </div>
+      </div>
+    </section>
+
+    <!-- ============= S6 노출/미노출 ============= -->
+    <section class="slide" id="s6">
+      <div class="slide-num">06</div>
+      <h2 class="slide-title">노출/미노출 정책</h2>
+      <p class="slide-subtitle">5/29 단순화 — 사유 8개 → 3개</p>
+
+      <div class="card">
+        <div class="card-title"><span class="num">1</span> 미노출 사유 (Phase 1)</div>
+        <table class="t">
+          <thead><tr><th>카테고리</th><th>사유</th><th>설명</th></tr></thead>
+          <tbody>
+            <tr>
+              <td rowspan="2"><strong>[운영자]</strong></td>
+              <td>일시 미노출</td>
+              <td>운영자 판단 — 프로모션 / 여행사 요청 / 일시 정지</td>
+            </tr>
+            <tr>
+              <td>콘텐츠 이슈</td>
+              <td>연결된 콘텐츠 누락 · 오류 (콘텐츠 수정 후 재노출)</td>
+            </tr>
+            <tr>
+              <td rowspan="2"><strong>[시스템 자동]</strong></td>
+              <td><code>NEGATIVE_MARGIN</code> 역마진</td>
+              <td>판매가 &lt; 원가 (고정마진=0% 케이스)</td>
+            </tr>
+            <tr>
+              <td><code>BELOW_COMPETITION</code> 경쟁가 미달</td>
+              <td>경쟁가 × 0.97 초과 — 가격 경쟁력 부족</td>
+            </tr>
+          </tbody>
+        </table>
+        <div style="margin-top:12px; padding:10px 14px; background:#fef3c7; border:1px solid #fbbf24; border-radius:8px; font-size:12px; color:#92400e;">
+          💡 공급사 응대 지연 → <strong>숙박권/항공권 단위 자동생성 OFF</strong>로 처리 (개별 상품 미노출 X)
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-title"><span class="num">2</span> 미노출 → 재노출 흐름</div>
+        <div class="flow">
+          <div class="flow-step done">
+            <div class="flow-step-num">1</div>
+            <div class="flow-step-title">라이브 상품</div>
+            <div class="flow-step-desc">노출 중</div>
+          </div>
+          <div class="flow-arrow">→</div>
+          <div class="flow-step active">
+            <div class="flow-step-num">2</div>
+            <div class="flow-step-title">미노출 처리</div>
+            <div class="flow-step-desc">사유 메모 필수</div>
+          </div>
+          <div class="flow-arrow">→</div>
+          <div class="flow-step" style="border-color:#fbbf24;background:linear-gradient(135deg,#fef3c7 0%,#fff 60%);">
+            <div class="flow-step-num">3</div>
+            <div class="flow-step-title">Reject Pool</div>
+            <div class="flow-step-desc">사유별 검토</div>
+          </div>
+          <div class="flow-arrow">→</div>
+          <div class="flow-step done">
+            <div class="flow-step-num">4</div>
+            <div class="flow-step-title">재노출</div>
+            <div class="flow-step-desc">사유 메모 필수</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="compare">
+        <div class="compare-col old">
+          <span class="compare-col-tag">❌ 폐기 항목 (5/29)</span>
+          <ul>
+            <li>영구 제외 (G4 MANUAL_BLOCK_PERM) — 다음 배치 영구 차단 개념 자체 폐기</li>
+            <li>재검토 기한 (3/7/14/30일 알림)</li>
+            <li>검토 필요 탭</li>
+            <li>공급사 응대 지연 사유 (상위 자동생성 OFF로 처리)</li>
+          </ul>
+        </div>
+        <div class="compare-col new">
+          <span class="compare-col-tag">⏸ Phase 2 보류</span>
+          <ul>
+            <li><code>LOW_VIEW</code> 조회수 급감</li>
+            <li><code>ZERO_CONV</code> 전환율 부진</li>
+            <li><code>LOW_DEMAND_SIGNAL</code> 인기도 미달</li>
+            <li>학습 데이터 축적 후 도입 예정</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="highlight green">
+        <div class="highlight-title">📋 운영자 기능 (단순화)</div>
+        <div class="highlight-body">
+          ① 상품 생성 → <strong>노출 상품 관리</strong> → 미노출 처리(사유 작성)<br>
+          ② 상품 생성 → <strong>미노출 상품 관리</strong> → 재노출 처리(사유 작성)<br>
+          ③ 사유 관리 + 자동/수동 생성 타입 구분
+        </div>
+      </div>
+    </section>
+
+    <!-- ============= S7 콘텐츠 ============= -->
+    <section class="slide" id="s7">
+      <div class="slide-num">07</div>
+      <h2 class="slide-title">콘텐츠(POST) Rule Engine</h2>
+      <p class="slide-subtitle">참조 방식 · 한 콘텐츠 N항목 · 자동 매칭</p>
+
+      <div class="grid-2">
+        <div class="card">
+          <div class="card-title"><span class="num">1</span> 패러다임 전환</div>
+          <table class="t" style="box-shadow:none;">
+            <tbody>
+              <tr><td><strong>이전</strong></td><td>sub_key 기반 · 타겟 기반 · 1:1 매핑</td></tr>
+              <tr><td><strong>현재</strong></td><td><code>Rule Engine</code> JSON 조건 · 조건 기반 · 1:N 매핑</td></tr>
+              <tr><td><strong>적용 단위</strong></td><td>상품 단위 (행사 단위 X — 성능 문제)</td></tr>
+              <tr><td><strong>조건 결합</strong></td><td><strong>AND</strong> only · 매칭 콘텐츠 모두 노출</td></tr>
+              <tr><td><strong>예약 스냅샷</strong></td><td>예약 시점 스냅샷 저장 (수정해도 기존 예약 안 바뀜)</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="card">
+          <div class="card-title"><span class="num">2</span> 카테고리 6종 + 룰</div>
+          <table class="t" style="box-shadow:none;">
+            <tbody>
+              <tr><td>🏨 소개</td><td>숙박권 단위 (이미지 포함)</td></tr>
+              <tr><td>⭐ 핵심 포인트</td><td>숙박권 + 객실+식사 (이미지 포함)</td></tr>
+              <tr><td>🎁 스페셜 혜택</td><td>숙박권 전체 또는 객실 단위</td></tr>
+              <tr><td>📋 유의사항</td><td>숙박권 전체</td></tr>
+              <tr><td>✈ 출발 전 안내</td><td>여행지 단위 (공통)</td></tr>
+              <tr><td>🛏 객실 정보</td><td>객실 + 식사 단위</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="highlight purple">
+        <div class="highlight-title">🎯 회의록 5/21 요청 — 한 콘텐츠 N항목</div>
+        <div class="highlight-body">
+          기존: 1요금표 = 1POST 1:1 매핑 (포스트가 너무 많음)<br>
+          <strong>변경</strong>: 1POST에 여러 항목 묶어서 관리 가능. 수정 시 모든 연결 상품에 자동 반영.<br>
+          <strong>예시</strong>: "스페셜 혜택" 포스트 1개 안에 ① 왕복 픽업 ② 빈원더스 1회권 ③ 조식 2회 — 항목 3개 묶음.
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-title"><span class="num">3</span> 프리셋 13종</div>
+        <div class="grid-3">
+          <div class="card-row" style="background:#fafbff;padding:10px;border-radius:6px;">① 전체 공통</div>
+          <div class="card-row" style="background:#fafbff;padding:10px;border-radius:6px;">② 상품코드</div>
+          <div class="card-row" style="background:#fafbff;padding:10px;border-radius:6px;">③ 공급사별</div>
+          <div class="card-row" style="background:#fafbff;padding:10px;border-radius:6px;">④ 공급사 + 숙소</div>
+          <div class="card-row" style="background:#fafbff;padding:10px;border-radius:6px;">⑤ + 객실</div>
+          <div class="card-row" style="background:#fafbff;padding:10px;border-radius:6px;">⑥ + 식사</div>
+          <div class="card-row" style="background:#fafbff;padding:10px;border-radius:6px;">⑦ + 객실 + 식사</div>
+          <div class="card-row" style="background:#fafbff;padding:10px;border-radius:6px;">⑧ 공급사 + 항공사</div>
+          <div class="card-row" style="background:#fafbff;padding:10px;border-radius:6px;">⑨ 공급사 + 스팟</div>
+          <div class="card-row" style="background:#fafbff;padding:10px;border-radius:6px;">⑩ 투어/티켓</div>
+          <div class="card-row" style="background:#fafbff;padding:10px;border-radius:6px;">⑪ 숙박권</div>
+          <div class="card-row" style="background:#fafbff;padding:10px;border-radius:6px;">⑫ 항공권</div>
+          <div class="card-row" style="background:#fafbff;padding:10px;border-radius:6px;">⑬ 여행지별</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============= S8 예약 ============= -->
+    <section class="slide" id="s8">
+      <div class="slide-num">08</div>
+      <h2 class="slide-title">예약 시스템</h2>
+      <p class="slide-subtitle">베이스 룰 + 6단계 진행 + 케이스 분기</p>
+
+      <div class="highlight blue">
+        <div class="highlight-title">🎯 베이스 룰 (5/26 결정)</div>
+        <div class="highlight-body" style="font-size:15px;">
+          <strong>항공 예약(발권) 완료 시점 = 예약 완료</strong>. 숙소는 후속 처리.<br>
+          고객 화면은 <strong>항공권 기준</strong>으로 표시.
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-title"><span class="num">1</span> 예약 진행 6단계</div>
+        <div class="flow">
+          <div class="flow-step done"><div class="flow-step-num">1</div><div class="flow-step-title">항공권 발권</div></div>
+          <div class="flow-arrow">→</div>
+          <div class="flow-step done"><div class="flow-step-num">2</div><div class="flow-step-title">숙박권 예약</div></div>
+          <div class="flow-arrow">→</div>
+          <div class="flow-step active"><div class="flow-step-num">3</div><div class="flow-step-title">투어/티켓 등록</div></div>
+          <div class="flow-arrow">→</div>
+          <div class="flow-step"><div class="flow-step-num">4</div><div class="flow-step-title">보험 등록</div></div>
+          <div class="flow-arrow">→</div>
+          <div class="flow-step"><div class="flow-step-num">5</div><div class="flow-step-title">출발 확정</div></div>
+          <div class="flow-arrow">→</div>
+          <div class="flow-step"><div class="flow-step-num">6</div><div class="flow-step-title">출발</div></div>
+        </div>
+      </div>
+
+      <div class="grid-2">
+        <div class="highlight green">
+          <div class="highlight-title">✅ 예약 확정 정책</div>
+          <div class="highlight-body">
+            <strong>즉시확정관 운영</strong> (회의 5/26)<br>
+            전액결제 즉시 항공·숙소 확정 진행.<br>
+            <strong>11:30까지 무료 취소 가능</strong>.
+          </div>
+        </div>
+        <div class="highlight red">
+          <div class="highlight-title">❌ 항공 발권 실패 시</div>
+          <div class="highlight-body">
+            누아 NDC 발권 실패 / 좌석 만석 등.<br>
+            <strong>숙소 자동 취소</strong> + 결제 환불 (3-5영업일).<br>
+            운영자 액션: 재시도 / 대체 항공 검색 / 전체 취소.
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-title"><span class="num">2</span> 11:30~12:00 점검 시간</div>
+        <div class="card-row">
+          자정 기점 항공권 환율 적용 변경 → KRW 가격 변동.<br>
+          이 시간대 들어온 예약 = <strong>숙소·항공 홀드</strong> → 12시 자동 확정 처리. 사용자에게 안내 알림톡.<br>
+          <span style="color:rgba(0,0,0,0.55);font-size:12.5px;">PB 영향 약 3-4건/일 (전체 200건 대비) — 영향 작음</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============= S9 케이스 분기 ============= -->
+    <section class="slide" id="s9">
+      <div class="slide-num">09</div>
+      <h2 class="slide-title">케이스 분기 A·B·C·D</h2>
+      <p class="slide-subtitle">항공/숙소 자동·수동 조합별 처리</p>
+
+      <table class="t">
+        <thead><tr><th style="width:60px;">케이스</th><th>항공</th><th>숙박</th><th>확정 방식</th><th>처리 흐름</th></tr></thead>
+        <tbody>
+          <tr>
+            <td><strong>A</strong></td>
+            <td><span class="pill blue">자동</span></td>
+            <td><span class="pill blue">자동</span></td>
+            <td><span class="pill green">즉시확정관</span></td>
+            <td>결제 즉시 항공 발권 + 숙소 confirm 자동 진행. <strong>11:30까지 무료 취소</strong>.</td>
+          </tr>
+          <tr>
+            <td><strong>B</strong></td>
+            <td><span class="pill blue">자동</span></td>
+            <td><span class="pill purple">수동</span></td>
+            <td><span class="pill yellow">파트너스 확인</span></td>
+            <td>항공 즉시 발권 + 숙소는 파트너스 관리자 수동 처리.</td>
+          </tr>
+          <tr>
+            <td><strong>C</strong></td>
+            <td><span class="pill purple">수동</span></td>
+            <td><span class="pill blue">자동</span></td>
+            <td><span class="pill yellow">파트너스 확인</span></td>
+            <td>숙소 자동 confirm + 항공은 파트너스 관리자 수동 처리.</td>
+          </tr>
+          <tr>
+            <td><strong>D</strong></td>
+            <td><span class="pill purple">수동</span></td>
+            <td><span class="pill purple">수동</span></td>
+            <td><span class="pill yellow">파트너스 확인</span></td>
+            <td>항공·숙소 모두 파트너스 관리자 수동 처리.</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <div class="highlight blue">
+        <div class="highlight-title">💡 케이스 분기 — 사용자 입장</div>
+        <div class="highlight-body">
+          모든 케이스에서 <strong>항공 발권 완료 = 예약 완료</strong>. 숙소는 후속 처리.<br>
+          단, A 케이스만 즉시확정관 (취소 페널티 적은 무료 취소 시간 보장).<br>
+          B/C/D는 파트너스 응대 시간 발생 — 알림톡으로 진행 상태 안내.
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-title"><span class="num">⚙</span> 케이스별 화면 시연</div>
+        <div class="card-row">
+          <strong>예약 상세 v3</strong> (reservation-detail-v3.html) 화면에서 케이스 셀렉터 칩으로 직접 토글:<br>
+          ✅ 정상 6단계 시뮬 / ❌ 항공·숙박 실패 케이스 / ✋ B·C·D 수동 케이스 → 진행 바 색·라벨 자동 변경
+        </div>
+      </div>
+    </section>
+
+    <!-- ============= S10 화면 데모 ============= -->
+    <section class="slide" id="s10">
+      <div class="slide-num">10</div>
+      <h2 class="slide-title">화면 데모</h2>
+      <p class="slide-subtitle">정책 반영된 목업 11종 — 회의 자료용</p>
+
+      <div class="link-grid">
+        <a class="link-card" href="https://seohyeonkimextriber.github.io/tripstore_mokup/pb-autogen-playground.html" target="_blank">
+          <div class="ico">🎮</div>
+          <div class="nm">PB 자동등록 플레이그라운드</div>
+          <div class="desc">한 페이지에서 7단계 전체 흐름 직접 시뮬 — 데이터 입력 → 자동생성 → 가상 예약</div>
+          <div class="url">pb-autogen-playground.html</div>
+        </a>
+        <a class="link-card" href="https://seohyeonkimextriber.github.io/tripstore_mokup/pb-accom-tickets.html" target="_blank">
+          <div class="ico">🏨</div>
+          <div class="nm">PB 숙박권 관리</div>
+          <div class="desc">객실요금표 단위 자동생성 토글 + 요금표 관리 모달 + OFF 사유 입력</div>
+          <div class="url">pb-accom-tickets.html</div>
+        </a>
+        <a class="link-card" href="https://seohyeonkimextriber.github.io/tripstore_mokup/pb-tour-tickets.html" target="_blank">
+          <div class="ico">🎟</div>
+          <div class="nm">투어/티켓 + 그룹 관리</div>
+          <div class="desc">개별 항목 + 그룹 관리 (회의록 5/21 수권님 요청). 그룹 단위 자동생성 후보.</div>
+          <div class="url">pb-tour-tickets.html</div>
+        </a>
+        <a class="link-card" href="https://seohyeonkimextriber.github.io/tripstore_mokup/accom-ticket-create.html" target="_blank">
+          <div class="ico">📝</div>
+          <div class="nm">숙박권 만들기 (콘텐츠 v6)</div>
+          <div class="desc">출발일별 단가 캘린더 + 콘텐츠 작성/검색·연결 + POST 기능 모달 4종</div>
+          <div class="url">accom-ticket-create.html</div>
+        </a>
+        <a class="link-card" href="https://seohyeonkimextriber.github.io/tripstore_mokup/pb-live-products.html" target="_blank">
+          <div class="ico">🎯</div>
+          <div class="nm">라이브 상품 노출 관리</div>
+          <div class="desc">자동/수동 생성 배지 + 미노출/재노출 사유 모달 + 마진 조정 기능</div>
+          <div class="url">pb-live-products.html</div>
+        </a>
+        <a class="link-card" href="https://seohyeonkimextriber.github.io/tripstore_mokup/reservation-detail-v3.html" target="_blank">
+          <div class="ico">🎫</div>
+          <div class="nm">예약 상세 v3 (한 화면 IA)</div>
+          <div class="desc">6단계 프로그래스 바 + 케이스 분기 ABCD + 가격 변동 모니터링 + 공급사 채널</div>
+          <div class="url">reservation-detail-v3.html</div>
+        </a>
+        <a class="link-card" href="https://seohyeonkimextriber.github.io/tripstore_mokup/autogen-gate-policy.html" target="_blank">
+          <div class="ico">📋</div>
+          <div class="nm">노출 게이트 정책</div>
+          <div class="desc">Stage 1·2·3 사유 코드 정리 + 회의록 5/29 단순화 반영</div>
+          <div class="url">autogen-gate-policy.html</div>
+        </a>
+        <a class="link-card" href="https://seohyeonkimextriber.github.io/tripstore_mokup/autogen-reject-pool.html" target="_blank">
+          <div class="ico">🚫</div>
+          <div class="nm">Reject Pool</div>
+          <div class="desc">탈락 상품 사유별 필터 + 운영자 액션. 영구 제외 → 미노출 처리 통일.</div>
+          <div class="url">autogen-reject-pool.html</div>
+        </a>
+        <a class="link-card" href="https://seohyeonkimextriber.github.io/tripstore_mokup/tmg-rate-admin.html" target="_blank">
+          <div class="ico">📊</div>
+          <div class="nm">TMG 요금표 관리</div>
+          <div class="desc">자동생성 ON/OFF 토글 + 요금타입 3종 (고정/재고변동/다이나믹) + 벌크 액션</div>
+          <div class="url">tmg-rate-admin.html</div>
+        </a>
+        <a class="link-card" href="https://seohyeonkimextriber.github.io/tripstore_mokup/autogen-monitoring.html" target="_blank">
+          <div class="ico">📈</div>
+          <div class="nm">모니터링 대시보드</div>
+          <div class="desc">자동생성 흐름 실시간 모니터링 (생성 / 노출 / 동적 컷)</div>
+          <div class="url">autogen-monitoring.html</div>
+        </a>
+        <a class="link-card" href="https://seohyeonkimextriber.github.io/tripstore_mokup/autogen-rule-v2.html" target="_blank">
+          <div class="ico">⚙</div>
+          <div class="nm">자동생성 룰 관리 v2</div>
+          <div class="desc">AI 중심 룰 — 4/17 대표님 회의 반영</div>
+          <div class="url">autogen-rule-v2.html</div>
+        </a>
+      </div>
+    </section>
+
+    <!-- ============= S11 인수인계 ============= -->
+    <section class="slide" id="s11">
+      <div class="slide-num">11</div>
+      <h2 class="slide-title">인수인계 항목</h2>
+      <p class="slide-subtitle">다음 PM이 정의해야 할 영역</p>
+
+      <table class="t">
+        <thead><tr><th>영역</th><th>현재 상태</th><th>필요한 작업</th></tr></thead>
+        <tbody>
+          <tr>
+            <td><strong>상품 제목 자동 생성</strong></td>
+            <td><span class="pill red">0% — 미정</span></td>
+            <td>템플릿 정의 · 글자 수 제한 · 우선순위 · 운영자 미세 조정 가능 여부</td>
+          </tr>
+          <tr>
+            <td><strong>상품 이미지 설정</strong></td>
+            <td><span class="pill yellow">30%</span></td>
+            <td>대표 이미지 자동 선택 룰 · 갤러리 구성 · 품질 검증 · 자동 크롭<br><span style="color:rgba(0,0,0,0.5);font-size:11.5px;">(콘텐츠 v6에 이미지 업로드만 있음)</span></td>
+          </tr>
+          <tr>
+            <td><strong>상품 콘텐츠 v6 운영</strong></td>
+            <td><span class="pill green">80% — 안정화 단계</span></td>
+            <td>Rule Engine 매칭 충돌 시 우선순위 · 카테고리 누락 알림 정책</td>
+          </tr>
+          <tr>
+            <td><strong>일정표 자동 생성</strong></td>
+            <td><span class="pill yellow">40%</span></td>
+            <td>투어 시간대 충돌 자동 배치 룰 · 자유 일정 vs 가이드 일정 표기<br><span style="color:rgba(0,0,0,0.5);font-size:11.5px;">(메모리: project_itinerary_autogen.md)</span></td>
+          </tr>
+          <tr>
+            <td><strong>누아 항공 조회 비용</strong></td>
+            <td><span class="pill red">미확인</span></td>
+            <td>400건당 10원 / 1000건당 항공사 공급중단 — 정재희님 정확한 정책 확인</td>
+          </tr>
+          <tr>
+            <td><strong>예약 변경 정책</strong></td>
+            <td><span class="pill red">미정</span></td>
+            <td>단순 변경(탑승자/옵션) vs 상품 변경(날짜/숙소) 처리 분기</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <div class="highlight">
+        <div class="highlight-title">📚 참고 자료</div>
+        <div class="highlight-body">
+          · <code>autogen-ai-spec.md</code> — AI 학습 데이터 스펙 (2026-04-17 대표님 회의)<br>
+          · <code>project_pb_autogen.md</code> — 자동생성 핵심 정책 메모리<br>
+          · <code>project_post_subkey_architecture.md</code> — 콘텐츠 Rule Engine v6<br>
+          · <code>project_itinerary_autogen.md</code> — 일정표 자동생성 메모리<br>
+          · <code>project_pb_autogen_similarity_rejected.md</code> — 게이트 정책 + 5/20 결정사항
+        </div>
+      </div>
+    </section>
+
+    <!-- ============= S12 Q&A ============= -->
+    <section class="slide" id="s12">
+      <div class="slide-num">12</div>
+      <h2 class="slide-title">다음 단계 · Q&A</h2>
+      <p class="slide-subtitle">Phase 2 + 운영 안정화</p>
+
+      <div class="grid-2">
+        <div class="card">
+          <div class="card-title"><span class="num">🚀</span> Phase 2 도입 예정</div>
+          <div class="card-row">
+            ① <strong>학습 기반 사유</strong> — 조회수/전환율/인기도 미달<br>
+            ② <strong>시장가 폴링</strong> — 외부 경쟁사 시세 트래킹<br>
+            ③ <strong>유사 상품 매트릭스 뷰</strong> — 가격 정리 (5/20 보류)<br>
+            ④ <strong>페르소나 변수</strong> — 일본·중국 시장 확장 시
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-title"><span class="num">📊</span> 운영 안정화 지표</div>
+          <div class="card-row">
+            ① 자동생성 상품 노출률 · 전환율<br>
+            ② 미노출 사유 분포 · 운영자 처리 시간<br>
+            ③ 가격 변동 흡수 비율 · 정산 차이<br>
+            ④ 케이스 ABCD별 예약 처리 시간
+          </div>
+        </div>
+      </div>
+
+      <div class="highlight green">
+        <div class="highlight-title">✅ 정책 정리 완료</div>
+        <div class="highlight-body" style="font-size:15px;">
+          <strong>2개월간의 회의</strong> (4/8 · 4/15 · 4/17 · 5/13 · 5/21 · 5/26 · 5/29) <strong>정책 정리 완료</strong>.<br>
+          11종 목업 화면으로 모든 흐름·정책 시연 가능. 인수인계 후 운영 안정화 단계로 진입.
+        </div>
+      </div>
+
+      <div class="cover" style="margin: 36px -56px 0; padding: 80px 56px;">
+        <h1 style="font-size:48px;">감사합니다 🙏</h1>
+        <div class="lead">
+          질문 및 추가 정책 정의는<br>
+          <strong style="color:#fbbf24;">김서현 PM</strong>으로 문의 주세요.
+        </div>
+        <div class="meta">
+          <div class="meta-item"><div class="k">발표 자료</div><div class="v">pb-autogen-presentation.html</div></div>
+          <div class="meta-item"><div class="k">목업 저장소</div><div class="v">tripstore_mokup</div></div>
+          <div class="meta-item"><div class="k">Figma 보드</div><div class="v">PB 통합 플로우</div></div>
+        </div>
+      </div>
+    </section>
+
+  </main>
+</div>
+
+<!-- Bottom nav -->
+<div class="bottom-nav">
+  <button class="nav-btn" onclick="navSlide(-1)" title="이전 (↑)">‹</button>
+  <button class="nav-btn" onclick="navSlide(1)" title="다음 (↓)">›</button>
+</div>
+
+<script>
+// 슬라이드 네비게이션
+const slides = ['s0','s1','s2','s3','s4','s5','s6','s7','s8','s9','s10','s11','s12'];
+let _curSlide = 0;
+
+function navSlide(dir) {
+  _curSlide = Math.max(0, Math.min(slides.length - 1, _curSlide + dir));
+  document.getElementById(slides[_curSlide])?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+
+// 키보드 단축키
+document.addEventListener('keydown', (e) => {
+  if (e.key === 'ArrowDown' || e.key === 'ArrowRight' || e.key === ' ') {
+    e.preventDefault(); navSlide(1);
+  } else if (e.key === 'ArrowUp' || e.key === 'ArrowLeft') {
+    e.preventDefault(); navSlide(-1);
+  } else if (e.key === 'Home') {
+    _curSlide = 0; document.getElementById(slides[0]).scrollIntoView({ behavior: 'smooth' });
+  } else if (e.key === 'End') {
+    _curSlide = slides.length - 1; document.getElementById(slides[_curSlide]).scrollIntoView({ behavior: 'smooth' });
+  }
+});
+
+// 진행률 + 현재 슬라이드 감지
+function updateProgress() {
+  const scrollTop = window.scrollY;
+  const docHeight = document.body.scrollHeight - window.innerHeight;
+  const pct = (scrollTop / docHeight) * 100;
+  document.getElementById('progressFill').style.width = pct + '%';
+
+  // 현재 슬라이드 감지
+  let cur = 0;
+  slides.forEach((id, i) => {
+    const el = document.getElementById(id);
+    if (el) {
+      const rect = el.getBoundingClientRect();
+      if (rect.top < window.innerHeight / 2) cur = i;
+    }
+  });
+  _curSlide = cur;
+  document.querySelectorAll('.toc-item').forEach((el, i) => {
+    el.classList.toggle('active', i === cur);
+  });
+}
+window.addEventListener('scroll', updateProgress, { passive: true });
+updateProgress();
+</script>
+
+</body>
+</html>
