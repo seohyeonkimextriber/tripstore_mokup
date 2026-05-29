@@ -374,10 +374,10 @@ table.tbl tbody tr:last-child td { border-bottom: none; }
 
   <!-- Sub Nav (상태별) -->
   <div class="subnav-card">
-    <button class="subnav-item active" onclick="switchSubnav('live', this)">🟢 라이브 (1,465) <span class="subnav-count">1,465</span></button>
-    <button class="subnav-item warn" onclick="switchSubnav('warn', this)">⚠ 검토 필요 <span class="subnav-count">295</span></button>
-    <button class="subnav-item danger" onclick="switchSubnav('hidden', this)">⊘ 미노출 (R3) <span class="subnav-count">87</span></button>
-    <button class="subnav-item" onclick="switchSubnav('all', this)">전체 <span class="subnav-count">1,847</span></button>
+    <button class="subnav-item active" onclick="switchSubnav('all', this)">전체 <span class="subnav-count">1,847</span></button>
+    <button class="subnav-item" onclick="switchSubnav('live', this)">🟢 라이브 <span class="subnav-count">1,465</span></button>
+    <button class="subnav-item warn" onclick="switchSubnav('review', this)" title="실시간 마진 3% 미만 — 검토 필요">⚠ 검토 필요 <span class="subnav-count">18</span></button>
+    <button class="subnav-item danger" onclick="switchSubnav('hidden', this)">⊘ 미노출 <span class="subnav-count">87</span></button>
   </div>
 
   <!-- Filter -->
@@ -423,7 +423,7 @@ table.tbl tbody tr:last-child td { border-bottom: none; }
         </thead>
         <tbody>
           <!-- 1. 라이브 — 양호 -->
-          <tr>
+          <tr data-status="live">
             <td><input type="checkbox" onclick="toggleRow(this)"></td>
             <td>
               <div class="product-cell">
@@ -470,8 +470,8 @@ table.tbl tbody tr:last-child td { border-bottom: none; }
             </td>
           </tr>
 
-          <!-- 2. 라이브 — 조회수 급감 ⚠ -->
-          <tr>
+          <!-- 2. 라이브 — 조회수 급감 (Phase 2 보류) -->
+          <tr data-status="live">
             <td><input type="checkbox" onclick="toggleRow(this)"></td>
             <td>
               <div class="product-cell">
@@ -523,8 +523,8 @@ table.tbl tbody tr:last-child td { border-bottom: none; }
             </td>
           </tr>
 
-          <!-- 3. 라이브 — 7일 무예약 ⚠ -->
-          <tr>
+          <!-- 3. 라이브 — 7일 무예약 (Phase 2 보류) -->
+          <tr data-status="live">
             <td><input type="checkbox" onclick="toggleRow(this)"></td>
             <td>
               <div class="product-cell">
@@ -576,8 +576,8 @@ table.tbl tbody tr:last-child td { border-bottom: none; }
             </td>
           </tr>
 
-          <!-- 4. 라이브 — 마진 경고 -->
-          <tr>
+          <!-- 4. 라이브 — 마진 경고 (검토 필요) -->
+          <tr data-status="live" data-review="margin">
             <td><input type="checkbox" onclick="toggleRow(this)"></td>
             <td>
               <div class="product-cell">
@@ -629,8 +629,8 @@ table.tbl tbody tr:last-child td { border-bottom: none; }
             </td>
           </tr>
 
-          <!-- 5. 미노출 (R3) — PM 처리 -->
-          <tr style="background:#fffbe6;">
+          <!-- 5. 미노출 — PM 처리 -->
+          <tr data-status="hidden" style="background:#fffbe6;">
             <td><input type="checkbox" disabled></td>
             <td>
               <div class="product-cell">
@@ -682,7 +682,7 @@ table.tbl tbody tr:last-child td { border-bottom: none; }
           </tr>
 
           <!-- 6. 라이브 — 양호 (다낭 핵심) -->
-          <tr>
+          <tr data-status="live">
             <td><input type="checkbox" onclick="toggleRow(this)"></td>
             <td>
               <div class="product-cell">
@@ -729,8 +729,8 @@ table.tbl tbody tr:last-child td { border-bottom: none; }
             </td>
           </tr>
 
-          <!-- 7. 라이브 — 조회수 급감 -->
-          <tr>
+          <!-- 7. 라이브 — 조회수 급감 (Phase 2 보류) -->
+          <tr data-status="live">
             <td><input type="checkbox" onclick="toggleRow(this)"></td>
             <td>
               <div class="product-cell">
@@ -782,8 +782,8 @@ table.tbl tbody tr:last-child td { border-bottom: none; }
             </td>
           </tr>
 
-          <!-- 8. 미노출 (R3) -->
-          <tr style="background:#fffbe6;">
+          <!-- 8. 미노출 -->
+          <tr data-status="hidden" style="background:#fffbe6;">
             <td><input type="checkbox" disabled></td>
             <td>
               <div class="product-cell">
@@ -1040,6 +1040,18 @@ function switchSubnav(scope, btn) {
     btn.parentElement.querySelectorAll('.subnav-item').forEach(b => b.classList.remove('active'));
     btn.classList.add('active');
   }
+  // 행 필터링
+  const rows = document.querySelectorAll('tbody tr[data-status]');
+  let visible = 0;
+  rows.forEach(tr => {
+    let show = false;
+    if (scope === 'all') show = true;
+    else if (scope === 'live') show = tr.dataset.status === 'live';
+    else if (scope === 'hidden') show = tr.dataset.status === 'hidden';
+    else if (scope === 'review') show = tr.dataset.review === 'margin'; // 검토 필요 = 마진 경고 (회의록 5/29 단순화)
+    tr.style.display = show ? '' : 'none';
+    if (show) visible++;
+  });
 }
 
 function toggleRow(cb) {
