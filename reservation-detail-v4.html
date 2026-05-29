@@ -544,6 +544,36 @@
   body.case-B .price-diff-sync,
   body.case-D .price-diff-sync { display: none; }
 
+  /* ===== v4 신규: 완료 상태(.done) 색상 초록색 통일 ===== */
+  .rsv-step.done .label { color: #389e0d; font-weight: 800; }
+  .rsv-step.done .sub { color: #389e0d; font-weight: 600; }
+  .rsv-step.done .line { background: #b7eb8f; }
+
+  /* ===== v4 신규: HotelLink 4버튼 상태별 노출 ===== */
+  /* 기본: 4버튼 모두 숨김 → state별로 노출 */
+  .tmg-status-bar .btn-tmg { display: none; }
+  /* CONFIRMED: 상태값 확인 + 숙소 예약 취소 */
+  .tmg-status-bar[data-state="confirmed"] .btn-status-check,
+  .tmg-status-bar[data-state="confirmed"] .btn-cancel { display: inline-block; }
+  /* RESERVED: 상태값 확인 + 숙박권 confirm + 숙소 예약 취소 */
+  .tmg-status-bar[data-state="reserved"] .btn-status-check,
+  .tmg-status-bar[data-state="reserved"] .btn-confirm,
+  .tmg-status-bar[data-state="reserved"] .btn-cancel { display: inline-block; }
+  /* FAILED (응대 거절): 상태값 확인 + 재예약 시도 */
+  .tmg-status-bar[data-state="failed"] .btn-status-check,
+  .tmg-status-bar[data-state="failed"] .btn-retry { display: inline-block; }
+  /* EXPIRED (confirmBefore 초과): 상태값 확인 + 재예약 시도 + 숙소 예약 취소 */
+  .tmg-status-bar[data-state="expired"] .btn-status-check,
+  .tmg-status-bar[data-state="expired"] .btn-retry,
+  .tmg-status-bar[data-state="expired"] .btn-cancel { display: inline-block; }
+
+  /* TMG 상태 라벨 색상 */
+  .tmg-state { padding: 2px 8px; border-radius: 10px; font-size: 10.5px; font-weight: 800; }
+  .tmg-status-bar[data-state="confirmed"] .tmg-state { background: #f6ffed; color: #389e0d; border: 1px solid #b7eb8f; }
+  .tmg-status-bar[data-state="reserved"] .tmg-state { background: #e6f4ff; color: #0958d9; border: 1px solid #91caff; }
+  .tmg-status-bar[data-state="failed"] .tmg-state { background: #fff1f0; color: #cf1322; border: 1px solid #ffa39e; }
+  .tmg-status-bar[data-state="expired"] .tmg-state { background: #fff7e6; color: #d46b08; border: 1px solid #ffd591; }
+
   /* 실패 시 운영자 액션 박스 */
   .fail-action-row { display: none; margin-top: 16px; padding: 12px 16px; background: linear-gradient(135deg, #fff1f0 0%, #ffe4e1 100%); border: 1px solid #ffa39e; border-radius: 10px; align-items: center; gap: 12px; flex-wrap: wrap; }
   .fail-action-row.show { display: flex; }
@@ -1142,17 +1172,17 @@
             </details>
 
             <!-- TMG 연동 상태 -->
-            <div class="tmg-status-bar">
+            <div class="tmg-status-bar" id="tmgStatusBar" data-state="confirmed">
               <div class="tsb-top">
                 <span class="tsb-label">🔗 TMG HotelLink 연동</span>
-                <span class="tmg-state confirmed">CONFIRMED</span>
+                <span class="tmg-state" id="tmgStateLabel">CONFIRMED</span>
               </div>
-              <div style="font-size:10px;color:#666;margin-top:4px;">confirmBefore: 2026-06-08 09:30 KST · cancellationPolicies 갱신됨</div>
+              <div id="tmgSubInfo" style="font-size:10px;color:#666;margin-top:4px;">confirmBefore: 2026-06-08 09:30 KST · cancellationPolicies 갱신됨</div>
               <div class="tmg-actions">
-                <button class="btn-tmg">상태값 확인</button>
-                <button class="btn-tmg">재예약 시도</button>
-                <button class="btn-tmg">숙박권 confirm</button>
-                <button class="btn-tmg danger">숙소 예약 취소</button>
+                <button class="btn-tmg btn-status-check">상태값 확인</button>
+                <button class="btn-tmg btn-retry">재예약 시도</button>
+                <button class="btn-tmg btn-confirm">숙박권 confirm</button>
+                <button class="btn-tmg danger btn-cancel">숙소 예약 취소</button>
               </div>
             </div>
 
@@ -3258,7 +3288,7 @@ function setCase(currentIdx, btn) {
 
   const steps = document.querySelectorAll('#progSteps .rsv-step');
   steps.forEach((step, i) => {
-    step.classList.remove('done', 'current');
+    step.classList.remove('done', 'current', 'manual', 'failed', 'blocked', 'skip');
     const circle = step.querySelector('.circle');
     const sub = step.querySelector('.sub');
     const doneText = sub.dataset.done;
@@ -3486,27 +3516,27 @@ const CASE_DATA = {
     scenarios: [
       {
         num: '1', tag: 'ok', tagLabel: '정상',
-        title: '✅ 풀 자동 성공 (모든 단계 완료)',
-        desc: '누아 자동 발권 + TMG 자동 confirm → 출발까지 무개입',
-        sim: () => setCase(6, null)
+        title: '✅ 풀 자동 성공 (항공·숙박 자동 완료 · 티켓부터 수동)',
+        desc: '누아 자동 발권 + TMG 자동 confirm → 1·2단계 완료. 투어·보험·출발은 수동 처리',
+        sim: () => { setCase(2, null); setTmgState('confirmed'); }
       },
       {
         num: '2', tag: 'fail', tagLabel: '실패',
         title: '❌ 항공 발권 실패 (누아 NDC)',
         desc: '자동 재시도 3회 실패 → 회의록 5/26 정책: 숙소 자동 취소 + 환불',
-        sim: () => setFailedCase(0, null)
+        sim: () => { setFailedCase(0, null); setTmgState('confirmed'); }
       },
       {
         num: '3', tag: 'fail', tagLabel: '실패',
         title: '❌ 숙박 confirm 실패 (TMG confirmBefore 초과)',
         desc: '자동 재예약 실패 → 항공 자동 취소 + 환불',
-        sim: () => setFailedCase(1, null)
+        sim: () => { setFailedCase(1, null); setTmgState('expired'); }
       },
       {
         num: '4', tag: 'price', tagLabel: '가격',
         title: '⚠ 결제 후 가격 변동 (마진범위 초과)',
         desc: '항공 +3.9% (유류할증) / 숙박 +1.4% (환율) → 마진 흡수 가능 여부 판단',
-        sim: () => setCase(3, null)
+        sim: () => { setCase(3, null); setTmgState('confirmed'); }
       },
     ],
     features: [
@@ -3558,19 +3588,19 @@ const CASE_DATA = {
         num: '1', tag: 'fail', tagLabel: '실패',
         title: '❌ 숙박권 인디비 예약 실패 (TMG 응대 거절)',
         desc: 'confirmBefore 시한 초과 또는 객실 매진 → 다른 숙소/객실 조회 → 고객 안내. 항공권 취소위약금 케이스 없음 (수동 발권 전)',
-        sim: () => setFailedCase(1, null)
+        sim: () => { setFailedCase(1, null); setTmgState('expired'); }
       },
       {
         num: '2', tag: 'manual', tagLabel: '수동',
         title: '✋ 항공권 수동 예약 - 자리 없음 이슈',
         desc: '파트너스 응답: 항공 자리 없음 → 다른 항공권 재고 조회 → 고객 안내. 숙박권 취소위약금 케이스 발생 (숙소 이미 confirmed)',
-        sim: () => setManualFlightCase(2, null)
+        sim: () => { setManualFlightCase(2, null); setTmgState('confirmed'); }
       },
       {
         num: '3', tag: 'price', tagLabel: '가격',
         title: '⚠ 결제시점 vs 실제 숙박권 예약시 금액 차이',
         desc: '가격변동 알림 확인 → 수용범위 정책 정의 → 범위 초과 시 추가 결제 요청',
-        sim: () => { setManualFlightCase(2, null); document.querySelector('.price-summary-banner')?.scrollIntoView({behavior:'smooth', block:'center'}); }
+        sim: () => { setManualFlightCase(2, null); setTmgState('confirmed'); document.querySelector('.price-summary-banner')?.scrollIntoView({behavior:'smooth', block:'center'}); }
       },
     ],
     features: [
@@ -3634,6 +3664,23 @@ function selectCase(caseKey, btn) {
     const firstCard = document.querySelector('.scenario-card');
     if (firstCard) firstCard.classList.add('active');
   }, 0);
+}
+
+// TMG HotelLink 상태 전환 (confirmed | reserved | failed | expired)
+function setTmgState(state) {
+  const bar = document.getElementById('tmgStatusBar');
+  if (!bar) return;
+  bar.dataset.state = state;
+  const label = document.getElementById('tmgStateLabel');
+  const sub = document.getElementById('tmgSubInfo');
+  const map = {
+    confirmed: { label: 'CONFIRMED', sub: 'confirmBefore: 2026-06-08 09:30 KST · cancellationPolicies 갱신됨' },
+    reserved:  { label: 'RESERVED',  sub: 'confirmBefore 시한 내 — 자동 confirm 대기 중' },
+    failed:    { label: 'FAILED',    sub: '⚠ TMG 응대 거절 — 다른 객실/숙소 조회 필요' },
+    expired:   { label: 'EXPIRED',   sub: '⚠ confirmBefore 초과 — 재예약 시도 필요' }
+  };
+  if (label) label.textContent = map[state].label;
+  if (sub) sub.textContent = map[state].sub;
 }
 
 // 수동 완료 처리 — 해당 단계를 done으로 마킹하고 다음 단계로 진행
