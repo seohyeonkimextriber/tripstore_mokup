@@ -355,20 +355,20 @@ table.tbl tbody tr:last-child td { border-bottom: none; }
       <div class="kpi-value warn">245</div>
       <div class="kpi-sub">전체의 <strong>16.7%</strong> · 검토 권장</div>
     </div>
-    <div class="kpi-card danger" onclick="switchSubnav('view-drop')">
-      <div class="kpi-label">📉 조회수 급감</div>
-      <div class="kpi-value danger">32</div>
-      <div class="kpi-sub">전주 대비 <strong>−50% 이상</strong></div>
-    </div>
     <div class="kpi-card danger" onclick="switchSubnav('margin-warn')">
       <div class="kpi-label">⚠ 마진 경고</div>
       <div class="kpi-value danger">18</div>
       <div class="kpi-sub">실시간 마진 <strong>3% 미만</strong></div>
     </div>
     <div class="kpi-card" onclick="switchSubnav('hidden')">
-      <div class="kpi-label">⊘ 미노출 (R3)</div>
+      <div class="kpi-label">⊘ 미노출 (운영자)</div>
       <div class="kpi-value">87</div>
-      <div class="kpi-sub">PM이 일시 미노출 처리</div>
+      <div class="kpi-sub">일시 미노출 + 시스템 자동</div>
+    </div>
+    <div class="kpi-card" style="opacity:0.55; cursor:not-allowed; background:#fafafa;" title="Phase 2 도입 예정">
+      <div class="kpi-label" style="color:rgba(0,0,0,0.4);">⏸ 조회수 급감 <span style="font-size:9px;background:#f5f5f5;padding:1px 5px;border-radius:3px;color:rgba(0,0,0,0.55);margin-left:3px;">Phase 2</span></div>
+      <div class="kpi-value" style="color:rgba(0,0,0,0.35);">—</div>
+      <div class="kpi-sub" style="color:rgba(0,0,0,0.4);">학습 데이터 축적 후 도입</div>
     </div>
   </div>
 
@@ -848,9 +848,13 @@ table.tbl tbody tr:last-child td { border-bottom: none; }
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
     <div>
       <strong>사유 코드 (메모리 2026-05-20 / autogen-gate-policy v2.1)</strong><br>
-      · <strong>Stage 1 (생성)</strong>: <code>G1 NO_INVENTORY</code> · <code>G2 NEGATIVE_MARGIN</code> · <code>G3 COMBINATION_LIMIT</code> · <code>G4 MANUAL_BLOCK_PERM</code><br>
-      · <strong>Stage 2 (노출)</strong>: <code>R1 BELOW_COMPETITION</code> · <code>R2 MARGIN_FLOOR_UNREACHABLE</code> · <strong><code>R3 MANUAL_BLOCK_TEMP</code> ← 이 화면 진입점</strong><br>
-      · <strong>Stage 3 (라이브 동적 컷)</strong>: <code>L1 STOCK_DEPLETED</code> · <code>L2 LOW_VIEW</code> · <code>L3 ZERO_CONV</code> · <code>L4 MARGIN_DRIFT</code> · <code>L5 DEPARTURE_GUARD</code>
+      <strong>Phase 1 (회의록 2026-05-29 단순화)</strong> — 미노출 사유 3카테고리:<br>
+      · [운영자 판단] 일시 미노출 / 콘텐츠 이슈 / 공급사 응대 지연<br>
+      · [시스템 자동] <code>NEGATIVE_MARGIN</code> 역마진 · <code>BELOW_COMPETITION</code> 경쟁가 미달 (평균가 × 0.97 초과)<br>
+      · [영구 제외] <code>MANUAL_BLOCK_PERM</code> 다음 배치에서도 영구 제외<br>
+      <br>
+      <strong style="color:rgba(0,0,0,0.4);">⏸ Phase 2 보류</strong> — 학습 데이터 축적 후 도입:
+      <code style="opacity:0.5;">LOW_VIEW</code> 조회수 급감 · <code style="opacity:0.5;">ZERO_CONV</code> 전환율 부진 · <code style="opacity:0.5;">LOW_DEMAND_SIGNAL</code> 인기도 미달
     </div>
   </div>
 
@@ -905,15 +909,18 @@ table.tbl tbody tr:last-child td { border-bottom: none; }
 
       <!-- 사유 카테고리 칩 -->
       <label class="field-label">사유 카테고리 <span class="hint">클릭하면 입력란에 채워집니다</span></label>
+      <div style="font-size:11px; color:rgba(0,0,0,0.5); margin-bottom:8px;">
+        ★ 회의록 2026-05-29 — Phase 1에서는 운영자 판단 + 시스템 자동 + 영구 제외 3가지 카테고리로 단순화 (학습 기반 사유 Phase 2 도입 예정)
+      </div>
       <div class="reason-chips">
-        <button class="reason-chip" onclick="pickReason(this, '경쟁가 미달 후속 — 가격 재검토 필요')">경쟁가 미달 (R1 후속)</button>
-        <button class="reason-chip" onclick="pickReason(this, '실시간 마진 5% 이하 — 항공/숙소 원가 변동 확인 필요')">실시간 마진 경고</button>
-        <button class="reason-chip" onclick="pickReason(this, '조회수 −50% 이상 급감 — 페르소나 미스매치 의심')">조회수 급감</button>
-        <button class="reason-chip" onclick="pickReason(this, '7일 이상 예약 0건 — 전환율 부진')">전환율 부진</button>
-        <button class="reason-chip" onclick="pickReason(this, '연결된 콘텐츠(POST) 누락 또는 오류 — 콘텐츠 수정 후 재노출')">콘텐츠 이슈</button>
-        <button class="reason-chip" onclick="pickReason(this, '공급사 응대 지연 / 항공편 운휴 / 숙소 재고 변동')">공급사 이슈</button>
-        <button class="reason-chip" onclick="pickReason(this, '성수기 단가 변동 — 가격 정책 재검토 후 재노출')">성수기 가격 변동</button>
-        <button class="reason-chip" onclick="pickReason(this, '예상가 변동성 큼 (±15% 이상) — 법무 검토 대기')">예상가 변동성</button>
+        <button class="reason-chip" onclick="pickReason(this, '운영자 판단 — 일시 미노출')">[운영자] 일시 미노출</button>
+        <button class="reason-chip" onclick="pickReason(this, '연결된 콘텐츠(POST) 누락 또는 오류 — 콘텐츠 수정 후 재노출')">[운영자] 콘텐츠 이슈</button>
+        <button class="reason-chip" onclick="pickReason(this, '공급사 응대 지연 / 항공편 운휴 / 숙소 재고 변동')">[운영자] 공급사 응대 지연</button>
+        <button class="reason-chip" onclick="pickReason(this, '시스템 자동 — 역마진 (NEGATIVE_MARGIN)')">[시스템] 역마진</button>
+        <button class="reason-chip" onclick="pickReason(this, '시스템 자동 — 경쟁가 미달 (BELOW_COMPETITION) · 평균가 × 0.97 초과')">[시스템] 경쟁가 미달</button>
+      </div>
+      <div style="font-size:10.5px; color:rgba(0,0,0,0.35); margin-top:6px; padding:6px 8px; background:#fafafa; border-radius:5px;">
+        ⏸ Phase 2 도입 예정 (초반 제외): 전환율 부진(ZERO_CONV) · 인기도 미달(LOW_DEMAND_SIGNAL) · 조회수 급감(LOW_VIEW)
       </div>
 
       <!-- 상세 사유 -->
