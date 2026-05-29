@@ -549,6 +549,26 @@
   .rsv-step.done .sub { color: #389e0d; font-weight: 600; }
   .rsv-step.done .line { background: #b7eb8f; }
 
+  /* ===== v4 신규: 고객안내 진행도 - 처리 이력 행 ===== */
+  .item-history { margin-top: 6px; padding: 5px 8px; background: #fafafa; border: 1px solid #f0f0f0; border-radius: 5px; cursor: pointer; transition: all 0.15s; font-size: 10.5px; }
+  .item-history:hover { background: #f0f7ff; border-color: #91caff; }
+  .item-history .h-recent { display: flex; align-items: center; gap: 4px; flex-wrap: wrap; line-height: 1.4; }
+  .item-history .h-actor { color: #0958d9; font-weight: 700; }
+  .item-history .h-actor.system { color: #595959; }
+  .item-history .h-sep { color: rgba(0,0,0,0.25); }
+  .item-history .h-action { color: rgba(0,0,0,0.7); font-weight: 600; }
+  .item-history .h-when { color: rgba(0,0,0,0.45); font-size: 10px; }
+  .item-history .h-count { margin-left: auto; color: #722ed1; font-size: 9.5px; font-weight: 700; padding: 1px 5px; background: #f9f0ff; border: 1px solid #d3adf7; border-radius: 8px; }
+  .item-history .h-full { display: none; margin-top: 6px; padding-top: 5px; border-top: 1px dashed #e8e8e8; }
+  .item-history .h-row { display: flex; gap: 6px; padding: 3px 0; font-size: 10px; color: rgba(0,0,0,0.6); align-items: center; }
+  .item-history .h-row .h-actor-s { color: #0958d9; font-weight: 700; min-width: 50px; }
+  .item-history .h-row .h-actor-s.system { color: #595959; }
+  .item-history .h-row .h-action-s { flex: 1; }
+  .item-history .h-row .h-when-s { color: rgba(0,0,0,0.4); font-size: 9.5px; }
+  .item-history.expanded .h-full { display: block; }
+  .item-history.expanded .h-count::after { content: ' ▴'; }
+  .item-history:not(.expanded) .h-count::after { content: ''; }
+
   /* ===== v4 신규: HotelLink 4버튼 상태별 노출 ===== */
   /* 기본: 4버튼 모두 숨김 → state별로 노출 */
   .tmg-status-bar .btn-tmg { display: none; }
@@ -3540,13 +3560,19 @@ const CASE_DATA = {
       },
     ],
     features: [
+      { name: '여행자 정보 + 여권정보 요청', has: true },
       { name: '자동 sync (가격·재고)', has: true },
       { name: '자동 재시도 (발권·confirm)', has: true },
-      { name: '재시도 / 대체 항공 검색 / 전체 취소 버튼', has: true },
-      { name: '대체 숙소·객실 자동 검색', has: false },
-      { name: '대체 항공편 자동 검색', has: false },
-      { name: '추가결제금액 설정 및 결제 요청', has: true, note: '어드민' },
-      { name: '마진범위 초과 알림 자동 트리거', has: false, note: '캡쳐 확인 필요' },
+      { name: '재시도 / 전체 취소 버튼', has: true },
+      { name: '추가결제금액 설정 및 결제 요청 (어드민)', has: true },
+      { name: '동일 숙소·항공권 금액·재고 조회', has: false },
+      { name: '인원별 항공권 승인·취소 관리', has: false, note: '누아 자동 업데이트 확인 필요' },
+      { name: '동일 건 재예약 (취소→재예약·인원추가)', has: false },
+      { name: '대체 항공·대체 숙소 조회', has: false },
+      { name: '누아·TMG 연동건 관리자 예약 처리', has: false, note: '양쪽 다 필요' },
+      { name: '파트너스 추가결제 + 부분취소', has: false },
+      { name: '사용자 내 예약 표시·안내 케이스 정리', has: false, note: '정책 정리 필요' },
+      { name: '마진범위 초과 알림 자동 트리거', has: false },
     ]
   },
   B: {
@@ -3572,13 +3598,19 @@ const CASE_DATA = {
       },
     ],
     features: [
+      { name: '여행자 정보 + 여권정보 요청', has: true },
       { name: '신규 객실요금표 추가', has: true },
       { name: '기존 객실요금표 취소', has: true },
       { name: '호텔 직접 문의 채널 (카톡/잔디/이메일)', has: true },
-      { name: '호텔 응답 수동 입력 (가격·확약)', has: true, note: '캡쳐 확인 필요' },
-      { name: '대체 숙소 검색', has: false },
-      { name: '추가결제금액 설정 및 결제 요청', has: true, note: '어드민' },
-      { name: '⚠ 캡쳐 확인 필요 — 다른 시나리오 보강 예정', has: false },
+      { name: '호텔 응답 수동 입력 (가격·확약)', has: true },
+      { name: '추가결제금액 설정 및 결제 요청 (어드민)', has: true },
+      { name: '동일 숙소·항공권 금액·재고 조회', has: false },
+      { name: '인원별 항공권 승인·취소 관리', has: false, note: '누아 자동 업데이트 확인 필요' },
+      { name: '동일 건 재예약 (취소→재예약·인원추가)', has: false },
+      { name: '대체 항공·대체 숙소 조회', has: false },
+      { name: '누아 연동건 관리자 예약 처리 (항공만)', has: false },
+      { name: '파트너스 추가결제 + 부분취소', has: false },
+      { name: '사용자 내 예약 표시·안내 케이스 정리', has: false, note: '정책 정리 필요' },
     ]
   },
   C: {
@@ -3604,13 +3636,20 @@ const CASE_DATA = {
       },
     ],
     features: [
+      { name: '여행자 정보 + 여권정보 요청', has: true },
       { name: '신규 객실요금표 추가', has: true },
       { name: '기존 객실요금표 취소', has: true },
-      { name: '대체 숙소/객실 조회', has: false },
       { name: '신규 항공권 추가', has: true },
       { name: '기존 항공권 취소', has: true },
-      { name: '대체 항공 검색', has: false },
-      { name: '추가결제금액 설정 및 결제 요청', has: true, note: '어드민' },
+      { name: '추가결제금액 설정 및 결제 요청 (어드민)', has: true },
+      { name: '동일 숙소·항공권 금액·재고 조회', has: false },
+      { name: '인원별 항공권 승인·취소 관리', has: false, note: '누아 자동 업데이트 확인 필요' },
+      { name: '동일 건 재예약 (취소→재예약·인원추가)', has: false },
+      { name: '대체 숙소/객실 조회', has: false },
+      { name: '대체 항공편 조회', has: false },
+      { name: 'TMG 연동건 관리자 예약 처리 (숙소만)', has: false },
+      { name: '파트너스 추가결제 + 부분취소', has: false },
+      { name: '사용자 내 예약 표시·안내 케이스 정리', has: false, note: '정책 정리 필요' },
     ]
   },
   D: {
@@ -3636,15 +3675,22 @@ const CASE_DATA = {
       },
     ],
     features: [
+      { name: '여행자 정보 + 여권정보 요청', has: true },
       { name: '신규 항공권 추가', has: true },
       { name: '신규 객실요금표 추가', has: true },
       { name: '기존 항공권 취소', has: true },
       { name: '기존 객실요금표 취소', has: true },
       { name: '항공사·호텔 직접 문의 채널', has: true },
-      { name: '수동 가격 수기 입력', has: true, note: '캡쳐 확인 필요' },
-      { name: '대체 항공·대체 숙소 검색', has: false },
-      { name: '자동 sync', has: false, note: '해당 없음' },
-      { name: '⚠ 캡쳐 확인 필요 — 다른 시나리오 보강 예정', has: false },
+      { name: '수동 가격 수기 입력', has: true },
+      { name: '추가결제금액 설정 및 결제 요청 (어드민)', has: true },
+      { name: '동일 숙소·항공권 금액·재고 조회', has: false },
+      { name: '인원별 항공권 승인·취소 관리 (수기)', has: false },
+      { name: '동일 건 재예약 (취소→재예약·인원추가)', has: false },
+      { name: '대체 항공·대체 숙소 조회', has: false },
+      { name: '파트너스 추가결제 + 부분취소', has: false },
+      { name: '사용자 내 예약 표시·안내 케이스 정리', has: false, note: '정책 정리 필요' },
+      { name: '누아/TMG 연동 관리자 예약 처리', has: false, note: '해당 없음 (수동)' },
+      { name: '자동 sync', has: false, note: '해당 없음 (수동)' },
     ]
   }
 };
@@ -3740,8 +3786,93 @@ function runScenario(caseKey, idx, card) {
   CASE_DATA[caseKey].scenarios[idx].sim?.();
 }
 
+// ============ v4 신규: 고객안내 진행도 - 항목별 처리 이력 데이터 ============
+const HISTORY_DATA = {
+  '여권정보 요청': [
+    { actor: '김PM', sys: false, action: '🔁 수동 재발송', when: '05-13 14:30' },
+    { actor: '이OP', sys: false, action: '📞 미응답 확인', when: '05-02 09:15' },
+    { actor: '시스템', sys: true, action: '🤖 알림톡 자동 발송', when: '04-29 10:00' }
+  ],
+  '여행계약서': [
+    { actor: '시스템', sys: true, action: '🤖 자동 발송 (예약완료)', when: '04-29 10:05' }
+  ],
+  '항공 좌석': [
+    { actor: '시스템', sys: true, action: '🤖 누아 NDC 자동 확약', when: '04-29 10:01' },
+    { actor: '시스템', sys: true, action: '🤖 자동 요청', when: '04-28 17:10' }
+  ],
+  '호텔 객실': [
+    { actor: '시스템', sys: true, action: '🤖 TMG 자동 confirm', when: '04-29 10:02' },
+    { actor: '시스템', sys: true, action: '🤖 reserveBooking 호출', when: '04-28 17:09' }
+  ],
+  '여권 수령': [
+    { actor: '이OP', sys: false, action: '✋ 수기 확인 (성인 2명 수령)', when: '04-30 16:40' },
+    { actor: '김PM', sys: false, action: '📞 고객 통화 (아동 재발급 중)', when: '04-30 14:20' }
+  ],
+  '여권정보 항공사 전달': [
+    { actor: '시스템', sys: true, action: '🤖 누아 OrderCreate 자동 전달', when: '05-01 09:00' }
+  ],
+  '여권정보 호텔 전달': [
+    { actor: '시스템', sys: true, action: '⏳ 대기 중 (아동 여권 수령 후)', when: '-' }
+  ],
+  '보험 가입': [
+    { actor: '시스템', sys: true, action: '⏳ 대기 중 (D-30 자동 가입 예정)', when: '-' }
+  ],
+  '항공 e티켓': [
+    { actor: '시스템', sys: true, action: '⚠ 미첨부 (발권 후 자동 첨부 예정)', when: '-' }
+  ],
+  '숙소 바우처': [
+    { actor: '이OP', sys: false, action: '✋ 수동 발송 (알림톡)', when: '05-10 12:00' },
+    { actor: '이OP', sys: false, action: '📎 파일 수동 첨부', when: '05-10 11:55' }
+  ],
+  '체크아웃 케어 안내': [
+    { actor: '시스템', sys: true, action: '⏳ 대기 중 (D-3 자동 발송 예정)', when: '-' }
+  ],
+  '픽업 안내': [
+    { actor: '시스템', sys: true, action: '⏳ 미발송 (D-1 자동 발송 예정)', when: '-' }
+  ]
+};
+
+function renderGuideHistory() {
+  document.querySelectorAll('.guide-item .item-name').forEach(name => {
+    const text = name.textContent.trim();
+    const hist = HISTORY_DATA[text];
+    if (!hist || !hist.length) return;
+    const item = name.closest('.guide-item');
+    if (item.querySelector('.item-history')) return; // 중복 방지
+    const recent = hist[0];
+    const recentHtml = `
+      <div class="h-recent">
+        <span class="h-actor ${recent.sys ? 'system' : ''}">👤 ${recent.actor}</span>
+        <span class="h-sep">·</span>
+        <span class="h-action">${recent.action}</span>
+        <span class="h-sep">·</span>
+        <span class="h-when">${recent.when}</span>
+        ${hist.length > 1 ? `<span class="h-count">이력 ${hist.length}건</span>` : ''}
+      </div>
+    `;
+    const fullHtml = hist.length > 1 ? `
+      <div class="h-full">
+        ${hist.slice(1).map(h => `
+          <div class="h-row">
+            <span class="h-actor-s ${h.sys ? 'system' : ''}">${h.actor}</span>
+            <span class="h-sep">·</span>
+            <span class="h-action-s">${h.action}</span>
+            <span class="h-when-s">${h.when}</span>
+          </div>
+        `).join('')}
+      </div>
+    ` : '';
+    const wrapper = document.createElement('div');
+    wrapper.className = 'item-history';
+    wrapper.innerHTML = recentHtml + fullHtml;
+    wrapper.onclick = (e) => { e.stopPropagation(); wrapper.classList.toggle('expanded'); };
+    item.appendChild(wrapper);
+  });
+}
+
 // 초기 상태: C 케이스 (캡쳐 검증된 케이스부터 노출)
 window.addEventListener('DOMContentLoaded', () => {
+  renderGuideHistory();
   const initBtn = document.querySelector('.case-tab[data-case="C"]');
   selectCase('C', initBtn);
 });
