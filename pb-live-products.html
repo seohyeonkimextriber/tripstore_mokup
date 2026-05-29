@@ -333,7 +333,7 @@ table.tbl tbody tr:last-child td { border-bottom: none; }
       <div class="page-title">라이브 상품 노출 관리</div>
       <div class="page-desc">
         자동생성 후 <strong>노출 중인 PB 상품</strong>을 검토하고 미노출 처리합니다. <code>MANUAL_BLOCK_TEMP</code>(R3) 진입점 — 미노출 처리 시 자동으로 Reject Pool로 이동합니다.<br>
-        <span style="font-size:11.5px; color:rgba(0,0,0,0.45);">관리 흐름: 라이브 상품 검증 → 미노출 처리(R3) → Reject Pool 이동 → 사유 검토 후 재노출 또는 영구 제외(G4)</span>
+        <span style="font-size:11.5px; color:rgba(0,0,0,0.45);">관리 흐름: 라이브 상품 검증 → 미노출 처리 → Reject Pool 이동 → 사유 검토 후 재노출</span>
       </div>
     </div>
     <div class="page-actions">
@@ -401,7 +401,6 @@ table.tbl tbody tr:last-child td { border-bottom: none; }
     <div class="bulk-actions">
       <button class="btn-bulk warn" onclick="openBulkHideModal()">⊘ 선택 미노출 처리</button>
       <button class="btn-bulk" onclick="alert('정가마진 일괄 조정 — 사유 입력 후 진행')">💰 마진 조정</button>
-      <button class="btn-bulk danger" onclick="alert('영구 블랙리스트는 신중하게 — 확인 모달 필요')">🚫 영구 제외</button>
       <button class="btn-bulk" onclick="clearSel()">선택 해제</button>
     </div>
   </div>
@@ -821,7 +820,6 @@ table.tbl tbody tr:last-child td { border-bottom: none; }
               <div class="action-cell">
                 <button class="btn-act" onclick="openDetailModal()">📊 상세</button>
                 <button class="btn-act success" onclick="reactivate('PB-58818')">🔄 재노출</button>
-                <button class="btn-act danger" onclick="confirmBan('PB-58818')">🚫 영구</button>
               </div>
             </td>
           </tr>
@@ -851,7 +849,6 @@ table.tbl tbody tr:last-child td { border-bottom: none; }
       <strong>Phase 1 (회의록 2026-05-29 단순화)</strong> — 미노출 사유 3카테고리:<br>
       · [운영자 판단] 일시 미노출 / 콘텐츠 이슈 / 공급사 응대 지연<br>
       · [시스템 자동] <code>NEGATIVE_MARGIN</code> 역마진 · <code>BELOW_COMPETITION</code> 경쟁가 미달 (평균가 × 0.97 초과)<br>
-      · [영구 제외] <code>MANUAL_BLOCK_PERM</code> 다음 배치에서도 영구 제외<br>
       <br>
       <strong style="color:rgba(0,0,0,0.4);">⏸ Phase 2 보류</strong> — 학습 데이터 축적 후 도입:
       <code style="opacity:0.5;">LOW_VIEW</code> 조회수 급감 · <code style="opacity:0.5;">ZERO_CONV</code> 전환율 부진 · <code style="opacity:0.5;">LOW_DEMAND_SIGNAL</code> 인기도 미달
@@ -888,34 +885,19 @@ table.tbl tbody tr:last-child td { border-bottom: none; }
         </div>
       </div>
 
-      <!-- 처리 타입 -->
-      <label class="field-label">처리 타입 <span class="req">*</span></label>
-      <div class="action-type-row">
-        <button class="action-type-btn active" data-type="hide" onclick="pickType(this)">
-          <div class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94"/><line x1="1" y1="1" x2="23" y2="23"/></svg></div>
-          <div>
-            <div class="at-title">일시 미노출 <span class="at-code">R3 MANUAL_BLOCK_TEMP</span></div>
-            <div class="at-desc">검토 후 재노출 가능. Reject Pool로 이동.</div>
-          </div>
-        </button>
-        <button class="action-type-btn" data-type="ban" onclick="pickType(this)">
-          <div class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="4.93" y1="4.93" x2="19.07" y2="19.07"/></svg></div>
-          <div>
-            <div class="at-title">영구 제외 <span class="at-code">G4 MANUAL_BLOCK_PERM</span></div>
-            <div class="at-desc">다음 생성 배치에서도 영구 제외. 신중히 사용.</div>
-          </div>
-        </button>
+      <!-- 처리 타입 — 회의록 5/29 단순화: 미노출 하나로 통일 (영구 제외 폐기) -->
+      <div style="padding:10px 14px; background:#fff7e6; border:1px solid #ffd591; border-radius:8px; margin-bottom:14px; font-size:12.5px; color:#874d00; line-height:1.55;">
+        ⊘ <strong>미노출 처리</strong> — 검토 후 재노출 가능. 변경 이력에 영구 기록.
       </div>
 
       <!-- 사유 카테고리 칩 -->
       <label class="field-label">사유 카테고리 <span class="hint">클릭하면 입력란에 채워집니다</span></label>
       <div style="font-size:11px; color:rgba(0,0,0,0.5); margin-bottom:8px;">
-        ★ 회의록 2026-05-29 — Phase 1에서는 운영자 판단 + 시스템 자동 + 영구 제외 3가지 카테고리로 단순화 (학습 기반 사유 Phase 2 도입 예정)
+        ★ 회의록 2026-05-29 — 미노출 사유 단순화 (운영자 판단 + 시스템 자동 2가지) · 영구 제외 폐기 · 공급사 이슈는 숙박권/항공권 단위 자동생성 중단으로 처리
       </div>
       <div class="reason-chips">
         <button class="reason-chip" onclick="pickReason(this, '운영자 판단 — 일시 미노출')">[운영자] 일시 미노출</button>
         <button class="reason-chip" onclick="pickReason(this, '연결된 콘텐츠(POST) 누락 또는 오류 — 콘텐츠 수정 후 재노출')">[운영자] 콘텐츠 이슈</button>
-        <button class="reason-chip" onclick="pickReason(this, '공급사 응대 지연 / 항공편 운휴 / 숙소 재고 변동')">[운영자] 공급사 응대 지연</button>
         <button class="reason-chip" onclick="pickReason(this, '시스템 자동 — 역마진 (NEGATIVE_MARGIN)')">[시스템] 역마진</button>
         <button class="reason-chip" onclick="pickReason(this, '시스템 자동 — 경쟁가 미달 (BELOW_COMPETITION) · 평균가 × 0.97 초과')">[시스템] 경쟁가 미달</button>
       </div>
@@ -927,15 +909,6 @@ table.tbl tbody tr:last-child td { border-bottom: none; }
       <label class="field-label">상세 사유 <span class="req">*</span></label>
       <textarea class="reason-ta" id="hideReasonText" placeholder="예: 빈원더스 7월 미제공 안내 추가 후 재노출 / 항공 유류할증 인상으로 마진 2.8% — 정가마진 조정 후 재노출"></textarea>
 
-      <!-- 재검토 기한 -->
-      <label class="field-label" style="margin-top:14px;">재검토 기한 <span class="hint">Reject Pool 알림 트리거</span></label>
-      <div class="duration-row">
-        <button class="duration-btn" onclick="pickDur(this)">3일</button>
-        <button class="duration-btn active" onclick="pickDur(this)">7일</button>
-        <button class="duration-btn" onclick="pickDur(this)">14일</button>
-        <button class="duration-btn" onclick="pickDur(this)">30일</button>
-        <button class="duration-btn" onclick="pickDur(this)">출발일까지</button>
-      </div>
     </div>
 
     <div class="m-foot">
@@ -1134,8 +1107,7 @@ function pickDur(btn) {
 function applyHide() {
   const val = document.getElementById('hideReasonText').value.trim();
   if (!val) { alert('사유를 입력해 주세요.'); return; }
-  const type = document.querySelector('#hideModal .action-type-btn.active').dataset.type;
-  alert(`${type === 'hide' ? 'R3 일시 미노출' : 'G4 영구 제외'} 처리 완료\n사유: ${val}\n\n→ Reject Pool로 이동됨 · 변경 이력 저장`);
+  alert(`⊘ 미노출 처리 완료\n사유: ${val}\n\n→ Reject Pool로 이동 · 변경 이력 저장`);
   closeHideModal();
 }
 
@@ -1163,10 +1135,6 @@ function reactivate(pid) {
   alert(`${pid} 재노출 처리 완료. 변경 이력 저장.`);
 }
 
-function confirmBan(pid) {
-  if (!confirm(`${pid} — G4 영구 제외 처리할까요?\n\n⚠ 다음 생성 배치에서도 영구 제외됩니다. 신중히 진행하세요.`)) return;
-  alert(`${pid} 영구 제외(G4 MANUAL_BLOCK_PERM) 완료.`);
-}
 </script>
 </body>
 </html>
