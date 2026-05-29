@@ -1,0 +1,691 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PB 예약 처리 — 4 케이스 시안 (2026-05-29 회의 반영)</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { font-family: -apple-system, 'Pretendard', sans-serif; background: #f5f5f5; color: #1a1a1a; font-size: 13px; }
+  .header { background: #fff; border-bottom: 1px solid #e0e0e0; padding: 0 24px; display: flex; align-items: center; height: 56px; position: sticky; top: 0; z-index: 100; }
+  .header .logo { font-weight: 700; font-size: 15px; color: #333; margin-right: 32px; }
+  .header nav a { color: #666; text-decoration: none; margin-right: 20px; font-size: 13px; }
+  .header nav a.active { color: #1a1a1a; font-weight: 600; }
+  .page { max-width: 1500px; margin: 0 auto; padding: 24px; }
+  .page-title { display: flex; align-items: baseline; gap: 12px; margin-bottom: 8px; }
+  .page-title h1 { font-size: 22px; font-weight: 700; }
+  .page-title .sub { font-size: 13px; color: #888; }
+  .page-desc { font-size: 13px; color: #666; margin-bottom: 20px; line-height: 1.6; }
+
+  .meeting-note { background: #fff3e0; border: 1px solid #ffe082; border-radius: 10px; padding: 14px 18px; margin-bottom: 20px; font-size: 12px; color: #6d4c00; }
+  .meeting-note b { color: #bf360c; }
+  .meeting-note ul { margin: 6px 0 0 18px; }
+  .meeting-note li { margin: 3px 0; line-height: 1.6; }
+
+  .badge { display: inline-block; padding: 3px 10px; border-radius: 12px; font-size: 11px; font-weight: 600; }
+  .badge.green { background: #e8f5e9; color: #2e7d32; }
+  .badge.red { background: #ffeaea; color: #d32f2f; }
+  .badge.blue { background: #e3f2fd; color: #1565c0; }
+  .badge.gray { background: #f0f0f0; color: #666; }
+  .badge.orange { background: #fff3e0; color: #e65100; }
+  .badge.purple { background: #f3e5f5; color: #6a1b9a; }
+  .badge.yellow { background: #fffde7; color: #f57f17; }
+
+  /* 케이스 매트릭스 */
+  .case-matrix { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-bottom: 24px; }
+  .case-mini { background: #fff; border: 2px solid #e8e8e8; border-radius: 10px; padding: 14px 16px; cursor: pointer; transition: all .15s; }
+  .case-mini:hover { border-color: #1a1a1a; }
+  .case-mini.active { border-color: #1a1a1a; background: #f8f8f8; }
+  .case-mini .case-no { font-size: 11px; font-weight: 700; color: #888; margin-bottom: 6px; }
+  .case-mini .case-name { font-size: 13px; font-weight: 700; margin-bottom: 8px; }
+  .case-mini .case-combo { display: flex; gap: 6px; font-size: 11px; }
+  .case-mini .pill { padding: 2px 8px; border-radius: 8px; font-weight: 600; }
+  .pill.indi { background: #e3f2fd; color: #1565c0; }
+  .pill.manual { background: #fff3e0; color: #e65100; }
+  .case-mini .case-flow { font-size: 11px; color: #666; margin-top: 8px; line-height: 1.5; }
+  .case-mini .case-tag { display: inline-block; margin-top: 6px; font-size: 10px; font-weight: 700; padding: 2px 6px; border-radius: 4px; }
+  .case-tag.auto { background: #e8f5e9; color: #2e7d32; }
+  .case-tag.hold { background: #fff3e0; color: #e65100; }
+
+  /* 케이스 상세 */
+  .case-detail { display: none; }
+  .case-detail.active { display: block; }
+
+  .section { background: #fff; border-radius: 12px; border: 1px solid #e8e8e8; margin-bottom: 16px; overflow: hidden; }
+  .section-header { display: flex; align-items: center; justify-content: space-between; padding: 14px 20px; border-bottom: 1px solid #f0f0f0; }
+  .section-header h2 { font-size: 14px; font-weight: 700; display: flex; align-items: center; gap: 8px; }
+  .section-header .num { width: 22px; height: 22px; border-radius: 50%; background: #1a1a1a; color: #fff; font-size: 11px; font-weight: 700; display: inline-flex; align-items: center; justify-content: center; }
+  .section-body { padding: 18px 20px; }
+
+  /* 상태 흐름 (스텝 차트) */
+  .flow { display: grid; grid-template-columns: repeat(6, 1fr); gap: 0; margin: 8px 0 14px; position: relative; }
+  .flow-step { position: relative; padding: 12px 12px 12px 18px; background: #fafafa; border-top: 1px solid #e8e8e8; border-bottom: 1px solid #e8e8e8; }
+  .flow-step:first-child { border-left: 1px solid #e8e8e8; border-radius: 8px 0 0 8px; padding-left: 14px; }
+  .flow-step:last-child { border-right: 1px solid #e8e8e8; border-radius: 0 8px 8px 0; }
+  .flow-step::after { content: ''; position: absolute; right: -10px; top: 50%; transform: translateY(-50%) rotate(-45deg); width: 18px; height: 18px; background: #fafafa; border-top: 1px solid #e8e8e8; border-right: 1px solid #e8e8e8; z-index: 1; }
+  .flow-step:last-child::after { display: none; }
+  .flow-step.done { background: #e8f5e9; border-color: #c8e6c9; }
+  .flow-step.done::after { background: #e8f5e9; border-color: #c8e6c9; }
+  .flow-step.active { background: #fff3e0; border-color: #ffe082; }
+  .flow-step.active::after { background: #fff3e0; border-color: #ffe082; }
+  .flow-step.todo { background: #fff; border-color: #e8e8e8; }
+  .flow-step.todo::after { background: #fff; border-color: #e8e8e8; }
+  .flow-step .step-no { font-size: 10px; color: #888; font-weight: 700; margin-bottom: 3px; }
+  .flow-step .step-name { font-size: 12px; font-weight: 700; }
+  .flow-step.done .step-no { color: #2e7d32; }
+  .flow-step.active .step-no { color: #e65100; }
+  .flow-step .step-actor { font-size: 10px; color: #666; margin-top: 3px; }
+
+  /* 2단 그리드: 상품 / 액션 */
+  .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+  .product-card { border: 1px solid #e8e8e8; border-radius: 10px; padding: 14px 16px; background: #fff; }
+  .product-card.flight { border-left: 4px solid #1565c0; }
+  .product-card.hotel { border-left: 4px solid #6a1b9a; }
+  .product-card.flight.manual { border-left-color: #e65100; }
+  .product-card.hotel.manual { border-left-color: #e65100; }
+  .product-card .pc-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; }
+  .product-card .pc-title { font-size: 13px; font-weight: 700; display: flex; align-items: center; gap: 6px; }
+  .product-card .pc-title .ico { width: 22px; height: 22px; border-radius: 6px; display: inline-flex; align-items: center; justify-content: center; font-size: 11px; }
+  .product-card.flight .ico { background: #e3f2fd; color: #1565c0; }
+  .product-card.hotel .ico { background: #f3e5f5; color: #6a1b9a; }
+  .product-card .pc-info { font-size: 12px; color: #444; line-height: 1.7; padding: 6px 0; border-top: 1px dashed #f0f0f0; }
+  .product-card .pc-info b { color: #1a1a1a; }
+  .product-card .pc-row { display: flex; justify-content: space-between; padding: 3px 0; font-size: 12px; }
+  .product-card .pc-row .l { color: #888; }
+  .product-card .pc-row .v { font-weight: 600; }
+  .product-card .pc-row .v.mono { font-family: 'SF Mono', monospace; }
+  .product-card .pc-row .v.warn { color: #d32f2f; }
+  .product-card .pc-actions { display: flex; gap: 6px; margin-top: 10px; padding-top: 10px; border-top: 1px solid #f0f0f0; flex-wrap: wrap; }
+
+  .btn { padding: 7px 14px; border-radius: 6px; font-size: 12px; font-weight: 600; cursor: pointer; border: 1px solid transparent; display: inline-flex; align-items: center; gap: 4px; }
+  .btn-primary { background: #1a1a1a; color: #fff; }
+  .btn-outline { background: #fff; color: #333; border-color: #d0d0d0; }
+  .btn-blue { background: #e3f2fd; color: #1565c0; border-color: #bbdefb; }
+  .btn-orange { background: #fff3e0; color: #e65100; border-color: #ffe0b2; }
+  .btn-purple { background: #f3e5f5; color: #6a1b9a; border-color: #e1bee7; }
+  .btn-green { background: #e8f5e9; color: #2e7d32; border-color: #c8e6c9; }
+  .btn-danger { background: #fff; color: #d32f2f; border-color: #ffcdd2; }
+  .btn-sm { padding: 5px 10px; font-size: 11px; }
+  .btn:disabled { opacity: .4; cursor: not-allowed; }
+
+  /* 가격 변동 경고 */
+  .price-diff { background: #fffde7; border: 1px solid #fff9c4; border-radius: 8px; padding: 12px 14px; margin: 10px 0; }
+  .price-diff .pd-title { font-size: 12px; font-weight: 700; color: #f57f17; margin-bottom: 8px; display: flex; align-items: center; gap: 6px; }
+  .price-diff .pd-table { font-size: 12px; }
+  .price-diff .pd-row { display: grid; grid-template-columns: 90px 1fr 1fr 80px; gap: 10px; padding: 4px 0; }
+  .price-diff .pd-row.h { font-weight: 700; color: #888; font-size: 11px; border-bottom: 1px dashed #f9c84d; padding-bottom: 6px; margin-bottom: 4px; }
+  .price-diff .pd-row .delta.plus { color: #d32f2f; font-weight: 700; font-family: 'SF Mono', monospace; }
+  .price-diff .pd-row .delta.minus { color: #2e7d32; font-weight: 700; font-family: 'SF Mono', monospace; }
+  .price-diff .pd-row .delta.same { color: #888; font-family: 'SF Mono', monospace; }
+  .price-diff .pd-actions { display: flex; gap: 6px; margin-top: 10px; padding-top: 10px; border-top: 1px dashed #f9c84d; }
+
+  /* 액션 패널 */
+  .action-panel { background: #fafafa; border-radius: 10px; padding: 16px; }
+  .action-panel .ap-title { font-size: 12px; font-weight: 700; color: #666; margin-bottom: 12px; display: flex; align-items: center; gap: 8px; }
+  .action-panel .ap-row { display: flex; align-items: center; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid #f0f0f0; gap: 12px; }
+  .action-panel .ap-row:last-child { border-bottom: none; padding-bottom: 0; }
+  .action-panel .ap-label { font-size: 12px; color: #555; flex: 1; }
+  .action-panel .ap-label b { color: #1a1a1a; }
+  .action-panel .ap-status { font-size: 11px; color: #888; margin-top: 2px; }
+
+  /* 타임라인 */
+  .timeline { position: relative; padding-left: 24px; }
+  .timeline::before { content: ''; position: absolute; left: 7px; top: 4px; bottom: 4px; width: 2px; background: #e8e8e8; }
+  .tl-item { position: relative; padding: 8px 0 12px; }
+  .tl-item::before { content: ''; position: absolute; left: -21px; top: 12px; width: 10px; height: 10px; border-radius: 50%; background: #fff; border: 2px solid #bbb; }
+  .tl-item.done::before { border-color: #2e7d32; background: #e8f5e9; }
+  .tl-item.active::before { border-color: #e65100; background: #fff3e0; }
+  .tl-head { display: flex; align-items: center; gap: 8px; font-size: 12px; }
+  .tl-head .tl-title { font-weight: 700; color: #1a1a1a; }
+  .tl-head .tl-time { margin-left: auto; font-size: 11px; color: #888; }
+  .tl-sub { font-size: 11px; color: #666; margin-top: 3px; }
+  .tl-sub .tl-actor { color: #1565c0; font-weight: 600; }
+
+  /* 공통: 탑승객 */
+  .pax-table { font-size: 12px; }
+  .pax-table th, .pax-table td { padding: 8px 10px; text-align: left; border-bottom: 1px solid #f0f0f0; }
+  .pax-table th { background: #fafafa; font-weight: 600; color: #666; font-size: 11px; }
+  .pax-table .pax-type { font-weight: 600; }
+
+  /* 고객 컨택 박스 */
+  .contact-box { background: #e8eaf6; border: 1px solid #c5cae9; border-radius: 10px; padding: 14px 16px; }
+  .contact-box .cb-title { font-size: 13px; font-weight: 700; color: #283593; margin-bottom: 8px; display: flex; align-items: center; gap: 6px; }
+  .contact-box .cb-msg { font-size: 12px; color: #444; line-height: 1.7; background: #fff; border-radius: 6px; padding: 10px 12px; margin: 8px 0; }
+  .contact-box .cb-actions { display: flex; gap: 6px; margin-top: 8px; }
+
+  /* 액션 비교 표 (요약용) */
+  .compare-table { width: 100%; border-collapse: collapse; font-size: 12px; background: #fff; border-radius: 10px; overflow: hidden; border: 1px solid #e8e8e8; }
+  .compare-table th, .compare-table td { padding: 12px 14px; text-align: left; border-bottom: 1px solid #f0f0f0; vertical-align: top; }
+  .compare-table th { background: #fafafa; font-weight: 700; color: #555; font-size: 11px; }
+  .compare-table td:first-child { font-weight: 600; color: #333; width: 140px; }
+  .compare-table .col-c1 { background: #f1f8e9; }
+  .compare-table .col-c2 { background: #fff3e0; }
+  .compare-table .col-c3 { background: #fff3e0; }
+  .compare-table .col-c4 { background: #fff3e0; }
+  .compare-table .small { font-size: 11px; color: #666; margin-top: 4px; }
+
+  .legend { display: flex; gap: 16px; padding: 10px 14px; background: #fafafa; border-radius: 8px; font-size: 11px; margin-bottom: 14px; flex-wrap: wrap; }
+  .legend .l-item { display: flex; align-items: center; gap: 6px; }
+  .legend .dot { width: 10px; height: 10px; border-radius: 50%; }
+
+  .common-section { display: block; margin-top: 24px; padding-top: 24px; border-top: 2px dashed #e0e0e0; }
+  .common-section h2 { font-size: 16px; font-weight: 700; margin-bottom: 12px; }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="logo">트립스토어 ADMIN</div>
+  <nav>
+    <a href="#">대시보드</a>
+    <a href="#">상품</a>
+    <a href="#" class="active">예약</a>
+    <a href="#">정산</a>
+    <a href="#">설정</a>
+  </nav>
+</div>
+
+<div class="page">
+  <div class="page-title">
+    <h1>PB 예약 처리 시안</h1>
+    <span class="sub">4 케이스 비교 — 2026-05-29 회의 반영</span>
+  </div>
+  <div class="page-desc">
+    PB 상품은 항공/숙박 각각 <b>인디비(API 연동)</b> 또는 <b>수동</b>으로 등록되어 총 4개 조합이 발생합니다.<br>
+    조합별로 어드민 예약 처리 흐름이 달라지며, 한 건이라도 수동이 섞이면 <b>예약 접수 단계에서 정지</b> 후 어드민이 가능 여부를 확인한 뒤 고객 컨택을 거쳐 확정합니다.
+  </div>
+
+  <div class="meeting-note">
+    <b>📌 2026-05-29 회의 결정 사항</b>
+    <ul>
+      <li><b>인디비×인디비만 자동 컨펌</b>(즉시 확정관). 가격 변동은 환율 수준 자동 허용 / 재고만 체크</li>
+      <li>수동이 1건이라도 포함되면 → <b>예약은 결제까지만 받고, 공급사 예약은 호출하지 않음</b>(접수 정지)</li>
+      <li>23:30~00:00 홀드 프로세스는 <b>폐기</b> → 즉시 확정관 PDP에 "페널티 발생 가능" 안내 문구로 대체</li>
+      <li>수동 처리 완료 후 어드민이 인디비 측을 <b>다시 조회 → 가능 확인 → 고객 컨택 → 확정</b></li>
+      <li>재조회 시 <b>가격이 달라져 있을 수 있음</b> → 차액 안내 후 고객 동의 필요 (동의 시 차액 결제, 거절 시 취소)</li>
+      <li>탑승객 정보는 항상 어드민에 노출 (현재는 항공권 아래에서만 보임) — 보관/저장 정책은 별도 검토</li>
+      <li>결제: PB 전체 <b>전액 결제만</b>, 취소는 모든 케이스 관리자 개입 필수</li>
+      <li>모든 기능 어드민에 일원화 (파트너스 별도 분기 X, 권한으로 제어)</li>
+    </ul>
+  </div>
+
+  <!-- 케이스 매트릭스 -->
+  <div class="case-matrix">
+    <div class="case-mini active" data-case="1" onclick="showCase(1)">
+      <div class="case-no">CASE 1</div>
+      <div class="case-name">즉시 확정관</div>
+      <div class="case-combo">
+        <span class="pill indi">✈️ 인디비</span>
+        <span class="pill indi">🏨 인디비</span>
+      </div>
+      <div class="case-flow">결제 = 발권/컨펌 자동</div>
+      <span class="case-tag auto">AUTO</span>
+    </div>
+    <div class="case-mini" data-case="2" onclick="showCase(2)">
+      <div class="case-no">CASE 2</div>
+      <div class="case-name">숙박만 수동</div>
+      <div class="case-combo">
+        <span class="pill indi">✈️ 인디비</span>
+        <span class="pill manual">🏨 수동</span>
+      </div>
+      <div class="case-flow">숙소 확인 → 항공 재조회 → 예약</div>
+      <span class="case-tag hold">접수 정지</span>
+    </div>
+    <div class="case-mini" data-case="3" onclick="showCase(3)">
+      <div class="case-no">CASE 3</div>
+      <div class="case-name">항공만 수동</div>
+      <div class="case-combo">
+        <span class="pill manual">✈️ 수동</span>
+        <span class="pill indi">🏨 인디비</span>
+      </div>
+      <div class="case-flow">항공 확인 → 숙박 재조회 → 예약</div>
+      <span class="case-tag hold">접수 정지</span>
+    </div>
+    <div class="case-mini" data-case="4" onclick="showCase(4)">
+      <div class="case-no">CASE 4</div>
+      <div class="case-name">전체 수동</div>
+      <div class="case-combo">
+        <span class="pill manual">✈️ 수동</span>
+        <span class="pill manual">🏨 수동</span>
+      </div>
+      <div class="case-flow">현행 PB 운영과 동일</div>
+      <span class="case-tag hold">접수 정지</span>
+    </div>
+  </div>
+
+  <div class="legend">
+    <div class="l-item"><span class="dot" style="background:#2e7d32"></span> 완료</div>
+    <div class="l-item"><span class="dot" style="background:#e65100"></span> 진행 중 / 액션 필요</div>
+    <div class="l-item"><span class="dot" style="background:#bbb"></span> 대기</div>
+    <div class="l-item"><span class="pill indi">인디비</span> = API 자동 연동 (누아 / TMG)</div>
+    <div class="l-item"><span class="pill manual">수동</span> = 어드민이 공급사에 수기 확인</div>
+  </div>
+
+  <!-- ============== CASE 1 ============== -->
+  <div class="case-detail active" id="case-1">
+    <div class="section">
+      <div class="section-header">
+        <h2><span class="num">1</span> CASE 1 · 인디비 항공 × 인디비 숙박 (즉시 확정관)</h2>
+        <span class="badge green">자동 확정</span>
+      </div>
+      <div class="section-body">
+        <div class="flow">
+          <div class="flow-step done"><div class="step-no">STEP 1</div><div class="step-name">고객 결제</div><div class="step-actor">사용자</div></div>
+          <div class="flow-step done"><div class="step-no">STEP 2</div><div class="step-name">항공 발권 호출</div><div class="step-actor">시스템 → 누아</div></div>
+          <div class="flow-step done"><div class="step-no">STEP 3</div><div class="step-name">숙박 reserve</div><div class="step-actor">시스템 → TMG</div></div>
+          <div class="flow-step done"><div class="step-no">STEP 4</div><div class="step-name">숙박 confirm</div><div class="step-actor">시스템 → TMG</div></div>
+          <div class="flow-step done"><div class="step-no">STEP 5</div><div class="step-name">예약 확정 안내</div><div class="step-actor">시스템 → 사용자</div></div>
+          <div class="flow-step todo"><div class="step-no">STEP 6</div><div class="step-name">출발 전 여권 수집</div><div class="step-actor">CS</div></div>
+        </div>
+
+        <div class="two-col" style="margin-top:18px">
+          <div class="product-card flight">
+            <div class="pc-head">
+              <div class="pc-title"><span class="ico">✈️</span> 항공 · 누아 인디비</div>
+              <span class="badge green">발권 완료</span>
+            </div>
+            <div class="pc-row"><span class="l">노선</span><span class="v">ICN → HKT (대한항공 KE661)</span></div>
+            <div class="pc-row"><span class="l">일정</span><span class="v">2026-08-12 ~ 2026-08-17</span></div>
+            <div class="pc-row"><span class="l">결제 시 가격</span><span class="v mono">₩712,000</span></div>
+            <div class="pc-row"><span class="l">확정 가격</span><span class="v mono">₩712,000</span></div>
+            <div class="pc-actions">
+              <button class="btn btn-outline btn-sm">티켓 조회</button>
+              <button class="btn btn-outline btn-sm">PNR 보기</button>
+            </div>
+          </div>
+          <div class="product-card hotel">
+            <div class="pc-head">
+              <div class="pc-title"><span class="ico">🏨</span> 숙박 · TMG 인디비</div>
+              <span class="badge green">CONFIRMED</span>
+            </div>
+            <div class="pc-row"><span class="l">호텔</span><span class="v">Phuket Marriott Resort, Merlin Beach</span></div>
+            <div class="pc-row"><span class="l">객실</span><span class="v">Deluxe Pool Access · 5박</span></div>
+            <div class="pc-row"><span class="l">결제 시 가격</span><span class="v mono">₩1,240,000</span></div>
+            <div class="pc-row"><span class="l">확정 가격</span><span class="v mono">₩1,240,000</span></div>
+            <div class="pc-actions">
+              <button class="btn btn-outline btn-sm">바우처</button>
+              <button class="btn btn-outline btn-sm">TMG 예약번호</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="action-panel" style="margin-top:14px;background:#e8f5e9;border:1px solid #c8e6c9">
+          <div class="ap-title" style="color:#2e7d32">✓ 어드민 액션 — 자동 확정 완료</div>
+          <div class="ap-label" style="color:#444">시스템이 결제 직후 항공 발권 + 숙박 reserve → confirm 까지 자동으로 처리했습니다. 가격은 환율 수준의 변동만 자동 흡수했고, 재고가 없었다면 결제 자동 취소되었을 케이스입니다.</div>
+          <div class="ap-label" style="margin-top:8px;color:#555"><b>출발 전 CS 액션:</b> 여권 사본 수령, 일정표 발송, 픽업/체크인 안내</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============== CASE 2 ============== -->
+  <div class="case-detail" id="case-2">
+    <div class="section">
+      <div class="section-header">
+        <h2><span class="num">2</span> CASE 2 · 인디비 항공 × 수동 숙박</h2>
+        <span class="badge orange">접수 정지 → 수동 처리</span>
+      </div>
+      <div class="section-body">
+        <div class="flow">
+          <div class="flow-step done"><div class="step-no">STEP 1</div><div class="step-name">고객 결제</div><div class="step-actor">사용자</div></div>
+          <div class="flow-step done"><div class="step-no">STEP 2</div><div class="step-name">예약 접수<br><span style="font-size:10px;color:#666">(공급사 호출 X)</span></div><div class="step-actor">시스템</div></div>
+          <div class="flow-step active"><div class="step-no">STEP 3</div><div class="step-name">숙박 가능 확인</div><div class="step-actor">CS → 공급사</div></div>
+          <div class="flow-step todo"><div class="step-no">STEP 4</div><div class="step-name">항공 재조회</div><div class="step-actor">CS · 누아</div></div>
+          <div class="flow-step todo"><div class="step-no">STEP 5</div><div class="step-name">고객 컨택 / 차액 동의</div><div class="step-actor">CS → 사용자</div></div>
+          <div class="flow-step todo"><div class="step-no">STEP 6</div><div class="step-name">예약 확정</div><div class="step-actor">CS</div></div>
+        </div>
+
+        <div class="two-col" style="margin-top:18px">
+          <div class="product-card flight">
+            <div class="pc-head">
+              <div class="pc-title"><span class="ico">✈️</span> 항공 · 누아 인디비</div>
+              <span class="badge yellow">대기 — 숙박 확정 후 발권</span>
+            </div>
+            <div class="pc-row"><span class="l">노선</span><span class="v">ICN → DAD (제주항공 7C2151)</span></div>
+            <div class="pc-row"><span class="l">결제 시 가격</span><span class="v mono">₩598,000</span></div>
+            <div class="pc-row"><span class="l">현재 조회 가격</span><span class="v mono">— (미조회)</span></div>
+            <div class="pc-row"><span class="l">오퍼 유효시간</span><span class="v warn">조회 시 약 20분</span></div>
+            <div class="pc-actions">
+              <button class="btn btn-blue btn-sm">🔄 재고/금액 재조회</button>
+              <button class="btn btn-primary btn-sm" disabled>예약 넣기</button>
+              <span class="badge gray" style="margin-left:auto">숙박 확정 후 활성화</span>
+            </div>
+          </div>
+          <div class="product-card hotel manual">
+            <div class="pc-head">
+              <div class="pc-title"><span class="ico">🏨</span> 숙박 · 수동 등록</div>
+              <span class="badge orange">공급사 확인 대기</span>
+            </div>
+            <div class="pc-row"><span class="l">호텔</span><span class="v">다낭 미카즈키 호텔</span></div>
+            <div class="pc-row"><span class="l">공급사</span><span class="v">베트남 현지 파트너 A</span></div>
+            <div class="pc-row"><span class="l">결제 시 가격</span><span class="v mono">₩620,000</span></div>
+            <div class="pc-row"><span class="l">담당자</span><span class="v">현정</span></div>
+            <div class="pc-actions">
+              <button class="btn btn-orange btn-sm">📧 가능 여부 문의 메일</button>
+              <button class="btn btn-green btn-sm">✓ 가능 회신 처리</button>
+              <button class="btn btn-danger btn-sm">✗ 불가 회신 처리</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- 가격 변동 안내 (재조회 결과) -->
+        <div class="price-diff">
+          <div class="pd-title">⚠️ 재조회 결과 — 가격이 변동되었습니다</div>
+          <div class="pd-table">
+            <div class="pd-row h">
+              <div>항목</div><div>고객 결제 시점</div><div>재조회 시점</div><div>차액</div>
+            </div>
+            <div class="pd-row">
+              <div>항공</div><div>₩598,000</div><div>₩624,000</div><div class="delta plus">+26,000</div>
+            </div>
+            <div class="pd-row">
+              <div>숙박</div><div>₩620,000</div><div>₩620,000</div><div class="delta same">±0</div>
+            </div>
+            <div class="pd-row" style="font-weight:700;border-top:1px dashed #f9c84d;padding-top:6px;margin-top:4px">
+              <div>합계</div><div>₩1,218,000</div><div>₩1,244,000</div><div class="delta plus">+26,000</div>
+            </div>
+          </div>
+          <div class="pd-actions">
+            <button class="btn btn-purple btn-sm">📞 고객 컨택 (차액 안내)</button>
+            <button class="btn btn-outline btn-sm">고객 동의 처리</button>
+            <button class="btn btn-danger btn-sm">고객 거절 → 예약 취소</button>
+          </div>
+        </div>
+
+        <!-- 고객 컨택 -->
+        <div class="contact-box" style="margin-top:14px">
+          <div class="cb-title">📞 고객 컨택 가이드</div>
+          <div class="cb-msg">
+            "고객님 안녕하세요. ○○ 예약 건 확인되어 안내 드립니다. 숙소는 정상 확보되었으나, 항공 가격이 결제 시점 대비 <b>26,000원 인상</b>되었습니다.
+            진행 동의 주시면 차액 결제 페이지를 보내드리고 즉시 확정 처리해드립니다."
+          </div>
+          <div class="cb-actions">
+            <button class="btn btn-blue btn-sm">SMS 발송</button>
+            <button class="btn btn-blue btn-sm">카카오 알림톡</button>
+            <button class="btn btn-outline btn-sm">통화 메모 작성</button>
+          </div>
+        </div>
+
+        <!-- 처리 이력 -->
+        <div style="margin-top:16px">
+          <div class="ap-title" style="font-size:12px;font-weight:700;color:#666;margin-bottom:10px">📜 처리 이력</div>
+          <div class="timeline">
+            <div class="tl-item done">
+              <div class="tl-head"><span class="tl-title">예약 접수</span><span class="tl-time">05-29 10:14</span></div>
+              <div class="tl-sub">고객 결제 완료 (₩1,218,000) · 공급사 예약 호출 보류</div>
+            </div>
+            <div class="tl-item done">
+              <div class="tl-head"><span class="tl-title">숙박 공급사 가능 회신</span><span class="tl-time">05-29 11:02</span></div>
+              <div class="tl-sub"><span class="tl-actor">현정</span> · 베트남 파트너 A 회신 — 객실 확보 OK</div>
+            </div>
+            <div class="tl-item active">
+              <div class="tl-head"><span class="tl-title">항공 재조회</span><span class="tl-time">05-29 11:08</span></div>
+              <div class="tl-sub"><span class="tl-actor">현정</span> · 가격 변동 발견 (+26,000) — 고객 컨택 대기</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============== CASE 3 ============== -->
+  <div class="case-detail" id="case-3">
+    <div class="section">
+      <div class="section-header">
+        <h2><span class="num">3</span> CASE 3 · 수동 항공 × 인디비 숙박</h2>
+        <span class="badge orange">접수 정지 → 수동 처리</span>
+      </div>
+      <div class="section-body">
+        <div class="flow">
+          <div class="flow-step done"><div class="step-no">STEP 1</div><div class="step-name">고객 결제</div><div class="step-actor">사용자</div></div>
+          <div class="flow-step done"><div class="step-no">STEP 2</div><div class="step-name">예약 접수<br><span style="font-size:10px;color:#666">(공급사 호출 X)</span></div><div class="step-actor">시스템</div></div>
+          <div class="flow-step active"><div class="step-no">STEP 3</div><div class="step-name">항공 가능 확인</div><div class="step-actor">CS → 항공사</div></div>
+          <div class="flow-step todo"><div class="step-no">STEP 4</div><div class="step-name">숙박 재조회</div><div class="step-actor">CS · TMG</div></div>
+          <div class="flow-step todo"><div class="step-no">STEP 5</div><div class="step-name">고객 컨택 / 차액 동의</div><div class="step-actor">CS → 사용자</div></div>
+          <div class="flow-step todo"><div class="step-no">STEP 6</div><div class="step-name">예약 확정</div><div class="step-actor">CS</div></div>
+        </div>
+
+        <div class="two-col" style="margin-top:18px">
+          <div class="product-card flight manual">
+            <div class="pc-head">
+              <div class="pc-title"><span class="ico">✈️</span> 항공 · 수동 등록</div>
+              <span class="badge orange">항공사 확인 대기</span>
+            </div>
+            <div class="pc-row"><span class="l">노선</span><span class="v">ICN → CXR (베트남항공 차터 VN412)</span></div>
+            <div class="pc-row"><span class="l">결제 시 가격</span><span class="v mono">₩540,000</span></div>
+            <div class="pc-row"><span class="l">담당자</span><span class="v">준영</span></div>
+            <div class="pc-row"><span class="l">확인 방법</span><span class="v">항공사 어드민 수기 조회 (대한항공/베트남항공 GDS)</span></div>
+            <div class="pc-actions">
+              <button class="btn btn-orange btn-sm">📞 항공사 확인 요청</button>
+              <button class="btn btn-green btn-sm">✓ 가능 회신 처리</button>
+              <button class="btn btn-danger btn-sm">✗ 불가 회신 처리</button>
+            </div>
+          </div>
+          <div class="product-card hotel">
+            <div class="pc-head">
+              <div class="pc-title"><span class="ico">🏨</span> 숙박 · TMG 인디비</div>
+              <span class="badge yellow">대기 — 항공 확정 후 자동 예약</span>
+            </div>
+            <div class="pc-row"><span class="l">호텔</span><span class="v">Nha Trang Marriott Resort</span></div>
+            <div class="pc-row"><span class="l">결제 시 가격</span><span class="v mono">₩880,000</span></div>
+            <div class="pc-row"><span class="l">현재 조회 가격</span><span class="v mono">— (미조회)</span></div>
+            <div class="pc-row"><span class="l">자동 처리</span><span class="v">예약 넣기 = reserve → confirm까지 자동</span></div>
+            <div class="pc-actions">
+              <button class="btn btn-blue btn-sm">🔄 재고/금액 재조회</button>
+              <button class="btn btn-primary btn-sm" disabled>예약하기 (자동 confirm)</button>
+              <span class="badge gray" style="margin-left:auto">항공 확정 후 활성화</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="price-diff">
+          <div class="pd-title">⚠️ 재조회 결과 — 숙박 가격이 변동되었습니다</div>
+          <div class="pd-table">
+            <div class="pd-row h">
+              <div>항목</div><div>고객 결제 시점</div><div>재조회 시점</div><div>차액</div>
+            </div>
+            <div class="pd-row">
+              <div>항공</div><div>₩540,000</div><div>₩540,000</div><div class="delta same">±0</div>
+            </div>
+            <div class="pd-row">
+              <div>숙박</div><div>₩880,000</div><div>₩842,000</div><div class="delta minus">−38,000</div>
+            </div>
+            <div class="pd-row" style="font-weight:700;border-top:1px dashed #f9c84d;padding-top:6px;margin-top:4px">
+              <div>합계</div><div>₩1,420,000</div><div>₩1,382,000</div><div class="delta minus">−38,000 (환불 예정)</div>
+            </div>
+          </div>
+          <div class="pd-actions">
+            <button class="btn btn-purple btn-sm">📞 고객 컨택 (인하 안내)</button>
+            <button class="btn btn-outline btn-sm">고객 동의 → 부분 환불</button>
+            <button class="btn btn-outline btn-sm">차액 없이 진행 (정책 검토)</button>
+          </div>
+        </div>
+
+        <div class="contact-box" style="margin-top:14px">
+          <div class="cb-title">📞 고객 컨택 가이드</div>
+          <div class="cb-msg">
+            "고객님 안녕하세요. 항공권 정상 확보되었고, 숙박이 결제 시점보다 <b>38,000원 인하</b>되어 차액 환불 후 진행 예정입니다.
+            확인 부탁드립니다."
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============== CASE 4 ============== -->
+  <div class="case-detail" id="case-4">
+    <div class="section">
+      <div class="section-header">
+        <h2><span class="num">4</span> CASE 4 · 수동 항공 × 수동 숙박 (현행 PB와 동일)</h2>
+        <span class="badge gray">접수 정지 → 양쪽 수기 처리</span>
+      </div>
+      <div class="section-body">
+        <div class="flow">
+          <div class="flow-step done"><div class="step-no">STEP 1</div><div class="step-name">고객 결제</div><div class="step-actor">사용자</div></div>
+          <div class="flow-step done"><div class="step-no">STEP 2</div><div class="step-name">예약 접수</div><div class="step-actor">시스템</div></div>
+          <div class="flow-step active"><div class="step-no">STEP 3</div><div class="step-name">항공 + 숙박 동시 확인</div><div class="step-actor">CS → 각 공급사</div></div>
+          <div class="flow-step todo"><div class="step-no">STEP 4</div><div class="step-name">최종 가격 합산</div><div class="step-actor">CS</div></div>
+          <div class="flow-step todo"><div class="step-no">STEP 5</div><div class="step-name">고객 컨택 / 차액 동의</div><div class="step-actor">CS → 사용자</div></div>
+          <div class="flow-step todo"><div class="step-no">STEP 6</div><div class="step-name">예약 확정</div><div class="step-actor">CS</div></div>
+        </div>
+
+        <div class="two-col" style="margin-top:18px">
+          <div class="product-card flight manual">
+            <div class="pc-head">
+              <div class="pc-title"><span class="ico">✈️</span> 항공 · 수동 등록</div>
+              <span class="badge orange">항공사 확인 대기</span>
+            </div>
+            <div class="pc-row"><span class="l">노선</span><span class="v">ICN → CEB (필리핀항공 PR489)</span></div>
+            <div class="pc-row"><span class="l">결제 시 가격</span><span class="v mono">₩520,000</span></div>
+            <div class="pc-row"><span class="l">담당자</span><span class="v">준영</span></div>
+            <div class="pc-actions">
+              <button class="btn btn-orange btn-sm">📞 항공사 확인 요청</button>
+              <button class="btn btn-green btn-sm">✓ 가능 회신</button>
+              <button class="btn btn-danger btn-sm">✗ 불가 회신</button>
+            </div>
+          </div>
+          <div class="product-card hotel manual">
+            <div class="pc-head">
+              <div class="pc-title"><span class="ico">🏨</span> 숙박 · 수동 등록</div>
+              <span class="badge orange">공급사 확인 대기</span>
+            </div>
+            <div class="pc-row"><span class="l">호텔</span><span class="v">세부 샹그릴라 막탄</span></div>
+            <div class="pc-row"><span class="l">결제 시 가격</span><span class="v mono">₩980,000</span></div>
+            <div class="pc-row"><span class="l">담당자</span><span class="v">현정</span></div>
+            <div class="pc-actions">
+              <button class="btn btn-orange btn-sm">📧 공급사 문의 메일</button>
+              <button class="btn btn-green btn-sm">✓ 가능 회신</button>
+              <button class="btn btn-danger btn-sm">✗ 불가 회신</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="action-panel" style="margin-top:14px">
+          <div class="ap-title">⏱ 운영 메모 (현행과 동일)</div>
+          <div class="ap-row">
+            <div class="ap-label"><b>딜레이 타임</b><div class="ap-status">담당자별로 다른 공급사와 통신 → 통상 1~24시간 소요. 가격이 결제 시점과 달라질 수 있음.</div></div>
+            <span class="badge gray">참고</span>
+          </div>
+          <div class="ap-row">
+            <div class="ap-label"><b>가격 변동 정책</b><div class="ap-status">수동 케이스는 환율 자동 흡수 X. 차이가 발생하면 반드시 고객 컨택 후 동의 받기.</div></div>
+            <span class="badge orange">필수 절차</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============== 공통 영역 ============== -->
+  <div class="common-section">
+    <h2>📋 4 케이스 액션 비교표</h2>
+    <table class="compare-table">
+      <thead>
+        <tr>
+          <th>구분</th>
+          <th>CASE 1<br>인디 × 인디</th>
+          <th>CASE 2<br>인디 항공 × 수동 숙박</th>
+          <th>CASE 3<br>수동 항공 × 인디 숙박</th>
+          <th>CASE 4<br>수동 × 수동</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>결제 직후 상태</td>
+          <td class="col-c1">자동 발권/CONFIRM</td>
+          <td class="col-c2">예약 접수 (공급사 호출 X)</td>
+          <td class="col-c3">예약 접수 (공급사 호출 X)</td>
+          <td class="col-c4">예약 접수 (공급사 호출 X)</td>
+        </tr>
+        <tr>
+          <td>가격 변동 처리</td>
+          <td class="col-c1">환율 수준 자동 흡수</td>
+          <td class="col-c2">재조회 후 고객 동의 필수</td>
+          <td class="col-c3">재조회 후 고객 동의 필수</td>
+          <td class="col-c4">합산 후 고객 동의 필수</td>
+        </tr>
+        <tr>
+          <td>어드민 액션 (항공)</td>
+          <td class="col-c1">—</td>
+          <td class="col-c2">재고/금액 재조회 → 예약 넣기</td>
+          <td class="col-c3">항공사 수기 조회 (GDS)</td>
+          <td class="col-c4">항공사 수기 조회 (GDS)</td>
+        </tr>
+        <tr>
+          <td>어드민 액션 (숙박)</td>
+          <td class="col-c1">—</td>
+          <td class="col-c2">공급사 메일/통화 확인</td>
+          <td class="col-c3">재고/금액 재조회 → 예약하기 (자동 confirm)</td>
+          <td class="col-c4">공급사 메일/통화 확인</td>
+        </tr>
+        <tr>
+          <td>고객 컨택</td>
+          <td class="col-c1">출발 전 일정/여권 안내만</td>
+          <td class="col-c2">차액 동의 SMS/통화</td>
+          <td class="col-c3">차액 동의 SMS/통화</td>
+          <td class="col-c4">차액 동의 SMS/통화</td>
+        </tr>
+        <tr>
+          <td>확정까지 소요</td>
+          <td class="col-c1">즉시</td>
+          <td class="col-c2">수 시간 ~ 1일</td>
+          <td class="col-c3">수 시간 ~ 1일</td>
+          <td class="col-c4">통상 1일+</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- 공통 요건 -->
+  <div class="common-section">
+    <h2>🔧 모든 케이스 공통 어드민 요건</h2>
+    <div class="two-col">
+      <div class="section" style="margin:0">
+        <div class="section-header"><h2 style="font-size:13px">👥 탑승객 정보 (항상 표시)</h2></div>
+        <div class="section-body" style="padding:14px 18px">
+          <table class="pax-table" style="width:100%">
+            <thead>
+              <tr><th>구분</th><th>이름</th><th>영문명</th><th>생년월일</th><th>여권</th></tr>
+            </thead>
+            <tbody>
+              <tr><td class="pax-type">대표 (성인)</td><td>김서현</td><td>KIM SOHYUN</td><td>1990-03-12</td><td><span class="badge gray">미등록</span></td></tr>
+              <tr><td class="pax-type">동반 (성인)</td><td>박지훈</td><td>PARK JIHUN</td><td>1988-07-22</td><td><span class="badge gray">미등록</span></td></tr>
+              <tr><td class="pax-type">동반 (아동)</td><td>김하준</td><td>KIM HAJUN</td><td>2018-11-05</td><td><span class="badge gray">미등록</span></td></tr>
+            </tbody>
+          </table>
+          <div style="margin-top:10px;font-size:11px;color:#888">
+            * 현재는 항공권 아래에서만 보임 → <b>예약 상세 상단에 항상 표시</b>로 변경<br>
+            * 아동 생년월일은 숙박 예약 시 필수 (TMG)<br>
+            * 여권 정보 보관 정책은 별도 검토 중 (저장 vs 보관 구분)
+          </div>
+        </div>
+      </div>
+      <div class="section" style="margin:0">
+        <div class="section-header"><h2 style="font-size:13px">💳 결제 / 취소 공통</h2></div>
+        <div class="section-body" style="padding:14px 18px;font-size:12px;line-height:1.8;color:#444">
+          <b>결제</b><br>
+          • PB 전체 <b>전액 결제만</b> 운영 (예약금 결제 X)<br>
+          • 항공 인디비: 결제 = 예약 = 발권<br>
+          • 가격 변동 시 차액 결제 페이지 별도 발송<br><br>
+          <b>취소</b><br>
+          • 모든 케이스 <b>관리자 개입 필수</b><br>
+          • <b>고객 환불 금액 ≠ 공급사 환급 금액</b> (별도 관리)<br>
+          • 항공/숙박 환불 규정 각각 적용 후 합산
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<script>
+function showCase(n) {
+  document.querySelectorAll('.case-mini').forEach(el => el.classList.remove('active'));
+  document.querySelector('.case-mini[data-case="' + n + '"]').classList.add('active');
+  document.querySelectorAll('.case-detail').forEach(el => el.classList.remove('active'));
+  document.getElementById('case-' + n).classList.add('active');
+  window.scrollTo({top: document.querySelector('.legend').offsetTop - 80, behavior: 'smooth'});
+}
+</script>
+
+</body>
+</html>
