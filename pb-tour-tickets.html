@@ -206,6 +206,13 @@ table.tbl tbody tr.clickable:hover td { background: #f0f7ff; }
 @media (max-width: 1100px) { .group-grid { grid-template-columns: repeat(2, 1fr); } }
 @media (max-width: 720px) { .group-grid { grid-template-columns: 1fr; } }
 
+.subcat-block { margin-bottom: 14px; }
+.subcat-block:last-child { margin-bottom: 0; }
+.subcat-head { display: flex; align-items: center; gap: 7px; padding: 6px 12px; margin-bottom: 8px; background: #fafbfc; border-left: 3px solid #d9d9d9; border-radius: 4px; }
+.subcat-dot { width: 6px; height: 6px; border-radius: 50%; }
+.subcat-name { font-size: 12.5px; font-weight: 700; color: rgba(0,0,0,0.7); }
+.subcat-count { font-size: 11px; color: rgba(0,0,0,0.4); background: #fff; padding: 1px 7px; border-radius: 8px; font-weight: 600; border: 1px solid #e8e8e8; }
+
 .group-card { background: #fff; border: 1px solid #e8e8e8; border-radius: 10px; padding: 14px 16px; transition: all 0.18s; display: flex; flex-direction: column; gap: 10px; }
 .group-card:hover { border-color: #91caff; box-shadow: 0 4px 14px rgba(22,119,255,0.07); }
 .group-card.forced { border-color: #e8e8e8; background: #fff; }
@@ -323,7 +330,6 @@ table.tbl tbody tr.clickable:hover td { background: #f0f7ff; }
       <div class="page-desc">PB 자동생성에 사용되는 투어/티켓/픽업/패스트트랙을 관리합니다. <strong>자동생성 엔진은 개별 항목이 아닌 "그룹" 단위로 후보를 선택</strong>합니다 (회의록 2026-05-21 수권님 방향).</div>
     </div>
     <div class="page-actions">
-      <button class="btn-ghost-md">📥 공급사 일괄 가져오기</button>
       <button class="btn-primary-md" onclick="openCreateItemModal()">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
         개별 항목 등록
@@ -352,24 +358,23 @@ table.tbl tbody tr.clickable:hover td { background: #f0f7ff; }
     <!-- Summary -->
     <div class="summary">
       <div class="summary-block">
-        <div class="summary-label">자동생성 ON</div>
-        <div class="summary-value"><strong>142</strong>건 <span class="sub">/ 186건 중</span></div>
-      </div>
-      <div class="summary-divider"></div>
-      <div class="summary-block">
-        <div class="summary-label">그룹 미배정 (⚠ 주의)</div>
-        <div class="summary-value"><strong style="color:#d48806;">23</strong>건 <span class="sub">ON이지만 그룹 없음 → 자동생성 누락</span></div>
-      </div>
-      <div class="summary-divider"></div>
-      <div class="summary-block">
-        <div class="summary-label">자동생성 OFF</div>
-        <div class="summary-value"><strong style="color:rgba(0,0,0,0.45)">44</strong>건</div>
+        <div class="summary-label">전체 항목</div>
+        <div class="summary-value"><strong>186</strong>건</div>
       </div>
       <div class="summary-divider"></div>
       <div class="summary-block">
         <div class="summary-label">라이브 PB 상품에 사용중</div>
         <div class="summary-value"><strong>119</strong>건</div>
       </div>
+      <div class="summary-divider"></div>
+      <div class="summary-block">
+        <div class="summary-label">미사용</div>
+        <div class="summary-value"><strong style="color:rgba(0,0,0,0.45)">67</strong>건</div>
+      </div>
+    </div>
+
+    <div style="background:#f6f8fa; border-left:3px solid #91caff; border-radius:6px; padding:9px 14px; margin-bottom:12px; font-size:11.5px; color:rgba(0,0,0,0.6); line-height:1.55;">
+      💡 <strong>자동생성 후보 지정은 [그룹 관리] 탭에서만</strong> 가능합니다. 개별 항목은 카탈로그/가격/공급사 관리 용도로만 사용하세요.
     </div>
 
     <!-- Filter -->
@@ -393,17 +398,6 @@ table.tbl tbody tr.clickable:hover td { background: #f0f7ff; }
         <option>호치민</option>
         <option>하노이</option>
       </select>
-      <select class="fi">
-        <option>자동생성 상태</option>
-        <option>ON · 그룹 배정</option>
-        <option>ON · 그룹 미배정 (⚠)</option>
-        <option>OFF</option>
-      </select>
-      <select class="fi">
-        <option>그룹 전체</option>
-        <option>그룹 배정됨</option>
-        <option>그룹 미배정</option>
-      </select>
       <div class="filter-total">총 <strong>186</strong>건</div>
     </div>
 
@@ -418,8 +412,6 @@ table.tbl tbody tr.clickable:hover td { background: #f0f7ff; }
               <th>공급사</th>
               <th>여행지</th>
               <th class="right">가격</th>
-              <th class="center">자동생성</th>
-              <th>소속 그룹</th>
               <th>상태</th>
               <th></th>
             </tr>
@@ -440,13 +432,6 @@ table.tbl tbody tr.clickable:hover td { background: #f0f7ff; }
               <td><span class="prov-pill kkday"><span class="pdot"></span>KKday</span></td>
               <td>푸꾸옥</td>
               <td class="right"><div class="price-cell">₩85,000<span class="unit">/인</span></div></td>
-              <td>
-                <div class="autogen-cell">
-                  <label class="autogen-switch"><input type="checkbox" checked onchange="toggleAutogen(this)"><span class="autogen-slider"></span></label>
-                  <span class="autogen-mini-label on">ON</span>
-                </div>
-              </td>
-              <td><div class="group-cell"><span class="group-pill"><span class="icon">📦</span>푸꾸옥 자연 투어</span></div></td>
               <td><span class="status-dot">활성</span></td>
               <td><button class="btn-rule"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4z"/></svg>편집</button></td>
             </tr>
@@ -466,13 +451,6 @@ table.tbl tbody tr.clickable:hover td { background: #f0f7ff; }
               <td><span class="prov-pill peaktime"><span class="pdot"></span>피크타임</span></td>
               <td>푸꾸옥</td>
               <td class="right"><div class="price-cell">₩45,000<span class="unit">/인</span></div></td>
-              <td>
-                <div class="autogen-cell">
-                  <label class="autogen-switch"><input type="checkbox" checked onchange="toggleAutogen(this)"><span class="autogen-slider"></span></label>
-                  <span class="autogen-mini-label on">ON</span>
-                </div>
-              </td>
-              <td><div class="group-cell"><span class="group-pill"><span class="icon">📦</span>푸꾸옥 인기 티켓</span></div></td>
               <td><span class="status-dot">활성</span></td>
               <td><button class="btn-rule"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4z"/></svg>편집</button></td>
             </tr>
@@ -492,14 +470,7 @@ table.tbl tbody tr.clickable:hover td { background: #f0f7ff; }
               <td><span class="prov-pill benazza"><span class="pdot"></span>베나자</span></td>
               <td>호치민</td>
               <td class="right"><div class="price-cell">₩28,000<span class="unit">/인</span></div></td>
-              <td>
-                <div class="autogen-cell">
-                  <label class="autogen-switch"><input type="checkbox" checked onchange="toggleAutogen(this)"><span class="autogen-slider"></span></label>
-                  <span class="autogen-mini-label on">ON</span>
-                </div>
-              </td>
-              <td><div class="group-cell"><span class="group-pill unassigned" onclick="openAssignGroupModal(this)">⚠ 그룹 미배정</span></div></td>
-              <td><span class="status-dot paused">자동생성 누락</span></td>
+              <td><span class="status-dot">활성</span></td>
               <td><button class="btn-rule"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4z"/></svg>편집</button></td>
             </tr>
 
@@ -518,13 +489,6 @@ table.tbl tbody tr.clickable:hover td { background: #f0f7ff; }
               <td><span class="prov-pill peaktime"><span class="pdot"></span>피크타임</span></td>
               <td>푸꾸옥</td>
               <td class="right"><div class="price-cell">₩55,000<span class="unit">/팀</span></div></td>
-              <td>
-                <div class="autogen-cell">
-                  <label class="autogen-switch"><input type="checkbox" checked onchange="toggleAutogen(this)"><span class="autogen-slider"></span></label>
-                  <span class="autogen-mini-label on">ON</span>
-                </div>
-              </td>
-              <td><div class="group-cell"><span class="group-pill"><span class="icon">📦</span>푸꾸옥 픽업</span></div></td>
               <td><span class="status-dot">활성</span></td>
               <td><button class="btn-rule"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4z"/></svg>편집</button></td>
             </tr>
@@ -544,13 +508,6 @@ table.tbl tbody tr.clickable:hover td { background: #f0f7ff; }
               <td><span class="prov-pill peaktime"><span class="pdot"></span>피크타임</span></td>
               <td>푸꾸옥</td>
               <td class="right"><div class="price-cell">₩35,000<span class="unit">/인</span></div></td>
-              <td>
-                <div class="autogen-cell">
-                  <label class="autogen-switch"><input type="checkbox" checked onchange="toggleAutogen(this)"><span class="autogen-slider"></span></label>
-                  <span class="autogen-mini-label on">ON</span>
-                </div>
-              </td>
-              <td><div class="group-cell"><span class="group-pill"><span class="icon">📦</span>푸꾸옥 패스트트랙</span></div></td>
               <td><span class="status-dot">활성</span></td>
               <td><button class="btn-rule"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4z"/></svg>편집</button></td>
             </tr>
@@ -570,13 +527,6 @@ table.tbl tbody tr.clickable:hover td { background: #f0f7ff; }
               <td><span class="prov-pill kkday"><span class="pdot"></span>KKday</span></td>
               <td>푸꾸옥</td>
               <td class="right"><div class="price-cell">₩72,000<span class="unit">/인</span></div></td>
-              <td>
-                <div class="autogen-cell">
-                  <label class="autogen-switch"><input type="checkbox" onchange="toggleAutogen(this)"><span class="autogen-slider"></span></label>
-                  <span class="autogen-mini-label off">OFF</span>
-                </div>
-              </td>
-              <td><div class="group-cell"><span style="font-size:11.5px; color:rgba(0,0,0,0.35); font-style:italic;">— (자동생성 OFF)</span></div></td>
               <td><span class="status-dot draft">대기</span></td>
               <td><button class="btn-rule"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4z"/></svg>편집</button></td>
             </tr>
@@ -596,18 +546,6 @@ table.tbl tbody tr.clickable:hover td { background: #f0f7ff; }
               <td><span class="prov-pill peaktime"><span class="pdot"></span>피크타임</span></td>
               <td>나트랑</td>
               <td class="right"><div class="price-cell">₩48,000<span class="unit">/인</span></div></td>
-              <td>
-                <div class="autogen-cell">
-                  <label class="autogen-switch"><input type="checkbox" checked onchange="toggleAutogen(this)"><span class="autogen-slider"></span></label>
-                  <span class="autogen-mini-label on">ON</span>
-                </div>
-              </td>
-              <td>
-                <div class="group-cell">
-                  <span class="group-pill"><span class="icon">📦</span>나트랑 인기 티켓</span>
-                  <span class="group-pill"><span class="icon">📦</span>빈원더스 통합 그룹</span>
-                </div>
-              </td>
               <td><span class="status-dot">활성</span></td>
               <td><button class="btn-rule"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4z"/></svg>편집</button></td>
             </tr>
@@ -627,13 +565,6 @@ table.tbl tbody tr.clickable:hover td { background: #f0f7ff; }
               <td><span class="prov-pill kkday"><span class="pdot"></span>KKday</span></td>
               <td>다낭</td>
               <td class="right"><div class="price-cell">₩95,000<span class="unit">/인</span></div></td>
-              <td>
-                <div class="autogen-cell">
-                  <label class="autogen-switch"><input type="checkbox" checked onchange="toggleAutogen(this)"><span class="autogen-slider"></span></label>
-                  <span class="autogen-mini-label on">ON</span>
-                </div>
-              </td>
-              <td><div class="group-cell"><span class="group-pill"><span class="icon">📦</span>다낭 핵심 투어</span></div></td>
               <td><span class="status-dot">활성</span></td>
               <td><button class="btn-rule"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4z"/></svg>편집</button></td>
             </tr>
@@ -662,7 +593,7 @@ table.tbl tbody tr.clickable:hover td { background: #f0f7ff; }
     <!-- 안내 배너 -->
     <div style="background: linear-gradient(135deg, #f0f7ff 0%, #e6f4ff 100%); border: 1px solid #91caff; border-radius: 10px; padding: 14px 18px; margin-bottom: 14px; font-size: 12.5px; line-height: 1.7; color: #003a8c;">
       <strong>💡 그룹 관리 핵심 (회의록 5/21 수권님 방향)</strong><br>
-      개별 투어·티켓 항목이 너무 많아 자동생성 엔진이 후보 선택을 못합니다. → <strong>여행지·카테고리·시즌 단위로 묶은 "그룹"만 자동생성에서 후보로 사용</strong>합니다.<br>
+      개별 투어·티켓 항목이 너무 많아 자동생성 엔진이 후보 선택을 못합니다. → <strong>여행지·서브카테고리 단위로 묶은 "그룹"만 자동생성에서 후보로 사용</strong>합니다.<br>
       예: "푸꾸옥 자연 투어 그룹" 안에 빈원더스/사파리/시티투어 등이 들어있고, 자동생성 엔진은 "투어 1개"가 필요할 때 이 그룹 안에서 AI가 선택.
     </div>
 
@@ -689,20 +620,14 @@ table.tbl tbody tr.clickable:hover td { background: #f0f7ff; }
       </div>
     </div>
 
-    <!-- 필터 + 새 그룹 -->
-    <div class="cat-chip-row">
-      <button class="cat-chip active">전체 <span class="cat-chip-count">17</span></button>
-      <button class="cat-chip"><span class="dot pickup"></span>픽업·샌딩 <span class="cat-chip-count">5</span></button>
-      <button class="cat-chip"><span class="dot fasttrack"></span>패스트트랙 <span class="cat-chip-count">3</span></button>
-      <button class="cat-chip"><span class="dot tour"></span>투어 <span class="cat-chip-count">6</span></button>
-      <button class="cat-chip"><span class="dot ticket"></span>티켓 <span class="cat-chip-count">3</span></button>
-      <div style="margin-left:auto; display:flex; gap:6px;">
-        <select class="fi" style="min-width:140px;">
-          <option>여행지 전체</option>
-          <option>푸꾸옥</option>
-          <option>나트랑</option>
-          <option>다낭</option>
-        </select>
+    <!-- 여행지 탭 + 새 그룹 -->
+    <div class="cat-chip-row" id="dest-tab-row">
+      <button class="cat-chip active" onclick="filterDest(this,'all')">전체 <span class="cat-chip-count">17</span></button>
+      <button class="cat-chip" onclick="filterDest(this,'푸꾸옥')">푸꾸옥 <span class="cat-chip-count">8</span></button>
+      <button class="cat-chip" onclick="filterDest(this,'나트랑')">나트랑 <span class="cat-chip-count">3</span></button>
+      <button class="cat-chip" onclick="filterDest(this,'다낭')">다낭 <span class="cat-chip-count">4</span></button>
+      <button class="cat-chip" onclick="filterDest(this,'전국')">전국 <span class="cat-chip-count">1</span></button>
+      <div style="margin-left:auto;">
         <button class="btn-primary-md" onclick="openCreateGroupModal()" style="height:32px; padding:0 14px; font-size:12.5px;">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
           새 그룹 만들기
@@ -719,7 +644,7 @@ table.tbl tbody tr.clickable:hover td { background: #f0f7ff; }
         <span class="group-section-desc">에어텔 디폴트 — 자동생성 상품에 기본 포함</span>
       </div>
       <div class="group-grid">
-        <div class="group-card forced">
+        <div class="group-card forced" data-dest="푸꾸옥">
           <div class="group-card-head">
             <div class="group-card-title">
               <div class="group-card-name">푸꾸옥 픽업·샌딩</div>
@@ -751,7 +676,7 @@ table.tbl tbody tr.clickable:hover td { background: #f0f7ff; }
           </div>
         </div>
 
-        <div class="group-card forced">
+        <div class="group-card forced" data-dest="나트랑">
           <div class="group-card-head">
             <div class="group-card-title">
               <div class="group-card-name">나트랑 픽업·샌딩</div>
@@ -779,7 +704,7 @@ table.tbl tbody tr.clickable:hover td { background: #f0f7ff; }
           </div>
         </div>
 
-        <div class="group-card forced">
+        <div class="group-card forced" data-dest="다낭">
           <div class="group-card-head">
             <div class="group-card-title">
               <div class="group-card-name">다낭 픽업·샌딩</div>
@@ -818,7 +743,7 @@ table.tbl tbody tr.clickable:hover td { background: #f0f7ff; }
         <span class="group-section-desc">선택 옵션 — AI가 가격대·여행자 프로필 보고 포함 여부 판단</span>
       </div>
       <div class="group-grid">
-        <div class="group-card">
+        <div class="group-card" data-dest="푸꾸옥">
           <div class="group-card-head">
             <div class="group-card-title">
               <div class="group-card-name">푸꾸옥 패스트트랙</div>
@@ -845,7 +770,7 @@ table.tbl tbody tr.clickable:hover td { background: #f0f7ff; }
           </div>
         </div>
 
-        <div class="group-card">
+        <div class="group-card" data-dest="나트랑">
           <div class="group-card-head">
             <div class="group-card-title">
               <div class="group-card-name">나트랑 패스트트랙</div>
@@ -871,7 +796,7 @@ table.tbl tbody tr.clickable:hover td { background: #f0f7ff; }
           </div>
         </div>
 
-        <div class="group-card">
+        <div class="group-card" data-dest="다낭">
           <div class="group-card-head">
             <div class="group-card-title">
               <div class="group-card-name">다낭 패스트트랙</div>
@@ -907,92 +832,108 @@ table.tbl tbody tr.clickable:hover td { background: #f0f7ff; }
         <span class="group-section-count">6개</span>
         <span class="group-section-desc">선택 옵션 (1개만) — AI가 여행자 성향·일정 보고 1개 선택</span>
       </div>
-      <div class="group-grid">
-        <div class="group-card">
-          <div class="group-card-head">
-            <div class="group-card-title">
-              <div class="group-card-name">푸꾸옥 자연 투어</div>
-              <div class="group-card-meta">
-                <span class="rule-chip">여행지=푸꾸옥</span>
-                <span class="rule-chip">카테고리=자연</span>
+      <!-- 서브카테고리: 자연 -->
+      <div class="subcat-block" data-subcat="자연">
+        <div class="subcat-head"><span class="subcat-dot" style="background:#52c41a;"></span><span class="subcat-name">🌿 자연</span><span class="subcat-count">1개</span></div>
+        <div class="group-grid">
+          <div class="group-card" data-dest="푸꾸옥">
+            <div class="group-card-head">
+              <div class="group-card-title">
+                <div class="group-card-name">푸꾸옥 자연 투어</div>
+                <div class="group-card-meta">
+                  <span class="rule-chip">여행지=푸꾸옥</span>
+                  <span class="rule-chip">서브=자연</span>
+                </div>
+              </div>
+              <div class="group-card-toggle">
+                <label class="autogen-switch"><input type="checkbox" checked><span class="autogen-slider"></span></label>
+                <span class="autogen-mini-label on" style="font-size:9.5px;">ON</span>
               </div>
             </div>
-            <div class="group-card-toggle">
-              <label class="autogen-switch"><input type="checkbox" checked><span class="autogen-slider"></span></label>
-              <span class="autogen-mini-label on" style="font-size:9.5px;">ON</span>
+            <div class="group-card-items">
+              <div class="group-card-items-head"><span>소속 항목 <strong>5개</strong></span></div>
+              <div class="group-card-items-list">
+                <div class="group-item-row"><span class="ix">TR-1042</span><span class="nm">사파리 + 빈원더스 1일</span><span class="pr">₩85,000</span></div>
+                <div class="group-item-row"><span class="ix">TR-1043</span><span class="nm">남섬 스노클링</span><span class="pr">₩68,000</span></div>
+                <div class="group-item-row"><span class="ix">TR-1044</span><span class="nm">맹그로브 보트 투어</span><span class="pr">₩52,000</span></div>
+                <div class="group-item-row"><span class="ix">TR-1045</span><span class="nm">진주 양식장 투어</span><span class="pr">₩42,000</span></div>
+                <div class="group-item-row"><span class="ix">TR-1046</span><span class="nm">호수 카약</span><span class="pr">₩38,000</span></div>
+              </div>
             </div>
-          </div>
-          <div class="group-card-items">
-            <div class="group-card-items-head"><span>소속 항목 <strong>5개</strong></span></div>
-            <div class="group-card-items-list">
-              <div class="group-item-row"><span class="ix">TR-1042</span><span class="nm">사파리 + 빈원더스 1일</span><span class="pr">₩85,000</span></div>
-              <div class="group-item-row"><span class="ix">TR-1043</span><span class="nm">남섬 스노클링</span><span class="pr">₩68,000</span></div>
-              <div class="group-item-row"><span class="ix">TR-1044</span><span class="nm">맹그로브 보트 투어</span><span class="pr">₩52,000</span></div>
-              <div class="group-item-row"><span class="ix">TR-1045</span><span class="nm">진주 양식장 투어</span><span class="pr">₩42,000</span></div>
-              <div class="group-item-row"><span class="ix">TR-1046</span><span class="nm">호수 카약</span><span class="pr">₩38,000</span></div>
+            <div class="group-card-foot">
+              <span class="group-card-usage">자동생성에 <strong>892회</strong> 사용</span>
+              <div class="group-card-actions"><button class="btn-mini">편집</button><button class="btn-mini">+ 항목</button></div>
             </div>
-          </div>
-          <div class="group-card-foot">
-            <span class="group-card-usage">자동생성에 <strong>892회</strong> 사용</span>
-            <div class="group-card-actions"><button class="btn-mini">편집</button><button class="btn-mini">+ 항목</button></div>
           </div>
         </div>
+      </div>
 
-        <div class="group-card">
-          <div class="group-card-head">
-            <div class="group-card-title">
-              <div class="group-card-name">푸꾸옥 액티비티 투어</div>
-              <div class="group-card-meta">
-                <span class="rule-chip">여행지=푸꾸옥</span>
-                <span class="rule-chip">카테고리=액티비티</span>
+      <!-- 서브카테고리: 액티비티 -->
+      <div class="subcat-block" data-subcat="액티비티">
+        <div class="subcat-head"><span class="subcat-dot" style="background:#fa8c16;"></span><span class="subcat-name">⚡ 액티비티</span><span class="subcat-count">1개</span></div>
+        <div class="group-grid">
+          <div class="group-card" data-dest="푸꾸옥">
+            <div class="group-card-head">
+              <div class="group-card-title">
+                <div class="group-card-name">푸꾸옥 액티비티 투어</div>
+                <div class="group-card-meta">
+                  <span class="rule-chip">여행지=푸꾸옥</span>
+                  <span class="rule-chip">서브=액티비티</span>
+                </div>
+              </div>
+              <div class="group-card-toggle">
+                <label class="autogen-switch"><input type="checkbox" checked><span class="autogen-slider"></span></label>
+                <span class="autogen-mini-label on" style="font-size:9.5px;">ON</span>
               </div>
             </div>
-            <div class="group-card-toggle">
-              <label class="autogen-switch"><input type="checkbox" checked><span class="autogen-slider"></span></label>
-              <span class="autogen-mini-label on" style="font-size:9.5px;">ON</span>
+            <div class="group-card-items">
+              <div class="group-card-items-head"><span>소속 항목 <strong>4개</strong></span></div>
+              <div class="group-card-items-list">
+                <div class="group-item-row"><span class="ix">TR-1052</span><span class="nm">제트스키 1시간</span><span class="pr">₩68,000</span></div>
+                <div class="group-item-row"><span class="ix">TR-1053</span><span class="nm">패러글라이딩</span><span class="pr">₩115,000</span></div>
+                <div class="group-item-row"><span class="ix">TR-1054</span><span class="nm">ATV 사파리</span><span class="pr">₩78,000</span></div>
+                <div class="group-item-row"><span class="ix">TR-1055</span><span class="nm">스쿠버 다이빙 체험</span><span class="pr">₩142,000</span></div>
+              </div>
             </div>
-          </div>
-          <div class="group-card-items">
-            <div class="group-card-items-head"><span>소속 항목 <strong>4개</strong></span></div>
-            <div class="group-card-items-list">
-              <div class="group-item-row"><span class="ix">TR-1052</span><span class="nm">제트스키 1시간</span><span class="pr">₩68,000</span></div>
-              <div class="group-item-row"><span class="ix">TR-1053</span><span class="nm">패러글라이딩</span><span class="pr">₩115,000</span></div>
-              <div class="group-item-row"><span class="ix">TR-1054</span><span class="nm">ATV 사파리</span><span class="pr">₩78,000</span></div>
-              <div class="group-item-row"><span class="ix">TR-1055</span><span class="nm">스쿠버 다이빙 체험</span><span class="pr">₩142,000</span></div>
+            <div class="group-card-foot">
+              <span class="group-card-usage">자동생성에 <strong>318회</strong> 사용</span>
+              <div class="group-card-actions"><button class="btn-mini">편집</button><button class="btn-mini">+ 항목</button></div>
             </div>
-          </div>
-          <div class="group-card-foot">
-            <span class="group-card-usage">자동생성에 <strong>318회</strong> 사용</span>
-            <div class="group-card-actions"><button class="btn-mini">편집</button><button class="btn-mini">+ 항목</button></div>
           </div>
         </div>
+      </div>
 
-        <div class="group-card">
-          <div class="group-card-head">
-            <div class="group-card-title">
-              <div class="group-card-name">다낭 핵심 투어</div>
-              <div class="group-card-meta">
-                <span class="rule-chip">여행지=다낭</span>
-                <span class="rule-chip">카테고리=관광</span>
+      <!-- 서브카테고리: 관광 -->
+      <div class="subcat-block" data-subcat="관광">
+        <div class="subcat-head"><span class="subcat-dot" style="background:#1677ff;"></span><span class="subcat-name">🏛 관광·문화</span><span class="subcat-count">1개</span></div>
+        <div class="group-grid">
+          <div class="group-card" data-dest="다낭">
+            <div class="group-card-head">
+              <div class="group-card-title">
+                <div class="group-card-name">다낭 핵심 투어</div>
+                <div class="group-card-meta">
+                  <span class="rule-chip">여행지=다낭</span>
+                  <span class="rule-chip">서브=관광·문화</span>
+                </div>
+              </div>
+              <div class="group-card-toggle">
+                <label class="autogen-switch"><input type="checkbox" checked><span class="autogen-slider"></span></label>
+                <span class="autogen-mini-label on" style="font-size:9.5px;">ON</span>
               </div>
             </div>
-            <div class="group-card-toggle">
-              <label class="autogen-switch"><input type="checkbox" checked><span class="autogen-slider"></span></label>
-              <span class="autogen-mini-label on" style="font-size:9.5px;">ON</span>
+            <div class="group-card-items">
+              <div class="group-card-items-head"><span>소속 항목 <strong>4개</strong></span></div>
+              <div class="group-card-items-list">
+                <div class="group-item-row"><span class="ix">TR-1133</span><span class="nm">바나힐 1일 투어</span><span class="pr">₩95,000</span></div>
+                <div class="group-item-row"><span class="ix">TR-1134</span><span class="nm">호이안 야경 투어</span><span class="pr">₩48,000</span></div>
+                <div class="group-item-row"><span class="ix">TR-1135</span><span class="nm">미썬 유적 + 호이안</span><span class="pr">₩82,000</span></div>
+                <div class="group-item-row"><span class="ix">TR-1136</span><span class="nm">손짜반도 1일</span><span class="pr">₩72,000</span></div>
+              </div>
             </div>
-          </div>
-          <div class="group-card-items">
-            <div class="group-card-items-head"><span>소속 항목 <strong>4개</strong></span></div>
-            <div class="group-card-items-list">
-              <div class="group-item-row"><span class="ix">TR-1133</span><span class="nm">바나힐 1일 투어</span><span class="pr">₩95,000</span></div>
-              <div class="group-item-row"><span class="ix">TR-1134</span><span class="nm">호이안 야경 투어</span><span class="pr">₩48,000</span></div>
-              <div class="group-item-row"><span class="ix">TR-1135</span><span class="nm">미썬 유적 + 호이안</span><span class="pr">₩82,000</span></div>
-              <div class="group-item-row"><span class="ix">TR-1136</span><span class="nm">손짜반도 1일</span><span class="pr">₩72,000</span></div>
+            <div class="group-card-foot">
+              <span class="group-card-usage">자동생성에 <strong>542회</strong> 사용</span>
+              <div class="group-card-actions"><button class="btn-mini">편집</button><button class="btn-mini">+ 항목</button></div>
             </div>
-          </div>
-          <div class="group-card-foot">
-            <span class="group-card-usage">자동생성에 <strong>542회</strong> 사용</span>
-            <div class="group-card-actions"><button class="btn-mini">편집</button><button class="btn-mini">+ 항목</button></div>
           </div>
         </div>
       </div>
@@ -1006,68 +947,81 @@ table.tbl tbody tr.clickable:hover td { background: #f0f7ff; }
         <span class="group-section-count">3개</span>
         <span class="group-section-desc">선택 옵션 (1개만) — 투어와 중복 X (회의록 룰)</span>
       </div>
-      <div class="group-grid">
-        <div class="group-card">
-          <div class="group-card-head">
-            <div class="group-card-title">
-              <div class="group-card-name">푸꾸옥 인기 티켓</div>
-              <div class="group-card-meta">
-                <span class="rule-chip">여행지=푸꾸옥</span>
+      <!-- 서브카테고리: 입장권 -->
+      <div class="subcat-block" data-subcat="입장권">
+        <div class="subcat-head"><span class="subcat-dot" style="background:#722ed1;"></span><span class="subcat-name">🎫 입장권</span><span class="subcat-count">1개</span></div>
+        <div class="group-grid">
+          <div class="group-card" data-dest="푸꾸옥">
+            <div class="group-card-head">
+              <div class="group-card-title">
+                <div class="group-card-name">푸꾸옥 인기 티켓</div>
+                <div class="group-card-meta">
+                  <span class="rule-chip">여행지=푸꾸옥</span>
+                  <span class="rule-chip">서브=입장권</span>
+                </div>
+              </div>
+              <div class="group-card-toggle">
+                <label class="autogen-switch"><input type="checkbox" checked><span class="autogen-slider"></span></label>
+                <span class="autogen-mini-label on" style="font-size:9.5px;">ON</span>
               </div>
             </div>
-            <div class="group-card-toggle">
-              <label class="autogen-switch"><input type="checkbox" checked><span class="autogen-slider"></span></label>
-              <span class="autogen-mini-label on" style="font-size:9.5px;">ON</span>
-            </div>
-          </div>
-          <div class="group-card-items">
-            <div class="group-card-items-head"><span>소속 항목 <strong>3개</strong></span></div>
-            <div class="group-card-items-list">
-              <div class="group-item-row"><span class="ix">TK-2541</span><span class="nm">빈원더스 입장권</span><span class="pr">₩45,000</span></div>
-              <div class="group-item-row"><span class="ix">TK-2543</span><span class="nm">사파리 입장권</span><span class="pr">₩38,000</span></div>
-              <div class="group-item-row"><span class="ix">TK-2546</span><span class="nm">아쿠아토피아 워터파크</span><span class="pr">₩42,000</span></div>
-            </div>
-          </div>
-          <div class="group-card-foot">
-            <span class="group-card-usage">자동생성에 <strong>1,124회</strong> 사용</span>
-            <div class="group-card-actions"><button class="btn-mini">편집</button><button class="btn-mini">+ 항목</button></div>
-          </div>
-        </div>
-
-        <div class="group-card">
-          <div class="group-card-head">
-            <div class="group-card-title">
-              <div class="group-card-name">빈원더스 통합 (전국)</div>
-              <div class="group-card-meta">
-                <span class="rule-chip">여행지=전체</span>
-                <span class="rule-chip">시즌 무관</span>
+            <div class="group-card-items">
+              <div class="group-card-items-head"><span>소속 항목 <strong>3개</strong></span></div>
+              <div class="group-card-items-list">
+                <div class="group-item-row"><span class="ix">TK-2541</span><span class="nm">빈원더스 입장권</span><span class="pr">₩45,000</span></div>
+                <div class="group-item-row"><span class="ix">TK-2543</span><span class="nm">사파리 입장권</span><span class="pr">₩38,000</span></div>
+                <div class="group-item-row"><span class="ix">TK-2546</span><span class="nm">아쿠아토피아 워터파크</span><span class="pr">₩42,000</span></div>
               </div>
             </div>
-            <div class="group-card-toggle">
-              <label class="autogen-switch"><input type="checkbox" checked><span class="autogen-slider"></span></label>
-              <span class="autogen-mini-label on" style="font-size:9.5px;">ON</span>
+            <div class="group-card-foot">
+              <span class="group-card-usage">자동생성에 <strong>1,124회</strong> 사용</span>
+              <div class="group-card-actions"><button class="btn-mini">편집</button><button class="btn-mini">+ 항목</button></div>
             </div>
-          </div>
-          <div class="group-card-items">
-            <div class="group-card-items-head"><span>소속 항목 <strong>4개</strong></span></div>
-            <div class="group-card-items-list">
-              <div class="group-item-row"><span class="ix">TK-2541</span><span class="nm">푸꾸옥 빈원더스</span><span class="pr">₩45,000</span></div>
-              <div class="group-item-row"><span class="ix">TK-2602</span><span class="nm">나트랑 빈원더스</span><span class="pr">₩48,000</span></div>
-              <div class="group-item-row"><span class="ix">TK-2615</span><span class="nm">하노이 빈원더스</span><span class="pr">₩42,000</span></div>
-              <div class="group-item-row"><span class="ix">TK-2618</span><span class="nm">호이안 빈원더스</span><span class="pr">₩40,000</span></div>
-            </div>
-          </div>
-          <div class="group-card-foot">
-            <span class="group-card-usage">자동생성에 <strong>682회</strong> 사용</span>
-            <div class="group-card-actions"><button class="btn-mini">편집</button><button class="btn-mini">+ 항목</button></div>
           </div>
         </div>
+      </div>
 
-        <!-- 새 그룹 만들기 카드 -->
+      <!-- 서브카테고리: 통합 브랜드 -->
+      <div class="subcat-block" data-subcat="브랜드">
+        <div class="subcat-head"><span class="subcat-dot" style="background:#eb2f96;"></span><span class="subcat-name">🏷 브랜드 통합</span><span class="subcat-count">1개</span></div>
+        <div class="group-grid">
+          <div class="group-card" data-dest="전국">
+            <div class="group-card-head">
+              <div class="group-card-title">
+                <div class="group-card-name">빈원더스 통합 (전국)</div>
+                <div class="group-card-meta">
+                  <span class="rule-chip">여행지=전체</span>
+                  <span class="rule-chip">서브=브랜드</span>
+                </div>
+              </div>
+              <div class="group-card-toggle">
+                <label class="autogen-switch"><input type="checkbox" checked><span class="autogen-slider"></span></label>
+                <span class="autogen-mini-label on" style="font-size:9.5px;">ON</span>
+              </div>
+            </div>
+            <div class="group-card-items">
+              <div class="group-card-items-head"><span>소속 항목 <strong>4개</strong></span></div>
+              <div class="group-card-items-list">
+                <div class="group-item-row"><span class="ix">TK-2541</span><span class="nm">푸꾸옥 빈원더스</span><span class="pr">₩45,000</span></div>
+                <div class="group-item-row"><span class="ix">TK-2602</span><span class="nm">나트랑 빈원더스</span><span class="pr">₩48,000</span></div>
+                <div class="group-item-row"><span class="ix">TK-2615</span><span class="nm">하노이 빈원더스</span><span class="pr">₩42,000</span></div>
+                <div class="group-item-row"><span class="ix">TK-2618</span><span class="nm">호이안 빈원더스</span><span class="pr">₩40,000</span></div>
+              </div>
+            </div>
+            <div class="group-card-foot">
+              <span class="group-card-usage">자동생성에 <strong>682회</strong> 사용</span>
+              <div class="group-card-actions"><button class="btn-mini">편집</button><button class="btn-mini">+ 항목</button></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 새 그룹 만들기 카드 -->
+      <div class="group-grid" style="margin-top:8px;">
         <div class="add-group-card" onclick="openCreateGroupModal()">
           <div class="plus">+</div>
           <div class="label">새 그룹 만들기</div>
-          <div class="sub">여행지·카테고리·시즌 단위로<br>묶어서 자동생성 후보로 사용</div>
+          <div class="sub">여행지·서브카테고리 단위로<br>묶어서 자동생성 후보로 사용</div>
         </div>
       </div>
     </div>
@@ -1080,7 +1034,7 @@ table.tbl tbody tr.clickable:hover td { background: #f0f7ff; }
       <strong>자동생성 룰 안내 (회의록 2026-05-21 / 메모리 2026-05-20 반영)</strong><br>
       · 디폴트 형태 = <strong>에어텔(항공+숙박)</strong> · 기본 포함 = <strong>픽업·샌딩 그룹</strong><br>
       · 선택 조합 = 패스트트랙·투어·티켓 그룹 중 <strong>1~2개</strong> (AI 판단 · 같은 카테고리 중복 X)<br>
-      · 개별 항목 자동생성 ON이어도 <strong>그룹 미배정 시 자동생성에 누락</strong> — 상단 ⚠ 표시로 알림
+      · 자동생성 후보 지정은 <strong>그룹 단위에서만</strong> — 개별 항목 단위 ON/OFF 토글은 사용하지 않습니다
     </div>
   </div>
 
@@ -1125,30 +1079,48 @@ table.tbl tbody tr.clickable:hover td { background: #f0f7ff; }
         <div style="background:#fafbfc; border:1px solid #f0f0f0; border-radius:8px; padding:12px 14px;">
           <div style="display:grid; grid-template-columns:80px 1fr; gap:10px; align-items:center;">
             <span style="font-size:12px; color:rgba(0,0,0,0.55); font-weight:600;">여행지</span>
-            <select class="fi-input" style="height:34px;"><option>전체</option><option>푸꾸옥</option><option>나트랑</option><option>다낭</option><option>호치민</option><option>하노이</option></select>
-          </div>
-          <div style="display:grid; grid-template-columns:80px 1fr; gap:10px; align-items:center; margin-top:8px;">
-            <span style="font-size:12px; color:rgba(0,0,0,0.55); font-weight:600;">시즌</span>
-            <select class="fi-input" style="height:34px;"><option>연중</option><option>성수기만</option><option>비수기만</option></select>
-          </div>
-          <div style="display:grid; grid-template-columns:80px 1fr; gap:10px; align-items:center; margin-top:8px;">
-            <span style="font-size:12px; color:rgba(0,0,0,0.55); font-weight:600;">서브 카테고리</span>
-            <select class="fi-input" style="height:34px;"><option>(선택)</option><option>자연</option><option>액티비티</option><option>관광·문화</option><option>식음·쇼핑</option></select>
+            <select class="fi-input" id="modal-dest-select" style="height:34px;" onchange="filterModalItems(this.value)">
+              <option value="all">전체</option>
+              <option value="푸꾸옥" selected>푸꾸옥</option>
+              <option value="나트랑">나트랑</option>
+              <option value="다낭">다낭</option>
+              <option value="호치민">호치민</option>
+              <option value="하노이">하노이</option>
+            </select>
           </div>
         </div>
       </div>
 
       <!-- 항목 선택 -->
       <div class="field-group">
-        <label class="field-label">소속 항목 선택 <span class="req">*</span><span class="hint">위 룰에 맞는 항목만 표시 — 체크해서 그룹에 포함</span></label>
-        <div class="item-pick-box">
-          <div class="item-pick-row"><input type="checkbox" checked><span class="nm">사파리 + 빈원더스 1일 투어</span><span class="meta">TR-1042</span><span class="pr">₩85,000</span></div>
-          <div class="item-pick-row"><input type="checkbox" checked><span class="nm">남섬 스노클링</span><span class="meta">TR-1043</span><span class="pr">₩68,000</span></div>
-          <div class="item-pick-row"><input type="checkbox" checked><span class="nm">맹그로브 보트 투어</span><span class="meta">TR-1044</span><span class="pr">₩52,000</span></div>
-          <div class="item-pick-row"><input type="checkbox"><span class="nm">진주 양식장 투어</span><span class="meta">TR-1045</span><span class="pr">₩42,000</span></div>
-          <div class="item-pick-row"><input type="checkbox"><span class="nm">호수 카약</span><span class="meta">TR-1046</span><span class="pr">₩38,000</span></div>
-          <div class="item-pick-row"><input type="checkbox"><span class="nm">야간 낚시 + BBQ</span><span class="meta">TR-1095</span><span class="pr">₩72,000</span></div>
+        <label class="field-label">소속 항목 선택 <span class="req">*</span><span class="hint">선택한 여행지의 항목만 표시 — 체크해서 그룹에 포함</span></label>
+        <div class="item-pick-box" id="modal-item-list">
+          <!-- 푸꾸옥 -->
+          <div class="item-pick-row" data-dest="푸꾸옥"><input type="checkbox" checked><span class="nm">사파리 + 빈원더스 1일 투어</span><span class="meta">TR-1042 · 푸꾸옥</span><span class="pr">₩85,000</span></div>
+          <div class="item-pick-row" data-dest="푸꾸옥"><input type="checkbox" checked><span class="nm">남섬 스노클링</span><span class="meta">TR-1043 · 푸꾸옥</span><span class="pr">₩68,000</span></div>
+          <div class="item-pick-row" data-dest="푸꾸옥"><input type="checkbox" checked><span class="nm">맹그로브 보트 투어</span><span class="meta">TR-1044 · 푸꾸옥</span><span class="pr">₩52,000</span></div>
+          <div class="item-pick-row" data-dest="푸꾸옥"><input type="checkbox"><span class="nm">진주 양식장 투어</span><span class="meta">TR-1045 · 푸꾸옥</span><span class="pr">₩42,000</span></div>
+          <div class="item-pick-row" data-dest="푸꾸옥"><input type="checkbox"><span class="nm">호수 카약</span><span class="meta">TR-1046 · 푸꾸옥</span><span class="pr">₩38,000</span></div>
+          <div class="item-pick-row" data-dest="푸꾸옥"><input type="checkbox"><span class="nm">야간 낚시 + BBQ</span><span class="meta">TR-1095 · 푸꾸옥</span><span class="pr">₩72,000</span></div>
+          <div class="item-pick-row" data-dest="푸꾸옥"><input type="checkbox"><span class="nm">제트스키 1시간</span><span class="meta">TR-1052 · 푸꾸옥</span><span class="pr">₩68,000</span></div>
+          <div class="item-pick-row" data-dest="푸꾸옥"><input type="checkbox"><span class="nm">패러글라이딩</span><span class="meta">TR-1053 · 푸꾸옥</span><span class="pr">₩115,000</span></div>
+          <!-- 나트랑 -->
+          <div class="item-pick-row" data-dest="나트랑"><input type="checkbox"><span class="nm">나트랑 빈원더스 입장권</span><span class="meta">TK-2602 · 나트랑</span><span class="pr">₩48,000</span></div>
+          <div class="item-pick-row" data-dest="나트랑"><input type="checkbox"><span class="nm">머드온천 1일권</span><span class="meta">TK-2611 · 나트랑</span><span class="pr">₩32,000</span></div>
+          <div class="item-pick-row" data-dest="나트랑"><input type="checkbox"><span class="nm">혼문섬 스노클링</span><span class="meta">TR-1071 · 나트랑</span><span class="pr">₩58,000</span></div>
+          <!-- 다낭 -->
+          <div class="item-pick-row" data-dest="다낭"><input type="checkbox"><span class="nm">바나힐 1일 투어</span><span class="meta">TR-1133 · 다낭</span><span class="pr">₩95,000</span></div>
+          <div class="item-pick-row" data-dest="다낭"><input type="checkbox"><span class="nm">호이안 야경 투어</span><span class="meta">TR-1134 · 다낭</span><span class="pr">₩48,000</span></div>
+          <div class="item-pick-row" data-dest="다낭"><input type="checkbox"><span class="nm">미썬 유적 + 호이안</span><span class="meta">TR-1135 · 다낭</span><span class="pr">₩82,000</span></div>
+          <div class="item-pick-row" data-dest="다낭"><input type="checkbox"><span class="nm">손짜반도 1일</span><span class="meta">TR-1136 · 다낭</span><span class="pr">₩72,000</span></div>
+          <!-- 호치민 -->
+          <div class="item-pick-row" data-dest="호치민"><input type="checkbox"><span class="nm">호치민 시티 케이블카 왕복</span><span class="meta">TK-2598 · 호치민</span><span class="pr">₩28,000</span></div>
+          <div class="item-pick-row" data-dest="호치민"><input type="checkbox"><span class="nm">메콩델타 1일 투어</span><span class="meta">TR-1181 · 호치민</span><span class="pr">₩52,000</span></div>
+          <!-- 하노이 -->
+          <div class="item-pick-row" data-dest="하노이"><input type="checkbox"><span class="nm">하롱베이 1일 크루즈</span><span class="meta">TR-1221 · 하노이</span><span class="pr">₩98,000</span></div>
+          <div class="item-pick-row" data-dest="하노이"><input type="checkbox"><span class="nm">하노이 빈원더스</span><span class="meta">TK-2615 · 하노이</span><span class="pr">₩42,000</span></div>
         </div>
+        <div class="empty-hint" id="modal-empty-hint" style="display:none; padding:24px; text-align:center; color:rgba(0,0,0,0.4); font-size:12px;">선택한 여행지에 해당하는 항목이 없습니다.</div>
       </div>
 
       <!-- 활성 상태 -->
@@ -1305,9 +1277,42 @@ function toggleAutogen(cb) {
   }
 }
 
+function filterDest(btn, dest) {
+  btn.parentElement.querySelectorAll('.cat-chip').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  const cards = document.querySelectorAll('#top-groups .group-card');
+  cards.forEach(card => {
+    const cardDest = card.dataset.dest || '';
+    card.style.display = (dest === 'all' || cardDest === dest) ? '' : 'none';
+  });
+  // 빈 서브카테고리/섹션 숨김
+  document.querySelectorAll('#top-groups .subcat-block').forEach(block => {
+    const visible = block.querySelectorAll('.group-card:not([style*="display: none"])').length;
+    block.style.display = visible > 0 ? '' : 'none';
+  });
+  document.querySelectorAll('#top-groups .group-section').forEach(section => {
+    const visibleCards = Array.from(section.querySelectorAll('.group-card')).filter(c => c.style.display !== 'none').length;
+    section.style.display = visibleCards > 0 ? '' : 'none';
+  });
+}
+
+function filterModalItems(dest) {
+  const rows = document.querySelectorAll('#modal-item-list .item-pick-row');
+  let visibleCount = 0;
+  rows.forEach(row => {
+    const match = (dest === 'all' || row.dataset.dest === dest);
+    row.style.display = match ? '' : 'none';
+    if (match) visibleCount++;
+  });
+  document.getElementById('modal-empty-hint').style.display = visibleCount === 0 ? 'block' : 'none';
+}
+
 function openCreateGroupModal() {
   document.getElementById('createGroupModal').classList.add('active');
   document.body.classList.add('modal-open');
+  // 초기 필터링: 푸꾸옥
+  const sel = document.getElementById('modal-dest-select');
+  if (sel) filterModalItems(sel.value);
 }
 function closeCreateGroupModal() {
   document.getElementById('createGroupModal').classList.remove('active');
