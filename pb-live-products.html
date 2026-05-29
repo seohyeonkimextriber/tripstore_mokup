@@ -376,7 +376,6 @@ table.tbl tbody tr:last-child td { border-bottom: none; }
   <div class="subnav-card">
     <button class="subnav-item active" onclick="switchSubnav('all', this)">전체 <span class="subnav-count">1,847</span></button>
     <button class="subnav-item" onclick="switchSubnav('live', this)">🟢 라이브 <span class="subnav-count">1,465</span></button>
-    <button class="subnav-item warn" onclick="switchSubnav('review', this)" title="실시간 마진 3% 미만 — 검토 필요">⚠ 검토 필요 <span class="subnav-count">18</span></button>
     <button class="subnav-item danger" onclick="switchSubnav('hidden', this)">⊘ 미노출 <span class="subnav-count">87</span></button>
   </div>
 
@@ -897,7 +896,6 @@ table.tbl tbody tr:last-child td { border-bottom: none; }
       </div>
       <div class="reason-chips">
         <button class="reason-chip" onclick="pickReason(this, '운영자 판단 — 일시 미노출')">[운영자] 일시 미노출</button>
-        <button class="reason-chip" onclick="pickReason(this, '연결된 콘텐츠(POST) 누락 또는 오류 — 콘텐츠 수정 후 재노출')">[운영자] 콘텐츠 이슈</button>
         <button class="reason-chip" onclick="pickReason(this, '시스템 자동 — 역마진 (NEGATIVE_MARGIN)')">[시스템] 역마진</button>
         <button class="reason-chip" onclick="pickReason(this, '시스템 자동 — 경쟁가 미달 (BELOW_COMPETITION) · 평균가 × 0.97 초과')">[시스템] 경쟁가 미달</button>
       </div>
@@ -1142,11 +1140,85 @@ function closeDetailModal() {
   document.body.classList.remove('modal-open');
 }
 
+/* ===== 재노출 모달 ===== */
+let _reactivateTargetId = null;
 function reactivate(pid) {
-  if (!confirm(`${pid} — 재노출 처리할까요?\n\n다음 정기 노출 배치(다음 시간 단위)부터 라이브에 표시됩니다.`)) return;
-  alert(`${pid} 재노출 처리 완료. 변경 이력 저장.`);
+  _reactivateTargetId = pid;
+  document.getElementById('reactivateTargetId').textContent = pid;
+  document.getElementById('reactivateReasonText').value = '';
+  document.querySelectorAll('#reactivateModal .reason-chip').forEach(c => c.classList.remove('active'));
+  document.getElementById('reactivateModal').classList.add('active');
+  document.body.classList.add('modal-open');
 }
-
+function closeReactivateModal() {
+  document.getElementById('reactivateModal').classList.remove('active');
+  document.body.classList.remove('modal-open');
+  _reactivateTargetId = null;
+}
+function pickReactivateReason(btn, text) {
+  document.querySelectorAll('#reactivateModal .reason-chip').forEach(c => c.classList.remove('active'));
+  btn.classList.add('active');
+  document.getElementById('reactivateReasonText').value = text;
+}
+function applyReactivate() {
+  const val = document.getElementById('reactivateReasonText').value.trim();
+  if (!val) { alert('재노출 사유를 입력해 주세요.'); return; }
+  alert(`✅ ${_reactivateTargetId} 재노출 처리 완료\n사유: ${val}\n\n→ 다음 정기 노출 배치부터 라이브 · 변경 이력 저장`);
+  closeReactivateModal();
+}
 </script>
+
+<!-- ============================================================ -->
+<!-- MODAL: 재노출 처리 -->
+<!-- ============================================================ -->
+<div class="backdrop" id="reactivateModal" onclick="if(event.target===this) closeReactivateModal()">
+  <div class="modal">
+    <div class="m-head">
+      <div class="m-head-icon" style="background:#f6ffed; color:#389e0d; border:1px solid #b7eb8f;">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg>
+      </div>
+      <div class="m-title-wrap">
+        <div class="m-title">미노출 상품 재노출 처리</div>
+        <div class="m-sub">미노출된 상품을 다시 노출 처리합니다. 사유는 운영팀에 공유되며 변경 이력으로 영구 저장됩니다.</div>
+      </div>
+      <button class="m-close" onclick="closeReactivateModal()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
+    </div>
+
+    <div class="m-body">
+      <!-- 대상 -->
+      <div class="target-banner" style="background: linear-gradient(135deg, #f6ffed 0%, #d9f7be 100%); border-color: #b7eb8f;">
+        <svg viewBox="0 0 24 24" fill="none" stroke="#389e0d" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="width:18px;height:18px;flex-shrink:0;"><polyline points="20 6 9 17 4 12"/></svg>
+        <div style="flex:1;">
+          <span class="pid" id="reactivateTargetId">PB-XXXXX</span>
+          <div class="pname" style="margin-top:4px;">미노출 상태 → 라이브 복귀</div>
+          <div class="pmeta" style="color:#389e0d;">재노출 시 사용자 검색·리스트·PDP 모두 즉시 노출 가능 상태로 전환됩니다.</div>
+        </div>
+      </div>
+
+      <label class="field-label">재노출 사유 카테고리 <span class="hint">클릭하면 입력란에 채워집니다</span></label>
+      <div class="reason-chips">
+        <button class="reason-chip" onclick="pickReactivateReason(this, '운영자 판단 — 일시 미노출 해제 / 사유 해소 완료')">[운영자] 일시 미노출 해제</button>
+        <button class="reason-chip" onclick="pickReactivateReason(this, '가격 정책 조정 완료 — 정가마진 변경 후 재노출')">[운영자] 가격 정책 조정 완료</button>
+        <button class="reason-chip" onclick="pickReactivateReason(this, '시스템 자동 조건 해소 — 마진/경쟁가 회복')">[시스템] 자동 조건 해소</button>
+      </div>
+
+      <label class="field-label">상세 사유 <span class="req">*</span></label>
+      <textarea class="reason-ta" id="reactivateReasonText" placeholder="예: 빈원더스 7월 미제공 안내 추가 완료 — 재노출 / 항공 유류할증 안정화 — 마진 복구"></textarea>
+    </div>
+
+    <div class="m-foot">
+      <div class="m-foot-info">변경 이력은 <strong>이 상품 활동 로그</strong>에 영구 보존됩니다.</div>
+      <div style="display:flex; gap:8px;">
+        <button class="btn-modal-close" onclick="closeReactivateModal()">취소</button>
+        <button class="btn-modal-primary" onclick="applyReactivate()" style="background:#52c41a; border-color:#52c41a;">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" style="width:13px;height:13px;"><polyline points="20 6 9 17 4 12"/></svg>
+          ✅ 재노출 적용
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+</body>
 </body>
 </html>
