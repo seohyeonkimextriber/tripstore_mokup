@@ -181,8 +181,8 @@ table.tbl .status.incomparable { background: #e0e7ff; color: #3730a3; }
   <div class="grid-3">
     <div class="task-card">
       <div class="t"><span class="badge">TASK 1</span></div>
-      <div class="d"><strong>DB 컬럼 추가</strong><br>
-        `reconciliation_status`, `not_matched_reasons`, `anomaly_amount`, `tax_free_amount`, `is_escrow` — 5개 컬럼 신규 추가
+      <div class="d"><strong>DB 컬럼 추가 (총 16종)</strong><br>
+        운영 신호 5종 (`reconciliation_status` 외) + <strong>포트원 응답 raw 보존 11종</strong> (`reconciliation_id`, `merchant_id`, `store_id`, `payment_currency`, `supply_amount`, `order_name`, `portone_paid_at` 등)
       </div>
     </div>
     <div class="task-card">
@@ -229,71 +229,160 @@ table.tbl .status.incomparable { background: #e0e7ff; color: #3730a3; }
 <section class="slide" id="s2">
   <div class="slide-num">SECTION 02 · TASK 1</div>
   <h2 class="slide-title">DB 컬럼 추가</h2>
-  <p class="slide-subtitle">신규 컬럼 5종 — 포트원 거래대사 응답을 받기 위한 스키마 변경</p>
+  <p class="slide-subtitle">ledgers는 <strong>포트원 응답을 raw 그대로 보관</strong>하는 테이블 → 응답에 있는 모든 필드를 컬럼으로 확보</p>
 
-  <table class="tbl">
-    <thead>
-      <tr>
-        <th style="width:24%">대상 테이블</th>
-        <th style="width:22%">컬럼</th>
-        <th style="width:14%">타입</th>
-        <th>정의 / 값</th>
-        <th style="width:14%">어드민 노출</th>
-      </tr>
-    </thead>
-    <tbody>
-      <tr>
-        <td><code>pg_settlement_ledgers</code><br><code>pg_settlements</code></td>
-        <td><code>reconciliation_status</code></td>
-        <td>enum</td>
-        <td>대사상태 4종: <code>MATCHED</code> / <code>NOT_MATCHED</code> / <code>INCOMPARABLE</code> / <code>NOT_COLLECTED</code></td>
-        <td><strong>표시 O</strong></td>
-      </tr>
-      <tr>
-        <td><code>pg_settlement_ledgers</code></td>
-        <td><code>not_matched_reasons</code></td>
-        <td>json</td>
-        <td>NotMatchedReason 배열 — 불일치 사유 6종 중 다중 가능</td>
-        <td>—</td>
-      </tr>
-      <tr>
-        <td><code>pg_settlement_ledgers</code></td>
-        <td><code>anomaly_amount</code></td>
-        <td>int</td>
-        <td>이상 금액 (status별 의미 다름 — 다음 슬라이드 참고)</td>
-        <td>—</td>
-      </tr>
-      <tr>
-        <td><code>pg_settlement_ledgers</code></td>
-        <td><code>tax_free_amount</code></td>
-        <td>int</td>
-        <td>면세금액 (세금계산서 정정 시 사용)</td>
-        <td>—</td>
-      </tr>
-      <tr>
-        <td><code>pg_settlement_ledgers</code></td>
-        <td><code>is_escrow</code></td>
-        <td>tinyint</td>
-        <td>에스크로 거래 여부 — true=에스크로(구매확정 후 입금) / false=일반(즉시 입금)</td>
-        <td>—</td>
-      </tr>
-    </tbody>
-  </table>
+  <div class="highlight red" style="margin-bottom:18px">
+    <div class="highlight-title">🔑 원칙 — ledgers = Source of Truth</div>
+    <div class="highlight-body">
+      <code>pg_settlement_ledgers</code>는 포트원 응답의 <strong>원본 보관소</strong>입니다. 가공된 <code>pg_settlements</code>로 흐르기 전 단계라서, <strong>포트원이 내려주는 값은 가공·요약 없이 전부 그대로 적재</strong>해야 합니다. 추후 대사 이슈 추적/수동 재패치 시 원본이 필요하기 때문.<br>
+      → 따라서 신규 컬럼은 reconciliation 운영 신호값(5종) <strong>+ 포트원 응답 raw 보존용(11종) = 총 16종</strong>이 됩니다.
+    </div>
+  </div>
 
-  <div class="card" style="margin-top:18px">
-    <div class="card-title"><span class="num">⚠️</span>anomaly_amount 계산 룰 (status에 따라 의미 다름)</div>
-    <table class="tbl" style="margin-top:8px">
-      <thead><tr><th>status</th><th>의미</th><th>계산식</th></tr></thead>
+  <div class="card">
+    <div class="card-title"><span class="num">A</span>운영 신호 컬럼 (5종) — 대사 결과 처리용</div>
+    <table class="tbl">
+      <thead>
+        <tr>
+          <th style="width:24%">컬럼</th>
+          <th style="width:12%">타입</th>
+          <th>정의 / 값</th>
+          <th style="width:12%">어드민 노출</th>
+        </tr>
+      </thead>
       <tbody>
-        <tr><td><span class="status notmatched">NOT_MATCHED</span></td><td>PG ↔ 포트원 <strong>차액</strong></td><td><code>paymentAmount - portonePaymentAmount</code></td></tr>
-        <tr><td><span class="status incomparable">INCOMPARABLE</span></td><td>거래금액 <strong>절대값</strong> (paymentAmount=0)</td><td><code>|portonePaymentAmount|</code></td></tr>
-        <tr><td><span class="status notcollected">NOT_COLLECTED</span></td><td>거래금액 <strong>절대값</strong> (portonePaymentAmount=0)</td><td><code>|paymentAmount|</code></td></tr>
+        <tr>
+          <td><code>reconciliation_status</code><br><span style="font-size:11px;color:#64748b">※ settlements에도 동일 추가</span></td>
+          <td>enum</td>
+          <td>대사상태 4종: <code>MATCHED</code> / <code>NOT_MATCHED</code> / <code>INCOMPARABLE</code> / <code>NOT_COLLECTED</code></td>
+          <td><strong>표시 O</strong></td>
+        </tr>
+        <tr>
+          <td><code>not_matched_reasons</code></td>
+          <td>json</td>
+          <td>NotMatchedReason 배열 — 불일치 사유 6종 중 다중 가능</td>
+          <td>—</td>
+        </tr>
+        <tr>
+          <td><code>anomaly_amount</code></td>
+          <td>bigint</td>
+          <td>이상 금액 (status별 의미 다름 — 아래 박스 참고)</td>
+          <td>—</td>
+        </tr>
+        <tr>
+          <td><code>tax_free_amount</code></td>
+          <td>bigint</td>
+          <td>면세금액 (세금계산서 정정 시 사용)</td>
+          <td>—</td>
+        </tr>
+        <tr>
+          <td><code>is_escrow</code></td>
+          <td>tinyint</td>
+          <td>에스크로 거래 여부 — true=에스크로(구매확정 후 입금) / false=일반(즉시 입금)</td>
+          <td>—</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="card">
+    <div class="card-title"><span class="num">B</span>포트원 응답 raw 보존 컬럼 (11종) — 매핑 빠졌던 필드</div>
+    <table class="tbl">
+      <thead>
+        <tr>
+          <th style="width:22%">컬럼</th>
+          <th style="width:12%">타입</th>
+          <th style="width:24%">포트원 필드</th>
+          <th>설명 / 추가 이유</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><code>reconciliation_id</code></td>
+          <td>varchar</td>
+          <td><code>id</code></td>
+          <td>포트원 거래대사 건 고유 ID — 추후 포트원 문의/재조회 시 식별자</td>
+        </tr>
+        <tr>
+          <td><code>merchant_id</code></td>
+          <td>varchar</td>
+          <td><code>merchantId</code></td>
+          <td>포트원 고객사 ID (가맹점 식별)</td>
+        </tr>
+        <tr>
+          <td><code>store_id</code></td>
+          <td>varchar</td>
+          <td><code>storeId</code></td>
+          <td>포트원 상점 ID — 멀티 상점 운영 대비. <strong>NOT_COLLECTED·INCOMPARABLE에선 누락 가능 (nullable)</strong></td>
+        </tr>
+        <tr>
+          <td><code>payment_currency</code></td>
+          <td>varchar(3)</td>
+          <td><code>paymentCurrency</code></td>
+          <td>ISO 4217 통화 코드. KRW 외 글로벌 결제 대비</td>
+        </tr>
+        <tr>
+          <td><code>supply_amount</code></td>
+          <td>bigint</td>
+          <td><code>supplyAmount</code></td>
+          <td>공급가액 — 현재 settlements에만 있고 ledgers에 누락. <strong>추가 필요</strong></td>
+        </tr>
+        <tr>
+          <td><code>order_name</code></td>
+          <td>varchar</td>
+          <td><code>orderName</code></td>
+          <td>주문명 — 슬랙 알림 디버깅·운영 식별용</td>
+        </tr>
+        <tr>
+          <td><code>portone_paid_at</code></td>
+          <td>datetime</td>
+          <td><code>portonePaidAt</code></td>
+          <td>포트원 거래 일시 — <strong>2025-06-26 수집건부터 필수</strong>. paidAt(PG 일시)과의 차이로 NOT_MATCHED 디버깅 가능</td>
+        </tr>
+        <tr>
+          <td><code>approval_number</code></td>
+          <td>varchar</td>
+          <td><code>paymentMethod.*.approvalNumber</code></td>
+          <td>승인번호 — CARD / TRANSFER / VIRTUAL_ACCOUNT / GIFT_CERTIFICATE에서 제공</td>
+        </tr>
+        <tr>
+          <td><code>card_acquirer</code></td>
+          <td>varchar</td>
+          <td><code>paymentMethod.acquirer</code></td>
+          <td>카드 매입사 (CardCompany). 발급사(issuer)와 별개 — 매입사 기준 정산 분석용</td>
+        </tr>
+        <tr>
+          <td><code>fee_vat_amount</code></td>
+          <td>bigint</td>
+          <td><code>settlement.feeVatAmount</code></td>
+          <td>정산 수수료 부가세. 현재 vat_amount와 별도 컬럼 필요 (혼동 방지)</td>
+        </tr>
+        <tr>
+          <td><code>settlement_currency</code></td>
+          <td>varchar(3)</td>
+          <td><code>settlement.settlementCurrency</code></td>
+          <td>정산 통화 — paymentCurrency와 다를 수 있음 (글로벌 결제)</td>
+        </tr>
       </tbody>
     </table>
   </div>
 
   <div class="highlight">
-    <div class="highlight-title">🔑 핵심 — 기존 컬럼과 병존</div>
+    <div class="highlight-title">⚠️ anomaly_amount 계산 룰 (status에 따라 의미 다름)</div>
+    <div class="highlight-body">
+      <table class="tbl" style="margin-top:6px;background:rgba(255,255,255,0.6)">
+        <thead><tr><th>status</th><th>의미</th><th>계산식</th></tr></thead>
+        <tbody>
+          <tr><td><span class="status notmatched">NOT_MATCHED</span></td><td>PG ↔ 포트원 <strong>차액</strong></td><td><code>paymentAmount - portonePaymentAmount</code></td></tr>
+          <tr><td><span class="status incomparable">INCOMPARABLE</span></td><td>거래금액 <strong>절대값</strong> (paymentAmount=0)</td><td><code>|portonePaymentAmount|</code></td></tr>
+          <tr><td><span class="status notcollected">NOT_COLLECTED</span></td><td>거래금액 <strong>절대값</strong> (portonePaymentAmount=0)</td><td><code>|paymentAmount|</code></td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="highlight blue">
+    <div class="highlight-title">🔑 기존 컬럼과 병존</div>
     <div class="highlight-body">
       기존 <code>pg_settlement_fetch_status</code>(우리 시스템 진행상태: READY/COMPLETED/EXCLUDED)는 그대로 유지.<br>
       새 <code>reconciliation_status</code>(포트원 대사 결과)는 별도 컬럼으로 추가합니다. <strong>두 컬럼은 의미가 다르므로 합치지 않음</strong>.
@@ -305,18 +394,18 @@ table.tbl .status.incomparable { background: #e0e7ff; color: #3730a3; }
 <section class="slide" id="s3">
   <div class="slide-num">SECTION 03 · TASK 2</div>
   <h2 class="slide-title"><code style="background:#f1f5f9;color:#0369a1;padding:2px 10px;border-radius:6px;font-size:30px">pg_settlement_ledgers</code> 매핑</h2>
-  <p class="slide-subtitle">포트원 거래대사 API 응답 (raw) → ledgers 컬럼으로 1:1 적재</p>
+  <p class="slide-subtitle">포트원 응답 (raw) → ledgers 컬럼으로 <strong>1:1 전체 적재</strong>. 기존 매핑(파랑) + 신규 보존 컬럼(노랑)</p>
 
   <table class="tbl">
-    <thead><tr><th style="width:34%">포트원 필드</th><th style="width:24%">ledgers 컬럼</th><th>매핑 룰 · 메모</th></tr></thead>
+    <thead><tr><th style="width:32%">포트원 필드</th><th style="width:24%">ledgers 컬럼</th><th>매핑 룰 · 메모</th></tr></thead>
     <tbody>
+      <tr style="background:#fef9c3"><td><code>id</code></td><td><code>reconciliation_id</code> <span class="req">신규</span></td><td>포트원 거래대사 건 고유 ID</td></tr>
+      <tr style="background:#fef9c3"><td><code>merchantId</code></td><td><code>merchant_id</code> <span class="req">신규</span></td><td>포트원 고객사 ID</td></tr>
+      <tr style="background:#fef9c3"><td><code>storeId</code></td><td><code>store_id</code> <span class="req">신규</span></td><td>포트원 상점 ID (NOT_COLLECTED/INCOMPARABLE 시 nullable)</td></tr>
       <tr><td><code>pgTxId</code></td><td><code>tid</code></td><td>—</td></tr>
       <tr><td><code>pgSpecifier.pgMerchantId</code><br><code>pgSpecifier.pgProvider</code></td><td><code>pg</code><br><code>mid</code></td><td>—</td></tr>
       <tr><td><code>actionType</code></td><td><code>transaction_type</code></td>
-        <td><strong>매핑룰:</strong><br>
-          승인 → 승인 / 전체취소·부분취소·기타취소 → 취소<br>
-          <strong style="color:#d97706">정산후 보정 → "정산후보정" (신규 값)</strong>
-        </td></tr>
+        <td><strong>매핑룰:</strong> 승인 → 승인 / 전체취소·부분취소·기타취소 → 취소 / <strong style="color:#d97706">정산후 보정 → "정산후보정" (신규)</strong></td></tr>
       <tr><td><code>paymentId</code></td><td><code>payment_code</code></td><td>—</td></tr>
       <tr><td><code>transactionId</code></td><td><code>hosting_payment_code</code><br><code>merchant_payment_code</code></td><td>—</td></tr>
       <tr><td><code>paymentMethod.type</code></td><td><code>payment_method</code></td>
@@ -325,18 +414,42 @@ table.tbl .status.incomparable { background: #e0e7ff; color: #3730a3; }
         <td><strong>EASY_PAY 한정</strong> — 간편결제사 (네이버페이/카카오페이/토스페이)</td></tr>
       <tr><td><code>paymentMethod.method.type</code></td><td><code>easy_payment_method</code></td>
         <td><strong>EASY_PAY 한정</strong> — 간편결제 내부 실제 결제수단</td></tr>
-      <tr><td><code>paymentMethod.issuer</code> (CARD&EASY_PAY)<br><code>paymentMethod.bank</code> (VIRTUAL_ACCOUNT)</td>
+      <tr><td><code>paymentMethod.issuer</code> (CARD&EASY_PAY)<br><code>paymentMethod.bank</code> (VIRTUAL_ACCOUNT/TRANSFER)</td>
         <td><code>financial_institution</code></td>
-        <td>CARD: CardCompany 60+종 (예: <code>LOTTE_CARD</code>)<br>계좌: Bank 70+종 (예: <code>KOOKMIN</code>, <code>NONGHYUP</code>)</td></tr>
+        <td>CARD: CardCompany 65+종 (예: <code>LOTTE_CARD</code>)<br>계좌: Bank 60+종 (예: <code>KOOKMIN</code>, <code>NONGHYUP</code>)</td></tr>
+      <tr style="background:#fef9c3"><td><code>paymentMethod.acquirer</code> (CARD)</td><td><code>card_acquirer</code> <span class="req">신규</span></td>
+        <td>카드 매입사 (CardCompany). 발급사와 별개</td></tr>
+      <tr style="background:#fef9c3"><td><code>paymentMethod.*.approvalNumber</code></td><td><code>approval_number</code> <span class="req">신규</span></td>
+        <td>승인번호 — CARD / TRANSFER / VIRTUAL_ACCOUNT / GIFT_CERTIFICATE에서 제공</td></tr>
       <tr><td><code>paymentMethod.method.installmentMonth</code></td><td><code>installment_months</code></td>
         <td>0 = 일시불. CARD 또는 EASY_PAY+method.type=CARD에서만 유효</td></tr>
+      <tr style="background:#fef9c3"><td><code>paymentCurrency</code></td><td><code>payment_currency</code> <span class="req">신규</span></td><td>ISO 4217 통화 코드</td></tr>
       <tr><td><code>paymentAmount</code></td><td><code>transaction_amount</code></td><td>—</td></tr>
-      <tr><td><code>settlement.feeAmount</code> / <code>feeVatAmount</code> / <code>settlementAmount</code> / <code>freeInterestFee</code> / <code>settlementDate</code></td>
-        <td><code>fee_amount</code> / <code>vat_amount</code> / <code>settlement_amount</code> / <code>no_interest_fee</code> / <code>settlement_date</code></td>
-        <td>—</td></tr>
-      <tr><td><code>paidAt</code></td><td><code>transaction_date</code></td><td>—</td></tr>
+      <tr style="background:#fef9c3"><td><code>supplyAmount</code></td><td><code>supply_amount</code> <span class="req">신규</span></td><td>공급가액 (현재 ledgers에 누락)</td></tr>
+      <tr style="background:#fef9c3"><td><code>orderName</code></td><td><code>order_name</code> <span class="req">신규</span></td><td>주문명 (운영 식별·슬랙 알림용)</td></tr>
+      <tr><td><code>paidAt</code></td><td><code>transaction_date</code></td><td>PG 기준 거래 일시</td></tr>
+      <tr style="background:#fef9c3"><td><code>portonePaidAt</code></td><td><code>portone_paid_at</code> <span class="req">신규</span></td>
+        <td>포트원 기준 거래 일시 — <strong>2025-06-26 수집건부터 필수</strong>. NOT_MATCHED 디버깅 핵심</td></tr>
+      <tr><td><code>settlement.feeAmount</code></td><td><code>fee_amount</code></td><td>정산 수수료</td></tr>
+      <tr><td><code>settlement.feeVatAmount</code></td><td><code>vat_amount</code> ⚠️</td>
+        <td><strong>⚠️ 재검토 필요</strong>: 현재 매핑은 vat_amount로 되어 있으나, vat_amount는 거래 부가세 의미가 일반적. <strong>fee_vat_amount(정산 수수료 부가세)</strong>로 분리 권장</td></tr>
+      <tr style="background:#fef9c3"><td><code>settlement.feeVatAmount</code> (분리 시)</td><td><code>fee_vat_amount</code> <span class="req">신규</span></td>
+        <td>정산 수수료 부가세 — 위 항목 분리 결정 시 적용</td></tr>
+      <tr><td><code>settlement.settlementAmount</code></td><td><code>settlement_amount</code></td><td>실제 정산 금액</td></tr>
+      <tr style="background:#fef9c3"><td><code>settlement.settlementCurrency</code></td><td><code>settlement_currency</code> <span class="req">신규</span></td>
+        <td>정산 통화 — paymentCurrency와 다를 수 있음 (글로벌)</td></tr>
+      <tr><td><code>settlement.freeInterestFee</code></td><td><code>no_interest_fee</code></td>
+        <td>상점부담무이자 수수료 — KCP 카드만</td></tr>
+      <tr><td><code>settlement.settlementDate</code></td><td><code>settlement_date</code></td><td>정산 일자</td></tr>
     </tbody>
   </table>
+
+  <div class="highlight green" style="margin-top:14px">
+    <div class="highlight-title">🎨 색상 구분</div>
+    <div class="highlight-body">
+      <strong>흰 행</strong> = 기존 매핑 (변경 없음) · <strong>노란 행</strong> = 신규 추가 컬럼 (11종). 노란 행은 SECTION 2의 "포트원 응답 raw 보존 컬럼"과 일대일 대응합니다.
+    </div>
+  </div>
 </section>
 
 <!-- ============ 4. settlements 매핑 ============ -->
@@ -699,7 +812,8 @@ table.tbl .status.incomparable { background: #e0e7ff; color: #3730a3; }
   <div class="summary-box">
     <h3>🎯 개발 리뷰 시 확정해야 할 항목</h3>
     <ul>
-      <li><strong>DB 컬럼 5종 추가 PR</strong> — <code>reconciliation_status</code>, <code>not_matched_reasons</code>, <code>anomaly_amount</code>, <code>tax_free_amount</code>, <code>is_escrow</code></li>
+      <li><strong>DB 컬럼 16종 추가 PR</strong> — 운영 신호 5종 + raw 보존 11종 (특히 <code>portone_paid_at</code>, <code>reconciliation_id</code>, <code>supply_amount</code> 누락 주의)</li>
+      <li><strong>`settlement.feeVatAmount` 매핑 재검토</strong> — 현재 <code>vat_amount</code>로 매핑되어 있으나 `fee_vat_amount`로 분리 필요 여부 확정</li>
       <li><strong>ledgers 적재 로직 + settlements 가공 로직</strong> 분리 구조 확정 (raw → 가공 2-step)</li>
       <li><strong>스케줄러 트리거 시점</strong> — 익일 13:00 이후 (포트원 권장 12:00 + 안전 마진)</li>
       <li><strong>슬랙 알림 모듈</strong> — 기존 알림 모듈 재사용 vs 신규 모듈 (그룹핑·코드블록 테이블 포맷 합의 필요)</li>
