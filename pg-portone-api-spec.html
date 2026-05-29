@@ -1,0 +1,760 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>포트원 V2 PG 거래대사 API 스펙</title>
+<link href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.6/dist/web/static/pretendard.css" rel="stylesheet">
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; }
+body { font-family: 'Pretendard', 'Apple SD Gothic Neo', -apple-system, sans-serif; font-size: 15px; color: rgba(0,0,0,0.88); background: #f5f6fa; line-height: 1.6; }
+a { color: inherit; }
+
+.app { display: grid; grid-template-columns: 280px 1fr; min-height: 100vh; }
+
+.sidebar { background: linear-gradient(180deg, #1e293b 0%, #334155 100%); color: #fff; padding: 28px 22px; position: sticky; top: 0; height: 100vh; overflow-y: auto; }
+.sidebar-brand { font-size: 13px; opacity: 0.7; letter-spacing: 0.4px; text-transform: uppercase; font-weight: 700; margin-bottom: 6px; }
+.sidebar-title { font-size: 19px; font-weight: 800; margin-bottom: 4px; letter-spacing: -0.3px; line-height: 1.3; }
+.sidebar-sub { font-size: 12px; opacity: 0.6; margin-bottom: 24px; }
+.sidebar-meta { display: flex; gap: 5px; margin-bottom: 24px; flex-wrap: wrap; }
+.sidebar-meta .pill { background: rgba(255,255,255,0.12); padding: 3px 9px; border-radius: 10px; font-size: 10.5px; font-weight: 600; }
+.toc-list { display: flex; flex-direction: column; gap: 2px; }
+.toc-item { display: flex; align-items: center; gap: 9px; padding: 9px 11px; border-radius: 8px; font-size: 13px; color: rgba(255,255,255,0.75); cursor: pointer; transition: all 0.15s; text-decoration: none; }
+.toc-item:hover { background: rgba(255,255,255,0.08); color: #fff; }
+.toc-item.active { background: #fbbf24; color: #1e293b; font-weight: 800; }
+.toc-num { width: 22px; height: 22px; border-radius: 50%; background: rgba(255,255,255,0.1); display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 800; flex-shrink: 0; }
+.toc-item.active .toc-num { background: #1e293b; color: #fbbf24; }
+
+.sidebar-foot { margin-top: 26px; padding-top: 18px; border-top: 1px solid rgba(255,255,255,0.12); font-size: 11px; opacity: 0.7; line-height: 1.55; }
+.sidebar-foot a { color: #fbbf24; text-decoration: none; }
+
+.main { padding: 0 56px; }
+.slide { min-height: 100vh; padding: 64px 0; display: flex; flex-direction: column; justify-content: center; }
+.slide-num { font-size: 12px; color: rgba(0,0,0,0.4); font-weight: 800; letter-spacing: 2px; margin-bottom: 10px; }
+.slide-title { font-size: 36px; font-weight: 800; letter-spacing: -0.8px; margin-bottom: 8px; line-height: 1.15; }
+.slide-subtitle { font-size: 16px; color: rgba(0,0,0,0.55); margin-bottom: 30px; line-height: 1.55; }
+
+.cover { background: linear-gradient(135deg, #1e293b 0%, #475569 50%, #64748b 100%); color: #fff; margin: 0 -56px; padding: 110px 56px; }
+.cover .badge { display: inline-block; background: rgba(255,255,255,0.16); padding: 6px 16px; border-radius: 20px; font-size: 12px; font-weight: 700; letter-spacing: 0.4px; margin-bottom: 18px; }
+.cover h1 { font-size: 52px; font-weight: 900; letter-spacing: -1.5px; line-height: 1.15; margin-bottom: 18px; }
+.cover h1 .accent { color: #fbbf24; }
+.cover .lead { font-size: 18px; opacity: 0.88; line-height: 1.65; max-width: 760px; }
+.cover .meta { margin-top: 36px; display: flex; gap: 26px; flex-wrap: wrap; padding-top: 26px; border-top: 1px solid rgba(255,255,255,0.18); }
+.cover .meta-item { font-size: 13px; }
+.cover .meta-item .k { opacity: 0.55; margin-bottom: 3px; font-size: 11px; letter-spacing: 0.4px; text-transform: uppercase; font-weight: 700; }
+.cover .meta-item .v { font-weight: 700; }
+
+.card { background: #fff; border-radius: 14px; padding: 24px 28px; box-shadow: 0 2px 12px rgba(0,0,0,0.05); margin-bottom: 16px; }
+.card-title { font-size: 16px; font-weight: 800; margin-bottom: 14px; display: flex; align-items: center; gap: 8px; letter-spacing: -0.2px; }
+.card-title .num { background: #1e293b; color: #fff; padding: 2px 10px; border-radius: 6px; font-size: 11px; font-weight: 800; }
+.card-row { font-size: 14px; line-height: 1.8; color: rgba(0,0,0,0.78); }
+.card-row strong { color: rgba(0,0,0,0.92); font-weight: 800; }
+.card-row code { background: #f1f5f9; padding: 2px 7px; border-radius: 4px; font-size: 13px; color: #1e293b; font-family: 'SF Mono', monospace; font-weight: 600; }
+
+.endpoint { background: #0f172a; color: #fbbf24; padding: 14px 18px; border-radius: 8px; font-family: 'SF Mono', monospace; font-size: 13.5px; font-weight: 600; margin: 8px 0; word-break: break-all; }
+.endpoint .method { background: #fbbf24; color: #0f172a; padding: 2px 8px; border-radius: 4px; font-size: 11px; margin-right: 10px; font-weight: 800; }
+
+pre.code { background: #0f172a; color: #e2e8f0; padding: 16px 18px; border-radius: 8px; font-family: 'SF Mono', monospace; font-size: 12.5px; line-height: 1.6; overflow-x: auto; margin: 8px 0; }
+pre.code .key { color: #93c5fd; }
+pre.code .val { color: #fcd34d; }
+pre.code .str { color: #86efac; }
+
+.highlight { background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%); border: 1.5px solid #f59e0b; border-radius: 12px; padding: 16px 20px; margin: 12px 0; }
+.highlight.blue { background: linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%); border-color: #3b82f6; }
+.highlight.red { background: linear-gradient(135deg, #fee2e2 0%, #fecaca 100%); border-color: #ef4444; }
+.highlight.green { background: linear-gradient(135deg, #d1fae5 0%, #a7f3d0 100%); border-color: #10b981; }
+.highlight-title { font-size: 13px; font-weight: 800; letter-spacing: 0.3px; margin-bottom: 8px; color: #92400e; }
+.highlight.blue .highlight-title { color: #1e3a8a; }
+.highlight.red .highlight-title { color: #991b1b; }
+.highlight.green .highlight-title { color: #064e3b; }
+.highlight-body { font-size: 14px; line-height: 1.75; }
+.highlight-body code { background: rgba(255,255,255,0.6); padding: 2px 6px; border-radius: 4px; font-family: 'SF Mono', monospace; font-size: 12.5px; font-weight: 700; }
+
+.grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+.grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 14px; }
+.grid-4 { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; }
+
+.stat { background: #fff; border-radius: 12px; padding: 18px 20px; text-align: left; border: 1px solid #e2e8f0; }
+.stat .lab { font-size: 11px; font-weight: 700; color: rgba(0,0,0,0.55); letter-spacing: 0.4px; text-transform: uppercase; margin-bottom: 6px; }
+.stat .val { font-size: 22px; font-weight: 800; color: #1e293b; letter-spacing: -0.4px; margin-bottom: 4px; }
+.stat .sub { font-size: 12px; color: rgba(0,0,0,0.55); }
+
+table.tbl { width: 100%; background: #fff; border-collapse: collapse; border-radius: 10px; overflow: hidden; font-size: 13px; box-shadow: 0 2px 12px rgba(0,0,0,0.04); }
+table.tbl th { background: #1e293b; color: #fff; text-align: left; padding: 11px 14px; font-weight: 700; font-size: 12px; letter-spacing: 0.2px; }
+table.tbl td { padding: 11px 14px; border-bottom: 1px solid #e2e8f0; vertical-align: top; line-height: 1.65; }
+table.tbl tr:last-child td { border-bottom: none; }
+table.tbl td code { background: #f1f5f9; padding: 1px 6px; border-radius: 3px; font-size: 12px; color: #1e293b; font-family: 'SF Mono', monospace; }
+table.tbl .status { display: inline-block; padding: 2px 8px; border-radius: 10px; font-size: 11px; font-weight: 700; }
+table.tbl .status.matched { background: #d1fae5; color: #064e3b; }
+table.tbl .status.notmatched { background: #fee2e2; color: #991b1b; }
+table.tbl .status.notcollected { background: #fef3c7; color: #92400e; }
+table.tbl .status.incomparable { background: #e0e7ff; color: #3730a3; }
+table.tbl .req { background: #fee2e2; color: #991b1b; padding: 1px 6px; border-radius: 3px; font-size: 11px; font-weight: 700; }
+table.tbl .opt { background: #e5e7eb; color: #374151; padding: 1px 6px; border-radius: 3px; font-size: 11px; font-weight: 700; }
+
+.enum-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 6px; margin-top: 10px; }
+.enum-item { background: #f8fafc; padding: 8px 12px; border-radius: 6px; font-size: 12.5px; border: 1px solid #e2e8f0; }
+.enum-item code { background: transparent; color: #1e293b; font-weight: 700; padding: 0; }
+
+details { background: #fff; border-radius: 10px; padding: 14px 18px; margin-bottom: 10px; border: 1px solid #e2e8f0; }
+details summary { font-weight: 800; font-size: 14px; cursor: pointer; color: #1e293b; }
+details summary:hover { color: #475569; }
+
+@media (max-width: 1024px) {
+  .app { grid-template-columns: 1fr; }
+  .sidebar { position: relative; height: auto; }
+  .main { padding: 0 24px; }
+  .cover { margin: 0 -24px; padding: 80px 24px; }
+  .cover h1 { font-size: 36px; }
+  .slide-title { font-size: 26px; }
+}
+</style>
+</head>
+<body>
+<div class="app">
+
+<aside class="sidebar">
+  <div class="sidebar-brand">PORTONE V2</div>
+  <div class="sidebar-title">PG 거래대사<br>API 스펙</div>
+  <div class="sidebar-sub">개발 참조 자료 · 2026-05-29</div>
+  <div class="sidebar-meta">
+    <span class="pill">V2 API</span>
+    <span class="pill">REST</span>
+    <span class="pill">JSON</span>
+  </div>
+  <nav class="toc-list">
+    <a href="#s0" class="toc-item active"><span class="toc-num">0</span>커버 & API 개요</a>
+    <a href="#s1" class="toc-item"><span class="toc-num">1</span>인증 & 호출 방식</a>
+    <a href="#s2" class="toc-item"><span class="toc-num">2</span>API #1: 거래대사 조회</a>
+    <a href="#s3" class="toc-item"><span class="toc-num">3</span>응답 4종 (oneOf)</a>
+    <a href="#s4" class="toc-item"><span class="toc-num">4</span>결제수단 9종 (oneOf)</a>
+    <a href="#s5" class="toc-item"><span class="toc-num">5</span>API #2: 거래 요약</a>
+    <a href="#s6" class="toc-item"><span class="toc-num">6</span>API #3: 정산 요약</a>
+    <a href="#s7" class="toc-item"><span class="toc-num">7</span>공통 Enum</a>
+    <a href="#s8" class="toc-item"><span class="toc-num">8</span>구현 체크리스트</a>
+  </nav>
+  <div class="sidebar-foot">
+    <strong style="color:#fff">📋 원문</strong><br>
+    <a href="https://portone.notion.site/PG-API-d8a4ab35472e44338713391b8d14de5d">포트원 — PG 거래대사 API 안내문서</a><br><br>
+    <a href="pg-portone-dev-review.html">← 개발 리뷰 발표자료로 돌아가기</a>
+  </div>
+</aside>
+
+<main class="main">
+
+<!-- ============ 0. COVER ============ -->
+<section class="slide" id="s0">
+  <div class="cover">
+    <div class="badge">📡 PortOne V2 API · PG Reconciliation</div>
+    <h1>포트원 V2<br><span class="accent">PG 거래대사 API</span> 스펙</h1>
+    <p class="lead">
+      포트원이 제공하는 <strong>PG 정산 자동화 API 3종</strong>의 호출 방식 · 요청/응답 스키마 정리.<br>
+      개발 구현 시 참조용 — 인증 헤더, oneOf 타입 분기, enum 사전 포함.
+    </p>
+    <div class="meta">
+      <div class="meta-item"><div class="k">Host</div><div class="v">api.portone.io</div></div>
+      <div class="meta-item"><div class="k">버전</div><div class="v">V2</div></div>
+      <div class="meta-item"><div class="k">API 수</div><div class="v">3종</div></div>
+      <div class="meta-item"><div class="k">조회 범위</div><div class="v">최대 3개월</div></div>
+      <div class="meta-item"><div class="k">권장 호출시각</div><div class="v">전일자 → 익일 12:00 이후</div></div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ 1. 인증 & 호출 방식 ============ -->
+<section class="slide" id="s1">
+  <div class="slide-num">SECTION 01</div>
+  <h2 class="slide-title">인증 & 호출 방식</h2>
+  <p class="slide-subtitle">V2 API Secret + Authorization 헤더 + 쿼리 파라미터로 JSON 전달</p>
+
+  <div class="card">
+    <div class="card-title"><span class="num">1</span>인증 헤더</div>
+    <div class="card-row" style="margin-bottom:8px">
+      포트원 콘솔(연동 관리 → 식별코드·API Keys → V2 API)에서 발급받은 Secret을 <code>Authorization</code> 헤더에 담아 호출합니다.
+    </div>
+    <div class="endpoint">Authorization: PortOne {API_SECRET}</div>
+    <div class="highlight blue" style="margin-top:10px">
+      <div class="highlight-title">💡 V1 사용자도 V2 Secret 발급 필요</div>
+      <div class="highlight-body">포트원 V1 결제를 사용 중이더라도 거래대사 API는 V2 전용이므로 <strong>V2 API Secret을 별도 발급</strong>해야 합니다.</div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-title"><span class="num">2</span>API Server Host</div>
+    <div class="endpoint">https://api.portone.io</div>
+  </div>
+
+  <div class="card">
+    <div class="card-title"><span class="num">3</span>파라미터 전달 방식 — GET + URL 인코딩된 JSON</div>
+    <div class="card-row">
+      포트원 GET API는 쿼리 파라미터로 JSON Body를 받습니다. <strong>JSON 생성 → URL 인코딩 → 지정 쿼리 파라미터에 담기</strong>의 순서로 호출합니다.
+    </div>
+    <div style="margin-top:10px">
+      <div style="font-size:12.5px;font-weight:700;color:#64748b;margin-bottom:4px">① 전달할 JSON</div>
+      <pre class="code">{
+  <span class="key">"name"</span>: <span class="str">"홍길동"</span>,
+  <span class="key">"transactionAmount"</span>: <span class="val">10000</span>,
+  <span class="key">"transactionDate"</span>: <span class="str">"2024-01-01"</span>,
+  <span class="key">"isDeleted"</span>: <span class="val">false</span>
+}</pre>
+      <div style="font-size:12.5px;font-weight:700;color:#64748b;margin-bottom:4px;margin-top:8px">② URL 인코딩 → API 호출</div>
+      <div class="endpoint">https://api.portone.io/example?parameter=%7B%0A%20%20%22name%22%3A%20%22%ED%99%8D%EA%B8%B8%EB%8F%99%22...</div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-title"><span class="num">4</span>에러 응답</div>
+    <table class="tbl">
+      <thead><tr><th style="width:22%">상태 코드</th><th>의미</th></tr></thead>
+      <tbody>
+        <tr><td><code>200 OK</code></td><td>정상 처리</td></tr>
+        <tr><td><code>400 Bad Request</code></td><td>요청 입력값 유효성 실패</td></tr>
+        <tr><td><code>401 Unauthorized</code></td><td>인증 정보(API Secret) 오류</td></tr>
+        <tr><td><code>403 Forbidden</code></td><td>API 호출 권한 없음</td></tr>
+      </tbody>
+    </table>
+    <div style="margin-top:10px;font-size:12.5px;font-weight:700;color:#64748b;margin-bottom:4px">공통 에러 포맷</div>
+    <pre class="code">{ <span class="key">"message"</span>: <span class="str">"에러메세지"</span> }</pre>
+  </div>
+</section>
+
+<!-- ============ 2. API #1 거래대사 조회 ============ -->
+<section class="slide" id="s2">
+  <div class="slide-num">SECTION 02 · API #1</div>
+  <h2 class="slide-title">거래대사 & 정산 내역 조회 API</h2>
+  <p class="slide-subtitle">건별 상세 거래대사 정보 — 가장 핵심 API. 우리 시스템 적재의 1차 소스</p>
+
+  <div class="endpoint"><span class="method">GET</span>https://api.portone.io/payment-reconciliations?requestBody={URL인코딩된JSON}</div>
+
+  <div class="card">
+    <div class="card-title"><span class="num">REQ</span>requestBody 스키마</div>
+    <table class="tbl">
+      <thead><tr><th style="width:18%">필드</th><th style="width:22%">타입</th><th style="width:10%">필수</th><th>설명</th></tr></thead>
+      <tbody>
+        <tr>
+          <td><code>dateCondition</code></td>
+          <td>ReconciliationDateConditionInput</td>
+          <td><span class="req">필수</span></td>
+          <td>조회 날짜 범위. <strong>최대 3개월</strong>. 하위 필드는 <code>transactionDateRange</code> 또는 <code>settlementDateRange</code> 중 하나 (둘 함께 사용 불가)</td>
+        </tr>
+        <tr>
+          <td><code>size</code></td>
+          <td>Int</td>
+          <td><span class="req">필수</span></td>
+          <td>한 번에 조회할 개수. <strong>최대 1000</strong></td>
+        </tr>
+        <tr>
+          <td><code>after</code></td>
+          <td>String</td>
+          <td><span class="opt">선택</span></td>
+          <td>이전 페이지 마지막 커서 (페이지네이션)</td>
+        </tr>
+      </tbody>
+    </table>
+    <div style="margin-top:10px;font-size:12.5px;font-weight:700;color:#64748b;margin-bottom:4px">요청 예시</div>
+    <pre class="code">{
+  <span class="key">"dateCondition"</span>: {
+    <span class="key">"transactionDateRange"</span>: {
+      <span class="key">"from"</span>: <span class="str">"2024-06-01"</span>,
+      <span class="key">"until"</span>: <span class="str">"2024-06-04"</span>
+    }
+  },
+  <span class="key">"size"</span>: <span class="val">1000</span>,
+  <span class="key">"after"</span>: <span class="str">"MDE4ZWQwNWItNGRlOS03OGFiLTljYTYtZmU3NDI4MjI5OWUyIyMj"</span>
+}</pre>
+  </div>
+
+  <div class="card">
+    <div class="card-title"><span class="num">RES</span>응답 구조 (Response Body)</div>
+    <table class="tbl">
+      <thead><tr><th style="width:18%">필드</th><th style="width:38%">타입</th><th>설명</th></tr></thead>
+      <tbody>
+        <tr><td><code>items</code></td><td>Array&lt;PaymentReconciliationWithCursor&gt;</td><td>조회 결과 리스트 (각 item + cursor)</td></tr>
+        <tr><td><code>items[].item</code></td><td>PaymentReconciliation (oneOf 4종)</td><td>개별 거래대사 건 — status 값에 따라 스키마가 분기됨</td></tr>
+        <tr><td><code>items[].cursor</code></td><td>String</td><td>해당 item을 가리키는 커서 (페이지네이션용)</td></tr>
+        <tr><td><code>pageInfo</code></td><td>PageInfo</td><td>startCursor / endCursor / hasPreviousPage / hasNextPage</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="highlight">
+    <div class="highlight-title">⏰ 조회 시점 제약</div>
+    <div class="highlight-body">
+      PG사 거래/정산 내역을 포트원 DB에 저장하기까지 시간이 걸리므로, <strong>전일자 데이터는 익일 12:00 이후</strong>부터 조회 권장. 그 이전에 호출하면 누락된 데이터를 받을 수 있음.
+    </div>
+  </div>
+</section>
+
+<!-- ============ 3. 응답 4종 ============ -->
+<section class="slide" id="s3">
+  <div class="slide-num">SECTION 03</div>
+  <h2 class="slide-title">PaymentReconciliation — 응답 oneOf 4종</h2>
+  <p class="slide-subtitle"><code style="background:#f1f5f9;padding:2px 8px;border-radius:6px;font-size:14px">status</code> 필드 값에 따라 스키마가 달라짐. 4개 중 하나의 타입을 가짐</p>
+
+  <div class="grid-4">
+    <div class="stat">
+      <div class="lab">a. MATCHED</div>
+      <div class="val" style="color:#064e3b">정상</div>
+      <div class="sub">PG ↔ 포트원 일치</div>
+    </div>
+    <div class="stat">
+      <div class="lab">b. NOT_MATCHED</div>
+      <div class="val" style="color:#991b1b">불일치</div>
+      <div class="sub">+ anomalyAmount, notMatchedReasons</div>
+    </div>
+    <div class="stat">
+      <div class="lab">c. INCOMPARABLE</div>
+      <div class="val" style="color:#3730a3">대사 불능</div>
+      <div class="sub">PG만 있음, 포트원 없음</div>
+    </div>
+    <div class="stat">
+      <div class="lab">d. NOT_COLLECTED</div>
+      <div class="val" style="color:#92400e">미수집</div>
+      <div class="sub">정산만 있음, 거래 미수집</div>
+    </div>
+  </div>
+
+  <details open>
+    <summary>a. PaymentReconciliationMatched — <code>status: "MATCHED"</code></summary>
+    <div style="margin-top:10px">
+      <strong>공통 필드</strong>: id / transactionId(포트원 결제ID) / paymentId(고객사 결제ID) / merchantId / storeId / pgTxId / pgSpecifier / actionType / paymentMethod / paymentCurrency / paymentAmount / taxFreeAmount / vatAmount / supplyAmount / paidAt / portonePaidAt(2025-06-26 수집건부터 필수) / orderName / isEscrow / settlement
+    </div>
+  </details>
+
+  <details open>
+    <summary>b. PaymentReconciliationNotMatched — <code>status: "NOT_MATCHED"</code></summary>
+    <div style="margin-top:10px">
+      <strong>MATCHED + 추가 필드</strong>:
+      <ul style="margin-left:20px;margin-top:6px;font-size:13.5px;line-height:1.85">
+        <li><code>anomalyAmount</code> (Int64, 필수) — <strong>PG 기준 거래금액 − 포트원 기준 거래금액 차액</strong></li>
+        <li><code>notMatchedReasons</code> (Array&lt;NotMatchedReason&gt;, 필수) — 불일치 사유 6종 중 다중 가능</li>
+      </ul>
+    </div>
+  </details>
+
+  <details open>
+    <summary>c. PaymentReconciliationIncomparable — <code>status: "INCOMPARABLE"</code></summary>
+    <div style="margin-top:10px">
+      <strong>MATCHED와 차이</strong>:
+      <ul style="margin-left:20px;margin-top:6px;font-size:13.5px;line-height:1.85">
+        <li><code>transactionId</code>, <code>paymentId</code>, <code>storeId</code>, <code>orderName</code>, <code>supplyAmount</code> — <strong>포트원에 없는 거래라서 누락</strong> (필수 아님)</li>
+        <li><code>anomalyAmount</code> (필수) — <strong>거래금액 절대값</strong></li>
+      </ul>
+    </div>
+  </details>
+
+  <details open>
+    <summary>d. PaymentReconciliationNotCollected — <code>status: "NOT_COLLECTED"</code></summary>
+    <div style="margin-top:10px">
+      포트원의 PG 정산 서비스는 PG 거래 내역을 먼저 가져와 거래 대사를 진행한 뒤, 정산일에 정산 정보가 채워지는 방식. <strong>이용 초기에 PG 정산내역에 존재하는 거래의 거래일이 서비스 이용 시작일보다 빠르면</strong> 이 케이스 발생.<br><br>
+      <strong>INCOMPARABLE과 차이</strong>:
+      <ul style="margin-left:20px;margin-top:6px;font-size:13.5px;line-height:1.85">
+        <li><code>pgTxId</code> — 선택 (UPLUS는 제공 불가)</li>
+        <li><code>portonePaidAt</code> — 선택</li>
+      </ul>
+    </div>
+  </details>
+
+  <div class="card" style="margin-top:14px">
+    <div class="card-title"><span class="num">📦</span>Settlement (정산 정보 — 모든 타입 공통, 선택 필드)</div>
+    <table class="tbl">
+      <thead><tr><th>필드</th><th>타입</th><th>설명</th></tr></thead>
+      <tbody>
+        <tr><td><code>feeAmount</code></td><td>Int64</td><td>정산 수수료</td></tr>
+        <tr><td><code>feeVatAmount</code></td><td>Int64</td><td>정산 수수료 부가세</td></tr>
+        <tr><td><code>settlementAmount</code></td><td>Int64</td><td>실제 정산 금액</td></tr>
+        <tr><td><code>settlementCurrency</code></td><td>String</td><td>정산 통화 (ISO 4217)</td></tr>
+        <tr><td><code>settlementDate</code></td><td>String</td><td>정산 일자</td></tr>
+        <tr><td><code>freeInterestFee</code></td><td>Int64 (선택)</td><td>상점부담무이자 수수료 — <strong>KCP 카드 거래에서만 제공</strong></td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="highlight blue">
+    <div class="highlight-title">💱 ISO 4217 마이너 단위 처리</div>
+    <div class="highlight-body">
+      모든 금액은 통화 마이너 단위만큼 소수점을 우측으로 옮겨 정수로 반환. <strong>예: 4.10 USD → 410</strong> (USD 마이너 단위 = 2). KRW는 마이너 단위 0이라 그대로.
+    </div>
+  </div>
+</section>
+
+<!-- ============ 4. 결제수단 9종 ============ -->
+<section class="slide" id="s4">
+  <div class="slide-num">SECTION 04</div>
+  <h2 class="slide-title">ReconciliationPaymentMethod — 결제수단 9종 (oneOf)</h2>
+  <p class="slide-subtitle"><code style="background:#f1f5f9;padding:2px 8px;border-radius:6px;font-size:14px">type</code> 필드 값에 따라 추가 필드가 달라짐</p>
+
+  <table class="tbl">
+    <thead>
+      <tr>
+        <th style="width:18%">type</th>
+        <th style="width:38%">추가 필드</th>
+        <th>비고 / 트립스토어 사용</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><code>CARD</code></td>
+        <td><code>issuer</code> (CardCompany) / <code>acquirer</code> (CardCompany) / <code>approvalNumber</code> / <code>installmentMonth</code> (Int)</td>
+        <td>신용카드 결제 — 메인 결제수단</td>
+      </tr>
+      <tr>
+        <td><code>VIRTUAL_ACCOUNT</code></td>
+        <td><code>bank</code> (Bank) / <code>approvalNumber</code></td>
+        <td>가상계좌</td>
+      </tr>
+      <tr>
+        <td><code>TRANSFER</code></td>
+        <td><code>bank</code> (Bank) / <code>approvalNumber</code></td>
+        <td>계좌이체</td>
+      </tr>
+      <tr>
+        <td><code>EASY_PAY</code></td>
+        <td><code>provider</code> (ReconciliationEasyPayProvider) / <code>method</code> (PaymentMethod 재귀)</td>
+        <td>간편결제 — provider로 구분 (KAKAOPAY/NAVERPAY/TOSSPAY 등) + method.type으로 내부 실제 결제수단 (CARD 등) 표현</td>
+      </tr>
+      <tr>
+        <td><code>CHARGE</code></td>
+        <td>—</td>
+        <td>간편결제 포인트 충전</td>
+      </tr>
+      <tr>
+        <td><code>GIFT_CERTIFICATE</code></td>
+        <td><code>approvalNumber</code> / <code>giftCertificateType</code> (5종)</td>
+        <td>상품권 (스마트문상/문상/도서문상/컬쳐랜드/해피머니)</td>
+      </tr>
+      <tr>
+        <td><code>MOBILE</code></td>
+        <td><code>carrier</code> (Enum 6종)</td>
+        <td>휴대폰 결제 — <strong>트립스토어 미운영</strong></td>
+      </tr>
+      <tr>
+        <td><code>ARS</code></td>
+        <td>—</td>
+        <td>ARS 결제</td>
+      </tr>
+      <tr>
+        <td><code>ETC</code></td>
+        <td><code>name</code> (String, 필수)</td>
+        <td>기타 결제수단</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <div class="highlight">
+    <div class="highlight-title">🔁 EASY_PAY의 재귀 구조</div>
+    <div class="highlight-body">
+      <code>EASY_PAY</code>의 <code>method</code> 필드는 다시 PaymentMethod 타입을 가짐. 예: 카카오페이로 카드 결제 시 → <code>type: EASY_PAY</code>, <code>provider: KAKAOPAY</code>, <code>method.type: CARD</code>, <code>method.issuer: KOOKMIN_CARD</code>.
+    </div>
+  </div>
+</section>
+
+<!-- ============ 5. API #2 거래 요약 ============ -->
+<section class="slide" id="s5">
+  <div class="slide-num">SECTION 05 · API #2</div>
+  <h2 class="slide-title">거래 요약 정보 API</h2>
+  <p class="slide-subtitle">거래일 + 거래통화 단위로 합산된 일별 요약 — 모니터링/대시보드용</p>
+
+  <div class="endpoint"><span class="method">GET</span>https://api.portone.io/payment-reconciliations/transactions/summaries</div>
+
+  <div class="grid-2">
+    <div class="card">
+      <div class="card-title"><span class="num">REQ</span>requestBody</div>
+      <table class="tbl">
+        <thead><tr><th>필드</th><th>타입</th><th>설명</th></tr></thead>
+        <tbody>
+          <tr><td><code>dateRange</code></td><td>DateRange</td><td>from / until (yyyy-MM-dd, 최대 3개월)</td></tr>
+          <tr><td><code>size</code></td><td>Int</td><td>최대 1000</td></tr>
+          <tr><td><code>after</code></td><td>String</td><td>커서 (선택)</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="card">
+      <div class="card-title"><span class="num">RES</span>응답 그룹핑 단위</div>
+      <div class="card-row">
+        <strong>거래일 (date) + 거래통화 (currency)</strong> 단위로 그룹핑된 요약.<br>
+        하위 <code>details[]</code>로 storeId + pgSpecifier 단위 분해 제공.
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-title"><span class="num">📊</span>PaymentReconciliationTransactionSummaryAggregate (합산)</div>
+    <table class="tbl">
+      <thead><tr><th style="width:25%">필드</th><th style="width:12%">타입</th><th>설명</th></tr></thead>
+      <tbody>
+        <tr><td><code>transactionAmount</code></td><td>Int64</td><td>거래 금액 총액</td></tr>
+        <tr><td><code>transactionCount</code></td><td>Int64</td><td>총 거래 건수</td></tr>
+        <tr><td><code>cancelAmount</code></td><td>Int64</td><td>취소 금액 총액 (음수)</td></tr>
+        <tr><td><code>cancelCount</code></td><td>Int64</td><td>총 취소 건수</td></tr>
+        <tr><td><code>anomalyAmount</code></td><td>Int64</td><td>거래 대사 결과가 정상이 아닌 거래건의 합산 금액</td></tr>
+        <tr><td><code>anomalyCount</code></td><td>Int64</td><td><code>notMatchedCount + incomparableCount</code></td></tr>
+        <tr><td><code>notMatchedCount</code></td><td>Int64</td><td>대사 불일치 건수</td></tr>
+        <tr><td><code>incomparableCount</code></td><td>Int64</td><td>대사 불능 건수</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <pre class="code">{
+  <span class="key">"items"</span>: [{
+    <span class="key">"item"</span>: {
+      <span class="key">"date"</span>: <span class="str">"2024-04-10"</span>,
+      <span class="key">"currency"</span>: <span class="str">"KRW"</span>,
+      <span class="key">"aggregate"</span>: {
+        <span class="key">"transactionAmount"</span>: <span class="val">55259685</span>, <span class="key">"transactionCount"</span>: <span class="val">651</span>,
+        <span class="key">"cancelAmount"</span>: <span class="val">-3263355</span>, <span class="key">"cancelCount"</span>: <span class="val">36</span>,
+        <span class="key">"anomalyAmount"</span>: <span class="val">100</span>, <span class="key">"anomalyCount"</span>: <span class="val">1</span>,
+        <span class="key">"notMatchedCount"</span>: <span class="val">1</span>, <span class="key">"incomparableCount"</span>: <span class="val">1</span>
+      },
+      <span class="key">"details"</span>: [{ <span class="key">"storeId"</span>: <span class="str">"store-xxx"</span>, <span class="key">"pgSpecifier"</span>: { ... }, ... }]
+    },
+    <span class="key">"cursor"</span>: <span class="str">"MjAyNC0wNC0xMCNLUlc="</span>
+  }],
+  <span class="key">"pageInfo"</span>: { <span class="key">"hasNextPage"</span>: <span class="val">true</span>, ... }
+}</pre>
+</section>
+
+<!-- ============ 6. API #3 정산 요약 ============ -->
+<section class="slide" id="s6">
+  <div class="slide-num">SECTION 06 · API #3</div>
+  <h2 class="slide-title">정산 요약 정보 API</h2>
+  <p class="slide-subtitle">정산일 + 정산통화 + 거래통화 단위로 합산된 일별 정산 요약 — 회계/정산 대시보드용</p>
+
+  <div class="endpoint"><span class="method">GET</span>https://api.portone.io/payment-reconciliations/settlements/summaries</div>
+
+  <div class="grid-2">
+    <div class="card">
+      <div class="card-title"><span class="num">REQ</span>requestBody</div>
+      <table class="tbl">
+        <thead><tr><th>필드</th><th>타입</th><th>설명</th></tr></thead>
+        <tbody>
+          <tr><td><code>dateRange</code></td><td>DateRange</td><td>from / until (최대 3개월)</td></tr>
+          <tr><td><code>size</code></td><td>Int</td><td>최대 1000</td></tr>
+          <tr><td><code>after</code></td><td>String</td><td>커서 (선택)</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="card">
+      <div class="card-title"><span class="num">RES</span>그룹핑 단위</div>
+      <div class="card-row">
+        <strong>정산일 (date) + 정산통화 (settlementCurrency) + 거래통화 (transactionCurrency)</strong> 단위.<br>
+        통화 변환이 일어나는 글로벌 결제까지 커버.
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-title"><span class="num">📊</span>PaymentReconciliationSettlementSummaryAggregate (합산)</div>
+    <table class="tbl">
+      <thead><tr><th style="width:28%">필드</th><th style="width:12%">타입</th><th>설명</th></tr></thead>
+      <tbody>
+        <tr><td><code>settlementAmount</code></td><td>Int64</td><td>정산 금액 총액 (settlementCurrency 기준)</td></tr>
+        <tr><td><code>settlementCount</code></td><td>Int64</td><td>총 정산 건수</td></tr>
+        <tr><td><code>feeAmount</code></td><td>Int64</td><td>정산 수수료 총액 (settlementCurrency)</td></tr>
+        <tr><td><code>feeVatAmount</code></td><td>Int64</td><td>정산 수수료 부가세 총액</td></tr>
+        <tr><td><code>cancelAmount</code></td><td>Int64</td><td>취소 금액 (transactionCurrency)</td></tr>
+        <tr><td><code>cancelCount</code></td><td>Int64</td><td>취소 건수</td></tr>
+        <tr><td><code>transactionAmount</code></td><td>Int64</td><td>거래 금액 총액 (transactionCurrency)</td></tr>
+        <tr><td><code>freeInterestFeeAmount</code></td><td>Int64 (선택)</td><td>상점부담무이자 수수료 — <strong>KCP 카드 거래에서만</strong></td></tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<!-- ============ 7. 공통 Enum ============ -->
+<section class="slide" id="s7">
+  <div class="slide-num">SECTION 07</div>
+  <h2 class="slide-title">공통 Enum 사전</h2>
+  <p class="slide-subtitle">개발 시 매핑 테이블에 미리 등록해야 할 enum 값들</p>
+
+  <div class="card">
+    <div class="card-title"><span class="num">🎯</span>actionType (거래 타입 — 5종)</div>
+    <div class="enum-grid">
+      <div class="enum-item"><code>APPROVAL</code> · 승인 거래</div>
+      <div class="enum-item"><code>FULL_CANCEL</code> · 전체 취소</div>
+      <div class="enum-item"><code>PARTIAL_CANCEL</code> · 부분 취소</div>
+      <div class="enum-item"><code>UNCLASSIFIED_CANCEL</code> · 기타 취소 (수기 보정 fallback)</div>
+      <div class="enum-item"><code>POST_CORRECTION</code> · 정산후 보정 (신규)</div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-title"><span class="num">⚠️</span>NotMatchedReason (불일치 사유 — 6종, 다중 가능)</div>
+    <div class="enum-grid">
+      <div class="enum-item"><code>PAYMENT_AMOUNT_NOT_MATCHED</code> · 거래 금액 불일치</div>
+      <div class="enum-item"><code>PAYMENT_DATE_NOT_MATCHED</code> · 거래 일자 불일치</div>
+      <div class="enum-item"><code>VAT_AMOUNT_NOT_MATCHED</code> · 부가세 금액 불일치</div>
+      <div class="enum-item"><code>TAX_FREE_AMOUNT_NOT_MATCHED</code> · 면세 금액 불일치</div>
+      <div class="enum-item"><code>INSTALLMENT_MONTH_NOT_MATCHED</code> · 할부 개월 수 불일치</div>
+      <div class="enum-item"><code>ESCROW_NOT_MATCHED</code> · 에스크로 여부 불일치</div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-title"><span class="num">🏪</span>pgProvider (PG사 — 21종)</div>
+    <div class="enum-grid">
+      <div class="enum-item"><code>NICEPAY</code> · 나이스페이</div>
+      <div class="enum-item"><code>TOSSPAYMENTS</code> · 토스페이먼츠</div>
+      <div class="enum-item"><code>UPLUS</code> · (구) 토스페이먼츠</div>
+      <div class="enum-item"><code>INICIS</code> · 이니시스</div>
+      <div class="enum-item"><code>KCP</code> · KCP</div>
+      <div class="enum-item"><code>KAKAOPAY</code> · 카카오페이</div>
+      <div class="enum-item"><code>NAVERPAY</code> · 네이버페이</div>
+      <div class="enum-item"><code>TOSSPAY</code> · 토스페이</div>
+      <div class="enum-item"><code>PAYCO</code> · 페이코</div>
+      <div class="enum-item"><code>DANAL</code> · 다날</div>
+      <div class="enum-item"><code>HECTO</code> · 헥토파이낸셜</div>
+      <div class="enum-item"><code>EXIMBAY</code> · 엑심베이</div>
+      <div class="enum-item"><code>PAYPAL</code> · 페이팔</div>
+      <div class="enum-item"><code>KPN</code> · 한국결제네트웍스</div>
+      <div class="enum-item"><code>KSNET</code> · KSNET</div>
+      <div class="enum-item"><code>MOBILIANS</code> · KG파이낸스</div>
+      <div class="enum-item"><code>PAYLETTER_GLOBAL</code> · 페이레터 해외</div>
+      <div class="enum-item"><code>PAYMENTWALL</code> · 페이먼트월</div>
+      <div class="enum-item"><code>KIWOOMPAY</code> · 키움페이</div>
+      <div class="enum-item"><code>INNOPAY</code> · 이노페이</div>
+      <div class="enum-item"><code>GALAXIA</code> · 갤럭시아머니트리</div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-title"><span class="num">💳</span>ReconciliationEasyPayProvider (간편결제사 — 19종)</div>
+    <div class="enum-grid">
+      <div class="enum-item"><code>KAKAOPAY</code> · 카카오페이</div>
+      <div class="enum-item"><code>NAVERPAY</code> · 네이버페이</div>
+      <div class="enum-item"><code>TOSSPAY</code> · 토스페이</div>
+      <div class="enum-item"><code>TOSS_BRANDPAY</code> · 토스 브랜드페이</div>
+      <div class="enum-item"><code>PAYCO</code> · 페이코</div>
+      <div class="enum-item"><code>SAMSUNGPAY</code> · 삼성페이</div>
+      <div class="enum-item"><code>SSGPAY</code> · 쓱페이</div>
+      <div class="enum-item"><code>LPAY</code> · 엘페이</div>
+      <div class="enum-item"><code>KPAY</code> · 케이페이</div>
+      <div class="enum-item"><code>LGPAY</code> · LG페이</div>
+      <div class="enum-item"><code>APPLEPAY</code> · 애플페이</div>
+      <div class="enum-item"><code>SKPAY</code> · SK페이</div>
+      <div class="enum-item"><code>KB_APP</code> · KB페이</div>
+      <div class="enum-item"><code>TMONEYPAY</code> · 티머니페이</div>
+      <div class="enum-item"><code>CHAI</code> · 차이페이</div>
+      <div class="enum-item"><code>PINPAY</code> · 핀페이</div>
+      <div class="enum-item"><code>WECHATPAY</code> · 위챗페이</div>
+      <div class="enum-item"><code>PAYPAL</code> · 페이팔</div>
+      <div class="enum-item"><code>ALIPAY</code> · 알리페이</div>
+    </div>
+  </div>
+
+  <details>
+    <summary>📇 CardCompany (카드 발급/매입사 — 65+종, 펼쳐서 보기)</summary>
+    <div style="margin-top:10px;font-size:12.5px;line-height:1.9;color:#475569">
+      <strong>국내 카드사</strong>: KOOKMIN_CARD, SHINHAN_CARD, HYUNDAI_CARD, LOTTE_CARD, SAMSUNG_CARD, WOORI_CARD, BC_CARD, HANA_CARD, NH_CARD, CITI_CARD, JEONBUK_CARD, JEJU_CARD, GWANGJU_CARD, SUHYUP_CARD, KYONGNAM_CARD, DAEGU_CARD, BUSAN_CARD<br><br>
+      <strong>은행 계열</strong>: KOREA_DEVELOPMENT_BANK(KDB산업), IBK(기업), NH_BANK(농협), KAKAO_BANK, K_BANK, TOSS_BANK, WOORI_BANK, SC_BANK, KFCC(새마을), SHINHYUP, EPOST(우체국), SAVINGS_BANK_KOREA<br><br>
+      <strong>해외/글로벌</strong>: VISA_CARD, MASTER_CARD, AMEX_CARD, JCB_CARD, DINERS_CARD, DISCOVER_CARD, UNION_CARD(은련), MIR_CARD(러시아), UNIDENTIFIED_GLOBAL_CARD, CHINA_BANK<br><br>
+      <strong>증권사</strong>: KB_SECURITIES, NH_SECURITIES, MIRAE_ASSET_SECURITIES, KOREA_INVESTMENT_SECURITIES, HANHWA_SECURITIES, SK_SECURITIES, DB_SECURITIES, EUGENE_SECURITIES, KYOBO_SECURITIES, YUANTA_SECURITIES<br><br>
+      <strong>핀테크/간편결제</strong>: NAVERPAY, KAKAOPAY, PAYCO, TOSS_CARD, SSG, CHAI(차이코퍼), KONA_I, GMONEY_TRANS(지머니트랜스), FINT(디셈버앤컴퍼니), KG_MOBILIANS, NICE(나이스정보통신), DANAL, SECTA(섹타나인), GME, LORD_SYSTEM, KDBC(KCB산은캐피탈), HANPASS, FINSHOT, BIZPLAY, FIRFIN<br><br>
+      <strong>선불/포인트</strong>: TEEN_CASH, EGG_MONEY, ON_CASH, GALAXIA_MONEY_TREE
+    </div>
+  </details>
+
+  <details>
+    <summary>🏦 Bank (은행 — 60+종, 펼쳐서 보기)</summary>
+    <div style="margin-top:10px;font-size:12.5px;line-height:1.9;color:#475569">
+      <strong>중앙/정책</strong>: BANK_OF_KOREA(한은), KDB(산업), IBK(기업), KEXIM(수출입), SGI(서울보증), KCIS(신용정보원), KODIT(신용보증기금), KIBO(기보)<br><br>
+      <strong>시중</strong>: KOOKMIN, SHINHAN, HANA, WOORI, NONGHYUP, SUHYUP, STANDARD_CHARTERED, CITI<br><br>
+      <strong>지방</strong>: DAEGU(iM뱅크), BUSAN, KWANGJU, JEJU, JEONBUK, KYONGNAM<br><br>
+      <strong>상호금융/특수</strong>: KFCC(새마을), SHINHYUP, SAVINGS_BANK, LOCAL_NONGHYUP, NFCF(산림조합), POST(우체국)<br><br>
+      <strong>인터넷 전문</strong>: KAKAO, TOSS, K_BANK<br><br>
+      <strong>외국계</strong>: MORGAN_STANLEY, HSBC, DEUTSCHE, JPMC, MIZUHO, MUFG, BANK_OF_AMERICA, BNP_PARIBAS, ICBC, BANK_OF_CHINA, UOB, BOCOM, CCB, MISC_FOREIGN<br><br>
+      <strong>증권사</strong>: YUANTA, KB, DAOL, MIRAE_ASSET, SAMSUNG, KOREA, NH, KYOBO, HI, HYUNDAI_MOTOR, KIWOOM, EBEST(LS), SK, DAISHIN, MERITZ, HANHWA, HANA, TOSS, SHINHAN, DB, EUGENE, KAKAO_PAY, BOOKOOK, SHINYOUNG, CAPE, KOREA_FOSS, SANGSANGIN, HANYANG, LEADING, BNK, IBK
+    </div>
+  </details>
+
+  <details>
+    <summary>🎁 기타 enum (giftCertificateType / carrier, 펼쳐서 보기)</summary>
+    <div style="margin-top:10px;font-size:13px;line-height:1.85">
+      <strong>giftCertificateType (5종)</strong>: SMART_MUNSANG / CULTURE_GIFT / BOOKNLIFE / CULTURELAND / HAPPYMONEY<br><br>
+      <strong>carrier (6종, 트립스토어 미운영)</strong>: SKT / KT / LGU / SKT_MVNO / KT_MVNO / LGU_MVNO
+    </div>
+  </details>
+</section>
+
+<!-- ============ 8. 구현 체크리스트 ============ -->
+<section class="slide" id="s8">
+  <div class="slide-num">SECTION 08</div>
+  <h2 class="slide-title">구현 체크리스트</h2>
+  <p class="slide-subtitle">API 클라이언트 구현 시 빠뜨리지 말아야 할 항목들</p>
+
+  <div class="card">
+    <div class="card-title"><span class="num">✅</span>HTTP 클라이언트 레벨</div>
+    <ul style="margin-left:20px;font-size:14px;line-height:1.9">
+      <li>인증 헤더 포맷: <code>Authorization: PortOne {API_SECRET}</code> (Bearer 아님 주의)</li>
+      <li>GET 방식 + 쿼리 파라미터에 <strong>URL 인코딩된 JSON</strong> — POST 아님</li>
+      <li>에러 응답 401/403 시 Secret 만료/권한 점검 알림 발송</li>
+      <li>스케줄러 트리거: 전일자 → <strong>익일 12:00 이후</strong> (안전 마진 두고 13:00)</li>
+    </ul>
+  </div>
+
+  <div class="card">
+    <div class="card-title"><span class="num">✅</span>페이지네이션</div>
+    <ul style="margin-left:20px;font-size:14px;line-height:1.9">
+      <li>1회 최대 <code>size: 1000</code> + <code>after</code> 커서</li>
+      <li>최대 조회 범위 <strong>3개월</strong> 초과 시 자동 분할</li>
+      <li><code>pageInfo.hasNextPage = true</code>인 동안 <code>endCursor</code>로 반복 호출</li>
+    </ul>
+  </div>
+
+  <div class="card">
+    <div class="card-title"><span class="num">✅</span>oneOf 응답 파싱</div>
+    <ul style="margin-left:20px;font-size:14px;line-height:1.9">
+      <li><code>status</code> 필드로 4종 타입 분기 (MATCHED / NOT_MATCHED / INCOMPARABLE / NOT_COLLECTED)</li>
+      <li>INCOMPARABLE/NOT_COLLECTED는 <code>transactionId</code>, <code>paymentId</code>, <code>storeId</code> 등 누락 가능 → nullable 처리</li>
+      <li><code>paymentMethod.type</code>으로 9종 결제수단 분기 (CARD/EASY_PAY/VIRTUAL_ACCOUNT 등)</li>
+      <li>EASY_PAY의 <code>method</code> 필드는 PaymentMethod 재귀 — 파서 재귀 호출 필요</li>
+    </ul>
+  </div>
+
+  <div class="card">
+    <div class="card-title"><span class="num">✅</span>금액 처리</div>
+    <ul style="margin-left:20px;font-size:14px;line-height:1.9">
+      <li>모든 금액은 Int64. <strong>ISO 4217 마이너 단위</strong>만큼 소수점 우측 이동된 정수</li>
+      <li>KRW는 마이너 단위 0이므로 그대로 / USD는 2이므로 410 = 4.10 USD</li>
+      <li><code>anomalyAmount</code>는 status에 따라 의미 다름 (차액 vs 절대값) — <strong>다음 슬라이드 참조</strong></li>
+    </ul>
+  </div>
+
+  <div class="card">
+    <div class="card-title"><span class="num">✅</span>Enum 매핑 테이블</div>
+    <ul style="margin-left:20px;font-size:14px;line-height:1.9">
+      <li>actionType 5종 + NotMatchedReason 6종 → 우리 컬럼 enum으로 변환</li>
+      <li>CardCompany 65+종 / Bank 60+종 → <code>financial_institution</code> 컬럼에 그대로 또는 한글명 매핑</li>
+      <li>pgProvider 21종 / EasyPayProvider 19종 → 결제수단 표시명 매핑 테이블 사전 구축</li>
+      <li><strong>신규 enum 추가 시 대응</strong>: 알 수 없는 값은 raw 그대로 저장 + 알림</li>
+    </ul>
+  </div>
+
+  <div class="highlight green" style="margin-top:14px">
+    <div class="highlight-title">🔗 우리 시스템 매핑은 별도 문서</div>
+    <div class="highlight-body">
+      포트원 응답 필드 → <code>pg_settlement_ledgers</code> / <code>pg_settlements</code> 컬럼 매핑은 <a href="pg-portone-dev-review.html#s3" style="color:#0369a1;font-weight:700">개발 리뷰 발표자료 SECTION 3·4</a>를 참조.
+    </div>
+  </div>
+</section>
+
+</main>
+</div>
+
+<script>
+const items = document.querySelectorAll('.toc-item');
+const sections = document.querySelectorAll('.slide');
+const observer = new IntersectionObserver((entries) => {
+  entries.forEach(entry => {
+    if (entry.isIntersecting) {
+      const id = entry.target.id;
+      items.forEach(i => i.classList.toggle('active', i.getAttribute('href') === '#' + id));
+    }
+  });
+}, { rootMargin: '-30% 0px -60% 0px' });
+sections.forEach(s => observer.observe(s));
+</script>
+
+</body>
+</html>
