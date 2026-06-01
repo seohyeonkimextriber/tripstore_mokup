@@ -1,0 +1,550 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>사용가능 조직 — TripStore Partners</title>
+<link href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.6/dist/web/static/pretendard.css" rel="stylesheet">
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: 'Pretendard', 'Apple SD Gothic Neo', -apple-system, sans-serif; font-size: 14px; color: rgba(0,0,0,0.88); background: #f5f5f5; }
+a { color: inherit; text-decoration: none; }
+button { font-family: inherit; cursor: pointer; }
+
+/* ===== GNB ===== */
+.gnb { background: #f0f5ff; height: 48px; display: flex; align-items: center; position: sticky; top: 0; z-index: 100; padding: 0 20px; border-bottom: 1px solid #d6e4ff; box-shadow: 0 1px 4px rgba(0,0,0,0.06); }
+.gnb-logo { color: #222427; font-weight: 800; font-size: 15px; margin-right: 24px; letter-spacing: -0.3px; }
+.gnb-logo span { color: #1677ff; }
+.gnb-logo .partners-badge { background: #1677ff; color: #fff; font-size: 10px; font-weight: 700; padding: 2px 6px; border-radius: 4px; margin-left: 6px; letter-spacing: 0.3px; vertical-align: middle; }
+.gnb-menu { display: flex; gap: 0; }
+.gnb-item { color: rgba(0,0,0,0.55); padding: 0 14px; height: 48px; display: flex; align-items: center; cursor: pointer; font-size: 13px; white-space: nowrap; position: relative; transition: color 0.15s; font-weight: 500; }
+.gnb-item:hover { color: rgba(0,0,0,0.88); }
+.gnb-item.active { color: #1677ff; }
+.gnb-item.active::after { content: ''; position: absolute; bottom: 0; left: 0; right: 0; height: 2px; background: #1677ff; }
+.gnb-right { margin-left: auto; display: flex; align-items: center; gap: 14px; }
+.gnb-user { font-size: 12px; color: rgba(0,0,0,0.55); display: flex; align-items: center; gap: 6px; }
+.gnb-user-name { font-weight: 600; color: rgba(0,0,0,0.75); }
+.gnb-org-badge { background: #fff; border: 1px solid #d6e4ff; color: #1677ff; font-size: 11px; font-weight: 600; padding: 3px 8px; border-radius: 4px; }
+
+/* ===== BREADCRUMB ===== */
+.breadcrumb { padding: 14px 24px 0; font-size: 12px; color: rgba(0,0,0,0.45); display: flex; align-items: center; gap: 6px; }
+.breadcrumb span:not(.sep) { cursor: pointer; transition: color 0.15s; }
+.breadcrumb span:not(.sep):hover { color: #1677ff; }
+.sep { color: rgba(0,0,0,0.2); cursor: default !important; }
+.bc-current { color: rgba(0,0,0,0.88) !important; cursor: default !important; }
+
+/* ===== LAYOUT ===== */
+.layout { padding: 14px 24px 48px; max-width: 1440px; margin: 0 auto; }
+
+/* ===== PAGE HEADER ===== */
+.page-header { margin: 12px 0 18px; display: flex; align-items: flex-end; justify-content: space-between; gap: 14px; flex-wrap: wrap; }
+.page-title { font-size: 22px; font-weight: 700; color: rgba(0,0,0,0.88); letter-spacing: -0.3px; }
+.page-desc { font-size: 13px; color: rgba(0,0,0,0.5); margin-top: 6px; line-height: 1.5; }
+
+/* ===== INFO BANNER ===== */
+.info-banner { background: #e6f4ff; border: 1px solid #91caff; border-radius: 8px; padding: 12px 16px; margin-bottom: 18px; display: flex; align-items: flex-start; gap: 10px; font-size: 13px; color: #0958d9; line-height: 1.6; }
+.info-banner svg { width: 16px; height: 16px; flex-shrink: 0; margin-top: 2px; }
+.info-banner strong { font-weight: 700; }
+.info-banner code { background: rgba(255,255,255,0.7); padding: 1px 6px; border-radius: 3px; font-size: 12px; font-family: 'SF Mono', monospace; color: #0958d9; }
+
+/* ===== SECTION ===== */
+.section { background: #fff; border: 1px solid #f0f0f0; border-radius: 10px; margin-bottom: 18px; overflow: hidden; }
+.section-head { padding: 14px 20px; border-bottom: 1px solid #f0f0f0; background: #fafbfc; display: flex; align-items: center; gap: 10px; }
+.section-num { width: 24px; height: 24px; border-radius: 50%; background: #1677ff; color: #fff; font-size: 12px; font-weight: 800; display: inline-flex; align-items: center; justify-content: center; }
+.section-title { font-size: 15px; font-weight: 700; color: rgba(0,0,0,0.88); }
+.section-sub { font-size: 12px; color: rgba(0,0,0,0.45); margin-left: 6px; }
+.section-body { padding: 22px; }
+
+/* ===== FORM ===== */
+.form-row { display: flex; gap: 16px; margin-bottom: 14px; align-items: flex-start; }
+.form-label { width: 140px; flex-shrink: 0; padding-top: 8px; font-size: 13px; font-weight: 600; color: rgba(0,0,0,0.75); }
+.form-label .req { color: #ff4d4f; margin-left: 2px; }
+.form-label .opt { font-size: 11px; color: rgba(0,0,0,0.4); font-weight: 500; margin-left: 4px; }
+.form-input-wrap { flex: 1; min-width: 0; }
+.form-input { width: 100%; height: 34px; border: 1px solid #d9d9d9; border-radius: 6px; padding: 0 12px; font-size: 13px; font-family: inherit; outline: none; transition: border 0.2s; background: #fff; }
+.form-input:focus { border-color: #1677ff; box-shadow: 0 0 0 2px rgba(22,119,255,0.1); }
+.form-input[readonly] { background: #fafafa; color: rgba(0,0,0,0.55); }
+.form-hint { font-size: 11.5px; color: rgba(0,0,0,0.45); margin-top: 6px; line-height: 1.5; }
+
+/* ===== MULTI SELECT ===== */
+.org-select { width: 100%; min-height: 38px; border: 1px solid #d9d9d9; border-radius: 6px; padding: 5px 32px 5px 8px; background: #fff; position: relative; cursor: pointer; transition: border 0.2s; }
+.org-select.focused { border-color: #1677ff; box-shadow: 0 0 0 2px rgba(22,119,255,0.1); }
+.org-select-tags { display: flex; flex-wrap: wrap; gap: 4px; align-items: center; min-height: 26px; }
+.org-tag { display: inline-flex; align-items: center; gap: 5px; padding: 3px 5px 3px 9px; border-radius: 4px; background: #f0f5ff; border: 1px solid #d6e4ff; color: #1677ff; font-size: 12px; font-weight: 600; line-height: 1; }
+.org-tag .tag-remove { width: 16px; height: 16px; border-radius: 3px; display: inline-flex; align-items: center; justify-content: center; color: rgba(22,119,255,0.55); cursor: pointer; transition: all 0.15s; }
+.org-tag .tag-remove:hover { background: rgba(22,119,255,0.15); color: #1677ff; }
+.org-tag .tag-remove svg { width: 9px; height: 9px; }
+.org-select-input { flex: 1; min-width: 80px; border: none; outline: none; padding: 4px 6px; font-size: 13px; font-family: inherit; background: transparent; height: 24px; }
+.org-select-input::placeholder { color: rgba(0,0,0,0.3); }
+.org-select-arrow { position: absolute; right: 10px; top: 50%; transform: translateY(-50%); color: rgba(0,0,0,0.35); pointer-events: none; }
+.org-select-arrow svg { width: 12px; height: 12px; }
+
+/* ===== DROPDOWN ===== */
+.org-dropdown { margin-top: 6px; border: 1px solid #d9d9d9; border-radius: 8px; box-shadow: 0 6px 16px rgba(0,0,0,0.08); background: #fff; padding: 6px; max-height: 280px; overflow-y: auto; }
+.org-dropdown.hidden { display: none; }
+.org-group-label { font-size: 10.5px; font-weight: 700; color: rgba(0,0,0,0.4); letter-spacing: 0.4px; text-transform: uppercase; padding: 8px 10px 6px; }
+.org-option { display: flex; align-items: center; gap: 10px; padding: 8px 10px; border-radius: 6px; cursor: pointer; transition: background 0.12s; }
+.org-option:hover { background: #f0f7ff; }
+.org-option.selected { background: #e6f4ff; }
+.org-option-check { width: 16px; height: 16px; border: 1.5px solid #d9d9d9; border-radius: 4px; flex-shrink: 0; display: inline-flex; align-items: center; justify-content: center; background: #fff; transition: all 0.15s; }
+.org-option.selected .org-option-check { background: #1677ff; border-color: #1677ff; }
+.org-option-check svg { width: 10px; height: 10px; color: #fff; opacity: 0; transition: opacity 0.15s; }
+.org-option.selected .org-option-check svg { opacity: 1; }
+.org-option-label { font-size: 13px; color: rgba(0,0,0,0.88); font-weight: 500; flex: 1; }
+.org-option-code { font-size: 11px; color: rgba(0,0,0,0.4); font-family: 'SF Mono', monospace; background: #f5f5f5; padding: 1px 6px; border-radius: 3px; }
+.org-dropdown-footer { border-top: 1px solid #f0f0f0; padding: 8px 10px; display: flex; justify-content: space-between; align-items: center; margin-top: 4px; }
+.org-link { font-size: 12px; color: #1677ff; cursor: pointer; font-weight: 600; }
+.org-link:hover { text-decoration: underline; }
+.org-quick { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 8px; }
+.org-quick-btn { font-size: 11.5px; padding: 3px 8px; border: 1px solid #f0f0f0; border-radius: 4px; background: #fafafa; color: rgba(0,0,0,0.55); cursor: pointer; font-weight: 500; }
+.org-quick-btn:hover { border-color: #1677ff; color: #1677ff; background: #f0f7ff; }
+
+/* ===== TABLE ===== */
+.filter-bar { padding: 12px 16px; display: flex; align-items: center; gap: 8px; flex-wrap: wrap; border-bottom: 1px solid #f0f0f0; background: #fafbfc; }
+.search-wrap { position: relative; }
+.search-wrap input { height: 32px; border: 1px solid #d9d9d9; border-radius: 6px; padding: 0 12px 0 32px; font-size: 13px; font-family: inherit; outline: none; width: 240px; background: #fff; }
+.search-icon { position: absolute; left: 10px; top: 50%; transform: translateY(-50%); color: rgba(0,0,0,0.3); pointer-events: none; }
+.search-icon svg { width: 14px; height: 14px; display: block; }
+.fi { height: 32px; border: 1px solid #d9d9d9; border-radius: 6px; font-size: 13px; font-family: inherit; color: rgba(0,0,0,0.88); outline: none; background: #fff; padding: 0 28px 0 12px; appearance: none; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='%23bbb'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 10px center; cursor: pointer; min-width: 150px; }
+.fi.highlight { border-color: #1677ff; background-color: #f0f7ff; }
+.filter-total { margin-left: auto; font-size: 12px; color: rgba(0,0,0,0.55); }
+.filter-total strong { color: #1677ff; font-weight: 700; font-size: 13px; }
+
+table.tbl { width: 100%; border-collapse: collapse; }
+table.tbl thead th { padding: 11px 16px; text-align: left; font-size: 11px; font-weight: 700; color: rgba(0,0,0,0.45); letter-spacing: 0.4px; text-transform: uppercase; background: #fafbfc; border-bottom: 1px solid #f0f0f0; white-space: nowrap; }
+table.tbl thead th.new-col { background: #fff7e6; color: #d48806; }
+table.tbl thead th.center { text-align: center; }
+table.tbl tbody td { padding: 13px 16px; font-size: 13px; color: rgba(0,0,0,0.88); border-bottom: 1px solid #f5f5f5; vertical-align: middle; }
+table.tbl tbody td.new-col { background: #fffbe6; }
+table.tbl tbody tr:last-child td { border-bottom: none; }
+table.tbl tbody tr.clickable { cursor: pointer; transition: background 0.12s; }
+table.tbl tbody tr.clickable:hover td { background: #f0f7ff; }
+table.tbl tbody tr.clickable:hover td.new-col { background: #fff3bf; }
+
+.hotel-cell { display: flex; align-items: center; gap: 10px; min-width: 0; }
+.hotel-thumb { width: 36px; height: 36px; border-radius: 8px; background: linear-gradient(135deg, #91caff, #1677ff); display: flex; align-items: center; justify-content: center; color: #fff; font-size: 12px; font-weight: 800; flex-shrink: 0; letter-spacing: 0.3px; }
+.hotel-name { font-size: 13px; font-weight: 700; color: rgba(0,0,0,0.88); line-height: 1.3; max-width: 220px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.hotel-meta { font-size: 11px; color: rgba(0,0,0,0.45); margin-top: 2px; }
+.hotel-meta .id-pill { background: #f5f5f5; padding: 1px 6px; border-radius: 3px; font-family: 'SF Mono', monospace; font-size: 10.5px; color: rgba(0,0,0,0.55); }
+
+/* ===== ORG PILLS IN TABLE ===== */
+.org-pills { display: flex; flex-wrap: wrap; gap: 3px; align-items: center; max-width: 280px; }
+.org-mini { display: inline-flex; align-items: center; gap: 3px; padding: 2px 7px; border-radius: 4px; font-size: 11px; font-weight: 600; background: #f0f5ff; color: #1677ff; border: 1px solid #d6e4ff; white-space: nowrap; }
+.org-mini.muted { background: #f5f5f5; color: rgba(0,0,0,0.45); border-color: #e8e8e8; }
+.org-mini.all { background: #f6ffed; color: #389e0d; border-color: #b7eb8f; }
+.org-more { font-size: 10.5px; color: rgba(0,0,0,0.45); font-weight: 600; padding: 2px 5px; cursor: pointer; }
+.org-more:hover { color: #1677ff; }
+.org-empty { font-size: 12px; color: rgba(0,0,0,0.3); font-style: italic; }
+
+/* ===== BUTTONS ===== */
+.btn-primary { height: 34px; padding: 0 16px; border-radius: 6px; font-size: 13px; font-weight: 600; cursor: pointer; border: 1px solid #1677ff; background: #1677ff; color: #fff; font-family: inherit; display: inline-flex; align-items: center; gap: 6px; }
+.btn-primary:hover { background: #4096ff; }
+.btn-ghost { height: 34px; padding: 0 14px; border-radius: 6px; font-size: 13px; font-weight: 500; cursor: pointer; border: 1px solid #d9d9d9; background: #fff; color: rgba(0,0,0,0.75); font-family: inherit; display: inline-flex; align-items: center; gap: 6px; }
+.btn-ghost:hover { color: #1677ff; border-color: #1677ff; }
+
+/* ===== ANNOTATION ===== */
+.annot { position: relative; display: inline-block; }
+.annot-tag { display: inline-block; background: #ff4d4f; color: #fff; font-size: 10px; font-weight: 700; padding: 2px 6px; border-radius: 3px; margin-left: 6px; vertical-align: middle; letter-spacing: 0.3px; }
+
+/* ===== FOOTER ===== */
+.footer-note { margin-top: 24px; padding: 14px 18px; background: #fff7e6; border: 1px solid #ffd666; border-radius: 8px; font-size: 12.5px; color: #874d00; line-height: 1.7; }
+.footer-note strong { font-weight: 700; }
+.footer-note ul { margin: 6px 0 0 18px; }
+
+/* ===== SECTION TAB ===== */
+.section-tabs { display: flex; gap: 4px; background: #fff; border: 1px solid #f0f0f0; border-radius: 10px; padding: 4px; margin-bottom: 18px; position: sticky; top: 56px; z-index: 50; }
+.section-tab { padding: 8px 16px; font-size: 13px; font-weight: 600; color: rgba(0,0,0,0.55); cursor: pointer; border-radius: 6px; transition: all 0.15s; display: inline-flex; align-items: center; gap: 6px; }
+.section-tab:hover { color: rgba(0,0,0,0.88); }
+.section-tab.active { background: #e6f4ff; color: #1677ff; }
+.section-tab-num { width: 18px; height: 18px; border-radius: 50%; background: rgba(0,0,0,0.08); color: rgba(0,0,0,0.55); font-size: 10.5px; font-weight: 800; display: inline-flex; align-items: center; justify-content: center; }
+.section-tab.active .section-tab-num { background: #1677ff; color: #fff; }
+
+</style>
+</head>
+<body>
+
+<!-- GNB -->
+<div class="gnb">
+  <div class="gnb-logo">TripStore<span> Admin</span><span class="partners-badge">PB</span></div>
+  <div class="gnb-menu">
+    <div class="gnb-item">대시보드</div>
+    <div class="gnb-item">PB 관리</div>
+    <div class="gnb-item active">상품 관리</div>
+    <div class="gnb-item">예약/결제</div>
+    <div class="gnb-item">정산</div>
+  </div>
+  <div class="gnb-right">
+    <span class="gnb-org-badge">트립스토어</span>
+    <div class="gnb-user"><span class="gnb-user-name">김서현</span> PM</div>
+  </div>
+</div>
+
+<!-- BREADCRUMB -->
+<div class="breadcrumb">
+  <span>홈</span><span class="sep">/</span>
+  <span>상품 관리</span><span class="sep">/</span>
+  <span class="bc-current">숙박권</span>
+</div>
+
+<div class="layout">
+
+  <!-- PAGE HEADER -->
+  <div class="page-header">
+    <div>
+      <div class="page-title">숙박권 관리 <span style="font-size:12px;font-weight:600;color:#1677ff;background:#e6f4ff;padding:3px 8px;border-radius:4px;margin-left:8px;vertical-align:middle;">사용가능 조직 필드 추가 미리보기</span></div>
+      <div class="page-desc">항공권·숙박권·투어/티켓 등록·편집 시 <strong>"사용가능 조직"</strong> 필드를 추가해, 해당 상품이 어떤 조직에서 사용될 수 있는지 지정합니다.<br>본 목업은 숙박권 1종을 대표 화면으로 보여주며, 항공권·투어/티켓도 동일한 패턴으로 적용됩니다.</div>
+    </div>
+  </div>
+
+  <!-- INFO BANNER -->
+  <div class="info-banner">
+    <svg viewBox="0 0 16 16" fill="currentColor"><path d="M8 0a8 8 0 100 16A8 8 0 008 0zm0 4a1 1 0 110 2 1 1 0 010-2zm1 3v6a1 1 0 11-2 0V7a1 1 0 112 0z"/></svg>
+    <div>
+      <strong>변경 요약</strong> · 등록/목록/편집 3개 화면 공통으로 <code>사용가능 조직</code> 필드를 추가합니다. select 박스 + 복수 선택, 미지정 시 "전체 조직 사용 가능"으로 간주.
+    </div>
+  </div>
+
+  <!-- SECTION TABS -->
+  <div class="section-tabs">
+    <div class="section-tab active" onclick="scrollToSection('s1')"><span class="section-tab-num">1</span> 등록 화면</div>
+    <div class="section-tab" onclick="scrollToSection('s2')"><span class="section-tab-num">2</span> 목록 화면</div>
+    <div class="section-tab" onclick="scrollToSection('s3')"><span class="section-tab-num">3</span> 편집 화면</div>
+  </div>
+
+  <!-- ============================================ -->
+  <!-- SECTION 1: 등록 -->
+  <!-- ============================================ -->
+  <div class="section" id="s1">
+    <div class="section-head">
+      <span class="section-num">1</span>
+      <span class="section-title">숙박권 등록</span>
+      <span class="section-sub">신규 숙박권 등록 시 "사용가능 조직" 입력 필드 추가</span>
+    </div>
+    <div class="section-body">
+
+      <!-- 기본 정보 (간략) -->
+      <div class="form-row">
+        <div class="form-label">호텔명 <span class="req">*</span></div>
+        <div class="form-input-wrap">
+          <input type="text" class="form-input" value="신라스테이 광화문" readonly>
+        </div>
+      </div>
+
+      <div class="form-row">
+        <div class="form-label">공급사 <span class="req">*</span></div>
+        <div class="form-input-wrap">
+          <input type="text" class="form-input" value="TMG (Tour Management Group)" readonly>
+        </div>
+      </div>
+
+      <div class="form-row">
+        <div class="form-label">판매 기간 <span class="req">*</span></div>
+        <div class="form-input-wrap">
+          <input type="text" class="form-input" value="2026-06-01 ~ 2026-12-31" readonly>
+        </div>
+      </div>
+
+      <!-- ★ 새 필드: 사용가능 조직 -->
+      <div class="form-row" style="margin-top:22px; padding-top:18px; border-top:1px dashed #d9d9d9;">
+        <div class="form-label">
+          사용가능 조직 <span class="req">*</span>
+          <span class="annot-tag">NEW</span>
+        </div>
+        <div class="form-input-wrap">
+          <div class="org-select focused" id="org-select-1">
+            <div class="org-select-tags">
+              <span class="org-tag">트립스토어 메인<span class="tag-remove"><svg viewBox="0 0 8 8"><path d="M1 1l6 6M7 1l-6 6" stroke="currentColor" stroke-width="1.5" fill="none" stroke-linecap="round"/></svg></span></span>
+              <span class="org-tag">트립스토어 모바일<span class="tag-remove"><svg viewBox="0 0 8 8"><path d="M1 1l6 6M7 1l-6 6" stroke="currentColor" stroke-width="1.5" fill="none" stroke-linecap="round"/></svg></span></span>
+              <span class="org-tag">카카오뱅크 트립<span class="tag-remove"><svg viewBox="0 0 8 8"><path d="M1 1l6 6M7 1l-6 6" stroke="currentColor" stroke-width="1.5" fill="none" stroke-linecap="round"/></svg></span></span>
+              <input type="text" class="org-select-input" placeholder="조직 선택 또는 검색...">
+            </div>
+            <span class="org-select-arrow"><svg viewBox="0 0 12 12"><path d="M2 4l4 5 4-5z" fill="currentColor"/></svg></span>
+          </div>
+          <!-- DROPDOWN (펼침 상태로 미리보기) -->
+          <div class="org-dropdown">
+            <div class="org-group-label">자사 채널</div>
+            <div class="org-option selected">
+              <span class="org-option-check"><svg viewBox="0 0 10 10"><path d="M2 5l2 2 4-5" stroke="currentColor" stroke-width="1.6" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+              <span class="org-option-label">트립스토어 메인</span>
+              <span class="org-option-code">TS_MAIN</span>
+            </div>
+            <div class="org-option selected">
+              <span class="org-option-check"><svg viewBox="0 0 10 10"><path d="M2 5l2 2 4-5" stroke="currentColor" stroke-width="1.6" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+              <span class="org-option-label">트립스토어 모바일</span>
+              <span class="org-option-code">TS_MOBILE</span>
+            </div>
+            <div class="org-option">
+              <span class="org-option-check"><svg viewBox="0 0 10 10"><path d="M2 5l2 2 4-5" stroke="currentColor" stroke-width="1.6" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+              <span class="org-option-label">TMG (Tour Management Group)</span>
+              <span class="org-option-code">TMG</span>
+            </div>
+            <div class="org-option">
+              <span class="org-option-check"><svg viewBox="0 0 10 10"><path d="M2 5l2 2 4-5" stroke="currentColor" stroke-width="1.6" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+              <span class="org-option-label">누아 (Nua)</span>
+              <span class="org-option-code">NUA</span>
+            </div>
+            <div class="org-group-label">제휴 채널</div>
+            <div class="org-option selected">
+              <span class="org-option-check"><svg viewBox="0 0 10 10"><path d="M2 5l2 2 4-5" stroke="currentColor" stroke-width="1.6" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+              <span class="org-option-label">카카오뱅크 트립</span>
+              <span class="org-option-code">KBANK</span>
+            </div>
+            <div class="org-option">
+              <span class="org-option-check"><svg viewBox="0 0 10 10"><path d="M2 5l2 2 4-5" stroke="currentColor" stroke-width="1.6" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+              <span class="org-option-label">11번가 트립스토어관</span>
+              <span class="org-option-code">11ST</span>
+            </div>
+            <div class="org-option">
+              <span class="org-option-check"><svg viewBox="0 0 10 10"><path d="M2 5l2 2 4-5" stroke="currentColor" stroke-width="1.6" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+              <span class="org-option-label">컨시어지 (Concierge)</span>
+              <span class="org-option-code">CONCIERGE</span>
+            </div>
+            <div class="org-dropdown-footer">
+              <span class="org-link">+ 새 조직 추가</span>
+              <span style="font-size:11.5px;color:rgba(0,0,0,0.4);">선택: 3 / 7</span>
+            </div>
+          </div>
+          <div class="form-hint">선택된 조직에서만 해당 숙박권이 노출/판매됩니다. 복수 선택 가능. 미지정 시 전체 조직에 노출.</div>
+          <div class="org-quick">
+            <button class="org-quick-btn">＋ 자사 채널 전체</button>
+            <button class="org-quick-btn">＋ 제휴 채널 전체</button>
+            <button class="org-quick-btn">＋ 전체 선택</button>
+            <button class="org-quick-btn">∅ 전체 해제</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="form-row" style="margin-top:24px; justify-content:flex-end;">
+        <div style="display:flex; gap:8px;">
+          <button class="btn-ghost">취소</button>
+          <button class="btn-primary">숙박권 등록</button>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ============================================ -->
+  <!-- SECTION 2: 목록 -->
+  <!-- ============================================ -->
+  <div class="section" id="s2">
+    <div class="section-head">
+      <span class="section-num">2</span>
+      <span class="section-title">숙박권 목록</span>
+      <span class="section-sub">목록 컬럼에 "사용가능 조직" 추가 (필터 가능)</span>
+    </div>
+
+    <!-- FILTER -->
+    <div class="filter-bar">
+      <div class="search-wrap">
+        <span class="search-icon"><svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="6" cy="6" r="4.5"/><path d="M10 10l3 3" stroke-linecap="round"/></svg></span>
+        <input type="text" placeholder="호텔명·상품코드 검색">
+      </div>
+      <select class="fi"><option>공급사 전체</option></select>
+      <select class="fi"><option>상태 전체</option></select>
+      <!-- ★ 새 필터 -->
+      <select class="fi highlight"><option>사용가능 조직 전체</option><option>트립스토어 메인</option><option>TMG</option><option>누아</option><option>카카오뱅크 트립</option><option>11번가 트립스토어관</option></select>
+      <div class="filter-total">전체 <strong>1,284</strong>건</div>
+    </div>
+
+    <!-- TABLE -->
+    <table class="tbl">
+      <thead>
+        <tr>
+          <th>호텔</th>
+          <th>공급사</th>
+          <th>판매 기간</th>
+          <th class="new-col">사용가능 조직 <span style="margin-left:4px;background:#ff4d4f;color:#fff;padding:1px 5px;border-radius:3px;font-size:9px;">NEW</span></th>
+          <th class="center">상태</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr class="clickable">
+          <td>
+            <div class="hotel-cell">
+              <div class="hotel-thumb">신라</div>
+              <div>
+                <div class="hotel-name">신라스테이 광화문</div>
+                <div class="hotel-meta"><span class="id-pill">HOT-10293</span></div>
+              </div>
+            </div>
+          </td>
+          <td>TMG</td>
+          <td style="font-size:12px;color:rgba(0,0,0,0.65);">2026-06-01 ~ 2026-12-31</td>
+          <td class="new-col">
+            <div class="org-pills">
+              <span class="org-mini">트립스토어 메인</span>
+              <span class="org-mini">트립스토어 모바일</span>
+              <span class="org-mini">카카오뱅크 트립</span>
+            </div>
+          </td>
+          <td class="center"><span style="display:inline-flex;align-items:center;gap:5px;font-size:12px;color:#389e0d;font-weight:600;"><span style="width:6px;height:6px;border-radius:50%;background:#52c41a;"></span>판매중</span></td>
+        </tr>
+        <tr class="clickable">
+          <td>
+            <div class="hotel-cell">
+              <div class="hotel-thumb" style="background:linear-gradient(135deg,#ffc069,#fa8c16);">롯데</div>
+              <div>
+                <div class="hotel-name">롯데호텔 제주</div>
+                <div class="hotel-meta"><span class="id-pill">HOT-10301</span></div>
+              </div>
+            </div>
+          </td>
+          <td>TMG</td>
+          <td style="font-size:12px;color:rgba(0,0,0,0.65);">2026-07-01 ~ 2027-02-28</td>
+          <td class="new-col">
+            <div class="org-pills">
+              <span class="org-mini all">✓ 전체 조직</span>
+            </div>
+          </td>
+          <td class="center"><span style="display:inline-flex;align-items:center;gap:5px;font-size:12px;color:#389e0d;font-weight:600;"><span style="width:6px;height:6px;border-radius:50%;background:#52c41a;"></span>판매중</span></td>
+        </tr>
+        <tr class="clickable">
+          <td>
+            <div class="hotel-cell">
+              <div class="hotel-thumb" style="background:linear-gradient(135deg,#b7eb8f,#389e0d);">파라</div>
+              <div>
+                <div class="hotel-name">파라다이스 시티 인천</div>
+                <div class="hotel-meta"><span class="id-pill">HOT-10322</span></div>
+              </div>
+            </div>
+          </td>
+          <td>직접 계약</td>
+          <td style="font-size:12px;color:rgba(0,0,0,0.65);">2026-06-15 ~ 2026-09-30</td>
+          <td class="new-col">
+            <div class="org-pills">
+              <span class="org-mini">누아</span>
+              <span class="org-mini">컨시어지</span>
+            </div>
+          </td>
+          <td class="center"><span style="display:inline-flex;align-items:center;gap:5px;font-size:12px;color:#389e0d;font-weight:600;"><span style="width:6px;height:6px;border-radius:50%;background:#52c41a;"></span>판매중</span></td>
+        </tr>
+        <tr class="clickable">
+          <td>
+            <div class="hotel-cell">
+              <div class="hotel-thumb" style="background:linear-gradient(135deg,#ffadd2,#eb2f96);">조선</div>
+              <div>
+                <div class="hotel-name">웨스틴 조선 부산</div>
+                <div class="hotel-meta"><span class="id-pill">HOT-10345</span></div>
+              </div>
+            </div>
+          </td>
+          <td>TMG</td>
+          <td style="font-size:12px;color:rgba(0,0,0,0.65);">2026-08-01 ~ 2027-01-31</td>
+          <td class="new-col">
+            <div class="org-pills">
+              <span class="org-mini">트립스토어 메인</span>
+              <span class="org-mini">트립스토어 모바일</span>
+              <span class="org-mini">카카오뱅크 트립</span>
+              <span class="org-mini">11번가 트립스토어관</span>
+              <span class="org-more">+2</span>
+            </div>
+          </td>
+          <td class="center"><span style="display:inline-flex;align-items:center;gap:5px;font-size:12px;color:#d48806;font-weight:600;"><span style="width:6px;height:6px;border-radius:50%;background:#d48806;"></span>일시중지</span></td>
+        </tr>
+        <tr class="clickable">
+          <td>
+            <div class="hotel-cell">
+              <div class="hotel-thumb" style="background:linear-gradient(135deg,#d3adf7,#722ed1);">반얀</div>
+              <div>
+                <div class="hotel-name">반얀트리 클럽 서울</div>
+                <div class="hotel-meta"><span class="id-pill">HOT-10358</span></div>
+              </div>
+            </div>
+          </td>
+          <td>직접 계약</td>
+          <td style="font-size:12px;color:rgba(0,0,0,0.65);">2026-06-01 ~ 2026-11-30</td>
+          <td class="new-col">
+            <span class="org-empty">미지정 (전체 노출)</span>
+          </td>
+          <td class="center"><span style="display:inline-flex;align-items:center;gap:5px;font-size:12px;color:rgba(0,0,0,0.45);font-weight:600;"><span style="width:6px;height:6px;border-radius:50%;background:#d9d9d9;"></span>임시저장</span></td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- ============================================ -->
+  <!-- SECTION 3: 편집 -->
+  <!-- ============================================ -->
+  <div class="section" id="s3">
+    <div class="section-head">
+      <span class="section-num">3</span>
+      <span class="section-title">숙박권 편집</span>
+      <span class="section-sub">기존 숙박권의 "사용가능 조직" 수정</span>
+    </div>
+    <div class="section-body">
+
+      <div class="form-row">
+        <div class="form-label">호텔명</div>
+        <div class="form-input-wrap">
+          <input type="text" class="form-input" value="웨스틴 조선 부산" readonly>
+        </div>
+      </div>
+
+      <div class="form-row">
+        <div class="form-label">상품코드</div>
+        <div class="form-input-wrap">
+          <input type="text" class="form-input" value="HOT-10345" readonly>
+        </div>
+      </div>
+
+      <!-- ★ 편집 가능: 사용가능 조직 -->
+      <div class="form-row" style="margin-top:22px; padding-top:18px; border-top:1px dashed #d9d9d9;">
+        <div class="form-label">
+          사용가능 조직 <span class="req">*</span>
+          <span class="annot-tag">편집</span>
+        </div>
+        <div class="form-input-wrap">
+          <div class="org-select">
+            <div class="org-select-tags">
+              <span class="org-tag">트립스토어 메인<span class="tag-remove"><svg viewBox="0 0 8 8"><path d="M1 1l6 6M7 1l-6 6" stroke="currentColor" stroke-width="1.5" fill="none" stroke-linecap="round"/></svg></span></span>
+              <span class="org-tag">트립스토어 모바일<span class="tag-remove"><svg viewBox="0 0 8 8"><path d="M1 1l6 6M7 1l-6 6" stroke="currentColor" stroke-width="1.5" fill="none" stroke-linecap="round"/></svg></span></span>
+              <span class="org-tag">카카오뱅크 트립<span class="tag-remove"><svg viewBox="0 0 8 8"><path d="M1 1l6 6M7 1l-6 6" stroke="currentColor" stroke-width="1.5" fill="none" stroke-linecap="round"/></svg></span></span>
+              <span class="org-tag">11번가 트립스토어관<span class="tag-remove"><svg viewBox="0 0 8 8"><path d="M1 1l6 6M7 1l-6 6" stroke="currentColor" stroke-width="1.5" fill="none" stroke-linecap="round"/></svg></span></span>
+              <span class="org-tag">누아<span class="tag-remove"><svg viewBox="0 0 8 8"><path d="M1 1l6 6M7 1l-6 6" stroke="currentColor" stroke-width="1.5" fill="none" stroke-linecap="round"/></svg></span></span>
+              <span class="org-tag">컨시어지<span class="tag-remove"><svg viewBox="0 0 8 8"><path d="M1 1l6 6M7 1l-6 6" stroke="currentColor" stroke-width="1.5" fill="none" stroke-linecap="round"/></svg></span></span>
+              <input type="text" class="org-select-input" placeholder="조직 추가...">
+            </div>
+            <span class="org-select-arrow"><svg viewBox="0 0 12 12"><path d="M2 4l4 5 4-5z" fill="currentColor"/></svg></span>
+          </div>
+          <div class="form-hint">
+            <span style="color:#d48806;font-weight:600;">⚠ 변경 이력</span> · 마지막 수정: 김서현 (2026-05-28 14:22) · 이전 상태: 트립스토어 메인 / 모바일 (2개) → 6개 추가
+          </div>
+        </div>
+      </div>
+
+      <div class="form-row" style="margin-top:24px; justify-content:flex-end;">
+        <div style="display:flex; gap:8px;">
+          <button class="btn-ghost">취소</button>
+          <button class="btn-primary">변경사항 저장</button>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- FOOTER NOTE -->
+  <div class="footer-note">
+    <strong>📌 적용 범위</strong>
+    <ul>
+      <li><strong>항공권 · 숙박권 · 투어/티켓</strong> 3개 도메인에 동일 패턴으로 적용</li>
+      <li>등록 화면: 필수/선택 여부는 정책 협의 필요 (현재 목업은 필수 가정)</li>
+      <li>목록 화면: "사용가능 조직" 컬럼 추가 + 필터 추가</li>
+      <li>편집 화면: 기존 선택값 표시 + 변경 이력 노출</li>
+      <li>미지정 상태(빈 값) 시 처리 정책: <strong>전체 조직 노출</strong> vs <strong>저장 불가(필수)</strong> — 정책 확정 필요</li>
+      <li>조직 마스터 데이터: 별도 관리 화면 필요 여부 검토 (조직 추가/삭제/순서 관리)</li>
+    </ul>
+  </div>
+
+</div>
+
+<script>
+function scrollToSection(id) {
+  document.getElementById(id).scrollIntoView({behavior:'smooth', block:'start'});
+  document.querySelectorAll('.section-tab').forEach(t => t.classList.remove('active'));
+  event.currentTarget.classList.add('active');
+}
+</script>
+
+</body>
+</html>
