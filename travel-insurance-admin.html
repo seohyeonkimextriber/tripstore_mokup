@@ -188,6 +188,9 @@ table.rate tbody tr:hover:not(.disabled) td { background: #fafbff; }
 .cat-card { display: flex; align-items: center; gap: 10px; padding: 14px 16px; border-radius: 10px; border: 1px solid #e6e6e6; background: #fff; font-size: 13.5px; font-weight: 600; color: rgba(0,0,0,0.78); cursor: pointer; transition: all 0.15s; text-align: left; }
 .cat-card:hover { border-color: #c7d8ff; background: #fafbff; }
 .cat-card.active { border-color: #1677ff; background: #f0f5ff; color: #1677ff; box-shadow: 0 0 0 1px #1677ff inset; }
+.cat-card.disabled, .cat-card[disabled] { background: #fafafa; color: rgba(0,0,0,0.3); cursor: not-allowed; border-color: #f0f0f0; }
+.cat-card.disabled:hover, .cat-card[disabled]:hover { background: #fafafa; border-color: #f0f0f0; }
+.cat-card.disabled .cat-dot, .cat-card[disabled] .cat-dot { opacity: 0.35; }
 .cat-dot { width: 9px; height: 9px; border-radius: 50%; flex-shrink: 0; }
 .cat-dot.ticket { background: #1677ff; }
 .cat-dot.insurance { background: #722ed1; }
@@ -266,16 +269,6 @@ table.rate tbody tr:hover:not(.disabled) td { background: #fafbff; }
   <div>
     <div class="page-title">보험관리</div>
     <div class="page-desc">여행자보험 상품을 보험사별로 기간·연령구간 요금표를 관리합니다.</div>
-  </div>
-  <div class="head-actions">
-    <button class="btn-ghost-lg">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
-      엑셀 다운로드
-    </button>
-    <button class="btn-primary-lg" onclick="openAddInsurerModal()">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-      보험사 추가
-    </button>
   </div>
 </div>
 
@@ -375,11 +368,6 @@ table.rate tbody tr:hover:not(.disabled) td { background: #fafbff; }
           </div>
         </div>
         <div class="head-tools">
-          <label class="switch">
-            <input type="checkbox" checked>
-            <span class="switch-track"></span>
-            <span class="switch-label">노출</span>
-          </label>
           <button class="btn-ghost" id="editToggleBtn" onclick="toggleEditMode()">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
             <span id="editToggleLabel">정보 편집</span>
@@ -395,13 +383,6 @@ table.rate tbody tr:hover:not(.disabled) td { background: #fafbff; }
             변경 2건
           </span>
           <span class="chip info">7일 성인 0원 → 검토 필요</span>
-        </div>
-        <div class="tt-right">
-          <label class="switch">
-            <input type="checkbox">
-            <span class="switch-track"></span>
-            <span class="switch-label">비활성 기간 숨기기</span>
-          </label>
         </div>
       </div>
 
@@ -648,11 +629,12 @@ table.rate tbody tr:hover:not(.disabled) td { background: #fafbff; }
     <div class="form-row">
       <label>카테고리<span class="req">*</span></label>
       <div class="cat-grid">
-        <button type="button" class="cat-card" data-cat="ticket" onclick="selectCat(this)"><span class="cat-dot ticket"></span>티켓 공급사</button>
-        <button type="button" class="cat-card active" data-cat="insurance" onclick="selectCat(this)"><span class="cat-dot insurance"></span>보험 공급사</button>
-        <button type="button" class="cat-card" data-cat="hotel" onclick="selectCat(this)"><span class="cat-dot hotel"></span>숙박 공급사</button>
-        <button type="button" class="cat-card" data-cat="flight" onclick="selectCat(this)"><span class="cat-dot flight"></span>항공 공급사</button>
+        <button type="button" class="cat-card disabled" disabled title="보험관리 페이지에서는 보험 공급사만 등록 가능합니다."><span class="cat-dot ticket"></span>티켓 공급사</button>
+        <button type="button" class="cat-card active" data-cat="insurance"><span class="cat-dot insurance"></span>보험 공급사</button>
+        <button type="button" class="cat-card disabled" disabled title="보험관리 페이지에서는 보험 공급사만 등록 가능합니다."><span class="cat-dot hotel"></span>숙박 공급사</button>
+        <button type="button" class="cat-card disabled" disabled title="보험관리 페이지에서는 보험 공급사만 등록 가능합니다."><span class="cat-dot flight"></span>항공 공급사</button>
       </div>
+      <span class="hint" style="margin-top:6px;">보험관리 페이지에서는 보험 공급사만 등록할 수 있습니다.</span>
     </div>
 
     <div class="form-row">
