@@ -71,6 +71,25 @@ body { font-family: 'Pretendard', 'Apple SD Gothic Neo', -apple-system, sans-ser
 textarea.fi { min-height: 60px; padding: 8px 10px; resize: vertical; font-family: inherit; line-height: 1.6; }
 select.fi { appearance: none; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='%23bbb'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 10px center; padding-right: 28px; cursor: pointer; }
 
+/* ===== ENTRY SOURCE TABS (진입 소스 선택) ===== */
+.entry-src { display:flex; gap:10px; margin-bottom:14px; }
+.entry-src-card { flex:1; padding:14px 16px; background:#fff; border:1.5px solid #f0f0f0; border-radius:10px; cursor:pointer; transition:all .15s; display:flex; align-items:center; gap:12px; }
+.entry-src-card:hover { border-color:#91caff; background:#fafcff; }
+.entry-src-card.active { border-color:#1677ff; background:#f0f7ff; box-shadow:0 2px 8px rgba(22,119,255,0.08); }
+.entry-src-icon { width:36px; height:36px; border-radius:8px; display:flex; align-items:center; justify-content:center; font-size:18px; flex-shrink:0; background:#fafafa; }
+.entry-src-card.active .entry-src-icon { background:#1677ff; color:#fff; }
+.entry-src-body { flex:1; min-width:0; }
+.entry-src-label { font-size:11px; font-weight:700; color:rgba(0,0,0,0.45); letter-spacing:0.3px; text-transform:uppercase; }
+.entry-src-card.active .entry-src-label { color:#1677ff; }
+.entry-src-name { font-size:14px; font-weight:700; color:rgba(0,0,0,0.88); margin-top:2px; }
+.entry-src-meta { font-size:11px; color:rgba(0,0,0,0.45); margin-top:2px; }
+.entry-src-check { color:#1677ff; font-size:16px; opacity:0; transition:opacity .15s; }
+.entry-src-card.active .entry-src-check { opacity:1; }
+
+/* 진입 소스 그룹 (활성 소스에 맞는 콘텐츠만 표시) */
+[data-src-group] { display:none; }
+[data-src-group].on { display:block; }
+
 /* ===== TARGET HEADER ===== */
 .target-header { background: linear-gradient(135deg, #e6f4ff 0%, #f0f7ff 100%); border: 1px solid #91caff; border-radius: 10px; padding: 14px 18px; margin-bottom: 14px; display: flex; align-items: center; gap: 16px; }
 .target-header-icon { width: 44px; height: 44px; border-radius: 10px; background: #1677ff; color: #fff; display: flex; align-items: center; justify-content: center; font-size: 22px; flex-shrink: 0; }
@@ -85,10 +104,8 @@ select.fi { appearance: none; background-image: url("data:image/svg+xml,%3Csvg x
 .cat-chip:hover { border-color: #91caff; color: #1677ff; }
 .cat-chip.active { background: #1677ff; color: #fff; border-color: #1677ff; font-weight: 500; }
 
-/* ===== SPLIT VIEW ===== */
-.split { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; min-height: 600px; }
-@media (max-width: 1200px) { .split { grid-template-columns: 1fr; } }
-
+/* ===== SPLIT VIEW (now single-pane) ===== */
+.split { display: block; }
 .split-pane { background: #fff; border-radius: 10px; border: 1px solid #f0f0f0; display: flex; flex-direction: column; }
 .split-pane-head { padding: 12px 16px; border-bottom: 1px solid #f0f0f0; display: flex; align-items: center; justify-content: space-between; }
 .split-pane-title { font-size: 13px; font-weight: 700; color: rgba(0,0,0,0.75); display: flex; align-items: center; gap: 6px; }
@@ -431,8 +448,8 @@ tbody tr:hover td { background: #fafafa; }
       </div>
       <div class="page-header">
         <div>
-          <div class="page-title">POST 등록</div>
-          <div class="page-desc">편집 내용이 www 상품 상세에 어떻게 노출되는지 오른쪽에서 실시간 확인</div>
+          <div class="page-title">콘텐츠 등록</div>
+          <div class="page-desc">숙박권 · 항공권 · 투어/티켓 정보를 기반으로 카테고리를 작성합니다</div>
         </div>
         <div style="display:flex;gap:8px;">
           <button class="btn btn-default">취소</button>
@@ -441,47 +458,135 @@ tbody tr:hover td { background: #fafafa; }
         </div>
       </div>
 
-      <!-- 타겟 헤더 (카탈로그 연결 정보 포함) -->
-      <div class="target-header">
-        <div class="target-header-icon">🏨</div>
-        <div class="target-header-info">
-          <div style="display:flex;align-items:center;gap:8px;margin-bottom:2px;">
-            <span class="target-header-type">숙박권 #103</span>
-            <span style="font-size:10px;color:rgba(0,0,0,0.4);">공급사: 트립스토어</span>
+      <!-- 진입 소스 선택 (숙박권 / 항공권 / 투어·티켓) -->
+      <div class="entry-src">
+        <div class="entry-src-card active" data-src="voucher" onclick="setEntrySrc('voucher')">
+          <div class="entry-src-icon">🏨</div>
+          <div class="entry-src-body">
+            <div class="entry-src-label">숙박권</div>
+            <div class="entry-src-name">솔 바이 멜리아 푸꾸옥</div>
+            <div class="entry-src-meta">#103 · 객실 3종 · 식사 4종</div>
           </div>
-          <div class="target-header-name">솔 바이 멜리아 푸꾸옥</div>
-          <div class="target-header-meta" style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-top:6px;">
-            <span style="display:inline-flex;align-items:center;gap:4px;font-size:11px;padding:2px 8px;background:#fff;border:1px solid #e8e8e8;border-radius:10px;color:rgba(0,0,0,0.6);">
-              <span style="color:#722ed1;font-weight:700;">🏠 숙소 카탈로그</span>
-              <span style="color:rgba(0,0,0,0.3);">#5001</span>
-              <span>솔바이멜리아 푸꾸옥</span>
-            </span>
-            <span style="display:inline-flex;align-items:center;gap:4px;font-size:11px;padding:2px 8px;background:#fff;border:1px solid #e8e8e8;border-radius:10px;color:rgba(0,0,0,0.6);">
-              <span style="color:#722ed1;font-weight:700;">🛌 객실</span>
-              <span style="color:rgba(0,0,0,0.3);">3종</span>
-              <span>디럭스 씨뷰 · 가든뷰 · 프리미엄</span>
-            </span>
-            <span style="display:inline-flex;align-items:center;gap:4px;font-size:11px;padding:2px 8px;background:#fff;border:1px solid #e8e8e8;border-radius:10px;color:rgba(0,0,0,0.6);">
-              <span style="color:#13c2c2;font-weight:700;">🍽 식사</span>
-              <span>RO · BB · HB · AI</span>
-            </span>
-          </div>
+          <div class="entry-src-check">✓</div>
         </div>
-        <button class="btn btn-ghost btn-sm">타겟 변경</button>
+        <div class="entry-src-card" data-src="flight" onclick="setEntrySrc('flight')">
+          <div class="entry-src-icon">✈️</div>
+          <div class="entry-src-body">
+            <div class="entry-src-label">항공권</div>
+            <div class="entry-src-name">ICN ↔ PQC · 베트남항공</div>
+            <div class="entry-src-meta">#A-247 · 직항 · 4시간 30분</div>
+          </div>
+          <div class="entry-src-check">✓</div>
+        </div>
+        <div class="entry-src-card" data-src="tour" onclick="setEntrySrc('tour')">
+          <div class="entry-src-icon">🎫</div>
+          <div class="entry-src-body">
+            <div class="entry-src-label">투어·티켓</div>
+            <div class="entry-src-name">호핑투어 + 케이블카 패키지</div>
+            <div class="entry-src-meta">#T-589 · 1일 · 한국어 가이드</div>
+          </div>
+          <div class="entry-src-check">✓</div>
+        </div>
+      </div>
+
+      <!-- 타겟 헤더 (진입 소스별로 토글) -->
+      <div data-src-group="voucher" class="on">
+        <div class="target-header">
+          <div class="target-header-icon">🏨</div>
+          <div class="target-header-info">
+            <div style="display:flex;align-items:center;gap:8px;margin-bottom:2px;">
+              <span class="target-header-type">숙박권 #103</span>
+              <span style="font-size:10px;color:rgba(0,0,0,0.4);">공급사: 트립스토어</span>
+            </div>
+            <div class="target-header-name">솔 바이 멜리아 푸꾸옥</div>
+            <div class="target-header-meta" style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-top:6px;">
+              <span style="display:inline-flex;align-items:center;gap:4px;font-size:11px;padding:2px 8px;background:#fff;border:1px solid #e8e8e8;border-radius:10px;color:rgba(0,0,0,0.6);">
+                <span style="color:#722ed1;font-weight:700;">🏠 숙소 카탈로그</span>
+                <span style="color:rgba(0,0,0,0.3);">#5001</span>
+                <span>솔바이멜리아 푸꾸옥</span>
+              </span>
+              <span style="display:inline-flex;align-items:center;gap:4px;font-size:11px;padding:2px 8px;background:#fff;border:1px solid #e8e8e8;border-radius:10px;color:rgba(0,0,0,0.6);">
+                <span style="color:#722ed1;font-weight:700;">🛌 객실</span>
+                <span style="color:rgba(0,0,0,0.3);">3종</span>
+                <span>디럭스 씨뷰 · 가든뷰 · 프리미엄</span>
+              </span>
+              <span style="display:inline-flex;align-items:center;gap:4px;font-size:11px;padding:2px 8px;background:#fff;border:1px solid #e8e8e8;border-radius:10px;color:rgba(0,0,0,0.6);">
+                <span style="color:#13c2c2;font-weight:700;">🍽 식사</span>
+                <span>RO · BB · HB · AI</span>
+              </span>
+            </div>
+          </div>
+          <button class="btn btn-ghost btn-sm">타겟 변경</button>
+        </div>
+      </div>
+
+      <div data-src-group="flight">
+        <div class="target-header" style="background:linear-gradient(135deg,#f0f5ff 0%,#f6f9ff 100%);border-color:#adc6ff;">
+          <div class="target-header-icon" style="background:#2f54eb;">✈️</div>
+          <div class="target-header-info">
+            <div style="display:flex;align-items:center;gap:8px;margin-bottom:2px;">
+              <span class="target-header-type" style="color:#1d39c4;">항공권 #A-247</span>
+              <span style="font-size:10px;color:rgba(0,0,0,0.4);">공급사: 베트남항공 (VN)</span>
+            </div>
+            <div class="target-header-name">인천(ICN) ↔ 푸꾸옥(PQC)</div>
+            <div class="target-header-meta" style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-top:6px;">
+              <span style="display:inline-flex;align-items:center;gap:4px;font-size:11px;padding:2px 8px;background:#fff;border:1px solid #e8e8e8;border-radius:10px;color:rgba(0,0,0,0.6);">
+                <span style="color:#2f54eb;font-weight:700;">🛫 노선</span>
+                <span>직항</span>
+                <span style="color:rgba(0,0,0,0.3);">4시간 30분</span>
+              </span>
+              <span style="display:inline-flex;align-items:center;gap:4px;font-size:11px;padding:2px 8px;background:#fff;border:1px solid #e8e8e8;border-radius:10px;color:rgba(0,0,0,0.6);">
+                <span style="color:#2f54eb;font-weight:700;">💺 좌석</span>
+                <span>이코노미 · 프리미엄이코노미</span>
+              </span>
+              <span style="display:inline-flex;align-items:center;gap:4px;font-size:11px;padding:2px 8px;background:#fff;border:1px solid #e8e8e8;border-radius:10px;color:rgba(0,0,0,0.6);">
+                <span style="color:#2f54eb;font-weight:700;">🧳 수하물</span>
+                <span>위탁 23kg · 기내 7kg</span>
+              </span>
+            </div>
+          </div>
+          <button class="btn btn-ghost btn-sm">타겟 변경</button>
+        </div>
+      </div>
+
+      <div data-src-group="tour">
+        <div class="target-header" style="background:linear-gradient(135deg,#fff7e6 0%,#fffbe6 100%);border-color:#ffd591;">
+          <div class="target-header-icon" style="background:#fa8c16;">🎫</div>
+          <div class="target-header-info">
+            <div style="display:flex;align-items:center;gap:8px;margin-bottom:2px;">
+              <span class="target-header-type" style="color:#ad6800;">투어·티켓 #T-589</span>
+              <span style="font-size:10px;color:rgba(0,0,0,0.4);">공급사: 트립스토어 현지</span>
+            </div>
+            <div class="target-header-name">호핑투어 + 혼톰 케이블카 패키지</div>
+            <div class="target-header-meta" style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-top:6px;">
+              <span style="display:inline-flex;align-items:center;gap:4px;font-size:11px;padding:2px 8px;background:#fff;border:1px solid #e8e8e8;border-radius:10px;color:rgba(0,0,0,0.6);">
+                <span style="color:#fa8c16;font-weight:700;">⏰ 소요</span>
+                <span>1일 (08:30 ~ 17:30)</span>
+              </span>
+              <span style="display:inline-flex;align-items:center;gap:4px;font-size:11px;padding:2px 8px;background:#fff;border:1px solid #e8e8e8;border-radius:10px;color:rgba(0,0,0,0.6);">
+                <span style="color:#fa8c16;font-weight:700;">🗣 가이드</span>
+                <span>한국어 인솔자 동행</span>
+              </span>
+              <span style="display:inline-flex;align-items:center;gap:4px;font-size:11px;padding:2px 8px;background:#fff;border:1px solid #e8e8e8;border-radius:10px;color:rgba(0,0,0,0.6);">
+                <span style="color:#fa8c16;font-weight:700;">📍 미팅</span>
+                <span>호텔 픽업 · 즈엉동 시내</span>
+              </span>
+            </div>
+          </div>
+          <button class="btn btn-ghost btn-sm">타겟 변경</button>
+        </div>
       </div>
 
       <!-- 안내: 일괄 등록 -->
       <div style="display:flex;gap:10px;padding:10px 14px;background:#fffbe6;border:1px solid #ffe58f;border-radius:8px;font-size:12px;color:#7c5800;line-height:1.6;margin-bottom:14px;">
         <span style="font-size:14px;">💡</span>
         <div style="flex:1;">
-          이 타겟에 등록할 카테고리를 <strong>원하는 만큼 추가해서 한 번에 등록</strong>합니다. 각 카테고리는 별도 POST로 저장됩니다. <strong>섹션 제목은 상품 등록 시 결정</strong>됩니다.
+          선택한 <strong id="entry-src-label">숙박권</strong> 정보를 기반으로 카테고리를 <strong>원하는 만큼 추가해서 한 번에 등록</strong>합니다. 각 카테고리는 별도 콘텐츠로 저장되며, <strong>섹션 제목은 상품 등록 시 결정</strong>됩니다.
         </div>
       </div>
 
-      <!-- Split View -->
+      <!-- 편집 영역 -->
       <div class="split">
-
-        <!-- ▶ 좌: 편집 -->
         <div class="split-pane">
           <div class="split-pane-head">
             <div class="split-pane-title">✏️ 편집 <span class="editor-badge">관리자</span></div>
@@ -728,89 +833,6 @@ tbody tr:hover td { background: #fafafa; }
               </div>
             </div>
 
-          </div>
-        </div>
-
-        <!-- ▶ 우: www 프리뷰 -->
-        <div class="split-pane">
-          <div class="split-pane-head">
-            <div class="split-pane-title">👁 www 프리뷰 <span class="preview-badge">실시간</span></div>
-            <div class="split-pane-sub">추가한 카테고리가 상품 상세에서 어떻게 보이는지</div>
-          </div>
-          <div class="split-pane-body" style="background:#f9f9f9;">
-            <div class="www-frame">
-              <div class="www-browser-bar">
-                <div class="www-dots">
-                  <div class="www-dot"></div><div class="www-dot"></div><div class="www-dot"></div>
-                </div>
-                <div class="www-url">🔒 tripstore.kr/products/TF5B94...?detail</div>
-              </div>
-              <div class="www-content">
-
-                <!-- 스페셜혜택 -->
-                <div class="www-section www-edit-sec">
-                  <div class="www-sec-label">⭐ 스페셜혜택</div>
-                  <div class="www-sec-title-placeholder">
-                    <span class="www-sec-title-tag">섹션 제목</span> 상품 등록 시 지정
-                  </div>
-                  <div class="www-benefit-list">
-                    <div class="www-benefit-item">
-                      <div class="www-benefit-icon">✓</div>
-                      <div class="www-benefit-body">
-                        <div class="www-benefit-title">공항 ↔ 리조트 왕복 픽업 서비스</div>
-                        <div class="www-benefit-desc">공항에서부터 편하게! 무료 왕복 픽업</div>
-                      </div>
-                    </div>
-                    <div class="www-benefit-item">
-                      <div class="www-benefit-icon">✓</div>
-                      <div class="www-benefit-body">
-                        <div class="www-benefit-title">전 일정 조식포함</div>
-                        <div class="www-benefit-desc">현지식과 뷔페식 조식 포함</div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-
-                <!-- 핵심포인트 -->
-                <div class="www-section www-edit-sec">
-                  <div class="www-sec-label">🎯 핵심포인트</div>
-                  <div class="www-sec-title-placeholder">
-                    <span class="www-sec-title-tag">섹션 제목</span> 상품 등록 시 지정
-                  </div>
-                  <div class="www-point-list">
-                    <div class="www-point-item">
-                      <div class="www-point-num"><small>POINT</small>1</div>
-                      <div class="www-point-body">
-                        <div class="www-point-title">공항에서 차량 30분</div>
-                        <div class="www-point-desc">신공항에서 편리한 접근성</div>
-                      </div>
-                    </div>
-                    <div class="www-point-item">
-                      <div class="www-point-num"><small>POINT</small>2</div>
-                      <div class="www-point-body">
-                        <div class="www-point-title">전 객실 오션뷰 / 풀액세스</div>
-                        <div class="www-point-desc">프라이빗한 풀 액세스 객실</div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-
-                <!-- 포함사항 -->
-                <div class="www-section www-edit-sec">
-                  <div class="www-sec-label">✓ 포함사항</div>
-                  <div class="www-sec-title-placeholder">
-                    <span class="www-sec-title-tag">섹션 제목</span> 상품 등록 시 지정
-                  </div>
-                  <div class="www-check-list">
-                    <div class="www-check-item"><span class="www-check-mark">✓</span>왕복 항공권 (위탁수하물 포함)</div>
-                    <div class="www-check-item"><span class="www-check-mark">✓</span>숙소 4박</div>
-                    <div class="www-check-item"><span class="www-check-mark">✓</span>BB(조식) 포함</div>
-                    <div class="www-check-item"><span class="www-check-mark">✓</span>공항-호텔 왕복 픽업/샌딩</div>
-                  </div>
-                </div>
-
-              </div>
-            </div>
           </div>
         </div>
 
@@ -1723,6 +1745,323 @@ function updateCatCount() {
   const el2 = document.getElementById('save-cat-count');
   if (el1) el1.textContent = count;
   if (el2) el2.textContent = count;
+}
+
+// ===== 진입 소스 전환 (숙박권 / 항공권 / 투어·티켓) =====
+const ENTRY_SRC_LABEL = { voucher:'숙박권', flight:'항공권', tour:'투어·티켓' };
+
+const ENTRY_SRC_CAT_STACKS = {
+  // 숙박권: 객실/식사 단위 범위 사용
+  voucher: `
+    <div class="cat-sec" data-cat="스페셜혜택">
+      <div class="cat-sec-head" onclick="toggleCatSec(this)">
+        <span class="cat-sec-chevron">▼</span><span class="cat-sec-icon">✓</span>
+        <span class="cat-sec-title">스페셜혜택</span>
+        <span class="scope-badge scope-all" onclick="event.stopPropagation();openScopeModal(this)">🌐 전체 적용</span>
+        <span class="cat-sec-sub">2개 아이템</span>
+        <div class="cat-sec-actions" onclick="event.stopPropagation();">
+          <button class="block-act-btn" title="위로">▲</button><button class="block-act-btn" title="아래로">▼</button>
+          <button class="block-act-btn danger" title="삭제" onclick="removeCatSec(this)">✕</button>
+        </div>
+      </div>
+      <div class="cat-sec-body">
+        <div class="form-label">제목</div>
+        <input type="text" class="fi" value="트립스토어만의 스페셜혜택" style="margin-bottom:10px;">
+        <div class="form-label">내용</div>
+        <div class="bi-list">
+          <div class="bi-item"><span class="bi-item-handle">⠿</span><span class="bi-item-bullet">✓</span>
+            <div class="bi-item-main"><input type="text" class="bi-item-title" value="공항 ↔ 리조트 왕복 픽업 서비스"><textarea class="bi-item-desc">공항에서부터 편하게! 무료 왕복 픽업</textarea></div>
+            <button class="bi-item-del" onclick="delItem(this)">✕</button></div>
+          <div class="bi-item"><span class="bi-item-handle">⠿</span><span class="bi-item-bullet">✓</span>
+            <div class="bi-item-main"><input type="text" class="bi-item-title" value="전 일정 조식포함"><textarea class="bi-item-desc">현지식과 뷔페식 조식 포함</textarea></div>
+            <button class="bi-item-del" onclick="delItem(this)">✕</button></div>
+        </div>
+        <div class="bi-add-btn" style="margin-top:10px;" onclick="addItem(this,'benefit')">+ 혜택 추가</div>
+      </div>
+    </div>
+    <div class="cat-sec" data-cat="포함사항" data-scope="meal:BB">
+      <div class="cat-sec-head" onclick="toggleCatSec(this)">
+        <span class="cat-sec-chevron">▼</span><span class="cat-sec-icon">✓</span>
+        <span class="cat-sec-title">포함사항</span>
+        <span class="scope-badge scope-meal" onclick="event.stopPropagation();openScopeModal(this)">🍽 식사 = BB</span>
+        <span class="cat-sec-sub">3개 아이템</span>
+        <div class="cat-sec-actions" onclick="event.stopPropagation();">
+          <button class="block-act-btn" title="위로">▲</button><button class="block-act-btn" title="아래로">▼</button>
+          <button class="block-act-btn danger" title="삭제" onclick="removeCatSec(this)">✕</button>
+        </div>
+      </div>
+      <div class="cat-sec-body">
+        <div class="chk-list">
+          <div class="chk-item"><span class="chk-mark">✓</span><input type="text" class="chk-input" value="아메리칸 뷔페 조식 (07:00-10:00)"><button class="bi-item-del" onclick="delItem(this)">✕</button></div>
+          <div class="chk-item"><span class="chk-mark">✓</span><input type="text" class="chk-input" value="커피·티 무제한"><button class="bi-item-del" onclick="delItem(this)">✕</button></div>
+          <div class="chk-item"><span class="chk-mark">✓</span><input type="text" class="chk-input" value="주말 브런치 업그레이드"><button class="bi-item-del" onclick="delItem(this)">✕</button></div>
+        </div>
+        <div class="bi-add-btn" style="margin-top:10px;" onclick="addItem(this,'check')">+ 항목 추가</div>
+      </div>
+    </div>
+    <div class="cat-sec" data-cat="유의사항" data-scope="room:디럭스씨뷰">
+      <div class="cat-sec-head" onclick="toggleCatSec(this)">
+        <span class="cat-sec-chevron">▼</span><span class="cat-sec-icon">⚠️</span>
+        <span class="cat-sec-title">유의사항</span>
+        <span class="scope-badge scope-room" onclick="event.stopPropagation();openScopeModal(this)">🛌 객실 = 디럭스 씨뷰</span>
+        <span class="cat-sec-sub">2개 아이템</span>
+        <div class="cat-sec-actions" onclick="event.stopPropagation();">
+          <button class="block-act-btn" title="위로">▲</button><button class="block-act-btn" title="아래로">▼</button>
+          <button class="block-act-btn danger" title="삭제" onclick="removeCatSec(this)">✕</button>
+        </div>
+      </div>
+      <div class="cat-sec-body">
+        <div class="chk-list">
+          <div class="chk-item"><span class="chk-mark" style="color:#faad14;">⚠</span><input type="text" class="chk-input" value="테라스 바닥 미끄럼 주의 (우천 시)"><button class="bi-item-del" onclick="delItem(this)">✕</button></div>
+          <div class="chk-item"><span class="chk-mark" style="color:#faad14;">⚠</span><input type="text" class="chk-input" value="오션뷰 특성상 바람 유의"><button class="bi-item-del" onclick="delItem(this)">✕</button></div>
+        </div>
+        <div class="bi-add-btn" style="margin-top:10px;" onclick="addItem(this,'check')">+ 항목 추가</div>
+      </div>
+    </div>
+  `,
+
+  // 항공권: 좌석등급/노선/항공사 단위 범위
+  flight: `
+    <div class="cat-sec" data-cat="핵심포인트">
+      <div class="cat-sec-head" onclick="toggleCatSec(this)">
+        <span class="cat-sec-chevron">▼</span><span class="cat-sec-icon">🎯</span>
+        <span class="cat-sec-title">핵심포인트</span>
+        <span class="scope-badge scope-all" onclick="event.stopPropagation();openScopeModal(this)">🌐 전체 적용</span>
+        <span class="cat-sec-sub">2개 아이템</span>
+        <div class="cat-sec-actions" onclick="event.stopPropagation();">
+          <button class="block-act-btn" title="위로">▲</button><button class="block-act-btn" title="아래로">▼</button>
+          <button class="block-act-btn danger" title="삭제" onclick="removeCatSec(this)">✕</button>
+        </div>
+      </div>
+      <div class="cat-sec-body">
+        <div class="form-label">제목</div>
+        <input type="text" class="fi" value="이 항공편의 강점" style="margin-bottom:10px;">
+        <div class="form-label">내용</div>
+        <div class="bi-list">
+          <div class="bi-item"><span class="bi-item-handle">⠿</span><span class="bi-item-bullet">✓</span>
+            <div class="bi-item-main"><input type="text" class="bi-item-title" value="인천 ↔ 푸꾸옥 직항 (경유 X)"><textarea class="bi-item-desc">4시간 30분, 야간 도착 없이 낮 도착</textarea></div>
+            <button class="bi-item-del" onclick="delItem(this)">✕</button></div>
+          <div class="bi-item"><span class="bi-item-handle">⠿</span><span class="bi-item-bullet">✓</span>
+            <div class="bi-item-main"><input type="text" class="bi-item-title" value="기내식 + 위탁수하물 23kg 포함"><textarea class="bi-item-desc">베트남항공 풀서비스 캐리어</textarea></div>
+            <button class="bi-item-del" onclick="delItem(this)">✕</button></div>
+        </div>
+        <div class="bi-add-btn" style="margin-top:10px;" onclick="addItem(this,'benefit')">+ 포인트 추가</div>
+      </div>
+    </div>
+    <div class="cat-sec" data-cat="수하물">
+      <div class="cat-sec-head" onclick="toggleCatSec(this)">
+        <span class="cat-sec-chevron">▼</span><span class="cat-sec-icon">🧳</span>
+        <span class="cat-sec-title">수하물 규정</span>
+        <span class="scope-badge scope-all" onclick="event.stopPropagation();openScopeModal(this)">🌐 전체 적용</span>
+        <span class="cat-sec-sub">3개 아이템</span>
+        <div class="cat-sec-actions" onclick="event.stopPropagation();">
+          <button class="block-act-btn" title="위로">▲</button><button class="block-act-btn" title="아래로">▼</button>
+          <button class="block-act-btn danger" title="삭제" onclick="removeCatSec(this)">✕</button>
+        </div>
+      </div>
+      <div class="cat-sec-body">
+        <div class="chk-list">
+          <div class="chk-item"><span class="chk-mark">✓</span><input type="text" class="chk-input" value="위탁수하물 23kg × 1개 (최대 158cm)"><button class="bi-item-del" onclick="delItem(this)">✕</button></div>
+          <div class="chk-item"><span class="chk-mark">✓</span><input type="text" class="chk-input" value="기내수하물 7kg × 1개 (56×36×23cm)"><button class="bi-item-del" onclick="delItem(this)">✕</button></div>
+          <div class="chk-item"><span class="chk-mark">✓</span><input type="text" class="chk-input" value="개인소지품(노트북/핸드백) 1개 추가 가능"><button class="bi-item-del" onclick="delItem(this)">✕</button></div>
+        </div>
+        <div class="bi-add-btn" style="margin-top:10px;" onclick="addItem(this,'check')">+ 항목 추가</div>
+      </div>
+    </div>
+    <div class="cat-sec" data-cat="포함사항" data-scope="class:프리미엄이코노미">
+      <div class="cat-sec-head" onclick="toggleCatSec(this)">
+        <span class="cat-sec-chevron">▼</span><span class="cat-sec-icon">✓</span>
+        <span class="cat-sec-title">포함사항</span>
+        <span class="scope-badge scope-room" onclick="event.stopPropagation();openScopeModal(this)">💺 좌석 = 프리미엄이코노미</span>
+        <span class="cat-sec-sub">3개 아이템</span>
+        <div class="cat-sec-actions" onclick="event.stopPropagation();">
+          <button class="block-act-btn" title="위로">▲</button><button class="block-act-btn" title="아래로">▼</button>
+          <button class="block-act-btn danger" title="삭제" onclick="removeCatSec(this)">✕</button>
+        </div>
+      </div>
+      <div class="cat-sec-body">
+        <div class="chk-list">
+          <div class="chk-item"><span class="chk-mark">✓</span><input type="text" class="chk-input" value="추가 레그룸 좌석 (10cm 넓음)"><button class="bi-item-del" onclick="delItem(this)">✕</button></div>
+          <div class="chk-item"><span class="chk-mark">✓</span><input type="text" class="chk-input" value="우선 탑승 + 위탁수하물 32kg"><button class="bi-item-del" onclick="delItem(this)">✕</button></div>
+          <div class="chk-item"><span class="chk-mark">✓</span><input type="text" class="chk-input" value="라운지 이용 (인천공항 KAL 라운지)"><button class="bi-item-del" onclick="delItem(this)">✕</button></div>
+        </div>
+        <div class="bi-add-btn" style="margin-top:10px;" onclick="addItem(this,'check')">+ 항목 추가</div>
+      </div>
+    </div>
+    <div class="cat-sec" data-cat="유의사항">
+      <div class="cat-sec-head" onclick="toggleCatSec(this)">
+        <span class="cat-sec-chevron">▼</span><span class="cat-sec-icon">⚠️</span>
+        <span class="cat-sec-title">유의사항</span>
+        <span class="scope-badge scope-all" onclick="event.stopPropagation();openScopeModal(this)">🌐 전체 적용</span>
+        <span class="cat-sec-sub">2개 아이템</span>
+        <div class="cat-sec-actions" onclick="event.stopPropagation();">
+          <button class="block-act-btn" title="위로">▲</button><button class="block-act-btn" title="아래로">▼</button>
+          <button class="block-act-btn danger" title="삭제" onclick="removeCatSec(this)">✕</button>
+        </div>
+      </div>
+      <div class="cat-sec-body">
+        <div class="chk-list">
+          <div class="chk-item"><span class="chk-mark" style="color:#faad14;">⚠</span><input type="text" class="chk-input" value="여권 유효기간 출국일 기준 6개월 이상 필수"><button class="bi-item-del" onclick="delItem(this)">✕</button></div>
+          <div class="chk-item"><span class="chk-mark" style="color:#faad14;">⚠</span><input type="text" class="chk-input" value="이름 변경/스펠링 수정 불가 (재발권 필요)"><button class="bi-item-del" onclick="delItem(this)">✕</button></div>
+        </div>
+        <div class="bi-add-btn" style="margin-top:10px;" onclick="addItem(this,'check')">+ 항목 추가</div>
+      </div>
+    </div>
+  `,
+
+  // 투어·티켓: 일정/포함사항/미팅포인트/취소정책
+  tour: `
+    <div class="cat-sec" data-cat="핵심포인트">
+      <div class="cat-sec-head" onclick="toggleCatSec(this)">
+        <span class="cat-sec-chevron">▼</span><span class="cat-sec-icon">🎯</span>
+        <span class="cat-sec-title">핵심포인트</span>
+        <span class="scope-badge scope-all" onclick="event.stopPropagation();openScopeModal(this)">🌐 전체 적용</span>
+        <span class="cat-sec-sub">3개 아이템</span>
+        <div class="cat-sec-actions" onclick="event.stopPropagation();">
+          <button class="block-act-btn" title="위로">▲</button><button class="block-act-btn" title="아래로">▼</button>
+          <button class="block-act-btn danger" title="삭제" onclick="removeCatSec(this)">✕</button>
+        </div>
+      </div>
+      <div class="cat-sec-body">
+        <div class="form-label">제목</div>
+        <input type="text" class="fi" value="이 투어의 하이라이트" style="margin-bottom:10px;">
+        <div class="form-label">내용</div>
+        <div class="bi-list">
+          <div class="bi-item"><span class="bi-item-handle">⠿</span><span class="bi-item-bullet">✓</span>
+            <div class="bi-item-main"><input type="text" class="bi-item-title" value="3섬 호핑 + 스노클링"><textarea class="bi-item-desc">메이루트섬·몽타이섬·감기섬에서 자유 스노클링</textarea></div>
+            <button class="bi-item-del" onclick="delItem(this)">✕</button></div>
+          <div class="bi-item"><span class="bi-item-handle">⠿</span><span class="bi-item-bullet">✓</span>
+            <div class="bi-item-main"><input type="text" class="bi-item-title" value="혼톰 케이블카 (세계 최장 7,899m)"><textarea class="bi-item-desc">왕복 25분 비행 같은 경험</textarea></div>
+            <button class="bi-item-del" onclick="delItem(this)">✕</button></div>
+          <div class="bi-item"><span class="bi-item-handle">⠿</span><span class="bi-item-bullet">✓</span>
+            <div class="bi-item-main"><input type="text" class="bi-item-title" value="한국어 인솔자 전일 동행"><textarea class="bi-item-desc">현지 가이드 + 한국인 인솔자 듀얼 운영</textarea></div>
+            <button class="bi-item-del" onclick="delItem(this)">✕</button></div>
+        </div>
+        <div class="bi-add-btn" style="margin-top:10px;" onclick="addItem(this,'benefit')">+ 포인트 추가</div>
+      </div>
+    </div>
+    <div class="cat-sec" data-cat="포함사항">
+      <div class="cat-sec-head" onclick="toggleCatSec(this)">
+        <span class="cat-sec-chevron">▼</span><span class="cat-sec-icon">✓</span>
+        <span class="cat-sec-title">포함사항</span>
+        <span class="scope-badge scope-all" onclick="event.stopPropagation();openScopeModal(this)">🌐 전체 적용</span>
+        <span class="cat-sec-sub">5개 아이템</span>
+        <div class="cat-sec-actions" onclick="event.stopPropagation();">
+          <button class="block-act-btn" title="위로">▲</button><button class="block-act-btn" title="아래로">▼</button>
+          <button class="block-act-btn danger" title="삭제" onclick="removeCatSec(this)">✕</button>
+        </div>
+      </div>
+      <div class="cat-sec-body">
+        <div class="chk-list">
+          <div class="chk-item"><span class="chk-mark">✓</span><input type="text" class="chk-input" value="호텔 픽업/드랍 (즈엉동 시내 호텔)"><button class="bi-item-del" onclick="delItem(this)">✕</button></div>
+          <div class="chk-item"><span class="chk-mark">✓</span><input type="text" class="chk-input" value="3섬 호핑 보트 (스피드보트)"><button class="bi-item-del" onclick="delItem(this)">✕</button></div>
+          <div class="chk-item"><span class="chk-mark">✓</span><input type="text" class="chk-input" value="혼톰 케이블카 왕복권"><button class="bi-item-del" onclick="delItem(this)">✕</button></div>
+          <div class="chk-item"><span class="chk-mark">✓</span><input type="text" class="chk-input" value="중식 (베트남 가정식 1식)"><button class="bi-item-del" onclick="delItem(this)">✕</button></div>
+          <div class="chk-item"><span class="chk-mark">✓</span><input type="text" class="chk-input" value="스노클링 장비 + 구명조끼"><button class="bi-item-del" onclick="delItem(this)">✕</button></div>
+        </div>
+        <div class="bi-add-btn" style="margin-top:10px;" onclick="addItem(this,'check')">+ 항목 추가</div>
+      </div>
+    </div>
+    <div class="cat-sec" data-cat="안내사항">
+      <div class="cat-sec-head" onclick="toggleCatSec(this)">
+        <span class="cat-sec-chevron">▼</span><span class="cat-sec-icon">📍</span>
+        <span class="cat-sec-title">미팅 포인트</span>
+        <span class="scope-badge scope-all" onclick="event.stopPropagation();openScopeModal(this)">🌐 전체 적용</span>
+        <span class="cat-sec-sub">3개 아이템</span>
+        <div class="cat-sec-actions" onclick="event.stopPropagation();">
+          <button class="block-act-btn" title="위로">▲</button><button class="block-act-btn" title="아래로">▼</button>
+          <button class="block-act-btn danger" title="삭제" onclick="removeCatSec(this)">✕</button>
+        </div>
+      </div>
+      <div class="cat-sec-body">
+        <div class="chk-list">
+          <div class="chk-item"><span class="chk-mark" style="color:#1677ff;">i</span><input type="text" class="chk-input" value="픽업 시간: 08:00~08:30 (호텔별 상이)"><button class="bi-item-del" onclick="delItem(this)">✕</button></div>
+          <div class="chk-item"><span class="chk-mark" style="color:#1677ff;">i</span><input type="text" class="chk-input" value="픽업 가능 호텔: 즈엉동 시내권 전체"><button class="bi-item-del" onclick="delItem(this)">✕</button></div>
+          <div class="chk-item"><span class="chk-mark" style="color:#1677ff;">i</span><input type="text" class="chk-input" value="픽업 지점 외 호텔은 인솔자에게 사전 문의"><button class="bi-item-del" onclick="delItem(this)">✕</button></div>
+        </div>
+        <div class="bi-add-btn" style="margin-top:10px;" onclick="addItem(this,'check')">+ 항목 추가</div>
+      </div>
+    </div>
+    <div class="cat-sec" data-cat="유의사항">
+      <div class="cat-sec-head" onclick="toggleCatSec(this)">
+        <span class="cat-sec-chevron">▼</span><span class="cat-sec-icon">⚠️</span>
+        <span class="cat-sec-title">취소·환불 정책</span>
+        <span class="scope-badge scope-all" onclick="event.stopPropagation();openScopeModal(this)">🌐 전체 적용</span>
+        <span class="cat-sec-sub">3개 아이템</span>
+        <div class="cat-sec-actions" onclick="event.stopPropagation();">
+          <button class="block-act-btn" title="위로">▲</button><button class="block-act-btn" title="아래로">▼</button>
+          <button class="block-act-btn danger" title="삭제" onclick="removeCatSec(this)">✕</button>
+        </div>
+      </div>
+      <div class="cat-sec-body">
+        <div class="chk-list">
+          <div class="chk-item"><span class="chk-mark" style="color:#faad14;">⚠</span><input type="text" class="chk-input" value="투어 출발 48시간 전: 100% 환불"><button class="bi-item-del" onclick="delItem(this)">✕</button></div>
+          <div class="chk-item"><span class="chk-mark" style="color:#faad14;">⚠</span><input type="text" class="chk-input" value="24~48시간 전: 50% 환불"><button class="bi-item-del" onclick="delItem(this)">✕</button></div>
+          <div class="chk-item"><span class="chk-mark" style="color:#faad14;">⚠</span><input type="text" class="chk-input" value="24시간 이내: 환불 불가 (기상악화는 제외)"><button class="bi-item-del" onclick="delItem(this)">✕</button></div>
+        </div>
+        <div class="bi-add-btn" style="margin-top:10px;" onclick="addItem(this,'check')">+ 항목 추가</div>
+      </div>
+    </div>
+  `
+};
+
+const ENTRY_SRC_PICKERS = {
+  voucher: [
+    {cat:'소개', icon:'📝', label:'소개'},
+    {cat:'핵심포인트', icon:'🎯', label:'핵심포인트'},
+    {cat:'스페셜혜택', icon:'✓', label:'스페셜혜택', disabled:true},
+    {cat:'포함사항', icon:'✓', label:'포함사항', disabled:true, suffix:'(추가됨)'},
+    {cat:'불포함사항', icon:'✗', label:'불포함사항'},
+    {cat:'유의사항', icon:'⚠️', label:'유의사항', disabled:true},
+    {cat:'FAQ', icon:'❓', label:'자주묻는 질문'},
+    {cat:'안내사항', icon:'📋', label:'안내사항'},
+    {cat:'출발전', icon:'🔢', label:'출발 전 안내'},
+  ],
+  flight: [
+    {cat:'소개', icon:'📝', label:'소개'},
+    {cat:'핵심포인트', icon:'🎯', label:'핵심포인트', disabled:true},
+    {cat:'스페셜혜택', icon:'✓', label:'스페셜혜택'},
+    {cat:'포함사항', icon:'✓', label:'포함사항', disabled:true},
+    {cat:'불포함사항', icon:'✗', label:'불포함사항'},
+    {cat:'수하물', icon:'🧳', label:'수하물 규정', disabled:true},
+    {cat:'유의사항', icon:'⚠️', label:'유의사항', disabled:true},
+    {cat:'FAQ', icon:'❓', label:'자주묻는 질문'},
+    {cat:'출발전', icon:'🔢', label:'출발 전 안내'},
+  ],
+  tour: [
+    {cat:'소개', icon:'📝', label:'소개'},
+    {cat:'핵심포인트', icon:'🎯', label:'핵심포인트', disabled:true},
+    {cat:'스페셜혜택', icon:'✓', label:'스페셜혜택'},
+    {cat:'포함사항', icon:'✓', label:'포함사항', disabled:true},
+    {cat:'불포함사항', icon:'✗', label:'불포함사항'},
+    {cat:'안내사항', icon:'📍', label:'미팅 포인트', disabled:true},
+    {cat:'유의사항', icon:'⚠️', label:'취소·환불 정책', disabled:true},
+    {cat:'FAQ', icon:'❓', label:'자주묻는 질문'},
+  ]
+};
+
+function setEntrySrc(src) {
+  // 카드 활성 토글
+  document.querySelectorAll('.entry-src-card').forEach(c => c.classList.toggle('active', c.dataset.src === src));
+  // 타겟 헤더 그룹 토글
+  document.querySelectorAll('[data-src-group]').forEach(g => g.classList.toggle('on', g.dataset.srcGroup === src));
+  // 안내 배너 라벨
+  const labEl = document.getElementById('entry-src-label');
+  if (labEl) labEl.textContent = ENTRY_SRC_LABEL[src];
+  // cat-stack 교체
+  const stack = document.getElementById('cat-stack');
+  if (stack && ENTRY_SRC_CAT_STACKS[src]) stack.innerHTML = ENTRY_SRC_CAT_STACKS[src];
+  // 카테고리 피커 교체
+  const picker = document.querySelector('#cat-picker .cat-picker-grid');
+  if (picker && ENTRY_SRC_PICKERS[src]) {
+    picker.innerHTML = ENTRY_SRC_PICKERS[src].map(it => {
+      const disabled = it.disabled ? ' disabled' : '';
+      const click = it.disabled ? '' : ` onclick="addCatSec('${it.cat}')"`;
+      const suffix = it.disabled ? ` <span style="font-size:10px;color:rgba(0,0,0,0.25);">(추가됨)</span>` : '';
+      return `<div class="cat-picker-item${disabled}"${click}><span>${it.icon}</span> ${it.label}${suffix}</div>`;
+    }).join('');
+  }
+  updateCatCount();
 }
 
 // ===== 타겟 탭 (필터링) =====
