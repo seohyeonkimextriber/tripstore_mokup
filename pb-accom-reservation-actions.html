@@ -19,6 +19,7 @@
   .badge.green { background: #e8f5e9; color: #2e7d32; }
   .badge.red { background: #ffeaea; color: #d32f2f; }
   .badge.gray { background: #f0f0f0; color: #666; }
+  .badge.orange { background: #fff3e0; color: #e65100; }
 
   /* 상단 메타 */
   .meta-card { background: #fff; border: 1px solid #e8e8e8; border-radius: 10px; padding: 16px 20px; margin-bottom: 16px; display: grid; grid-template-columns: repeat(5, 1fr); gap: 16px; }
@@ -156,6 +157,22 @@
       <li><b>대체 숙소 조회</b>는 언제든 클릭 가능 (성급 탭 + 비슷→저렴→비쌈 정렬)</li>
       <li><b>객실 추가/취소</b>는 객실 카드 액션. 부분 취소는 전체 cancelBooking + 재예약 (위약금 안내 모달)</li>
     </ol>
+  </div>
+
+  <!-- 시나리오 셀렉터 -->
+  <div style="background:#fff;border:2px solid #1a1a1a;border-radius:10px;padding:14px 18px;margin-bottom:16px;">
+    <div style="font-size:13px;font-weight:700;margin-bottom:8px;display:flex;align-items:center;gap:8px;">
+      🧪 예약 응답 시나리오 시뮬레이션
+      <span style="font-size:11px;color:#666;font-weight:400;">선택 후 [예약 넣기] 클릭 → 해당 케이스 결과 표시</span>
+    </div>
+    <div style="display:flex;gap:6px;flex-wrap:wrap;">
+      <button class="btn btn-outline" id="scn-success" onclick="setScenario('success')" style="border:2px solid #2e7d32;">✅ 성공 (기본)</button>
+      <button class="btn btn-outline" id="scn-unavail" onclick="setScenario('unavail')">❌ UNAVAILABLE</button>
+      <button class="btn btn-outline" id="scn-canceled" onclick="setScenario('canceled')">❌ 호텔측 Canceled</button>
+      <button class="btn btn-outline" id="scn-pending" onclick="setScenario('pending')">❌ PENDING</button>
+      <button class="btn btn-outline" id="scn-timeout" onclick="setScenario('timeout')">⏰ 시한 초과</button>
+      <button class="btn btn-outline" id="scn-error" onclick="setScenario('error')">🚨 errorCode</button>
+    </div>
   </div>
 
   <!-- 메타 -->
@@ -434,8 +451,139 @@
       </label>
     </div>
     <div class="modal-foot">
-      <button class="btn btn-outline" onclick="closeModal('modalCancelRoom')">취소</button>
-      <button class="btn btn-danger" onclick="cancelRoomConfirm()">전체 취소 + 재예약</button>
+      <button class="btn btn-outline" onclick="closeModal('modalCancelRoom')">닫기</button>
+      <button class="btn btn-danger" onclick="cancelOnlyConfirm()">전체 취소만 (예약 종료)</button>
+      <button class="btn btn-danger" onclick="cancelRoomConfirm()" style="background:#d32f2f;color:#fff;border-color:#d32f2f;">전체 취소 + 재예약</button>
+    </div>
+  </div>
+</div>
+
+<!-- ========================= 모달: UNAVAILABLE ========================= -->
+<div class="modal-overlay" id="modalUnavail">
+  <div class="modal">
+    <div class="modal-head">
+      <h3>❌ TMG 가용 불가 — UNAVAILABLE</h3>
+      <button class="modal-close" onclick="closeModal('modalUnavail')">×</button>
+    </div>
+    <div class="modal-body">
+      <p style="font-size:13px; color:#333; margin-bottom:12px;"><b>reserveBooking 응답: UNAVAILABLE</b></p>
+      <p style="font-size:12px; color:#555;">TMG측에서 해당 객실 예약이 불가합니다. (재고 사라짐 / 호텔측 차단 / 기타)</p>
+      <div style="background:#ffebee; border:1px solid #ffcdd2; border-radius:8px; padding:12px 14px; font-size:12px; margin-top:12px;">
+        <b>처리 가이드</b><br>
+        ① 운영팀 자동 알림 발송됨<br>
+        ② <b>대체 숙소 조회</b>로 다른 옵션 검색<br>
+        ③ 고객에게 안내 → 동의 시 대체 자원으로 예약
+      </div>
+    </div>
+    <div class="modal-foot">
+      <button class="btn btn-outline" onclick="closeModal('modalUnavail')">닫기</button>
+      <button class="btn btn-danger" onclick="cancelOnlyConfirm()">예약 취소·환불</button>
+      <button class="btn btn-primary" onclick="closeModal('modalUnavail'); openAltSearch();">🔍 대체 숙소 조회</button>
+    </div>
+  </div>
+</div>
+
+<!-- ========================= 모달: 호텔측 Canceled ========================= -->
+<div class="modal-overlay" id="modalCanceled">
+  <div class="modal">
+    <div class="modal-head">
+      <h3>❌ 호텔측 거부 — Canceled</h3>
+      <button class="modal-close" onclick="closeModal('modalCanceled')">×</button>
+    </div>
+    <div class="modal-body">
+      <p style="font-size:13px; color:#333; margin-bottom:12px;"><b>confirmBooking 응답: Canceled</b></p>
+      <p style="font-size:12px; color:#555;">TMG가 reserveBooking까지는 받았으나, 최종 confirmBooking 단계에서 호텔측이 거부했습니다.</p>
+      <div style="background:#ffebee; border:1px solid #ffcdd2; border-radius:8px; padding:12px 14px; font-size:12px; margin-top:12px;">
+        <b>처리 가이드</b><br>
+        ① 운영팀 자동 알림 발송됨<br>
+        ② <b>대체 숙소 협의</b> 또는 <b>고객 환불 처리</b><br>
+        ③ 호텔측 사유 확인 후 운영 판단
+      </div>
+    </div>
+    <div class="modal-foot">
+      <button class="btn btn-outline" onclick="closeModal('modalCanceled')">닫기</button>
+      <button class="btn btn-danger" onclick="cancelOnlyConfirm()">예약 취소·환불</button>
+      <button class="btn btn-primary" onclick="closeModal('modalCanceled'); openAltSearch();">🔍 대체 숙소 협의</button>
+    </div>
+  </div>
+</div>
+
+<!-- ========================= 모달: PENDING ========================= -->
+<div class="modal-overlay" id="modalPending">
+  <div class="modal">
+    <div class="modal-head">
+      <h3>❌ 비정상 상태 — PENDING</h3>
+      <button class="modal-close" onclick="closeModal('modalPending')">×</button>
+    </div>
+    <div class="modal-body">
+      <p style="font-size:13px; color:#333; margin-bottom:12px;"><b>retrieveBooking 응답: PENDING</b></p>
+      <p style="font-size:12px; color:#555;">TMG 측 상태가 비정상으로 멈춰있습니다. (시한 만료 직전 처리 누락 등)</p>
+      <div style="background:#ffebee; border:1px solid #ffcdd2; border-radius:8px; padding:12px 14px; font-size:12px; margin-top:12px;">
+        <b>처리 가이드</b><br>
+        ① <b>실패로 처리</b> (PENDING은 실패 케이스로 분류)<br>
+        ② 운영팀 자동 알림 발송됨<br>
+        ③ <b>재예약 필요</b> — [재예약 시도] 또는 대체 숙소 조회
+      </div>
+    </div>
+    <div class="modal-foot">
+      <button class="btn btn-outline" onclick="closeModal('modalPending')">닫기</button>
+      <button class="btn btn-danger" onclick="cancelOnlyConfirm()">예약 취소·환불</button>
+      <button class="btn btn-primary" onclick="closeModal('modalPending'); retryBooking();">🔄 재예약 시도</button>
+    </div>
+  </div>
+</div>
+
+<!-- ========================= 모달: 시한 초과 ========================= -->
+<div class="modal-overlay" id="modalTimeout">
+  <div class="modal">
+    <div class="modal-head">
+      <h3>⏰ 홀드 시한 초과 — confirmBefore 만료</h3>
+      <button class="modal-close" onclick="closeModal('modalTimeout')">×</button>
+    </div>
+    <div class="modal-body">
+      <p style="font-size:13px; color:#333; margin-bottom:12px;"><b>TMG가 홀드를 자동 해제했습니다.</b></p>
+      <p style="font-size:12px; color:#555;">계약 요금 12h / 다이나믹 ~30분 시한 내 confirmBooking 호출 못 함.</p>
+      <div style="background:#fff8e1; border:1px solid #ffe082; border-radius:8px; padding:12px 14px; font-size:12px; margin-top:12px;">
+        <b>처리 가이드</b><br>
+        ① 어드민 [예약 만료] 상태 표시<br>
+        ② <b>[재예약 시도] 자동 호출</b> — checkAvailability → reserveBooking → confirmBooking 일괄<br>
+        ③ 재고/가격 변동 시 운영팀 수동 처리
+      </div>
+    </div>
+    <div class="modal-foot">
+      <button class="btn btn-outline" onclick="closeModal('modalTimeout')">닫기</button>
+      <button class="btn btn-danger" onclick="cancelOnlyConfirm()">예약 취소·환불</button>
+      <button class="btn btn-primary" onclick="closeModal('modalTimeout'); retryBooking();">🔄 재예약 시도</button>
+    </div>
+  </div>
+</div>
+
+<!-- ========================= 모달: errorCode ========================= -->
+<div class="modal-overlay" id="modalError">
+  <div class="modal">
+    <div class="modal-head">
+      <h3>🚨 API 오류 — errorCode 응답</h3>
+      <button class="modal-close" onclick="closeModal('modalError')">×</button>
+    </div>
+    <div class="modal-body">
+      <p style="font-size:13px; color:#333; margin-bottom:12px;"><b>TMG API에서 errorCode를 반환했습니다.</b> (HTTP 200이어도 errorCode 필드 포함)</p>
+      <div style="background:#fafafa; border:1px solid #e0e0e0; border-radius:8px; padding:12px 14px; font-size:12px; margin-bottom:12px; font-family:'SF Mono', monospace;">
+        <div>errorCode: <b style="color:#d32f2f;">TMG_ERR_5023</b></div>
+        <div>message: "Rate not available — possibly expired"</div>
+        <div>step: reserveBooking</div>
+        <div>at: 2026-06-02 17:42:08</div>
+        <div>bookingCode: <i>(미발급)</i></div>
+        <div>clientReference: TS-20260602-0042</div>
+      </div>
+      <div style="background:#e3f2fd; border:1px solid #90caf9; border-radius:8px; padding:12px 14px; font-size:12px;">
+        <b>🔔 개발자 슬랙 자동 발송됨</b><br>
+        채널: <code>#dev-pb-tmg</code><br>
+        내용: 위 오류 정보 + 어드민 사용자 + 예약 상세 링크<br>
+        <span style="color:#1565c0;">→ 개발자가 확인 후 회신 예정</span>
+      </div>
+    </div>
+    <div class="modal-foot">
+      <button class="btn btn-outline" onclick="closeModal('modalError')">닫기 (현재 상태 유지)</button>
     </div>
   </div>
 </div>
@@ -446,6 +594,33 @@
 <script>
 let recheckDone = false;
 let priceChanged = true; // 데모: 변동 있음 시나리오
+let scenario = 'success'; // success / unavail / canceled / pending / timeout / error
+
+function setScenario(s) {
+  scenario = s;
+  document.querySelectorAll('[id^="scn-"]').forEach(b => b.style.border = '1px solid #d0d0d0');
+  const colorMap = { success:'#2e7d32', unavail:'#d32f2f', canceled:'#d32f2f', pending:'#d32f2f', timeout:'#e65100', error:'#d32f2f' };
+  document.getElementById('scn-'+s).style.border = '2px solid ' + colorMap[s];
+  showToast('시나리오 변경: ' + s.toUpperCase(), 'warn');
+}
+function retryBooking() {
+  showToast('[재예약 시도] checkAvailability → reserveBooking → confirmBooking 일괄 재호출', 'warn');
+  setTimeout(() => {
+    showToast('재예약 성공 → CONFIRMED', 'success');
+    document.getElementById('bookingStatus').textContent = 'CONFIRMED (재예약)';
+    document.getElementById('bookingStatus').className = 'badge green';
+  }, 1500);
+}
+function cancelOnlyConfirm() {
+  // 모든 모달 닫기
+  ['modalUnavail','modalCanceled','modalPending','modalTimeout','modalCancelRoom'].forEach(id => closeModal(id));
+  showToast('cancelBooking 호출 → 환불 산정 진행', 'danger');
+  setTimeout(() => {
+    showToast('예약 취소·환불 완료 (재예약 X)', 'danger');
+    document.getElementById('bookingStatus').textContent = 'CANCELLED';
+    document.getElementById('bookingStatus').className = 'badge red';
+  }, 1500);
+}
 
 function showToast(msg, type='success') {
   const t = document.getElementById('toast');
@@ -476,7 +651,7 @@ function recheck() {
 }
 
 function placeBooking() {
-  if (priceChanged) {
+  if (priceChanged && scenario === 'success') {
     openModal('modalConfirmCustomer');
   } else {
     proceedBooking();
@@ -487,10 +662,37 @@ function proceedBooking() {
   closeModal('modalConfirmCustomer');
   showToast('예약 직전 checkAvailability 재검증 중...', 'success');
   setTimeout(() => {
-    showToast('reserveBooking → confirmBooking 자동 연쇄 완료. CONFIRMED', 'success');
-    document.getElementById('bookingStatus').textContent = 'CONFIRMED';
-    document.getElementById('bookingStatus').className = 'badge green';
-    document.getElementById('bookBtn').disabled = true;
+    if (scenario === 'success') {
+      showToast('reserveBooking → confirmBooking 자동 연쇄 완료. CONFIRMED', 'success');
+      document.getElementById('bookingStatus').textContent = 'CONFIRMED';
+      document.getElementById('bookingStatus').className = 'badge green';
+      document.getElementById('bookBtn').disabled = true;
+    } else if (scenario === 'unavail') {
+      showToast('❌ reserveBooking 응답: UNAVAILABLE', 'danger');
+      document.getElementById('bookingStatus').textContent = '예약 실패 (UNAVAILABLE)';
+      document.getElementById('bookingStatus').className = 'badge red';
+      openModal('modalUnavail');
+    } else if (scenario === 'canceled') {
+      showToast('❌ confirmBooking 응답: 호텔측 Canceled', 'danger');
+      document.getElementById('bookingStatus').textContent = '호텔측 거부 (Canceled)';
+      document.getElementById('bookingStatus').className = 'badge red';
+      openModal('modalCanceled');
+    } else if (scenario === 'pending') {
+      showToast('❌ retrieveBooking 응답: PENDING (실패 처리)', 'danger');
+      document.getElementById('bookingStatus').textContent = '비정상 (PENDING)';
+      document.getElementById('bookingStatus').className = 'badge red';
+      openModal('modalPending');
+    } else if (scenario === 'timeout') {
+      showToast('⏰ confirmBefore 시한 초과 — 홀드 자동 해제', 'warn');
+      document.getElementById('bookingStatus').textContent = '예약 만료';
+      document.getElementById('bookingStatus').className = 'badge orange';
+      openModal('modalTimeout');
+    } else if (scenario === 'error') {
+      showToast('🚨 errorCode 응답 — 개발자 슬랙 자동 발송', 'danger');
+      document.getElementById('bookingStatus').textContent = 'API 오류 (errorCode)';
+      document.getElementById('bookingStatus').className = 'badge red';
+      openModal('modalError');
+    }
   }, 1800);
 }
 
