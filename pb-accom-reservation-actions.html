@@ -1,0 +1,519 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<title>숙박권 예약 — 어드민 4기능 데모</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { font-family: -apple-system, 'Pretendard', sans-serif; background: #f5f6f8; color: #1a1a1a; font-size: 13px; line-height: 1.5; }
+  .header { background: #1a1a1a; color: #fff; padding: 14px 24px; display: flex; align-items: center; justify-content: space-between; }
+  .header h1 { font-size: 15px; font-weight: 700; }
+  .header .sub { font-size: 12px; color: #a0a0a0; }
+  .page { max-width: 1280px; margin: 0 auto; padding: 24px; }
+  .breadcrumb { font-size: 12px; color: #888; margin-bottom: 14px; }
+  .title-row { display: flex; align-items: baseline; gap: 12px; margin-bottom: 20px; }
+  .title-row h2 { font-size: 22px; font-weight: 800; }
+  .badge { padding: 3px 9px; border-radius: 12px; font-size: 11px; font-weight: 700; }
+  .badge.blue { background: #e3f2fd; color: #1565c0; }
+  .badge.yellow { background: #fff8e1; color: #e65100; }
+  .badge.green { background: #e8f5e9; color: #2e7d32; }
+  .badge.red { background: #ffeaea; color: #d32f2f; }
+  .badge.gray { background: #f0f0f0; color: #666; }
+
+  /* 상단 메타 */
+  .meta-card { background: #fff; border: 1px solid #e8e8e8; border-radius: 10px; padding: 16px 20px; margin-bottom: 16px; display: grid; grid-template-columns: repeat(5, 1fr); gap: 16px; }
+  .meta-card .m-item .label { font-size: 11px; color: #888; margin-bottom: 4px; }
+  .meta-card .m-item .value { font-size: 13px; font-weight: 600; }
+
+  /* 자원 카드 */
+  .section-head { display: flex; align-items: center; justify-content: space-between; margin: 16px 0 10px; }
+  .section-head h3 { font-size: 15px; font-weight: 700; }
+  .section-head .actions { display: flex; gap: 8px; }
+  .resource-card { background: #fff; border: 1.5px solid #d0e3ff; border-radius: 10px; margin-bottom: 14px; overflow: hidden; }
+  .rc-head { display: flex; align-items: center; justify-content: space-between; padding: 14px 18px; border-bottom: 1px solid #f0f0f0; }
+  .rc-head .rc-name { font-size: 14px; font-weight: 700; display: flex; align-items: center; gap: 8px; }
+  .rc-head .rc-name .ico { width: 28px; height: 28px; background: #f3e5f5; color: #6a1b9a; border-radius: 6px; display: inline-flex; align-items: center; justify-content: center; }
+  .rc-head .rc-status { display: flex; gap: 6px; }
+  .rc-body { padding: 14px 18px; display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  .rc-row { display: flex; justify-content: space-between; padding: 4px 0; font-size: 12px; }
+  .rc-row .l { color: #888; }
+  .rc-row .v { font-weight: 600; }
+  .rc-row .v.mono { font-family: 'SF Mono', Menlo, monospace; }
+  .rc-row .v.warn { color: #d32f2f; }
+  .rc-row .v.good { color: #2e7d32; }
+
+  .rc-actions { background: #fafbfd; border-top: 1px solid #f0f0f0; padding: 12px 18px; display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+  .rc-actions .ra-hint { font-size: 11px; color: #888; margin-left: auto; }
+
+  .btn { padding: 7px 14px; border-radius: 6px; font-size: 12px; font-weight: 600; cursor: pointer; border: 1px solid transparent; display: inline-flex; align-items: center; gap: 4px; font-family: inherit; }
+  .btn-primary { background: #1a1a1a; color: #fff; }
+  .btn-primary:hover { background: #333; }
+  .btn-primary:disabled { background: #ccc; color: #fff; cursor: not-allowed; }
+  .btn-outline { background: #fff; color: #333; border-color: #d0d0d0; }
+  .btn-outline:hover { background: #f5f5f5; }
+  .btn-blue { background: #e3f2fd; color: #1565c0; border-color: #bbdefb; }
+  .btn-blue:hover { background: #bbdefb; }
+  .btn-orange { background: #fff3e0; color: #e65100; border-color: #ffcc80; }
+  .btn-orange:hover { background: #ffcc80; }
+  .btn-danger { background: #fff; color: #d32f2f; border-color: #ffcdd2; }
+  .btn-danger:hover { background: #ffebee; }
+
+  /* 변동 금액 인라인 카드 */
+  .price-diff { background: #fffde7; border: 1px solid #fff9c4; border-radius: 8px; padding: 10px 14px; margin: 0 18px 12px; font-size: 12px; display: none; align-items: center; gap: 12px; }
+  .price-diff.show { display: flex; }
+  .price-diff .pd-icon { font-size: 18px; }
+  .price-diff .pd-msg { flex: 1; }
+  .price-diff .pd-amount { font-family: 'SF Mono', monospace; font-weight: 700; color: #d32f2f; }
+  .price-diff .pd-old { text-decoration: line-through; color: #999; margin-right: 6px; }
+  .price-diff .pd-arrow { color: #999; margin: 0 4px; }
+
+  /* 모달 */
+  .modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 200; align-items: center; justify-content: center; }
+  .modal-overlay.show { display: flex; }
+  .modal { background: #fff; border-radius: 12px; width: 560px; max-height: 88vh; overflow-y: auto; }
+  .modal.lg { width: 880px; }
+  .modal-head { padding: 18px 22px; border-bottom: 1px solid #eee; display: flex; align-items: center; justify-content: space-between; }
+  .modal-head h3 { font-size: 16px; font-weight: 700; }
+  .modal-close { background: none; border: none; font-size: 20px; cursor: pointer; color: #888; }
+  .modal-body { padding: 20px 22px; }
+  .modal-foot { padding: 14px 22px; border-top: 1px solid #eee; display: flex; justify-content: flex-end; gap: 8px; }
+
+  /* 대체 숙소 조회 모달 */
+  .filter-tabs { display: flex; gap: 4px; margin-bottom: 14px; border-bottom: 1px solid #e8e8e8; }
+  .filter-tab { padding: 9px 16px; font-size: 12px; font-weight: 600; color: #888; cursor: pointer; border-bottom: 2px solid transparent; margin-bottom: -1px; }
+  .filter-tab.active { color: #1a1a1a; border-bottom-color: #1a1a1a; }
+  .filter-tab .cnt { font-size: 10px; color: #666; margin-left: 4px; }
+  .alt-card { display: grid; grid-template-columns: 60px 1fr 110px 90px; gap: 12px; padding: 12px 14px; border: 1px solid #eee; border-radius: 8px; margin-bottom: 8px; align-items: center; transition: border 0.15s; cursor: pointer; }
+  .alt-card:hover { border-color: #1a1a1a; }
+  .alt-card.selected { border-color: #1565c0; background: #f5f9ff; }
+  .alt-card .alt-rank { display: flex; align-items: center; justify-content: center; width: 50px; height: 50px; border-radius: 8px; font-size: 12px; font-weight: 700; }
+  .alt-card.similar .alt-rank { background: #fffde7; color: #f57f17; }
+  .alt-card.cheaper .alt-rank { background: #e8f5e9; color: #2e7d32; }
+  .alt-card.expensive .alt-rank { background: #ffebee; color: #c62828; }
+  .alt-info .alt-name { font-weight: 700; font-size: 13px; margin-bottom: 2px; }
+  .alt-info .alt-sub { font-size: 11px; color: #888; }
+  .alt-price { text-align: right; font-family: 'SF Mono', monospace; font-weight: 700; font-size: 13px; }
+  .alt-price .delta { font-size: 11px; margin-top: 2px; }
+  .alt-price .delta.minus { color: #2e7d32; }
+  .alt-price .delta.plus { color: #d32f2f; }
+  .alt-price .delta.zero { color: #888; }
+  .alt-stock { text-align: center; font-size: 11px; font-weight: 700; padding: 3px 8px; border-radius: 10px; }
+  .alt-stock.ok { background: #e8f5e9; color: #2e7d32; }
+  .alt-stock.low { background: #fff3e0; color: #e65100; }
+  .alt-stock.none { background: #f5f5f5; color: #999; }
+
+  /* 객실 추가/취소 모달 */
+  .room-row { display: flex; align-items: center; padding: 10px 0; border-bottom: 1px solid #f0f0f0; gap: 12px; }
+  .room-row:last-child { border-bottom: none; }
+  .room-row .r-name { flex: 1; font-weight: 600; font-size: 12px; }
+  .room-row .r-meta { font-size: 11px; color: #888; }
+  .room-row .r-price { font-family: monospace; font-weight: 700; font-size: 12px; min-width: 110px; text-align: right; }
+
+  /* 흐름 패널 */
+  .flow-callout { background: #e3f2fd; border: 1px solid #90caf9; border-radius: 8px; padding: 14px 16px; margin: 12px 0; font-size: 12px; color: #0d47a1; }
+  .flow-callout b { display: block; margin-bottom: 6px; }
+
+  /* 토스트 */
+  .toast { position: fixed; bottom: 24px; right: 24px; background: #1a1a1a; color: #fff; padding: 12px 18px; border-radius: 8px; font-size: 13px; z-index: 300; transform: translateY(10px); opacity: 0; transition: all 0.2s; max-width: 360px; }
+  .toast.show { transform: translateY(0); opacity: 1; }
+  .toast.success { background: #2e7d32; }
+  .toast.warn { background: #e65100; }
+  .toast.danger { background: #d32f2f; }
+
+  /* 기능 안내 */
+  .feature-guide { background: #fff; border-radius: 10px; border: 1px solid #e8e8e8; padding: 16px 20px; margin-bottom: 16px; }
+  .feature-guide h4 { font-size: 13px; font-weight: 700; margin-bottom: 10px; color: #1a1a1a; }
+  .feature-guide ol { padding-left: 22px; font-size: 12px; color: #555; }
+  .feature-guide ol li { margin: 4px 0; }
+  .feature-guide ol li b { color: #1a1a1a; }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <h1>🎫 어드민 — 예약 상세</h1>
+  <div class="sub">PB 숙박권 예약 처리 / 4기능 데모</div>
+</div>
+
+<div class="page">
+  <div class="breadcrumb">예약 관리 / PB 예약 / TS-20260602-0042</div>
+
+  <div class="title-row">
+    <h2>예약 상세</h2>
+    <span class="badge yellow">예약 접수 정지 — 수동 처리 필요</span>
+    <span class="badge gray">CASE 3 · 수동 항공 × 인디 숙박</span>
+  </div>
+
+  <div class="feature-guide">
+    <h4>📌 데모 사용법</h4>
+    <ol>
+      <li><b>금액/재고 재조회</b>를 먼저 누르면 → 변동 발견 → 숙박권 카드에 변동 금액 표시 + [예약 넣기] 활성화</li>
+      <li><b>예약 넣기</b>는 재조회 후에만 활성. 변동이 있으면 "고객 안내·입금 확인" 모달 → [확인] → 진행</li>
+      <li><b>대체 숙소 조회</b>는 언제든 클릭 가능 (성급 탭 + 비슷→저렴→비쌈 정렬)</li>
+      <li><b>객실 추가/취소</b>는 객실 카드 액션. 부분 취소는 전체 cancelBooking + 재예약 (위약금 안내 모달)</li>
+    </ol>
+  </div>
+
+  <!-- 메타 -->
+  <div class="meta-card">
+    <div class="m-item"><div class="label">예약자</div><div class="value">김서현</div></div>
+    <div class="m-item"><div class="label">여행지</div><div class="value">다낭, 베트남</div></div>
+    <div class="m-item"><div class="label">일정</div><div class="value">2026-08-12 ~ 08-16 (4박)</div></div>
+    <div class="m-item"><div class="label">인원</div><div class="value">성인 2 · 아동 1</div></div>
+    <div class="m-item"><div class="label">결제 금액</div><div class="value mono">₩1,240,000</div></div>
+  </div>
+
+  <!-- 자원 섹션 -->
+  <div class="section-head">
+    <h3>🏨 숙박 자원 — TMG 인디비</h3>
+    <div class="actions">
+      <button class="btn btn-orange" onclick="openAltSearch()">🔍 대체 숙소 조회</button>
+    </div>
+  </div>
+
+  <!-- 숙박권 카드 -->
+  <div class="resource-card" id="hotelCard">
+    <div class="rc-head">
+      <div class="rc-name">
+        <span class="ico">🏨</span>
+        <span>Phuket Marriott Resort, Merlin Beach</span>
+        <span class="badge blue">TMG 인디비</span>
+      </div>
+      <div class="rc-status">
+        <span class="badge yellow" id="bookingStatus">예약 대기 (재조회 전)</span>
+      </div>
+    </div>
+
+    <div class="rc-body">
+      <div>
+        <div class="rc-row"><span class="l">객실</span><span class="v">Deluxe Pool Access (1개)</span></div>
+        <div class="rc-row"><span class="l">체크인</span><span class="v">2026-08-12</span></div>
+        <div class="rc-row"><span class="l">체크아웃</span><span class="v">2026-08-16</span></div>
+        <div class="rc-row"><span class="l">조식</span><span class="v">포함 (BB)</span></div>
+      </div>
+      <div>
+        <div class="rc-row"><span class="l">결제 시 가격</span><span class="v mono" id="originalPrice">₩1,240,000</span></div>
+        <div class="rc-row"><span class="l">현재 가격</span><span class="v mono" id="currentPrice">— (미조회)</span></div>
+        <div class="rc-row"><span class="l">rateType</span><span class="v">ALM-DYNAMIC</span></div>
+        <div class="rc-row"><span class="l">TMG 예약 ID</span><span class="v mono">—</span></div>
+      </div>
+    </div>
+
+    <!-- 변동 금액 인라인 표시 (재조회 후 노출) -->
+    <div class="price-diff" id="priceDiff">
+      <span class="pd-icon">⚠️</span>
+      <div class="pd-msg">
+        <b>가격 변동 감지</b> — checkAvailability 재조회 결과
+      </div>
+      <div class="pd-amount">
+        <span class="pd-old">₩1,240,000</span>
+        <span class="pd-arrow">→</span>
+        ₩1,294,000
+        <div style="font-size:10px; color:#666; font-weight:400; margin-top:2px;">차액 <b>+54,000원</b></div>
+      </div>
+    </div>
+
+    <div class="rc-actions">
+      <button class="btn btn-blue" onclick="recheck()">🔄 금액/재고 재조회</button>
+      <button class="btn btn-primary" id="bookBtn" onclick="placeBooking()" disabled>📝 예약 넣기</button>
+      <button class="btn btn-outline" onclick="openAddRoom()">＋ 객실 추가</button>
+      <button class="btn btn-danger" onclick="openCancelRoom()">─ 객실 취소</button>
+      <span class="ra-hint" id="actionHint">먼저 [재조회]로 가격·재고 확인하세요</span>
+    </div>
+  </div>
+
+  <!-- 흐름 안내 -->
+  <div class="flow-callout">
+    <b>📋 처리 흐름 (CASE 3: 수동 항공 × 인디 숙박)</b>
+    1. 항공사 수기 조회(GDS)로 가능 회신 받음 →
+    2. <b>숙박 [재조회]</b>로 금액·재고 확인 →
+    3. 변동 있으면 고객 안내 →
+    4. <b>[예약 넣기]</b>로 reserve→confirm 자동 연쇄 →
+    5. 고객 컨택으로 확정 안내
+  </div>
+
+</div>
+
+<!-- ========================= 모달 1: 재조회 결과 모달 (가격 변동 없을 때 안내) ========================= -->
+<div class="modal-overlay" id="modalRecheckOK">
+  <div class="modal">
+    <div class="modal-head">
+      <h3>✅ 재조회 완료 — 변동 없음</h3>
+      <button class="modal-close" onclick="closeModal('modalRecheckOK')">×</button>
+    </div>
+    <div class="modal-body">
+      <p style="font-size:13px; color:#333;">checkAvailability 결과, 결제 시점과 동일한 가격·재고입니다.</p>
+      <p style="margin-top:10px; font-size:12px; color:#666;">바로 <b>[예약 넣기]</b> 진행 가능합니다.</p>
+    </div>
+    <div class="modal-foot">
+      <button class="btn btn-primary" onclick="closeModal('modalRecheckOK')">확인</button>
+    </div>
+  </div>
+</div>
+
+<!-- ========================= 모달 2: 예약 넣기 — 고객 입금 확인 모달 (변동 있을 때) ========================= -->
+<div class="modal-overlay" id="modalConfirmCustomer">
+  <div class="modal">
+    <div class="modal-head">
+      <h3>💬 고객 안내·입금 확인</h3>
+      <button class="modal-close" onclick="closeModal('modalConfirmCustomer')">×</button>
+    </div>
+    <div class="modal-body">
+      <p style="font-size:13px; margin-bottom:14px;">금액이 변동되었습니다. 고객님께 안내 및 추가 입금 받으셨나요?</p>
+      <div style="background:#fafafa; border-radius:8px; padding:12px 14px; font-size:12px;">
+        <div style="display:flex; justify-content:space-between; margin-bottom:4px;"><span>결제 시</span><span class="mono">₩1,240,000</span></div>
+        <div style="display:flex; justify-content:space-between; margin-bottom:4px;"><span>현재 가격</span><span class="mono"><b>₩1,294,000</b></span></div>
+        <div style="display:flex; justify-content:space-between; padding-top:8px; border-top:1px dashed #ddd; color:#d32f2f; font-weight:700;"><span>추가 입금 필요</span><span class="mono">+54,000원</span></div>
+      </div>
+      <label style="display:flex; align-items:center; gap:8px; margin-top:14px; font-size:12px;">
+        <input type="checkbox" id="confirmCheck">
+        고객에게 안내하고 추가 입금을 확인했습니다
+      </label>
+    </div>
+    <div class="modal-foot">
+      <button class="btn btn-outline" onclick="closeModal('modalConfirmCustomer')">취소</button>
+      <button class="btn btn-primary" onclick="proceedBooking()">확인 — 예약 진행</button>
+    </div>
+  </div>
+</div>
+
+<!-- ========================= 모달 3: 대체 숙소 조회 ========================= -->
+<div class="modal-overlay" id="modalAltSearch">
+  <div class="modal lg">
+    <div class="modal-head">
+      <h3>🔍 대체 숙소 조회</h3>
+      <button class="modal-close" onclick="closeModal('modalAltSearch')">×</button>
+    </div>
+    <div class="modal-body">
+      <div style="background:#f5f9ff; border:1px solid #bbdefb; border-radius:8px; padding:10px 14px; font-size:12px; margin-bottom:14px;">
+        <b>📍 자동 로드된 조건</b><br>
+        다낭, 베트남 · 2026-08-12 ~ 08-16 · 성인 2 + 아동 1 · 1객실<br>
+        <span style="color:#888;">트립스토어 PB 숙박권 풀에서 동일 여행지·기간 검색 (외부 API 호출 X)</span>
+      </div>
+
+      <div class="filter-tabs">
+        <div class="filter-tab active">전체 <span class="cnt">(14)</span></div>
+        <div class="filter-tab">5성 <span class="cnt">(3)</span></div>
+        <div class="filter-tab">4성 <span class="cnt">(6)</span></div>
+        <div class="filter-tab">3성 <span class="cnt">(4)</span></div>
+        <div class="filter-tab">기타 <span class="cnt">(1)</span></div>
+      </div>
+
+      <div style="font-size:11px; color:#666; margin-bottom:8px;">정렬: 🟡 비슷 → 🟢 더 저렴 → 🔴 더 비쌈</div>
+
+      <!-- 비슷한 가격대 -->
+      <div class="alt-card similar">
+        <div class="alt-rank">🟡 비슷</div>
+        <div class="alt-info">
+          <div class="alt-name">Hyatt Regency Danang Resort</div>
+          <div class="alt-sub">5성 · 미케비치 · 조식 포함 · ★ 4.5 (1,240)</div>
+        </div>
+        <div class="alt-price">
+          ₩1,260,000
+          <div class="delta zero">차액 +20,000</div>
+        </div>
+        <div class="alt-stock ok">재고 OK</div>
+      </div>
+      <div class="alt-card similar">
+        <div class="alt-rank">🟡 비슷</div>
+        <div class="alt-info">
+          <div class="alt-name">Sheraton Grand Danang Resort</div>
+          <div class="alt-sub">5성 · 논느억비치 · 조식 포함 · ★ 4.6 (2,180)</div>
+        </div>
+        <div class="alt-price">
+          ₩1,228,000
+          <div class="delta zero">차액 -12,000</div>
+        </div>
+        <div class="alt-stock ok">재고 OK</div>
+      </div>
+
+      <!-- 더 저렴 -->
+      <div class="alt-card cheaper">
+        <div class="alt-rank">🟢 저렴</div>
+        <div class="alt-info">
+          <div class="alt-name">Furama Resort Danang</div>
+          <div class="alt-sub">5성 · 미케비치 · 조식 포함 · ★ 4.3 (980)</div>
+        </div>
+        <div class="alt-price">
+          ₩1,089,000
+          <div class="delta minus">차액 -151,000</div>
+        </div>
+        <div class="alt-stock low">재고 1</div>
+      </div>
+      <div class="alt-card cheaper">
+        <div class="alt-rank">🟢 저렴</div>
+        <div class="alt-info">
+          <div class="alt-name">Pullman Danang Beach Resort</div>
+          <div class="alt-sub">5성 · 미케비치 · 조식 포함 · ★ 4.4 (1,520)</div>
+        </div>
+        <div class="alt-price">
+          ₩980,000
+          <div class="delta minus">차액 -260,000</div>
+        </div>
+        <div class="alt-stock ok">재고 OK</div>
+      </div>
+
+      <!-- 더 비쌈 -->
+      <div class="alt-card expensive">
+        <div class="alt-rank">🔴 비쌈</div>
+        <div class="alt-info">
+          <div class="alt-name">InterContinental Danang Sun Peninsula Resort</div>
+          <div class="alt-sub">5성 · 손짜반도 · 조식 포함 · ★ 4.8 (3,420)</div>
+        </div>
+        <div class="alt-price">
+          ₩2,180,000
+          <div class="delta plus">차액 +940,000</div>
+        </div>
+        <div class="alt-stock ok">재고 OK</div>
+      </div>
+    </div>
+    <div class="modal-foot">
+      <button class="btn btn-outline" onclick="closeModal('modalAltSearch')">닫기</button>
+      <button class="btn btn-primary" onclick="selectAlt()">선택 — 재조회·예약 흐름으로</button>
+    </div>
+  </div>
+</div>
+
+<!-- ========================= 모달 4: 객실 추가 ========================= -->
+<div class="modal-overlay" id="modalAddRoom">
+  <div class="modal">
+    <div class="modal-head">
+      <h3>＋ 객실 추가</h3>
+      <button class="modal-close" onclick="closeModal('modalAddRoom')">×</button>
+    </div>
+    <div class="modal-body">
+      <p style="font-size:12px; color:#666; margin-bottom:12px;">동일 호텔·동일 기간에 추가할 객실을 선택하세요. 새 reserveBooking이 추가로 호출되며 별도 bookingCode로 관리됩니다.</p>
+      <div class="room-row">
+        <input type="radio" name="addRoom" id="ar1" checked>
+        <label for="ar1" class="r-name">Deluxe Pool Access<div class="r-meta">2인 기준 · 조식 포함</div></label>
+        <div class="r-price">+₩1,240,000</div>
+      </div>
+      <div class="room-row">
+        <input type="radio" name="addRoom" id="ar2">
+        <label for="ar2" class="r-name">Family Suite<div class="r-meta">4인 기준 · 조식 포함</div></label>
+        <div class="r-price">+₩1,860,000</div>
+      </div>
+      <div class="room-row">
+        <input type="radio" name="addRoom" id="ar3">
+        <label for="ar3" class="r-name">Premium Sea View<div class="r-meta">2인 기준 · 조식 포함</div></label>
+        <div class="r-price">+₩1,420,000</div>
+      </div>
+    </div>
+    <div class="modal-foot">
+      <button class="btn btn-outline" onclick="closeModal('modalAddRoom')">취소</button>
+      <button class="btn btn-primary" onclick="addRoomConfirm()">추가 예약 + 차액 결제</button>
+    </div>
+  </div>
+</div>
+
+<!-- ========================= 모달 5: 객실 취소 (전체 취소 + 재예약 안내) ========================= -->
+<div class="modal-overlay" id="modalCancelRoom">
+  <div class="modal">
+    <div class="modal-head">
+      <h3>⚠️ 객실 부분 취소</h3>
+      <button class="modal-close" onclick="closeModal('modalCancelRoom')">×</button>
+    </div>
+    <div class="modal-body">
+      <div style="background:#fff8e1; border:1px solid #ffe082; border-radius:8px; padding:12px 14px; font-size:12px; color:#6d2c00; margin-bottom:14px;">
+        <b>⚠️ TMG API 한계 안내</b><br>
+        cancelBooking은 <b>bookingCode 단위 전체 취소</b>만 가능합니다.<br>
+        따라서 <b>전체 예약 취소 → 남은 객실로 재예약</b> 프로세스로 진행됩니다.
+      </div>
+      <div style="font-size:12px;">
+        <div style="display:flex; justify-content:space-between; padding:6px 0;"><span>전체 cancelBooking 위약금</span><span class="mono" style="color:#d32f2f; font-weight:700;">−248,000원</span></div>
+        <div style="display:flex; justify-content:space-between; padding:6px 0;"><span>재예약 (남은 객실)</span><span class="mono">신규 bookingCode 발급</span></div>
+        <div style="display:flex; justify-content:space-between; padding:6px 0;"><span>고객 환불</span><span class="mono">고객 약관 기준 별도 산정</span></div>
+      </div>
+      <label style="display:flex; align-items:center; gap:8px; margin-top:14px; font-size:12px;">
+        <input type="checkbox">
+        고객에게 안내·동의 받았습니다 (전체 위약금 + bookingCode 변경)
+      </label>
+    </div>
+    <div class="modal-foot">
+      <button class="btn btn-outline" onclick="closeModal('modalCancelRoom')">취소</button>
+      <button class="btn btn-danger" onclick="cancelRoomConfirm()">전체 취소 + 재예약</button>
+    </div>
+  </div>
+</div>
+
+<!-- 토스트 -->
+<div class="toast" id="toast"></div>
+
+<script>
+let recheckDone = false;
+let priceChanged = true; // 데모: 변동 있음 시나리오
+
+function showToast(msg, type='success') {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.className = 'toast show ' + type;
+  setTimeout(() => t.className = 'toast', 2800);
+}
+function openModal(id) { document.getElementById(id).classList.add('show'); }
+function closeModal(id) { document.getElementById(id).classList.remove('show'); }
+
+function recheck() {
+  recheckDone = true;
+  if (priceChanged) {
+    document.getElementById('currentPrice').textContent = '₩1,294,000';
+    document.getElementById('currentPrice').classList.add('warn');
+    document.getElementById('priceDiff').classList.add('show');
+    document.getElementById('bookBtn').disabled = false;
+    document.getElementById('actionHint').textContent = '⚠️ 변동 +54,000원 — [예약 넣기] 클릭 시 고객 확인 모달';
+    showToast('재조회 완료 — 가격 변동 발견 (+54,000원)', 'warn');
+  } else {
+    document.getElementById('currentPrice').textContent = '₩1,240,000';
+    document.getElementById('currentPrice').classList.add('good');
+    document.getElementById('bookBtn').disabled = false;
+    document.getElementById('actionHint').textContent = '변동 없음 — [예약 넣기] 가능';
+    openModal('modalRecheckOK');
+    showToast('재조회 완료 — 변동 없음', 'success');
+  }
+}
+
+function placeBooking() {
+  if (priceChanged) {
+    openModal('modalConfirmCustomer');
+  } else {
+    proceedBooking();
+  }
+}
+
+function proceedBooking() {
+  closeModal('modalConfirmCustomer');
+  showToast('예약 직전 checkAvailability 재검증 중...', 'success');
+  setTimeout(() => {
+    showToast('reserveBooking → confirmBooking 자동 연쇄 완료. CONFIRMED', 'success');
+    document.getElementById('bookingStatus').textContent = 'CONFIRMED';
+    document.getElementById('bookingStatus').className = 'badge green';
+    document.getElementById('bookBtn').disabled = true;
+  }, 1800);
+}
+
+function openAltSearch() { openModal('modalAltSearch'); }
+function selectAlt() {
+  closeModal('modalAltSearch');
+  showToast('대체 숙소 선택 — 재조회·예약 흐름으로 전환됩니다', 'success');
+}
+function openAddRoom() { openModal('modalAddRoom'); }
+function addRoomConfirm() {
+  closeModal('modalAddRoom');
+  showToast('추가 reserveBooking 호출 → confirmBooking 완료. 신규 bookingCode 발급', 'success');
+}
+function openCancelRoom() { openModal('modalCancelRoom'); }
+function cancelRoomConfirm() {
+  closeModal('modalCancelRoom');
+  showToast('전체 cancelBooking → 남은 객실 reserveBooking 재호출 진행', 'danger');
+}
+
+// 탭 전환
+document.querySelectorAll('.filter-tab').forEach(t => {
+  t.addEventListener('click', () => {
+    document.querySelectorAll('.filter-tab').forEach(x => x.classList.remove('active'));
+    t.classList.add('active');
+  });
+});
+</script>
+
+</body>
+</html>
