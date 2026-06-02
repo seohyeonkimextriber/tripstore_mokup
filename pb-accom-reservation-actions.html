@@ -166,12 +166,13 @@
       <span style="font-size:11px;color:#666;font-weight:400;">선택 후 [예약 넣기] 클릭 → 해당 케이스 결과 표시</span>
     </div>
     <div style="display:flex;gap:6px;flex-wrap:wrap;">
-      <button class="btn btn-outline" id="scn-success" onclick="setScenario('success')" style="border:2px solid #2e7d32;">✅ 성공 (기본)</button>
-      <button class="btn btn-outline" id="scn-unavail" onclick="setScenario('unavail')">❌ UNAVAILABLE</button>
-      <button class="btn btn-outline" id="scn-canceled" onclick="setScenario('canceled')">❌ 호텔측 Canceled</button>
-      <button class="btn btn-outline" id="scn-pending" onclick="setScenario('pending')">❌ PENDING</button>
-      <button class="btn btn-outline" id="scn-timeout" onclick="setScenario('timeout')">⏰ 시한 초과</button>
-      <button class="btn btn-outline" id="scn-error" onclick="setScenario('error')">🚨 errorCode</button>
+      <button class="btn btn-outline" id="scn-success" onclick="setScenario('success')" style="border:2px solid #2e7d32;">✅ 성공</button>
+      <button class="btn btn-outline" id="scn-fail" onclick="setScenario('fail')">❌ 실패</button>
+      <button class="btn btn-outline" id="scn-error" onclick="setScenario('error')">🚨 에러 (errorCode)</button>
+    </div>
+    <div style="font-size:11px; color:#666; margin-top:8px; line-height:1.6;">
+      <b>✅ 성공</b> = RESERVED → CONFIRMED 자동 연쇄 / <b>❌ 실패</b> = 재검증 불일치 · UNAVAILABLE · 호텔측 Canceled · PENDING 모두 통합 (사유별 안내) / <b>🚨 에러</b> = errorCode 응답 → 개발자 슬랙 자동 발송<br>
+      ⚠️ 시한 초과는 시나리오에서 제외 — checkAvailability 조회 후 바로 예약하는 흐름이라 시한 발생 안 함. 재검증 시 금액 불일치만 중간에 멈춤 (실패 케이스).
     </div>
   </div>
 
@@ -225,7 +226,6 @@
         <div class="rc-row"><span class="l">현재 가격</span><span class="v mono" id="currentPrice">— (미조회)</span></div>
         <div class="rc-row"><span class="l">추가 요금 (supplementRates)</span><span class="v mono">+₩45,000 (조식 추가)</span></div>
         <div class="rc-row"><span class="l">TMG 예약 ID (bookingCode)</span><span class="v mono" id="bookingCode">—</span></div>
-        <div class="rc-row"><span class="l">confirmBefore</span><span class="v mono" id="confirmBefore">—</span></div>
         <div class="rc-row"><span class="l">취소 정책 (cancellationPolicies)</span><span class="v" id="cancellationPolicies">—</span></div>
         <div class="rc-row" id="cancelInfoRow" style="display:none;"><span class="l">취소 위약금 (cancelFees)</span><span class="v mono warn" id="cancelFees">—</span></div>
         <div class="rc-row" id="cancelledAtRow" style="display:none;"><span class="l">취소 시각 (cancelledAt)</span><span class="v mono" id="cancelledAt">—</span></div>
@@ -477,17 +477,22 @@
 <div class="modal-overlay" id="modalUnavail">
   <div class="modal">
     <div class="modal-head">
-      <h3>❌ TMG 가용 불가 — UNAVAILABLE</h3>
+      <h3>❌ 예약 실패</h3>
       <button class="modal-close" onclick="closeModal('modalUnavail')">×</button>
     </div>
     <div class="modal-body">
-      <p style="font-size:13px; color:#333; margin-bottom:12px;"><b>reserveBooking 응답: UNAVAILABLE</b></p>
-      <p style="font-size:12px; color:#555;">TMG측에서 해당 객실 예약이 불가합니다. (재고 사라짐 / 호텔측 차단 / 기타)</p>
+      <p style="font-size:13px; color:#333; margin-bottom:12px;"><b>예약이 완료되지 않았습니다.</b> 아래 사유 중 하나에 해당:</p>
+      <ul style="font-size:12px; color:#555; padding-left:18px; line-height:1.7;">
+        <li><b>재검증 불일치</b> — 예약 직전 checkAvailability 결과가 최근 재조회 금액과 다름</li>
+        <li><b>UNAVAILABLE</b> — reserveBooking 단계에서 TMG 가용 불가</li>
+        <li><b>호텔측 Canceled</b> — confirmBooking 단계에서 호텔이 거부</li>
+        <li><b>PENDING</b> — retrieveBooking 비정상 상태 (실패로 처리)</li>
+      </ul>
       <div style="background:#ffebee; border:1px solid #ffcdd2; border-radius:8px; padding:12px 14px; font-size:12px; margin-top:12px;">
         <b>처리 가이드</b><br>
         ① 운영팀 자동 알림 발송됨<br>
-        ② <b>대체 숙소 조회</b>로 다른 옵션 검색<br>
-        ③ 고객에게 안내 → 동의 시 대체 자원으로 예약
+        ② <b>대체 숙소 조회</b>로 다른 옵션 검색 또는 <b>예약 취소·환불</b><br>
+        ③ 재검증 불일치 케이스는 <b>금액/재고 재조회</b>부터 다시
       </div>
     </div>
     <div class="modal-foot">
@@ -614,18 +619,17 @@ let scenario = 'success'; // success / unavail / canceled / pending / timeout / 
 function setScenario(s) {
   scenario = s;
   document.querySelectorAll('[id^="scn-"]').forEach(b => b.style.border = '1px solid #d0d0d0');
-  const colorMap = { success:'#2e7d32', unavail:'#d32f2f', canceled:'#d32f2f', pending:'#d32f2f', timeout:'#e65100', error:'#d32f2f' };
+  const colorMap = { success:'#2e7d32', fail:'#d32f2f', error:'#d32f2f' };
   document.getElementById('scn-'+s).style.border = '2px solid ' + colorMap[s];
   showToast('시나리오 변경: ' + s.toUpperCase(), 'warn');
 }
 function retryBooking() {
-  showToast('[재예약 시도] checkAvailability → reserveBooking → confirmBooking 일괄 재호출', 'warn');
+  showToast('재예약 진행 — checkAvailability → reserveBooking → confirmBooking 일괄 호출', 'warn');
   setTimeout(() => {
     showToast('재예약 성공 → CONFIRMED', 'success');
     document.getElementById('bookingStatus').textContent = 'CONFIRMED (재예약)';
     document.getElementById('bookingStatus').className = 'badge green';
     document.getElementById('bookingCode').textContent = 'TMG-BK-20260602-9123';
-    document.getElementById('confirmBefore').textContent = '— (확정 완료)';
     document.getElementById('cancellationPolicies').textContent = '체크인 7일 전: 무료 / 7일 이내: 50% / 24시간 이내: 100%';
   }, 1500);
 }
@@ -689,29 +693,13 @@ function proceedBooking() {
       document.getElementById('bookingStatus').textContent = 'CONFIRMED';
       document.getElementById('bookingStatus').className = 'badge green';
       document.getElementById('bookingCode').textContent = 'TMG-BK-20260602-7841';
-      document.getElementById('confirmBefore').textContent = '— (확정 완료)';
       document.getElementById('cancellationPolicies').textContent = '체크인 7일 전: 무료 / 7일 이내: 50% / 24시간 이내: 100%';
       document.getElementById('bookBtn').disabled = true;
-    } else if (scenario === 'unavail') {
-      showToast('❌ reserveBooking 응답: UNAVAILABLE', 'danger');
-      document.getElementById('bookingStatus').textContent = '예약 실패 (UNAVAILABLE)';
+    } else if (scenario === 'fail') {
+      showToast('❌ 예약 실패 — 사유별 안내 확인', 'danger');
+      document.getElementById('bookingStatus').textContent = '예약 실패';
       document.getElementById('bookingStatus').className = 'badge red';
       openModal('modalUnavail');
-    } else if (scenario === 'canceled') {
-      showToast('❌ confirmBooking 응답: 호텔측 Canceled', 'danger');
-      document.getElementById('bookingStatus').textContent = '호텔측 거부 (Canceled)';
-      document.getElementById('bookingStatus').className = 'badge red';
-      openModal('modalCanceled');
-    } else if (scenario === 'pending') {
-      showToast('❌ retrieveBooking 응답: PENDING (실패 처리)', 'danger');
-      document.getElementById('bookingStatus').textContent = '비정상 (PENDING)';
-      document.getElementById('bookingStatus').className = 'badge red';
-      openModal('modalPending');
-    } else if (scenario === 'timeout') {
-      showToast('⏰ confirmBefore 시한 초과 — 홀드 자동 해제', 'warn');
-      document.getElementById('bookingStatus').textContent = '예약 만료';
-      document.getElementById('bookingStatus').className = 'badge orange';
-      openModal('modalTimeout');
     } else if (scenario === 'error') {
       showToast('🚨 errorCode 응답 — 개발자 슬랙 자동 발송', 'danger');
       document.getElementById('bookingStatus').textContent = 'API 오류 (errorCode)';
