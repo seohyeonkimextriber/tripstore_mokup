@@ -38,9 +38,12 @@ body { font-family: 'Pretendard', 'Apple SD Gothic Neo', -apple-system, sans-ser
 .board-tab-count { font-size: 10.5px; padding: 1px 6px; border-radius: 10px; background: rgba(0,0,0,0.05); color: rgba(0,0,0,0.5); font-weight: 700; }
 .board-tab.active .board-tab-count { background: #1677ff; color: #fff; }
 .board-tab-sep { flex-basis: 100%; height: 1px; background: #f0f0f0; margin: 6px 0; }
-.board-tab-group { font-size: 10px; font-weight: 700; color: rgba(0,0,0,0.32); letter-spacing: 0.4px; text-transform: uppercase; padding: 0 8px 0 4px; white-space: nowrap; }
+.board-tab-group { font-size: 12px; font-weight: 700; padding: 5px 12px; border-radius: 14px; white-space: nowrap; display: inline-flex; align-items: center; gap: 5px; margin-right: 4px; border: 1px solid transparent; }
+.board-tab-group .info { font-size: 10px; opacity: 0.7; cursor: help; }
+.board-tab-group.g-stock  { background: #e6f4ff; color: #0958d9; border-color: #91caff; }
+.board-tab-group.g-base   { background: #f9f0ff; color: #531dab; border-color: #d3adf7; }
+.board-tab-group.g-common { background: #fffbe6; color: #874d00; border-color: #ffe58f; }
 .board-tab-admin { color: rgba(0,0,0,0.35); }
-.board-tab-admin .board-tab-count { background: #f9f0ff; color: #722ed1; }
 
 /* ===== LAYOUT (사이드바 제거, 단일 컬럼) ===== */
 .shell { display: block; min-height: calc(100vh - 88px); }
@@ -988,21 +991,21 @@ tbody tr:hover td { background: #fafafa; }
           <div class="page-desc">타겟 단위에만 등록 · 상품 단위 편집 금지. 상품 등록 시 Scope 매칭으로 자동 적용 (룰 기반 자동 연결 X)</div>
         </div>
         <div style="display:flex;gap:8px;align-items:center;">
-          <button class="btn btn-default btn-sm">⚙ 게시판 설정</button>
+          <button class="btn btn-default btn-sm" onclick="openList('all')">🔍 전체 보기</button>
           <button class="btn btn-primary" onclick="openEditor()">+ 콘텐츠 등록</button>
         </div>
       </div>
 
-      <!-- 12 게시판 sub-tab + 3그룹 (단위별 줄바꿈) -->
+      <!-- 12 게시판 sub-tab + 3그룹 (단위별 줄바꿈 + 컬러 칩) -->
       <div class="board-tabs">
-        <span class="board-tab-group" title="내가 직접 등록한 숙박권·항공권·투어 등 판매 단위에 들어가는 콘텐츠">📦 상품 정보 <span style="font-size:9px;opacity:0.6;">ⓘ</span></span>
+        <span class="board-tab-group g-stock" title="내가 직접 등록한 숙박권·항공권·투어 등 판매 단위에 들어가는 콘텐츠">📦 상품 정보 <span class="info">ⓘ</span></span>
         <button class="board-tab active" data-board="hotel_voucher" onclick="openList('hotel_voucher')">🏨 숙박권</button>
         <button class="board-tab" data-board="room_rate" onclick="openList('room_rate')">🛏 객실요금표</button>
         <button class="board-tab" data-board="flight_voucher" onclick="openList('flight_voucher')">✈️ 항공권</button>
         <button class="board-tab" data-board="tour" onclick="openList('tour')">🎫 투어·티켓</button>
         <button class="board-tab" data-board="insurance" onclick="openList('insurance')">🛡 보험</button>
         <span class="board-tab-sep"></span>
-        <span class="board-tab-group" title="여행지·숙소·항공사 등 카탈로그(마스터) 단위에 들어가는 공통 콘텐츠">🗂 기본 정보 <span style="font-size:9px;opacity:0.6;">ⓘ</span></span>
+        <span class="board-tab-group g-base" title="여행지·숙소·항공사 등 카탈로그(마스터) 단위에 들어가는 공통 콘텐츠">🗂 기본 정보 <span class="info">ⓘ</span></span>
         <button class="board-tab" data-board="accom" onclick="openList('accom')">🏠 숙소</button>
         <button class="board-tab" data-board="room" onclick="openList('room')">🛌 객실</button>
         <button class="board-tab" data-board="airline" onclick="openList('airline')">🛫 항공사</button>
@@ -1010,23 +1013,8 @@ tbody tr:hover td { background: #fafafa; }
         <button class="board-tab" data-board="place" onclick="openList('place')">📍 여행지</button>
         <button class="board-tab" data-board="spot" onclick="openList('spot')">🎯 스팟·체험</button>
         <span class="board-tab-sep"></span>
-        <span class="board-tab-group" title="회사 표준 — 모든 상품에 자동 적용되는 필수 공통 콘텐츠">🌟 필수 공통 <span style="font-size:9px;opacity:0.6;">ⓘ</span></span>
+        <span class="board-tab-group g-common" title="회사 표준 — 모든 상품에 자동 적용되는 필수 공통 콘텐츠">🌟 필수 공통 <span class="info">ⓘ</span></span>
         <button class="board-tab" data-board="org" onclick="openList('org')">🌟 필수공통</button>
-        <span class="board-tab-sep"></span>
-        <button class="board-tab board-tab-admin" data-board="all" onclick="openList('all')">🔍 전체</button>
-      </div>
-
-      <!-- 그룹 안내 (파트너스 친화) -->
-      <div style="display:flex;gap:10px;margin-bottom:10px;font-size:11.5px;">
-        <div style="flex:1;padding:8px 12px;background:#e6f4ff;border:1px solid #91caff;border-radius:6px;color:#0958d9;line-height:1.6;">
-          <strong>📦 상품 정보</strong> — 내가 직접 등록한 <strong>숙박권·항공권·투어·티켓</strong> 등 판매 단위
-        </div>
-        <div style="flex:1;padding:8px 12px;background:#f9f0ff;border:1px solid #d3adf7;border-radius:6px;color:#531dab;line-height:1.6;">
-          <strong>🗂 기본 정보</strong> — <strong>여행지·숙소·항공사</strong> 등 카탈로그(마스터) 단위 공통
-        </div>
-        <div style="flex:1;padding:8px 12px;background:#fffbe6;border:1px solid #ffe58f;border-radius:6px;color:#874d00;line-height:1.6;">
-          <strong>🌟 필수 공통</strong> — 회사 표준 (모든 상품에 자동 적용)
-        </div>
       </div>
 
       <!-- 게시판별 컨텍스트 헤더 -->
@@ -1432,7 +1420,7 @@ const BOARD_META = {
   spot:           { group:'기본 정보', icon:'🎯', name:'스팟·체험 게시판',  desc:'카탈로그 스팟·체험 단위 공통 콘텐츠',                                     bg:'#f9f0ff' },
   // 필수 공통
   org:            { group:'필수 공통', icon:'🌟', name:'필수공통 게시판',   desc:'회사 표준 — 모든 상품에 자동 적용 (구 org)',                              bg:'#fffbe6' },
-  all:            { group:'슈퍼',      icon:'🔍', name:'통합 조회',         desc:'전체 게시판 통합 조회 (슈퍼어드민 전용)',                                 bg:'#f9f0ff' }
+  all:            { group:'전체',      icon:'🔍', name:'전체 보기',         desc:'어드민/파트너스 누구나 — 내가 등록 또는 사용 가능한 전체 콘텐츠 보기',     bg:'#f9f0ff' }
 };
 
 function showView(name) {
