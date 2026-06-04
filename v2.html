@@ -82,6 +82,13 @@ body { font-family: 'Pretendard', 'Apple SD Gothic Neo', -apple-system, sans-ser
 textarea.fi { min-height: 60px; padding: 8px 10px; resize: vertical; font-family: inherit; line-height: 1.6; }
 select.fi { appearance: none; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='%23bbb'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 10px center; padding-right: 28px; cursor: pointer; }
 
+/* ===== IMPORTED FROM CATALOG (불러온 카테고리 표시) ===== */
+.cat-sec.imported { border-color: #d3adf7; background: linear-gradient(to right, #faf5ff 0%, #fff 50%); }
+.cat-sec.imported .cat-sec-head { background: #f9f0ff; }
+.cat-imp-badge { display:inline-flex; align-items:center; gap:4px; font-size:10px; padding:2px 8px; background:#fff; border:1px solid #d3adf7; color:#722ed1; border-radius:10px; font-weight:600; margin-left:6px; }
+.cat-imp-unlink { font-size:10px; padding:1px 6px; border:1px solid #d9d9d9; background:#fff; color:rgba(0,0,0,0.55); border-radius:4px; cursor:pointer; margin-left:4px; }
+.cat-imp-unlink:hover { border-color:#f5222d; color:#f5222d; }
+
 /* ===== CATALOG IMPORT TOGGLE (재고 → 카탈로그 가져오기) ===== */
 .cat-import { display:flex; align-items:center; gap:10px; padding:10px 14px; margin-bottom:10px; background:#f0f7ff; border:1px solid #91caff; border-radius:8px; font-size:12px; color:rgba(0,0,0,0.75); flex-wrap:wrap; }
 .cat-import-label { font-weight:700; color:#0958d9; display:flex; align-items:center; gap:6px; }
@@ -597,7 +604,8 @@ tbody tr:hover td { background: #fafafa; }
       <div id="cat-import" class="cat-import" style="display:none;">
         <div class="cat-import-label">🗂 카탈로그 콘텐츠 가져오기</div>
         <div class="cat-import-opts" id="cat-import-opts"></div>
-        <div class="cat-import-hint">선택한 카탈로그 게시판의 콘텐츠가 이 재고에 자동으로 함께 노출됩니다</div>
+        <button class="btn btn-default btn-sm" onclick="importCatalogContent()" style="border-color:#1677ff;color:#1677ff;font-weight:600;">📥 지금 불러오기</button>
+        <div class="cat-import-hint">선택한 카탈로그의 콘텐츠를 편집기에 즉시 추가 + 저장 시 자동 적용</div>
       </div>
 
       <!-- POST 소유 조직 (어드민에서 등록 시) -->
@@ -1580,10 +1588,90 @@ function setupCatImport(boardKey) {
   wrap.style.display = 'flex';
   const optsEl = document.getElementById('cat-import-opts');
   optsEl.innerHTML = opts.map(o => `
-    <label class="cat-import-chip on" onclick="this.classList.toggle('on')">
+    <label class="cat-import-chip on" data-cat-key="${o.key}" onclick="this.classList.toggle('on')">
       <input type="checkbox" checked> ${o.label}
     </label>
   `).join('');
+}
+
+// ===== 카탈로그별 데모 콘텐츠 (불러올 카테고리들) =====
+const CATALOG_CONTENT = {
+  accom: {
+    label: '🏠 숙소', source: '솔 바이 멜리아 푸꾸옥 (#H-5001)', color: '#722ed1',
+    items: [
+      { cat:'소개', icon:'📝', title:'솔 바이 멜리아 푸꾸옥', desc:'베트남 푸꾸옥 남부에 위치한 5성급 비치프론트 리조트. 인터내셔널 멜리아 호텔 브랜드.' },
+      { cat:'핵심포인트', icon:'🎯', title:'호텔 핵심 포인트', desc:'전 객실 오션뷰 · 프라이빗 비치 · 키즈클럽 운영' },
+      { cat:'안내사항', icon:'📋', title:'체크인/체크아웃', desc:'체크인 15:00 / 체크아웃 12:00 · 24시간 프런트' },
+    ]
+  },
+  room: {
+    label: '🛌 객실', source: '디럭스 씨뷰 (#R-5001-DXSV)', color: '#eb2f96',
+    items: [
+      { cat:'소개', icon:'📝', title:'디럭스 씨뷰 객실', desc:'40㎡ · 킹베드 1 또는 트윈 · 풀 오션뷰 테라스 · 무료 WiFi' },
+      { cat:'유의사항', icon:'⚠️', title:'객실 유의사항', desc:'테라스 바닥 미끄럼 주의 (우천 시) · 오션뷰 특성상 바람 유의' },
+    ]
+  },
+  airline: {
+    label: '🛫 항공사', source: '베트남항공 VN (#AL-VN)', color: '#1677ff',
+    items: [
+      { cat:'안내사항', icon:'📋', title:'베트남항공 공통 안내', desc:'스카이팀 얼라이언스 · 마일리지 적립 가능 · 사전 좌석 지정 가능' },
+      { cat:'유의사항', icon:'⚠️', title:'항공사 유의사항', desc:'온라인 체크인 24시간 전 오픈 · 공항 카운터 출발 2시간 전 마감' },
+      { cat:'수하물', icon:'🧳', title:'베트남항공 수하물 표준', desc:'국제선 위탁 23kg × 1 / 기내 7kg × 1 (좌석등급 무관)' },
+    ]
+  },
+  spot: {
+    label: '🎯 스팟·체험', source: '혼톰 케이블카 (#S-HONTHM)', color: '#fa8c16',
+    items: [
+      { cat:'소개', icon:'📝', title:'혼톰 케이블카', desc:'세계 최장 케이블카 (7,899m). 푸꾸옥 본섬 ↔ 혼톰섬 25분 비행.' },
+      { cat:'안내사항', icon:'📋', title:'운영 시간', desc:'09:00 ~ 17:00 · 기상악화 시 운행 중단' },
+    ]
+  }
+};
+
+function importCatalogContent() {
+  const stack = document.getElementById('cat-stack');
+  if (!stack) return;
+  // on 상태 카탈로그 칩만 처리
+  const activeChips = document.querySelectorAll('#cat-import-opts .cat-import-chip.on');
+  if (activeChips.length === 0) {
+    alert('가져올 카탈로그를 1개 이상 선택하세요');
+    return;
+  }
+  let added = 0;
+  activeChips.forEach(chip => {
+    const key = chip.dataset.catKey;
+    const cfg = CATALOG_CONTENT[key];
+    if (!cfg) return;
+    cfg.items.forEach(it => {
+      const sec = document.createElement('div');
+      sec.className = 'cat-sec imported';
+      sec.dataset.cat = it.cat;
+      sec.innerHTML = `
+        <div class="cat-sec-head" onclick="toggleCatSec(this)">
+          <span class="cat-sec-chevron">▼</span>
+          <span class="cat-sec-icon">${it.icon}</span>
+          <span class="cat-sec-title">${it.cat}</span>
+          <span class="cat-imp-badge">📥 ${cfg.label} · ${cfg.source}</span>
+          <button class="cat-imp-unlink" onclick="event.stopPropagation();this.closest('.cat-sec').remove();updateCatCount();" title="연결 해제">✕ 연결해제</button>
+          <span class="cat-sec-sub" style="margin-left:auto;">자동 동기화</span>
+        </div>
+        <div class="cat-sec-body">
+          <div class="form-label">제목 <span style="font-size:10px;color:#722ed1;margin-left:6px;">읽기 전용 (카탈로그에서 관리)</span></div>
+          <input type="text" class="fi" value="${it.title}" readonly style="background:#fafafa;color:rgba(0,0,0,0.7);margin-bottom:10px;">
+          <div class="form-label">내용</div>
+          <textarea class="fi" readonly style="background:#fafafa;color:rgba(0,0,0,0.7);min-height:60px;">${it.desc}</textarea>
+        </div>
+      `;
+      stack.appendChild(sec);
+      added++;
+    });
+  });
+  if (added > 0) {
+    updateCatCount();
+    // 마지막 추가된 섹션으로 스크롤
+    const last = stack.querySelector('.cat-sec:last-child');
+    if (last) last.scrollIntoView({behavior:'smooth', block:'center'});
+  }
 }
 
 // ===== 게시판 메타 (12종 + 통합조회) — 그룹: 상품 정보 / 기본 정보 / 필수 공통 =====
