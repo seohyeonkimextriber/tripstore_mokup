@@ -81,6 +81,33 @@ body { font-family: 'Pretendard', 'Apple SD Gothic Neo', -apple-system, sans-ser
 textarea.fi { min-height: 60px; padding: 8px 10px; resize: vertical; font-family: inherit; line-height: 1.6; }
 select.fi { appearance: none; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='%23bbb'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 10px center; padding-right: 28px; cursor: pointer; }
 
+/* ===== WIZARD STEPS (POST 등록 위자드) ===== */
+.steps { display:flex; align-items:center; gap:14px; padding:10px 16px; background:#fff; border:1px solid #f0f0f0; border-radius:8px; margin-bottom:10px; }
+.step { display:flex; align-items:center; gap:8px; color:rgba(0,0,0,0.45); cursor:default; font-size:12.5px; font-weight:500; transition:color .15s; }
+.step.clickable { cursor:pointer; }
+.step.clickable:hover { color:rgba(0,0,0,0.75); }
+.step.active { color:#1677ff; font-weight:700; }
+.step.done { color:#52c41a; }
+.step-num { width:22px; height:22px; border-radius:50%; background:#f0f0f0; color:rgba(0,0,0,0.55); display:flex; align-items:center; justify-content:center; font-size:11px; font-weight:700; }
+.step.active .step-num { background:#1677ff; color:#fff; }
+.step.done .step-num { background:#52c41a; color:#fff; }
+.step-arrow { color:rgba(0,0,0,0.2); font-size:13px; }
+.step-pane { display:none; }
+.step-pane.on { display:block; }
+
+/* Step 1 picker (inline) */
+.tpk-inline { background:#fff; border:1px solid #f0f0f0; border-radius:8px; overflow:hidden; margin-bottom:12px; }
+.tpk-inline .tpk-filters { padding:10px 14px; }
+.tpk-inline .tpk-list { padding:6px; max-height:480px; }
+
+/* Selected target chip (Step 2 헤더) */
+.sel-target { padding:10px 14px; margin-bottom:10px; background:linear-gradient(135deg,#e6f4ff 0%,#f0f7ff 100%); border:1px solid #91caff; border-radius:8px; display:flex; align-items:center; gap:12px; }
+.sel-target-icon { width:34px; height:34px; border-radius:8px; background:#1677ff; color:#fff; display:flex; align-items:center; justify-content:center; font-size:16px; flex-shrink:0; }
+.sel-target-info { flex:1; min-width:0; }
+.sel-target-type { font-size:10.5px; font-weight:700; color:#0958d9; letter-spacing:0.4px; text-transform:uppercase; }
+.sel-target-name { font-size:14px; font-weight:700; color:rgba(0,0,0,0.88); margin-top:1px; }
+.sel-target-meta { font-size:11px; color:rgba(0,0,0,0.55); margin-top:2px; }
+
 /* ===== TARGET PICKER MODAL (재고 타겟 선택) ===== */
 .tpk-overlay { display:none; position:fixed; inset:0; background:rgba(0,0,0,0.5); z-index:2000; align-items:center; justify-content:center; }
 .tpk-overlay.on { display:flex; }
@@ -515,6 +542,46 @@ tbody tr:hover td { background: #fafafa; }
         </div>
       </div>
 
+      <!-- ⓘ 위자드 스텝 인디케이터 -->
+      <div class="steps">
+        <div class="step active clickable" data-step="1" onclick="goStep(1)"><span class="step-num">1</span> 타겟 선택</div>
+        <span class="step-arrow">→</span>
+        <div class="step" data-step="2"><span class="step-num">2</span> 콘텐츠 작성</div>
+      </div>
+
+      <!-- ━━━━━━━━ Step 1: 타겟 선택 ━━━━━━━━ -->
+      <div id="step-1" class="step-pane on">
+        <div class="page-header" style="margin-top:4px;margin-bottom:8px;">
+          <div>
+            <div class="page-title" id="step1-title" style="font-size:16px;">어떤 숙박권에 콘텐츠를 등록할까요?</div>
+            <div class="page-desc" id="step1-desc">검색하거나 공급사 필터로 좁혀서 선택</div>
+          </div>
+        </div>
+        <div class="tpk-inline">
+          <div class="tpk-filters">
+            <select id="tpk-supplier" class="fi" style="width:160px;" onchange="renderTpkList(document.getElementById('tpk-search').value)">
+              <option value="">공급사 전체</option>
+            </select>
+            <input id="tpk-search" type="text" class="fi" placeholder="타겟명 / ID 검색" style="flex:1;" oninput="renderTpkList(this.value)">
+          </div>
+          <div id="tpk-list" class="tpk-list"></div>
+        </div>
+      </div>
+
+      <!-- ━━━━━━━━ Step 2: 콘텐츠 작성 ━━━━━━━━ -->
+      <div id="step-2" class="step-pane">
+
+      <!-- 선택된 타겟 표시 + 변경 -->
+      <div class="sel-target">
+        <div id="sel-icon" class="sel-target-icon">🏨</div>
+        <div class="sel-target-info">
+          <div id="sel-type" class="sel-target-type">숙박권 · #103</div>
+          <div id="sel-name" class="sel-target-name">솔 바이 멜리아 푸꾸옥</div>
+          <div id="sel-meta" class="sel-target-meta">트립스토어 · 객실 3종 · 식사 4종</div>
+        </div>
+        <button class="btn btn-ghost btn-sm" onclick="goStep(1)">← 타겟 변경</button>
+      </div>
+
       <!-- POST 소유 조직 (어드민에서 등록 시) -->
       <div class="owner-org">
         <div class="owner-org-label">🏢 소유 조직 <span class="req">*</span></div>
@@ -531,8 +598,8 @@ tbody tr:hover td { background: #fafafa; }
         <div style="font-size:11px;color:rgba(0,0,0,0.45);margin-left:auto;" id="owner-hint">전체 = 본사 + 모든 파트너에게 노출 · 파트너스 등록 시 자동으로 해당 파트너 owner로 저장</div>
       </div>
 
-      <!-- 진입 소스 선택 (5개 게시판) -->
-      <div class="entry-src">
+      <!-- (구) 진입 소스 선택 — 위자드 도입으로 제거. 숨김 유지 (기존 setEntrySrc JS 호환용) -->
+      <div class="entry-src" style="display:none;">
         <div class="entry-src-card active" data-src="voucher" onclick="setEntrySrc('voucher')">
           <div class="entry-src-icon">🏨</div>
           <div class="entry-src-body">
@@ -999,6 +1066,7 @@ tbody tr:hover td { background: #fafafa; }
         <button class="btn btn-default" style="border-color:#faad14;color:#ad6800;">전체 임시저장 (Draft)</button>
         <button class="btn btn-primary btn-lg">전체 게시 (운영중)</button>
       </div>
+      </div><!-- /step-2 -->
     </div>
 
     <!-- ================ VIEW: POST 목록 ================ -->
@@ -1423,6 +1491,44 @@ function openEditor() {
   const meta = BOARD_META[currentBoard] || BOARD_META.hotel_voucher;
   const crumb = document.getElementById('editor-board-crumb');
   if (crumb) crumb.textContent = meta.name;
+  // 필수공통은 타겟 선택 없이 바로 Step 2
+  if (currentBoard === 'org') {
+    setSelectedTarget({ icon:'🌟', type:'필수공통 · 전체 적용', name:meta.name, meta:'모든 상품에 자동 적용' });
+    goStep(2);
+  } else {
+    // Step 1으로 시작 → picker 데이터 로드
+    currentTpkSrc = src;
+    const cfg = TARGET_DATA[src] || TARGET_DATA.voucher;
+    document.getElementById('step1-title').textContent = `어떤 ${cfg.title.replace(/^\S+\s/, '').replace(' 타겟 선택','')}에 콘텐츠를 등록할까요?`;
+    document.getElementById('step1-desc').textContent = cfg.desc;
+    const supplierSet = new Set(cfg.items.map(i => i.supplier));
+    const supSel = document.getElementById('tpk-supplier');
+    supSel.innerHTML = '<option value="">공급사 전체</option>' + [...supplierSet].map(s => `<option value="${s}">${s}</option>`).join('');
+    document.getElementById('tpk-search').value = '';
+    renderTpkList('');
+    goStep(1);
+  }
+}
+
+// ===== 위자드 스텝 이동 =====
+function goStep(n) {
+  document.querySelectorAll('.step-pane').forEach(p => p.classList.remove('on'));
+  document.getElementById('step-' + n).classList.add('on');
+  document.querySelectorAll('.step').forEach(s => {
+    const sn = parseInt(s.dataset.step);
+    s.classList.remove('active','done');
+    if (sn === n) s.classList.add('active');
+    else if (sn < n) s.classList.add('done','clickable');
+  });
+  window.scrollTo(0, 0);
+}
+
+// ===== Step 2 헤더 갱신 =====
+function setSelectedTarget(t) {
+  document.getElementById('sel-icon').textContent = t.icon;
+  document.getElementById('sel-type').textContent = t.type;
+  document.getElementById('sel-name').textContent = t.name;
+  document.getElementById('sel-meta').textContent = t.meta;
 }
 
 // ===== 게시판 메타 (12종 + 통합조회) — 그룹: 상품 정보 / 기본 정보 / 필수 공통 =====
@@ -2560,18 +2666,19 @@ function renderTpkList(query) {
 }
 
 function selectTpkTarget(item) {
-  // 현재 활성화된 타겟 헤더 업데이트
-  const activeGroup = document.querySelector('[data-src-group].on');
-  if (activeGroup) {
-    const nameEl = activeGroup.querySelector('.target-header-name');
-    const typeEl = activeGroup.querySelector('.target-header-type');
-    if (nameEl) nameEl.textContent = item.name;
-    if (typeEl) {
-      const labelMap = { voucher:'숙박권', flight:'항공권', tour:'투어·티켓', insurance:'보험' };
-      typeEl.textContent = `${labelMap[currentTpkSrc] || ''} ${item.id}`;
-    }
-  }
+  const cfg = TARGET_DATA[currentTpkSrc] || {};
+  const labelMap = { voucher:'숙박권', flight:'항공권', tour:'투어·티켓', insurance:'보험', accom:'숙소', room:'객실', airline:'항공사', country:'국가', place:'여행지', spot:'스팟·체험' };
+  // Step 2 sel-target 갱신
+  setSelectedTarget({
+    icon: cfg.icon || '🏨',
+    type: `${labelMap[currentTpkSrc] || ''} · ${item.id}`,
+    name: item.name,
+    meta: `${item.supplier} · ${item.meta}`
+  });
+  // (호환) 기존 모달도 닫음
   closeTargetPicker();
+  // Step 2로 진행
+  goStep(2);
 }
 
 function closeTargetPicker() {
