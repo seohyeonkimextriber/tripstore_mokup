@@ -605,13 +605,16 @@ tbody tr:hover td { background: #fafafa; }
         <div class="owner-org-label">🏢 소유 조직 <span class="req">*</span></div>
         <div class="owner-org-opts">
           <span class="owner-opt active" onclick="setOwnerOpt(this,'all')">전체</span>
-          <span class="owner-opt" onclick="setOwnerOpt(this,'tripstore')">트립스토어 본사</span>
-          <span class="owner-opt" onclick="setOwnerOpt(this,'partners')">특정 파트너 지정</span>
+          <span class="owner-opt" onclick="setOwnerOpt(this,'partner')">특정 파트너 지정</span>
         </div>
         <div class="owner-org-pickers" id="owner-partners" style="display:none;">
-          <span class="owner-org-chip">TMG <span class="owner-org-chip-x" onclick="this.parentElement.remove()">✕</span></span>
-          <span class="owner-org-chip">NUUA <span class="owner-org-chip-x" onclick="this.parentElement.remove()">✕</span></span>
-          <button class="btn btn-default btn-sm" onclick="alert('파트너 선택 모달')">+ 파트너 추가</button>
+          <select id="owner-partner-sel" class="fi" style="width:200px;">
+            <option value="TMG">TMG</option>
+            <option value="NUUA">NUUA</option>
+            <option value="누아여행">누아여행</option>
+            <option value="베스트투어">베스트투어</option>
+            <option value="모두투어">모두투어</option>
+          </select>
         </div>
         <div style="font-size:11px;color:rgba(0,0,0,0.45);margin-left:auto;" id="owner-hint">전체 = 본사 + 모든 파트너에게 노출 · 파트너스 등록 시 자동으로 해당 파트너 owner로 저장</div>
       </div>
@@ -2822,12 +2825,9 @@ function setOwnerOpt(el, val) {
   el.classList.add('active');
   const pickers = document.getElementById('owner-partners');
   const hint = document.getElementById('owner-hint');
-  if (val === 'partners') {
+  if (val === 'partner') {
     pickers.style.display = 'flex';
-    hint.textContent = '선택한 파트너에게만 노출 · 같은 파트너의 어드민/파트너스에서 사용 가능';
-  } else if (val === 'tripstore') {
-    pickers.style.display = 'none';
-    hint.textContent = '트립스토어 본사 상품에만 노출 · 파트너에는 미노출';
+    hint.textContent = '선택한 1개 파트너에게만 노출 · 해당 파트너의 어드민/파트너스에서 사용 가능';
   } else {
     pickers.style.display = 'none';
     hint.textContent = '전체 = 본사 + 모든 파트너에게 노출 · 파트너스 등록 시 자동으로 해당 파트너 owner로 저장';
