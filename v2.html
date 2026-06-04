@@ -38,9 +38,10 @@ body { font-family: 'Pretendard', 'Apple SD Gothic Neo', -apple-system, sans-ser
 .board-tab-sep { flex-basis: 100%; height: 1px; background: #f5f5f5; margin: 4px 0; }
 .board-tab-group { font-size: 12px; font-weight: 700; padding: 5px 12px; border-radius: 14px; white-space: nowrap; display: inline-flex; align-items: center; gap: 5px; margin-right: 4px; border: 1px solid transparent; }
 .board-tab-group .info { font-size: 10px; opacity: 0.7; cursor: help; }
-.board-tab-group.g-stock  { background: #e6f4ff; color: #0958d9; border-color: #91caff; }
-.board-tab-group.g-base   { background: #f9f0ff; color: #531dab; border-color: #d3adf7; }
-.board-tab-group.g-common { background: #fffbe6; color: #874d00; border-color: #ffe58f; }
+.board-tab-group.g-stock    { background: #e6f4ff; color: #0958d9; border-color: #91caff; }
+.board-tab-group.g-base     { background: #f9f0ff; color: #531dab; border-color: #d3adf7; }
+.board-tab-group.g-location { background: #fff2e8; color: #ad4e00; border-color: #ffbb96; }
+.board-tab-group.g-common   { background: #fffbe6; color: #874d00; border-color: #ffe58f; }
 .board-tab-admin { color: rgba(0,0,0,0.35); }
 
 /* ===== LAYOUT (사이드바 제거, 단일 컬럼) ===== */
@@ -80,6 +81,16 @@ body { font-family: 'Pretendard', 'Apple SD Gothic Neo', -apple-system, sans-ser
 .fi::placeholder { color: rgba(0,0,0,0.3); }
 textarea.fi { min-height: 60px; padding: 8px 10px; resize: vertical; font-family: inherit; line-height: 1.6; }
 select.fi { appearance: none; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='%23bbb'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 10px center; padding-right: 28px; cursor: pointer; }
+
+/* ===== CATALOG IMPORT TOGGLE (재고 → 카탈로그 가져오기) ===== */
+.cat-import { display:flex; align-items:center; gap:10px; padding:10px 14px; margin-bottom:10px; background:#f0f7ff; border:1px solid #91caff; border-radius:8px; font-size:12px; color:rgba(0,0,0,0.75); flex-wrap:wrap; }
+.cat-import-label { font-weight:700; color:#0958d9; display:flex; align-items:center; gap:6px; }
+.cat-import-opts { display:flex; gap:6px; flex-wrap:wrap; }
+.cat-import-chip { display:inline-flex; align-items:center; gap:5px; padding:4px 10px; background:#fff; border:1px solid #d9d9d9; border-radius:14px; font-size:11.5px; color:rgba(0,0,0,0.65); cursor:pointer; transition:all .15s; }
+.cat-import-chip:hover { border-color:#1677ff; color:#1677ff; }
+.cat-import-chip.on { background:#1677ff; color:#fff; border-color:#1677ff; font-weight:600; }
+.cat-import-chip input { display:none; }
+.cat-import-hint { font-size:11px; color:rgba(0,0,0,0.45); margin-left:auto; }
 
 /* ===== WIZARD STEPS (POST 등록 위자드) ===== */
 .steps { display:flex; align-items:center; gap:14px; padding:10px 16px; background:#fff; border:1px solid #f0f0f0; border-radius:8px; margin-bottom:10px; }
@@ -580,6 +591,13 @@ tbody tr:hover td { background: #fafafa; }
           <div id="sel-meta" class="sel-target-meta">트립스토어 · 객실 3종 · 식사 4종</div>
         </div>
         <button class="btn btn-ghost btn-sm" onclick="goStep(1)">← 타겟 변경</button>
+      </div>
+
+      <!-- 카탈로그 가져오기 (재고 게시판 한정) -->
+      <div id="cat-import" class="cat-import" style="display:none;">
+        <div class="cat-import-label">🗂 카탈로그 콘텐츠 가져오기</div>
+        <div class="cat-import-opts" id="cat-import-opts"></div>
+        <div class="cat-import-hint">선택한 카탈로그 게시판의 콘텐츠가 이 재고에 자동으로 함께 노출됩니다</div>
       </div>
 
       <!-- POST 소유 조직 (어드민에서 등록 시) -->
@@ -1096,13 +1114,15 @@ tbody tr:hover td { background: #fafafa; }
         <button class="board-tab" data-board="tour" onclick="openList('tour')">🎫 투어·티켓</button>
         <button class="board-tab" data-board="insurance" onclick="openList('insurance')">🛡 보험</button>
         <span class="board-tab-sep"></span>
-        <span class="board-tab-group g-base" title="여행지·숙소·항공사 등 카탈로그(마스터) 단위에 들어가는 공통 콘텐츠">🗂 기본 정보 <span class="info">ⓘ</span></span>
+        <span class="board-tab-group g-base" title="숙소·객실·항공사·스팟 등 재고에 직접 연결되는 카탈로그 콘텐츠">🗂 기본 정보 <span class="info">ⓘ</span></span>
         <button class="board-tab" data-board="accom" onclick="openList('accom')">🏠 숙소</button>
         <button class="board-tab" data-board="room" onclick="openList('room')">🛌 객실</button>
         <button class="board-tab" data-board="airline" onclick="openList('airline')">🛫 항공사</button>
+        <button class="board-tab" data-board="spot" onclick="openList('spot')">🎯 스팟·체험</button>
+        <span class="board-tab-sep"></span>
+        <span class="board-tab-group g-location" title="국가·여행지 — 도착 위치가 일치하는 모든 상품에 자동 적용">🌍 위치 공통 <span class="info">ⓘ</span></span>
         <button class="board-tab" data-board="country" onclick="openList('country')">🌏 국가</button>
         <button class="board-tab" data-board="place" onclick="openList('place')">📍 여행지</button>
-        <button class="board-tab" data-board="spot" onclick="openList('spot')">🎯 스팟·체험</button>
         <span class="board-tab-sep"></span>
         <span class="board-tab-group g-common" title="회사 표준 — 모든 상품에 자동 적용되는 필수 공통 콘텐츠">🌟 필수 공통 <span class="info">ⓘ</span></span>
         <button class="board-tab" data-board="org" onclick="openList('org')">🌟 필수공통</button>
@@ -1491,6 +1511,8 @@ function openEditor() {
   const meta = BOARD_META[currentBoard] || BOARD_META.hotel_voucher;
   const crumb = document.getElementById('editor-board-crumb');
   if (crumb) crumb.textContent = meta.name;
+  // 카탈로그 가져오기 옵션 셋업 (재고 한정)
+  setupCatImport(currentBoard);
   // 필수공통(org)은 타겟 선택 없이 바로 Step 2
   if (currentBoard === 'org') {
     setSelectedTarget({ icon:'🌟', type:'필수공통 · 전체 적용', name:meta.name, meta:'모든 상품에 자동 적용' });
@@ -1536,6 +1558,31 @@ function setSelectedTarget(t) {
   document.getElementById('sel-meta').textContent = t.meta;
 }
 
+// ===== 재고 → 카탈로그 가져오기 매핑 =====
+const STOCK_TO_CATALOG = {
+  hotel_voucher: [{ key:'accom', label:'🏠 숙소' }, { key:'room', label:'🛌 객실' }],
+  room_rate:     [{ key:'accom', label:'🏠 숙소' }, { key:'room', label:'🛌 객실' }],
+  flight_voucher:[{ key:'airline', label:'🛫 항공사' }],
+  tour:          [{ key:'spot', label:'🎯 스팟·체험' }],
+  insurance:     [],
+};
+
+function setupCatImport(boardKey) {
+  const wrap = document.getElementById('cat-import');
+  const opts = STOCK_TO_CATALOG[boardKey];
+  if (!opts || opts.length === 0) {
+    wrap.style.display = 'none';
+    return;
+  }
+  wrap.style.display = 'flex';
+  const optsEl = document.getElementById('cat-import-opts');
+  optsEl.innerHTML = opts.map(o => `
+    <label class="cat-import-chip on" onclick="this.classList.toggle('on')">
+      <input type="checkbox" checked> ${o.label}
+    </label>
+  `).join('');
+}
+
 // ===== 게시판 메타 (12종 + 통합조회) — 그룹: 상품 정보 / 기본 정보 / 필수 공통 =====
 const BOARD_META = {
   // 상품 정보 (구 "재고 단위")
@@ -1544,13 +1591,14 @@ const BOARD_META = {
   flight_voucher: { group:'상품 정보', icon:'✈️', name:'항공권 게시판',     desc:'항공권 단위 콘텐츠 · Scope: 노선 · 항공사 · 좌석등급 · 운임유형',       bg:'#f0f5ff' },
   tour:           { group:'상품 정보', icon:'🎫', name:'투어·티켓 게시판',  desc:'투어/티켓 단위 콘텐츠 · Scope: 옵션 · 회차 · 기간',                      bg:'#fff7e6' },
   insurance:      { group:'상품 정보', icon:'🛡', name:'보험 게시판',       desc:'여행자보험 콘텐츠 · Scope: 플랜 · 보장기간',                              bg:'#f6ffed' },
-  // 기본 정보 (구 "카탈로그 단위")
-  accom:          { group:'기본 정보', icon:'🏠', name:'숙소 게시판',       desc:'카탈로그 숙소 단위 공통 콘텐츠 · 해당 숙소를 쓰는 모든 상품에 적용',     bg:'#f9f0ff' },
-  room:           { group:'기본 정보', icon:'🛌', name:'객실 게시판',       desc:'카탈로그 객실 단위 공통 콘텐츠',                                          bg:'#fff0f6' },
-  airline:        { group:'기본 정보', icon:'🛫', name:'항공사 게시판',     desc:'카탈로그 항공사 단위 공통 콘텐츠 · 해당 항공사를 쓰는 모든 상품에 적용',  bg:'#fff7e6' },
-  country:        { group:'기본 정보', icon:'🌏', name:'국가 게시판',       desc:'국가 단위 공통 콘텐츠',                                                   bg:'#e6fffb' },
-  place:          { group:'기본 정보', icon:'📍', name:'여행지 게시판',     desc:'여행지(도시) 단위 공통 콘텐츠',                                           bg:'#fff0f6' },
-  spot:           { group:'기본 정보', icon:'🎯', name:'스팟·체험 게시판',  desc:'카탈로그 스팟·체험 단위 공통 콘텐츠',                                     bg:'#f9f0ff' },
+  // 기본 정보 (재고에 1:1 연결되는 카탈로그)
+  accom:          { group:'기본 정보', icon:'🏠', name:'숙소 게시판',       desc:'숙소 카탈로그 콘텐츠 · 숙박권에서 옵션으로 가져오기',                       bg:'#f9f0ff' },
+  room:           { group:'기본 정보', icon:'🛌', name:'객실 게시판',       desc:'객실 카탈로그 콘텐츠 · 숙박권에서 옵션으로 가져오기',                       bg:'#fff0f6' },
+  airline:        { group:'기본 정보', icon:'🛫', name:'항공사 게시판',     desc:'항공사 카탈로그 콘텐츠 · 항공권에서 옵션으로 가져오기',                     bg:'#fff7e6' },
+  spot:           { group:'기본 정보', icon:'🎯', name:'스팟·체험 게시판',  desc:'스팟·체험 카탈로그 콘텐츠 · 투어·티켓에서 옵션으로 가져오기',               bg:'#f9f0ff' },
+  // 위치 공통 (도착 위치 매칭 자동 적용)
+  country:        { group:'위치 공통', icon:'🌏', name:'국가 게시판',       desc:'국가 단위 콘텐츠 · 도착 국가가 일치하는 모든 상품에 자동 적용',             bg:'#fff2e8' },
+  place:          { group:'위치 공통', icon:'📍', name:'여행지 게시판',     desc:'여행지(도시) 단위 콘텐츠 · 도착 여행지가 일치하는 모든 상품에 자동 적용',  bg:'#fff7e6' },
   // 필수 공통
   org:            { group:'필수 공통', icon:'🌟', name:'필수공통 게시판',   desc:'회사 표준 — 모든 상품에 자동 적용 (구 org)',                              bg:'#fffbe6' },
   all:            { group:'전체',      icon:'🔍', name:'전체 보기',         desc:'어드민/파트너스 누구나 — 내가 등록 또는 사용 가능한 전체 콘텐츠 보기',     bg:'#f9f0ff' }
