@@ -31,13 +31,11 @@ body { font-family: 'Pretendard', 'Apple SD Gothic Neo', -apple-system, sans-ser
 .subnav-item .new-badge { font-size: 9px; background: #f5222d; color: #fff; padding: 1px 5px; border-radius: 8px; margin-left: 5px; font-weight: 700; letter-spacing: 0.3px; }
 
 /* ===== BOARD TABS (12 게시판 + 3그룹) ===== */
-.board-tabs { background: #fff; border: 1px solid #f0f0f0; border-radius: 8px; padding: 6px; margin-bottom: 12px; display: flex; flex-wrap: wrap; gap: 2px; align-items: center; }
-.board-tab { padding: 7px 12px; font-size: 12.5px; font-weight: 500; color: rgba(0,0,0,0.55); cursor: pointer; border-radius: 6px; transition: all 0.15s; display: inline-flex; align-items: center; gap: 5px; background: transparent; border: none; font-family: inherit; white-space: nowrap; }
+.board-tabs { background: #fff; border: 1px solid #f0f0f0; border-radius: 8px; padding: 5px; margin-bottom: 10px; display: flex; flex-wrap: wrap; gap: 2px; align-items: center; }
+.board-tab { padding: 6px 11px; font-size: 12.5px; font-weight: 500; color: rgba(0,0,0,0.65); cursor: pointer; border-radius: 6px; transition: all 0.15s; display: inline-flex; align-items: center; gap: 5px; background: transparent; border: none; font-family: inherit; white-space: nowrap; }
 .board-tab:hover { color: rgba(0,0,0,0.88); background: #fafafa; }
-.board-tab.active { color: #1677ff; background: #e6f4ff; font-weight: 600; }
-.board-tab-count { font-size: 10.5px; padding: 1px 6px; border-radius: 10px; background: rgba(0,0,0,0.05); color: rgba(0,0,0,0.5); font-weight: 700; }
-.board-tab.active .board-tab-count { background: #1677ff; color: #fff; }
-.board-tab-sep { flex-basis: 100%; height: 1px; background: #f0f0f0; margin: 6px 0; }
+.board-tab.active { color: #1677ff; background: #e6f4ff; font-weight: 700; }
+.board-tab-sep { flex-basis: 100%; height: 1px; background: #f5f5f5; margin: 4px 0; }
 .board-tab-group { font-size: 12px; font-weight: 700; padding: 5px 12px; border-radius: 14px; white-space: nowrap; display: inline-flex; align-items: center; gap: 5px; margin-right: 4px; border: 1px solid transparent; }
 .board-tab-group .info { font-size: 10px; opacity: 0.7; cursor: help; }
 .board-tab-group.g-stock  { background: #e6f4ff; color: #0958d9; border-color: #91caff; }
@@ -49,7 +47,7 @@ body { font-family: 'Pretendard', 'Apple SD Gothic Neo', -apple-system, sans-ser
 .shell { display: block; min-height: calc(100vh - 88px); }
 
 /* ===== MAIN ===== */
-.main { padding: 14px 24px 32px; overflow-x: hidden; max-width: 1440px; margin: 0 auto; }
+.main { padding: 12px 20px 24px; overflow-x: hidden; max-width: 1440px; margin: 0 auto; }
 .breadcrumb { font-size: 12px; color: rgba(0,0,0,0.45); margin-bottom: 6px; display: flex; align-items: center; gap: 6px; }
 .breadcrumb span:not(.sep) { cursor: pointer; }
 .breadcrumb span:not(.sep):hover { color: #1677ff; }
@@ -83,17 +81,42 @@ body { font-family: 'Pretendard', 'Apple SD Gothic Neo', -apple-system, sans-ser
 textarea.fi { min-height: 60px; padding: 8px 10px; resize: vertical; font-family: inherit; line-height: 1.6; }
 select.fi { appearance: none; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='%23bbb'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 10px center; padding-right: 28px; cursor: pointer; }
 
+/* ===== TARGET PICKER MODAL (재고 타겟 선택) ===== */
+.tpk-overlay { display:none; position:fixed; inset:0; background:rgba(0,0,0,0.5); z-index:2000; align-items:center; justify-content:center; }
+.tpk-overlay.on { display:flex; }
+.tpk-modal { background:#fff; border-radius:12px; width:680px; max-width:94vw; max-height:84vh; display:flex; flex-direction:column; box-shadow:0 10px 40px rgba(0,0,0,0.2); }
+.tpk-head { padding:14px 20px; border-bottom:1px solid #f0f0f0; display:flex; align-items:center; gap:10px; }
+.tpk-head-icon { width:32px; height:32px; border-radius:8px; background:#e6f4ff; display:flex; align-items:center; justify-content:center; font-size:16px; }
+.tpk-head-body { flex:1; }
+.tpk-head-title { font-size:15px; font-weight:700; color:rgba(0,0,0,0.88); }
+.tpk-head-desc { font-size:11.5px; color:rgba(0,0,0,0.5); margin-top:2px; }
+.tpk-head-close { background:transparent; border:none; font-size:18px; color:rgba(0,0,0,0.45); cursor:pointer; padding:4px 8px; border-radius:4px; }
+.tpk-head-close:hover { background:#fafafa; color:rgba(0,0,0,0.88); }
+.tpk-filters { padding:12px 16px; display:flex; gap:8px; align-items:center; border-bottom:1px solid #f5f5f5; background:#fafafa; }
+.tpk-list { flex:1; overflow-y:auto; padding:6px; }
+.tpk-row { display:flex; align-items:center; gap:12px; padding:10px 14px; border-radius:8px; cursor:pointer; transition:all .12s; border:1px solid transparent; }
+.tpk-row:hover { background:#f0f7ff; border-color:#91caff; }
+.tpk-row-icon { width:34px; height:34px; border-radius:8px; background:#fafafa; display:flex; align-items:center; justify-content:center; font-size:18px; flex-shrink:0; }
+.tpk-row-info { flex:1; min-width:0; }
+.tpk-row-name { font-size:13.5px; font-weight:700; color:rgba(0,0,0,0.88); }
+.tpk-row-meta { font-size:11px; color:rgba(0,0,0,0.55); margin-top:2px; display:flex; gap:8px; flex-wrap:wrap; }
+.tpk-row-meta .sep { color:rgba(0,0,0,0.2); }
+.tpk-row-supplier { background:#f9f0ff; color:#722ed1; border:1px solid #d3adf7; border-radius:10px; padding:1px 7px; font-weight:600; font-size:10px; }
+.tpk-row-action { font-size:12px; color:#1677ff; font-weight:600; opacity:0; transition:opacity .15s; }
+.tpk-row:hover .tpk-row-action { opacity:1; }
+.tpk-empty { padding:40px 20px; text-align:center; color:rgba(0,0,0,0.35); font-size:13px; }
+
 /* ===== OWNER ORG SELECTOR (POST 소유 조직) ===== */
-.owner-org { background:#fff; border:1px solid #f0f0f0; border-radius:8px; padding:10px 14px; margin-bottom:10px; display:flex; align-items:center; gap:12px; flex-wrap:wrap; }
-.owner-org-label { font-size:12px; font-weight:700; color:rgba(0,0,0,0.75); display:flex; align-items:center; gap:6px; }
-.owner-org-label .req { color:#f5222d; font-size:11px; }
-.owner-org-opts { display:flex; gap:6px; align-items:center; flex-wrap:wrap; }
-.owner-opt { padding:5px 12px; font-size:12px; font-weight:500; border:1px solid #e8e8e8; border-radius:14px; background:#fff; color:rgba(0,0,0,0.65); cursor:pointer; transition:all .15s; }
+.owner-org { background:#fff; border:1px solid #f0f0f0; border-radius:8px; padding:8px 12px; margin-bottom:8px; display:flex; align-items:center; gap:10px; flex-wrap:wrap; }
+.owner-org-label { font-size:11.5px; font-weight:700; color:rgba(0,0,0,0.75); display:flex; align-items:center; gap:4px; }
+.owner-org-label .req { color:#f5222d; font-size:10px; }
+.owner-org-opts { display:flex; gap:4px; align-items:center; flex-wrap:wrap; }
+.owner-opt { padding:4px 10px; font-size:11.5px; font-weight:500; border:1px solid #e8e8e8; border-radius:12px; background:#fff; color:rgba(0,0,0,0.65); cursor:pointer; transition:all .15s; }
 .owner-opt:hover { border-color:#1677ff; color:#1677ff; }
 .owner-opt.active { background:#1677ff; color:#fff; border-color:#1677ff; font-weight:600; }
-.owner-org-pickers { display:flex; gap:6px; align-items:center; flex-wrap:wrap; margin-left:auto; }
-.owner-org-chip { font-size:11px; padding:2px 8px 2px 10px; border-radius:10px; background:#f0f5ff; color:#2f54eb; border:1px solid #adc6ff; display:inline-flex; align-items:center; gap:4px; }
-.owner-org-chip-x { cursor:pointer; opacity:0.55; }
+.owner-org-pickers { display:flex; gap:5px; align-items:center; flex-wrap:wrap; }
+.owner-org-chip { font-size:10.5px; padding:2px 7px 2px 9px; border-radius:10px; background:#f0f5ff; color:#2f54eb; border:1px solid #adc6ff; display:inline-flex; align-items:center; gap:4px; }
+.owner-org-chip-x { cursor:pointer; opacity:0.55; font-size:10px; }
 .owner-org-chip-x:hover { opacity:1; color:#f5222d; }
 
 /* ===== ENTRY SOURCE TABS (진입 소스 선택) ===== */
@@ -584,7 +607,7 @@ tbody tr:hover td { background: #fafafa; }
               </span>
             </div>
           </div>
-          <button class="btn btn-ghost btn-sm">타겟 변경</button>
+          <button class="btn btn-ghost btn-sm" onclick="openTargetPicker()">🔍 타겟 변경</button>
         </div>
       </div>
 
@@ -613,7 +636,7 @@ tbody tr:hover td { background: #fafafa; }
               </span>
             </div>
           </div>
-          <button class="btn btn-ghost btn-sm">타겟 변경</button>
+          <button class="btn btn-ghost btn-sm" onclick="openTargetPicker()">🔍 타겟 변경</button>
         </div>
       </div>
 
@@ -641,7 +664,7 @@ tbody tr:hover td { background: #fafafa; }
               </span>
             </div>
           </div>
-          <button class="btn btn-ghost btn-sm">타겟 변경</button>
+          <button class="btn btn-ghost btn-sm" onclick="openTargetPicker()">🔍 타겟 변경</button>
         </div>
       </div>
 
@@ -669,7 +692,7 @@ tbody tr:hover td { background: #fafafa; }
               </span>
             </div>
           </div>
-          <button class="btn btn-ghost btn-sm">타겟 변경</button>
+          <button class="btn btn-ghost btn-sm" onclick="openTargetPicker()">🔍 타겟 변경</button>
         </div>
       </div>
 
@@ -697,7 +720,7 @@ tbody tr:hover td { background: #fafafa; }
               </span>
             </div>
           </div>
-          <button class="btn btn-ghost btn-sm">타겟 변경</button>
+          <button class="btn btn-ghost btn-sm" onclick="openTargetPicker()">🔍 타겟 변경</button>
         </div>
       </div>
 
@@ -1018,12 +1041,11 @@ tbody tr:hover td { background: #fafafa; }
       </div>
 
       <!-- 게시판별 컨텍스트 헤더 -->
-      <div id="board-context" style="padding:10px 14px;margin-bottom:10px;background:#fafafa;border:1px solid #f0f0f0;border-radius:8px;display:flex;align-items:center;gap:12px;">
-        <div id="list-board-icon" style="width:32px;height:32px;border-radius:7px;background:#e6f4ff;display:flex;align-items:center;justify-content:center;font-size:16px;">🏨</div>
-        <div style="flex:1;min-width:0;">
-          <div id="list-board-title" style="font-size:13px;font-weight:700;color:rgba(0,0,0,0.85);">숙박권 게시판</div>
-          <div id="list-board-desc" style="font-size:11.5px;color:rgba(0,0,0,0.5);margin-top:1px;">숙박권 단위 콘텐츠 · Scope: 객실 · 식사 · 옵션 · 요금</div>
-        </div>
+      <div id="board-context" style="padding:6px 12px;margin-bottom:8px;background:#fafafa;border:1px solid #f0f0f0;border-radius:6px;display:flex;align-items:center;gap:8px;">
+        <span id="list-board-icon" style="font-size:14px;">🏨</span>
+        <span id="list-board-title" style="font-size:12px;font-weight:700;color:rgba(0,0,0,0.85);">숙박권 게시판</span>
+        <span style="color:rgba(0,0,0,0.2);">·</span>
+        <span id="list-board-desc" style="font-size:11px;color:rgba(0,0,0,0.5);">숙박권 단위 콘텐츠 · Scope: 객실 · 식사 · 옵션 · 요금</span>
         <span id="list-board-crumb" style="display:none;">숙박권 게시판</span>
       </div>
 
@@ -1449,7 +1471,7 @@ function openList(filter) {
   const crumbEl = document.getElementById('list-board-crumb');
   if (titleEl) titleEl.textContent = meta.name;
   if (descEl)  descEl.textContent  = meta.desc;
-  if (iconEl) { iconEl.textContent = meta.icon; iconEl.style.background = meta.bg; }
+  if (iconEl) iconEl.textContent = meta.icon;
   if (crumbEl) crumbEl.textContent = meta.name;
   // 행/카드 필터링
   const rows = document.querySelectorAll('#view-list tbody tr');
@@ -2435,6 +2457,128 @@ function delBi(idx) {
   if (wwwList.children[idx]) wwwList.children[idx].remove();
 }
 
+// ===== 타겟 선택 모달 (재고 타겟) =====
+const TARGET_DATA = {
+  voucher: {
+    title: '🏨 숙박권 타겟 선택',
+    desc: '콘텐츠를 등록할 숙박권을 선택하세요',
+    icon: '🏨', bg:'#e6f4ff',
+    items: [
+      { id:'#103', name:'솔 바이 멜리아 푸꾸옥',  supplier:'트립스토어', meta:'객실 3종 · 식사 4종' },
+      { id:'#104', name:'씨셀스 푸꾸옥',          supplier:'TMG',         meta:'객실 2종 · 식사 2종' },
+      { id:'#105', name:'노보텔 푸꾸옥 리조트',    supplier:'트립스토어', meta:'객실 4종 · 식사 3종' },
+      { id:'#106', name:'멜리아 빈펄 다낭',        supplier:'TMG',         meta:'객실 3종 · 식사 4종' },
+      { id:'#107', name:'그랜드 머큐어 다낭',      supplier:'NUUA',        meta:'객실 2종 · 식사 3종' },
+    ]
+  },
+  flight: {
+    title: '✈️ 항공권 타겟 선택',
+    desc: '콘텐츠를 등록할 항공권을 선택하세요',
+    icon: '✈️', bg:'#f0f5ff',
+    items: [
+      { id:'#A-247', name:'ICN ↔ PQC 직항',  supplier:'베트남항공(VN)', meta:'4시간 30분 · 이코노미·프리미엄' },
+      { id:'#A-301', name:'ICN ↔ HAN 직항',  supplier:'대한항공(KE)',    meta:'5시간 · 이코노미·비즈니스' },
+      { id:'#A-415', name:'ICN ↔ NRT 직항',  supplier:'아시아나(OZ)',     meta:'2시간 20분 · 이코노미' },
+      { id:'#A-520', name:'ICN ↔ BKK 직항',  supplier:'타이항공(TG)',     meta:'5시간 30분 · 이코노미·비즈니스' },
+    ]
+  },
+  tour: {
+    title: '🎫 투어·티켓 타겟 선택',
+    desc: '콘텐츠를 등록할 투어/티켓을 선택하세요',
+    icon: '🎫', bg:'#fff7e6',
+    items: [
+      { id:'#T-589', name:'호핑투어 + 케이블카 패키지',  supplier:'TMG',         meta:'1일 · 한국어 인솔자' },
+      { id:'#T-401', name:'선셋 크루즈',                 supplier:'TMG',         meta:'3시간 · 디너 포함' },
+      { id:'#T-712', name:'다낭 시내 투어',              supplier:'트립스토어', meta:'반나절 · 한국어' },
+      { id:'#T-803', name:'바나힐 입장권',               supplier:'NUUA',        meta:'당일 입장권' },
+    ]
+  },
+  insurance: {
+    title: '🛡 보험 타겟 선택',
+    desc: '콘텐츠를 등록할 보험 상품을 선택하세요 (공급사 = 재보험사)',
+    icon: '🛡', bg:'#f6ffed',
+    items: [
+      { id:'#I-021', name:'여행자보험 플러스',  supplier:'삼성화재', meta:'플랜 2종 · 최대 30일' },
+      { id:'#I-022', name:'여행자보험 기본',    supplier:'삼성화재', meta:'단일 플랜 · 최대 15일' },
+      { id:'#I-031', name:'프리미엄 여행보험',  supplier:'KB손해',   meta:'플랜 3종 · 최대 60일' },
+      { id:'#I-041', name:'세이프 트래블',      supplier:'현대해상', meta:'플랜 2종 · 최대 21일' },
+    ]
+  }
+};
+
+let currentTpkSrc = 'voucher';
+
+function openTargetPicker() {
+  // 현재 선택된 entry-src 카드 기준
+  const activeCard = document.querySelector('.entry-src-card.active');
+  const src = activeCard ? activeCard.dataset.src : 'voucher';
+  if (!TARGET_DATA[src]) return; // org는 picker 없음
+  currentTpkSrc = src;
+  const cfg = TARGET_DATA[src];
+  document.getElementById('tpk-title').textContent = cfg.title;
+  document.getElementById('tpk-desc').textContent = cfg.desc;
+  const iconEl = document.getElementById('tpk-icon');
+  iconEl.textContent = cfg.icon;
+  iconEl.style.background = cfg.bg;
+  // 공급사 필터 옵션
+  const supplierSet = new Set(cfg.items.map(i => i.supplier));
+  const supSel = document.getElementById('tpk-supplier');
+  supSel.innerHTML = '<option value="">공급사 전체</option>' + [...supplierSet].map(s => `<option value="${s}">${s}</option>`).join('');
+  // 리스트 렌더
+  renderTpkList('');
+  document.getElementById('tpk-overlay').classList.add('on');
+  document.body.style.overflow = 'hidden';
+}
+
+function renderTpkList(query) {
+  const cfg = TARGET_DATA[currentTpkSrc];
+  const sup = document.getElementById('tpk-supplier').value;
+  const q = (query || '').toLowerCase().trim();
+  const filtered = cfg.items.filter(it => {
+    if (sup && it.supplier !== sup) return false;
+    if (q && !(it.name.toLowerCase().includes(q) || it.id.toLowerCase().includes(q))) return false;
+    return true;
+  });
+  const list = document.getElementById('tpk-list');
+  if (filtered.length === 0) {
+    list.innerHTML = '<div class="tpk-empty">검색 조건에 맞는 타겟이 없습니다</div>';
+    return;
+  }
+  list.innerHTML = filtered.map(it => `
+    <div class="tpk-row" onclick='selectTpkTarget(${JSON.stringify(it).replaceAll("'","&#39;")})'>
+      <div class="tpk-row-icon">${cfg.icon}</div>
+      <div class="tpk-row-info">
+        <div class="tpk-row-name">${it.name}</div>
+        <div class="tpk-row-meta">
+          <span class="tpk-row-supplier">${it.supplier}</span>
+          <span>${it.id}</span><span class="sep">·</span><span>${it.meta}</span>
+        </div>
+      </div>
+      <div class="tpk-row-action">선택 →</div>
+    </div>
+  `).join('');
+}
+
+function selectTpkTarget(item) {
+  // 현재 활성화된 타겟 헤더 업데이트
+  const activeGroup = document.querySelector('[data-src-group].on');
+  if (activeGroup) {
+    const nameEl = activeGroup.querySelector('.target-header-name');
+    const typeEl = activeGroup.querySelector('.target-header-type');
+    if (nameEl) nameEl.textContent = item.name;
+    if (typeEl) {
+      const labelMap = { voucher:'숙박권', flight:'항공권', tour:'투어·티켓', insurance:'보험' };
+      typeEl.textContent = `${labelMap[currentTpkSrc] || ''} ${item.id}`;
+    }
+  }
+  closeTargetPicker();
+}
+
+function closeTargetPicker() {
+  document.getElementById('tpk-overlay').classList.remove('on');
+  document.body.style.overflow = '';
+}
+
 // ===== 소유 조직 (owner_org) 선택 토글 =====
 function setOwnerOpt(el, val) {
   el.parentElement.querySelectorAll('.owner-opt').forEach(o => o.classList.remove('active'));
@@ -2458,6 +2602,27 @@ document.addEventListener('DOMContentLoaded', () => {
   openList('hotel_voucher');
 });
 </script>
+
+<!-- 타겟 선택 모달 -->
+<div id="tpk-overlay" class="tpk-overlay" onclick="if(event.target===this)closeTargetPicker()">
+  <div class="tpk-modal">
+    <div class="tpk-head">
+      <div id="tpk-icon" class="tpk-head-icon">🏨</div>
+      <div class="tpk-head-body">
+        <div id="tpk-title" class="tpk-head-title">🏨 숙박권 타겟 선택</div>
+        <div id="tpk-desc" class="tpk-head-desc">콘텐츠를 등록할 숙박권을 선택하세요</div>
+      </div>
+      <button class="tpk-head-close" onclick="closeTargetPicker()">✕</button>
+    </div>
+    <div class="tpk-filters">
+      <select id="tpk-supplier" class="fi" style="width:160px;" onchange="renderTpkList(document.getElementById('tpk-search').value)">
+        <option value="">공급사 전체</option>
+      </select>
+      <input id="tpk-search" type="text" class="fi" placeholder="타겟명 / ID 검색" style="flex:1;" oninput="renderTpkList(this.value)">
+    </div>
+    <div id="tpk-list" class="tpk-list"></div>
+  </div>
+</div>
 
 </body>
 </html>
