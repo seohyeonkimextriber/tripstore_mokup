@@ -1491,23 +1491,28 @@ function openEditor() {
   const meta = BOARD_META[currentBoard] || BOARD_META.hotel_voucher;
   const crumb = document.getElementById('editor-board-crumb');
   if (crumb) crumb.textContent = meta.name;
-  // 필수공통은 타겟 선택 없이 바로 Step 2
+  // 필수공통(org)은 타겟 선택 없이 바로 Step 2
   if (currentBoard === 'org') {
     setSelectedTarget({ icon:'🌟', type:'필수공통 · 전체 적용', name:meta.name, meta:'모든 상품에 자동 적용' });
     goStep(2);
-  } else {
-    // Step 1으로 시작 → picker 데이터 로드
-    currentTpkSrc = src;
-    const cfg = TARGET_DATA[src] || TARGET_DATA.voucher;
-    document.getElementById('step1-title').textContent = `어떤 ${cfg.title.replace(/^\S+\s/, '').replace(' 타겟 선택','')}에 콘텐츠를 등록할까요?`;
-    document.getElementById('step1-desc').textContent = cfg.desc;
-    const supplierSet = new Set(cfg.items.map(i => i.supplier));
-    const supSel = document.getElementById('tpk-supplier');
-    supSel.innerHTML = '<option value="">공급사 전체</option>' + [...supplierSet].map(s => `<option value="${s}">${s}</option>`).join('');
-    document.getElementById('tpk-search').value = '';
-    renderTpkList('');
-    goStep(1);
+    return;
   }
+  // 각 게시판은 자기 자신 키로 picker 데이터 로드
+  currentTpkSrc = currentBoard;
+  const cfg = TARGET_DATA[currentBoard];
+  if (!cfg) {
+    // 데이터 정의 안 된 게시판은 일단 Step2로
+    goStep(2);
+    return;
+  }
+  document.getElementById('step1-title').textContent = cfg.title;
+  document.getElementById('step1-desc').textContent = cfg.desc;
+  const supplierSet = new Set(cfg.items.map(i => i.supplier));
+  const supSel = document.getElementById('tpk-supplier');
+  supSel.innerHTML = '<option value="">공급사 전체</option>' + [...supplierSet].map(s => `<option value="${s}">${s}</option>`).join('');
+  document.getElementById('tpk-search').value = '';
+  renderTpkList('');
+  goStep(1);
 }
 
 // ===== 위자드 스텝 이동 =====
@@ -2563,12 +2568,14 @@ function delBi(idx) {
   if (wwwList.children[idx]) wwwList.children[idx].remove();
 }
 
-// ===== 타겟 선택 모달 (재고 타겟) =====
+// ===== 타겟 선택 데이터 (11종 게시판, 각자 picker) =====
+// org(필수공통)는 picker 없음 — Step1 스킵
 const TARGET_DATA = {
-  voucher: {
-    title: '🏨 숙박권 타겟 선택',
-    desc: '콘텐츠를 등록할 숙박권을 선택하세요',
-    icon: '🏨', bg:'#e6f4ff',
+  // ─── 상품 정보 (재고 단위) ───
+  hotel_voucher: {
+    label:'숙박권', icon:'🏨', bg:'#e6f4ff',
+    title:'어떤 숙박권에 콘텐츠를 등록할까요?',
+    desc:'재고 단위 — 숙박권 1건 선택',
     items: [
       { id:'#103', name:'솔 바이 멜리아 푸꾸옥',  supplier:'트립스토어', meta:'객실 3종 · 식사 4종' },
       { id:'#104', name:'씨셀스 푸꾸옥',          supplier:'TMG',         meta:'객실 2종 · 식사 2종' },
@@ -2577,10 +2584,22 @@ const TARGET_DATA = {
       { id:'#107', name:'그랜드 머큐어 다낭',      supplier:'NUUA',        meta:'객실 2종 · 식사 3종' },
     ]
   },
-  flight: {
-    title: '✈️ 항공권 타겟 선택',
-    desc: '콘텐츠를 등록할 항공권을 선택하세요',
-    icon: '✈️', bg:'#f0f5ff',
+  room_rate: {
+    label:'객실요금표', icon:'🛏', bg:'#e6fffb',
+    title:'어떤 객실요금표(숙소×객실×식사 조합)에 콘텐츠를 등록할까요?',
+    desc:'특정 조합에만 적용되는 콘텐츠',
+    items: [
+      { id:'#RR-103-DXSV-BB', name:'솔바이멜리아 × 디럭스 씨뷰 × BB',  supplier:'트립스토어', meta:'숙박권 #103 조합' },
+      { id:'#RR-103-DXSV-AI', name:'솔바이멜리아 × 디럭스 씨뷰 × AI',  supplier:'트립스토어', meta:'숙박권 #103 조합' },
+      { id:'#RR-103-PRES-BB', name:'솔바이멜리아 × 프리미엄 × BB',     supplier:'트립스토어', meta:'숙박권 #103 조합' },
+      { id:'#RR-104-DLX',      name:'씨셀스 × 디럭스 (식사 무관)',      supplier:'TMG',         meta:'숙박권 #104 객실 단독' },
+      { id:'#RR-106-SUIT-AI', name:'멜리아 빈펄 × 스위트 × AI',         supplier:'TMG',         meta:'숙박권 #106 조합' },
+    ]
+  },
+  flight_voucher: {
+    label:'항공권', icon:'✈️', bg:'#f0f5ff',
+    title:'어떤 항공권에 콘텐츠를 등록할까요?',
+    desc:'재고 단위 — 항공권 1건 선택',
     items: [
       { id:'#A-247', name:'ICN ↔ PQC 직항',  supplier:'베트남항공(VN)', meta:'4시간 30분 · 이코노미·프리미엄' },
       { id:'#A-301', name:'ICN ↔ HAN 직항',  supplier:'대한항공(KE)',    meta:'5시간 · 이코노미·비즈니스' },
@@ -2589,9 +2608,9 @@ const TARGET_DATA = {
     ]
   },
   tour: {
-    title: '🎫 투어·티켓 타겟 선택',
-    desc: '콘텐츠를 등록할 투어/티켓을 선택하세요',
-    icon: '🎫', bg:'#fff7e6',
+    label:'투어·티켓', icon:'🎫', bg:'#fff7e6',
+    title:'어떤 투어·티켓에 콘텐츠를 등록할까요?',
+    desc:'재고 단위 — 투어/티켓 1건 선택',
     items: [
       { id:'#T-589', name:'호핑투어 + 케이블카 패키지',  supplier:'TMG',         meta:'1일 · 한국어 인솔자' },
       { id:'#T-401', name:'선셋 크루즈',                 supplier:'TMG',         meta:'3시간 · 디너 포함' },
@@ -2600,40 +2619,107 @@ const TARGET_DATA = {
     ]
   },
   insurance: {
-    title: '🛡 보험 타겟 선택',
-    desc: '콘텐츠를 등록할 보험 상품을 선택하세요 (공급사 = 재보험사)',
-    icon: '🛡', bg:'#f6ffed',
+    label:'보험', icon:'🛡', bg:'#f6ffed',
+    title:'어떤 보험에 콘텐츠를 등록할까요?',
+    desc:'재고 단위 — 보험 1건 선택 (공급사=재보험사)',
     items: [
       { id:'#I-021', name:'여행자보험 플러스',  supplier:'삼성화재', meta:'플랜 2종 · 최대 30일' },
       { id:'#I-022', name:'여행자보험 기본',    supplier:'삼성화재', meta:'단일 플랜 · 최대 15일' },
       { id:'#I-031', name:'프리미엄 여행보험',  supplier:'KB손해',   meta:'플랜 3종 · 최대 60일' },
       { id:'#I-041', name:'세이프 트래블',      supplier:'현대해상', meta:'플랜 2종 · 최대 21일' },
     ]
+  },
+  // ─── 기본 정보 (카탈로그 단위) ───
+  accom: {
+    label:'숙소', icon:'🏠', bg:'#f9f0ff',
+    title:'어떤 숙소에 콘텐츠를 등록할까요?',
+    desc:'카탈로그 숙소 단위 — 해당 숙소를 쓰는 모든 상품에 자동 적용',
+    items: [
+      { id:'#H-5001', name:'솔 바이 멜리아 푸꾸옥', supplier:'카탈로그', meta:'베트남 · 푸꾸옥 · 객실 12종' },
+      { id:'#H-5002', name:'씨셀스 푸꾸옥',         supplier:'카탈로그', meta:'베트남 · 푸꾸옥 · 객실 8종' },
+      { id:'#H-5101', name:'멜리아 빈펄 다낭',      supplier:'카탈로그', meta:'베트남 · 다낭 · 객실 14종' },
+      { id:'#H-5201', name:'노보텔 푸꾸옥 리조트',  supplier:'카탈로그', meta:'베트남 · 푸꾸옥 · 객실 10종' },
+    ]
+  },
+  room: {
+    label:'객실', icon:'🛌', bg:'#fff0f6',
+    title:'어떤 객실에 콘텐츠를 등록할까요?',
+    desc:'카탈로그 객실 단위 — 해당 객실을 쓰는 모든 상품에 자동 적용',
+    items: [
+      { id:'#R-5001-DXSV',  name:'솔바이멜리아 · 디럭스 씨뷰',   supplier:'카탈로그', meta:'40㎡ · 오션뷰' },
+      { id:'#R-5001-GARDN', name:'솔바이멜리아 · 디럭스 가든뷰', supplier:'카탈로그', meta:'40㎡ · 가든뷰' },
+      { id:'#R-5001-PRES',  name:'솔바이멜리아 · 프리미엄 스위트', supplier:'카탈로그', meta:'75㎡ · 풀액세스' },
+      { id:'#R-5002-DLX',   name:'씨셀스 · 디럭스',              supplier:'카탈로그', meta:'35㎡ · 시티뷰' },
+    ]
+  },
+  airline: {
+    label:'항공사', icon:'🛫', bg:'#fff7e6',
+    title:'어떤 항공사에 콘텐츠를 등록할까요?',
+    desc:'카탈로그 항공사 단위 — 해당 항공사를 쓰는 모든 항공권/상품에 자동 적용',
+    items: [
+      { id:'#AL-KE', name:'대한항공',     supplier:'카탈로그', meta:'KE · 풀서비스' },
+      { id:'#AL-OZ', name:'아시아나항공', supplier:'카탈로그', meta:'OZ · 풀서비스' },
+      { id:'#AL-VN', name:'베트남항공',   supplier:'카탈로그', meta:'VN · 풀서비스' },
+      { id:'#AL-VJ', name:'비엣젯항공',   supplier:'카탈로그', meta:'VJ · LCC' },
+      { id:'#AL-TG', name:'타이항공',     supplier:'카탈로그', meta:'TG · 풀서비스' },
+    ]
+  },
+  country: {
+    label:'국가', icon:'🌏', bg:'#e6fffb',
+    title:'어떤 국가에 콘텐츠를 등록할까요?',
+    desc:'국가 단위 — 해당 국가 여행 상품 전체에 자동 적용',
+    items: [
+      { id:'#C-VN', name:'베트남',  supplier:'카탈로그', meta:'동남아 · ISO: VN' },
+      { id:'#C-TH', name:'태국',    supplier:'카탈로그', meta:'동남아 · ISO: TH' },
+      { id:'#C-JP', name:'일본',    supplier:'카탈로그', meta:'동북아 · ISO: JP' },
+      { id:'#C-PH', name:'필리핀',  supplier:'카탈로그', meta:'동남아 · ISO: PH' },
+    ]
+  },
+  place: {
+    label:'여행지', icon:'📍', bg:'#fff0f6',
+    title:'어떤 여행지에 콘텐츠를 등록할까요?',
+    desc:'여행지(도시) 단위 — 해당 여행지 상품에 자동 적용',
+    items: [
+      { id:'#P-PQC', name:'푸꾸옥',  supplier:'카탈로그', meta:'베트남 · 휴양' },
+      { id:'#P-DAD', name:'다낭',    supplier:'카탈로그', meta:'베트남 · 휴양' },
+      { id:'#P-NHA', name:'나트랑',  supplier:'카탈로그', meta:'베트남 · 휴양' },
+      { id:'#P-BKK', name:'방콕',    supplier:'카탈로그', meta:'태국 · 도시' },
+      { id:'#P-CNX', name:'치앙마이', supplier:'카탈로그', meta:'태국 · 휴양' },
+    ]
+  },
+  spot: {
+    label:'스팟·체험', icon:'🎯', bg:'#f9f0ff',
+    title:'어떤 스팟·체험에 콘텐츠를 등록할까요?',
+    desc:'카탈로그 스팟 단위 — 해당 스팟을 포함하는 투어/상품에 자동 적용',
+    items: [
+      { id:'#S-VPLAND', name:'빈펄 랜드',     supplier:'카탈로그', meta:'푸꾸옥 · 테마파크' },
+      { id:'#S-BANAHL', name:'바나힐',        supplier:'카탈로그', meta:'다낭 · 테마파크' },
+      { id:'#S-HONTHM', name:'혼톰 케이블카', supplier:'카탈로그', meta:'푸꾸옥 · 어트랙션' },
+      { id:'#S-MARBLE', name:'마블 마운틴',   supplier:'카탈로그', meta:'다낭 · 자연' },
+    ]
   }
 };
 
 let currentTpkSrc = 'voucher';
 
+// (호환용) 모달도 currentBoard 기준으로 동작
 function openTargetPicker() {
-  // 현재 선택된 entry-src 카드 기준
-  const activeCard = document.querySelector('.entry-src-card.active');
-  const src = activeCard ? activeCard.dataset.src : 'voucher';
-  if (!TARGET_DATA[src]) return; // org는 picker 없음
-  currentTpkSrc = src;
-  const cfg = TARGET_DATA[src];
-  document.getElementById('tpk-title').textContent = cfg.title;
-  document.getElementById('tpk-desc').textContent = cfg.desc;
-  const iconEl = document.getElementById('tpk-icon');
-  iconEl.textContent = cfg.icon;
-  iconEl.style.background = cfg.bg;
-  // 공급사 필터 옵션
+  if (!TARGET_DATA[currentBoard]) return;
+  currentTpkSrc = currentBoard;
+  const cfg = TARGET_DATA[currentBoard];
+  // 모달 헤더는 위자드와 동일 데이터 사용 (모달 HTML이 남아있을 경우)
+  const modalTitle = document.getElementById('tpk-title');
+  const modalDesc  = document.getElementById('tpk-desc');
+  const modalIcon  = document.getElementById('tpk-icon');
+  if (modalTitle) modalTitle.textContent = cfg.title;
+  if (modalDesc)  modalDesc.textContent  = cfg.desc;
+  if (modalIcon) { modalIcon.textContent = cfg.icon; modalIcon.style.background = cfg.bg; }
   const supplierSet = new Set(cfg.items.map(i => i.supplier));
   const supSel = document.getElementById('tpk-supplier');
-  supSel.innerHTML = '<option value="">공급사 전체</option>' + [...supplierSet].map(s => `<option value="${s}">${s}</option>`).join('');
-  // 리스트 렌더
+  if (supSel) supSel.innerHTML = '<option value="">공급사 전체</option>' + [...supplierSet].map(s => `<option value="${s}">${s}</option>`).join('');
   renderTpkList('');
-  document.getElementById('tpk-overlay').classList.add('on');
-  document.body.style.overflow = 'hidden';
+  const overlay = document.getElementById('tpk-overlay');
+  if (overlay) { overlay.classList.add('on'); document.body.style.overflow = 'hidden'; }
 }
 
 function renderTpkList(query) {
@@ -2667,17 +2753,13 @@ function renderTpkList(query) {
 
 function selectTpkTarget(item) {
   const cfg = TARGET_DATA[currentTpkSrc] || {};
-  const labelMap = { voucher:'숙박권', flight:'항공권', tour:'투어·티켓', insurance:'보험', accom:'숙소', room:'객실', airline:'항공사', country:'국가', place:'여행지', spot:'스팟·체험' };
-  // Step 2 sel-target 갱신
   setSelectedTarget({
     icon: cfg.icon || '🏨',
-    type: `${labelMap[currentTpkSrc] || ''} · ${item.id}`,
+    type: `${cfg.label || ''} · ${item.id}`,
     name: item.name,
     meta: `${item.supplier} · ${item.meta}`
   });
-  // (호환) 기존 모달도 닫음
   closeTargetPicker();
-  // Step 2로 진행
   goStep(2);
 }
 
