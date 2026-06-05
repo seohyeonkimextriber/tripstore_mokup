@@ -543,7 +543,6 @@ tbody tr:hover td { background: #fafafa; }
     <div class="side-group">
       <div class="side-title">TRP 게시판</div>
       <div class="side-item active" data-side="hotel_voucher"></div>
-      <div class="side-item" data-side="room_rate"></div>
       <div class="side-item" data-side="flight_voucher"></div>
       <div class="side-item" data-side="tour"></div>
       <div class="side-item" data-side="insurance"></div>
@@ -1161,7 +1160,6 @@ tbody tr:hover td { background: #fafafa; }
       <div class="board-tabs">
         <span class="board-tab-group g-stock" title="내가 직접 등록한 숙박권·항공권·투어·티켓·보험 등 판매 단위에 들어가는 콘텐츠">📦 상품 정보</span>
         <button class="board-tab active" data-board="hotel_voucher" data-related="accom,room" onclick="openList('hotel_voucher')">🏨 숙박권</button>
-        <button class="board-tab" data-board="room_rate" data-related="accom,room" onclick="openList('room_rate')">🛏 객실요금표</button>
         <button class="board-tab" data-board="flight_voucher" data-related="airline,country,place" onclick="openList('flight_voucher')">✈️ 항공권</button>
         <button class="board-tab" data-board="tour" data-related="spot" onclick="openList('tour')">🎫 투어·티켓</button>
         <button class="board-tab" data-board="insurance" onclick="openList('insurance')">🛡 보험</button>
@@ -1544,7 +1542,7 @@ tbody tr:hover td { background: #fafafa; }
 // ===== 뷰 전환 =====
 // ===== 게시판 ↔ 에디터 진입소스 매핑 =====
 const BOARD_TO_SRC = {
-  hotel_voucher:'voucher', room_rate:'voucher', flight_voucher:'flight', tour:'tour', insurance:'insurance',
+  hotel_voucher:'voucher', flight_voucher:'flight', tour:'tour', insurance:'insurance',
   accom:'voucher', room:'voucher', airline:'flight', country:'org', place:'org', spot:'tour',
   org:'org', all:'voucher'
 };
@@ -1609,7 +1607,6 @@ function setSelectedTarget(t) {
 // ===== 재고 → 기본정보 가져오기 매핑 =====
 const STOCK_TO_CATALOG = {
   hotel_voucher: [{ key:'accom', label:'🏠 숙소' }, { key:'room', label:'🛌 객실' }],
-  room_rate:     [{ key:'accom', label:'🏠 숙소' }, { key:'room', label:'🛌 객실' }],
   flight_voucher:[{ key:'airline', label:'🛫 항공사' }, { key:'country', label:'🌏 국가' }, { key:'place', label:'📍 여행지' }],
   tour:          [{ key:'spot', label:'🎯 스팟·체험' }],
   insurance:     [],
@@ -1732,8 +1729,7 @@ function importCatalogContent() {
 // ===== 게시판 메타 (12종 + 통합조회) — 그룹: 상품 정보 / 기본 정보 / 필수 공통 =====
 const BOARD_META = {
   // 상품 정보 (구 "재고 단위")
-  hotel_voucher:  { group:'상품 정보', icon:'🏨', name:'숙박권 게시판',     desc:'숙박권 단위 콘텐츠 · Scope: 숙박권 전체 · 식사 · 객실 · 옵션 · 요금',  bg:'#e6f4ff' },
-  room_rate:      { group:'상품 정보', icon:'🛏', name:'객실요금표 게시판', desc:'숙소×객실(×식사) 조합 단위 콘텐츠 · 특정 조합에만 적용',                bg:'#e6fffb' },
+  hotel_voucher:  { group:'상품 정보', icon:'🏨', name:'숙박권 게시판',     desc:'숙박권 콘텐츠 · 카테고리별 Scope: 전체 / 식사 / 객실 / 객실요금표(객실+식사) / 옵션',  bg:'#e6f4ff' },
   flight_voucher: { group:'상품 정보', icon:'✈️', name:'항공권 게시판',     desc:'항공권 단위 콘텐츠 · Scope: 노선 · 항공사 · 좌석등급 · 운임유형',       bg:'#f0f5ff' },
   tour:           { group:'상품 정보', icon:'🎫', name:'투어·티켓 게시판',  desc:'투어/티켓 단위 콘텐츠 · Scope: 옵션 · 회차 · 기간',                      bg:'#fff7e6' },
   insurance:      { group:'상품 정보', icon:'🛡', name:'보험 게시판',       desc:'여행자보험 콘텐츠 · Scope: 플랜 · 보장기간',                              bg:'#f6ffed' },
@@ -2872,18 +2868,6 @@ const TARGET_DATA = {
       { id:'#105', name:'노보텔 푸꾸옥 리조트',    supplier:'트립스토어', meta:'객실 4종 · 식사 3종' },
       { id:'#106', name:'멜리아 빈펄 다낭',        supplier:'TMG',         meta:'객실 3종 · 식사 4종' },
       { id:'#107', name:'그랜드 머큐어 다낭',      supplier:'NUUA',        meta:'객실 2종 · 식사 3종' },
-    ]
-  },
-  room_rate: {
-    label:'객실요금표', icon:'🛏', bg:'#e6fffb',
-    title:'어떤 객실요금표(숙소×객실×식사 조합)에 콘텐츠를 등록할까요?',
-    desc:'특정 조합에만 적용되는 콘텐츠',
-    items: [
-      { id:'#RR-103-DXSV-BB', name:'솔바이멜리아 × 디럭스 씨뷰 × BB',  supplier:'트립스토어', meta:'숙박권 #103 조합' },
-      { id:'#RR-103-DXSV-AI', name:'솔바이멜리아 × 디럭스 씨뷰 × AI',  supplier:'트립스토어', meta:'숙박권 #103 조합' },
-      { id:'#RR-103-PRES-BB', name:'솔바이멜리아 × 프리미엄 × BB',     supplier:'트립스토어', meta:'숙박권 #103 조합' },
-      { id:'#RR-104-DLX',      name:'씨셀스 × 디럭스 (식사 무관)',      supplier:'TMG',         meta:'숙박권 #104 객실 단독' },
-      { id:'#RR-106-SUIT-AI', name:'멜리아 빈펄 × 스위트 × AI',         supplier:'TMG',         meta:'숙박권 #106 조합' },
     ]
   },
   flight_voucher: {
