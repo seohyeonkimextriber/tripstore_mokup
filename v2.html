@@ -30,12 +30,18 @@ body { font-family: 'Pretendard', 'Apple SD Gothic Neo', -apple-system, sans-ser
 .subnav-item.active::after { content: ''; position: absolute; bottom: 0; left: 0; right: 0; height: 2px; background: #1677ff; }
 .subnav-item .new-badge { font-size: 9px; background: #f5222d; color: #fff; padding: 1px 5px; border-radius: 8px; margin-left: 5px; font-weight: 700; letter-spacing: 0.3px; }
 
-/* ===== BOARD TABS (12 게시판 + 3그룹) ===== */
-.board-tabs { background: #fff; border: 1px solid #f0f0f0; border-radius: 8px; padding: 5px; margin-bottom: 10px; display: flex; flex-wrap: wrap; gap: 2px; align-items: center; }
+/* ===== BOARD TABS (Master-Detail) ===== */
+.board-tabs { background: #fff; border: 1px solid #f0f0f0; border-radius: 8px; padding: 5px; margin-bottom: 8px; display: flex; flex-wrap: wrap; gap: 2px; align-items: center; }
 .board-tab { padding: 6px 11px; font-size: 12.5px; font-weight: 500; color: rgba(0,0,0,0.65); cursor: pointer; border-radius: 6px; transition: all 0.15s; display: inline-flex; align-items: center; gap: 5px; background: transparent; border: none; font-family: inherit; white-space: nowrap; }
 .board-tab:hover { color: rgba(0,0,0,0.88); background: #fafafa; }
 .board-tab.active { color: #1677ff; background: #e6f4ff; font-weight: 700; }
-.board-tab-sep { flex-basis: 100%; height: 1px; background: #f5f5f5; margin: 4px 0; }
+.board-tab.parent-active { color: #1677ff; background: rgba(22,119,255,0.06); font-weight: 600; }
+.board-tab-sep { width: 1px; height: 18px; background: #e8e8e8; margin: 0 6px; }
+/* Related (Sub) row */
+.board-tabs.related-row { background: #fafbfc; border-color: #e8e8e8; padding: 4px 6px; margin-bottom: 10px; position: relative; }
+.board-tabs.related-row::before { content: '↳'; color: rgba(0,0,0,0.3); font-size: 14px; margin-right: 6px; margin-left: 4px; }
+.board-tabs.related-row .board-tab { padding: 5px 10px; font-size: 12px; }
+.board-tabs.related-row .board-tab.active { background: #f9f0ff; color: #531dab; }
 .board-tab-group { font-size: 12px; font-weight: 700; padding: 5px 12px; border-radius: 14px; white-space: nowrap; display: inline-flex; align-items: center; gap: 5px; margin-right: 4px; border: 1px solid transparent; }
 .board-tab-group .info { font-size: 10px; opacity: 0.7; cursor: help; }
 .board-tab-group.g-stock    { background: #e6f4ff; color: #0958d9; border-color: #91caff; }
@@ -1151,25 +1157,23 @@ tbody tr:hover td { background: #fafafa; }
         </div>
       </div>
 
-      <!-- 12 게시판 sub-tab + 3그룹 (단위별 줄바꿈 + 컬러 칩) -->
+      <!-- Primary: 상품정보 5종 + 필수공통 -->
       <div class="board-tabs">
-        <span class="board-tab-group g-stock" title="내가 직접 등록한 숙박권·항공권·투어 등 판매 단위에 들어가는 콘텐츠">📦 상품 정보 <span class="info">ⓘ</span></span>
-        <button class="board-tab active" data-board="hotel_voucher" onclick="openList('hotel_voucher')">🏨 숙박권</button>
-        <button class="board-tab" data-board="room_rate" onclick="openList('room_rate')">🛏 객실요금표</button>
-        <button class="board-tab" data-board="flight_voucher" onclick="openList('flight_voucher')">✈️ 항공권</button>
-        <button class="board-tab" data-board="tour" onclick="openList('tour')">🎫 투어·티켓</button>
+        <span class="board-tab-group g-stock" title="내가 직접 등록한 숙박권·항공권·투어·티켓·보험 등 판매 단위에 들어가는 콘텐츠">📦 상품 정보</span>
+        <button class="board-tab active" data-board="hotel_voucher" data-related="accom,room" onclick="openList('hotel_voucher')">🏨 숙박권</button>
+        <button class="board-tab" data-board="room_rate" data-related="accom,room" onclick="openList('room_rate')">🛏 객실요금표</button>
+        <button class="board-tab" data-board="flight_voucher" data-related="airline,country,place" onclick="openList('flight_voucher')">✈️ 항공권</button>
+        <button class="board-tab" data-board="tour" data-related="spot,country,place" onclick="openList('tour')">🎫 투어·티켓</button>
         <button class="board-tab" data-board="insurance" onclick="openList('insurance')">🛡 보험</button>
         <span class="board-tab-sep"></span>
-        <span class="board-tab-group g-base" title="숙소·객실·항공사·스팟·국가·여행지 — 재고에서 자동 끌고 오는 기본 콘텐츠">🗂 기본 정보 <span class="info">ⓘ</span></span>
-        <button class="board-tab" data-board="accom" onclick="openList('accom')">🏠 숙소</button>
-        <button class="board-tab" data-board="room" onclick="openList('room')">🛌 객실</button>
-        <button class="board-tab" data-board="airline" onclick="openList('airline')">🛫 항공사</button>
-        <button class="board-tab" data-board="spot" onclick="openList('spot')">🎯 스팟·체험</button>
-        <button class="board-tab" data-board="country" onclick="openList('country')">🌏 국가</button>
-        <button class="board-tab" data-board="place" onclick="openList('place')">📍 여행지</button>
-        <span class="board-tab-sep"></span>
-        <span class="board-tab-group g-common" title="회사 표준 — 모든 상품에 자동 적용 · FAQ · 예약안내 · 표준 취소환불규정">🌟 필수 공통 <span class="info">ⓘ</span></span>
+        <span class="board-tab-group g-common" title="회사 표준 — 모든 상품에 자동 적용 · FAQ · 예약안내 · 표준 취소환불규정">🌟 필수 공통</span>
         <button class="board-tab" data-board="org" onclick="openList('org')">🌟 필수공통</button>
+      </div>
+
+      <!-- Secondary: 선택된 상품정보의 관련 기본정보 (동적) -->
+      <div id="related-tabs" class="board-tabs related-row" style="display:none;">
+        <span class="board-tab-group g-base" title="현재 선택된 상품정보가 자동으로 끌어오는 기본정보 게시판">🗂 관련 기본정보</span>
+        <div id="related-tabs-list" style="display:inline-flex;gap:2px;align-items:center;flex-wrap:wrap;"></div>
       </div>
 
       <!-- 게시판별 컨텍스트 헤더 -->
@@ -1752,14 +1756,47 @@ function showView(name) {
   window.scrollTo(0, 0);
 }
 
+// ===== 게시판 ↔ 부모 매핑 (역방향 lookup) =====
+const CATALOG_TO_PRIMARY = {
+  accom: 'hotel_voucher', room: 'hotel_voucher',
+  airline: 'flight_voucher', country: 'flight_voucher', place: 'flight_voucher',
+  spot: 'tour',
+};
+
 // ===== 게시판 탭 → 목록 (필터 적용) =====
 function openList(filter) {
   currentBoard = filter;
   showView('list');
-  // 게시판 탭 active 상태
-  document.querySelectorAll('.board-tab').forEach(t => t.classList.remove('active'));
+  // 모든 탭 비활성화
+  document.querySelectorAll('.board-tab').forEach(t => { t.classList.remove('active'); t.classList.remove('parent-active'); });
+  // 클릭된 탭 활성화
   const tabEl = document.querySelector(`.board-tab[data-board="${filter}"]`);
   if (tabEl) tabEl.classList.add('active');
+  // Related row 처리
+  const relatedRow = document.getElementById('related-tabs');
+  const relatedList = document.getElementById('related-tabs-list');
+  let primaryKey = filter;
+  // 기본정보 board면 부모 primary 추적
+  if (CATALOG_TO_PRIMARY[filter]) {
+    primaryKey = CATALOG_TO_PRIMARY[filter];
+    const parentEl = document.querySelector(`.board-tab[data-board="${primaryKey}"]`);
+    if (parentEl) parentEl.classList.add('parent-active');
+  }
+  // primary에 related 정보 가져와서 secondary 렌더
+  const primaryTab = document.querySelector(`.board-tab[data-board="${primaryKey}"]`);
+  const relatedAttr = primaryTab && primaryTab.dataset.related;
+  if (relatedAttr) {
+    const related = relatedAttr.split(',').map(s => s.trim()).filter(Boolean);
+    relatedList.innerHTML = related.map(k => {
+      const m = BOARD_META[k] || {};
+      const isActive = k === filter ? 'active' : '';
+      return `<button class="board-tab ${isActive}" data-board="${k}" onclick="openList('${k}')">${m.icon || ''} ${m.name?m.name.replace(' 게시판',''):k}</button>`;
+    }).join('');
+    relatedRow.style.display = 'flex';
+  } else {
+    relatedRow.style.display = 'none';
+    relatedList.innerHTML = '';
+  }
   // (히든) 사이드바 호환
   document.querySelectorAll('.side-item').forEach(s => s.classList.remove('active'));
   const sideEl = document.querySelector(`.side-item[data-side="${filter}"]`);
