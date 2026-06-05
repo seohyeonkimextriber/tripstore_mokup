@@ -88,6 +88,14 @@ body { font-family: 'Pretendard', 'Apple SD Gothic Neo', -apple-system, sans-ser
 textarea.fi { min-height: 60px; padding: 8px 10px; resize: vertical; font-family: inherit; line-height: 1.6; }
 select.fi { appearance: none; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='%23bbb'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 10px center; padding-right: 28px; cursor: pointer; }
 
+/* ===== SCOPE TABS (숙박권 등록 시 Scope 선택) ===== */
+.scope-tabs-wrap { background:#fff; border:1px solid #f0f0f0; border-radius:8px; padding:5px; margin-bottom:8px; display:inline-flex; gap:2px; flex-wrap:wrap; max-width:100%; }
+.scope-tab-btn { padding:7px 12px; font-size:12px; font-weight:500; color:rgba(0,0,0,0.65); cursor:pointer; border-radius:6px; transition:all .15s; background:transparent; border:none; font-family:inherit; white-space:nowrap; display:inline-flex; align-items:center; gap:5px; }
+.scope-tab-btn:hover { color:rgba(0,0,0,0.88); background:#fafafa; }
+.scope-tab-btn.active { color:#fff; background:#1677ff; font-weight:700; }
+.scope-sub { padding:8px 12px; background:#fafbff; border:1px solid #e6f0ff; border-radius:8px; margin-bottom:10px; display:flex; gap:8px; align-items:center; flex-wrap:wrap; font-size:11.5px; }
+.scope-sub-label { font-weight:700; color:rgba(0,0,0,0.65); }
+
 /* ===== CANCEL POLICY (취소환불 단일 적용 카드) ===== */
 .cancel-policy { border: 2px solid #ffa39e !important; background: linear-gradient(to right, #fff1f0 0%, #fff 30%) !important; }
 .cancel-policy .cat-sec-head { background: #fff1f0 !important; border-bottom: 1px solid #ffccc7; }
@@ -626,6 +634,19 @@ tbody tr:hover td { background: #fafafa; }
           <div id="sel-meta" class="sel-target-meta">트립스토어 · 객실 3종 · 식사 4종</div>
         </div>
         <button class="btn btn-ghost btn-sm" onclick="goStep(1)">← 타겟 변경</button>
+      </div>
+
+      <!-- Scope 탭 (숙박권 한정) -->
+      <div id="scope-tabs-section" style="display:none;">
+        <div style="font-size:11px;font-weight:700;color:rgba(0,0,0,0.55);margin-bottom:4px;">🎯 어떤 조건으로 적용할까요?</div>
+        <div class="scope-tabs-wrap">
+          <button class="scope-tab-btn active" data-scope="all" onclick="setScopeTab('all')">🌐 숙박권 전체</button>
+          <button class="scope-tab-btn" data-scope="room-meal" onclick="setScopeTab('room-meal')">🛏 객실요금표 (객실+식사)</button>
+          <button class="scope-tab-btn" data-scope="meal" onclick="setScopeTab('meal')">🍽 식사일 때만</button>
+          <button class="scope-tab-btn" data-scope="room" onclick="setScopeTab('room')">🛌 객실일 때만</button>
+          <button class="scope-tab-btn" data-scope="option" onclick="setScopeTab('option')">⚙️ 숙소 옵션</button>
+        </div>
+        <div id="scope-sub" class="scope-sub" style="display:none;"></div>
       </div>
 
       <!-- 카탈로그 가져오기 (재고 게시판 한정) -->
@@ -1557,6 +1578,12 @@ function openEditor() {
   const meta = BOARD_META[currentBoard] || BOARD_META.hotel_voucher;
   const crumb = document.getElementById('editor-board-crumb');
   if (crumb) crumb.textContent = meta.name;
+  // Scope 탭 (숙박권 한정)
+  const scopeSection = document.getElementById('scope-tabs-section');
+  if (scopeSection) {
+    scopeSection.style.display = (currentBoard === 'hotel_voucher') ? 'block' : 'none';
+    if (currentBoard === 'hotel_voucher') setScopeTab('all');
+  }
   // 카탈로그 가져오기 옵션 셋업 (재고 한정)
   setupCatImport(currentBoard);
   // 필수공통(org)은 타겟 선택 없이 바로 Step 2
@@ -3040,6 +3067,35 @@ function selectTpkTarget(item) {
 function closeTargetPicker() {
   document.getElementById('tpk-overlay').classList.remove('on');
   document.body.style.overflow = '';
+}
+
+// ===== Scope 탭 (숙박권 등록 시 — 어떤 조건으로 적용할지) =====
+function setScopeTab(scope) {
+  document.querySelectorAll('.scope-tab-btn').forEach(t => t.classList.toggle('active', t.dataset.scope === scope));
+  const sub = document.getElementById('scope-sub');
+  if (!sub) return;
+  if (scope === 'all') {
+    sub.style.display = 'none';
+    sub.innerHTML = '';
+  } else if (scope === 'meal') {
+    sub.style.display = 'flex';
+    sub.innerHTML = '<span class="scope-sub-label">🍽 식사 타입</span>'
+      + '<span class="scope-pill">RO</span><span class="scope-pill active">BB</span><span class="scope-pill">HB</span><span class="scope-pill">FB</span><span class="scope-pill">AI</span>';
+  } else if (scope === 'room') {
+    sub.style.display = 'flex';
+    sub.innerHTML = '<span class="scope-sub-label">🛌 객실 선택</span>'
+      + '<select class="fi" style="width:200px;height:28px;"><option>디럭스 씨뷰</option><option>디럭스 가든뷰</option><option>프리미엄 스위트</option></select>';
+  } else if (scope === 'room-meal') {
+    sub.style.display = 'flex';
+    sub.innerHTML = '<span class="scope-sub-label">🛏 객실 + 🍽 식사 조합</span>'
+      + '<select class="fi" style="width:160px;height:28px;"><option>디럭스 씨뷰</option><option>디럭스 가든뷰</option><option>프리미엄 스위트</option></select>'
+      + '<span style="color:rgba(0,0,0,0.3);">×</span>'
+      + '<select class="fi" style="width:90px;height:28px;"><option>RO</option><option selected>BB</option><option>HB</option><option>FB</option><option>AI</option></select>';
+  } else if (scope === 'option') {
+    sub.style.display = 'flex';
+    sub.innerHTML = '<span class="scope-sub-label">⚙️ 옵션</span>'
+      + '<span class="scope-pill active">얼리체크인</span><span class="scope-pill">레이트체크아웃</span><span class="scope-pill">왕복픽업</span>';
+  }
 }
 
 // ===== 소유 조직 (owner_org) 선택 토글 =====
