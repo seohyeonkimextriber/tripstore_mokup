@@ -1569,15 +1569,46 @@ const BOARD_TO_SRC = {
 };
 let currentBoard = 'hotel_voucher';
 
+// ===== 게시판 그룹 분류 =====
+const KIBON_BOARDS = ['accom','room','airline','spot','country','place'];
+const STOCK_BOARDS = ['hotel_voucher','flight_voucher','tour','insurance'];
+
 // ===== 콘텐츠 등록 진입 =====
 function openEditor() {
   showView('editor');
-  const src = BOARD_TO_SRC[currentBoard] || 'voucher';
-  if (typeof setEntrySrc === 'function') setEntrySrc(src);
-  // 에디터 브레드크럼에 현재 게시판명 표시
   const meta = BOARD_META[currentBoard] || BOARD_META.hotel_voucher;
   const crumb = document.getElementById('editor-board-crumb');
   if (crumb) crumb.textContent = meta.name;
+
+  const isKibon = KIBON_BOARDS.includes(currentBoard);
+  const isOrg = currentBoard === 'org';
+  const isStock = STOCK_BOARDS.includes(currentBoard);
+
+  // cat-stack 콘텐츠 로드
+  if (isStock && typeof setEntrySrc === 'function') {
+    const src = BOARD_TO_SRC[currentBoard] || 'voucher';
+    setEntrySrc(src);
+  } else if (isKibon) {
+    const stack = document.getElementById('cat-stack');
+    if (stack) stack.innerHTML = `
+      <div style="padding:30px 20px;text-align:center;color:rgba(0,0,0,0.45);font-size:13px;background:#fafafa;border:1.5px dashed #e8e8e8;border-radius:10px;">
+        📝 ${meta.name} — 새 콘텐츠 등록<br>
+        <div style="font-size:11.5px;margin-top:8px;color:rgba(0,0,0,0.4);">아래 <strong style="color:#1677ff;">+ 카테고리 추가</strong> 버튼으로 시작하세요</div>
+        <div style="font-size:11px;margin-top:10px;color:rgba(0,0,0,0.35);">여기서 등록한 콘텐츠는 매칭되는 재고(상품정보)에 자동 끌려갑니다</div>
+      </div>`;
+    // 기본정보 cat-picker 옵션 조정 (취소환불·스페셜혜택 등 제외)
+    const picker = document.querySelector('#cat-picker .cat-picker-grid');
+    if (picker) {
+      picker.innerHTML = `
+        <div class="cat-picker-item" onclick="addCatSec('소개')"><span>📝</span> 소개</div>
+        <div class="cat-picker-item" onclick="addCatSec('핵심포인트')"><span>🎯</span> 핵심포인트</div>
+        <div class="cat-picker-item" onclick="addCatSec('안내사항')"><span>📋</span> 안내사항</div>
+        <div class="cat-picker-item" onclick="addCatSec('유의사항')"><span>⚠️</span> 유의사항</div>
+        <div class="cat-picker-item" onclick="addCatSec('FAQ')"><span>❓</span> 자주묻는 질문</div>
+      `;
+    }
+  }
+
   // Scope 탭 (숙박권 한정)
   const scopeSection = document.getElementById('scope-tabs-section');
   if (scopeSection) {
