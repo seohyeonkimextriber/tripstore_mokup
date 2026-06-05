@@ -82,6 +82,29 @@ body { font-family: 'Pretendard', 'Apple SD Gothic Neo', -apple-system, sans-ser
 textarea.fi { min-height: 60px; padding: 8px 10px; resize: vertical; font-family: inherit; line-height: 1.6; }
 select.fi { appearance: none; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='%23bbb'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 10px center; padding-right: 28px; cursor: pointer; }
 
+/* ===== CANCEL POLICY (취소환불 단일 적용 카드) ===== */
+.cancel-policy { border: 2px solid #ffa39e !important; background: linear-gradient(to right, #fff1f0 0%, #fff 30%) !important; }
+.cancel-policy .cat-sec-head { background: #fff1f0 !important; border-bottom: 1px solid #ffccc7; }
+.single-badge { display:inline-flex; align-items:center; gap:3px; font-size:10px; padding:2px 8px; background:#fff; border:1px solid #ffa39e; color:#cf1322; border-radius:10px; font-weight:700; margin-left:6px; }
+.cp-active { padding:10px 14px; background:#f6ffed; border:1px solid #b7eb8f; border-radius:6px; margin-bottom:10px; display:flex; align-items:center; gap:10px; }
+.cp-active-dot { width:10px; height:10px; border-radius:50%; background:#52c41a; flex-shrink:0; box-shadow:0 0 0 3px rgba(82,196,26,0.18); }
+.cp-active-body { flex:1; }
+.cp-active-label { font-size:11px; font-weight:700; color:#389e0d; letter-spacing:0.2px; }
+.cp-active-source { font-size:13px; font-weight:700; color:rgba(0,0,0,0.88); margin-top:1px; }
+.cp-content { padding:12px 14px; background:#fff; border:1px solid #f0f0f0; border-radius:6px; margin-bottom:10px; }
+.cp-overrides { padding:8px 12px; background:#fafafa; border:1px dashed #d9d9d9; border-radius:6px; cursor:pointer; }
+.cp-overrides-toggle { font-size:11.5px; color:rgba(0,0,0,0.55); display:flex; align-items:center; gap:6px; user-select:none; font-weight:600; }
+.cp-overrides-toggle .arrow { transition: transform .2s; display:inline-block; }
+.cp-overrides.open .cp-overrides-toggle .arrow { transform: rotate(90deg); }
+.cp-overrides-list { display:none; margin-top:8px; flex-direction:column; gap:5px; padding-top:8px; border-top:1px dashed #e8e8e8; }
+.cp-overrides.open .cp-overrides-list { display:flex; }
+.cp-override-item { display:flex; align-items:center; gap:8px; padding:6px 10px; background:#fff; border:1px solid #f0f0f0; border-radius:6px; }
+.cp-override-icon { width:6px; height:6px; border-radius:50%; background:#bfbfbf; flex-shrink:0; }
+.cp-override-text { font-size:11.5px; color:rgba(0,0,0,0.55); flex:1; }
+.cp-override-tag { font-size:9.5px; padding:1px 6px; background:#f5f5f5; color:rgba(0,0,0,0.4); border:1px solid #e8e8e8; border-radius:8px; font-weight:600; text-transform:uppercase; letter-spacing:0.3px; }
+.cp-priority-hint { font-size:11px; color:rgba(0,0,0,0.5); padding:8px 0 0; display:flex; align-items:center; gap:5px; }
+.cp-priority-hint strong { color:rgba(0,0,0,0.75); }
+
 /* ===== IMPORTED FROM CATALOG (불러온 카테고리 표시) ===== */
 .cat-sec.imported { border-color: #d3adf7; background: linear-gradient(to right, #faf5ff 0%, #fff 50%); }
 .cat-sec.imported .cat-sec-head { background: #f9f0ff; }
@@ -2303,6 +2326,56 @@ const ENTRY_SRC_CAT_STACKS = {
           <div class="chk-item"><span class="chk-mark" style="color:#faad14;">⚠</span><input type="text" class="chk-input" value="이름 변경/스펠링 수정 불가 (재발권 필요)"><button class="bi-item-del" onclick="delItem(this)">✕</button></div>
         </div>
         <div class="bi-add-btn" style="margin-top:10px;" onclick="addItem(this,'check')">+ 항목 추가</div>
+      </div>
+    </div>
+    <!-- 취소환불 규정 — 단일 적용 특수 카드 -->
+    <div class="cat-sec cancel-policy" data-cat="취소환불규정">
+      <div class="cat-sec-head" onclick="toggleCatSec(this)">
+        <span class="cat-sec-chevron">▼</span><span class="cat-sec-icon">📋</span>
+        <span class="cat-sec-title">취소·환불 규정</span>
+        <span class="single-badge">⚡ 단일 적용</span>
+        <span class="cat-sec-sub">상품에 1개만 적용</span>
+        <div class="cat-sec-actions" onclick="event.stopPropagation();">
+          <button class="block-act-btn danger" title="삭제 (필수공통 표준으로 fallback)" onclick="removeCatSec(this)">✕</button>
+        </div>
+      </div>
+      <div class="cat-sec-body">
+        <div class="cp-active">
+          <div class="cp-active-dot"></div>
+          <div class="cp-active-body">
+            <div class="cp-active-label">🟢 현재 적용 중</div>
+            <div class="cp-active-source">✈️ 항공권 #A-247 · 베트남항공 취소환불</div>
+          </div>
+          <span style="font-size:10px;color:#52c41a;background:#f6ffed;padding:3px 8px;border:1px solid #b7eb8f;border-radius:10px;font-weight:700;">최우선</span>
+        </div>
+        <div class="cp-content">
+          <div class="chk-list">
+            <div class="chk-item"><span class="chk-mark">✓</span><input type="text" class="chk-input" value="출발 30일 전: 전액 환불"><button class="bi-item-del" onclick="delItem(this)">✕</button></div>
+            <div class="chk-item"><span class="chk-mark">✓</span><input type="text" class="chk-input" value="출발 20~29일 전: 상품가의 10% 위약금"><button class="bi-item-del" onclick="delItem(this)">✕</button></div>
+            <div class="chk-item"><span class="chk-mark">✓</span><input type="text" class="chk-input" value="출발 10~19일 전: 상품가의 30% 위약금"><button class="bi-item-del" onclick="delItem(this)">✕</button></div>
+            <div class="chk-item"><span class="chk-mark">✓</span><input type="text" class="chk-input" value="출발 5~9일 전: 50% 위약금"><button class="bi-item-del" onclick="delItem(this)">✕</button></div>
+            <div class="chk-item"><span class="chk-mark">✓</span><input type="text" class="chk-input" value="출발 4일 이내: 환불 불가 (천재지변 예외)"><button class="bi-item-del" onclick="delItem(this)">✕</button></div>
+          </div>
+          <div class="bi-add-btn" style="margin-top:10px;" onclick="addItem(this,'check')">+ 항목 추가</div>
+        </div>
+        <div class="cp-overrides" onclick="this.classList.toggle('open')">
+          <div class="cp-overrides-toggle"><span class="arrow">▶</span> 덮어쓰여진 출처 (2)</div>
+          <div class="cp-overrides-list">
+            <div class="cp-override-item">
+              <span class="cp-override-icon"></span>
+              <span class="cp-override-text">🏨 숙박권 #103 · 솔바이멜리아 취소환불</span>
+              <span class="cp-override-tag">override됨</span>
+            </div>
+            <div class="cp-override-item">
+              <span class="cp-override-icon"></span>
+              <span class="cp-override-text">🌟 필수공통 · 회사 표준 취소환불</span>
+              <span class="cp-override-tag">override됨</span>
+            </div>
+          </div>
+        </div>
+        <div class="cp-priority-hint">
+          ℹ️ 우선순위: <strong>✈️ 항공권 &gt; 🏨 숙박권 &gt; 🌟 필수공통</strong> — 가장 specific한 1개만 적용됩니다
+        </div>
       </div>
     </div>
   `,
