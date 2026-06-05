@@ -602,10 +602,22 @@ tbody tr:hover td { background: #fafafa; }
 
       <!-- 카탈로그 가져오기 (재고 게시판 한정) -->
       <div id="cat-import" class="cat-import" style="display:none;">
-        <div class="cat-import-label">🗂 카탈로그 콘텐츠 가져오기</div>
+        <div class="cat-import-label">🗂 기본 정보 콘텐츠 가져오기</div>
         <div class="cat-import-opts" id="cat-import-opts"></div>
         <button class="btn btn-default btn-sm" onclick="importCatalogContent()" style="border-color:#1677ff;color:#1677ff;font-weight:600;">📥 지금 불러오기</button>
-        <div class="cat-import-hint">선택한 카탈로그의 콘텐츠를 편집기에 즉시 추가 + 저장 시 자동 적용</div>
+        <div class="cat-import-hint">선택한 기본정보의 콘텐츠를 편집기에 즉시 추가 + 저장 시 자동 적용</div>
+      </div>
+
+      <!-- 우선순위 + 취소환불 안내 (재고 게시판 한정) -->
+      <div id="priority-info" style="display:none;padding:8px 12px;margin-bottom:10px;background:#f0f7ff;border:1px solid #91caff;border-radius:6px;font-size:11.5px;color:#0958d9;line-height:1.65;">
+        <div style="display:flex;align-items:center;gap:6px;margin-bottom:3px;font-weight:700;">⚙️ 적용 우선순위</div>
+        <div style="padding-left:22px;">
+          🗂 <strong>기본정보</strong> → 📦 <strong>상품정보(현재)</strong> → 🌟 <strong>필수공통</strong> 순서로 자동 합쳐서 노출.
+          기본정보는 반드시 상품정보를 거쳐 적용되며, 필수공통을 직접 건너뛸 수 없습니다.
+        </div>
+        <div style="padding-left:22px;margin-top:4px;">
+          📋 <strong>취소환불규정</strong>: 현재 <em>필수공통의 표준 규정</em> 적용 중. 이 재고에 별도 규정이 필요하면 카테고리 추가 → 필수공통 자동 숨김. (기본정보 게시판에서는 등록 불가 — 공급사 룰)
+        </div>
       </div>
 
       <!-- POST 소유 조직 (어드민에서 등록 시) -->
@@ -1125,17 +1137,15 @@ tbody tr:hover td { background: #fafafa; }
         <button class="board-tab" data-board="tour" onclick="openList('tour')">🎫 투어·티켓</button>
         <button class="board-tab" data-board="insurance" onclick="openList('insurance')">🛡 보험</button>
         <span class="board-tab-sep"></span>
-        <span class="board-tab-group g-base" title="숙소·객실·항공사·스팟 등 재고에 직접 연결되는 카탈로그 콘텐츠">🗂 기본 정보 <span class="info">ⓘ</span></span>
+        <span class="board-tab-group g-base" title="숙소·객실·항공사·스팟·국가·여행지 — 재고에서 자동 끌고 오는 기본 콘텐츠">🗂 기본 정보 <span class="info">ⓘ</span></span>
         <button class="board-tab" data-board="accom" onclick="openList('accom')">🏠 숙소</button>
         <button class="board-tab" data-board="room" onclick="openList('room')">🛌 객실</button>
         <button class="board-tab" data-board="airline" onclick="openList('airline')">🛫 항공사</button>
         <button class="board-tab" data-board="spot" onclick="openList('spot')">🎯 스팟·체험</button>
-        <span class="board-tab-sep"></span>
-        <span class="board-tab-group g-location" title="국가·여행지 — 도착 위치가 일치하는 모든 상품에 자동 적용">🌍 위치 공통 <span class="info">ⓘ</span></span>
         <button class="board-tab" data-board="country" onclick="openList('country')">🌏 국가</button>
         <button class="board-tab" data-board="place" onclick="openList('place')">📍 여행지</button>
         <span class="board-tab-sep"></span>
-        <span class="board-tab-group g-common" title="회사 표준 — 모든 상품에 자동 적용되는 필수 공통 콘텐츠">🌟 필수 공통 <span class="info">ⓘ</span></span>
+        <span class="board-tab-group g-common" title="회사 표준 — 모든 상품에 자동 적용 · FAQ · 예약안내 · 표준 취소환불규정">🌟 필수 공통 <span class="info">ⓘ</span></span>
         <button class="board-tab" data-board="org" onclick="openList('org')">🌟 필수공통</button>
       </div>
 
@@ -1569,23 +1579,26 @@ function setSelectedTarget(t) {
   document.getElementById('sel-meta').textContent = t.meta;
 }
 
-// ===== 재고 → 카탈로그 가져오기 매핑 =====
+// ===== 재고 → 기본정보 가져오기 매핑 =====
 const STOCK_TO_CATALOG = {
   hotel_voucher: [{ key:'accom', label:'🏠 숙소' }, { key:'room', label:'🛌 객실' }],
   room_rate:     [{ key:'accom', label:'🏠 숙소' }, { key:'room', label:'🛌 객실' }],
-  flight_voucher:[{ key:'airline', label:'🛫 항공사' }],
-  tour:          [{ key:'spot', label:'🎯 스팟·체험' }],
+  flight_voucher:[{ key:'airline', label:'🛫 항공사' }, { key:'country', label:'🌏 국가' }, { key:'place', label:'📍 여행지' }],
+  tour:          [{ key:'spot', label:'🎯 스팟·체험' }, { key:'country', label:'🌏 국가' }, { key:'place', label:'📍 여행지' }],
   insurance:     [],
 };
 
 function setupCatImport(boardKey) {
   const wrap = document.getElementById('cat-import');
+  const prioInfo = document.getElementById('priority-info');
   const opts = STOCK_TO_CATALOG[boardKey];
   if (!opts || opts.length === 0) {
     wrap.style.display = 'none';
+    if (prioInfo) prioInfo.style.display = boardKey === 'insurance' ? 'block' : 'none';
     return;
   }
   wrap.style.display = 'flex';
+  if (prioInfo) prioInfo.style.display = 'block';
   const optsEl = document.getElementById('cat-import-opts');
   optsEl.innerHTML = opts.map(o => `
     <label class="cat-import-chip on" data-cat-key="${o.key}" onclick="this.classList.toggle('on')">
@@ -1624,6 +1637,21 @@ const CATALOG_CONTENT = {
     items: [
       { cat:'소개', icon:'📝', title:'혼톰 케이블카', desc:'세계 최장 케이블카 (7,899m). 푸꾸옥 본섬 ↔ 혼톰섬 25분 비행.' },
       { cat:'안내사항', icon:'📋', title:'운영 시간', desc:'09:00 ~ 17:00 · 기상악화 시 운행 중단' },
+    ]
+  },
+  country: {
+    label: '🌏 국가', source: '베트남 (#C-VN)', color: '#fa8c16',
+    items: [
+      { cat:'소개', icon:'📝', title:'베트남 여행 안내', desc:'동남아 인도차이나 반도. 사회주의 공화국. 수도: 하노이. 화폐: 동(VND).' },
+      { cat:'안내사항', icon:'📋', title:'비자/여권 정보', desc:'15일 이내 무비자 입국 가능. 여권 유효기간 6개월 이상 필수. 출입국 신고서는 항공기 내 배포.' },
+      { cat:'유의사항', icon:'⚠️', title:'입국 시 주의사항', desc:'세관 신고: $5,000 이상 현금 신고. 입국 시 면세 한도 1.5L 주류 / 200 담배.' },
+    ]
+  },
+  place: {
+    label: '📍 여행지', source: '푸꾸옥 (#P-PQC)', color: '#eb2f96',
+    items: [
+      { cat:'소개', icon:'📝', title:'푸꾸옥 여행지 소개', desc:'베트남 남부 최대의 섬 휴양지. 화이트 비치와 트로피컬 정글이 어우러진 곳.' },
+      { cat:'안내사항', icon:'📋', title:'현지 교통·환율·날씨', desc:'대중교통 제한적, 그랩/택시 권장. 환율 1$ ≈ 24,500 VND. 건기 11~4월 / 우기 5~10월.' },
     ]
   }
 };
@@ -1687,9 +1715,9 @@ const BOARD_META = {
   room:           { group:'기본 정보', icon:'🛌', name:'객실 게시판',       desc:'객실 카탈로그 콘텐츠 · 숙박권에서 옵션으로 가져오기',                       bg:'#fff0f6' },
   airline:        { group:'기본 정보', icon:'🛫', name:'항공사 게시판',     desc:'항공사 카탈로그 콘텐츠 · 항공권에서 옵션으로 가져오기',                     bg:'#fff7e6' },
   spot:           { group:'기본 정보', icon:'🎯', name:'스팟·체험 게시판',  desc:'스팟·체험 카탈로그 콘텐츠 · 투어·티켓에서 옵션으로 가져오기',               bg:'#f9f0ff' },
-  // 위치 공통 (도착 위치 매칭 자동 적용)
-  country:        { group:'위치 공통', icon:'🌏', name:'국가 게시판',       desc:'국가 단위 콘텐츠 · 도착 국가가 일치하는 모든 상품에 자동 적용',             bg:'#fff2e8' },
-  place:          { group:'위치 공통', icon:'📍', name:'여행지 게시판',     desc:'여행지(도시) 단위 콘텐츠 · 도착 여행지가 일치하는 모든 상품에 자동 적용',  bg:'#fff7e6' },
+  // 기본 정보 (위치 — 항공권/투어에서 자동 끌고 옴)
+  country:        { group:'기본 정보', icon:'🌏', name:'국가 게시판',       desc:'국가 단위 콘텐츠 · 항공권·투어 등록 시 자동으로 끌고 오기',                bg:'#fff2e8' },
+  place:          { group:'기본 정보', icon:'📍', name:'여행지 게시판',     desc:'여행지(도시) 단위 콘텐츠 · 항공권·투어 등록 시 자동으로 끌고 오기',         bg:'#fff7e6' },
   // 필수 공통
   org:            { group:'필수 공통', icon:'🌟', name:'필수공통 게시판',   desc:'회사 표준 — 모든 상품에 자동 적용 (구 org)',                              bg:'#fffbe6' },
   all:            { group:'전체',      icon:'🔍', name:'전체 보기',         desc:'어드민/파트너스 누구나 — 내가 등록 또는 사용 가능한 전체 콘텐츠 보기',     bg:'#f9f0ff' }
