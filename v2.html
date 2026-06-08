@@ -130,6 +130,17 @@ select.fi { appearance: none; background-image: url("data:image/svg+xml,%3Csvg x
 .cat-import-chip input { display:none; }
 .cat-import-hint { font-size:11px; color:rgba(0,0,0,0.45); margin-left:auto; }
 
+/* ===== BOARD GUIDE (게시판별 등록 가이드) ===== */
+.board-guide { padding: 10px 14px; margin-bottom: 10px; background: #f0f7ff; border: 1px solid #91caff; border-radius: 8px; }
+.board-guide-head { display: flex; align-items: center; gap: 6px; font-size: 12px; font-weight: 700; color: #0958d9; margin-bottom: 6px; cursor: pointer; user-select: none; }
+.board-guide-head .chev { transition: transform .2s; font-size: 10px; opacity: 0.7; }
+.board-guide.collapsed .chev { transform: rotate(-90deg); }
+.board-guide-body { padding-left: 18px; font-size: 11.5px; color: rgba(0,0,0,0.7); line-height: 1.7; }
+.board-guide.collapsed .board-guide-body { display: none; }
+.board-guide-cat { display: inline-block; margin-right: 4px; }
+.board-guide-cat strong { color: #0958d9; font-weight: 700; }
+.board-guide-auto { margin-top: 6px; padding: 6px 10px; background: #fff; border: 1px dashed #91caff; border-radius: 6px; font-size: 11px; color: #0958d9; }
+
 /* ===== WIZARD STEPS (POST 등록 위자드) ===== */
 .steps { display:flex; align-items:center; gap:14px; padding:10px 16px; background:#fff; border:1px solid #f0f0f0; border-radius:8px; margin-bottom:10px; }
 .step { display:flex; align-items:center; gap:8px; color:rgba(0,0,0,0.45); cursor:default; font-size:12.5px; font-weight:500; transition:color .15s; }
@@ -1200,6 +1211,16 @@ tbody tr:hover td { background: #fafafa; }
         <span id="list-board-crumb" style="display:none;">숙박권 게시판</span>
       </div>
 
+      <!-- 게시판별 등록 가이드 (동적) -->
+      <div id="board-guide" class="board-guide" style="display:none;">
+        <div class="board-guide-head" onclick="this.parentElement.classList.toggle('collapsed')">
+          <span>💡</span>
+          <span id="board-guide-title">숙박권 게시판 등록 가이드</span>
+          <span class="chev">▼</span>
+        </div>
+        <div class="board-guide-body" id="board-guide-body"></div>
+      </div>
+
       <div class="card">
         <div style="padding:10px 14px;border-bottom:1px solid #f0f0f0;display:flex;gap:8px;align-items:center;">
           <select class="fi" style="width:140px;">
@@ -1806,6 +1827,136 @@ function showView(name) {
   window.scrollTo(0, 0);
 }
 
+// ===== 게시판별 등록 가이드 (어떤 카테고리를 주로 작성하는지) =====
+const BOARD_GUIDE = {
+  hotel_voucher: {
+    title: '🏨 숙박권 게시판 등록 가이드',
+    items: [
+      ['📝 소개', '숙박권/숙소 본문 + 대표 이미지'],
+      ['🎯 핵심포인트', '주요 시설 · 접근성 · 전망 등 포인트별 강조 (이미지 포함)'],
+      ['✨ 스페셜혜택', '트립스토어 단독 혜택 (조식 무료 · 픽업 등)'],
+      ['✅ 포함사항', '식사·객실 조합별 포함 (Scope: BB/AI 등)'],
+      ['❌ 불포함사항', '미포함 비용'],
+      ['⚠️ 유의사항', '객실별·옵션별 주의 (Scope: 객실=디럭스 등)'],
+      ['📋 안내사항', '얼리체크인·왕복픽업 등 옵션 안내 (Scope: 옵션)'],
+    ],
+    auto: '⚡ 자동 가져옴: 🏠 숙소 + 🛌 객실 카탈로그 콘텐츠 (같은 ID 매칭)'
+  },
+  flight_voucher: {
+    title: '✈️ 항공권 게시판 등록 가이드',
+    items: [
+      ['📝 소개', '항공편 강점 (직항·소요시간 등)'],
+      ['🎯 핵심포인트', '노선·항공사 강점 (Scope: 좌석등급)'],
+      ['✨ 스페셜혜택', '라운지 · 우선 탑승 · 추가 수하물 등'],
+      ['✅ 포함사항', '좌석 등급별 혜택 (Scope: 프리미엄/비즈니스)'],
+      ['⚠️ 유의사항', '여권 유효기간 · 이름 변경 불가 등'],
+      ['📋 안내사항', '여권 정보 · 비자 · 입국 안내'],
+      ['🧳 수하물 규정', '위탁/기내 수하물 (누아 자동 등록)'],
+    ],
+    auto: '⚡ 자동 가져옴: 🛫 항공사 + 🌏 도착 국가 + 📍 도착 여행지 (도착지 ID 매칭)'
+  },
+  tour: {
+    title: '🎫 투어·티켓 게시판 등록 가이드',
+    items: [
+      ['📝 소개', '투어/티켓 본문 + 대표 이미지'],
+      ['🎯 핵심포인트', '하이라이트 (스팟·언어·인솔자)'],
+      ['✅ 포함사항', '가이드 · 식사 · 입장권 · 픽업'],
+      ['❌ 불포함사항', '개인 경비 · 선택 옵션'],
+      ['⚠️ 유의사항', '픽업·기상 영향 · 최소 출발 인원'],
+      ['📋 안내사항', '미팅포인트 · 운영 시간 · 픽업 호텔'],
+    ],
+    auto: '⚡ 자동 가져옴: 🎯 스팟·체험 카탈로그 콘텐츠 (스팟 ID 매칭)'
+  },
+  insurance: {
+    title: '🛡 보험 게시판 등록 가이드',
+    items: [
+      ['📝 소개', '보험 상품 소개 (보장 한도 · 가입 대상)'],
+      ['✅ 보장 항목', '의료비·휴대품·항공기 지연 등 (Scope: 플랜)'],
+      ['❌ 면책 항목', '보장 제외 항목 (전쟁·익스트림 스포츠 등)'],
+      ['⚠️ 유의사항', '청구 시 주의 (영문 진단서·폴리스리포트 등)'],
+      ['📋 안내사항', '보험금 청구 절차 · 24시 콜센터'],
+      ['❓ 자주묻는 질문', '보험 관련 FAQ'],
+    ],
+    auto: '🔗 카탈로그 자동 가져오기 없음 (공급사 = 재보험사 룰)'
+  },
+  org: {
+    title: '🌟 필수공통 게시판 등록 가이드',
+    items: [
+      ['❓ 자주묻는 질문', '회사 표준 FAQ — 모든 상품에 자동 노출'],
+      ['📋 안내사항 (예약 안내)', '예약 진행 절차 · 1인 예약 · 결제 안내'],
+      ['💸 취소·환불 규정', '회사 표준 (재고에서 override 가능)'],
+    ],
+    auto: '⚡ 모든 상품에 자동 적용 (fallback 표준)'
+  },
+  accom: {
+    title: '🏠 숙소 게시판 등록 가이드',
+    items: [
+      ['📝 소개', '숙소 본문 + 이미지 (위치·등급)'],
+      ['🎯 핵심포인트', '부대시설 · 접근성 · 뷰 등'],
+      ['📋 안내사항', '체크인/체크아웃 · 24시 프런트 · WiFi'],
+    ],
+    auto: '🏨 숙박권에 같은 숙소가 연결되면 자동 입력'
+  },
+  room: {
+    title: '🛌 객실 게시판 등록 가이드',
+    items: [
+      ['📝 소개', '객실 본문 + 이미지 (평수·뷰·침대 구성)'],
+      ['⚠️ 유의사항', '객실 특성 (테라스·바람 등)'],
+    ],
+    auto: '🏨 숙박권에 같은 객실이 연결되면 자동 입력'
+  },
+  airline: {
+    title: '🛫 항공사 게시판 등록 가이드',
+    items: [
+      ['📋 안내사항', '항공사 공통 안내 (마일리지·체크인)'],
+      ['⚠️ 유의사항', '항공사별 공통 유의사항'],
+      ['🧳 수하물 규정', '항공사 표준 수하물 (좌석등급 무관)'],
+    ],
+    auto: '✈️ 항공권에 같은 항공사가 연결되면 자동 입력'
+  },
+  spot: {
+    title: '🎯 스팟·체험 게시판 등록 가이드',
+    items: [
+      ['📝 소개', '스팟 본문 + 이미지'],
+      ['📋 안내사항', '운영 시간 · 휴무일 · 입장 안내'],
+    ],
+    auto: '🎫 투어·티켓에 같은 스팟이 연결되면 자동 입력'
+  },
+  country: {
+    title: '🌏 국가 게시판 등록 가이드',
+    items: [
+      ['📝 소개', '국가 소개 (수도·언어·화폐)'],
+      ['📋 안내사항 (비자·여권)', '비자 면제 조건 · 여권 유효기간 · 입국 신고서'],
+      ['⚠️ 유의사항 (입국 주의)', '세관 신고 · 면세 한도 · 금지 품목'],
+    ],
+    auto: '✈️ 항공권의 도착 국가가 일치하면 자동 입력'
+  },
+  place: {
+    title: '📍 여행지 게시판 등록 가이드',
+    items: [
+      ['📝 소개', '여행지(도시) 본문 + 이미지'],
+      ['📋 안내사항', '현지 교통 · 환율 · 날씨 · 시차'],
+    ],
+    auto: '✈️ 항공권의 도착 여행지가 일치하면 자동 입력'
+  },
+};
+
+function renderBoardGuide(boardKey) {
+  const guideEl = document.getElementById('board-guide');
+  if (!guideEl) return;
+  const g = BOARD_GUIDE[boardKey];
+  if (!g) {
+    guideEl.style.display = 'none';
+    return;
+  }
+  document.getElementById('board-guide-title').textContent = g.title + ' — 주로 등록하는 콘텐츠';
+  const body = document.getElementById('board-guide-body');
+  body.innerHTML = g.items.map(([cat, desc]) =>
+    `<div class="board-guide-cat"><strong>${cat}</strong> — ${desc}</div>`
+  ).join('<br>') + (g.auto ? `<div class="board-guide-auto">${g.auto}</div>` : '');
+  guideEl.style.display = 'block';
+}
+
 // ===== 게시판 탭 → 목록 (필터 적용) =====
 function openList(filter) {
   currentBoard = filter;
@@ -1827,6 +1978,8 @@ function openList(filter) {
   if (titleEl) titleEl.textContent = meta.name;
   if (descEl)  descEl.textContent  = meta.desc;
   if (iconEl) iconEl.textContent = meta.icon;
+  // 게시판별 등록 가이드 갱신
+  renderBoardGuide(filter);
   if (crumbEl) crumbEl.textContent = meta.name;
   // 행/카드 필터링
   const rows = document.querySelectorAll('#view-list tbody tr');
