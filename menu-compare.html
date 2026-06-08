@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>메뉴 구성 비교 — PB 콘텐츠 관리</title>
+<link href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.6/dist/web/static/pretendard.css" rel="stylesheet">
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: 'Pretendard', 'Apple SD Gothic Neo', sans-serif; font-size: 14px; color: rgba(0,0,0,0.88); background: #f5f5f5; padding: 24px; }
+
+.wrap { max-width: 1200px; margin: 0 auto; }
+h1 { font-size: 22px; font-weight: 800; letter-spacing: -0.3px; margin-bottom: 6px; }
+.lead { color: rgba(0,0,0,0.55); font-size: 13px; margin-bottom: 24px; }
+
+.opt { background: #fff; border-radius: 12px; box-shadow: 0 1px 3px rgba(0,0,0,0.05); border: 1px solid #f0f0f0; padding: 20px 22px; margin-bottom: 16px; }
+.opt.recommended { border: 2px solid #52c41a; box-shadow: 0 4px 16px rgba(82,196,26,0.12); }
+.opt-head { display: flex; align-items: center; gap: 10px; margin-bottom: 14px; flex-wrap: wrap; }
+.opt-tag { font-size: 11px; font-weight: 800; padding: 3px 10px; border-radius: 4px; letter-spacing: 0.4px; }
+.opt-tag.a { background: #f5f5f5; color: rgba(0,0,0,0.65); }
+.opt-tag.b { background: #f6ffed; color: #389e0d; border: 1px solid #b7eb8f; }
+.opt-tag.c { background: #fff7e6; color: #ad6800; border: 1px solid #ffd591; }
+.opt-title { font-size: 17px; font-weight: 700; }
+.recommend-badge { font-size: 10.5px; font-weight: 800; background: #52c41a; color: #fff; padding: 3px 10px; border-radius: 12px; letter-spacing: 0.4px; }
+.opt-desc { font-size: 12.5px; color: rgba(0,0,0,0.55); margin-bottom: 12px; line-height: 1.6; }
+
+/* Preview frame */
+.preview { background: linear-gradient(180deg, #fafbfc 0%, #f5f5f5 100%); border: 1px solid #e8e8e8; border-radius: 8px; padding: 12px; margin-bottom: 12px; overflow-x: auto; }
+.preview-label { font-size: 10px; font-weight: 700; color: rgba(0,0,0,0.4); letter-spacing: 0.4px; text-transform: uppercase; margin-bottom: 8px; }
+
+/* Board tab base */
+.bt-wrap { background: #fff; border: 1px solid #f0f0f0; border-radius: 8px; padding: 5px; display: flex; flex-wrap: wrap; gap: 2px; align-items: center; min-width: 760px; }
+.bt-wrap + .bt-wrap { margin-top: 6px; }
+.bt-tab { padding: 6px 11px; font-size: 12.5px; font-weight: 500; color: rgba(0,0,0,0.65); border-radius: 6px; background: transparent; border: none; white-space: nowrap; display: inline-flex; align-items: center; gap: 5px; cursor: default; }
+.bt-tab.active { color: #1677ff; background: #e6f4ff; font-weight: 700; }
+.bt-tab.parent-active { color: #1677ff; background: rgba(22,119,255,0.06); font-weight: 600; }
+.bt-group { font-size: 12px; font-weight: 700; padding: 5px 12px; border-radius: 14px; border: 1px solid transparent; }
+.bt-group.g-stock { background: #e6f4ff; color: #0958d9; border-color: #91caff; }
+.bt-group.g-base { background: #f9f0ff; color: #531dab; border-color: #d3adf7; }
+.bt-group.g-common { background: #fffbe6; color: #874d00; border-color: #ffe58f; }
+.bt-sep { width: 1px; height: 18px; background: #e8e8e8; margin: 0 6px; }
+.bt-sep-h { flex-basis: 100%; height: 1px; background: #f5f5f5; margin: 4px 0; }
+.bt-wrap.related-row { background: #fafbfc; border-color: #e8e8e8; padding: 4px 6px; min-width: 0; }
+.bt-wrap.related-row::before { content: '↳'; color: rgba(0,0,0,0.3); font-size: 14px; margin: 0 6px 0 4px; }
+
+/* Pros/cons */
+.pc { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 12px; }
+.pc-box { padding: 10px 14px; border-radius: 8px; font-size: 12px; line-height: 1.7; }
+.pc-pros { background: #f6ffed; border: 1px solid #b7eb8f; color: #389e0d; }
+.pc-cons { background: #fff1f0; border: 1px solid #ffa39e; color: #cf1322; }
+.pc-box strong { display: block; font-size: 11px; font-weight: 800; letter-spacing: 0.3px; text-transform: uppercase; margin-bottom: 4px; }
+.pc-box ul { margin: 0; padding-left: 16px; }
+
+/* Decision section */
+.decision { background: linear-gradient(135deg, #f6ffed 0%, #fff 100%); border: 2px solid #b7eb8f; border-radius: 12px; padding: 18px 22px; margin-top: 20px; }
+.decision-title { font-size: 15px; font-weight: 800; color: #389e0d; margin-bottom: 6px; display: flex; align-items: center; gap: 8px; }
+.decision-body { font-size: 13px; color: rgba(0,0,0,0.75); line-height: 1.7; }
+.decision-body strong { color: #237804; }
+
+.note { font-size: 11.5px; color: rgba(0,0,0,0.5); font-style: italic; margin-top: 8px; }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <h1>메뉴 구성 비교 — PB 콘텐츠 관리</h1>
+  <div class="lead">A: 현재 트리 · B: 플랫 3-row · C: 하이브리드 단일 row + 그룹 구분. 같은 11개 게시판을 3가지 방식으로 표현.</div>
+
+  <!-- ============================ -->
+  <!-- 옵션 A: 트리 (현재 상태)      -->
+  <!-- ============================ -->
+  <div class="opt">
+    <div class="opt-head">
+      <span class="opt-tag a">A</span>
+      <span class="opt-title">트리 (마스터-디테일, 현재 상태)</span>
+    </div>
+    <div class="opt-desc">상품정보 + 필수공통이 primary. 선택된 상품정보에 따라 관련 기본정보가 ↳ 아래에 동적으로 노출됨.</div>
+
+    <div class="preview">
+      <div class="preview-label">Primary</div>
+      <div class="bt-wrap">
+        <span class="bt-group g-stock">📦 상품 정보</span>
+        <button class="bt-tab active">🏨 숙박권</button>
+        <button class="bt-tab">✈️ 항공권</button>
+        <button class="bt-tab">🎫 투어·티켓</button>
+        <button class="bt-tab">🛡 보험</button>
+        <span class="bt-sep"></span>
+        <span class="bt-group g-common">🌟 필수 공통</span>
+        <button class="bt-tab">🌟 필수공통</button>
+      </div>
+      <div class="preview-label" style="margin-top:8px;">Secondary (관련 기본정보, 동적)</div>
+      <div class="bt-wrap related-row">
+        <span class="bt-group g-base" style="font-size:11px;padding:4px 10px;">🗂 관련 기본정보</span>
+        <button class="bt-tab">🏠 숙소</button>
+        <button class="bt-tab">🛌 객실</button>
+      </div>
+      <div class="note">예: 항공권 선택 시 → 🛫 항공사 · 🌏 국가 · 📍 여행지 노출 / 보험·필수공통 선택 시 → secondary 숨김</div>
+    </div>
+
+    <div class="pc">
+      <div class="pc-box pc-pros">
+        <strong>👍 장점</strong>
+        <ul>
+          <li>상품정보 ↔ 기본정보 관계 시각적으로 명확</li>
+          <li>공간 효율 — 관련 있는 것만 보임</li>
+          <li>운영 멘탈모델 그대로 (어디서 끌고 오는지 한눈에)</li>
+        </ul>
+      </div>
+      <div class="pc-box pc-cons">
+        <strong>👎 단점</strong>
+        <ul>
+          <li>2단계 인터랙션 필요 (먼저 부모 선택)</li>
+          <li>기본정보 직접 진입 시 "내 부모 뭐지?" 사고 단계</li>
+          <li>전체 게시판 한눈에 안 보임</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============================ -->
+  <!-- 옵션 B: 플랫 3-row (추천)    -->
+  <!-- ============================ -->
+  <div class="opt recommended">
+    <div class="opt-head">
+      <span class="opt-tag b">B</span>
+      <span class="opt-title">플랫 3-row (그룹별 줄바꿈)</span>
+      <span class="recommend-badge">✨ 추천</span>
+    </div>
+    <div class="opt-desc">3그룹 (상품정보 / 기본정보 / 필수공통)을 각자 한 줄씩. 11개 게시판이 항상 다 보이고 직접 클릭 가능.</div>
+
+    <div class="preview">
+      <div class="bt-wrap">
+        <span class="bt-group g-stock">📦 상품 정보</span>
+        <button class="bt-tab active">🏨 숙박권</button>
+        <button class="bt-tab">✈️ 항공권</button>
+        <button class="bt-tab">🎫 투어·티켓</button>
+        <button class="bt-tab">🛡 보험</button>
+        <span class="bt-sep-h"></span>
+        <span class="bt-group g-base">🗂 기본 정보</span>
+        <button class="bt-tab">🏠 숙소</button>
+        <button class="bt-tab">🛌 객실</button>
+        <button class="bt-tab">🛫 항공사</button>
+        <button class="bt-tab">🎯 스팟·체험</button>
+        <button class="bt-tab">🌏 국가</button>
+        <button class="bt-tab">📍 여행지</button>
+        <span class="bt-sep-h"></span>
+        <span class="bt-group g-common">🌟 필수 공통</span>
+        <button class="bt-tab">🌟 필수공통</button>
+      </div>
+      <div class="note">관계는 운영 가이드 / 등록 화면 안내문에서 설명. 메뉴는 순수 네비게이션.</div>
+    </div>
+
+    <div class="pc">
+      <div class="pc-box pc-pros">
+        <strong>👍 장점</strong>
+        <ul>
+          <li>모든 게시판 1-click 직접 접근</li>
+          <li>인지 부담 최소 (학습 비용 ↓)</li>
+          <li>그룹 구분도 컬러 칩으로 명확</li>
+          <li>매일 쓰는 어드민 운영 패턴에 적합</li>
+        </ul>
+      </div>
+      <div class="pc-box pc-cons">
+        <strong>👎 단점</strong>
+        <ul>
+          <li>3행 차지 (수직 공간 ↑)</li>
+          <li>상품 ↔ 기본 관계는 직접 노출 안 됨 (가이드 필요)</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============================ -->
+  <!-- 옵션 C: 하이브리드 (단일 row) -->
+  <!-- ============================ -->
+  <div class="opt">
+    <div class="opt-head">
+      <span class="opt-tag c">C</span>
+      <span class="opt-title">하이브리드 단일 row + 그룹 구분</span>
+    </div>
+    <div class="opt-desc">한 줄에 모든 게시판 + 그룹 칩으로 구분. 화면 좁아지면 자동 wrap.</div>
+
+    <div class="preview">
+      <div class="bt-wrap" style="flex-wrap:nowrap;overflow-x:auto;">
+        <span class="bt-group g-stock">📦 상품정보</span>
+        <button class="bt-tab active">🏨 숙박권</button>
+        <button class="bt-tab">✈️ 항공권</button>
+        <button class="bt-tab">🎫 투어·티켓</button>
+        <button class="bt-tab">🛡 보험</button>
+        <span class="bt-sep"></span>
+        <span class="bt-group g-base">🗂 기본정보</span>
+        <button class="bt-tab">🏠 숙소</button>
+        <button class="bt-tab">🛌 객실</button>
+        <button class="bt-tab">🛫 항공사</button>
+        <button class="bt-tab">🎯 스팟</button>
+        <button class="bt-tab">🌏 국가</button>
+        <button class="bt-tab">📍 여행지</button>
+        <span class="bt-sep"></span>
+        <span class="bt-group g-common">🌟 필수</span>
+        <button class="bt-tab">필수공통</button>
+      </div>
+      <div class="note">화면 좁으면 가로 스크롤 또는 wrap. 그룹 칩 텍스트 축약 가능.</div>
+    </div>
+
+    <div class="pc">
+      <div class="pc-box pc-pros">
+        <strong>👍 장점</strong>
+        <ul>
+          <li>한 줄에 모든 것 — 시각적 컴팩트</li>
+          <li>그룹 구분은 유지</li>
+          <li>전체 게시판 동시 노출</li>
+        </ul>
+      </div>
+      <div class="pc-box pc-cons">
+        <strong>👎 단점</strong>
+        <ul>
+          <li>가로폭 부담 큼 (좁은 모니터에서 wrap/스크롤)</li>
+          <li>탭 텍스트 축약 필요 (스팟·체험 → 스팟)</li>
+          <li>그룹 칩과 탭 사이 시각적 위계 약함</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============================ -->
+  <!-- 결정 권고                     -->
+  <!-- ============================ -->
+  <div class="decision">
+    <div class="decision-title">🎯 추천: B (플랫 3-row)</div>
+    <div class="decision-body">
+      TRP 어드민은 운영자가 <strong>매일 들어와서 11개 게시판을 자유롭게 오가는 도구</strong>입니다.
+      <br><br>
+      → <strong>1-click 직접 접근이 가장 중요</strong>. 트리(A)는 멋있지만 "부모 먼저 선택"이 매번 부담.
+      <br>
+      → 운영자는 이미 11개 게시판 관계를 알고 있고, <strong>관계 설명은 등록 화면 안내문에서</strong> 해도 충분.
+      <br>
+      → 3-row지만 height는 그렇게 크지 않음 (각 row 38px ≈ 총 114px). 페이지 헤더보다 작음.
+      <br><br>
+      <strong>B로 가시면 바로 v2.html 적용 후 배포하겠습니다.</strong>
+    </div>
+  </div>
+
+</div>
+</body>
+</html>
