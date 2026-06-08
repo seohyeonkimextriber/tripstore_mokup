@@ -159,6 +159,11 @@ select.fi { appearance: none; background-image: url("data:image/svg+xml,%3Csvg x
 .pdp-section.expanded .pdp-sec-body { display:block; }
 .pdp-sec-actions { display:flex; gap:6px; justify-content:flex-end; margin-top:12px; padding-top:10px; border-top:1px solid #f0f0f0; }
 
+/* "다른 조건으로 추가" 버튼 */
+.pdp-add-variant { padding:8px 14px; margin-bottom:10px; border:1.5px dashed #d3adf7; border-radius:8px; background:#fafbff; cursor:pointer; font-size:12px; color:#722ed1; font-weight:600; transition:all .15s; display:flex; align-items:center; gap:8px; }
+.pdp-add-variant:hover { background:#f9f0ff; border-color:#722ed1; box-shadow:0 2px 6px rgba(114,46,209,0.08); }
+.pdp-add-variant .pdp-add-icon { font-size:14px; }
+
 /* Cancel policy special (PDP mode) */
 .pdp-section.pdp-cancel { border-color:#ffa39e; }
 .pdp-section.pdp-cancel.empty { background:#fff7f5; border-color:#ffccc7; }
@@ -1917,28 +1922,44 @@ const PDP_SECTIONS = {
   ],
 };
 
-// 데모: 일부 섹션 미리 작성된 상태
+// 데모: 일부 섹션 미리 작성된 상태 (배열 — 같은 카테고리 다중 조건 가능)
 const PDP_DEMO = {
   hotel_voucher: {
-    special: { title:'트립스토어만의 스페셜혜택', content:'• 공항 ↔ 리조트 왕복 픽업 서비스\n• 전 일정 조식 포함\n• 얼리체크인 (선착순)' },
-    intro:   { title:'솔 바이 멜리아 푸꾸옥', content:'베트남 푸꾸옥 남부에 위치한 5성급 비치프론트 리조트. 멜리아 인터내셔널 호텔 브랜드.' },
-    point:   { title:'이 숙소의 핵심 포인트', content:'1. 공항에서 차량 30분, 신공항 접근성\n2. 전 객실 오션뷰 / 풀액세스\n3. 키즈클럽 & 스파 운영' },
+    special: [{ title:'트립스토어만의 스페셜혜택', content:'• 공항 ↔ 리조트 왕복 픽업 서비스\n• 전 일정 조식 포함\n• 얼리체크인 (선착순)', scope:'all' }],
+    intro:   [{ title:'솔 바이 멜리아 푸꾸옥', content:'베트남 푸꾸옥 남부에 위치한 5성급 비치프론트 리조트. 멜리아 인터내셔널 호텔 브랜드.', scope:'all' }],
+    point:   [{ title:'이 숙소의 핵심 포인트', content:'1. 공항에서 차량 30분, 신공항 접근성\n2. 전 객실 오션뷰 / 풀액세스\n3. 키즈클럽 & 스파 운영', scope:'all' }],
+    include: [
+      { title:'BB 조식 포함사항',     content:'• 아메리칸 뷔페 조식 (07:00-10:00)\n• 커피·티 무제한\n• 주말 브런치 업그레이드', scope:'meal:BB' },
+      { title:'AI 올인클루시브 포함사항', content:'• 전 식음료 무제한 (조·중·석식)\n• 미니바·주류 포함\n• 룸서비스 24시간 무료', scope:'meal:AI' },
+    ],
+    caution: [{ title:'디럭스 씨뷰 유의사항', content:'• 테라스 바닥 미끄럼 주의 (우천)\n• 오션뷰 특성상 바람 유의', scope:'room:디럭스 씨뷰' }],
+    guide:   [{ title:'얼리체크인 안내', content:'• 11:00부터 가능 (현장 가용 상황 따라)\n• 사전 요청 시 선착순 배정', scope:'option:얼리체크인' }],
   },
   flight_voucher: {
-    intro:   { title:'베트남항공 ICN ↔ PQC 직항', content:'4시간 30분 · 야간 도착 없이 낮 도착\n베트남항공 풀서비스 캐리어' },
-    baggage: { title:'수하물 규정 (이코노미)', content:'• 위탁수하물 23kg × 1개 (158cm 이내)\n• 기내수하물 7kg × 1개 (56×36×23cm)\n• 개인소지품 1개 추가 가능' },
-    cancel:  { title:'베트남항공 취소·환불 규정', content:'• 출발 30일 전: 전액 환불\n• 출발 20~29일 전: 10% 위약금\n• 출발 10~19일 전: 30% 위약금\n• 출발 5~9일 전: 50% 위약금\n• 출발 4일 이내: 환불 불가' },
+    intro:   [{ title:'베트남항공 ICN ↔ PQC 직항', content:'4시간 30분 · 야간 도착 없이 낮 도착\n베트남항공 풀서비스 캐리어', scope:'all' }],
+    baggage: [{ title:'수하물 규정 (이코노미)', content:'• 위탁수하물 23kg × 1개 (158cm 이내)\n• 기내수하물 7kg × 1개 (56×36×23cm)\n• 개인소지품 1개 추가 가능', scope:'all' }],
+    cancel:  [{ title:'베트남항공 취소·환불 규정', content:'• 출발 30일 전: 전액 환불\n• 출발 20~29일 전: 10% 위약금\n• 출발 10~19일 전: 30% 위약금\n• 출발 5~9일 전: 50% 위약금\n• 출발 4일 이내: 환불 불가', scope:'all' }],
   },
   tour: {
-    intro:   { title:'호핑투어 + 혼톰 케이블카', content:'1일 일정 (08:30 ~ 17:30) · 한국어 인솔자 동행' },
-    include: { title:'포함사항', content:'• 호텔 픽업/드랍 (즈엉동 시내)\n• 스피드보트 + 호핑 3섬\n• 혼톰 케이블카 왕복권\n• 중식 1식\n• 스노클링 장비' },
+    intro:   [{ title:'호핑투어 + 혼톰 케이블카', content:'1일 일정 (08:30 ~ 17:30) · 한국어 인솔자 동행', scope:'all' }],
+    include: [{ title:'포함사항', content:'• 호텔 픽업/드랍 (즈엉동 시내)\n• 스피드보트 + 호핑 3섬\n• 혼톰 케이블카 왕복권\n• 중식 1식\n• 스노클링 장비', scope:'all' }],
   },
   org: {
-    faq:    { title:'예약 필수 FAQ', content:'• 결제 후 확정 시간은?\n• 영문 이름 오타 시?\n• 환불 처리 기간은?\n... (총 8개 질문)' },
-    guide:  { title:'예약 진행 안내', content:'• 예약 신청 후 24시간 이내 결제 완료 필수\n• 예약자 본인 명의 결제만 가능\n• 여권 영문 이름 정확히 입력 (변경 불가)' },
-    cancel: { title:'회사 표준 취소·환불 규정', content:'• 출발 30일 전: 전액 환불\n• 출발 20~29일 전: 10% 위약금\n• 출발 10~19일 전: 30% 위약금\n• 출발 5일 이내: 환불 불가 (천재지변 예외)' },
+    faq:    [{ title:'예약 필수 FAQ', content:'• 결제 후 확정 시간은?\n• 영문 이름 오타 시?\n• 환불 처리 기간은?\n... (총 8개 질문)', scope:'all' }],
+    guide:  [{ title:'예약 진행 안내', content:'• 예약 신청 후 24시간 이내 결제 완료 필수\n• 예약자 본인 명의 결제만 가능\n• 여권 영문 이름 정확히 입력 (변경 불가)', scope:'all' }],
+    cancel: [{ title:'회사 표준 취소·환불 규정', content:'• 출발 30일 전: 전액 환불\n• 출발 20~29일 전: 10% 위약금\n• 출발 10~19일 전: 30% 위약금\n• 출발 5일 이내: 환불 불가 (천재지변 예외)', scope:'all' }],
   },
 };
+
+// Scope 뱃지 포맷
+function formatScopeBadge(scope) {
+  if (!scope || scope === 'all') return '<span class="scope-badge scope-all">🌐 전체 적용</span>';
+  if (scope.startsWith('meal:'))      return `<span class="scope-badge scope-meal">🍽 식사 = ${scope.slice(5)}</span>`;
+  if (scope.startsWith('room-meal:')) return `<span class="scope-badge scope-room-meal">🛏 객실+식사 = ${scope.slice(10)}</span>`;
+  if (scope.startsWith('room:'))      return `<span class="scope-badge scope-room">🛌 객실 = ${scope.slice(5)}</span>`;
+  if (scope.startsWith('option:'))    return `<span class="scope-badge scope-option">⚙ 옵션 = ${scope.slice(7)}</span>`;
+  return '';
+}
 
 // ===== PDP 미러 렌더 =====
 function renderPdpEditor(boardKey) {
@@ -1946,43 +1967,94 @@ function renderPdpEditor(boardKey) {
   const demo = PDP_DEMO[boardKey] || {};
   const stack = document.getElementById('cat-stack');
   if (!stack) return;
-  stack.innerHTML = sections.map(sec => {
-    const data = demo[sec.key];
-    if (sec.special === 'cancel') return renderPdpCancel(sec, data, boardKey);
-    return renderPdpSection(sec, data);
-  }).join('');
-  // (구) 카테고리 추가 picker 숨김 — PDP 미러는 섹션이 미리 자리잡혀 있음
+  let html = '';
+  sections.forEach(sec => {
+    const items = demo[sec.key]; // array or undefined
+    if (sec.special === 'cancel') {
+      html += renderPdpCancel(sec, items && items[0], boardKey);
+      return;
+    }
+    if (!items || items.length === 0) {
+      // 빈 상태
+      html += renderEmptyPdpCard(sec);
+    } else {
+      // 작성된 카드들 하나씩
+      items.forEach(item => {
+        html += renderFilledPdpCard(sec, item);
+      });
+      // "+ 다른 조건으로 추가" 버튼 (스코프 가능 섹션만)
+      if (sec.scopeable) {
+        html += `<div class="pdp-add-variant" onclick="alert('${sec.title} 같은 카테고리 다른 조건 카드 추가 (목업)')">
+          <span class="pdp-add-icon">+</span> 같은 ${sec.title} 다른 조건으로 추가
+        </div>`;
+      }
+    }
+  });
+  stack.innerHTML = html;
+  // 추가 카테고리 picker는 부활 (사용자 요청 — 자유롭게 추가 가능)
   const addWrap = document.querySelector('.cat-add-wrap');
-  if (addWrap) addWrap.style.display = 'none';
+  if (addWrap) addWrap.style.display = '';
 }
 
-function renderPdpSection(sec, data) {
-  const isFilled = !!data;
-  const stateBadge = isFilled
-    ? '<span class="pdp-sec-state s-filled">✓ 작성됨</span>'
-    : '<span class="pdp-sec-state s-empty">미작성</span>';
-  const scopeBadge = sec.scopeable ? '<span class="pdp-sec-scope-hint">🎯 Scope 가능</span>' : '';
-  const previewHtml = isFilled ? `
-    <div class="pdp-sec-preview">
-      <div class="ptitle">${escapeHtml(data.title)}</div>
-      <div class="pbody">${escapeHtml(data.content || '')}</div>
-    </div>` : '';
+function renderEmptyPdpCard(sec) {
+  const scopeable = sec.scopeable ? '<span class="pdp-sec-scope-hint">🎯 Scope 가능</span>' : '';
   return `
-    <div class="pdp-section ${isFilled ? 'filled' : 'empty'}" data-section="${sec.key}">
+    <div class="pdp-section empty" data-section="${sec.key}">
       <div class="pdp-sec-head" onclick="togglePdpSection(this)">
         <span class="pdp-sec-icon">${sec.icon}</span>
         <span class="pdp-sec-title">${sec.title}</span>
-        ${stateBadge}${scopeBadge}
-        <span class="pdp-sec-action">${isFilled ? '편집' : '+ 추가'}</span>
+        <span class="pdp-sec-state s-empty">미작성</span>
+        ${scopeable}
+        <span class="pdp-sec-action">+ 추가</span>
       </div>
-      ${previewHtml}
       <div class="pdp-sec-body">
         <div class="form-label">제목</div>
-        <input type="text" class="fi" value="${isFilled ? escapeAttr(data.title) : ''}" placeholder="${sec.title} 제목 입력" style="margin-bottom:10px;">
+        <input type="text" class="fi" placeholder="${sec.title} 제목 입력" style="margin-bottom:10px;">
         <div class="form-label">내용</div>
-        <textarea class="fi" style="min-height:90px;" placeholder="내용 입력 (줄바꿈 가능)">${isFilled ? escapeHtml(data.content || '') : ''}</textarea>
+        <textarea class="fi" style="min-height:90px;" placeholder="내용 입력 (줄바꿈 가능)"></textarea>
+        ${sec.scopeable ? `
+          <div class="form-label" style="margin-top:10px;">적용 조건 (Scope)</div>
+          <div style="display:flex;gap:4px;flex-wrap:wrap;">
+            <span class="scope-pill active">🌐 전체 적용</span>
+            <span class="scope-pill">🍽 식사별</span>
+            <span class="scope-pill">🛌 객실별</span>
+            <span class="scope-pill">🛏 객실+식사</span>
+            <span class="scope-pill">⚙ 옵션</span>
+          </div>
+        ` : ''}
         <div class="pdp-sec-actions">
-          ${isFilled ? '<button class="btn btn-text-danger btn-sm" onclick="event.stopPropagation();if(confirm(\'이 섹션을 삭제할까요?\')){this.closest(\'.pdp-section\').remove();}">삭제</button>' : ''}
+          <button class="btn btn-default btn-sm" onclick="event.stopPropagation();this.closest('.pdp-section').classList.remove('expanded');">취소</button>
+          <button class="btn btn-primary btn-sm" onclick="event.stopPropagation();alert('저장 (목업)');">저장</button>
+        </div>
+      </div>
+    </div>
+  `;
+}
+
+function renderFilledPdpCard(sec, item) {
+  const scopeBadge = formatScopeBadge(item.scope);
+  return `
+    <div class="pdp-section filled" data-section="${sec.key}">
+      <div class="pdp-sec-head" onclick="togglePdpSection(this)">
+        <span class="pdp-sec-icon">${sec.icon}</span>
+        <span class="pdp-sec-title">${sec.title}</span>
+        ${scopeBadge}
+        <span class="pdp-sec-state s-filled">✓ 작성됨</span>
+        <span class="pdp-sec-action">편집</span>
+      </div>
+      <div class="pdp-sec-preview">
+        <div class="ptitle">${escapeHtml(item.title)}</div>
+        <div class="pbody">${escapeHtml(item.content || '')}</div>
+      </div>
+      <div class="pdp-sec-body">
+        <div class="form-label">제목</div>
+        <input type="text" class="fi" value="${escapeAttr(item.title)}" style="margin-bottom:10px;">
+        <div class="form-label">내용</div>
+        <textarea class="fi" style="min-height:90px;">${escapeHtml(item.content || '')}</textarea>
+        <div class="form-label" style="margin-top:10px;">적용 조건 (Scope)</div>
+        <div>${scopeBadge.replace('scope-badge', 'scope-pill active')}</div>
+        <div class="pdp-sec-actions">
+          <button class="btn btn-text-danger btn-sm" onclick="event.stopPropagation();if(confirm('이 카드를 삭제할까요?')){this.closest('.pdp-section').remove();}">삭제</button>
           <button class="btn btn-default btn-sm" onclick="event.stopPropagation();this.closest('.pdp-section').classList.remove('expanded');">취소</button>
           <button class="btn btn-primary btn-sm" onclick="event.stopPropagation();alert('저장 (목업)');">저장</button>
         </div>
