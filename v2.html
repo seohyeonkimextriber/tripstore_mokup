@@ -664,13 +664,12 @@ tbody tr:hover td { background: #fafafa; }
 
       <!-- 우선순위 + 취소환불 안내 (재고 게시판 한정) -->
       <div id="priority-info" style="display:none;padding:8px 12px;margin-bottom:10px;background:#f0f7ff;border:1px solid #91caff;border-radius:6px;font-size:11.5px;color:#0958d9;line-height:1.65;">
-        <div style="display:flex;align-items:center;gap:6px;margin-bottom:3px;font-weight:700;">⚙️ 적용 우선순위</div>
+        <div style="display:flex;align-items:center;gap:6px;margin-bottom:3px;font-weight:700;">⚙️ 콘텐츠 노출 우선순위</div>
         <div style="padding-left:22px;">
-          🗂 <strong>기본정보</strong> → 📦 <strong>상품정보(현재)</strong> → 🌟 <strong>필수공통</strong> 순서로 자동 합쳐서 노출.
-          기본정보는 반드시 상품정보를 거쳐 적용되며, 필수공통을 직접 건너뛸 수 없습니다.
+          상품에 노출될 때: <strong>🗂 기본정보</strong>(같은 숙소/객실 등에서 자동 입력) → <strong>📦 상품정보</strong>(이 화면에서 직접 작성한 내용) → <strong>🌟 필수공통</strong>(회사 표준) 순서로 합쳐져서 보여집니다.
         </div>
         <div style="padding-left:22px;margin-top:4px;">
-          📋 <strong>취소환불규정</strong>: 현재 <em>필수공통의 표준 규정</em> 적용 중. 이 재고에 별도 규정이 필요하면 카테고리 추가 → 필수공통 자동 숨김. (기본정보 게시판에서는 등록 불가 — 공급사 룰)
+          📋 <strong>취소·환불 규정</strong>: 지금은 <em>회사 표준</em>이 적용되는 중. 이 재고에 별도 규정을 등록하면 그게 우선 적용되고 회사 표준은 가려집니다. (기본정보 게시판에서는 등록 불가 — 공급사가 정하는 룰이라 상품·항공권·숙박권 단위에서만 관리)
         </div>
       </div>
 
@@ -1884,9 +1883,9 @@ const BOARD_GUIDE = {
     items: [
       ['❓ 자주묻는 질문', '회사 표준 FAQ — 모든 상품에 자동 노출'],
       ['📋 안내사항 (예약 안내)', '예약 진행 절차 · 1인 예약 · 결제 안내'],
-      ['💸 취소·환불 규정', '회사 표준 (재고에서 override 가능)'],
+      ['💸 취소·환불 규정', '회사 표준 — 숙박권·항공권에 별도 규정이 있으면 그쪽이 우선 적용됩니다'],
     ],
-    auto: '⚡ 모든 상품에 자동 적용 (fallback 표준)'
+    auto: '⚡ 모든 상품에 회사 표준으로 자동 적용 (특정 상품에 별도 규정 없을 때 기본값)'
   },
   accom: {
     title: '🏠 숙소 게시판 등록 가이드',
@@ -2540,10 +2539,10 @@ const ENTRY_SRC_CAT_STACKS = {
       <div class="cat-sec-head" onclick="toggleCatSec(this)">
         <span class="cat-sec-chevron">▼</span><span class="cat-sec-icon">📋</span>
         <span class="cat-sec-title">취소·환불 규정</span>
-        <span class="single-badge">⚡ 단일 적용</span>
+        <span class="single-badge">⚡ 1개만 적용</span>
         <span class="cat-sec-sub">상품에 1개만 적용</span>
         <div class="cat-sec-actions" onclick="event.stopPropagation();">
-          <button class="block-act-btn danger" title="삭제 (필수공통 표준으로 fallback)" onclick="removeCatSec(this)">✕</button>
+          <button class="block-act-btn danger" title="삭제 시 회사 표준 규정으로 자동 복귀" onclick="removeCatSec(this)">✕</button>
         </div>
       </div>
       <div class="cat-sec-body">
@@ -2566,22 +2565,22 @@ const ENTRY_SRC_CAT_STACKS = {
           <div class="bi-add-btn" style="margin-top:10px;" onclick="addItem(this,'check')">+ 항목 추가</div>
         </div>
         <div class="cp-overrides" onclick="this.classList.toggle('open')">
-          <div class="cp-overrides-toggle"><span class="arrow">▶</span> 덮어쓰여진 출처 (2)</div>
+          <div class="cp-overrides-toggle"><span class="arrow">▶</span> 다른 곳에 등록된 규정 (2건 — 항공권 우선이라 적용 안 됨)</div>
           <div class="cp-overrides-list">
             <div class="cp-override-item">
               <span class="cp-override-icon"></span>
               <span class="cp-override-text">🏨 숙박권 #103 · 솔바이멜리아 취소환불</span>
-              <span class="cp-override-tag">override됨</span>
+              <span class="cp-override-tag">미적용</span>
             </div>
             <div class="cp-override-item">
               <span class="cp-override-icon"></span>
               <span class="cp-override-text">🌟 필수공통 · 회사 표준 취소환불</span>
-              <span class="cp-override-tag">override됨</span>
+              <span class="cp-override-tag">미적용</span>
             </div>
           </div>
         </div>
         <div class="cp-priority-hint">
-          ℹ️ 우선순위: <strong>✈️ 항공권 &gt; 🏨 숙박권 &gt; 🌟 필수공통</strong> — 가장 specific한 1개만 적용됩니다
+          ℹ️ 우선순위: <strong>✈️ 항공권 &gt; 🏨 숙박권 &gt; 🌟 회사 표준</strong> — 가장 구체적인 1개만 상품에 노출됩니다
         </div>
       </div>
     </div>
