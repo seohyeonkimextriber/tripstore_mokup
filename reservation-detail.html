@@ -2479,43 +2479,23 @@
       </div>
 
       <div class="form-group">
-        <label>결제주체 <span style="color:#d32f2f;">*</span></label>
-        <select id="addpay-owner" onchange="updateAddPaymentFields()">
-          <option value="agency" data-code="403">🚩 여행사 결제 (등록 후 관리자 수정 가능)</option>
-          <option value="channel" data-code="402">🔗 채널사 결제 (등록 후 수정 X, PG 연동 보호)</option>
-        </select>
-      </div>
-
-      <!-- 여행사 결제 시 자동 매핑 정보 -->
-      <div class="form-group" id="addpay-agency-info">
-        <label>여행사 (예약 매핑 자동)</label>
+        <label>결제주체</label>
         <div style="background:#fff8e1;border:1px solid #ffe082;border-radius:6px;padding:10px 14px;font-size:13px;display:flex;align-items:center;gap:8px;">
           <span style="font-size:18px;">🚩</span>
           <div style="flex:1;">
-            <div style="font-weight:700;color:#e65100;">하나투어</div>
-            <div style="font-size:11px;color:#888;font-family:monospace;">여행사 예약번호: HB2633517226</div>
+            <div style="font-weight:700;color:#e65100;">여행사 결제 — 하나투어</div>
+            <div style="font-size:11px;color:#888;font-family:monospace;">여행사 예약번호: HB2633517226 (예약 매핑 자동)</div>
           </div>
           <span style="background:#fff;color:#e65100;border:1px solid #ffe082;padding:2px 8px;border-radius:4px;font-size:10px;font-weight:600;">자동</span>
         </div>
       </div>
 
-      <!-- 채널사 결제 시만 표시 -->
-      <div class="form-group" id="addpay-pg-group" style="display:none;">
-        <label>채널사 선택 <span style="color:#d32f2f;">*</span></label>
-        <select id="addpay-pg">
-          <option value="ssg">SSG</option>
-          <option value="street11">11번가</option>
-          <option value="kakaoshopping">카카오쇼핑</option>
-          <option value="nol">NOL</option>
-          <option value="thehyundaitravel">더현대트래블 (THT)</option>
-        </select>
-      </div>
+      <input type="hidden" id="addpay-owner" value="agency">
 
       <div class="form-group">
         <label>결제수단</label>
         <select id="addpay-method">
           <option value="agency">여행사</option>
-          <option value="channel">채널결제</option>
           <option value="credit">신용카드</option>
           <option value="transfer">계좌이체</option>
           <option value="virtual">가상계좌</option>
@@ -2589,8 +2569,8 @@
         </div>
       </div>
 
-      <div style="background:#fff8e1;border:1px solid #ffe082;border-radius:8px;padding:10px 14px;margin-top:10px;font-size:11px;color:#e65100;">
-        ⚠️ <b>채널사 결제 등록 후에는 결제 행을 수정할 수 없습니다.</b> 잘못 등록 시 취소 처리만 가능.
+      <div style="background:#f0fdf4;border:1px solid #bbf7d0;border-radius:8px;padding:10px 14px;margin-top:10px;font-size:11px;color:#166534;">
+        ℹ️ 여행사 결제는 <b>등록 후 관리자 수정 가능</b>합니다.
       </div>
     </div>
     <div class="modal-footer">
@@ -4272,46 +4252,22 @@ function executeSubAmount() {
 let manualPayments = [];
 
 function updateAddPaymentFields() {
-  const owner = document.getElementById('addpay-owner').value;
-  const pgGroup = document.getElementById('addpay-pg-group');
-  const agencyInfo = document.getElementById('addpay-agency-info');
-  const methodSelect = document.getElementById('addpay-method');
   const ledgerCode = document.getElementById('addpay-ledger-code');
   const ledgerDesc = document.getElementById('addpay-ledger-desc');
   const extCodeDisplay = document.getElementById('addpay-extcode-display');
-
-  // 결제번호 자동 채번 (시퀀스)
   const seq = String((manualPayments.length || 0) + 1).padStart(3, '0');
   const reservationCode = '26040708-4300101H';
 
-  if (owner === 'channel') {
-    // 채널사 결제
-    pgGroup.style.display = 'block';
-    agencyInfo.style.display = 'none';
-    methodSelect.value = 'channel';
-    ledgerCode.textContent = '402';
-    ledgerDesc.textContent = '고객결제(채널)';
-    const pg = document.getElementById('addpay-pg').value;
-    extCodeDisplay.textContent = `CHN-${pg.toUpperCase()}-${reservationCode}-${seq}`;
-  } else {
-    // 여행사 결제 (default)
-    pgGroup.style.display = 'none';
-    agencyInfo.style.display = 'block';
-    methodSelect.value = 'agency';
-    ledgerCode.textContent = '403';
-    ledgerDesc.textContent = '고객결제(여행사)';
-    extCodeDisplay.textContent = `AGY-HANATOUR-${reservationCode}-${seq}`;
-  }
+  // 여행사 결제만
+  if (ledgerCode) ledgerCode.textContent = '403';
+  if (ledgerDesc) ledgerDesc.textContent = '고객결제(여행사)';
+  if (extCodeDisplay) extCodeDisplay.textContent = `AGY-HANATOUR-${reservationCode}-${seq}`;
   previewAddPayment();
 }
 
-// 초기화 (모달 처음 열릴 때 적용되도록)
 document.addEventListener('DOMContentLoaded', () => {
   setTimeout(() => {
     if (document.getElementById('addpay-owner')) updateAddPaymentFields();
-    // 채널사 select 변경 시 결제번호 재생성
-    const pgSel = document.getElementById('addpay-pg');
-    if (pgSel) pgSel.addEventListener('change', updateAddPaymentFields);
   }, 100);
 });
 
@@ -4346,9 +4302,6 @@ function previewAddPayment() {
 }
 
 function executeAddPayment() {
-  const owner = document.getElementById('addpay-owner');
-  const ownerVal = owner.value;
-  const ownerName = owner.options[owner.selectedIndex].textContent;
   const method = document.getElementById('addpay-method');
   const methodName = method.options[method.selectedIndex].textContent;
   const amount = parseInt(document.getElementById('addpay-amount').value) || 0;
@@ -4357,21 +4310,15 @@ function executeAddPayment() {
 
   if (amount <= 0) { showToast('결제금액을 입력하세요.'); return; }
 
-  // 결제번호 자동 채번
+  // 여행사 결제만 (채널사 결제 제거)
   const seq = String(manualPayments.length + 1).padStart(3, '0');
   const reservationCode = '26040708-4300101H';
-  let extCode, pg, ownerBadge, code;
-  if (ownerVal === 'channel') {
-    pg = document.getElementById('addpay-pg').value;
-    extCode = `CHN-${pg.toUpperCase()}-${reservationCode}-${seq}`;
-    ownerBadge = '<span class="badge purple">🔗 채널</span>';
-    code = '402';
-  } else {
-    pg = '-';
-    extCode = `AGY-HANATOUR-${reservationCode}-${seq}`;
-    ownerBadge = '<span class="badge orange">🚩 여행사</span>';
-    code = '403';
-  }
+  const ownerVal = 'agency';
+  const ownerName = '🚩 여행사 결제';
+  const pg = '-';
+  const extCode = `AGY-HANATOUR-${reservationCode}-${seq}`;
+  const ownerBadge = '<span class="badge orange">🚩 여행사</span>';
+  const code = '403';
 
   // 결제일시 자동 (등록 시점)
   const now = new Date();
