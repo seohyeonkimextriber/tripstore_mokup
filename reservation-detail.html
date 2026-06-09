@@ -1861,35 +1861,38 @@
     <div class="modal-body">
       <div style="background:#ffebee;border-radius:8px;padding:10px 14px;font-size:12px;color:#d32f2f;margin-bottom:16px;">
         삭제할 인원을 선택하세요. 선택된 인원의 모든 원장 항목이 <strong>역분개(취소)</strong> 처리됩니다.<br>
-        <span style="font-size:11px;opacity:0.8;">취소위약금이 필요하면 삭제 완료 후 [+금액 추가(추가 청구)]로 위약금을 추가하세요.</span>
+        <span style="font-size:11px;opacity:0.8;">예약자도 삭제 가능. 전원 삭제 시 예약 전체 취소 흐름으로 전환됩니다.<br>
+        삭제 후 자동으로 [+금액 추가] 모달이 열리며 취소위약금을 입력할 수 있습니다.</span>
       </div>
 
       <!-- 현재 인원 목록 -->
       <div style="font-size:12px;font-weight:700;margin-bottom:8px;">현재 인원 목록</div>
       <div id="remove-pax-list" style="display:flex;flex-direction:column;gap:6px;">
-        <!-- 예약자 (삭제 불가) -->
-        <div style="display:flex;align-items:center;gap:10px;padding:10px 12px;background:#f5f5f5;border:1px solid #e0e0e0;border-radius:8px;opacity:0.6;">
-          <input type="checkbox" disabled>
-          <span class="badge blue">성인</span>
-          <span style="font-weight:600;font-size:12px;flex:1;">오기웅 (예약자)</span>
-          <span style="font-family:monospace;font-size:12px;">판매가 686,000</span>
-          <span style="font-size:10px;color:#888;">삭제 불가</span>
-        </div>
-        <!-- 동행 2 -->
+        <!-- 예약자 (삭제 가능) -->
         <label style="display:flex;align-items:center;gap:10px;padding:10px 12px;background:#fff;border:1px solid #e0e0e0;border-radius:8px;cursor:pointer;transition:all 0.15s;" onmouseover="this.style.borderColor='#d32f2f';this.style.background='#fff5f5'" onmouseout="if(!this.querySelector('input').checked){this.style.borderColor='#e0e0e0';this.style.background='#fff'}">
-          <input type="checkbox" name="remove-pax" value="adult-1" onchange="recalcRemovePax()">
+          <input type="checkbox" name="remove-pax" value="adult-booker" onchange="recalcRemovePax()">
           <span class="badge blue">성인</span>
-          <span style="font-weight:600;font-size:12px;flex:1;">동행 2</span>
+          <span style="font-weight:600;font-size:12px;flex:1;">P-5501 (예약자)</span>
           <div style="text-align:right;">
             <div style="font-family:monospace;font-size:12px;">판매가 686,000</div>
             <div style="font-size:9px;color:#888;">상품가 699,000 - 특가 13,000</div>
           </div>
         </label>
-        <!-- 동행 3 -->
+        <!-- P-5502 -->
+        <label style="display:flex;align-items:center;gap:10px;padding:10px 12px;background:#fff;border:1px solid #e0e0e0;border-radius:8px;cursor:pointer;transition:all 0.15s;" onmouseover="this.style.borderColor='#d32f2f';this.style.background='#fff5f5'" onmouseout="if(!this.querySelector('input').checked){this.style.borderColor='#e0e0e0';this.style.background='#fff'}">
+          <input type="checkbox" name="remove-pax" value="adult-1" onchange="recalcRemovePax()">
+          <span class="badge blue">성인</span>
+          <span style="font-weight:600;font-size:12px;flex:1;">P-5502</span>
+          <div style="text-align:right;">
+            <div style="font-family:monospace;font-size:12px;">판매가 686,000</div>
+            <div style="font-size:9px;color:#888;">상품가 699,000 - 특가 13,000</div>
+          </div>
+        </label>
+        <!-- P-5503 -->
         <label style="display:flex;align-items:center;gap:10px;padding:10px 12px;background:#fff;border:1px solid #e0e0e0;border-radius:8px;cursor:pointer;transition:all 0.15s;" onmouseover="this.style.borderColor='#d32f2f';this.style.background='#fff5f5'" onmouseout="if(!this.querySelector('input').checked){this.style.borderColor='#e0e0e0';this.style.background='#fff'}">
           <input type="checkbox" name="remove-pax" value="adult-2" onchange="recalcRemovePax()">
           <span class="badge blue">성인</span>
-          <span style="font-weight:600;font-size:12px;flex:1;">동행 3</span>
+          <span style="font-weight:600;font-size:12px;flex:1;">P-5503</span>
           <div style="text-align:right;">
             <div style="font-family:monospace;font-size:12px;">판매가 686,000</div>
             <div style="font-size:9px;color:#888;">상품가 699,000 - 특가 13,000</div>
@@ -2029,9 +2032,9 @@
         <label>대상 여행자</label>
         <select id="add-target">
           <option value="all">전체 (3명)</option>
-          <option value="0">오기웅 (성인)</option>
-          <option value="1">오서연 (성인)</option>
-          <option value="2">오민준 (성인)</option>
+          <option value="0">P-5501 (예약자, 성인)</option>
+          <option value="1">P-5502 (성인)</option>
+          <option value="2">P-5503 (성인)</option>
         </select>
       </div>
       <div class="form-group">
@@ -2080,6 +2083,9 @@
           <span style="margin-left:auto;font-family:monospace;color:#1565c0;font-weight:600;" id="add-ledger-amount">+0</span>
         </div>
       </div>
+
+      <!-- 쿠폰 자동 재검증 경고 -->
+      <div id="add-coupon-warn" style="display:none;background:#ffebee;border:1px solid #ffcdd2;border-radius:8px;padding:10px 14px;margin-top:10px;font-size:11px;"></div>
     </div>
     <div class="modal-footer">
       <button class="btn btn-outline" onclick="this.closest('.modal-overlay').classList.remove('show')">취소</button>
@@ -2094,25 +2100,25 @@
     <div class="modal-header"><h3>+ 금액 추가 (추가 청구)</h3><button class="close" onclick="this.closest('.modal-overlay').classList.remove('show')">&times;</button></div>
     <div class="modal-body">
       <div style="background:#fff3e0;border-radius:8px;padding:10px 14px;font-size:12px;color:#e65100;margin-bottom:16px;">
-        추가 청구가 필요한 금액 변동 시 사용합니다. <strong>결제 필요 금액이 증가</strong>합니다.<br>
-        <span style="font-size:11px;opacity:0.8;">확인 시 원장에 해당 항목이 자동 생성됩니다.</span>
+        <strong>인원 취소에 따라서 발생하는 취소위약금이 있는 경우 금액을 입력해주세요.</strong><br>
+        <span style="font-size:11px;opacity:0.8;">위약금이 필요 없으면 모달을 닫으세요. 확인 시 원장에 해당 항목(800)이 자동 생성됩니다.</span>
       </div>
       <div class="form-group">
         <label>대상 여행자</label>
         <select id="sub-target">
           <option value="all">전체 (3명)</option>
-          <option value="0">오기웅 (성인)</option>
-          <option value="1">오서연 (성인)</option>
-          <option value="2">오민준 (성인)</option>
+          <option value="0">P-5501 (예약자, 성인)</option>
+          <option value="1">P-5502 (성인)</option>
+          <option value="2">P-5503 (성인)</option>
         </select>
       </div>
       <div class="form-group">
-        <label>차감 유형</label>
+        <label>추가 유형</label>
         <select id="sub-type" onchange="updateSubLedgerCode()">
-          <option value="discount-cancel" data-code="202">할인 취소 (환수)</option>
+          <option value="penalty" data-code="800" selected>취소위약금</option>
           <option value="surcharge" data-code="100">추가 요금</option>
           <option value="adjust" data-code="100">금액 조정 (증액)</option>
-          <option value="penalty" data-code="800">취소위약금</option>
+          <option value="discount-cancel" data-code="202">할인 취소 (환수)</option>
           <option value="etc" data-code="299">기타</option>
         </select>
       </div>
@@ -3955,12 +3961,32 @@ function previewAddAmount() {
     document.getElementById('add-preview-after').textContent = after.toLocaleString();
     document.getElementById('add-ledger-amount').textContent = `+${val.toLocaleString()}`;
 
+    // 쿠폰 자동 재검증 (금액 차감 후 판매금액이 쿠폰 최소주문금액 미달 케이스)
+    const pp = currentReservation.pricePerPerson;
+    const dppp = currentReservation.discountPerPerson;
+    const total = currentReservation.travelers;
+    const saleBeforeCoupon = (pp - dppp) * total - val;
+    const minOrder = 500000;
+    const couponWarn = document.getElementById('add-coupon-warn');
+    if (couponWarn) {
+      if (saleBeforeCoupon < minOrder && currentReservation.couponAmount > 0) {
+        couponWarn.style.display = 'block';
+        couponWarn.innerHTML = `<div style="display:flex;align-items:center;gap:6px;margin-bottom:4px;"><span style="font-size:14px;">🎟</span><strong style="color:#d32f2f;">쿠폰 조건 미달 경고</strong></div>
+          <div style="color:#666;font-size:11px;">차감 후 판매금액(쿠폰 제외): <strong style="font-family:monospace;color:#d32f2f;">${saleBeforeCoupon.toLocaleString()}</strong> &lt; 쿠폰 최소주문금액 <strong style="font-family:monospace;">500,000</strong><br>
+          <span style="color:#d32f2f;font-weight:600;">→ 차감 실행 시 쿠폰 자동 해제(302) + 유효기간 내 쿠폰함 원복</span></div>`;
+      } else {
+        couponWarn.style.display = 'none';
+      }
+    }
+
     btn.disabled = false;
     btn.style.opacity = '1';
     btn.style.cursor = 'pointer';
   } else {
     preview.style.display = 'none';
     ledgerPreview.style.display = 'none';
+    const couponWarn = document.getElementById('add-coupon-warn');
+    if (couponWarn) couponWarn.style.display = 'none';
     btn.disabled = true;
     btn.style.opacity = '0.5';
     btn.style.cursor = 'not-allowed';
