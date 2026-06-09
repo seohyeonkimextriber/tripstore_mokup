@@ -2483,15 +2483,26 @@
         <select id="addpay-owner" onchange="updateAddPaymentFields()">
           <option value="agency" data-code="403">🚩 여행사 결제 (등록 후 관리자 수정 가능)</option>
           <option value="channel" data-code="402">🔗 채널사 결제 (등록 후 수정 X, PG 연동 보호)</option>
-          <option value="platform" data-code="401">🏢 트립스토어 결제 (플랫폼 직판)</option>
         </select>
       </div>
 
-      <div class="form-group" id="addpay-pg-group">
-        <label>PG사 / 채널사</label>
+      <!-- 여행사 결제 시 자동 매핑 정보 -->
+      <div class="form-group" id="addpay-agency-info">
+        <label>여행사 (예약 매핑 자동)</label>
+        <div style="background:#fff8e1;border:1px solid #ffe082;border-radius:6px;padding:10px 14px;font-size:13px;display:flex;align-items:center;gap:8px;">
+          <span style="font-size:18px;">🚩</span>
+          <div style="flex:1;">
+            <div style="font-weight:700;color:#e65100;">하나투어</div>
+            <div style="font-size:11px;color:#888;font-family:monospace;">여행사 예약번호: HB2633517226</div>
+          </div>
+          <span style="background:#fff;color:#e65100;border:1px solid #ffe082;padding:2px 8px;border-radius:4px;font-size:10px;font-weight:600;">자동</span>
+        </div>
+      </div>
+
+      <!-- 채널사 결제 시만 표시 -->
+      <div class="form-group" id="addpay-pg-group" style="display:none;">
+        <label>채널사 선택 <span style="color:#d32f2f;">*</span></label>
         <select id="addpay-pg">
-          <option value="-">- (여행사 직접 입금)</option>
-          <option value="nice_v2">nice_v2 (트립 플랫폼)</option>
           <option value="ssg">SSG</option>
           <option value="street11">11번가</option>
           <option value="kakaoshopping">카카오쇼핑</option>
@@ -2503,19 +2514,23 @@
       <div class="form-group">
         <label>결제수단</label>
         <select id="addpay-method">
+          <option value="agency">여행사</option>
+          <option value="channel">채널결제</option>
           <option value="credit">신용카드</option>
           <option value="transfer">계좌이체</option>
           <option value="virtual">가상계좌</option>
           <option value="cash">현금</option>
-          <option value="channel">채널결제</option>
           <option value="etc">기타</option>
         </select>
       </div>
 
       <div class="form-group">
-        <label>결제번호 (외부 결제 식별자) <span style="color:#d32f2f;">*</span></label>
-        <input type="text" id="addpay-extcode" placeholder="예: HB-PAY-26040712, SSG-O-20260426-A0091" style="font-family:monospace;">
-        <div class="help">여행사 결제번호 · 채널사 주문번호 · PG 결제번호 등 외부 시스템 식별자</div>
+        <label>결제번호 <small style="color:#888;font-weight:400;">(자동 생성)</small></label>
+        <div style="background:#f8f9fa;border:1px solid #e0e0e0;border-radius:6px;padding:10px 14px;font-family:monospace;font-size:12px;color:#1565c0;display:flex;align-items:center;gap:8px;" id="addpay-extcode-preview">
+          <span style="background:#1565c0;color:white;padding:1px 8px;border-radius:4px;font-size:10px;font-weight:600;">AUTO</span>
+          <span id="addpay-extcode-display">결제주체 선택 시 자동 생성됩니다</span>
+        </div>
+        <div class="help">결제주체·예약번호·순번 기반으로 시스템이 자동 채번 (필요시 등록 후 수정 가능)</div>
       </div>
 
       <div class="form-group">
@@ -2524,8 +2539,11 @@
       </div>
 
       <div class="form-group">
-        <label>결제일시</label>
-        <input type="datetime-local" id="addpay-datetime">
+        <label>결제일시 <small style="color:#888;font-weight:400;">(자동: 등록 시점 기준)</small></label>
+        <div style="background:#f8f9fa;border:1px solid #e0e0e0;border-radius:6px;padding:8px 12px;font-size:12px;color:#888;display:flex;align-items:center;gap:8px;">
+          <span style="background:#888;color:white;padding:1px 8px;border-radius:4px;font-size:10px;font-weight:600;">AUTO</span>
+          <span id="addpay-datetime-display">등록 버튼 클릭 시점이 자동 기록됩니다</span>
+        </div>
       </div>
 
       <div class="form-group">
@@ -4255,25 +4273,47 @@ let manualPayments = [];
 
 function updateAddPaymentFields() {
   const owner = document.getElementById('addpay-owner').value;
-  const pgSelect = document.getElementById('addpay-pg');
+  const pgGroup = document.getElementById('addpay-pg-group');
+  const agencyInfo = document.getElementById('addpay-agency-info');
+  const methodSelect = document.getElementById('addpay-method');
   const ledgerCode = document.getElementById('addpay-ledger-code');
   const ledgerDesc = document.getElementById('addpay-ledger-desc');
+  const extCodeDisplay = document.getElementById('addpay-extcode-display');
 
-  if (owner === 'platform') {
-    pgSelect.value = 'nice_v2';
-    ledgerCode.textContent = '401';
-    ledgerDesc.textContent = '고객결제(플랫폼)';
-  } else if (owner === 'channel') {
-    pgSelect.value = 'ssg';
+  // 결제번호 자동 채번 (시퀀스)
+  const seq = String((manualPayments.length || 0) + 1).padStart(3, '0');
+  const reservationCode = '26040708-4300101H';
+
+  if (owner === 'channel') {
+    // 채널사 결제
+    pgGroup.style.display = 'block';
+    agencyInfo.style.display = 'none';
+    methodSelect.value = 'channel';
     ledgerCode.textContent = '402';
     ledgerDesc.textContent = '고객결제(채널)';
-  } else if (owner === 'agency') {
-    pgSelect.value = '-';
+    const pg = document.getElementById('addpay-pg').value;
+    extCodeDisplay.textContent = `CHN-${pg.toUpperCase()}-${reservationCode}-${seq}`;
+  } else {
+    // 여행사 결제 (default)
+    pgGroup.style.display = 'none';
+    agencyInfo.style.display = 'block';
+    methodSelect.value = 'agency';
     ledgerCode.textContent = '403';
     ledgerDesc.textContent = '고객결제(여행사)';
+    extCodeDisplay.textContent = `AGY-HANATOUR-${reservationCode}-${seq}`;
   }
   previewAddPayment();
 }
+
+// 초기화 (모달 처음 열릴 때 적용되도록)
+document.addEventListener('DOMContentLoaded', () => {
+  setTimeout(() => {
+    if (document.getElementById('addpay-owner')) updateAddPaymentFields();
+    // 채널사 select 변경 시 결제번호 재생성
+    const pgSel = document.getElementById('addpay-pg');
+    if (pgSel) pgSel.addEventListener('change', updateAddPaymentFields);
+  }, 100);
+});
 
 function previewAddPayment() {
   const val = parseInt(document.getElementById('addpay-amount').value) || 0;
@@ -4309,23 +4349,34 @@ function executeAddPayment() {
   const owner = document.getElementById('addpay-owner');
   const ownerVal = owner.value;
   const ownerName = owner.options[owner.selectedIndex].textContent;
-  const pg = document.getElementById('addpay-pg').value;
   const method = document.getElementById('addpay-method');
   const methodName = method.options[method.selectedIndex].textContent;
-  const extCode = document.getElementById('addpay-extcode').value.trim();
   const amount = parseInt(document.getElementById('addpay-amount').value) || 0;
-  const datetime = document.getElementById('addpay-datetime').value || new Date().toISOString().slice(0, 16);
   const reason = document.getElementById('addpay-reason').value;
   const memo = document.getElementById('addpay-memo').value.trim();
 
-  if (!extCode) { showToast('결제번호를 입력하세요.'); return; }
   if (amount <= 0) { showToast('결제금액을 입력하세요.'); return; }
 
-  // 원장 코드
-  const code = ownerVal === 'platform' ? '401' : ownerVal === 'channel' ? '402' : '403';
-  const ownerBadge = ownerVal === 'platform' ? '<span class="badge gray">🏢 트립</span>' :
-                     ownerVal === 'channel' ? '<span class="badge purple">🔗 채널</span>' :
-                     '<span class="badge orange">🚩 여행사</span>';
+  // 결제번호 자동 채번
+  const seq = String(manualPayments.length + 1).padStart(3, '0');
+  const reservationCode = '26040708-4300101H';
+  let extCode, pg, ownerBadge, code;
+  if (ownerVal === 'channel') {
+    pg = document.getElementById('addpay-pg').value;
+    extCode = `CHN-${pg.toUpperCase()}-${reservationCode}-${seq}`;
+    ownerBadge = '<span class="badge purple">🔗 채널</span>';
+    code = '402';
+  } else {
+    pg = '-';
+    extCode = `AGY-HANATOUR-${reservationCode}-${seq}`;
+    ownerBadge = '<span class="badge orange">🚩 여행사</span>';
+    code = '403';
+  }
+
+  // 결제일시 자동 (등록 시점)
+  const now = new Date();
+  const datetime = now.toISOString().slice(0, 16);
+  const dtDisplay = `${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')} ${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`;
 
   manualPayments.push({
     id: manualPayments.length + 1,
@@ -4345,14 +4396,13 @@ function executeAddPayment() {
   const newRow = document.createElement('tr');
   newRow.style.background = '#f3f9ff';
   const newIdx = paymentTable.children.length + 1;
-  const dt = datetime.replace('T', ' ').slice(0, 16).replace('-', '-').slice(5);
   newRow.innerHTML = `
     <td>${newIdx}</td><td>${ownerBadge}</td><td>${pg}</td><td>${methodName}</td>
     <td class="text-mono" style="font-size:11px;">${extCode}</td>
     <td class="text-right text-mono">${amount.toLocaleString()}</td>
     <td class="text-right text-mono" style="color:#bbb;">0</td>
     <td class="text-right text-mono">${amount.toLocaleString()}</td>
-    <td style="font-size:11px;">${dt}</td><td style="font-size:11px;color:#bbb;">-</td>
+    <td style="font-size:11px;">${dtDisplay}</td><td style="font-size:11px;color:#bbb;">-</td>
     <td class="text-center"><span class="badge green">완료</span><div style="font-size:9px;color:#888;margin-top:2px;">수동 등록</div></td>
   `;
   paymentTable.appendChild(newRow);
@@ -4363,7 +4413,6 @@ function executeAddPayment() {
   actualEl.textContent = (currentActual + amount).toLocaleString();
 
   // 총 결제금액 카드 업데이트
-  const totalCard = document.querySelector('.amount-card .label');
   document.querySelectorAll('.amount-card').forEach(card => {
     const label = card.querySelector('.label');
     if (label && label.textContent === '총 결제금액') {
@@ -4376,13 +4425,13 @@ function executeAddPayment() {
   document.getElementById('modal-add-payment').classList.remove('show');
 
   // 초기화
-  document.getElementById('addpay-extcode').value = '';
   document.getElementById('addpay-amount').value = '';
   document.getElementById('addpay-memo').value = '';
   document.getElementById('addpay-preview').style.display = 'none';
   document.getElementById('addpay-ledger-preview').style.display = 'none';
+  updateAddPaymentFields();
 
-  showToast(`결제 추가 완료: ${ownerName.split(' ')[0]} ${amount.toLocaleString()}원 등록 · 원장 ${code}(고객결제) 자동 생성`);
+  showToast(`결제 추가 완료: ${ownerName.split(' ')[0]} ${amount.toLocaleString()}원 (${extCode}) · 원장 ${code} 자동 생성`);
 }
 
 // 조정 반영된 전체 재계산
