@@ -1,0 +1,682 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<title>신규 예약시스템 — 백로그 12개 효용 가치 분석</title>
+<style>
+* { box-sizing: border-box; }
+body {
+  font-family: -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", "Pretendard", sans-serif;
+  line-height: 1.6;
+  color: #1f2937;
+  background: #f8fafc;
+  margin: 0;
+  font-size: 15px;
+}
+.container { max-width: 1200px; margin: 0 auto; padding: 56px 32px 80px; }
+header {
+  border-bottom: 1px solid #e5e7eb;
+  padding-bottom: 28px;
+  margin-bottom: 40px;
+}
+h1 {
+  font-size: 32px;
+  margin: 0 0 8px;
+  letter-spacing: -0.6px;
+  font-weight: 800;
+}
+.subtitle { color: #6b7280; font-size: 16px; margin: 0; }
+.meta { color: #9ca3af; font-size: 13px; margin-top: 12px; }
+h2 {
+  font-size: 22px;
+  margin: 56px 0 16px;
+  letter-spacing: -0.3px;
+}
+h3 {
+  font-size: 17px;
+  margin: 0 0 14px;
+  color: #374151;
+}
+
+/* TL;DR */
+.tldr {
+  background: white;
+  border: 1px solid #e5e7eb;
+  border-radius: 16px;
+  padding: 28px 32px;
+  margin-bottom: 24px;
+}
+.tldr p { margin: 0 0 10px; font-size: 16px; line-height: 1.7; }
+.tldr b.hl {
+  background: linear-gradient(180deg, transparent 60%, #fef08a 60%);
+  padding: 0 4px;
+}
+
+/* Filter chips */
+.chips {
+  display: flex;
+  gap: 8px;
+  margin: 24px 0 16px;
+  flex-wrap: wrap;
+}
+.chip {
+  background: white;
+  border: 1px solid #e5e7eb;
+  padding: 6px 14px;
+  border-radius: 999px;
+  font-size: 13px;
+  color: #374151;
+  cursor: pointer;
+  user-select: none;
+}
+.chip.active { background: #1f2937; color: white; border-color: #1f2937; }
+.chip:hover:not(.active) { background: #f1f5f9; }
+
+/* Backlog list (ranking) */
+.list { display: flex; flex-direction: column; gap: 12px; }
+.row {
+  background: white;
+  border: 1px solid #e5e7eb;
+  border-radius: 14px;
+  padding: 20px 24px;
+  display: grid;
+  grid-template-columns: 56px 1fr 240px;
+  gap: 20px;
+  align-items: center;
+  transition: box-shadow 0.15s;
+}
+.row:hover { box-shadow: 0 6px 18px rgba(0,0,0,0.06); }
+.rank {
+  font-size: 36px;
+  font-weight: 800;
+  color: #9ca3af;
+  text-align: center;
+  line-height: 1;
+}
+.row.tier-must .rank { color: #f59e0b; }
+.row.tier-strong .rank { color: #6366f1; }
+.row.tier-rec .rank { color: #10b981; }
+.row.tier-nice .rank { color: #94a3b8; }
+.row.tier-skip .rank { color: #d1d5db; }
+
+.content .title {
+  font-size: 17px;
+  font-weight: 700;
+  margin: 0 0 4px;
+  letter-spacing: -0.2px;
+}
+.content .desc {
+  font-size: 13.5px;
+  color: #6b7280;
+  margin: 0 0 8px;
+}
+.content .tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 6px;
+}
+.tag {
+  display: inline-block;
+  padding: 3px 10px;
+  border-radius: 999px;
+  font-size: 11.5px;
+  font-weight: 600;
+  letter-spacing: 0.3px;
+}
+.t-quant { background: #fef3c7; color: #92400e; }
+.t-found { background: #ede9fe; color: #5b21b6; }
+.t-dep { background: #fee2e2; color: #991b1b; }
+.t-quick { background: #d1fae5; color: #065f46; }
+.t-ops { background: #dbeafe; color: #1e40af; }
+.t-user { background: #fce7f3; color: #9d174d; }
+.t-data { background: #e0e7ff; color: #3730a3; }
+.t-skip { background: #f3f4f6; color: #6b7280; }
+
+/* Score */
+.score-block {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.score-row {
+  display: grid;
+  grid-template-columns: 60px 1fr 24px;
+  gap: 6px;
+  align-items: center;
+  font-size: 11px;
+  color: #6b7280;
+}
+.score-bar {
+  height: 6px;
+  background: #f1f5f9;
+  border-radius: 3px;
+  overflow: hidden;
+}
+.score-bar > div {
+  height: 100%;
+  background: linear-gradient(90deg, #6366f1, #818cf8);
+  border-radius: 3px;
+}
+.score-row .val { text-align: right; font-weight: 600; color: #1f2937; }
+.row.tier-must .score-bar > div { background: linear-gradient(90deg, #f59e0b, #fbbf24); }
+.row.tier-skip .score-bar > div { background: linear-gradient(90deg, #d1d5db, #e5e7eb); }
+.total-score {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 6px 0;
+  border-top: 1px dashed #e5e7eb;
+  margin-top: 4px;
+  font-size: 12px;
+}
+.total-score .lab { color: #6b7280; font-weight: 600; }
+.total-score .v { font-weight: 800; color: #1f2937; font-size: 14px; }
+
+/* Tier badge */
+.tier {
+  display: inline-block;
+  padding: 4px 10px;
+  border-radius: 6px;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.6px;
+  margin-bottom: 6px;
+}
+.tier-must-bg { background: #fef3c7; color: #92400e; }
+.tier-strong-bg { background: #ede9fe; color: #5b21b6; }
+.tier-rec-bg { background: #d1fae5; color: #065f46; }
+.tier-nice-bg { background: #f3f4f6; color: #4b5563; }
+.tier-skip-bg { background: #fee2e2; color: #991b1b; }
+
+/* Matrix */
+.matrix {
+  background: white;
+  border: 1px solid #e5e7eb;
+  border-radius: 16px;
+  padding: 24px 28px;
+  margin-bottom: 24px;
+}
+.matrix-grid {
+  display: grid;
+  grid-template-columns: 80px 1fr 1fr;
+  grid-template-rows: 40px 1fr 1fr;
+  gap: 8px;
+  margin-top: 12px;
+}
+.matrix-cell {
+  background: #f8fafc;
+  border-radius: 10px;
+  padding: 14px 16px;
+  min-height: 160px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.matrix-cell.q1 { background: #fef3c7; border: 1px solid #fbbf24; } /* High value, Low effort */
+.matrix-cell.q2 { background: #d1fae5; border: 1px solid #34d399; } /* High value, High effort */
+.matrix-cell.q3 { background: #f3f4f6; border: 1px solid #d1d5db; } /* Low value, Low effort */
+.matrix-cell.q4 { background: #fef2f2; border: 1px solid #fca5a5; } /* Low value, High effort */
+.matrix-axis-y, .matrix-axis-x {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+  font-weight: 700;
+  color: #6b7280;
+  letter-spacing: 1px;
+}
+.matrix-axis-y { writing-mode: vertical-rl; transform: rotate(180deg); }
+.matrix-quadrant-label {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  color: #374151;
+  text-transform: uppercase;
+  margin-bottom: 4px;
+}
+.m-item {
+  background: white;
+  padding: 6px 10px;
+  border-radius: 6px;
+  font-size: 12px;
+  font-weight: 600;
+  color: #1f2937;
+  border: 1px solid rgba(0,0,0,0.05);
+}
+
+.legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+  margin: 16px 0 0;
+  font-size: 12px;
+  color: #6b7280;
+}
+.legend-item { display: flex; align-items: center; gap: 6px; }
+.legend-dot { width: 12px; height: 12px; border-radius: 3px; }
+
+/* Conclusion */
+.conclusion {
+  background: linear-gradient(135deg, #4338ca 0%, #6366f1 100%);
+  color: white;
+  border-radius: 16px;
+  padding: 32px 36px;
+  margin-top: 40px;
+}
+.conclusion h2 { margin-top: 0; color: white; font-size: 24px; }
+.conclusion h2::before { content: ''; }
+.conclusion p { font-size: 15.5px; line-height: 1.75; opacity: 0.95; margin: 8px 0; }
+.conclusion b { background: rgba(255,255,255,0.2); padding: 2px 8px; border-radius: 4px; }
+.conclusion .picks {
+  margin-top: 16px;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
+}
+.conclusion .pick {
+  background: rgba(255,255,255,0.15);
+  padding: 16px 18px;
+  border-radius: 10px;
+}
+.conclusion .pick .lab { font-size: 11px; opacity: 0.8; letter-spacing: 1px; font-weight: 700; }
+.conclusion .pick .name { font-size: 17px; font-weight: 700; margin: 4px 0; }
+.conclusion .pick .why { font-size: 12.5px; opacity: 0.85; line-height: 1.5; }
+
+footer {
+  text-align: center;
+  color: #9ca3af;
+  font-size: 12px;
+  margin-top: 64px;
+  padding-top: 24px;
+  border-top: 1px dashed #e5e7eb;
+}
+
+@media (max-width: 800px) {
+  .row { grid-template-columns: 1fr; }
+  .rank { text-align: left; font-size: 24px; }
+  .matrix-grid { grid-template-columns: 50px 1fr 1fr; }
+}
+</style>
+</head>
+<body>
+
+<div class="container">
+
+<header>
+  <h1>📊 신규 예약시스템 — 백로그 12개 효용 가치 분석</h1>
+  <p class="subtitle">"어떤 백로그가 가장 가치 있는가" 5개 기준 점수화 & 우선순위</p>
+  <p class="meta">평가 차원: 정량 효용 · 정성 효용 · 영향 범위 · 시급성 · 의존성 (각 1~5점) · PM 김서현 · 2026-06-05</p>
+</header>
+
+<!-- TL;DR -->
+<div class="tldr">
+  <p>💎 <b>가장 효용 가치 높은 백로그 3개:</b></p>
+  <p>① <b class="hl">원장 개념 추가</b> (23/25) — 모든 후속의 기반. 안 하면 다른 11개가 의미 없음<br>
+  ② <b class="hl">BQ/예약지표 수정</b> (22/25) — 전사 의사결정 데이터의 신뢰도. 원장 안 되면 같이 안 됨<br>
+  ③ <b class="hl">행사이동</b> (21/25) — <b>유일하게 정량 근거가 명확</b> (취소율 −8%p, 25년 7,015건)</p>
+  <p style="margin-top:14px; color:#6b7280; font-size:14px;">
+  → 효용 1·2위는 "데이터 기반(foundation)" 성격. 3위 행사이동은 "운영 즉시 효과" 성격으로 가장 빨리 가치를 보여줌.
+  </p>
+</div>
+
+<!-- Matrix -->
+<h2>① 효용 × 작업난이도 매트릭스</h2>
+<p style="color:#6b7280; margin-top:-6px; font-size:14px;">PM 의사결정용 — "노력 대비 효용" 사분면 분석</p>
+
+<div class="matrix">
+  <div class="matrix-grid">
+    <div></div>
+    <div style="text-align:center; font-size:12px; font-weight:700; color:#6b7280; letter-spacing:1px; padding-top:10px;">← 노력 적음</div>
+    <div style="text-align:center; font-size:12px; font-weight:700; color:#6b7280; letter-spacing:1px; padding-top:10px;">노력 많음 →</div>
+
+    <div class="matrix-axis-y" style="background:linear-gradient(180deg, #fbbf24 0%, #fef3c7 100%); border-radius:8px;">효용 높음</div>
+    <div class="matrix-cell q1">
+      <div class="matrix-quadrant-label">🔥 Quick Win</div>
+      <div class="m-item">④ 취소위약금 시스템 변경</div>
+      <div class="m-item">⑥ [User] 일괄수정</div>
+      <div class="m-item">⑦ [Partners] 일괄수정</div>
+      <div style="font-size:11px; color:#92400e; margin-top:auto;">→ 최우선 진행. 효용 ≥ 17, 난이도 ≤ 2</div>
+    </div>
+    <div class="matrix-cell q2">
+      <div class="matrix-quadrant-label">💎 Big Bet</div>
+      <div class="m-item">① 원장 개념 추가 ⭐</div>
+      <div class="m-item">② 행사이동</div>
+      <div class="m-item">⑧ BQ / 예약지표</div>
+      <div class="m-item">⑤ [admin] 일괄수정</div>
+      <div style="font-size:11px; color:#065f46; margin-top:auto;">→ 핵심 투자. 효용 ≥ 17, 난이도 ≥ 3</div>
+    </div>
+
+    <div class="matrix-axis-y" style="background:linear-gradient(180deg, #f1f5f9 0%, #f8fafc 100%); border-radius:8px;">효용 낮음</div>
+    <div class="matrix-cell q3">
+      <div class="matrix-quadrant-label">🪶 Fill-in</div>
+      <div class="m-item">⑨ 여행사 상태값 페이드아웃</div>
+      <div style="font-size:11px; color:#6b7280; margin-top:auto;">→ ⑤~⑦에 묶어 한 번에 처리</div>
+    </div>
+    <div class="matrix-cell q4">
+      <div class="matrix-quadrant-label">⏸ Defer</div>
+      <div class="m-item">③ 회원 쿠폰 (방향 결정 후)</div>
+      <div class="m-item">⑩ 결제수단 변경</div>
+      <div class="m-item">⑪ 결제링크 동시발행</div>
+      <div class="m-item">⑫ 결제이관 (제외 상태)</div>
+      <div style="font-size:11px; color:#991b1b; margin-top:auto;">→ 정량 근거 약함. 2차로 미루기</div>
+    </div>
+  </div>
+
+  <div class="legend">
+    <div class="legend-item"><div class="legend-dot" style="background:#fef3c7; border:1px solid #fbbf24;"></div>Quick Win — 즉시 진행</div>
+    <div class="legend-item"><div class="legend-dot" style="background:#d1fae5; border:1px solid #34d399;"></div>Big Bet — 핵심 투자</div>
+    <div class="legend-item"><div class="legend-dot" style="background:#f3f4f6; border:1px solid #d1d5db;"></div>Fill-in — 묶음 처리</div>
+    <div class="legend-item"><div class="legend-dot" style="background:#fef2f2; border:1px solid #fca5a5;"></div>Defer — 후순위</div>
+  </div>
+</div>
+
+<!-- Backlog ranking -->
+<h2>② 백로그별 효용 점수 (랭킹)</h2>
+<p style="color:#6b7280; margin-top:-6px; font-size:14px;">5개 차원 점수 합산 · 25점 만점</p>
+
+<div class="list">
+
+  <!-- #1 -->
+  <div class="row tier-must">
+    <div class="rank">1</div>
+    <div class="content">
+      <span class="tier tier-must-bg">MUST</span>
+      <div class="title">① 원장 개념 추가 <small style="color:#6b7280; font-weight:500;">— [admin]</small></div>
+      <div class="desc">예약 1건 = 가계부 1권. 4주체(고객·채널·플랫폼·여행사) 잔액 검증. 모든 후속 과제의 기반</div>
+      <div class="tags">
+        <span class="tag t-found">🏛 기반</span>
+        <span class="tag t-data">📊 데이터정합</span>
+        <span class="tag t-ops">🎯 전사 영향</span>
+      </div>
+    </div>
+    <div class="score-block">
+      <div class="score-row"><div>정량효용</div><div class="score-bar"><div style="width:60%"></div></div><div class="val">3</div></div>
+      <div class="score-row"><div>정성효용</div><div class="score-bar"><div style="width:100%"></div></div><div class="val">5</div></div>
+      <div class="score-row"><div>영향범위</div><div class="score-bar"><div style="width:100%"></div></div><div class="val">5</div></div>
+      <div class="score-row"><div>시급성</div><div class="score-bar"><div style="width:100%"></div></div><div class="val">5</div></div>
+      <div class="score-row"><div>의존성</div><div class="score-bar"><div style="width:100%"></div></div><div class="val">5</div></div>
+      <div class="total-score"><span class="lab">종합</span><span class="v">23 / 25</span></div>
+    </div>
+  </div>
+
+  <!-- #2 -->
+  <div class="row tier-must">
+    <div class="rank">2</div>
+    <div class="content">
+      <span class="tier tier-must-bg">MUST</span>
+      <div class="title">⑧ BQ / 예약지표 수정 <small style="color:#6b7280; font-weight:500;">— [Internal]</small></div>
+      <div class="desc">전사 지표를 ledger_items 기반으로 재정의. 대표/PM 보고용 데이터 신뢰도 회복</div>
+      <div class="tags">
+        <span class="tag t-data">📊 데이터정합</span>
+        <span class="tag t-ops">🎯 전사 영향</span>
+        <span class="tag t-dep">🔗 원장 의존</span>
+      </div>
+    </div>
+    <div class="score-block">
+      <div class="score-row"><div>정량효용</div><div class="score-bar"><div style="width:80%"></div></div><div class="val">4</div></div>
+      <div class="score-row"><div>정성효용</div><div class="score-bar"><div style="width:100%"></div></div><div class="val">5</div></div>
+      <div class="score-row"><div>영향범위</div><div class="score-bar"><div style="width:100%"></div></div><div class="val">5</div></div>
+      <div class="score-row"><div>시급성</div><div class="score-bar"><div style="width:80%"></div></div><div class="val">4</div></div>
+      <div class="score-row"><div>의존성</div><div class="score-bar"><div style="width:80%"></div></div><div class="val">4</div></div>
+      <div class="total-score"><span class="lab">종합</span><span class="v">22 / 25</span></div>
+    </div>
+  </div>
+
+  <!-- #3 -->
+  <div class="row tier-must">
+    <div class="rank">3</div>
+    <div class="content">
+      <span class="tier tier-must-bg">MUST</span>
+      <div class="title">② 행사이동 <small style="color:#6b7280; font-weight:500;">— [admin/partners]</small></div>
+      <div class="desc"><b>유일하게 정량 근거가 있음.</b> 25년 7,015건(전체 취소의 28%) 흡수 → 취소율 54%→46%</div>
+      <div class="tags">
+        <span class="tag t-quant">📈 정량근거 강함</span>
+        <span class="tag t-ops">🎯 운영효율</span>
+        <span class="tag t-user">🛒 어뷰징 차단</span>
+      </div>
+    </div>
+    <div class="score-block">
+      <div class="score-row"><div>정량효용</div><div class="score-bar"><div style="width:100%"></div></div><div class="val">5</div></div>
+      <div class="score-row"><div>정성효용</div><div class="score-bar"><div style="width:80%"></div></div><div class="val">4</div></div>
+      <div class="score-row"><div>영향범위</div><div class="score-bar"><div style="width:100%"></div></div><div class="val">5</div></div>
+      <div class="score-row"><div>시급성</div><div class="score-bar"><div style="width:80%"></div></div><div class="val">4</div></div>
+      <div class="score-row"><div>의존성</div><div class="score-bar"><div style="width:60%"></div></div><div class="val">3</div></div>
+      <div class="total-score"><span class="lab">종합</span><span class="v">21 / 25</span></div>
+    </div>
+  </div>
+
+  <!-- #4 -->
+  <div class="row tier-must">
+    <div class="rank">4</div>
+    <div class="content">
+      <span class="tier tier-must-bg">MUST</span>
+      <div class="title">④ 취소위약금 시스템 변경 <small style="color:#6b7280; font-weight:500;">— [admin]</small></div>
+      <div class="desc">결제↔예약 이중관리 100% 제거. 원장 800(ADJUSTMENT)으로 통합. <b>Quick Win</b></div>
+      <div class="tags">
+        <span class="tag t-quick">⚡ Quick Win</span>
+        <span class="tag t-ops">🎯 운영효율</span>
+        <span class="tag t-data">📊 정산 정확도</span>
+      </div>
+    </div>
+    <div class="score-block">
+      <div class="score-row"><div>정량효용</div><div class="score-bar"><div style="width:60%"></div></div><div class="val">3</div></div>
+      <div class="score-row"><div>정성효용</div><div class="score-bar"><div style="width:100%"></div></div><div class="val">5</div></div>
+      <div class="score-row"><div>영향범위</div><div class="score-bar"><div style="width:80%"></div></div><div class="val">4</div></div>
+      <div class="score-row"><div>시급성</div><div class="score-bar"><div style="width:80%"></div></div><div class="val">4</div></div>
+      <div class="score-row"><div>의존성</div><div class="score-bar"><div style="width:80%"></div></div><div class="val">4</div></div>
+      <div class="total-score"><span class="lab">종합</span><span class="v">20 / 25</span></div>
+    </div>
+  </div>
+
+  <!-- #5 -->
+  <div class="row tier-strong">
+    <div class="rank">5</div>
+    <div class="content">
+      <span class="tier tier-strong-bg">STRONG</span>
+      <div class="title">⑤ [admin] 예약정보 데이터 일괄수정</div>
+      <div class="desc">어드민↔파트너스 인원 데이터 불일치 100% 해소. 5개 영역(목록·엑셀·정산엑셀) 정책 통일</div>
+      <div class="tags">
+        <span class="tag t-data">📊 데이터정합</span>
+        <span class="tag t-ops">🎯 운영효율</span>
+      </div>
+    </div>
+    <div class="score-block">
+      <div class="score-row"><div>정량효용</div><div class="score-bar"><div style="width:60%"></div></div><div class="val">3</div></div>
+      <div class="score-row"><div>정성효용</div><div class="score-bar"><div style="width:80%"></div></div><div class="val">4</div></div>
+      <div class="score-row"><div>영향범위</div><div class="score-bar"><div style="width:80%"></div></div><div class="val">4</div></div>
+      <div class="score-row"><div>시급성</div><div class="score-bar"><div style="width:60%"></div></div><div class="val">3</div></div>
+      <div class="score-row"><div>의존성</div><div class="score-bar"><div style="width:60%"></div></div><div class="val">3</div></div>
+      <div class="total-score"><span class="lab">종합</span><span class="v">17 / 25</span></div>
+    </div>
+  </div>
+
+  <!-- #6 -->
+  <div class="row tier-strong">
+    <div class="rank">6</div>
+    <div class="content">
+      <span class="tier tier-strong-bg">STRONG</span>
+      <div class="title">⑥ [User] 예약정보 데이터 일괄수정</div>
+      <div class="desc">사용자 "내 예약" 화면 인원 정보 정합성. <b>Quick Win</b> (작업 난이도 낮음)</div>
+      <div class="tags">
+        <span class="tag t-quick">⚡ Quick Win</span>
+        <span class="tag t-user">🛒 사용자 신뢰</span>
+      </div>
+    </div>
+    <div class="score-block">
+      <div class="score-row"><div>정량효용</div><div class="score-bar"><div style="width:60%"></div></div><div class="val">3</div></div>
+      <div class="score-row"><div>정성효용</div><div class="score-bar"><div style="width:80%"></div></div><div class="val">4</div></div>
+      <div class="score-row"><div>영향범위</div><div class="score-bar"><div style="width:60%"></div></div><div class="val">3</div></div>
+      <div class="score-row"><div>시급성</div><div class="score-bar"><div style="width:60%"></div></div><div class="val">3</div></div>
+      <div class="score-row"><div>의존성</div><div class="score-bar"><div style="width:60%"></div></div><div class="val">3</div></div>
+      <div class="total-score"><span class="lab">종합</span><span class="v">16 / 25</span></div>
+    </div>
+  </div>
+
+  <!-- #7 -->
+  <div class="row tier-strong">
+    <div class="rank">7</div>
+    <div class="content">
+      <span class="tier tier-strong-bg">STRONG</span>
+      <div class="title">⑦ [Partners] 예약정보 데이터 일괄수정</div>
+      <div class="desc">파트너스 화면 인원 정합성. ⑤⑥와 같은 정책으로 동시 진행</div>
+      <div class="tags">
+        <span class="tag t-quick">⚡ Quick Win</span>
+        <span class="tag t-ops">🤝 파트너 신뢰</span>
+      </div>
+    </div>
+    <div class="score-block">
+      <div class="score-row"><div>정량효용</div><div class="score-bar"><div style="width:60%"></div></div><div class="val">3</div></div>
+      <div class="score-row"><div>정성효용</div><div class="score-bar"><div style="width:80%"></div></div><div class="val">4</div></div>
+      <div class="score-row"><div>영향범위</div><div class="score-bar"><div style="width:60%"></div></div><div class="val">3</div></div>
+      <div class="score-row"><div>시급성</div><div class="score-bar"><div style="width:60%"></div></div><div class="val">3</div></div>
+      <div class="score-row"><div>의존성</div><div class="score-bar"><div style="width:60%"></div></div><div class="val">3</div></div>
+      <div class="total-score"><span class="lab">종합</span><span class="v">16 / 25</span></div>
+    </div>
+  </div>
+
+  <!-- #8 -->
+  <div class="row tier-strong">
+    <div class="rank">8</div>
+    <div class="content">
+      <span class="tier tier-strong-bg">STRONG</span>
+      <div class="title">③ 회원 쿠폰 조회·적용 <small style="color:#6b7280; font-weight:500;">— [admin/partners]</small></div>
+      <div class="desc">운영자 수동 계산 100% 제거. <span style="color:#dc2626;">⚠️ 방향1 vs 방향2 결정 필요 (9/5 논의)</span></div>
+      <div class="tags">
+        <span class="tag t-ops">🎯 운영효율</span>
+        <span class="tag t-dep">🔴 결정 대기</span>
+      </div>
+    </div>
+    <div class="score-block">
+      <div class="score-row"><div>정량효용</div><div class="score-bar"><div style="width:40%"></div></div><div class="val">2</div></div>
+      <div class="score-row"><div>정성효용</div><div class="score-bar"><div style="width:80%"></div></div><div class="val">4</div></div>
+      <div class="score-row"><div>영향범위</div><div class="score-bar"><div style="width:60%"></div></div><div class="val">3</div></div>
+      <div class="score-row"><div>시급성</div><div class="score-bar"><div style="width:60%"></div></div><div class="val">3</div></div>
+      <div class="score-row"><div>의존성</div><div class="score-bar"><div style="width:80%"></div></div><div class="val">4</div></div>
+      <div class="total-score"><span class="lab">종합</span><span class="v">16 / 25</span></div>
+    </div>
+  </div>
+
+  <!-- #9 -->
+  <div class="row tier-rec">
+    <div class="rank">9</div>
+    <div class="content">
+      <span class="tier tier-rec-bg">RECOMMENDED</span>
+      <div class="title">⑩ 결제수단 변경 편리 기능 <small style="color:#6b7280; font-weight:500;">— [admin/partners]</small></div>
+      <div class="desc">100→200→100 수동 조작 제거. 사용자가 "내 예약"에서 잘못된 금액 보는 문제 해소</div>
+      <div class="tags">
+        <span class="tag t-user">🛒 사용자 신뢰</span>
+        <span class="tag t-ops">🎯 운영 편의</span>
+      </div>
+    </div>
+    <div class="score-block">
+      <div class="score-row"><div>정량효용</div><div class="score-bar"><div style="width:40%"></div></div><div class="val">2</div></div>
+      <div class="score-row"><div>정성효용</div><div class="score-bar"><div style="width:80%"></div></div><div class="val">4</div></div>
+      <div class="score-row"><div>영향범위</div><div class="score-bar"><div style="width:60%"></div></div><div class="val">3</div></div>
+      <div class="score-row"><div>시급성</div><div class="score-bar"><div style="width:40%"></div></div><div class="val">2</div></div>
+      <div class="score-row"><div>의존성</div><div class="score-bar"><div style="width:40%"></div></div><div class="val">2</div></div>
+      <div class="total-score"><span class="lab">종합</span><span class="v">13 / 25</span></div>
+    </div>
+  </div>
+
+  <!-- #10 -->
+  <div class="row tier-nice">
+    <div class="rank">10</div>
+    <div class="content">
+      <span class="tier tier-nice-bg">NICE-TO-HAVE</span>
+      <div class="title">⑪ 결제링크 동시발행 <small style="color:#6b7280; font-weight:500;">— [admin/partners]</small></div>
+      <div class="desc">N명 분할 결제 자동화. 시나리오는 명확하나 <b>정량 근거 없음</b> (월 발생 빈도 미산정)</div>
+      <div class="tags">
+        <span class="tag t-user">🛒 사용자 편의</span>
+        <span class="tag t-skip">⚪ 정량근거 부족</span>
+      </div>
+    </div>
+    <div class="score-block">
+      <div class="score-row"><div>정량효용</div><div class="score-bar"><div style="width:20%"></div></div><div class="val">1</div></div>
+      <div class="score-row"><div>정성효용</div><div class="score-bar"><div style="width:60%"></div></div><div class="val">3</div></div>
+      <div class="score-row"><div>영향범위</div><div class="score-bar"><div style="width:40%"></div></div><div class="val">2</div></div>
+      <div class="score-row"><div>시급성</div><div class="score-bar"><div style="width:20%"></div></div><div class="val">1</div></div>
+      <div class="score-row"><div>의존성</div><div class="score-bar"><div style="width:40%"></div></div><div class="val">2</div></div>
+      <div class="total-score"><span class="lab">종합</span><span class="v">9 / 25</span></div>
+    </div>
+  </div>
+
+  <!-- #11 -->
+  <div class="row tier-nice">
+    <div class="rank">11</div>
+    <div class="content">
+      <span class="tier tier-nice-bg">NICE-TO-HAVE</span>
+      <div class="title">⑨ 여행사 예약상태 값 페이드아웃</div>
+      <div class="desc">신규 시스템 이관 후 불필요한 기능 정리. <b>가벼움</b> — ⑤⑥⑦에 묶어 처리</div>
+      <div class="tags">
+        <span class="tag t-quick">⚡ 가벼움</span>
+        <span class="tag t-data">🧹 코드 정리</span>
+      </div>
+    </div>
+    <div class="score-block">
+      <div class="score-row"><div>정량효용</div><div class="score-bar"><div style="width:20%"></div></div><div class="val">1</div></div>
+      <div class="score-row"><div>정성효용</div><div class="score-bar"><div style="width:40%"></div></div><div class="val">2</div></div>
+      <div class="score-row"><div>영향범위</div><div class="score-bar"><div style="width:20%"></div></div><div class="val">1</div></div>
+      <div class="score-row"><div>시급성</div><div class="score-bar"><div style="width:20%"></div></div><div class="val">1</div></div>
+      <div class="score-row"><div>의존성</div><div class="score-bar"><div style="width:20%"></div></div><div class="val">1</div></div>
+      <div class="total-score"><span class="lab">종합</span><span class="v">6 / 25</span></div>
+    </div>
+  </div>
+
+  <!-- #12 -->
+  <div class="row tier-skip">
+    <div class="rank">12</div>
+    <div class="content">
+      <span class="tier tier-skip-bg">SKIP / DEFER</span>
+      <div class="title">⑫ 결제이관 <small style="color:#6b7280; font-weight:500;">— [admin/partners]</small></div>
+      <div class="desc">현재 노션 상태 "제외". 행사이동(②)으로 일부 케이스 대체 가능. 정책 재검토 후 결정</div>
+      <div class="tags">
+        <span class="tag t-skip">⏸ 제외 상태</span>
+        <span class="tag t-skip">⚪ 정책 재검토</span>
+      </div>
+    </div>
+    <div class="score-block">
+      <div class="score-row"><div>정량효용</div><div class="score-bar"><div style="width:20%"></div></div><div class="val">1</div></div>
+      <div class="score-row"><div>정성효용</div><div class="score-bar"><div style="width:40%"></div></div><div class="val">2</div></div>
+      <div class="score-row"><div>영향범위</div><div class="score-bar"><div style="width:20%"></div></div><div class="val">1</div></div>
+      <div class="score-row"><div>시급성</div><div class="score-bar"><div style="width:20%"></div></div><div class="val">1</div></div>
+      <div class="score-row"><div>의존성</div><div class="score-bar"><div style="width:20%"></div></div><div class="val">1</div></div>
+      <div class="total-score"><span class="lab">종합</span><span class="v">6 / 25</span></div>
+    </div>
+  </div>
+
+</div>
+
+<!-- Conclusion -->
+<div class="conclusion">
+  <h2>🎯 결론 — 효용 가치 기준 PM 권고</h2>
+  <p><b>"기반 다지기 → 정량 효용 즉시 회수 → 정합성 마무리"</b> 순서로 가는 것이 가장 합리적이에요.</p>
+  <p>특히 행사이동(③)은 <b>유일하게 숫자로 효용을 증명할 수 있는 과제</b>라서, 원장 안착 직후 가장 먼저 외부에 가시적 성과를 보여줄 수 있는 카드.</p>
+
+  <div class="picks">
+    <div class="pick">
+      <div class="lab">🥇 가치 1등</div>
+      <div class="name">원장 개념 추가</div>
+      <div class="why">없으면 다른 11개가 의미 없음. 4주체 잔액 검증·순이익 계산의 토대</div>
+    </div>
+    <div class="pick">
+      <div class="lab">🥈 가시적 성과 1등</div>
+      <div class="name">행사이동</div>
+      <div class="why">7,015건/8%p 정량 근거. 운영팀·영업실·여행사 모두 즉시 체감</div>
+    </div>
+    <div class="pick">
+      <div class="lab">🥉 ROI 1등 (Quick Win)</div>
+      <div class="name">취소위약금 + 일괄수정</div>
+      <div class="why">난이도 낮고 효용 큼. 8월에 동시 진행 권장</div>
+    </div>
+  </div>
+</div>
+
+<footer>
+  ⓒ 2026 트립스토어 · PM 김서현 · 효용 가치는 정성 평가가 포함되어 있으며, 마이그레이션 진행 중 재조정 가능
+</footer>
+
+</div>
+
+</body>
+</html>

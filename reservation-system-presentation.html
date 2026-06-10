@@ -1,0 +1,1044 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<title>신규 예약시스템 — 작업별 효용성 & 진행 방안</title>
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html, body {
+  font-family: -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", "Pretendard", sans-serif;
+  color: #1f2937;
+  background: #0f172a;
+  overflow: hidden;
+  height: 100vh;
+}
+.deck {
+  position: relative;
+  width: 100vw;
+  height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.slide {
+  width: 95vw;
+  max-width: 1280px;
+  aspect-ratio: 16/9;
+  background: #ffffff;
+  border-radius: 18px;
+  box-shadow: 0 12px 48px rgba(0,0,0,0.4);
+  padding: 56px 72px;
+  display: none;
+  flex-direction: column;
+  position: relative;
+  overflow: hidden;
+}
+.slide.active { display: flex; }
+.slide.cover {
+  background: linear-gradient(135deg, #4338ca 0%, #6366f1 50%, #8b5cf6 100%);
+  color: white;
+  align-items: flex-start;
+  justify-content: center;
+}
+.slide.cover .label {
+  font-size: 13px;
+  letter-spacing: 4px;
+  opacity: 0.7;
+  margin-bottom: 12px;
+}
+.slide.cover h1 {
+  font-size: 56px;
+  line-height: 1.15;
+  margin-bottom: 16px;
+  font-weight: 800;
+  letter-spacing: -1.5px;
+}
+.slide.cover .sub { font-size: 20px; opacity: 0.85; margin-bottom: 40px; }
+.slide.cover .meta {
+  font-size: 14px;
+  opacity: 0.7;
+  position: absolute;
+  bottom: 56px;
+  left: 72px;
+}
+.slide .stitle {
+  font-size: 11px;
+  letter-spacing: 3px;
+  font-weight: 700;
+  color: #6366f1;
+  margin-bottom: 8px;
+}
+.slide h2 {
+  font-size: 34px;
+  line-height: 1.2;
+  margin-bottom: 8px;
+  font-weight: 800;
+  letter-spacing: -0.8px;
+}
+.slide h3 {
+  font-size: 19px;
+  color: #4b5563;
+  margin-bottom: 28px;
+  font-weight: 500;
+}
+.slide .body { flex: 1; display: flex; flex-direction: column; justify-content: flex-start; }
+.page-num {
+  position: absolute;
+  bottom: 28px;
+  right: 36px;
+  font-size: 11px;
+  color: #9ca3af;
+  font-family: "SF Mono", Consolas, monospace;
+}
+.slide-footer {
+  position: absolute;
+  bottom: 28px;
+  left: 72px;
+  font-size: 11px;
+  color: #9ca3af;
+  letter-spacing: 0.5px;
+}
+
+/* Navigation */
+.nav-bar {
+  position: fixed;
+  bottom: 16px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: rgba(15,23,42,0.85);
+  backdrop-filter: blur(10px);
+  padding: 8px 16px;
+  border-radius: 999px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  z-index: 100;
+}
+.nav-bar button {
+  background: rgba(255,255,255,0.1);
+  border: none;
+  color: white;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  cursor: pointer;
+  font-size: 16px;
+}
+.nav-bar button:hover { background: rgba(255,255,255,0.25); }
+.nav-bar .counter { color: white; font-family: "SF Mono", monospace; font-size: 12px; min-width: 60px; text-align: center; }
+
+/* Shared components */
+.big-num { font-size: 80px; font-weight: 800; color: #6366f1; line-height: 1; letter-spacing: -2px; }
+.big-num .unit { font-size: 24px; color: #9ca3af; margin-left: 8px; font-weight: 500; }
+.metric-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 24px;
+  margin: 16px 0;
+}
+.metric {
+  background: #f8fafc;
+  padding: 24px;
+  border-radius: 12px;
+  border-left: 4px solid #6366f1;
+}
+.metric .v { font-size: 36px; font-weight: 800; color: #4338ca; line-height: 1.1; }
+.metric .n { font-size: 13px; color: #6b7280; margin-top: 6px; }
+.kv {
+  display: grid;
+  grid-template-columns: 140px 1fr;
+  gap: 12px 24px;
+  font-size: 15px;
+  margin: 4px 0;
+}
+.kv dt { color: #6b7280; font-weight: 600; }
+.kv dd { color: #1f2937; }
+.steps {
+  list-style: none;
+  counter-reset: step;
+  padding: 0;
+}
+.steps li {
+  position: relative;
+  padding: 8px 0 8px 44px;
+  counter-increment: step;
+  font-size: 15px;
+  line-height: 1.6;
+}
+.steps li::before {
+  content: counter(step);
+  position: absolute;
+  left: 0;
+  top: 8px;
+  background: #6366f1;
+  color: white;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  font-size: 13px;
+}
+.tag {
+  display: inline-block;
+  padding: 3px 10px;
+  border-radius: 999px;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  margin-right: 6px;
+  vertical-align: middle;
+}
+.tag-p0 { background: #fef2f2; color: #991b1b; }
+.tag-p1 { background: #fef3c7; color: #92400e; }
+.tag-p2 { background: #f3f4f6; color: #4b5563; }
+.tag-1st { background: #dcfce7; color: #166534; }
+.tag-2nd { background: #e0e7ff; color: #3730a3; }
+.tag-blocker { background: #fee2e2; color: #991b1b; }
+
+/* Roadmap (Gantt) */
+.gantt {
+  width: 100%;
+  margin: 12px 0;
+}
+.gantt-row {
+  display: grid;
+  grid-template-columns: 240px 1fr;
+  gap: 16px;
+  align-items: center;
+  margin: 6px 0;
+  font-size: 13.5px;
+}
+.gantt-label { color: #1f2937; font-weight: 500; }
+.gantt-bar { position: relative; height: 22px; background: #f1f5f9; border-radius: 4px; }
+.gantt-bar span {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  background: linear-gradient(90deg, #6366f1, #818cf8);
+  border-radius: 4px;
+  color: white;
+  font-size: 11px;
+  display: flex;
+  align-items: center;
+  padding: 0 8px;
+  font-weight: 600;
+}
+.gantt-bar span.s2 { background: linear-gradient(90deg, #94a3b8, #cbd5e1); color: #1f2937; }
+.gantt-header { font-size: 11px; color: #94a3b8; font-weight: 700; }
+.gantt-month {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  text-align: center;
+  margin-left: 256px;
+  margin-bottom: 4px;
+  font-size: 11px;
+  color: #94a3b8;
+  font-weight: 700;
+  letter-spacing: 1px;
+}
+
+/* Map grid */
+.map-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 12px;
+  margin: 8px 0;
+}
+.map-card {
+  background: #f8fafc;
+  border: 1px solid #e5e7eb;
+  border-radius: 10px;
+  padding: 14px 16px;
+  font-size: 13px;
+}
+.map-card.t1 { border-left: 4px solid #16a34a; }
+.map-card.t2 { border-left: 4px solid #6366f1; }
+.map-card .title { font-weight: 700; font-size: 13.5px; color: #1f2937; margin-bottom: 4px; }
+.map-card .meta { font-size: 11px; color: #6b7280; }
+
+/* Before/after */
+.compare { display: grid; grid-template-columns: 1fr 60px 1fr; gap: 12px; align-items: stretch; margin: 16px 0; }
+.compare .box {
+  padding: 18px 22px;
+  border-radius: 10px;
+  font-size: 14.5px;
+  line-height: 1.65;
+}
+.compare .box.before { background: #fef2f2; border: 1px solid #fecaca; }
+.compare .box.after  { background: #f0fdf4; border: 1px solid #bbf7d0; }
+.compare .box .lab {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 1px;
+  display: block;
+  margin-bottom: 8px;
+}
+.compare .box.before .lab { color: #991b1b; }
+.compare .box.after .lab { color: #166534; }
+.compare .arr { display: flex; align-items: center; justify-content: center; color: #94a3b8; font-size: 32px; font-weight: 100; }
+
+/* Two columns */
+.two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 32px; }
+.col-card { background: #f8fafc; padding: 24px; border-radius: 12px; }
+.col-card h4 { font-size: 14px; font-weight: 700; color: #6366f1; margin-bottom: 12px; letter-spacing: 0.5px; }
+.col-card p, .col-card li { font-size: 14px; line-height: 1.7; }
+.col-card ul { padding-left: 20px; }
+
+/* Effect ranking */
+.rank-row {
+  display: grid;
+  grid-template-columns: 40px 1fr 100px;
+  gap: 12px;
+  align-items: center;
+  padding: 12px 16px;
+  border-bottom: 1px solid #f1f5f9;
+  font-size: 14.5px;
+}
+.rank-row .pos { font-size: 24px; font-weight: 800; color: #6366f1; text-align: center; }
+.rank-row .stars { color: #f59e0b; text-align: right; font-size: 14px; letter-spacing: 1px; }
+
+/* Highlight */
+.hl { background: linear-gradient(180deg, transparent 65%, #fef08a 65%); padding: 0 2px; }
+.callout {
+  background: #eff6ff;
+  border-left: 5px solid #2563eb;
+  padding: 16px 22px;
+  border-radius: 0 10px 10px 0;
+  margin: 12px 0;
+  font-size: 14.5px;
+}
+.callout b { color: #1e40af; }
+
+/* Print */
+@media print {
+  html, body { background: white; height: auto; overflow: visible; }
+  .deck { display: block; height: auto; }
+  .slide {
+    display: flex !important;
+    page-break-after: always;
+    box-shadow: none;
+    border-radius: 0;
+    margin: 0 auto 0;
+  }
+  .nav-bar { display: none; }
+}
+</style>
+</head>
+<body>
+
+<div class="deck">
+
+<!-- ========== SLIDE 1: COVER ========== -->
+<section class="slide cover active" data-slide="1">
+  <div class="label">TRIPSTORE · 결제/정산 도메인</div>
+  <h1>신규 예약시스템<br>작업별 효용성 & 진행 방안</h1>
+  <div class="sub">12개 하위 과제를 1차 9개 / 2차 3개로 분리한 실행 계획</div>
+  <div class="meta">PM 김서현 · 2026-06-05 · 발표용</div>
+  <span class="page-num">01</span>
+</section>
+
+<!-- ========== SLIDE 2: AGENDA ========== -->
+<section class="slide" data-slide="2">
+  <div class="stitle">AGENDA</div>
+  <h2>오늘 발표 내용</h2>
+  <div class="body">
+    <ol class="steps" style="font-size: 17px;">
+      <li>왜 신규 예약시스템이 필요한가 — 배경 & 한계</li>
+      <li>12개 과제 전체 맵 (1차/2차)</li>
+      <li>효용 가치 랭킹 — 어떤 게 가장 중요한가</li>
+      <li>1차 9개 과제 — 효용 & 진행 방안</li>
+      <li>2차 3개 과제 — 운영 편의 기능</li>
+      <li>실행 로드맵 (6~9월)</li>
+      <li>리스크 & 결정 필요 사항</li>
+      <li>다음 액션</li>
+    </ol>
+  </div>
+  <div class="slide-footer">신규 예약시스템 — 작업별 효용성 & 진행 방안</div>
+  <span class="page-num">02</span>
+</section>
+
+<!-- ========== SLIDE 3: 배경 ========== -->
+<section class="slide" data-slide="3">
+  <div class="stitle">BACKGROUND</div>
+  <h2>지금 예약시스템의 한계</h2>
+  <h3>"하나의 예약 = 일관된 금액 흐름"이 안 되는 구조적 문제</h3>
+  <div class="body">
+    <div class="two-col">
+      <div class="col-card">
+        <h4>🔴 운영상의 한계</h4>
+        <ul>
+          <li>예약 1건에 결제주체가 둘 → <b>예약을 2건으로 쪼개서</b> 운영</li>
+          <li>예약·결제 금액 이력이 <b>덮어쓰기로 사라짐</b></li>
+          <li>운영자 수기 관리·엑셀 의존도 ↑</li>
+          <li>금액 변경/조정 과정 오류 위험</li>
+        </ul>
+      </div>
+      <div class="col-card">
+        <h4>📉 비즈니스 임팩트</h4>
+        <ul>
+          <li>여행사 결제분 → <b>플랫폼 수수료 누락</b> (수익 손실)</li>
+          <li>결제 ≠ 정산 케이스 추적 불가</li>
+          <li>취소율 데이터 왜곡 (행사변경 = 가짜 취소)</li>
+          <li>"우리 예약 1건의 순이익"을 시스템으로 계산 불가</li>
+        </ul>
+      </div>
+    </div>
+    <div class="callout">
+      <b>📒 신규 시스템 핵심 컨셉:</b> 예약 1건마다 "가계부(원장)"를 두고 모든 금액 흐름을 한 줄씩 기록 → 결제·환불·정산·금액수정 이력을 끊김 없이 추적
+    </div>
+  </div>
+  <div class="slide-footer">신규 예약시스템 — 작업별 효용성 & 진행 방안</div>
+  <span class="page-num">03</span>
+</section>
+
+<!-- ========== SLIDE 4: 12개 맵 ========== -->
+<section class="slide" data-slide="4">
+  <div class="stitle">OVERVIEW</div>
+  <h2>12개 과제 전체 맵</h2>
+  <h3>1차 9개 (6~9월, 데이터 정합성 묶음) / 2차 3개 (10월~, 운영 편의)</h3>
+  <div class="body">
+    <div style="margin-bottom:16px;">
+      <div style="font-size:13px; font-weight:700; color:#16a34a; margin-bottom:8px;">🔴 1차 (9개)</div>
+      <div class="map-grid">
+        <div class="map-card t1"><div class="title">① 원장 개념 추가</div><div class="meta">진행중 · 6/1~7/10</div></div>
+        <div class="map-card t1"><div class="title">② 행사이동</div><div class="meta">7/2~7/13 · 정량효용 1등</div></div>
+        <div class="map-card t1"><div class="title">③ 회원 쿠폰 조회·적용</div><div class="meta">7/14~7/22</div></div>
+        <div class="map-card t1"><div class="title">④ 취소위약금 시스템 변경</div><div class="meta">8/12~8/20</div></div>
+        <div class="map-card t1"><div class="title">⑤ [admin] 일괄수정</div><div class="meta">8/21~9/3</div></div>
+        <div class="map-card t1"><div class="title">⑥ [User] 일괄수정</div><div class="meta">8/24~9/6</div></div>
+        <div class="map-card t1"><div class="title">⑦ [Partners] 일괄수정</div><div class="meta">8/26~9/8</div></div>
+        <div class="map-card t1"><div class="title">⑧ BQ / 예약지표 수정</div><div class="meta">8/29~9/11</div></div>
+      </div>
+      <div class="map-grid" style="grid-template-columns: repeat(4, 1fr); margin-top:12px;">
+        <div class="map-card t1"><div class="title">⑨ 여행사 상태값 페이드아웃</div><div class="meta">⑤~⑦에 묶기</div></div>
+        <div></div><div></div><div></div>
+      </div>
+    </div>
+    <div>
+      <div style="font-size:13px; font-weight:700; color:#3730a3; margin-bottom:8px;">🟡 2차 (3개)</div>
+      <div class="map-grid">
+        <div class="map-card t2"><div class="title">⑩ 결제수단 변경</div><div class="meta">10월 이후</div></div>
+        <div class="map-card t2"><div class="title">⑪ 결제링크 동시발행</div><div class="meta">10월 이후</div></div>
+        <div class="map-card t2"><div class="title">⑫ 결제이관 (제외 상태)</div><div class="meta">정책 재검토 후</div></div>
+        <div></div>
+      </div>
+    </div>
+  </div>
+  <div class="slide-footer">신규 예약시스템 — 작업별 효용성 & 진행 방안</div>
+  <span class="page-num">04</span>
+</section>
+
+<!-- ========== SLIDE 5: 효용 랭킹 ========== -->
+<section class="slide" data-slide="5">
+  <div class="stitle">EFFECT RANKING</div>
+  <h2>효용 가치 랭킹</h2>
+  <h3>정량/정성 근거 기반으로 매긴 우선순위</h3>
+  <div class="body">
+    <div style="background:#fff; border-radius:12px; border:1px solid #e5e7eb; padding:8px 12px;">
+      <div class="rank-row"><div class="pos">🥇</div><div><b>행사이동</b> — 취소율 54%→46% (8%p ↓), 25년 7,015건 흡수 가능. <span class="hl">정량 근거가 단단한 유일한 과제</span></div><div class="stars">★★★★★</div></div>
+      <div class="rank-row"><div class="pos">🥈</div><div><b>원장 개념 추가</b> — 4주체 잔액 검증, 모든 후속 과제의 기반. 결제 ≠ 정산 케이스 설명 가능</div><div class="stars">★★★★★</div></div>
+      <div class="rank-row"><div class="pos">🥉</div><div><b>취소위약금 시스템 변경</b> — 결제↔예약 이중관리 100% 제거. 정산 정확도 회복</div><div class="stars">★★★★</div></div>
+      <div class="rank-row"><div class="pos">4</div><div><b>3종 일괄수정 + BQ</b> — 어드민↔파트너스 인원 데이터 100% 정합. 전사 지표 신뢰 회복</div><div class="stars">★★★★</div></div>
+      <div class="rank-row"><div class="pos">5</div><div><b>회원 쿠폰 조회·적용</b> — 운영자 수동 계산 100% 제거. 단, 방향1/2 결정 필요</div><div class="stars">★★★</div></div>
+      <div class="rank-row"><div class="pos">6</div><div><b>결제수단 변경</b> (2차) — 100→200→100 수동조작 제거. 단, 발생 빈도 작음</div><div class="stars">★★★</div></div>
+      <div class="rank-row"><div class="pos">7</div><div><b>결제링크 동시발행</b> (2차) — 분할 결제 자동화. 정량 근거 부족</div><div class="stars">★★</div></div>
+    </div>
+  </div>
+  <div class="slide-footer">신규 예약시스템 — 작업별 효용성 & 진행 방안</div>
+  <span class="page-num">05</span>
+</section>
+
+<!-- ========== SLIDE 6: ① 원장 ========== -->
+<section class="slide" data-slide="6">
+  <div class="stitle">1차 ① · 진행중</div>
+  <h2>원장 개념 추가</h2>
+  <h3>모든 후속 과제의 기반. 예약 = 가계부 1권 구조 정착</h3>
+  <div class="body">
+    <div class="two-col">
+      <div>
+        <h4 style="color:#6366f1;">📈 효용</h4>
+        <ul style="padding-left:18px; font-size:14.5px; line-height:1.8;">
+          <li>4주체(고객·채널·플랫폼·여행사) 잔액을 시스템으로 검증</li>
+          <li>"결제 금액 ≠ 정산 금액" 케이스 이력 기반 설명</li>
+          <li>예약 1건의 <b>순이익 자동 계산</b> 가능</li>
+          <li>모든 후속 과제(②~⑨)가 이 위에서 동작</li>
+        </ul>
+        <h4 style="color:#6366f1; margin-top:18px;">📦 산출물</h4>
+        <ul style="padding-left:18px; font-size:14px;">
+          <li>BE: 7개 API (원장 조회/잔액/금액 가감/취소정보)</li>
+          <li>FE: 기본탭 + 원장탭 (4 서브탭)</li>
+          <li>주체별 잔액 카드 (4개)</li>
+        </ul>
+      </div>
+      <div>
+        <h4 style="color:#6366f1;">🛠 진행 방안</h4>
+        <ol class="steps">
+          <li>DB 스키마 안착 <span class="tag tag-1st">완료</span></li>
+          <li>BE API 7종 구현 <span class="tag tag-p0">P0</span></li>
+          <li>FE 어드민 화면 (원장탭 + 주체별 잔액)</li>
+          <li>+금액/−금액 모달 (금액 직접수정 금지)</li>
+          <li>운영팀 트레이닝 + 정책문서 SSOT 배포</li>
+        </ol>
+        <div class="callout" style="margin-top:14px;">
+          <b>🔑 핵심 제약:</b> 금액 직접 수정 불가. 모든 변동은 +추가/−차감으로 원장 행 추가
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="slide-footer">신규 예약시스템 — 작업별 효용성 & 진행 방안</div>
+  <span class="page-num">06</span>
+</section>
+
+<!-- ========== SLIDE 7: ② 행사이동 ========== -->
+<section class="slide" data-slide="7">
+  <div class="stitle">1차 ② · 7/2~7/13</div>
+  <h2>행사이동 <span style="font-size:18px; background:#fef3c7; color:#92400e; padding:4px 12px; border-radius:6px; margin-left:8px;">🥇 정량효용 1등</span></h2>
+  <h3>취소·재예약 흔적 없이 동일 여행사 다른 행사로 이동</h3>
+  <div class="body">
+    <div class="metric-grid">
+      <div class="metric"><div class="v">54% → 46%</div><div class="n">취소완료 전환율 개선 (8%p ↓)</div></div>
+      <div class="metric"><div class="v">7,015건</div><div class="n">25년 행사이동 가능 취소 (전체의 28%)</div></div>
+      <div class="metric"><div class="v">5,794명</div><div class="n">25년 7일 이내 재예약자 (33.8%)</div></div>
+    </div>
+    <div class="two-col" style="margin-top:16px;">
+      <div>
+        <h4 style="color:#6366f1;">📈 효용</h4>
+        <ul style="padding-left:18px; font-size:14px;">
+          <li>여행사 어뷰징(취소→재예약) 차단</li>
+          <li>출발전환율 통계 정상화</li>
+          <li>예약 맥락 유지 (CS 대응 효율)</li>
+        </ul>
+      </div>
+      <div>
+        <h4 style="color:#6366f1;">🛠 진행 방안</h4>
+        <ol class="steps" style="font-size:14px;">
+          <li>행사 검색 API (동일 여행사 행사만)</li>
+          <li>행사 이동 실행 API (금액 자동 재계산 + 원장 100/202/301/302 자동 생성)</li>
+          <li>어드민 모달 (검색→선택→금액비교→쿠폰→여행사번호→사유)</li>
+          <li>FROM→TO 이력 카드 UI</li>
+        </ol>
+      </div>
+    </div>
+  </div>
+  <div class="slide-footer">신규 예약시스템 — 작업별 효용성 & 진행 방안</div>
+  <span class="page-num">07</span>
+</section>
+
+<!-- ========== SLIDE 8: ③ 쿠폰 ========== -->
+<section class="slide" data-slide="8">
+  <div class="stitle">1차 ③ · 7/14~7/22</div>
+  <h2>회원 쿠폰 조회·적용</h2>
+  <h3>운영자 수동 계산 100% 제거 — 시스템이 쿠폰 자동 처리</h3>
+  <div class="body">
+    <div class="compare">
+      <div class="box before">
+        <span class="lab">📕 지금</span>
+        인원변경/행사이동 시 운영자가 <b>쿠폰 금액 직접 계산</b>해서 "추가할인"에 수동 입력
+      </div>
+      <div class="arr">→</div>
+      <div class="box after">
+        <span class="lab">📗 앞으로</span>
+        쿠폰 조건 자동 검증 → <b>자동 재계산 / 해제 / 재적용</b> 처리
+      </div>
+    </div>
+    <div class="two-col" style="margin-top:8px;">
+      <div>
+        <h4 style="color:#6366f1;">📈 효용</h4>
+        <ul style="padding-left:18px; font-size:14px;">
+          <li>운영자 수동 계산 제거 (실수 위험 ↓)</li>
+          <li>사용자 보유 쿠폰 최적 매칭</li>
+          <li>쿠폰 유효기간 내 자동 원복</li>
+        </ul>
+      </div>
+      <div>
+        <h4 style="color:#6366f1;">🛠 진행 방안</h4>
+        <ol class="steps" style="font-size:14px;">
+          <li>사용자 보유 쿠폰 조회 API + 적용 가능 필터</li>
+          <li>쿠폰 적용/취소 API (원장 301/302 자동)</li>
+          <li>자동 재계산 로직 (방향1/방향2 중 결정)</li>
+          <li>어드민 쿠폰 관리 섹션 (예약금액과 분리)</li>
+        </ol>
+      </div>
+    </div>
+    <div class="callout" style="margin-top:14px;">
+      <b>🔴 결정 필요 (9/5 영업운영팀+개발실 논의):</b> 방향1 비율차감 (자동) vs 방향2 해제→재적용 (운영자 선택)
+    </div>
+  </div>
+  <div class="slide-footer">신규 예약시스템 — 작업별 효용성 & 진행 방안</div>
+  <span class="page-num">08</span>
+</section>
+
+<!-- ========== SLIDE 9: ④ 취소위약금 ========== -->
+<section class="slide" data-slide="9">
+  <div class="stitle">1차 ④ · 8/12~8/20</div>
+  <h2>취소위약금 시스템 변경</h2>
+  <h3>결제시스템 → 예약시스템 원장(800)으로 이동. 이중관리 종료</h3>
+  <div class="body">
+    <div class="compare">
+      <div class="box before">
+        <span class="lab">📕 지금</span>
+        취소위약금이 <b>결제시스템</b>에서 관리 + <b>예약시스템</b>에서 인원별 별도 관리 = 이중 작업
+      </div>
+      <div class="arr">→</div>
+      <div class="box after">
+        <span class="lab">📗 앞으로</span>
+        예약 원장 <b>800 ADJUSTMENT</b> 행 추가로 통합. 결제 시스템은 "얼마 결제·환불"만 관리
+      </div>
+    </div>
+    <div class="two-col" style="margin-top:12px;">
+      <div>
+        <h4 style="color:#6366f1;">📈 효용</h4>
+        <ul style="padding-left:18px; font-size:14px;">
+          <li>관리자 이중 작업 100% 제거</li>
+          <li>인원별 위약금이 원장 행으로 명확</li>
+          <li>결제필요금액 = 100 − 200 ± 800 (단순화)</li>
+          <li>정산 정확도 회복</li>
+        </ul>
+      </div>
+      <div>
+        <h4 style="color:#6366f1;">🛠 진행 방안</h4>
+        <ol class="steps" style="font-size:14px;">
+          <li>결제시스템 위약금 관리 기능 제거</li>
+          <li>예약시스템 원장 800 생성 로직</li>
+          <li>결제필요금액 계산식 변경</li>
+          <li>인원삭제 후 +금액추가 모달 자동 표시 (목업 완료)</li>
+        </ol>
+      </div>
+    </div>
+    <div class="callout" style="margin-top:12px;">
+      <b>🔴 결정 필요:</b> 1/n 결제 시 위약금 처리 케이스 — 서비스운영팀 협의 필요
+    </div>
+  </div>
+  <div class="slide-footer">신규 예약시스템 — 작업별 효용성 & 진행 방안</div>
+  <span class="page-num">09</span>
+</section>
+
+<!-- ========== SLIDE 10: ⑤⑥⑦ 일괄수정 ========== -->
+<section class="slide" data-slide="10">
+  <div class="stitle">1차 ⑤⑥⑦ · 8/21~9/8</div>
+  <h2>예약정보 데이터 일괄수정 (admin/User/Partners)</h2>
+  <h3>취소완료 예약 인원·금액 표시 기준 통일. 데이터 정합성 확보</h3>
+  <div class="body">
+    <div class="callout">
+      <b>현재 문제:</b> 어드민 취소 → 인원 0명 표시 / 파트너스 취소 → 마지막 인원 그대로. <b class="hl">같은 "취소완료"인데 다르게 표시</b>
+    </div>
+    <table style="width:100%; margin-top:12px; font-size:13px; border-collapse:collapse;">
+      <thead>
+        <tr style="background:#f1f5f9;">
+          <th style="padding:8px 12px; text-align:left;">반영 위치</th>
+          <th style="padding:8px 12px; text-align:left;">TO-BE 정책</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr><td style="padding:8px 12px; border-bottom:1px solid #e5e7eb;">어드민/파트너스 - 목록</td><td style="padding:8px 12px; border-bottom:1px solid #e5e7eb;">취소완료 시 인원 <b>0명</b></td></tr>
+        <tr><td style="padding:8px 12px; border-bottom:1px solid #e5e7eb;">어드민/파트너스 - 엑셀</td><td style="padding:8px 12px; border-bottom:1px solid #e5e7eb;">취소완료 시 <b>travelers 원래 인원</b> 표시</td></tr>
+        <tr><td style="padding:8px 12px;">정산관리 - 엑셀</td><td style="padding:8px 12px;">취소완료 시 <b>travelers 원래 인원</b> 표시</td></tr>
+      </tbody>
+    </table>
+    <div class="two-col" style="margin-top:16px;">
+      <div>
+        <h4 style="color:#6366f1;">📈 효용</h4>
+        <ul style="padding-left:18px; font-size:14px;">
+          <li>어드민↔파트너스 데이터 일치</li>
+          <li>정산 데이터 신뢰도 회복</li>
+          <li>2,565건 마이그레이션 시점에 정합성 확보</li>
+        </ul>
+      </div>
+      <div>
+        <h4 style="color:#6366f1;">🛠 진행 방안</h4>
+        <ol class="steps" style="font-size:14px;">
+          <li>5개 영역 인원 표시 정책 정의</li>
+          <li>BE 일괄 update 배치 작성</li>
+          <li>마이그레이션 + QA 검증</li>
+        </ol>
+      </div>
+    </div>
+  </div>
+  <div class="slide-footer">신규 예약시스템 — 작업별 효용성 & 진행 방안</div>
+  <span class="page-num">10</span>
+</section>
+
+<!-- ========== SLIDE 11: ⑧ BQ ========== -->
+<section class="slide" data-slide="11">
+  <div class="stitle">1차 ⑧ · 8/29~9/11</div>
+  <h2>BQ / 예약지표 수정</h2>
+  <h3>전사 지표를 원장(ledger_items) 기반으로 재정의</h3>
+  <div class="body">
+    <div class="two-col">
+      <div>
+        <h4 style="color:#6366f1;">📈 효용</h4>
+        <ul style="padding-left:18px; font-size:14.5px;">
+          <li>대표/PM 보고용 지표 신뢰도 회복</li>
+          <li>출발전환율·취소전환율 정확 계산</li>
+          <li>예약·결제·정산 지표 일관 정의</li>
+          <li>"한 예약의 순이익" 지표 신설 가능</li>
+        </ul>
+        <div class="callout" style="margin-top:14px;">
+          <b>⚠️ 원장 스키마 변경되면 지표 동시 깨짐</b><br>
+          → ⑤⑥⑦ 완료 직후 진행이 필수 (분리 불가)
+        </div>
+      </div>
+      <div>
+        <h4 style="color:#6366f1;">🛠 진행 방안</h4>
+        <ol class="steps">
+          <li>현행 BQ 쿼리 인벤토리 작성 (영향 받는 쿼리 식별)</li>
+          <li>ledger_items 기반으로 핵심 지표 재정의<br><small style="color:#6b7280;">결제금액·정산금액·취소율·전환율 등</small></li>
+          <li>예약지표 정의서 v2 업데이트</li>
+          <li>대시보드/리포트 새로고침</li>
+          <li>데이터팀 + 영업실 + 대표 보고용 검증</li>
+        </ol>
+      </div>
+    </div>
+  </div>
+  <div class="slide-footer">신규 예약시스템 — 작업별 효용성 & 진행 방안</div>
+  <span class="page-num">11</span>
+</section>
+
+<!-- ========== SLIDE 12: ⑨ 페이드아웃 ========== -->
+<section class="slide" data-slide="12">
+  <div class="stitle">1차 ⑨ · ⑤~⑦에 묶기</div>
+  <h2>여행사 예약상태 값 페이드아웃</h2>
+  <h3>신규 시스템 이관 후 불필요해진 기능 정리</h3>
+  <div class="body">
+    <div class="two-col">
+      <div>
+        <h4 style="color:#6366f1;">📈 효용</h4>
+        <ul style="padding-left:18px; font-size:14.5px;">
+          <li>코드 정리·유지보수 부담 감소</li>
+          <li>운영자가 잘못 클릭할 가능성 제거</li>
+          <li>여행사 결제건 모두 정리되면 불필요</li>
+        </ul>
+      </div>
+      <div>
+        <h4 style="color:#6366f1;">🛠 진행 방안</h4>
+        <ol class="steps">
+          <li>어드민 목록·상세 "최신화 버튼" 제거</li>
+          <li>백엔드 동기화 로직·데이터 삭제</li>
+          <li>운영팀 공지</li>
+        </ol>
+        <div style="background:#f8fafc; padding:14px 18px; border-radius:8px; margin-top:14px; font-size:13.5px;">
+          <b style="color:#16a34a;">✓ 가벼운 정리 작업</b> — ⑤~⑦ 일괄수정 작업에 묶어서 동시 진행 권장
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="slide-footer">신규 예약시스템 — 작업별 효용성 & 진행 방안</div>
+  <span class="page-num">12</span>
+</section>
+
+<!-- ========== SLIDE 13: 2차 ⑩⑪⑫ ========== -->
+<section class="slide" data-slide="13">
+  <div class="stitle">2차 · 10월 이후</div>
+  <h2>2차 3개 과제 (운영 편의 기능)</h2>
+  <h3>워크어라운드 가능 + 정량 근거 부족 → 1차에서 분리</h3>
+  <div class="body">
+    <div class="map-grid" style="grid-template-columns: 1fr 1fr 1fr; gap: 20px;">
+      <div class="map-card t2" style="padding: 20px;">
+        <div class="title" style="font-size: 16px; margin-bottom: 10px;">⑩ 결제수단 변경</div>
+        <div style="font-size:13px; line-height:1.7;">
+          <b>효용:</b> 100→200→100 수동조작 제거. 사용자 가짜 금액 X<br><br>
+          <b>진행:</b><br>
+          ① 재결제 링크 생성 API<br>
+          ② 24h 만료 처리<br>
+          ③ 어드민 변경 모달<br><br>
+          <b style="color:#3730a3;">대상:</b> 트립 직판(nice_v2)만
+        </div>
+      </div>
+      <div class="map-card t2" style="padding: 20px;">
+        <div class="title" style="font-size: 16px; margin-bottom: 10px;">⑪ 결제링크 동시발행</div>
+        <div style="font-size:13px; line-height:1.7;">
+          <b>효용:</b> 카드한도/여행자별 분할 결제 자동화<br><br>
+          <b>진행:</b><br>
+          ① 다중 토큰 발급 API<br>
+          ② 금액 합계 검증<br>
+          ③ 어드민 다중 발송 모달<br><br>
+          <b style="color:#3730a3;">참고:</b> 1차 ① 원장 위에서 401 N행으로 자연 표현
+        </div>
+      </div>
+      <div class="map-card t2" style="padding: 20px;">
+        <div class="title" style="font-size: 16px; margin-bottom: 10px;">⑫ 결제이관 (제외)</div>
+        <div style="font-size:13px; line-height:1.7;">
+          <b>현재 상태:</b> 제외<br><br>
+          <b>이유:</b> 행사이동(②)으로 일부 케이스 대체 가능<br><br>
+          <b>다음 단계:</b><br>
+          행사이동 정착 후 잔여 케이스 재검토 → 정책 정리 → 재진입 결정
+        </div>
+      </div>
+    </div>
+    <div class="callout" style="margin-top:16px;">
+      <b>📌 2차 분리 기준:</b> ① 운영자 워크어라운드 가능 ② 정량 근거(빈도/금액) 부족 ③ 1차 완료 후 데이터로 재검토 가능
+    </div>
+  </div>
+  <div class="slide-footer">신규 예약시스템 — 작업별 효용성 & 진행 방안</div>
+  <span class="page-num">13</span>
+</section>
+
+<!-- ========== SLIDE 14: 로드맵 ========== -->
+<section class="slide" data-slide="14">
+  <div class="stitle">ROADMAP</div>
+  <h2>실행 로드맵 (6~9월)</h2>
+  <h3>1차 9개 직렬 진행 + 일부 병렬. 9/11 마감, 10/1까지 운영 안정화 버퍼</h3>
+  <div class="body">
+    <div class="gantt-month">
+      <div>6월</div><div>7월</div><div>8월 전반</div><div>8월 후반</div><div>9월</div>
+    </div>
+    <div class="gantt">
+      <div class="gantt-row">
+        <div class="gantt-label">① 원장 개념 추가 <span class="tag tag-1st">진행중</span></div>
+        <div class="gantt-bar"><span style="left:0%; width:30%;">6/1~7/10</span></div>
+      </div>
+      <div class="gantt-row">
+        <div class="gantt-label">② 행사이동 <span class="tag tag-p0">P0</span></div>
+        <div class="gantt-bar"><span style="left:28%; width:8%;">7/2~7/13</span></div>
+      </div>
+      <div class="gantt-row">
+        <div class="gantt-label">③ 회원 쿠폰</div>
+        <div class="gantt-bar"><span style="left:34%; width:7%;">7/14~7/22</span></div>
+      </div>
+      <div class="gantt-row">
+        <div class="gantt-label">④ 취소위약금</div>
+        <div class="gantt-bar"><span style="left:46%; width:8%;">8/12~8/20</span></div>
+      </div>
+      <div class="gantt-row">
+        <div class="gantt-label">⑤ [admin] 일괄수정</div>
+        <div class="gantt-bar"><span style="left:53%; width:12%;">8/21~9/3</span></div>
+      </div>
+      <div class="gantt-row">
+        <div class="gantt-label">⑥ [User] 일괄수정</div>
+        <div class="gantt-bar"><span style="left:55%; width:12%;">8/24~9/6</span></div>
+      </div>
+      <div class="gantt-row">
+        <div class="gantt-label">⑦ [Partners] 일괄수정</div>
+        <div class="gantt-bar"><span style="left:56%; width:12%;">8/26~9/8</span></div>
+      </div>
+      <div class="gantt-row">
+        <div class="gantt-label">⑧ BQ / 예약지표</div>
+        <div class="gantt-bar"><span style="left:58%; width:13%;">8/29~9/11</span></div>
+      </div>
+      <div class="gantt-row">
+        <div class="gantt-label">⑨ 여행사 상태값 페이드아웃</div>
+        <div class="gantt-bar"><span style="left:55%; width:13%; background:linear-gradient(90deg, #64748b, #94a3b8);">⑤~⑦에 묶음</span></div>
+      </div>
+      <div class="gantt-row">
+        <div class="gantt-label">⑩⑪ 2차 과제</div>
+        <div class="gantt-bar"><span class="s2" style="left:75%; width:25%;">10월 이후</span></div>
+      </div>
+    </div>
+    <div class="callout" style="margin-top:14px;">
+      <b>⚠️ 9/11 마감 → 10/1 상위프로젝트 마감까지 운영 안정화·인수인계 3주</b>
+    </div>
+  </div>
+  <div class="slide-footer">신규 예약시스템 — 작업별 효용성 & 진행 방안</div>
+  <span class="page-num">14</span>
+</section>
+
+<!-- ========== SLIDE 15: 의존성 ========== -->
+<section class="slide" data-slide="15">
+  <div class="stitle">DEPENDENCY</div>
+  <h2>의존성 & 진행 순서 논리</h2>
+  <h3>"무엇이 끝나야 무엇을 할 수 있는지"</h3>
+  <div class="body">
+    <div style="background:#f8fafc; border-radius:12px; padding:24px; font-size:14px; line-height:2;">
+      <div style="font-weight:700; color:#4338ca; margin-bottom:8px;">🔗 직렬 의존 체인</div>
+      <div style="font-family: 'SF Mono', monospace; font-size:13px; background:#fff; padding:14px 18px; border-radius:8px; line-height:1.9;">
+        ① 원장 추가 <span style="color:#94a3b8;">▶</span> ② 행사이동 <span style="color:#94a3b8;">▶</span> ③ 쿠폰 <span style="color:#94a3b8;">▶</span> ④ 위약금<br>
+        <span style="color:#94a3b8;">     ▶</span> ⑤⑥⑦ 일괄수정 (병렬) <span style="color:#94a3b8;">▶</span> ⑧ BQ
+      </div>
+      <div style="margin-top:18px; font-weight:700; color:#4338ca; margin-bottom:8px;">📋 의존 이유</div>
+      <ul style="padding-left:24px; font-size:13.5px;">
+        <li><b>② ③ ④</b>는 원장의 100/202/301/302/800 행 자동 생성 로직에 의존</li>
+        <li><b>⑤⑥⑦</b>은 신규 스키마(rsv_*)로 마이그레이션된 데이터를 기준으로 정합성 작업</li>
+        <li><b>⑧ BQ</b>는 ledger_items 컬럼이 안정화되어야 쿼리 재정의 가능</li>
+        <li><b>⑨</b>는 ⑤~⑦의 데이터 정리 작업에 묶으면 한 번에 끝</li>
+        <li><b>⑩ 결제수단 변경</b>은 1차 ① 원장 안착 후 진행 가능. <span class="hl">포트원 V2와는 무관</span></li>
+      </ul>
+    </div>
+  </div>
+  <div class="slide-footer">신규 예약시스템 — 작업별 효용성 & 진행 방안</div>
+  <span class="page-num">15</span>
+</section>
+
+<!-- ========== SLIDE 16: 결정 필요 ========== -->
+<section class="slide" data-slide="16">
+  <div class="stitle">DECISIONS</div>
+  <h2>결정 필요 사항</h2>
+  <h3>1차 진행을 위해 사전 정리되어야 할 정책 3가지</h3>
+  <div class="body">
+    <div style="display:grid; grid-template-columns:1fr; gap:16px;">
+      <div style="background:#fff; border:1px solid #e5e7eb; border-left:5px solid #dc2626; border-radius:10px; padding:18px 22px;">
+        <div style="font-size:12px; font-weight:700; color:#dc2626; letter-spacing:0.5px; margin-bottom:4px;">🔴 BLOCKER · 9/5 논의 예정</div>
+        <div style="font-size:17px; font-weight:700; margin-bottom:6px;">① 회원 쿠폰 자동 처리 방향</div>
+        <div style="font-size:14px;">
+          <b>옵션 A:</b> 판매금액 비율 차감 (자동, 단순)<br>
+          <b>옵션 B:</b> 쿠폰 해제 → 보유 쿠폰 재적용 (운영자 선택)<br>
+          <b>참여:</b> PM 김서현 · 영업운영팀 · 개발실
+        </div>
+      </div>
+      <div style="background:#fff; border:1px solid #e5e7eb; border-left:5px solid #f59e0b; border-radius:10px; padding:18px 22px;">
+        <div style="font-size:12px; font-weight:700; color:#f59e0b; letter-spacing:0.5px; margin-bottom:4px;">🟡 NEED · 8월 전 결정</div>
+        <div style="font-size:17px; font-weight:700; margin-bottom:6px;">② 1/n 결제 시 위약금 처리 케이스</div>
+        <div style="font-size:14px;">
+          분할 결제 예약에서 일부 인원만 취소될 때 위약금을 어떻게 분배·차감할지 정책 필요<br>
+          <b>참여:</b> PM 김서현 · 서비스운영팀
+        </div>
+      </div>
+      <div style="background:#fff; border:1px solid #e5e7eb; border-left:5px solid #f59e0b; border-radius:10px; padding:18px 22px;">
+        <div style="font-size:12px; font-weight:700; color:#f59e0b; letter-spacing:0.5px; margin-bottom:4px;">🟡 NEED · 7월 전 결정</div>
+        <div style="font-size:17px; font-weight:700; margin-bottom:6px;">③ 사용자 화면 행사이동 표시 정책</div>
+        <div style="font-size:14px;">
+          변경 알림 배너 표시 / 이전 금액 취소선 / 변경 이력 노출 — 3가지 결정 필요<br>
+          <b>참여:</b> PM 김서현 · UX · 영업실
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="slide-footer">신규 예약시스템 — 작업별 효용성 & 진행 방안</div>
+  <span class="page-num">16</span>
+</section>
+
+<!-- ========== SLIDE 17: 리스크 ========== -->
+<section class="slide" data-slide="17">
+  <div class="stitle">RISKS</div>
+  <h2>리스크 & 완화 방안</h2>
+  <h3>1차 직렬 진행 시 발생 가능한 4가지 리스크</h3>
+  <div class="body">
+    <table style="width:100%; font-size:14px; border-collapse:collapse;">
+      <thead>
+        <tr style="background:#f1f5f9;">
+          <th style="padding:12px 16px; text-align:left; width:30%;">리스크</th>
+          <th style="padding:12px 16px; text-align:left; width:35%;">영향</th>
+          <th style="padding:12px 16px; text-align:left; width:35%;">완화 방안</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td style="padding:14px 16px; border-bottom:1px solid #e5e7eb;"><b>개발 리소스 단일 트랙</b></td>
+          <td style="padding:14px 16px; border-bottom:1px solid #e5e7eb;">한 명만 이탈해도 도미노. 9/11 마감 위험</td>
+          <td style="padding:14px 16px; border-bottom:1px solid #e5e7eb;">BE/FE 리소스 명확히 할당. ⑤⑥⑦ 병렬화로 8월 중 분산</td>
+        </tr>
+        <tr>
+          <td style="padding:14px 16px; border-bottom:1px solid #e5e7eb;"><b>QA·운영 인수인계 압박</b></td>
+          <td style="padding:14px 16px; border-bottom:1px solid #e5e7eb;">8월 말 4개 과제 겹침 → 검증 시간 부족</td>
+          <td style="padding:14px 16px; border-bottom:1px solid #e5e7eb;">9월 둘째주를 운영팀 트레이닝 주간으로 확보</td>
+        </tr>
+        <tr>
+          <td style="padding:14px 16px; border-bottom:1px solid #e5e7eb;"><b>마이그레이션 검증</b></td>
+          <td style="padding:14px 16px; border-bottom:1px solid #e5e7eb;">2,565건/51 배치 변환 오류 가능</td>
+          <td style="padding:14px 16px; border-bottom:1px solid #e5e7eb;">배치별 sample 검증 + 롤백 절차 확보</td>
+        </tr>
+        <tr>
+          <td style="padding:14px 16px;"><b>결정 의존성 동시 폭주</b></td>
+          <td style="padding:14px 16px;">쿠폰 방향·위약금 정책·UX 결정이 동시 필요</td>
+          <td style="padding:14px 16px;">7월 초까지 사전 의사결정 일정 확정 (이 발표 직후)</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+  <div class="slide-footer">신규 예약시스템 — 작업별 효용성 & 진행 방안</div>
+  <span class="page-num">17</span>
+</section>
+
+<!-- ========== SLIDE 18: KPI ========== -->
+<section class="slide" data-slide="18">
+  <div class="stitle">SUCCESS METRICS</div>
+  <h2>성공 지표 (KPI)</h2>
+  <h3>9월 말 시점에서 측정할 4가지 정량/정성 지표</h3>
+  <div class="body">
+    <div class="metric-grid" style="grid-template-columns:repeat(2,1fr); gap:20px;">
+      <div class="metric" style="border-left-color:#16a34a;">
+        <div class="v" style="color:#16a34a;">취소율 8%p ↓</div>
+        <div class="n" style="margin-top:8px;">54% → 46% (행사이동 효과)</div>
+      </div>
+      <div class="metric" style="border-left-color:#16a34a;">
+        <div class="v" style="color:#16a34a;">100%</div>
+        <div class="n" style="margin-top:8px;">어드민↔파트너스 인원 데이터 일치</div>
+      </div>
+      <div class="metric" style="border-left-color:#16a34a;">
+        <div class="v" style="color:#16a34a;">4주체 잔액 = 0</div>
+        <div class="n" style="margin-top:8px;">결산 완료 시 모든 주체 잔액 0 검증 가능</div>
+      </div>
+      <div class="metric" style="border-left-color:#16a34a;">
+        <div class="v" style="color:#16a34a;">수동 계산 0건</div>
+        <div class="n" style="margin-top:8px;">쿠폰·위약금 운영자 수기 입력 0건</div>
+      </div>
+    </div>
+    <div class="callout" style="margin-top:18px;">
+      <b>🎯 추가 정성 지표:</b> 예약 1건의 "순이익" 시스템 계산 가능 / 결제≠정산 케이스 이력 기반 설명 가능 / 25년 누락 수수료 회수액 측정 가능
+    </div>
+  </div>
+  <div class="slide-footer">신규 예약시스템 — 작업별 효용성 & 진행 방안</div>
+  <span class="page-num">18</span>
+</section>
+
+<!-- ========== SLIDE 19: NEXT ACTION ========== -->
+<section class="slide" data-slide="19">
+  <div class="stitle">NEXT ACTIONS</div>
+  <h2>다음 액션 (1주 이내)</h2>
+  <h3>이 발표 직후 PM이 챙겨야 할 것</h3>
+  <div class="body">
+    <ol class="steps" style="font-size:16px;">
+      <li><b>1차 9개 / 2차 3개 분리 노션 라벨링</b><br><small style="color:#6b7280;">상위 [Internal] 신규 예약 시스템 페이지에 1차/2차 구분 표시</small></li>
+      <li><b>9/5 쿠폰 방향 결정 회의 일정 확정</b><br><small style="color:#6b7280;">영업운영팀 + 개발실 + PM 김서현</small></li>
+      <li><b>1/n 위약금 정책 협의 일정 잡기</b><br><small style="color:#6b7280;">8월 시작 전 완료 필수</small></li>
+      <li><b>사용자 화면 행사이동 표시 정책 결정</b><br><small style="color:#6b7280;">7월 행사이동 작업 전 결정</small></li>
+      <li><b>마이그레이션 배치 검증 절차 + 롤백 시나리오 확정</b></li>
+      <li><b>운영팀 트레이닝 일정 확보 (9월 둘째주)</b></li>
+    </ol>
+  </div>
+  <div class="slide-footer">신규 예약시스템 — 작업별 효용성 & 진행 방안</div>
+  <span class="page-num">19</span>
+</section>
+
+<!-- ========== SLIDE 20: 마무리 ========== -->
+<section class="slide cover" data-slide="20">
+  <div class="label">SUMMARY</div>
+  <h1 style="font-size:42px; line-height:1.25;">신규 예약시스템 =<br><span style="background: linear-gradient(180deg, transparent 65%, #fbbf24 65%); color: white; padding: 0 6px;">예약 1건의 가계부</span></h1>
+  <div class="sub" style="margin-top:24px;">
+    1차 9개로 데이터 정합성·원장 안착<br>
+    2차 3개로 운영 편의 기능 확장<br>
+    9월 말 출범 목표, 10월부터 안정 운영
+  </div>
+  <div style="margin-top:32px; font-size:16px; opacity:0.9;">
+    🥇 행사이동 (취소율 −8%p) · 🥈 원장 추가 · 🥉 위약금 통합
+  </div>
+  <div class="meta">PM 김서현 · 2026-06-05<br><small style="opacity:0.6;">키보드 ← → 또는 PageUp/Down 으로 슬라이드 이동 · Cmd+P 로 PDF 출력</small></div>
+  <span class="page-num">20</span>
+</section>
+
+</div>
+
+<!-- Navigation -->
+<div class="nav-bar">
+  <button class="prev" onclick="prevSlide()">◀</button>
+  <span class="counter" id="counter">1 / 20</span>
+  <button class="next" onclick="nextSlide()">▶</button>
+</div>
+
+<script>
+let currentSlide = 1;
+const totalSlides = document.querySelectorAll('.slide').length;
+document.getElementById('counter').textContent = `${currentSlide} / ${totalSlides}`;
+
+function showSlide(n) {
+  document.querySelectorAll('.slide').forEach(s => s.classList.remove('active'));
+  const slide = document.querySelector(`.slide[data-slide="${n}"]`);
+  if (slide) slide.classList.add('active');
+  document.getElementById('counter').textContent = `${n} / ${totalSlides}`;
+  currentSlide = n;
+}
+function nextSlide() { if (currentSlide < totalSlides) showSlide(currentSlide + 1); }
+function prevSlide() { if (currentSlide > 1) showSlide(currentSlide - 1); }
+
+document.addEventListener('keydown', (e) => {
+  if (e.key === 'ArrowRight' || e.key === 'PageDown' || e.key === ' ') { nextSlide(); e.preventDefault(); }
+  if (e.key === 'ArrowLeft' || e.key === 'PageUp') { prevSlide(); e.preventDefault(); }
+  if (e.key === 'Home') { showSlide(1); }
+  if (e.key === 'End') { showSlide(totalSlides); }
+});
+</script>
+
+</body>
+</html>

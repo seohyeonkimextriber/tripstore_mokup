@@ -1,0 +1,617 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<title>신규 예약시스템, 운영자 입장에서 뭐가 달라지나요?</title>
+<style>
+* { box-sizing: border-box; }
+body {
+  font-family: -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", "Pretendard", sans-serif;
+  line-height: 1.7;
+  color: #1a1a1a;
+  max-width: 920px;
+  margin: 0 auto;
+  padding: 48px 36px;
+  background: #fafbfc;
+  font-size: 15.5px;
+}
+h1 {
+  font-size: 30px;
+  margin-bottom: 8px;
+  letter-spacing: -0.5px;
+}
+.subtitle {
+  font-size: 16px;
+  color: #6b7280;
+  margin-bottom: 36px;
+  padding-bottom: 24px;
+  border-bottom: 2px solid #e5e7eb;
+}
+h2 {
+  font-size: 22px;
+  margin-top: 56px;
+  margin-bottom: 16px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+h2 .num {
+  background: #2563eb;
+  color: white;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 16px;
+  flex-shrink: 0;
+}
+h3 { font-size: 17px; margin-top: 28px; color: #1f2937; }
+p { margin: 10px 0; }
+.intro {
+  background: linear-gradient(135deg, #eff6ff 0%, #f0f9ff 100%);
+  padding: 24px 28px;
+  border-radius: 12px;
+  border-left: 5px solid #2563eb;
+  margin: 24px 0 40px 0;
+}
+.intro p { margin: 0; font-size: 16px; }
+.intro b { color: #1e40af; }
+.case {
+  background: white;
+  border: 1px solid #e5e7eb;
+  border-radius: 12px;
+  padding: 0;
+  margin: 24px 0;
+  overflow: hidden;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.04);
+}
+.case-header {
+  background: #f8fafc;
+  padding: 14px 20px;
+  font-weight: 600;
+  font-size: 15px;
+  border-bottom: 1px solid #e5e7eb;
+  color: #1e40af;
+}
+.case-body {
+  padding: 20px 24px;
+}
+.before-after {
+  display: grid;
+  grid-template-columns: 1fr 60px 1fr;
+  gap: 12px;
+  align-items: stretch;
+  margin: 14px 0;
+}
+.ba-box {
+  padding: 16px 18px;
+  border-radius: 10px;
+  font-size: 14.5px;
+  line-height: 1.6;
+}
+.ba-box.before {
+  background: #fef2f2;
+  border: 1px solid #fecaca;
+}
+.ba-box.before .label {
+  color: #991b1b;
+  font-weight: 700;
+  font-size: 12px;
+  letter-spacing: 1px;
+  margin-bottom: 8px;
+  display: block;
+}
+.ba-box.after {
+  background: #f0fdf4;
+  border: 1px solid #bbf7d0;
+}
+.ba-box.after .label {
+  color: #166534;
+  font-weight: 700;
+  font-size: 12px;
+  letter-spacing: 1px;
+  margin-bottom: 8px;
+  display: block;
+}
+.arrow {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 28px;
+  color: #94a3b8;
+  font-weight: 300;
+}
+.story {
+  background: white;
+  border-radius: 12px;
+  padding: 28px 32px;
+  border: 1px solid #e5e7eb;
+  margin: 24px 0;
+}
+.story-card {
+  border-left: 4px solid #2563eb;
+  padding: 12px 16px 12px 20px;
+  margin: 18px 0;
+  background: #f8fafc;
+  border-radius: 0 8px 8px 0;
+}
+.story-card .when {
+  font-size: 12.5px;
+  color: #6b7280;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+}
+.story-card .what {
+  font-size: 16px;
+  font-weight: 600;
+  margin: 4px 0;
+}
+.story-card .ledger {
+  background: white;
+  border: 1px dashed #cbd5e1;
+  border-radius: 6px;
+  padding: 10px 14px;
+  font-size: 13.5px;
+  margin-top: 8px;
+  font-family: "SF Mono", Consolas, monospace;
+}
+.story-card .ledger b { color: #2563eb; }
+.story-card.cancel { border-left-color: #dc2626; }
+.story-card.cancel .ledger { color: #991b1b; }
+.story-card.complete { border-left-color: #16a34a; }
+.scenario {
+  background: #fffbeb;
+  border: 1px solid #fde68a;
+  border-radius: 10px;
+  padding: 16px 20px;
+  margin: 18px 0;
+}
+.scenario .who {
+  font-size: 13px;
+  color: #92400e;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+}
+.scenario .quote {
+  font-style: italic;
+  color: #78350f;
+  margin: 4px 0;
+}
+.compare-table {
+  width: 100%;
+  border-collapse: collapse;
+  background: white;
+  margin: 16px 0;
+  font-size: 14.5px;
+  border-radius: 10px;
+  overflow: hidden;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.06);
+}
+.compare-table th,
+.compare-table td {
+  padding: 12px 16px;
+  text-align: left;
+  border-bottom: 1px solid #e5e7eb;
+  vertical-align: top;
+}
+.compare-table thead th {
+  background: #f1f5f9;
+  font-weight: 700;
+  font-size: 13px;
+  color: #334155;
+}
+.compare-table .col-old { background: #fef2f2; }
+.compare-table .col-new { background: #f0fdf4; }
+.tldr {
+  background: white;
+  border-radius: 12px;
+  padding: 24px 28px;
+  margin: 24px 0;
+  border: 1px solid #e5e7eb;
+}
+.tldr-item {
+  display: flex;
+  gap: 16px;
+  align-items: flex-start;
+  padding: 14px 0;
+  border-bottom: 1px solid #f1f5f9;
+}
+.tldr-item:last-child { border-bottom: none; }
+.tldr-num {
+  background: #eff6ff;
+  color: #1e40af;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  flex-shrink: 0;
+}
+.tldr-text b { color: #1e40af; }
+.tldr-text { line-height: 1.6; }
+.bank-book {
+  background: #fffef7;
+  border: 2px solid #fbbf24;
+  border-radius: 12px;
+  padding: 24px 28px;
+  margin: 24px 0;
+}
+.bank-book h3 { margin-top: 0; color: #92400e; }
+.bank-row {
+  display: grid;
+  grid-template-columns: 110px 90px 1fr 130px;
+  gap: 8px;
+  padding: 8px 10px;
+  font-size: 13.5px;
+  border-bottom: 1px dotted #d4d4d8;
+  align-items: center;
+}
+.bank-row.head {
+  font-weight: 700;
+  background: #fef3c7;
+  color: #78350f;
+  border-radius: 6px;
+  border: none;
+}
+.bank-row .amt-plus { color: #15803d; font-weight: 600; text-align: right; }
+.bank-row .amt-minus { color: #b91c1c; font-weight: 600; text-align: right; }
+.timeline-box {
+  background: #f8fafc;
+  border-radius: 10px;
+  padding: 18px 22px;
+  margin: 16px 0;
+}
+.tag {
+  display: inline-block;
+  padding: 3px 10px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 600;
+  margin-right: 4px;
+}
+.tag-1 { background: #dbeafe; color: #1e40af; }
+.tag-2 { background: #f3f4f6; color: #4b5563; }
+.footer {
+  text-align: center;
+  color: #9ca3af;
+  font-size: 13px;
+  margin-top: 64px;
+  padding-top: 24px;
+  border-top: 1px dashed #e5e7eb;
+}
+.highlight {
+  background: linear-gradient(180deg, transparent 60%, #fef3c7 60%);
+  padding: 0 2px;
+}
+</style>
+</head>
+<body>
+
+<h1>📘 신규 예약시스템, 운영자 입장에서 뭐가 달라지나요?</h1>
+<div class="subtitle">
+이번에 예약시스템이 새로 바뀌어요. 운영팀·영업실 입장에서 <b>매일 보는 화면과 작업이 어떻게 편해지는지</b> 사례 중심으로 정리했어요.
+</div>
+
+<div class="intro">
+  <p>👉 <b>한 줄로 말하면,</b> 예약 1건마다 <b class="highlight">"가계부"</b>가 생긴다고 생각하세요.<br>
+  지금까지는 <b>"통장 잔액"</b>만 봤다면, 이제는 <b>"언제, 누가, 왜, 얼마"</b>가 줄줄이 적힌 가계부를 펼쳐볼 수 있어요.<br>
+  이 가계부를 우리는 <b>"예약 원장"</b>이라고 불러요.</p>
+</div>
+
+<h2><span class="num">1</span> 지금 운영하면서 불편했던 거, 이렇게 바뀌어요</h2>
+
+<!-- Case 1 -->
+<div class="case">
+  <div class="case-header">사례 ① — "결제를 두 명이 나눠서 했어요" (카드 한도 초과)</div>
+  <div class="case-body">
+
+    <div class="scenario">
+      <div class="who">👤 고객 김여행님 (예약자)</div>
+      <div class="quote">"제 카드 한도가 부족해서 150만원만 제 카드로, 나머지 139만원은 남편 카드로 결제할게요."</div>
+    </div>
+
+    <div class="before-after">
+      <div class="ba-box before">
+        <span class="label">📕 지금 (불편함)</span>
+        예약 한 건을 <b>두 개로 쪼개서</b> 만들어요.<br>
+        → 예약A 150만원 + 예약B 139만원<br>
+        <small>· 출발자명단·여행자 정보 따로 관리<br>
+        · 정산도 두 번 처리<br>
+        · 고객은 "왜 내 예약이 두 개야?" 혼란</small>
+      </div>
+      <div class="arrow">→</div>
+      <div class="ba-box after">
+        <span class="label">📗 앞으로 (편리)</span>
+        예약 한 건 <b>그대로 두고</b> 결제 링크만 두 개 보내요.<br>
+        → 예약자 150만원 결제 + 남편 139만원 결제<br>
+        <small>· 가계부에 결제 기록 2줄로 남음<br>
+        · 여행자 정보 그대로<br>
+        · 정산도 한 예약 안에서 자동</small>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- Case 2 -->
+<div class="case">
+  <div class="case-header">사례 ② — "결제수단 바꾸고 싶어요" (카드 변경)</div>
+  <div class="case-body">
+
+    <div class="scenario">
+      <div class="who">👤 고객</div>
+      <div class="quote">"카드를 바꿔서 다시 결제하고 싶어요."</div>
+    </div>
+
+    <div class="before-after">
+      <div class="ba-box before">
+        <span class="label">📕 지금 (불편함)</span>
+        결제금액 한도가 정해져 있어서…<br>
+        ① 예약금액을 <b>100→200으로 올림</b><br>
+        ② 고객 재결제 받음<br>
+        ③ 다시 예약금액을 <b>200→100으로 내림</b><br>
+        <small>· 그 사이 고객이 "내 예약" 화면에서 잘못된 금액(200만원!) 봄<br>
+        · "왜 갑자기 비싸졌어요?" CS 폭주</small>
+      </div>
+      <div class="arrow">→</div>
+      <div class="ba-box after">
+        <span class="label">📗 앞으로 (편리)</span>
+        예약금액 <b>그대로 두고</b> 결제수단만 변경.<br>
+        ① "결제수단 변경" 버튼 클릭<br>
+        ② 새 결제링크 SMS 자동 발송<br>
+        ③ 고객 재결제 완료 → 기존 결제 자동 취소<br>
+        <small>· 고객 "내 예약" 금액 변동 없음<br>
+        · 결제 공백 없음</small>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- Case 3 -->
+<div class="case">
+  <div class="case-header">사례 ③ — "쿠폰 적용된 예약인데 행사를 옮겨야 해요"</div>
+  <div class="case-body">
+
+    <div class="scenario">
+      <div class="who">👤 고객</div>
+      <div class="quote">"출발일을 7일에서 14일로 바꾸고 싶어요."</div>
+    </div>
+
+    <div class="before-after">
+      <div class="ba-box before">
+        <span class="label">📕 지금 (불편함)</span>
+        ① 기존 예약 <b>취소완료</b> 처리<br>
+        ② 새 예약 생성<br>
+        ③ 쿠폰은 재발급 어려워서 <b>운영자가 직접 계산해서 "추가할인"으로 수동 입력</b><br>
+        <small>· 취소·재예약으로 보여서 취소율 통계 왜곡<br>
+        · 쿠폰 금액 계산 실수 위험</small>
+      </div>
+      <div class="arrow">→</div>
+      <div class="ba-box after">
+        <span class="label">📗 앞으로 (편리)</span>
+        "행사 이동" 버튼 한 번이면 끝.<br>
+        ① 옮길 행사 검색·선택<br>
+        ② 금액 자동 재계산 (상품가·특가·쿠폰 다)<br>
+        ③ 가계부에 변경 이력 자동 기록<br>
+        <small>· 취소·재예약 흔적 없음<br>
+        · 쿠폰 수동 계산 X<br>
+        · 출발전환율 통계 정상</small>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- Case 4 -->
+<div class="case">
+  <div class="case-header">사례 ④ — "어드민에서 본 인원수와 파트너스에서 본 인원수가 달라요"</div>
+  <div class="case-body">
+
+    <div class="scenario">
+      <div class="who">👤 영업실 담당자</div>
+      <div class="quote">"이 예약, 어드민에서는 0명인데 파트너스에서는 3명으로 보여요. 어느 게 맞는 거예요?"</div>
+    </div>
+
+    <div class="before-after">
+      <div class="ba-box before">
+        <span class="label">📕 지금 (불편함)</span>
+        취소완료 예약의 인원수가 <b>취소 경로에 따라 다르게 표시</b><br>
+        · 어드민 취소 → 0명<br>
+        · 파트너스 취소 → 마지막 수정값<br>
+        <small>· 정산 데이터 신뢰도 ↓<br>
+        · 추가 확인 작업 발생</small>
+      </div>
+      <div class="arrow">→</div>
+      <div class="ba-box after">
+        <span class="label">📗 앞으로 (편리)</span>
+        화면별로 <b>표시 기준 통일</b><br>
+        · 목록 = 취소완료면 0명<br>
+        · 엑셀 = 취소완료면 원래 인원 표시<br>
+        <small>· 어드민↔파트너스 데이터 일치<br>
+        · 정산·리포트 신뢰도 회복</small>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<h2><span class="num">2</span> "예약 원장" 이 뭐예요? — 가계부 비유로 설명</h2>
+
+<p>예약 한 건이 만들어지는 순간부터 출발 완료까지, 그 안에서 일어나는 <b>모든 돈의 흐름</b>이 가계부처럼 한 줄씩 쌓여요.</p>
+
+<div class="bank-book">
+  <h3>📒 예약 <span style="font-family:monospace;">26042623-1700101V</span> 의 가계부 (예시)</h3>
+  <small style="color:#92400e;">고객: 김여행님 · 3명 · 패키지 1인 100만원 · 특가 3만원/인 · 쿠폰 2만원</small>
+
+  <div style="margin-top:16px;">
+    <div class="bank-row head">
+      <div>날짜</div><div>구분</div><div>내용</div><div>금액</div>
+    </div>
+    <div class="bank-row">
+      <div>4/26 23:17</div><div>상품가</div><div>김여행님 (성인)</div><div class="amt-plus">+1,000,000</div>
+    </div>
+    <div class="bank-row">
+      <div>4/26 23:17</div><div>상품가</div><div>이동행님 (성인)</div><div class="amt-plus">+1,000,000</div>
+    </div>
+    <div class="bank-row">
+      <div>4/26 23:17</div><div>상품가</div><div>김아동님 (아동)</div><div class="amt-plus">+1,000,000</div>
+    </div>
+    <div class="bank-row">
+      <div>4/26 23:17</div><div>특가</div><div>김여행님 특가할인</div><div class="amt-minus">−30,000</div>
+    </div>
+    <div class="bank-row">
+      <div>4/26 23:17</div><div>특가</div><div>이동행님 특가할인</div><div class="amt-minus">−30,000</div>
+    </div>
+    <div class="bank-row">
+      <div>4/26 23:17</div><div>특가</div><div>김아동님 특가할인</div><div class="amt-minus">−30,000</div>
+    </div>
+    <div class="bank-row">
+      <div>4/26 23:17</div><div>쿠폰</div><div>쿠폰 CP-3091 적용</div><div class="amt-minus">−20,000</div>
+    </div>
+    <div class="bank-row">
+      <div>4/27 09:12</div><div>결제</div><div>김여행님 신용카드 결제</div><div class="amt-plus">+1,500,000</div>
+    </div>
+    <div class="bank-row">
+      <div>4/27 14:38</div><div>결제</div><div>남편 신용카드 결제 (분할)</div><div class="amt-plus">+1,390,000</div>
+    </div>
+    <div class="bank-row">
+      <div>5/12 10:00</div><div>정산</div><div>여행사 대금이전</div><div class="amt-minus">−2,565,000</div>
+    </div>
+    <div class="bank-row">
+      <div>5/12 10:00</div><div>정산</div><div>PG 수수료</div><div class="amt-minus">−25,000</div>
+    </div>
+    <div class="bank-row">
+      <div>5/12 10:00</div><div>정산</div><div>플랫폼 이용료</div><div class="amt-minus">−300,000</div>
+    </div>
+  </div>
+
+  <p style="margin-top:20px; color:#78350f; font-size:14px;">
+  💡 이 가계부를 펼치면 <b>"누가 / 언제 / 얼마 / 왜"</b> 가 한눈에 보여요.<br>
+  → "이 예약 환불해주세요" 할 때 → 가계부 펼쳐서 결제 행만 보면 됨<br>
+  → "이 예약 정산 어떻게 됐어요?" 할 때 → 정산 행만 보면 됨<br>
+  → "취소위약금 추가 청구해주세요" 할 때 → 가계부에 한 줄 더 추가하면 됨
+  </p>
+</div>
+
+<h2><span class="num">3</span> 같은 예약, 지금 vs 앞으로 어떻게 보일까요?</h2>
+
+<p>방금 본 김여행님 예약을 <b>현재 시스템 / 신규 시스템</b>에서 어떻게 저장하는지 비교해볼게요.</p>
+
+<table class="compare-table">
+<thead>
+<tr>
+  <th style="width:35%">항목</th>
+  <th class="col-old">📕 지금</th>
+  <th class="col-new">📗 앞으로</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+  <td><b>예약 단위</b></td>
+  <td class="col-old">예약 1건 = 행 여러 개에 흩어져 저장</td>
+  <td class="col-new">예약 1건 = <b>가계부 1권</b></td>
+</tr>
+<tr>
+  <td><b>금액 변동 추적</b></td>
+  <td class="col-old">최신 금액만 보임 (덮어쓰기)<br><small>"왜 이 금액이지?" 추적 어려움</small></td>
+  <td class="col-new">시간 순으로 모든 변동이 줄줄이 남음<br><small>"4/27 9시에 누가 얼마 입금" 다 보임</small></td>
+</tr>
+<tr>
+  <td><b>분할 결제 (2명 나눠 결제)</b></td>
+  <td class="col-old">예약을 <b>2건으로 쪼개야 함</b></td>
+  <td class="col-new">예약 1건에 결제 행만 2줄 추가</td>
+</tr>
+<tr>
+  <td><b>인원별 금액</b></td>
+  <td class="col-old">합쳐진 총액만 보임</td>
+  <td class="col-new">"이 분만 얼마 받았는지" 인원별로 보임</td>
+</tr>
+<tr>
+  <td><b>취소위약금</b></td>
+  <td class="col-old">결제 시스템에서 별도 관리 (이중관리)</td>
+  <td class="col-new">가계부에 "취소위약금" 한 줄로 추가</td>
+</tr>
+<tr>
+  <td><b>변경 이력</b></td>
+  <td class="col-old">메모에 텍스트로만 남기는 경우 많음</td>
+  <td class="col-new">모든 변경이 자동으로 가계부에 기록</td>
+</tr>
+</tbody>
+</table>
+
+<h2><span class="num">4</span> 운영자가 마주칠 화면 변화 (요약)</h2>
+
+<div class="timeline-box">
+<h3 style="margin-top:0;">예약 상세 화면에서 새로 보이는 것</h3>
+<ul>
+  <li><b>"기본탭"</b> — 평소 보던 정보 (예약자·상품·금액·결제)</li>
+  <li><b>"원장탭"</b> — 가계부 펼쳐보기 (CS 응대·정산 검증할 때 사용)
+    <ul>
+      <li>예약금액 관리 (상품가/할인/쿠폰/조정)</li>
+      <li>결제금액 관리 (결제/환불)</li>
+      <li>정산 관리 (수수료/대금이전)</li>
+      <li>전체 원장 (시계열 + 주체별·기간 필터)</li>
+    </ul>
+  </li>
+  <li><b>주체별 잔액 카드</b> — 고객 🙋 / 채널사 🔗 / 플랫폼 🏢 / 여행사 🚩 각각 얼마씩 들어왔고 나갔는지 한눈에</li>
+  <li><b>"+금액 추가" / "−금액 차감"</b> 버튼 — 금액 직접 수정은 못 하고, 항상 가계부에 한 줄 추가하는 방식 (실수 방지)</li>
+</ul>
+</div>
+
+<h2><span class="num">5</span> 핵심 변화 5줄 요약</h2>
+
+<div class="tldr">
+
+  <div class="tldr-item">
+    <div class="tldr-num">1</div>
+    <div class="tldr-text">예약 1건 = <b>가계부 1권</b>. 모든 돈의 흐름이 시간 순으로 한 줄씩 기록돼요.</div>
+  </div>
+
+  <div class="tldr-item">
+    <div class="tldr-num">2</div>
+    <div class="tldr-text">결제를 두 명이 나눠서 해도 <b>예약을 쪼갤 필요 없어요</b>.</div>
+  </div>
+
+  <div class="tldr-item">
+    <div class="tldr-num">3</div>
+    <div class="tldr-text">결제수단 바꿀 때 <b>예약금액을 임시로 올렸다 내렸다 할 필요 없어요</b>.</div>
+  </div>
+
+  <div class="tldr-item">
+    <div class="tldr-num">4</div>
+    <div class="tldr-text">행사 이동·쿠폰 변경 시 <b>운영자가 직접 계산하지 않아도 자동 처리</b>돼요.</div>
+  </div>
+
+  <div class="tldr-item">
+    <div class="tldr-num">5</div>
+    <div class="tldr-text">취소완료 예약의 인원·금액 표시가 <b>어드민/파트너스 다르게 보이지 않아요</b>.</div>
+  </div>
+
+</div>
+
+<h2><span class="num">6</span> 언제 적용되나요?</h2>
+
+<table class="compare-table">
+<thead>
+<tr><th>시점</th><th>적용되는 기능</th></tr>
+</thead>
+<tbody>
+<tr><td><span class="tag tag-1">7월</span></td><td>예약원장(가계부) 추가, 행사이동, 회원 쿠폰 자동 처리</td></tr>
+<tr><td><span class="tag tag-1">8월</span></td><td>취소위약금 통합, 예약정보 데이터 정합성 일괄 수정 (어드민/유저/파트너스)</td></tr>
+<tr><td><span class="tag tag-1">9월</span></td><td>BQ·예약지표 재정의, 마이그레이션 완료</td></tr>
+<tr><td><span class="tag tag-2">10월~</span></td><td>결제수단 변경, 결제링크 동시 발송 (운영 편의 기능)</td></tr>
+</tbody>
+</table>
+
+<div class="footer">
+ⓒ 2026 트립스토어 · PM 김서현 · 본 문서는 운영팀·영업실 공유용 요약본이며 상세 정책은 노션 페이지를 참고해주세요.
+</div>
+
+</body>
+</html>
