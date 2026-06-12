@@ -420,7 +420,7 @@ body main { transition: padding-right 0.3s ease, max-width 0.3s ease; }
   body.mockup-open main { padding-right: 24px; }
 }
 
-/* Track tabs (1차 / 2차) */
+/* Track tabs (1차 / 2차 / 독립) - 페이지 내 점프 버튼 */
 .track-tabs {
   display: flex;
   gap: 8px;
@@ -428,9 +428,6 @@ body main { transition: padding-right 0.3s ease, max-width 0.3s ease; }
   padding: 6px;
   background: #f1f5f9;
   border-radius: 14px;
-  position: sticky;
-  top: 8px;
-  z-index: 100;
   border: 1px solid #cbd5e1;
 }
 .track-tab {
@@ -477,19 +474,35 @@ body main { transition: padding-right 0.3s ease, max-width 0.3s ease; }
   color: #475569;
 }
 
-/* Track filtering */
-body.show-1st [data-track="2nd"],
-body.show-1st [data-track="misc"] { display: none; }
-body.show-2nd [data-track="1st"],
-body.show-2nd [data-track="misc"] { display: none; }
-body.show-misc [data-track="1st"],
-body.show-misc [data-track="2nd"] { display: none; }
-body.show-1st [data-track-show="2nd"],
-body.show-1st [data-track-show="misc"] { display: none; }
-body.show-2nd [data-track-show="1st"],
-body.show-2nd [data-track-show="misc"] { display: none; }
-body.show-misc [data-track-show="1st"],
-body.show-misc [data-track-show="2nd"] { display: none; }
+/* Track divider — 트랙 사이 시각적 구분 */
+.track-divider {
+  margin: 48px 0 24px;
+  padding: 28px 32px;
+  border-radius: 16px;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  font-size: 22px;
+  font-weight: 800;
+  letter-spacing: -0.3px;
+  color: white;
+  scroll-margin-top: 24px;
+}
+.track-divider.track-1st-div {
+  background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+  box-shadow: 0 4px 16px rgba(16,185,129,0.25);
+}
+.track-divider.track-2nd-div {
+  background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+  box-shadow: 0 4px 16px rgba(245,158,11,0.25);
+}
+.track-divider.track-misc-div {
+  background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+  box-shadow: 0 4px 16px rgba(59,130,246,0.25);
+}
+.track-divider .div-emoji { font-size: 32px; }
+.track-divider .div-text { display: flex; flex-direction: column; gap: 4px; }
+.track-divider .div-sub { font-size: 13px; font-weight: 500; opacity: 0.9; }
 
 /* Track indicator badge on sections */
 .track-badge {
@@ -515,25 +528,7 @@ body.show-misc [data-track-show="2nd"] { display: none; }
   color: #1e40af;
 }
 
-/* Sidebar: 비활성 트랙 메뉴는 살짝 흐리게 (클릭 가능 명확하게) */
-body.show-1st nav.sidebar a[data-jump-track="2nd"],
-body.show-1st nav.sidebar a[data-jump-track="misc"],
-body.show-2nd nav.sidebar a[data-jump-track="1st"],
-body.show-2nd nav.sidebar a[data-jump-track="misc"],
-body.show-misc nav.sidebar a[data-jump-track="1st"],
-body.show-misc nav.sidebar a[data-jump-track="2nd"] {
-  opacity: 0.7;
-}
-body.show-1st nav.sidebar a[data-jump-track="2nd"]:hover,
-body.show-1st nav.sidebar a[data-jump-track="misc"]:hover,
-body.show-2nd nav.sidebar a[data-jump-track="1st"]:hover,
-body.show-2nd nav.sidebar a[data-jump-track="misc"]:hover,
-body.show-misc nav.sidebar a[data-jump-track="1st"]:hover,
-body.show-misc nav.sidebar a[data-jump-track="2nd"]:hover {
-  opacity: 1;
-}
-
-/* Sidebar 트랙 라벨도 클릭 가능 */
+/* Sidebar 트랙 라벨 클릭 가능 */
 nav.sidebar .section-label[data-track-jump] {
   cursor: pointer;
   transition: background 0.15s;
@@ -543,11 +538,6 @@ nav.sidebar .section-label[data-track-jump] {
 }
 nav.sidebar .section-label[data-track-jump]:hover {
   background: rgba(255,255,255,0.05);
-}
-nav.sidebar .section-label[data-track-jump]::after {
-  content: " ▸";
-  font-size: 10px;
-  opacity: 0.6;
 }
 </style>
 </head>
@@ -1533,6 +1523,31 @@ nav.sidebar .section-label[data-track-jump]::after {
   </div>
 </section>
 
+<!-- Track Dividers (JS로 적절한 위치에 재배치됨) -->
+<div class="track-divider track-1st-div" id="track-1st-start">
+  <span class="div-emoji">🟢</span>
+  <div class="div-text">
+    <span>1차 작업 (9월 추석 오픈)</span>
+    <span class="div-sub">신규 예약 원장 시스템 1차 오픈 범위 — 인원/금액/원장탭/타임라인/정책</span>
+  </div>
+</div>
+
+<div class="track-divider track-2nd-div" id="track-2nd-start">
+  <span class="div-emoji">🟡</span>
+  <div class="div-text">
+    <span>2차 작업 (예약 원장 후속)</span>
+    <span class="div-sub">1차 오픈 이후 진행되는 예약 원장 관련 작업 — 행사 이동/쿠폰 비율차감/정산 데이터/별도 시스템</span>
+  </div>
+</div>
+
+<div class="track-divider track-misc-div" id="track-misc-start">
+  <span class="div-emoji">🔵</span>
+  <div class="div-text">
+    <span>독립 트랙 (예약 원장과 무관)</span>
+    <span class="div-sub">결제 서비스 단독 개선 + 단순 UI 개선 — 결제 정보/예약 기본/예약자 정보</span>
+  </div>
+</div>
+
 <!-- FAQ -->
 <footer>
   ⓒ 2026 트립스토어 · PM 김서현 · 본 가이드는 신규 예약시스템 운영 매뉴얼 초안 (목업 샘플 예약 기준)
@@ -1563,38 +1578,60 @@ nav.sidebar .section-label[data-track-jump]::after {
 </aside>
 
 <script>
-// === Track Tab Switching (1차 / 2차 / misc) ===
-function switchTrack(track, opts = {}) {
-  document.body.classList.remove('show-1st', 'show-2nd', 'show-misc');
-  document.body.classList.add(`show-${track}`);
-  document.querySelectorAll('.track-tab').forEach(btn => {
-    btn.classList.toggle('active', btn.dataset.track === track);
-  });
-  if (opts.scrollTop !== false) {
-    window.scrollTo({ top: 0, behavior: 'smooth' });
+// === Track Jump (1차 / 2차 / 독립) ===
+// 모든 트랙 콘텐츠는 항상 표시. 탭/사이드바 클릭 시 해당 트랙 시작점으로 부드럽게 스크롤.
+function switchTrack(track) {
+  const divider = document.getElementById(`track-${track}-start`);
+  if (divider) {
+    divider.scrollIntoView({ behavior: 'smooth', block: 'start' });
   }
 }
-document.addEventListener('DOMContentLoaded', () => {
-  document.body.classList.add('show-1st');
 
-  // 사이드바 링크 클릭 시 해당 트랙으로 자동 전환
-  document.querySelectorAll('a[data-jump-track]').forEach(link => {
-    link.addEventListener('click', (e) => {
-      const targetTrack = link.dataset.jumpTrack;
-      const currentTrack = document.body.classList.contains('show-1st') ? '1st'
-        : document.body.classList.contains('show-2nd') ? '2nd'
-        : 'misc';
-      if (currentTrack !== targetTrack) {
-        e.preventDefault();
-        switchTrack(targetTrack, { scrollTop: false });
-        // 트랙 전환 후 해당 섹션으로 스크롤
-        setTimeout(() => {
-          const target = document.querySelector(link.getAttribute('href'));
-          if (target) target.scrollIntoView({ behavior: 'smooth', block: 'start' });
-        }, 50);
-      }
-    });
+// 스크롤 위치에 따라 현재 활성 트랙 자동 감지 → 탭/사이드바 강조
+function updateActiveTrack() {
+  const dividers = [
+    { id: 'track-1st-start', track: '1st' },
+    { id: 'track-2nd-start', track: '2nd' },
+    { id: 'track-misc-start', track: 'misc' }
+  ];
+  const scrollY = window.scrollY + 200; // 200px 오프셋
+  let active = '1st';
+  for (const d of dividers) {
+    const el = document.getElementById(d.id);
+    if (el && el.offsetTop <= scrollY) active = d.track;
+  }
+  document.querySelectorAll('.track-tab').forEach(btn => {
+    btn.classList.toggle('active', btn.dataset.track === active);
   });
+}
+
+// 페이지 로드 시 섹션을 트랙별 그룹으로 재배치
+function rearrangeSections() {
+  const main = document.querySelector('main');
+  const footer = main.querySelector('footer');
+  const orderIds = [
+    // 공통 헤더 (헤더 + 샘플 배너는 별도)
+    'overview', 'top-cases', 'rollout',
+    // 🟢 1차 트랙
+    'track-1st-start',
+    'area-4', 'area-5', 'area-8', 'area-9', 'area-11',
+    // 🟡 2차 트랙
+    'track-2nd-start',
+    'area-2', 'area-6', 'track2-settlement', 'separated-systems',
+    // 🔵 독립 트랙
+    'track-misc-start',
+    'area-7', 'area-1', 'area-3'
+  ];
+  orderIds.forEach(id => {
+    const el = document.getElementById(id);
+    if (el && footer) main.insertBefore(el, footer);
+  });
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+  rearrangeSections();
+  updateActiveTrack();
+  window.addEventListener('scroll', updateActiveTrack, { passive: true });
 });
 
 const MOCKUP_URL = 'https://seohyeonkimextriber.github.io/tripstore_mokup/reservation-detail.html';
