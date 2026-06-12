@@ -514,6 +514,24 @@ body.show-misc [data-track-show="2nd"] { display: none; }
   background: #e2e8f0;
   color: #334155;
 }
+
+/* Sidebar: 비활성 트랙 메뉴는 흐리게 표시 (클릭은 가능) */
+body.show-1st nav.sidebar a[data-jump-track="2nd"],
+body.show-1st nav.sidebar a[data-jump-track="misc"],
+body.show-2nd nav.sidebar a[data-jump-track="1st"],
+body.show-2nd nav.sidebar a[data-jump-track="misc"],
+body.show-misc nav.sidebar a[data-jump-track="1st"],
+body.show-misc nav.sidebar a[data-jump-track="2nd"] {
+  opacity: 0.45;
+}
+body.show-1st nav.sidebar a[data-jump-track="2nd"]:hover,
+body.show-1st nav.sidebar a[data-jump-track="misc"]:hover,
+body.show-2nd nav.sidebar a[data-jump-track="1st"]:hover,
+body.show-2nd nav.sidebar a[data-jump-track="misc"]:hover,
+body.show-misc nav.sidebar a[data-jump-track="1st"]:hover,
+body.show-misc nav.sidebar a[data-jump-track="2nd"]:hover {
+  opacity: 1;
+}
 </style>
 </head>
 <body>
@@ -530,28 +548,28 @@ body.show-misc [data-track-show="2nd"] { display: none; }
     <li><a href="#rollout"><span class="ic">🗓️</span> 1차/2차 작업 범위</a></li>
   </ul>
 
-  <div class="section-label" data-track-show="1st" style="color:#10b981;">🟢 1차 작업 (9월 추석 오픈)</div>
-  <ul data-track-show="1st">
-    <li><a href="#area-4"><span class="ic">④</span> 인원 관리</a></li>
-    <li><a href="#area-5"><span class="ic">⑤</span> 예약 금액 관리</a></li>
-    <li><a href="#area-8"><span class="ic">⑧</span> 원장탭 (가계부)</a></li>
-    <li><a href="#area-9"><span class="ic">⑨</span> 타임라인·이력</a></li>
-    <li><a href="#area-11"><span class="ic">⑩</span> 정책 매트릭스</a></li>
+  <div class="section-label" style="color:#10b981;">🟢 1차 작업 (9월 추석 오픈)</div>
+  <ul>
+    <li><a href="#area-4" data-jump-track="1st"><span class="ic">④</span> 인원 관리</a></li>
+    <li><a href="#area-5" data-jump-track="1st"><span class="ic">⑤</span> 예약 금액 관리</a></li>
+    <li><a href="#area-8" data-jump-track="1st"><span class="ic">⑧</span> 원장탭 (가계부)</a></li>
+    <li><a href="#area-9" data-jump-track="1st"><span class="ic">⑨</span> 타임라인·이력</a></li>
+    <li><a href="#area-11" data-jump-track="1st"><span class="ic">⑩</span> 정책 매트릭스</a></li>
   </ul>
 
-  <div class="section-label" data-track-show="2nd" style="color:#f59e0b;">🟡 2차 작업 (후속)</div>
-  <ul data-track-show="2nd">
-    <li><a href="#area-2"><span class="ic">②</span> 여행 상품 정보 (행사 이동)</a></li>
-    <li><a href="#area-6"><span class="ic">⑥</span> 쿠폰 자동 비율 차감</a></li>
-    <li><a href="#area-7"><span class="ic">⑦</span> 결제 정보 (수단 변경 외)</a></li>
-    <li><a href="#track2-settlement"><span class="ic">📐</span> 정산 데이터 + 액션 아이템</a></li>
-    <li><a href="#separated-systems"><span class="ic">🔀</span> 별도 시스템 분리</a></li>
+  <div class="section-label" style="color:#f59e0b;">🟡 2차 작업 (후속)</div>
+  <ul>
+    <li><a href="#area-2" data-jump-track="2nd"><span class="ic">②</span> 여행 상품 정보 (행사 이동)</a></li>
+    <li><a href="#area-6" data-jump-track="2nd"><span class="ic">⑥</span> 쿠폰 자동 비율 차감</a></li>
+    <li><a href="#area-7" data-jump-track="2nd"><span class="ic">⑦</span> 결제 정보 (수단 변경 외)</a></li>
+    <li><a href="#track2-settlement" data-jump-track="2nd"><span class="ic">📐</span> 정산 데이터 + 액션 아이템</a></li>
+    <li><a href="#separated-systems" data-jump-track="2nd"><span class="ic">🔀</span> 별도 시스템 분리</a></li>
   </ul>
 
-  <div class="section-label" data-track-show="misc" style="color:#475569;">⚪ 작은 개선사항 (독립 트랙)</div>
-  <ul data-track-show="misc">
-    <li><a href="#area-1"><span class="ic">①</span> 예약 기본 정보</a></li>
-    <li><a href="#area-3"><span class="ic">③</span> 예약자 정보</a></li>
+  <div class="section-label" style="color:#94a3b8;">⚪ 작은 개선사항 (독립 트랙)</div>
+  <ul>
+    <li><a href="#area-1" data-jump-track="misc"><span class="ic">①</span> 예약 기본 정보</a></li>
+    <li><a href="#area-3" data-jump-track="misc"><span class="ic">③</span> 예약자 정보</a></li>
   </ul>
 
 </nav>
@@ -1522,17 +1540,38 @@ body.show-misc [data-track-show="2nd"] { display: none; }
 </aside>
 
 <script>
-// === Track Tab Switching (1차 / 2차) ===
-function switchTrack(track) {
-  document.body.classList.remove('show-1st', 'show-2nd');
+// === Track Tab Switching (1차 / 2차 / misc) ===
+function switchTrack(track, opts = {}) {
+  document.body.classList.remove('show-1st', 'show-2nd', 'show-misc');
   document.body.classList.add(`show-${track}`);
   document.querySelectorAll('.track-tab').forEach(btn => {
     btn.classList.toggle('active', btn.dataset.track === track);
   });
-  window.scrollTo({ top: 0, behavior: 'smooth' });
+  if (opts.scrollTop !== false) {
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
 }
 document.addEventListener('DOMContentLoaded', () => {
   document.body.classList.add('show-1st');
+
+  // 사이드바 링크 클릭 시 해당 트랙으로 자동 전환
+  document.querySelectorAll('a[data-jump-track]').forEach(link => {
+    link.addEventListener('click', (e) => {
+      const targetTrack = link.dataset.jumpTrack;
+      const currentTrack = document.body.classList.contains('show-1st') ? '1st'
+        : document.body.classList.contains('show-2nd') ? '2nd'
+        : 'misc';
+      if (currentTrack !== targetTrack) {
+        e.preventDefault();
+        switchTrack(targetTrack, { scrollTop: false });
+        // 트랙 전환 후 해당 섹션으로 스크롤
+        setTimeout(() => {
+          const target = document.querySelector(link.getAttribute('href'));
+          if (target) target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }, 50);
+      }
+    });
+  });
 });
 
 const MOCKUP_URL = 'https://seohyeonkimextriber.github.io/tripstore_mokup/reservation-detail.html';
