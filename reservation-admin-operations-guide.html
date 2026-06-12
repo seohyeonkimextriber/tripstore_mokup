@@ -461,6 +461,11 @@ body main { transition: padding-right 0.3s ease, max-width 0.3s ease; }
   color: white;
   box-shadow: 0 2px 8px rgba(245,158,11,0.3);
 }
+.track-tab.active.track-misc {
+  background: linear-gradient(135deg, #64748b 0%, #475569 100%);
+  color: white;
+  box-shadow: 0 2px 8px rgba(100,116,139,0.3);
+}
 .track-tab .badge-count {
   background: rgba(255,255,255,0.25);
   padding: 2px 8px;
@@ -473,10 +478,18 @@ body main { transition: padding-right 0.3s ease, max-width 0.3s ease; }
 }
 
 /* Track filtering */
-body.show-1st [data-track="2nd"] { display: none; }
-body.show-2nd [data-track="1st"] { display: none; }
-body.show-1st [data-track-show="2nd"] { display: none; }
-body.show-2nd [data-track-show="1st"] { display: none; }
+body.show-1st [data-track="2nd"],
+body.show-1st [data-track="misc"] { display: none; }
+body.show-2nd [data-track="1st"],
+body.show-2nd [data-track="misc"] { display: none; }
+body.show-misc [data-track="1st"],
+body.show-misc [data-track="2nd"] { display: none; }
+body.show-1st [data-track-show="2nd"],
+body.show-1st [data-track-show="misc"] { display: none; }
+body.show-2nd [data-track-show="1st"],
+body.show-2nd [data-track-show="misc"] { display: none; }
+body.show-misc [data-track-show="1st"],
+body.show-misc [data-track-show="2nd"] { display: none; }
 
 /* Track indicator badge on sections */
 .track-badge {
@@ -497,6 +510,10 @@ body.show-2nd [data-track-show="1st"] { display: none; }
   background: #fef3c7;
   color: #78350f;
 }
+.track-badge.track-misc-badge {
+  background: #e2e8f0;
+  color: #334155;
+}
 </style>
 </head>
 <body>
@@ -515,8 +532,6 @@ body.show-2nd [data-track-show="1st"] { display: none; }
 
   <div class="section-label" data-track-show="1st" style="color:#10b981;">🟢 1차 작업 (9월 추석 오픈)</div>
   <ul data-track-show="1st">
-    <li><a href="#area-1"><span class="ic">①</span> 예약 기본 정보</a></li>
-    <li><a href="#area-3"><span class="ic">③</span> 예약자 정보</a></li>
     <li><a href="#area-4"><span class="ic">④</span> 인원 관리</a></li>
     <li><a href="#area-5"><span class="ic">⑤</span> 예약 금액 관리</a></li>
     <li><a href="#area-8"><span class="ic">⑧</span> 원장탭 (가계부)</a></li>
@@ -529,7 +544,14 @@ body.show-2nd [data-track-show="1st"] { display: none; }
     <li><a href="#area-2"><span class="ic">②</span> 여행 상품 정보 (행사 이동)</a></li>
     <li><a href="#area-6"><span class="ic">⑥</span> 쿠폰 자동 비율 차감</a></li>
     <li><a href="#area-7"><span class="ic">⑦</span> 결제 정보 (수단 변경 외)</a></li>
+    <li><a href="#track2-settlement"><span class="ic">📐</span> 정산 데이터 + 액션 아이템</a></li>
     <li><a href="#separated-systems"><span class="ic">🔀</span> 별도 시스템 분리</a></li>
+  </ul>
+
+  <div class="section-label" data-track-show="misc" style="color:#475569;">⚪ 작은 개선사항 (독립 트랙)</div>
+  <ul data-track-show="misc">
+    <li><a href="#area-1"><span class="ic">①</span> 예약 기본 정보</a></li>
+    <li><a href="#area-3"><span class="ic">③</span> 예약자 정보</a></li>
   </ul>
 
 </nav>
@@ -537,7 +559,7 @@ body.show-2nd [data-track-show="1st"] { display: none; }
 <main>
 
 <header class="page-header">
-  <h1>신규 예약시스템 어드민 운영 가이드 <span class="badge">v1.2</span></h1>
+  <h1>신규 예약시스템 어드민 운영 가이드 <span class="badge">v1.3</span></h1>
   <p class="page-meta">
     영역별 "이거 어떻게 써요?" 운영 매뉴얼 · 목업 샘플 예약 기준 · PM 김서현 · 2026-06-12 업데이트<br>
     참고 목업: <a href="https://seohyeonkimextriber.github.io/tripstore_mokup/reservation-detail.html" target="_blank">reservation-detail.html</a><br>
@@ -582,15 +604,19 @@ body.show-2nd [data-track-show="1st"] { display: none; }
   </div>
 </div>
 
-<!-- Track Tabs (1차 / 2차) -->
+<!-- Track Tabs (1차 / 2차 / 작은 개선사항) -->
 <div class="track-tabs" role="tablist">
   <button class="track-tab track-1st active" data-track="1st" onclick="switchTrack('1st')" role="tab">
     🟢 1차 작업 <span style="font-size:11px; opacity:0.9; font-weight:500;">(9월 추석 오픈)</span>
-    <span class="badge-count">7</span>
+    <span class="badge-count">5</span>
   </button>
   <button class="track-tab track-2nd" data-track="2nd" onclick="switchTrack('2nd')" role="tab">
     🟡 2차 작업 <span style="font-size:11px; opacity:0.9; font-weight:500;">(후속)</span>
-    <span class="badge-count">4</span>
+    <span class="badge-count">5</span>
+  </button>
+  <button class="track-tab track-misc" data-track="misc" onclick="switchTrack('misc')" role="tab">
+    ⚪ 작은 개선사항 <span style="font-size:11px; opacity:0.9; font-weight:500;">(독립 트랙)</span>
+    <span class="badge-count">2</span>
   </button>
 </div>
 
@@ -686,8 +712,8 @@ body.show-2nd [data-track-show="1st"] { display: none; }
 </section>
 
 <!-- Area 1 -->
-<section class="area" id="area-1" data-track="1st">
-  <h2><span class="area-num">①</span>예약 기본 정보</h2>
+<section class="area" id="area-1" data-track="misc">
+  <h2><span class="area-num">①</span>예약 기본 정보 <span class="track-badge track-misc-badge">⚪ 작은 개선</span></h2>
   <div class="area-sub">예약의 정체성 정보. 변경할 일은 거의 없고 "조회·복사용"</div>
 
   <h3>이 영역에 보이는 데이터</h3>
@@ -793,8 +819,8 @@ body.show-2nd [data-track-show="1st"] { display: none; }
 </section>
 
 <!-- Area 3 -->
-<section class="area" id="area-3" data-track="1st">
-  <h2><span class="area-num">③</span>예약자 정보</h2>
+<section class="area" id="area-3" data-track="misc">
+  <h2><span class="area-num">③</span>예약자 정보 <span class="track-badge track-misc-badge">⚪ 작은 개선</span></h2>
   <div class="area-sub">예약자 개인정보 조회 + 4개 항목 직접 수정 (회원정보엔 영향 없음, 예약 단위 스냅샷)</div>
 
   <h3>이 영역에 보이는 데이터</h3>
@@ -1365,6 +1391,56 @@ body.show-2nd [data-track-show="1st"] { display: none; }
       • <b>⛔ Don'ts 다시 정의</b> — 함께 정리 (현재 가이드에서 잠시 제거됨)
     </div>
   </div>
+</section>
+
+<!-- 2nd Track Settlement & Action Items -->
+<section class="area" id="track2-settlement" data-track="2nd">
+  <h2><span class="area-num">📐</span>정산 데이터 개선 + 액션 아이템 <span class="track-badge track-2nd-badge">🟡 2차 작업</span></h2>
+  <div class="area-sub">2026-06-11 미팅 — 변경된 예약 원장 기준으로 정산 데이터 인터페이스 개선 + 담당자별 액션 아이템</div>
+
+  <h3 style="margin-top:18px;">정산 데이터 개선 흐름 (1차 오픈 함께)</h3>
+  <div class="mockup-preview">
+    <div class="mp-row"><dt>1단계 (9월 1차 오픈)</dt><dd>변경된 예약 원장 데이터 구조 기준으로 <b>정산 시스템이 받아갈 신규 API 스펙 정의</b> (기존 API 재활용 X)</dd></div>
+    <div class="mp-row"><dt>2단계 (9월 1차 오픈)</dt><dd>현정님이 회계 인식 기준으로 원장 항목 그룹핑 가이드 작성 → 정근님이 가이드 기반 API 스펙 작성</dd></div>
+    <div class="mp-row"><dt>3단계 (9월 1차 오픈)</dt><dd>정산 시스템이 신규 예약 원장에서 받은 데이터로 정상 계산 → 기존 정산 로직과 호환</dd></div>
+    <div class="mp-row"><dt>4단계 (후속)</dt><dd>정산 결과 (지급/PG 수수료/채널사 수수료) → 예약 원장으로 역반영 → <b>최종 0원 결산 모델</b> 지향</dd></div>
+    <div class="mp-row"><dt>5단계 (별도 트랙)</dt><dd>공급사 정산 시스템 신규 개발 → 공급사로 가는 자금 흐름까지 통합</dd></div>
+  </div>
+
+  <div style="background:#eff6ff; border-left:4px solid #3b82f6; padding:12px 16px; border-radius:0 8px 8px 0; font-size:13px; color:#1e3a8a; margin-top:12px;">
+    💡 <b>정산 API 신규 스펙 (현정님 + 정근님 협의 필요):</b><br>
+    • 기존 정산 API를 그대로 신규 원장에서 내려주는 식은 NO<br>
+    • <b>신규 원장 항목 분류를 그대로/집계해서 정산이 받아가는 신규 스펙</b>이 정답<br>
+    • 현정님이 "원장 각 항목을 회계학적으로 어떻게 인식할지" 정리 → 정근님이 가이드 기반 API 사이즈 산정<br>
+    • 6월 중 정리, 7월 리뷰 목표
+  </div>
+
+  <div style="background:#fef3c7; border-left:4px solid #f59e0b; padding:12px 16px; border-radius:0 8px 8px 0; font-size:13px; color:#78350f; margin-top:10px;">
+    📌 <b>노션 트래커 항목명 정정 (액션 아이템):</b> 기존 "신규 정산 시스템" → "<b>포트원 PG 정산 시스템 연동 개선</b>" 으로 정정. 정산 시스템은 이미 운영 중이며, 신규 원장 기반으로 데이터 인터페이스만 개선하는 작업.
+  </div>
+
+  <h3 style="margin-top:24px;">📋 액션 아이템 (2026-06-11 미팅)</h3>
+  <table style="width:100%; font-size:12.5px; border-collapse:collapse; background:white; border:1px solid #e5e7eb; border-radius:8px; overflow:hidden; margin-top:8px;">
+    <thead>
+      <tr style="background:#f1f5f9;">
+        <th style="padding:9px 12px; text-align:left; font-size:11px; font-weight:700; color:#334155;">담당</th>
+        <th style="padding:9px 12px; text-align:left; font-size:11px; font-weight:700; color:#334155;">내용</th>
+        <th style="padding:9px 12px; text-align:left; font-size:11px; font-weight:700; color:#334155;">기한</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr><td style="padding:8px 12px; border-bottom:1px solid #f1f5f9; font-weight:600;">김서현</td><td style="padding:8px 12px; border-bottom:1px solid #f1f5f9;">신규 예약 원장 API 가이드(회계 인식 기준 포함)를 현정님과 정렬해 정산팀 전달</td><td style="padding:8px 12px; border-bottom:1px solid #f1f5f9; color:#7c2d12;">6월 중</td></tr>
+      <tr><td style="padding:8px 12px; border-bottom:1px solid #f1f5f9; font-weight:600;">김서현</td><td style="padding:8px 12px; border-bottom:1px solid #f1f5f9;">어드민/파트너스 화면 스펙에 "할인 분담 주체 선택" 추가</td><td style="padding:8px 12px; border-bottom:1px solid #f1f5f9; color:#7c2d12;">1차 스펙 확정 전</td></tr>
+      <tr><td style="padding:8px 12px; border-bottom:1px solid #f1f5f9; font-weight:600;">김서현</td><td style="padding:8px 12px; border-bottom:1px solid #f1f5f9;">숙박 예약 관리 화면(컬럼/뷰) 정리해서 현정님 리뷰용으로 전달</td><td style="padding:8px 12px; border-bottom:1px solid #f1f5f9; color:#475569;">-</td></tr>
+      <tr><td style="padding:8px 12px; border-bottom:1px solid #f1f5f9; font-weight:600;">김서현</td><td style="padding:8px 12px; border-bottom:1px solid #f1f5f9;">노션 작업 트래커 항목명 정정 ("신규 정산 시스템" → "포트원 PG 정산 시스템 연동 개선")</td><td style="padding:8px 12px; border-bottom:1px solid #f1f5f9; color:#dc2626; font-weight:600;">즉시</td></tr>
+      <tr><td style="padding:8px 12px; border-bottom:1px solid #f1f5f9; font-weight:600;">정근</td><td style="padding:8px 12px; border-bottom:1px solid #f1f5f9;">결제 서비스 결제 금액 한도(cap) 해제 — 결제 수단 변경/URL 동시 발송 별개 트랙</td><td style="padding:8px 12px; border-bottom:1px solid #f1f5f9; color:#7c2d12;">신규 예약 오픈 전</td></tr>
+      <tr><td style="padding:8px 12px; border-bottom:1px solid #f1f5f9; font-weight:600;">정근</td><td style="padding:8px 12px; border-bottom:1px solid #f1f5f9;">신규 인원 타입 추가 시 특가/분담금 저장 가능 여부 — 레거시·신규 원장 모두 검토 후 회신</td><td style="padding:8px 12px; border-bottom:1px solid #f1f5f9; color:#7c2d12;">다음 미팅</td></tr>
+      <tr><td style="padding:8px 12px; border-bottom:1px solid #f1f5f9; font-weight:600;">재원</td><td style="padding:8px 12px; border-bottom:1px solid #f1f5f9;">쿠폰 2개 이상 사용 가능 작업 — 국내 숙소 오픈 이후 착수 시점 잡기</td><td style="padding:8px 12px; border-bottom:1px solid #f1f5f9; color:#7c2d12;">6월 말 합의</td></tr>
+      <tr><td style="padding:8px 12px; border-bottom:1px solid #f1f5f9; font-weight:600;">경준 / 준영</td><td style="padding:8px 12px; border-bottom:1px solid #f1f5f9;">공급사 정산 신규 시스템 착수 — 놀 검색 연동 종료 후 즉시. 1차 리뷰</td><td style="padding:8px 12px; border-bottom:1px solid #f1f5f9; color:#7c2d12;">7월 중</td></tr>
+      <tr><td style="padding:8px 12px; border-bottom:1px solid #f1f5f9; font-weight:600;">현정</td><td style="padding:8px 12px; border-bottom:1px solid #f1f5f9;">예약 원장 각 항목의 회계학적 인식 기준 정리 (정산 API 가이드용 베이스)</td><td style="padding:8px 12px; border-bottom:1px solid #f1f5f9; color:#7c2d12;">정산 API 산정 전</td></tr>
+      <tr><td style="padding:8px 12px; font-weight:600;">현정</td><td style="padding:8px 12px;">원장 화면 단어/표현 1~2회 리뷰 후 데이터 가공 방향 합의</td><td style="padding:8px 12px; color:#7c2d12;">6월 중</td></tr>
+    </tbody>
+  </table>
 </section>
 
 <!-- Separated Systems -->
