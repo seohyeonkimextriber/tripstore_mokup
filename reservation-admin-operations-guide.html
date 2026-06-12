@@ -419,6 +419,84 @@ body main { transition: padding-right 0.3s ease, max-width 0.3s ease; }
   .mockup-toggle-btn.open { right: 16px; bottom: 16px; }
   body.mockup-open main { padding-right: 24px; }
 }
+
+/* Track tabs (1차 / 2차) */
+.track-tabs {
+  display: flex;
+  gap: 8px;
+  margin: 24px 0 20px;
+  padding: 6px;
+  background: #f1f5f9;
+  border-radius: 14px;
+  position: sticky;
+  top: 8px;
+  z-index: 100;
+  border: 1px solid #cbd5e1;
+}
+.track-tab {
+  flex: 1;
+  padding: 14px 18px;
+  border-radius: 10px;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 700;
+  letter-spacing: 0.3px;
+  color: #475569;
+  transition: all 0.2s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+.track-tab:hover { background: #e2e8f0; }
+.track-tab.active.track-1st {
+  background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+  color: white;
+  box-shadow: 0 2px 8px rgba(16,185,129,0.3);
+}
+.track-tab.active.track-2nd {
+  background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+  color: white;
+  box-shadow: 0 2px 8px rgba(245,158,11,0.3);
+}
+.track-tab .badge-count {
+  background: rgba(255,255,255,0.25);
+  padding: 2px 8px;
+  border-radius: 999px;
+  font-size: 11px;
+}
+.track-tab:not(.active) .badge-count {
+  background: #cbd5e1;
+  color: #475569;
+}
+
+/* Track filtering */
+body.show-1st [data-track="2nd"] { display: none; }
+body.show-2nd [data-track="1st"] { display: none; }
+body.show-1st [data-track-show="2nd"] { display: none; }
+body.show-2nd [data-track-show="1st"] { display: none; }
+
+/* Track indicator badge on sections */
+.track-badge {
+  display: inline-block;
+  font-size: 11px;
+  font-weight: 700;
+  padding: 3px 10px;
+  border-radius: 999px;
+  letter-spacing: 0.3px;
+  margin-left: 8px;
+  vertical-align: middle;
+}
+.track-badge.track-1st-badge {
+  background: #d1fae5;
+  color: #065f46;
+}
+.track-badge.track-2nd-badge {
+  background: #fef3c7;
+  color: #78350f;
+}
 </style>
 </head>
 <body>
@@ -432,30 +510,25 @@ body main { transition: padding-right 0.3s ease, max-width 0.3s ease; }
   <ul>
     <li><a href="#overview"><span class="ic">🏠</span> 화면 개요</a></li>
     <li><a href="#top-cases"><span class="ic">🔥</span> 자주 쓰는 케이스 Top 5</a></li>
-    <li><a href="#rollout"><span class="ic">🗓️</span> 1차 오픈 범위 (9월)</a></li>
+    <li><a href="#rollout"><span class="ic">🗓️</span> 1차/2차 작업 범위</a></li>
   </ul>
 
-  <div class="section-label">기본탭 영역</div>
-  <ul>
+  <div class="section-label" data-track-show="1st" style="color:#10b981;">🟢 1차 작업 (9월 추석 오픈)</div>
+  <ul data-track-show="1st">
     <li><a href="#area-1"><span class="ic">①</span> 예약 기본 정보</a></li>
-    <li><a href="#area-2"><span class="ic">②</span> 여행 상품 정보</a></li>
     <li><a href="#area-3"><span class="ic">③</span> 예약자 정보</a></li>
     <li><a href="#area-4"><span class="ic">④</span> 인원 관리</a></li>
     <li><a href="#area-5"><span class="ic">⑤</span> 예약 금액 관리</a></li>
-    <li><a href="#area-6"><span class="ic">⑥</span> 쿠폰 관리</a></li>
-    <li><a href="#area-7"><span class="ic">⑦</span> 결제 정보</a></li>
-  </ul>
-
-  <div class="section-label">원장탭 / 공통</div>
-  <ul>
     <li><a href="#area-8"><span class="ic">⑧</span> 원장탭 (가계부)</a></li>
     <li><a href="#area-9"><span class="ic">⑨</span> 타임라인·이력</a></li>
+    <li><a href="#area-11"><span class="ic">⑩</span> 정책 매트릭스</a></li>
   </ul>
 
-  <div class="section-label">정책</div>
-  <ul>
-    <li><a href="#area-11"><span class="ic">⑩</span> 정책 매트릭스</a></li>
-    <li><a href="#roadmap"><span class="ic">🛣️</span> 후속 작업 로드맵</a></li>
+  <div class="section-label" data-track-show="2nd" style="color:#f59e0b;">🟡 2차 작업 (후속)</div>
+  <ul data-track-show="2nd">
+    <li><a href="#area-2"><span class="ic">②</span> 여행 상품 정보 (행사 이동)</a></li>
+    <li><a href="#area-6"><span class="ic">⑥</span> 쿠폰 자동 비율 차감</a></li>
+    <li><a href="#area-7"><span class="ic">⑦</span> 결제 정보 (수단 변경 외)</a></li>
     <li><a href="#separated-systems"><span class="ic">🔀</span> 별도 시스템 분리</a></li>
   </ul>
 
@@ -507,6 +580,18 @@ body main { transition: padding-right 0.3s ease, max-width 0.3s ease; }
     <div class="lab">채널</div>
     <div class="val">트립스토어 (직판)</div>
   </div>
+</div>
+
+<!-- Track Tabs (1차 / 2차) -->
+<div class="track-tabs" role="tablist">
+  <button class="track-tab track-1st active" data-track="1st" onclick="switchTrack('1st')" role="tab">
+    🟢 1차 작업 <span style="font-size:11px; opacity:0.9; font-weight:500;">(9월 추석 오픈)</span>
+    <span class="badge-count">7</span>
+  </button>
+  <button class="track-tab track-2nd" data-track="2nd" onclick="switchTrack('2nd')" role="tab">
+    🟡 2차 작업 <span style="font-size:11px; opacity:0.9; font-weight:500;">(후속)</span>
+    <span class="badge-count">4</span>
+  </button>
 </div>
 
 <!-- Overview -->
@@ -563,8 +648,8 @@ body main { transition: padding-right 0.3s ease, max-width 0.3s ease; }
 
 <!-- Rollout Plan (2026-06-11 미팅 결정) -->
 <section class="area" id="rollout">
-  <h2><span class="area-num">🗓️</span>1차 오픈 범위 (2026-09 추석)</h2>
-  <div class="area-sub">2026-06-11 미팅 확정 — 신규 예약 원장 시스템 1차 오픈 스펙</div>
+  <h2><span class="area-num">🗓️</span>1차 / 2차 작업 범위</h2>
+  <div class="area-sub">2026-06-11 미팅 확정 — 9월 추석 1차 오픈 후 후속 작업 분리. 상단 [🟢 1차 작업] / [🟡 2차 작업] 탭으로 가이드 영역 전환</div>
 
   <div style="display:grid; grid-template-columns:1fr 1fr; gap:16px; margin-top:14px;">
     <div style="background:linear-gradient(135deg, #ecfdf5 0%, #d1fae5 100%); border:1px solid #34d399; border-radius:12px; padding:18px 22px;">
@@ -601,7 +686,7 @@ body main { transition: padding-right 0.3s ease, max-width 0.3s ease; }
 </section>
 
 <!-- Area 1 -->
-<section class="area" id="area-1">
+<section class="area" id="area-1" data-track="1st">
   <h2><span class="area-num">①</span>예약 기본 정보</h2>
   <div class="area-sub">예약의 정체성 정보. 변경할 일은 거의 없고 "조회·복사용"</div>
 
@@ -638,8 +723,8 @@ body main { transition: padding-right 0.3s ease, max-width 0.3s ease; }
 </section>
 
 <!-- Area 2 -->
-<section class="area" id="area-2">
-  <h2><span class="area-num">②</span>여행 상품 정보</h2>
+<section class="area" id="area-2" data-track="2nd">
+  <h2><span class="area-num">②</span>여행 상품 정보 <span class="track-badge track-2nd-badge">🟡 2차 작업</span></h2>
   <div class="area-sub">예약된 행사·상품 정보. 행사 이동·정보 수정의 진입점</div>
 
   <h3>이 영역에 보이는 데이터</h3>
@@ -671,7 +756,7 @@ body main { transition: padding-right 0.3s ease, max-width 0.3s ease; }
   </div>
 
   <div style="background:#eff6ff; border-left:4px solid #3b82f6; padding:14px 18px; border-radius:0 10px 10px 0; font-size:13px; color:#1e3a8a; margin-top:14px;">
-    💡 <b>설계 핵심 (전무님 결정):</b><br>
+    💡 <b>설계 핵심 (상문님 결정):</b><br>
     • 행사 정보 변경과 행사 이동(가격 변경)을 <b>분리</b>하여 액션마다 책임 명확화<br>
     • 우리 시스템의 행사코드(travelId)는 임의로 조작하지 않음 → 안정성 확보<br>
     • 여행사 관리용 코드는 별도 필드 → 여행사 자유 수정, 우리 인벤토리에 영향 X<br>
@@ -708,7 +793,7 @@ body main { transition: padding-right 0.3s ease, max-width 0.3s ease; }
 </section>
 
 <!-- Area 3 -->
-<section class="area" id="area-3">
+<section class="area" id="area-3" data-track="1st">
   <h2><span class="area-num">③</span>예약자 정보</h2>
   <div class="area-sub">예약자 개인정보 조회 + 4개 항목 직접 수정 (회원정보엔 영향 없음, 예약 단위 스냅샷)</div>
 
@@ -753,7 +838,7 @@ body main { transition: padding-right 0.3s ease, max-width 0.3s ease; }
 </section>
 
 <!-- Area 4 -->
-<section class="area" id="area-4">
+<section class="area" id="area-4" data-track="1st">
   <h2><span class="area-num">④</span>인원 관리</h2>
   <div class="area-sub">⑤ 예약 금액 관리 영역 안에 있음. 인원 추가·삭제·인원별 보기</div>
 
@@ -814,12 +899,12 @@ body main { transition: padding-right 0.3s ease, max-width 0.3s ease; }
     예: 성인 2명 + 유아 1명 예약 → 큰 아이가 아동으로 추가되는 케이스. <b>아동 가격 정보 / 특가 분담 정보를 시스템이 알 수 없는 상황</b>.<br>
     • Option A: 그냥 성인으로 추가하고 금액 차감으로 처리 (분담 정보 = 여행사로 자동)<br>
     • Option B: 신규 타입 추가 자체를 차단, 운영팀이 별도 CS 채널로 처리<br>
-    → <b>상무님이 특가 정보 저장 구조 분석 후 정책 결정 예정</b>. 1차 오픈 시점에는 신규 타입 추가 비활성화 가능성.
+    → <b>상문님이 특가 정보 저장 구조 분석 후 정책 결정 예정</b>. 1차 오픈 시점에는 신규 타입 추가 비활성화 가능성.
   </div>
 </section>
 
 <!-- Area 5 -->
-<section class="area" id="area-5">
+<section class="area" id="area-5" data-track="1st">
   <h2><span class="area-num">⑤</span>예약 금액 관리</h2>
   <div class="area-sub">예약 금액을 +/− 행 추가로만 관리. <b>금액 직접 수정 불가</b></div>
 
@@ -897,7 +982,7 @@ body main { transition: padding-right 0.3s ease, max-width 0.3s ease; }
   </table>
 
   <div style="background:#eff6ff; border-left:4px solid #3b82f6; padding:12px 16px; border-radius:0 8px 8px 0; font-size:13px; color:#1e3a8a; margin-top:10px;">
-    💡 <b>명목 + 부담주체 명시 필수 (전무님 강조):</b><br>
+    💡 <b>명목 + 부담주체 명시 필수 (상문님 강조):</b><br>
     • <b>"+ 금액 추가" / "− 금액 차감" 만으로는 부족</b>. 어떤 명목인지, 누가 부담하는지 명확하게 표기.<br>
     • 어드민 화면에서는 손익에 미치는 영향까지 같이 보이도록 (예: 채널수수료/플랫폼이용료 영향).<br>
     • 파트너스 화면에서는 "본인이 부담하는 항목" 위주로 리스트업 (어차피 회계 시스템 외 연동이라 단순화).
@@ -909,8 +994,8 @@ body main { transition: padding-right 0.3s ease, max-width 0.3s ease; }
 </section>
 
 <!-- Area 6 -->
-<section class="area" id="area-6">
-  <h2><span class="area-num">⑥</span>쿠폰 관리</h2>
+<section class="area" id="area-6" data-track="2nd">
+  <h2><span class="area-num">⑥</span>쿠폰 관리 <span class="track-badge track-2nd-badge">🟡 2차 자동 비율 차감</span></h2>
   <div class="area-sub">예약금액과 <b>분리된 독립 섹션</b>. 쿠폰 적용/취소/자동조정 전담</div>
 
   <h3>이 영역에 보이는 적용된 쿠폰</h3>
@@ -970,8 +1055,8 @@ body main { transition: padding-right 0.3s ease, max-width 0.3s ease; }
 </section>
 
 <!-- Area 7 -->
-<section class="area" id="area-7">
-  <h2><span class="area-num">⑦</span>결제 정보</h2>
+<section class="area" id="area-7" data-track="2nd">
+  <h2><span class="area-num">⑦</span>결제 정보 <span class="track-badge track-2nd-badge">🟡 2차 수단 변경 외</span></h2>
   <div class="area-sub">결제 필요 금액 vs 실결제 금액 비교 + 결제 액션 3종</div>
 
   <h3>이 영역에 보이는 결제 테이블</h3>
@@ -1077,7 +1162,7 @@ body main { transition: padding-right 0.3s ease, max-width 0.3s ease; }
 </section>
 
 <!-- Area 8 -->
-<section class="area" id="area-8">
+<section class="area" id="area-8" data-track="1st">
   <h2><span class="area-num">⑧</span>원장탭 (가계부 펼쳐보기)</h2>
   <div class="area-sub">예약 1건의 모든 돈 흐름을 시계열로 펼쳐보는 영역</div>
 
@@ -1155,7 +1240,7 @@ body main { transition: padding-right 0.3s ease, max-width 0.3s ease; }
 </section>
 
 <!-- Area 9 -->
-<section class="area" id="area-9">
+<section class="area" id="area-9" data-track="1st">
   <h2><span class="area-num">⑨</span>타임라인 · 이력</h2>
   <div class="area-sub">예약에서 일어난 모든 이벤트를 시계열로 추적</div>
 
@@ -1184,7 +1269,7 @@ body main { transition: padding-right 0.3s ease, max-width 0.3s ease; }
 </section>
 
 <!-- Area 10: 정책 매트릭스 -->
-<section class="area" id="area-11">
+<section class="area" id="area-11" data-track="1st">
   <h2><span class="area-num">⑩</span>정책 매트릭스</h2>
   <div class="area-sub">취소완료 예약의 인원/금액 표시 + 데이터 수정 권한 일람</div>
 
@@ -1282,81 +1367,9 @@ body main { transition: padding-right 0.3s ease, max-width 0.3s ease; }
   </div>
 </section>
 
-<!-- Roadmap -->
-<section class="area" id="roadmap">
-  <h2><span class="area-num">🛣️</span>후속 작업 로드맵</h2>
-  <div class="area-sub">2026-06-11 미팅에서 정리된 단계별 작업 순서. 1차 오픈(9월) 이후 진행 예정 항목</div>
-
-  <h3>1차 오픈 이후 작업 (10월~12월)</h3>
-  <table style="width:100%; font-size:13px; border-collapse:collapse; background:white; border:1px solid #e5e7eb; border-radius:8px; overflow:hidden; margin-top:8px;">
-    <thead>
-      <tr style="background:#f1f5f9;">
-        <th style="padding:9px 12px; text-align:left; font-size:11px; font-weight:700; color:#334155;">작업</th>
-        <th style="padding:9px 12px; text-align:left; font-size:11px; font-weight:700; color:#334155;">담당자</th>
-        <th style="padding:9px 12px; text-align:left; font-size:11px; font-weight:700; color:#334155;">예상 시점</th>
-        <th style="padding:9px 12px; text-align:left; font-size:11px; font-weight:700; color:#334155;">의존성</th>
-      </tr>
-    </thead>
-    <tbody>
-      <tr><td style="padding:9px 12px; border-bottom:1px solid #f1f5f9;"><b>여행 상품 정보 변경</b> (관리용 코드 텍스트)</td><td style="padding:9px 12px; border-bottom:1px solid #f1f5f9;">예약 시스템</td><td style="padding:9px 12px; border-bottom:1px solid #f1f5f9;">10월~</td><td style="padding:9px 12px; border-bottom:1px solid #f1f5f9; color:#475569;">예약 원장 오픈 후</td></tr>
-      <tr><td style="padding:9px 12px; border-bottom:1px solid #f1f5f9;"><b>쿠폰 자동 비율 차감</b> (단일 쿠폰 재계산)</td><td style="padding:9px 12px; border-bottom:1px solid #f1f5f9;">서연님 (예약 시스템)</td><td style="padding:9px 12px; border-bottom:1px solid #f1f5f9;">10월~</td><td style="padding:9px 12px; border-bottom:1px solid #f1f5f9; color:#475569;">예약 원장 오픈 후</td></tr>
-      <tr><td style="padding:9px 12px; border-bottom:1px solid #f1f5f9;"><b>취소 위약금 원장 이전</b> (결제→7010)</td><td style="padding:9px 12px; border-bottom:1px solid #f1f5f9;">예약 + 결제 시스템</td><td style="padding:9px 12px; border-bottom:1px solid #f1f5f9;">10월~</td><td style="padding:9px 12px; border-bottom:1px solid #f1f5f9; color:#475569;">예약 원장 오픈 후</td></tr>
-      <tr><td style="padding:9px 12px; border-bottom:1px solid #f1f5f9;"><b>결제 서비스 개선</b> (수단 변경 + URL 동시 발송)</td><td style="padding:9px 12px; border-bottom:1px solid #f1f5f9;">정근님</td><td style="padding:9px 12px; border-bottom:1px solid #f1f5f9; color:#15803d; font-weight:600;">병렬 가능 (신규 예약 오픈 전)</td><td style="padding:9px 12px; border-bottom:1px solid #f1f5f9; color:#475569;">예약 원장과 무관 → 즉시 가능</td></tr>
-      <tr><td style="padding:9px 12px; border-bottom:1px solid #f1f5f9;"><b>중복 쿠폰 사용</b> (단일 → 다중)</td><td style="padding:9px 12px; border-bottom:1px solid #f1f5f9;">재원님 (쿠폰 시스템)</td><td style="padding:9px 12px; border-bottom:1px solid #f1f5f9;">10월~ (국내 숙소 이후)</td><td style="padding:9px 12px; border-bottom:1px solid #f1f5f9; color:#475569;">예약 원장 오픈 후</td></tr>
-      <tr><td style="padding:9px 12px; border-bottom:1px solid #f1f5f9;"><b>행사 이동 검색 (파트너스)</b></td><td style="padding:9px 12px; border-bottom:1px solid #f1f5f9;">예약 시스템</td><td style="padding:9px 12px; border-bottom:1px solid #f1f5f9;">11월~</td><td style="padding:9px 12px; border-bottom:1px solid #f1f5f9; color:#475569;">행사 정보 변경 후</td></tr>
-      <tr><td style="padding:9px 12px; border-bottom:1px solid #f1f5f9;"><b>결제 추가 (여행사 결제 케이스)</b></td><td style="padding:9px 12px; border-bottom:1px solid #f1f5f9;">예약 + 정산 시스템</td><td style="padding:9px 12px; border-bottom:1px solid #f1f5f9; color:#b91c1c; font-weight:600;">미정</td><td style="padding:9px 12px; border-bottom:1px solid #f1f5f9; color:#475569;">정산 시스템 영향 큼, 후순위</td></tr>
-      <tr><td style="padding:9px 12px;"><b>공급사 정산 시스템 신규 개발</b></td><td style="padding:9px 12px;">경준님(메인) + 준영님</td><td style="padding:9px 12px; color:#b91c1c; font-weight:600;">7월 킥오프, 6개월+ 소요</td><td style="padding:9px 12px; color:#475569;">완전 별도 트랙</td></tr>
-    </tbody>
-  </table>
-
-  <h3 style="margin-top:24px;">정산 데이터 개선 흐름 (1차 오픈 함께)</h3>
-  <div class="mockup-preview">
-    <div class="mp-row"><dt>1단계 (9월 1차 오픈)</dt><dd>변경된 예약 원장 데이터 구조 기준으로 <b>정산 시스템이 받아갈 신규 API 스펙 정의</b> (기존 API 재활용 X)</dd></div>
-    <div class="mp-row"><dt>2단계 (9월 1차 오픈)</dt><dd>현정님이 회계 인식 기준으로 원장 항목 그룹핑 가이드 작성 → 정근님이 가이드 기반 API 스펙 작성</dd></div>
-    <div class="mp-row"><dt>3단계 (9월 1차 오픈)</dt><dd>정산 시스템이 신규 예약 원장에서 받은 데이터로 정상 계산 → 기존 정산 로직과 호환</dd></div>
-    <div class="mp-row"><dt>4단계 (후속)</dt><dd>정산 결과 (지급/PG 수수료/채널사 수수료) → 예약 원장으로 역반영 → <b>최종 0원 결산 모델</b> 지향</dd></div>
-    <div class="mp-row"><dt>5단계 (별도 트랙)</dt><dd>공급사 정산 시스템 신규 개발 → 공급사로 가는 자금 흐름까지 통합</dd></div>
-  </div>
-
-  <div style="background:#eff6ff; border-left:4px solid #3b82f6; padding:12px 16px; border-radius:0 8px 8px 0; font-size:13px; color:#1e3a8a; margin-top:12px;">
-    💡 <b>정산 API 신규 스펙 (현정님 + 정근님 협의 필요):</b><br>
-    • 기존 정산 API를 그대로 신규 원장에서 내려주는 식은 NO<br>
-    • <b>신규 원장 항목 분류를 그대로/집계해서 정산이 받아가는 신규 스펙</b>이 정답<br>
-    • 현정님이 "원장 각 항목을 회계학적으로 어떻게 인식할지" 정리 → 정근님이 가이드 기반 API 사이즈 산정<br>
-    • 6월 중 정리, 7월 리뷰 목표
-  </div>
-
-  <div style="background:#fef3c7; border-left:4px solid #f59e0b; padding:12px 16px; border-radius:0 8px 8px 0; font-size:13px; color:#78350f; margin-top:10px;">
-    📌 <b>노션 트래커 항목명 정정 (액션 아이템):</b> 기존 "신규 정산 시스템" → "<b>포트원 PG 정산 시스템 연동 개선</b>" 으로 정정. 정산 시스템은 이미 운영 중이며, 신규 원장 기반으로 데이터 인터페이스만 개선하는 작업.
-  </div>
-
-  <h3 style="margin-top:24px;">📋 액션 아이템 (2026-06-11 미팅)</h3>
-  <table style="width:100%; font-size:12.5px; border-collapse:collapse; background:white; border:1px solid #e5e7eb; border-radius:8px; overflow:hidden; margin-top:8px;">
-    <thead>
-      <tr style="background:#f1f5f9;">
-        <th style="padding:9px 12px; text-align:left; font-size:11px; font-weight:700; color:#334155;">담당</th>
-        <th style="padding:9px 12px; text-align:left; font-size:11px; font-weight:700; color:#334155;">내용</th>
-        <th style="padding:9px 12px; text-align:left; font-size:11px; font-weight:700; color:#334155;">기한</th>
-      </tr>
-    </thead>
-    <tbody>
-      <tr><td style="padding:8px 12px; border-bottom:1px solid #f1f5f9; font-weight:600;">김서현</td><td style="padding:8px 12px; border-bottom:1px solid #f1f5f9;">신규 예약 원장 API 가이드(회계 인식 기준 포함)를 현정님과 정렬해 정산팀 전달</td><td style="padding:8px 12px; border-bottom:1px solid #f1f5f9; color:#7c2d12;">6월 중</td></tr>
-      <tr><td style="padding:8px 12px; border-bottom:1px solid #f1f5f9; font-weight:600;">김서현</td><td style="padding:8px 12px; border-bottom:1px solid #f1f5f9;">어드민/파트너스 화면 스펙에 "할인 분담 주체 선택" 추가</td><td style="padding:8px 12px; border-bottom:1px solid #f1f5f9; color:#7c2d12;">1차 스펙 확정 전</td></tr>
-      <tr><td style="padding:8px 12px; border-bottom:1px solid #f1f5f9; font-weight:600;">김서현</td><td style="padding:8px 12px; border-bottom:1px solid #f1f5f9;">숙박 예약 관리 화면(컬럼/뷰) 정리해서 현정님 리뷰용으로 전달</td><td style="padding:8px 12px; border-bottom:1px solid #f1f5f9; color:#475569;">-</td></tr>
-      <tr><td style="padding:8px 12px; border-bottom:1px solid #f1f5f9; font-weight:600;">김서현</td><td style="padding:8px 12px; border-bottom:1px solid #f1f5f9;">노션 작업 트래커 항목명 정정 ("신규 정산 시스템" → "포트원 PG 정산 시스템 연동 개선")</td><td style="padding:8px 12px; border-bottom:1px solid #f1f5f9; color:#dc2626; font-weight:600;">즉시</td></tr>
-      <tr><td style="padding:8px 12px; border-bottom:1px solid #f1f5f9; font-weight:600;">정근</td><td style="padding:8px 12px; border-bottom:1px solid #f1f5f9;">결제 서비스 결제 금액 한도(cap) 해제 — 결제 수단 변경/URL 동시 발송 별개 트랙</td><td style="padding:8px 12px; border-bottom:1px solid #f1f5f9; color:#7c2d12;">신규 예약 오픈 전</td></tr>
-      <tr><td style="padding:8px 12px; border-bottom:1px solid #f1f5f9; font-weight:600;">정근</td><td style="padding:8px 12px; border-bottom:1px solid #f1f5f9;">신규 인원 타입 추가 시 특가/분담금 저장 가능 여부 — 레거시·신규 원장 모두 검토 후 회신</td><td style="padding:8px 12px; border-bottom:1px solid #f1f5f9; color:#7c2d12;">다음 미팅</td></tr>
-      <tr><td style="padding:8px 12px; border-bottom:1px solid #f1f5f9; font-weight:600;">재원</td><td style="padding:8px 12px; border-bottom:1px solid #f1f5f9;">쿠폰 2개 이상 사용 가능 작업 — 국내 숙소 오픈 이후 착수 시점 잡기</td><td style="padding:8px 12px; border-bottom:1px solid #f1f5f9; color:#7c2d12;">6월 말 합의</td></tr>
-      <tr><td style="padding:8px 12px; border-bottom:1px solid #f1f5f9; font-weight:600;">경준 / 준영</td><td style="padding:8px 12px; border-bottom:1px solid #f1f5f9;">공급사 정산 신규 시스템 착수 — 놀 검색 연동 종료 후 즉시. 1차 리뷰</td><td style="padding:8px 12px; border-bottom:1px solid #f1f5f9; color:#7c2d12;">7월 중</td></tr>
-      <tr><td style="padding:8px 12px; border-bottom:1px solid #f1f5f9; font-weight:600;">현정</td><td style="padding:8px 12px; border-bottom:1px solid #f1f5f9;">예약 원장 각 항목의 회계학적 인식 기준 정리 (정산 API 가이드용 베이스)</td><td style="padding:8px 12px; border-bottom:1px solid #f1f5f9; color:#7c2d12;">정산 API 산정 전</td></tr>
-      <tr><td style="padding:8px 12px; font-weight:600;">현정</td><td style="padding:8px 12px;">원장 화면 단어/표현 1~2회 리뷰 후 데이터 가공 방향 합의</td><td style="padding:8px 12px; color:#7c2d12;">6월 중</td></tr>
-    </tbody>
-  </table>
-</section>
-
 <!-- Separated Systems -->
-<section class="area" id="separated-systems">
-  <h2><span class="area-num">🔀</span>별도 시스템 분리</h2>
+<section class="area" id="separated-systems" data-track="2nd">
+  <h2><span class="area-num">🔀</span>별도 시스템 분리 <span class="track-badge track-2nd-badge">🟡 2차 작업</span></h2>
   <div class="area-sub">2026-06-11 미팅 결정 — 예약 시스템에 오염되지 않도록 별도 분리하는 케이스</div>
 
   <div style="background:linear-gradient(135deg, #fef2f2 0%, #fee2e2 100%); border:1px solid #fca5a5; border-radius:12px; padding:18px 22px; margin-top:14px;">
@@ -1367,7 +1380,7 @@ body main { transition: padding-right 0.3s ease, max-width 0.3s ease; }
       • 예약/결제 시스템에 오염시키지 않음<br>
       • 시가 N만 원 같은 기록은 별도 시스템에서 관리<br>
       • 추가 과금 필요 시도 그 별도 시스템 안에서 처리<br><br>
-      <b>담당:</b> 별도 발주 → AI 시대에 간단한 쇼핑몰은 빠르게 만들 수 있다는 판단 (전무님 의견)
+      <b>담당:</b> 별도 발주 → AI 시대에 간단한 쇼핑몰은 빠르게 만들 수 있다는 판단 (상문님 의견)
     </div>
   </div>
 
@@ -1433,6 +1446,19 @@ body main { transition: padding-right 0.3s ease, max-width 0.3s ease; }
 </aside>
 
 <script>
+// === Track Tab Switching (1차 / 2차) ===
+function switchTrack(track) {
+  document.body.classList.remove('show-1st', 'show-2nd');
+  document.body.classList.add(`show-${track}`);
+  document.querySelectorAll('.track-tab').forEach(btn => {
+    btn.classList.toggle('active', btn.dataset.track === track);
+  });
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+document.addEventListener('DOMContentLoaded', () => {
+  document.body.classList.add('show-1st');
+});
+
 const MOCKUP_URL = 'https://seohyeonkimextriber.github.io/tripstore_mokup/reservation-detail.html';
 
 function toggleMockup() {
