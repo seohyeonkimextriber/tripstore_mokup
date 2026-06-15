@@ -528,6 +528,78 @@ body main { transition: padding-right 0.3s ease, max-width 0.3s ease; }
   color: #1e40af;
 }
 
+/* 기능 상세 카드 (접을 수 있는 details/summary) */
+.feature-cards { display: grid; gap: 10px; margin-top: 12px; }
+.feature-card {
+  border: 1px solid #e5e7eb;
+  border-radius: 10px;
+  background: white;
+  overflow: hidden;
+  transition: all 0.15s;
+}
+.feature-card[open] { box-shadow: 0 2px 8px rgba(0,0,0,0.05); }
+.feature-card summary {
+  padding: 12px 16px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 14px;
+  font-weight: 600;
+  list-style: none;
+  user-select: none;
+}
+.feature-card summary::-webkit-details-marker { display: none; }
+.feature-card summary::before {
+  content: "▸";
+  font-size: 11px;
+  color: #94a3b8;
+  transition: transform 0.15s;
+}
+.feature-card[open] summary::before { transform: rotate(90deg); }
+.feature-card summary .priority {
+  font-size: 11px;
+  font-weight: 700;
+  padding: 3px 9px;
+  border-radius: 999px;
+  margin-left: auto;
+  letter-spacing: 0.3px;
+}
+.feature-card.fc-1st { border-left: 4px solid #10b981; }
+.feature-card.fc-1st summary { background: #f0fdf4; color: #065f46; }
+.feature-card.fc-1st .priority { background: #d1fae5; color: #065f46; }
+.feature-card.fc-2nd { border-left: 4px solid #f59e0b; }
+.feature-card.fc-2nd summary { background: #fffbeb; color: #78350f; }
+.feature-card.fc-2nd .priority { background: #fef3c7; color: #78350f; }
+.feature-card.fc-misc { border-left: 4px solid #3b82f6; }
+.feature-card.fc-misc summary { background: #eff6ff; color: #1e3a8a; }
+.feature-card.fc-misc .priority { background: #dbeafe; color: #1e40af; }
+.feature-card .fc-body { padding: 16px 20px; font-size: 13.5px; line-height: 1.85; color: #334155; }
+.feature-card .fc-body strong { color: #1e293b; }
+.feature-card .fc-body h4 {
+  font-size: 12px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: #6b7280;
+  margin-top: 12px;
+  margin-bottom: 4px;
+}
+.feature-card .fc-body h4:first-child { margin-top: 0; }
+.feature-card .fc-body ul { padding-left: 20px; margin: 4px 0; }
+.feature-card .fc-body li { margin: 3px 0; }
+
+.feature-group-title {
+  font-size: 14px;
+  font-weight: 700;
+  margin-top: 24px;
+  margin-bottom: 8px;
+  letter-spacing: 0.3px;
+}
+.feature-group-title.fg-1st { color: #10b981; }
+.feature-group-title.fg-2nd { color: #d97706; }
+.feature-group-title.fg-misc { color: #3b82f6; }
+
 /* Sidebar 트랙 라벨 클릭 가능 */
 nav.sidebar .section-label[data-track-jump] {
   cursor: pointer;
@@ -710,6 +782,387 @@ nav.sidebar .section-label[data-track-jump]:hover {
 
   <div style="margin-top:14px; background:#f0fdf4; border-left:4px solid #10b981; padding:14px 18px; border-radius:0 10px 10px 0; font-size:13px; color:#064e3b;">
     📌 <b>9월 추석 오픈 일정 유지:</b> 1차 작업(인원·금액·정산 시스템 연계)만 9월에 집중. 일부 후속 작업이 분리되면서 1차 작업 부담이 오히려 줄어듦. 속도가 빠르면 더 당겨질 가능성도.
+  </div>
+
+  <h3 style="margin-top:28px;">📋 기능 상세 (노션 v2 — 13개 우선순위순)</h3>
+  <div style="font-size:13px; color:#64748b; margin-bottom:8px;">각 카드 클릭 시 상세 펼침. 구조: <b>배경 → 결정 → 정책/방향성 → 사유 → 미해결/담당</b></div>
+
+  <div class="feature-group-title fg-1st">🟢 1차 작업 (9월 추석 오픈)</div>
+  <div class="feature-cards">
+    <details class="feature-card fc-1st">
+      <summary>1. 인원 추가 / 삭제 <span class="priority">🟢 1차</span></summary>
+      <div class="fc-body">
+        <h4>배경</h4>
+        <ul>
+          <li>운영 과정에서 인원 변경 요청 지속 발생</li>
+          <li>기존 시스템은 인원 변동 시 할인/특가를 운영자가 수기 계산</li>
+        </ul>
+        <h4>결정</h4>
+        <p>1차 오픈 포함</p>
+        <h4>정책 (인원 추가)</h4>
+        <ul>
+          <li>기본 금액으로 자동 입력</li>
+          <li>할인/특가는 담당자가 수동 입력 (분담 정보 매뉴얼 처리)</li>
+        </ul>
+        <h4>정책 (인원 삭제)</h4>
+        <ul>
+          <li>인원 취소 처리</li>
+          <li>[+금액 추가] 모달 자동 표시 → 위약금(7010) 입력 흐름</li>
+        </ul>
+        <h4>추가 확인 사항</h4>
+        <ul>
+          <li>신규 인원 유형(아동/유아) 추가 시 <strong>특가 분담 정보 재현 가능 여부</strong></li>
+          <li>상문님 레거시·신규 원장 모두 확인 후 회신 예정</li>
+        </ul>
+        <h4>결정 사유</h4>
+        <p>신규 원장 핵심 기능. 운영 핵심 흐름</p>
+      </div>
+    </details>
+
+    <details class="feature-card fc-1st">
+      <summary>2. 금액 추가 / 차감 <span class="priority">🟢 1차</span></summary>
+      <div class="fc-body">
+        <h4>배경</h4>
+        <ul>
+          <li>CS 보상, 추가 요금, 위약금 등 다양한 금액 조정 발생</li>
+          <li>직접 금액 수정 시 이력 추적 어려움</li>
+        </ul>
+        <h4>결정</h4>
+        <p>1차 오픈 포함</p>
+        <h4>정책 (파트너스)</h4>
+        <ul>
+          <li>금액 추가 / 차감</li>
+          <li>사유 입력만 (분담 주체 선택 X — 무조건 여행사 분담)</li>
+        </ul>
+        <h4>정책 (어드민)</h4>
+        <ul>
+          <li>금액 추가 / 차감</li>
+          <li><strong>분담 주체 선택 노출 필수</strong> (채널/플랫폼/여행사)</li>
+        </ul>
+        <h4>추가 과제</h4>
+        <ul>
+          <li>원장 항목 카인드(분류) 재그룹핑 정의 필요</li>
+          <li>어떤 카인드를 분담 주체와 연결할지 매핑표 작성 — <strong>담당: 현정</strong></li>
+        </ul>
+        <h4>결정 사유</h4>
+        <p>신규 원장 핵심 기능. 금액 변경 이력 추적 보장</p>
+      </div>
+    </details>
+
+    <details class="feature-card fc-1st">
+      <summary>3. 정산 시스템 연계 <span class="priority">🟢 1차 (신규 API)</span></summary>
+      <div class="fc-body">
+        <h4>배경</h4>
+        <ul>
+          <li>기존 정산 API는 레거시 예약 구조 기반</li>
+          <li>신규 원장 항목 분류 체계가 크게 달라짐</li>
+        </ul>
+        <h4>결정</h4>
+        <p>1차 오픈 함께 (신규 API)</p>
+        <h4>방향성 (정근 발언)</h4>
+        <ul>
+          <li>기존 정산 API 재사용 <strong>하지 않음</strong></li>
+          <li>신규 원장 항목 분류 기반으로 <strong>신규 API 설계</strong></li>
+          <li>정산 결과를 다시 원장으로 역반영 → 최종 0원 결산 구조 지향</li>
+        </ul>
+        <h4>추가 과제</h4>
+        <ul>
+          <li>회계 인식 기준 정리 — <strong>담당: 현정</strong></li>
+          <li>정산 API 사이즈/스펙 산정 — <strong>담당: 정근</strong></li>
+        </ul>
+        <h4>일정</h4>
+        <p>6월 중 가이드 정리, 7월 리뷰</p>
+        <h4>노션 트래커 명칭 정정</h4>
+        <p>"신규 정산 시스템" → "포트원 PG 정산 시스템 연동 개선"</p>
+      </div>
+    </details>
+
+    <details class="feature-card fc-1st">
+      <summary>4. 취소 위약금 원장 이전 <span class="priority">🟢 1차</span></summary>
+      <div class="fc-body">
+        <h4>배경</h4>
+        <ul>
+          <li>현재는 결제 시스템에서 취소 위약금을 적용 중</li>
+          <li>결제·환불 트랜잭션과 위약금 정보가 섞여 회계 정합성 저하</li>
+        </ul>
+        <h4>결정</h4>
+        <p>1차 오픈 포함 ("취소위약금 예약원장 우선 오픈" 단락 1:29~1:34)</p>
+        <h4>정책</h4>
+        <ul>
+          <li>결제 시스템 → 예약 원장 <strong>7010 항목</strong>으로 위약금 이전</li>
+          <li>결제 서비스는 "결제·환불" 트랜잭션만 관리</li>
+          <li>위약금 발생 시 결제는 깨지지 않고 원장에서 처리</li>
+        </ul>
+        <h4>운영 흐름</h4>
+        <ul>
+          <li>인원 삭제 → [+금액 추가] 모달 자동 → 위약금(7010) 입력</li>
+          <li>인원 관리·금액 관리 흐름 안에 자연스럽게 통합</li>
+        </ul>
+        <h4>결정 사유</h4>
+        <p>예약·인원·취소 범위까지 원장 개념은 큰 변경 없이 우선 오픈 가능</p>
+      </div>
+    </details>
+
+    <details class="feature-card fc-1st">
+      <summary>5. 즉시결제할인 (별도 진행) <span class="priority">🟢 1차 (별도 트랙)</span></summary>
+      <div class="fc-body">
+        <h4>배경</h4>
+        <ul>
+          <li>즉시 결제 할인 기능 도입 필요</li>
+          <li>현재 쿠폰 시스템과 즉시할인 분리되어 운영 복잡도 ↑</li>
+        </ul>
+        <h4>결정</h4>
+        <p>1차 오픈 포함 (작업은 별도 트랙)</p>
+        <h4>정책</h4>
+        <ul>
+          <li>쿠폰 시스템 → <strong>할인 시스템으로 변경</strong></li>
+          <li>즉시할인 + 쿠폰 동일 컨셉으로 통합</li>
+          <li>다중 쿠폰 사용 설계도 함께 (신규 원장이 설계상 유리)</li>
+        </ul>
+        <h4>담당 / 일정</h4>
+        <ul>
+          <li>재원님 (별도 트랙으로 진행)</li>
+          <li>국내 숙소 오픈 후 착수, 6월 말 일정 합의</li>
+          <li><strong>오픈 시점은 신규 원장 시스템 오픈 기준</strong>으로 맞춤</li>
+        </ul>
+        <h4>미해결</h4>
+        <p>작업 진행 중에도 오픈 시점 한 번 더 리체크 필요</p>
+        <h4>결정 사유</h4>
+        <p>신규 원장 핵심 기능 사용. 작업 트랙은 분리하되 오픈은 동시</p>
+      </div>
+    </details>
+  </div>
+
+  <div class="feature-group-title fg-2nd">🟡 2차 작업 (원장 오픈 후)</div>
+  <div class="feature-cards">
+    <details class="feature-card fc-2nd">
+      <summary>6. 행사 이동 (가장 길게 논의됨) <span class="priority">🟡 2차</span></summary>
+      <div class="fc-body">
+        <h4>배경</h4>
+        <ul>
+          <li>여행사에서 행사 코드 변경 요청 지속 발생</li>
+          <li>행사 단위 손익 집계를 위한 관리용 행사 코드 변경 필요</li>
+          <li>출발일 변경 등 운영 이슈 대응 필요</li>
+        </ul>
+        <h4>논의 내용 (검토안 비교)</h4>
+        <ul>
+          <li>검토안 1: 행사 변경 시 행사 정보 + 금액 자동 변경 동시 처리</li>
+          <li>검토안 2: 행사 정보 변경과 금액 변경 <strong>분리 처리</strong></li>
+        </ul>
+        <h4>상문님 시스템 설계 관점</h4>
+        <ul>
+          <li>원장 무결성 유지가 최우선</li>
+          <li>자동 가격 변경 시 예상치 못한 사이드이펙트 발생 가능</li>
+          <li>우리 시스템 행사코드(travelId)는 임의 조작 X</li>
+        </ul>
+        <h4>영업실 우려 (어뷰징)</h4>
+        <ul>
+          <li>운영자가 행사 이동 기능을 너무 빈번하게 사용할 가능성</li>
+          <li>통제 방안(횟수 제한·모니터링) 검토 필요</li>
+        </ul>
+        <h4>결정</h4>
+        <p>1차 제외, 2차에서 검토 (검토안 2 — 분리 처리 채택)</p>
+        <h4>정책 (2분리)</h4>
+        <ul>
+          <li>① 행사 정보 변경: 여행사 관리용 코드 필드를 텍스트로 자유 수정</li>
+          <li>② 행사 이동: 검색 기반, 차액만 자동 원장 항목 추가 (가격 자체는 수정 X)</li>
+        </ul>
+        <h4>프론트 UX</h4>
+        <p>백엔드는 ①·② 분리, 프론트는 step-by-step으로 통합 경험</p>
+        <h4>결정 사유</h4>
+        <ul>
+          <li>원장 무결성 유지</li>
+          <li>금액 변경 이력 추적 가능성 확보</li>
+          <li>자동 금액 변경 사이드이펙트 차단</li>
+        </ul>
+      </div>
+    </details>
+
+    <details class="feature-card fc-2nd">
+      <summary>7. 쿠폰 금액 자동 조정 <span class="priority">🟡 2차</span></summary>
+      <div class="fc-body">
+        <h4>배경</h4>
+        <ul>
+          <li>부분 취소 시 쿠폰 금액 처리 이슈 존재</li>
+          <li>다중 쿠폰 적용 케이스 누적 중</li>
+        </ul>
+        <h4>결정</h4>
+        <p>1차 제외 (2차 원장 오픈 후)</p>
+        <h4>정책</h4>
+        <ul>
+          <li>인원 차감 / 행사이동 시 판매금액 변동에 맞춰 쿠폰 자동 비율 차감</li>
+          <li>예: 3명→2명 (66.7%) → 쿠폰 20,000 × 66.7% = 13,340원</li>
+          <li>쿠폰 ID 단위로 사용 흐름 추적 (현정님 회계 분석 요건)</li>
+          <li>발급/예약/취소/출발/실제 사용량 분리 추적</li>
+        </ul>
+        <h4>제외 사유</h4>
+        <ul>
+          <li>쿠폰 자동 재계산은 원장 구조 안정화 후 진행</li>
+          <li>중복 쿠폰 사용 가능한 작업은 별도 트랙 (즉시결제할인과 통합)</li>
+        </ul>
+      </div>
+    </details>
+
+    <details class="feature-card fc-2nd">
+      <summary>8. 수동예약 처리 (단체 / VIP) <span class="priority">🟡 2차</span></summary>
+      <div class="fc-body">
+        <h4>배경</h4>
+        <ul>
+          <li>일반 예약 프로세스와 운영 방식 상이</li>
+          <li>수동 예약 케이스 복잡도가 전체의 40~50% 비중</li>
+        </ul>
+        <h4>결정</h4>
+        <p>1차 제외 (2차 원장 오픈 후)</p>
+        <h4>방향성</h4>
+        <ul>
+          <li>단체/VIP = <strong>가상 행사 인벤토리</strong> 생성</li>
+          <li>생성 후 정상 예약 플로우 진입</li>
+          <li>수동 예약 전용 에이전시 / 관리용 org 신설</li>
+        </ul>
+        <h4>결정 사유</h4>
+        <p>변종 케이스를 정상 플로우로 흡수하여 시스템 복잡도 ↓</p>
+        <h4>의사결정자</h4>
+        <p>상문 / 서현</p>
+      </div>
+    </details>
+
+    <details class="feature-card fc-2nd">
+      <summary>9. 결제 추가 (여행사 결제 수동 등록) <span class="priority">🟡 후순위</span></summary>
+      <div class="fc-body">
+        <h4>배경</h4>
+        <ul>
+          <li>여행사 직접 수납 건 관리 목적</li>
+          <li>한 예약에 여러 결제 주체(트립/채널/여행사) 공존 필요성</li>
+        </ul>
+        <h4>결정</h4>
+        <p>1차 제외 (후순위)</p>
+        <h4>제외 사유</h4>
+        <ul>
+          <li>사용 빈도 낮음 (마이너 케이스)</li>
+          <li>정산 정책 미확정 (트립 PG vs 채널 vs 여행사 정산 주기 다름)</li>
+        </ul>
+        <h4>현재 운영</h4>
+        <p>여행사 결제 분 수동 제외 처리 중 (별도 과금 안 함)</p>
+        <h4>의사결정자</h4>
+        <p>현정</p>
+      </div>
+    </details>
+  </div>
+
+  <div class="feature-group-title fg-misc">🔵 별도 트랙 (신규 예약 무관)</div>
+  <div class="feature-cards">
+    <details class="feature-card fc-misc">
+      <summary>10. 결제 수단 변경 <span class="priority">🔵 별도 트랙</span></summary>
+      <div class="fc-body">
+        <h4>배경</h4>
+        <ul>
+          <li>현재 결제 수단 변경을 위해 예약 금액 수정이 필요한 우회 구조</li>
+          <li>100→200→100 수동 조작으로 운영 혼란</li>
+        </ul>
+        <h4>결정</h4>
+        <p>신규 예약 시스템과 <strong>분리</strong> → 별도 트랙</p>
+        <h4>정책</h4>
+        <ul>
+          <li>예약금액 그대로 두고 결제수단만 변경</li>
+          <li>재결제 링크 SMS → 고객 재결제 → 기존 결제 자동 취소</li>
+          <li>대상: 트립스토어 직접 예약(nice_v2) 만</li>
+        </ul>
+        <h4>결정 사유 (정근 발언)</h4>
+        <ul>
+          <li>결제 시스템의 <strong>캡(cap) 해제</strong>로 결제 수단 변경 단독 처리 가능</li>
+          <li>신규 예약 의존성 없음</li>
+        </ul>
+        <h4>담당</h4>
+        <p>정근 (신규 예약 오픈 전 작업)</p>
+      </div>
+    </details>
+
+    <details class="feature-card fc-misc">
+      <summary>11. 다중 결제 URL 전송 <span class="priority">🔵 별도 트랙</span></summary>
+      <div class="fc-body">
+        <h4>배경</h4>
+        <ul>
+          <li>카드 한도/여행자별 분할 결제 시 결제 링크 N개 동시 발송 필요</li>
+          <li>기존 = 새 링크 만들면 기존 자동 만료 (한 번에 하나만 유효)</li>
+        </ul>
+        <h4>결정</h4>
+        <p>신규 예약 시스템과 <strong>분리</strong> → 별도 트랙</p>
+        <h4>정책</h4>
+        <ul>
+          <li>N개 결제 링크 동시 유효</li>
+          <li>수신자별 휴대폰·금액 직접 입력, 1/N 균등분할 버튼</li>
+          <li>알림톡 고정 (SMS 제거)</li>
+        </ul>
+        <h4>결정 사유</h4>
+        <p>결제 시스템 영역, 신규 예약 의존성 없음</p>
+        <h4>담당</h4>
+        <p>정근</p>
+      </div>
+    </details>
+
+    <details class="feature-card fc-misc">
+      <summary>12. 공급사 정산 <span class="priority">🔵 별도 트랙 (신규 시스템)</span></summary>
+      <div class="fc-body">
+        <h4>배경</h4>
+        <ul>
+          <li>운영팀 수작업 비중 매우 높음</li>
+          <li>기존 플랫폼 정산과 계산 로직이 완전히 다름</li>
+        </ul>
+        <h4>결정</h4>
+        <p>신규 트랙 (별도 시스템)</p>
+        <h4>방향성</h4>
+        <ul>
+          <li>신규 정산 시스템 (TRP 내 + 어드민 통합 뷰)</li>
+          <li>공급사용 파트너스 화면 일부 기획</li>
+        </ul>
+        <h4>우선순위</h4>
+        <p><strong>채널사 정산보다 우선</strong> (운영팀 부담 ↑)</p>
+        <h4>담당 / 일정</h4>
+        <ul>
+          <li>경준 (주담당) + 준형 (서포트) — 둘이 병행 X, 메인이 컨트롤</li>
+          <li>7월부터 리소스 진행 가능 (놀 검색 연동 종료 후)</li>
+          <li>7월 중 1차 리뷰</li>
+          <li>6개월+ 소요 예상</li>
+        </ul>
+        <h4>의사결정자</h4>
+        <p>현정 / 상문</p>
+      </div>
+    </details>
+
+    <details class="feature-card fc-misc">
+      <summary>13. 경품 예약 <span class="priority">🔵 별도 트랙 (신규 시스템)</span></summary>
+      <div class="fc-body">
+        <h4>배경</h4>
+        <ul>
+          <li>경품/숙박권 이벤트로 인한 수동 예약 복잡도 40~50% 차지</li>
+          <li>일반 예약 프로세스와 운영 방식 상이</li>
+        </ul>
+        <h4>결정</h4>
+        <p>예약 시스템과 <strong>분리</strong> (별도 신규 트랙)</p>
+        <h4>방향성</h4>
+        <ul>
+          <li>별도 <strong>쇼핑몰형 시스템</strong> 구축</li>
+          <li>어드민에 메뉴 1개 추가만 진행</li>
+          <li>시가/공급가 등 증빙용 금액 정보는 별도 시스템 관리</li>
+        </ul>
+        <h4>결정 사유</h4>
+        <ul>
+          <li>트립스토어 예약/결제 시스템에 오염 방지</li>
+          <li>AI 시대에 간단한 쇼핑몰은 빠르게 만들 수 있음 (상문님 의견)</li>
+          <li>우선순위 낮음 (당첨자 수 적음)</li>
+        </ul>
+        <h4>의사결정자</h4>
+        <p>상문 / 서현</p>
+      </div>
+    </details>
+  </div>
+
+  <div style="margin-top:18px; background:#faf5ff; border-left:4px solid #a855f7; padding:12px 16px; border-radius:0 8px 8px 0; font-size:13px; color:#581c87;">
+    📋 <b>액션 아이템</b> (회의 결정사항)<br>
+    • <b>상문</b> — 신규 인원 타입(아동/유아) 추가 시 특가 분담 정보 재현 가능 여부 확인<br>
+    • <b>현정</b> — 원장 항목 카인드 재그룹핑 정의 + 분담 주체 매핑표 작성<br>
+    • <b>현정</b> — 정산 회계 인식 기준 정리<br>
+    • <b>현정</b> — 공급사 정산 1차 리뷰 자료 준비
   </div>
 </section>
 
