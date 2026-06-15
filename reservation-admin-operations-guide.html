@@ -572,6 +572,42 @@ body main { transition: padding-right 0.3s ease, max-width 0.3s ease; }
 .feature-group-title.fg-2nd { color: #d97706; }
 .feature-group-title.fg-misc { color: #3b82f6; }
 
+/* 기능 상세 전체 토글 */
+.feature-section { margin-top: 28px; }
+.feature-section > summary {
+  list-style: none;
+  cursor: pointer;
+  user-select: none;
+  font-size: 12px;
+  color: #4338ca;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  font-weight: 700;
+  padding: 10px 14px;
+  background: #f8fafc;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.feature-section > summary::-webkit-details-marker { display: none; }
+.feature-section > summary::before {
+  content: "▸";
+  font-size: 11px;
+  color: #94a3b8;
+  transition: transform 0.15s;
+}
+.feature-section[open] > summary::before { transform: rotate(90deg); }
+.feature-section > summary .hint {
+  font-size: 11px;
+  color: #94a3b8;
+  font-weight: 500;
+  letter-spacing: 0.3px;
+  text-transform: none;
+  margin-left: auto;
+}
+
 /* JS 섹션 재배치 완료 전까지 main 숨김 (깜빡임 방지) */
 main { opacity: 0; transition: opacity 0.2s; }
 body.layout-ready main { opacity: 1; }
@@ -670,20 +706,6 @@ nav.sidebar .section-label[data-track-jump]:hover {
   <h2><span class="area-num">🗓️</span>1차 / 2차 / 별도 트랙 작업 범위 <a href="https://www.notion.so/tripstore/2026-06-11-37d86ade8e7780dfba43df7319ae18f5" target="_blank" style="font-size:12px; font-weight:500; color:#4338ca; margin-left:8px; vertical-align:middle;">📋 노션 회의록 원본</a></h2>
   <div class="area-sub">2026-06-11 미팅 확정 매트릭스 — 9월 추석 1차 오픈 + 후속/별도 트랙 구분. 상단 탭 [🟢 1차] [🟡 2차] [🔵 별도] 클릭하면 해당 트랙으로 점프</div>
 
-  <div style="margin-top:14px; background:linear-gradient(135deg, #faf5ff 0%, #f3e8ff 100%); border:1px solid #c084fc; border-radius:12px; padding:18px 22px;">
-    <div style="font-size:13px; font-weight:700; color:#6b21a8; margin-bottom:10px; letter-spacing:0.3px;">💡 단계적 분리 원칙 (왜 이렇게 나눴나)</div>
-    <div style="font-size:13px; color:#581c87; line-height:1.85;">
-      <b>핵심 컨셉:</b> 한 번에 전체를 적용하면 <b>운영팀 적응이 어려움</b> → 태스크를 잘라 단계적으로 진행<br><br>
-      ① <b>예약·인원·취소 + 원장 개념</b> = 큰 변경 없이 우선 오픈 가능 → <b>🟢 1차로 묶음</b><br>
-      ② <b>취소 위약금</b> = 결제 시스템 → 예약 원장으로 이전 (현재는 결제 단에서 취소 위약금 적용 중 → 원장 7010으로 이동, 결제는 깨지지 않게 유지) → <b>1차에 포함</b><br>
-      ③ <b>쿠폰 자동 조정·행사 이동·수동예약</b> 등 기타 기능 = 분리 오픈 (1차 안정화 후) → <b>🟡 2차</b><br>
-      ③-1 <b>즉시결제할인</b> = 1차 오픈 시점에 함께 (재원님 별도 트랙 작업이지만 오픈은 동시) → <b>🟢 1차</b><br>
-      ④ <b>결제 서비스 단독 작업</b> (결제수단 변경, 다중 결제 URL 전송) = 결제 시스템 캡 해제로 풀 수 있음, 신규 예약 원장 영향 없음 → <b>🔵 별도 트랙</b><br>
-      ⑤ <b>결제 동시 송신</b> 등 일부 기능 개선은 데이터 구조 여지 점검 후 포함 검토<br><br>
-      <small style="color:#7e22ce;">📌 출처: 2026-06-11 미팅 1:29~1:34 (취소위약금 예약원장 우선 오픈 단락)</small>
-    </div>
-  </div>
-
   <h3 style="margin-top:18px;">📋 의사결정 Summary (노션 회의록 매트릭스 그대로)</h3>
   <table style="width:100%; font-size:13px; border-collapse:collapse; background:white; border:1px solid #e5e7eb; border-radius:8px; overflow:hidden; margin-top:8px;">
     <thead>
@@ -714,8 +736,9 @@ nav.sidebar .section-label[data-track-jump]:hover {
     📌 <b>9월 추석 오픈 일정 유지:</b> 1차 작업(인원·금액·정산 시스템 연계)만 9월에 집중. 일부 후속 작업이 분리되면서 1차 작업 부담이 오히려 줄어듦. 속도가 빠르면 더 당겨질 가능성도.
   </div>
 
-  <h3 style="margin-top:28px;">📋 기능 상세 (노션 v2 — 13개 우선순위순)</h3>
-  <div style="font-size:13px; color:#64748b; margin-bottom:8px;">각 카드 클릭 시 상세 펼침. 구조: <b>배경 → 결정 → 정책/방향성 → 사유 → 미해결/담당</b></div>
+  <details class="feature-section">
+    <summary>📋 기능 상세 (노션 v2 — 13개 우선순위순) <span class="hint">클릭하여 펼치기</span></summary>
+    <div style="font-size:13px; color:#64748b; margin:12px 0 8px;">각 카드 클릭 시 상세 펼침. 구조: <b>배경 → 결정 → 정책/방향성 → 사유 → 미해결/담당</b></div>
 
   <div class="feature-group-title fg-1st">🟢 1차 작업 (9월 추석 오픈)</div>
   <div class="feature-cards">
@@ -1086,6 +1109,7 @@ nav.sidebar .section-label[data-track-jump]:hover {
       </div>
     </details>
   </div>
+  </details>
 
   <div style="margin-top:18px; background:#faf5ff; border-left:4px solid #a855f7; padding:12px 16px; border-radius:0 8px 8px 0; font-size:13px; color:#581c87;">
     📋 <b>액션 아이템</b> (회의 결정사항)<br>
