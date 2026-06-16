@@ -1,0 +1,628 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<title>트립 파트너스 대시보드 — 새로워질 운영 화면 제안</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: -apple-system, BlinkMacSystemFont, 'Pretendard', sans-serif; background: #f5f7fa; color: #333; font-size: 13px; line-height: 1.6; }
+
+  /* ==== 영업실 발표용 상단 인트로 ==== */
+  .pitch-hero { background: linear-gradient(135deg, #1a73e8 0%, #0d47a1 100%); color: #fff; padding: 48px 32px 56px; text-align: center; }
+  .pitch-hero .badge-tag { display: inline-block; background: rgba(255,255,255,0.2); padding: 4px 14px; border-radius: 999px; font-size: 12px; font-weight: 600; margin-bottom: 16px; letter-spacing: 0.5px; }
+  .pitch-hero h1 { font-size: 32px; font-weight: 800; margin-bottom: 12px; line-height: 1.3; }
+  .pitch-hero h1 .accent { color: #ffd54f; }
+  .pitch-hero .sub { font-size: 15px; opacity: 0.95; max-width: 760px; margin: 0 auto; }
+
+  /* ==== 섹션 공통 ==== */
+  .section-wrap { max-width: 1280px; margin: 0 auto; padding: 32px; }
+  .section-title { font-size: 20px; font-weight: 800; margin-bottom: 6px; color: #1a1a1a; }
+  .section-desc { font-size: 13px; color: #666; margin-bottom: 20px; }
+
+  /* ==== Before vs After ==== */
+  .before-after { display: grid; grid-template-columns: 1fr auto 1fr; gap: 20px; align-items: stretch; margin-bottom: 32px; }
+  .ba-card { border-radius: 14px; padding: 22px; }
+  .ba-card.before { background: #fafafa; border: 1px solid #e0e0e0; }
+  .ba-card.after { background: linear-gradient(135deg, #f0f7ff 0%, #e3f2fd 100%); border: 2px solid #1a73e8; box-shadow: 0 4px 20px rgba(26,115,232,0.15); }
+  .ba-card h3 { font-size: 14px; font-weight: 700; margin-bottom: 14px; display: flex; align-items: center; gap: 8px; }
+  .ba-card.before h3 { color: #666; }
+  .ba-card.after h3 { color: #0d47a1; }
+  .ba-card ul { list-style: none; }
+  .ba-card li { padding: 8px 0; font-size: 13px; display: flex; align-items: flex-start; gap: 8px; }
+  .ba-card.before li { color: #555; }
+  .ba-card.after li { color: #0d47a1; font-weight: 500; }
+  .ba-card li::before { font-size: 14px; line-height: 1.4; flex-shrink: 0; }
+  .ba-card.before li::before { content: "😓"; }
+  .ba-card.after li::before { content: "✨"; }
+  .ba-arrow { display: flex; align-items: center; justify-content: center; font-size: 32px; color: #1a73e8; font-weight: 800; }
+
+  /* ==== 페르소나 박스 ==== */
+  .persona-box { background: #fff8e1; border: 1px solid #ffc107; border-radius: 12px; padding: 18px 22px; margin-bottom: 24px; }
+  .persona-box .ph { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; font-size: 14px; font-weight: 700; color: #5d4037; }
+  .persona-box .quote { font-size: 13px; color: #5d4037; font-style: italic; line-height: 1.7; padding-left: 14px; border-left: 3px solid #ffc107; }
+
+  /* ==== 대시보드 컨테이너 ==== */
+  .dashboard-frame { background: #fff; border-radius: 14px; box-shadow: 0 4px 24px rgba(0,0,0,0.06); overflow: hidden; margin-bottom: 32px; }
+  .browser-bar { background: #f0f0f0; padding: 10px 16px; display: flex; align-items: center; gap: 8px; border-bottom: 1px solid #e0e0e0; }
+  .browser-bar .dot { width: 12px; height: 12px; border-radius: 50%; }
+  .browser-bar .red { background: #ff5f57; }
+  .browser-bar .yellow { background: #febc2e; }
+  .browser-bar .green { background: #28c840; }
+  .browser-bar .url { background: #fff; flex: 1; padding: 4px 10px; border-radius: 6px; font-size: 11px; color: #666; margin-left: 12px; font-family: monospace; }
+
+  /* ==== 파트너스 글로벌 네비 (미니어처) ==== */
+  .partner-nav { background: #fff; border-bottom: 1px solid #e0e0e0; padding: 0 24px; display: flex; align-items: center; height: 48px; }
+  .partner-logo { display: flex; align-items: center; gap: 8px; font-weight: 700; font-size: 13px; color: #1a1a1a; margin-right: 24px; }
+  .partner-logo .logo-mark { width: 26px; height: 26px; background: #1a1a1a; color: #fff; border-radius: 6px; display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 12px; }
+  .partner-menu { display: flex; gap: 4px; flex: 1; }
+  .partner-menu a { padding: 6px 12px; color: #666; font-size: 12px; font-weight: 500; text-decoration: none; }
+  .partner-menu a.active { color: #1a73e8; font-weight: 700; border-bottom: 2px solid #1a73e8; padding-bottom: 14px; margin-bottom: -14px; }
+  .partner-user { font-size: 11px; color: #666; }
+  .partner-user strong { color: #1a1a1a; }
+
+  /* ==== 대시보드 본문 ==== */
+  .db-body { padding: 24px; background: #f5f7fa; }
+  .db-greeting { display: flex; justify-content: space-between; align-items: center; margin-bottom: 18px; }
+  .db-greeting .hello { font-size: 18px; font-weight: 700; }
+  .db-greeting .hello .name { color: #1a73e8; }
+  .db-greeting .date { font-size: 12px; color: #888; }
+
+  /* ==== 오늘의 할 일 ==== */
+  .today-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-bottom: 20px; }
+  .today-card { background: #fff; border-radius: 12px; padding: 16px 18px; border: 1px solid #e0e0e0; cursor: pointer; transition: all 0.15s; }
+  .today-card:hover { transform: translateY(-2px); box-shadow: 0 4px 16px rgba(0,0,0,0.08); }
+  .today-card .icon { font-size: 22px; margin-bottom: 6px; }
+  .today-card .label { font-size: 11px; color: #666; font-weight: 600; margin-bottom: 4px; }
+  .today-card .number { font-size: 26px; font-weight: 800; font-family: monospace; color: #1a1a1a; }
+  .today-card .desc { font-size: 10px; color: #888; margin-top: 4px; }
+  .today-card.urgent { border-color: #f57c00; background: #fff8e1; }
+  .today-card.urgent .number { color: #e65100; }
+  .today-card.danger { border-color: #ef5350; background: #ffebee; }
+  .today-card.danger .number { color: #c62828; }
+  .today-card .cta { display: inline-block; margin-top: 8px; background: #1a73e8; color: #fff; font-size: 10px; padding: 3px 8px; border-radius: 4px; font-weight: 600; }
+  .today-card.urgent .cta { background: #f57c00; }
+  .today-card.danger .cta { background: #c62828; }
+
+  /* ==== 메인 그리드 (2-col) ==== */
+  .db-main { display: grid; grid-template-columns: 2fr 1fr; gap: 16px; }
+  .db-widget { background: #fff; border-radius: 12px; padding: 18px 20px; border: 1px solid #e0e0e0; margin-bottom: 16px; }
+  .db-widget h3 { font-size: 14px; font-weight: 700; margin-bottom: 4px; }
+  .db-widget .sub { font-size: 11px; color: #888; margin-bottom: 14px; }
+
+  /* 이번달 모객 현황 */
+  .moga-list { display: flex; flex-direction: column; gap: 10px; }
+  .moga-row { display: flex; align-items: center; gap: 12px; padding: 10px 12px; background: #fafbfc; border-radius: 8px; border: 1px solid #f0f0f0; }
+  .moga-row .info { flex: 1; min-width: 0; }
+  .moga-row .name { font-size: 12px; font-weight: 700; color: #1a1a1a; margin-bottom: 4px; }
+  .moga-row .meta { font-size: 10px; color: #888; }
+  .moga-row .bar-wrap { width: 140px; display: flex; flex-direction: column; gap: 4px; }
+  .moga-row .bar-bg { background: #e0e0e0; border-radius: 999px; height: 8px; overflow: hidden; }
+  .moga-row .bar-fill { height: 100%; background: linear-gradient(90deg, #2e7d32, #66bb6a); border-radius: 999px; }
+  .moga-row .bar-fill.warn { background: linear-gradient(90deg, #f57c00, #ffb74d); }
+  .moga-row .bar-fill.danger { background: linear-gradient(90deg, #c62828, #ef5350); }
+  .moga-row .pct { font-size: 11px; font-weight: 700; text-align: right; color: #1a1a1a; font-family: monospace; min-width: 50px; }
+  .moga-row .badge-sm { font-size: 9px; padding: 1px 6px; border-radius: 3px; font-weight: 700; }
+  .moga-row .badge-sm.good { background: #e8f5e9; color: #2e7d32; }
+  .moga-row .badge-sm.warn { background: #fff3e0; color: #e65100; }
+  .moga-row .badge-sm.danger { background: #ffebee; color: #c62828; }
+
+  /* 정산 캘린더 */
+  .settle-list { display: flex; flex-direction: column; gap: 8px; }
+  .settle-row { display: flex; align-items: center; gap: 10px; padding: 10px; background: #fafbfc; border-radius: 8px; border: 1px solid #f0f0f0; }
+  .settle-row .dot-day { background: #1a73e8; color: #fff; width: 38px; height: 38px; border-radius: 8px; display: flex; flex-direction: column; align-items: center; justify-content: center; font-size: 9px; font-weight: 700; flex-shrink: 0; }
+  .settle-row .dot-day .d { font-size: 14px; }
+  .settle-row .body { flex: 1; }
+  .settle-row .label { font-size: 11px; color: #666; }
+  .settle-row .amt { font-size: 13px; font-weight: 700; font-family: monospace; color: #1a73e8; }
+
+  /* KPI */
+  .kpi-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+  .kpi-cell { background: #fafbfc; border: 1px solid #f0f0f0; border-radius: 8px; padding: 12px; }
+  .kpi-cell .lbl { font-size: 10px; color: #888; font-weight: 600; }
+  .kpi-cell .val { font-size: 22px; font-weight: 800; color: #1a73e8; font-family: monospace; margin-top: 4px; }
+  .kpi-cell .delta { font-size: 10px; color: #2e7d32; font-weight: 700; margin-top: 2px; }
+  .kpi-cell .delta.down { color: #c62828; }
+
+  /* 알림 리스트 */
+  .alert-list { display: flex; flex-direction: column; gap: 8px; }
+  .alert-row { display: flex; gap: 10px; padding: 10px; border-radius: 8px; font-size: 11px; line-height: 1.5; }
+  .alert-row.warn { background: #fff8e1; border: 1px solid #ffe082; }
+  .alert-row.danger { background: #ffebee; border: 1px solid #ffcdd2; }
+  .alert-row.info { background: #e3f2fd; border: 1px solid #bbdefb; }
+  .alert-row .ico { font-size: 14px; line-height: 1; }
+  .alert-row .txt { flex: 1; }
+  .alert-row strong { display: block; margin-bottom: 2px; }
+
+  /* ==== 기대 효과 ==== */
+  .effect-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 18px; margin-bottom: 32px; }
+  .effect-card { background: #fff; border-radius: 14px; padding: 24px 22px; border: 1px solid #e0e0e0; text-align: center; }
+  .effect-card .icon { font-size: 32px; margin-bottom: 10px; }
+  .effect-card .stat { font-size: 32px; font-weight: 800; color: #1a73e8; margin-bottom: 4px; font-family: monospace; }
+  .effect-card .stat-sub { font-size: 11px; color: #888; margin-bottom: 12px; }
+  .effect-card .desc { font-size: 12px; color: #555; line-height: 1.6; }
+
+  /* ==== 시나리오 ==== */
+  .scenario { background: #fff; border-radius: 14px; padding: 28px; margin-bottom: 32px; border: 1px solid #e0e0e0; }
+  .scenario h3 { font-size: 16px; font-weight: 800; margin-bottom: 14px; color: #1a1a1a; }
+  .scenario .timeline { display: flex; gap: 0; margin-top: 20px; }
+  .timeline-step { flex: 1; padding: 0 8px; position: relative; }
+  .timeline-step:not(:last-child)::after { content: "→"; position: absolute; right: -8px; top: 18px; font-size: 18px; color: #1a73e8; font-weight: 800; }
+  .timeline-step .num { background: #1a73e8; color: #fff; width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 800; margin-bottom: 10px; font-size: 13px; }
+  .timeline-step .title { font-size: 12px; font-weight: 700; margin-bottom: 6px; }
+  .timeline-step .desc { font-size: 11px; color: #666; line-height: 1.5; }
+
+  /* ==== CTA 박스 ==== */
+  .cta-box { background: linear-gradient(135deg, #1a73e8 0%, #0d47a1 100%); color: #fff; padding: 32px 40px; border-radius: 14px; display: flex; justify-content: space-between; align-items: center; gap: 24px; }
+  .cta-box .text h3 { font-size: 18px; font-weight: 800; margin-bottom: 6px; }
+  .cta-box .text p { font-size: 13px; opacity: 0.95; }
+  .cta-box .btn-row { display: flex; gap: 10px; }
+  .cta-btn { background: #fff; color: #1a73e8; padding: 12px 22px; border-radius: 8px; font-weight: 700; font-size: 13px; text-decoration: none; }
+  .cta-btn.outline { background: transparent; color: #fff; border: 2px solid #fff; }
+
+  /* ==== 모드 토글 (영업실용/실제용) ==== */
+  .mode-toggle { position: fixed; top: 16px; right: 16px; background: #fff; border: 1px solid #d0d0d0; border-radius: 999px; padding: 4px; display: flex; gap: 2px; font-size: 11px; font-weight: 700; box-shadow: 0 2px 8px rgba(0,0,0,0.08); z-index: 50; }
+  .mode-toggle button { background: transparent; border: none; padding: 6px 14px; border-radius: 999px; cursor: pointer; color: #888; font-weight: 700; }
+  .mode-toggle button.on { background: #1a73e8; color: #fff; }
+
+  /* ==== 핵심 아이디어 박스 ==== */
+  .key-idea { background: linear-gradient(135deg, #fff8e1 0%, #fff3e0 100%); border-left: 6px solid #f57c00; border-radius: 0 12px 12px 0; padding: 18px 22px; margin-bottom: 20px; }
+  .key-idea .ph { font-size: 12px; font-weight: 800; color: #e65100; letter-spacing: 0.5px; margin-bottom: 6px; }
+  .key-idea .msg { font-size: 14px; color: #5d4037; line-height: 1.6; }
+  .key-idea .msg strong { color: #c62828; }
+
+  @media print { .mode-toggle, .browser-bar { display: none; } }
+</style>
+</head>
+<body>
+
+<!-- 모드 토글 -->
+<div class="mode-toggle">
+  <button class="on" onclick="setMode('pitch', this)">발표 모드</button>
+  <button onclick="setMode('clean', this)">화면만 보기</button>
+</div>
+
+<!-- ========================================================== -->
+<!-- 영업실 발표용 인트로                                        -->
+<!-- ========================================================== -->
+<div class="pitch-hero" id="hero">
+  <div class="badge-tag">🚀 트립스토어 파트너스 개편 제안</div>
+  <h1>여행사 사장님의 하루를<br><span class="accent">한 화면</span>으로 정리해 드립니다</h1>
+  <p class="sub">예약 건마다 일일이 클릭하지 않아도, <strong>오늘 처리할 일 / 이번달 모객 현황 / 다음 정산 입금일</strong>까지 한눈에 — 파트너스가 운영팀의 <strong>업무 도우미</strong>가 됩니다.</p>
+</div>
+
+<!-- ========================================================== -->
+<!-- 페인포인트 + 솔루션 (Before vs After)                       -->
+<!-- ========================================================== -->
+<div class="section-wrap" id="ba-section">
+  <div class="section-title">현재 vs 새로워질 파트너스</div>
+  <p class="section-desc">여행사 운영팀에서 자주 듣는 이야기와, 새 파트너스가 어떻게 해결하는지 비교합니다.</p>
+
+  <div class="persona-box">
+    <div class="ph">👤 사례 — A여행사 운영팀장님 인터뷰</div>
+    <div class="quote">"매일 아침 출근하면 예약 목록 페이지를 열어서 어떤 건이 잔금 미입금인지, 오늘 처리해야 할 게 뭔지 일일이 찾아봅니다. 이번주 출발 행사 모객이 잘 됐는지 확인하려면 또 따로 엑셀로 정리해야 하고요. 정산은 정산관리 메뉴에 들어가야 보이고… 화면이 너무 많아요."</div>
+  </div>
+
+  <div class="before-after">
+    <div class="ba-card before">
+      <h3>😓 지금 운영팀의 하루</h3>
+      <ul>
+        <li>예약 목록을 열어 <strong>일일이 클릭</strong>해서 미입금 건 확인</li>
+        <li>이번달 행사별 모객 현황은 <strong>엑셀로 따로 정리</strong></li>
+        <li>출발 임박한 예약 누구인지 <strong>달력 보면서 찾기</strong></li>
+        <li>정산 들어올 돈은 <strong>다른 메뉴</strong>에서 확인</li>
+        <li>여러 화면을 왔다갔다하며 시간 낭비</li>
+      </ul>
+    </div>
+    <div class="ba-arrow">→</div>
+    <div class="ba-card after">
+      <h3>✨ 새 파트너스의 하루</h3>
+      <ul>
+        <li>로그인하자마자 <strong>오늘 할 일 4가지</strong>가 카드로 보임</li>
+        <li>이번달 행사별 모객률이 <strong>그래프</strong>로 한눈에</strong></li>
+        <li>D-3, D-1 출발 임박 건이 <strong>자동으로 큐</strong>에 표시</li>
+        <li>다음 정산 입금일 / 금액이 <strong>대시보드 메인</strong>에</li>
+        <li>한 화면으로 전체 운영 상황 파악 (3분 → 30초)</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="key-idea">
+    <div class="ph">💡 핵심 아이디어</div>
+    <div class="msg">"예약 한 건"이 아니라 <strong>"오늘 처리할 일"</strong> 중심으로 화면을 다시 짭니다. 파트너스가 단순한 조회 도구를 넘어, <strong>운영팀의 비서</strong>가 됩니다.</div>
+  </div>
+</div>
+
+<!-- ========================================================== -->
+<!-- 실제 화면 mockup                                            -->
+<!-- ========================================================== -->
+<div class="section-wrap">
+  <div class="section-title">🖥️ 새 대시보드 실제 화면 (시안)</div>
+  <p class="section-desc">로그인 후 첫 화면 — 운영팀의 모든 의사결정을 한 곳에서 시작합니다.</p>
+
+  <div class="dashboard-frame">
+    <div class="browser-bar">
+      <div class="dot red"></div><div class="dot yellow"></div><div class="dot green"></div>
+      <div class="url">partners.tripstore.kr/dashboard</div>
+    </div>
+
+    <!-- 글로벌 네비 -->
+    <div class="partner-nav">
+      <div class="partner-logo">
+        <div class="logo-mark">E</div>
+        <div>트립<br><span style="font-size:9px;font-weight:500;">파트너스</span></div>
+      </div>
+      <nav class="partner-menu">
+        <a href="#" class="active">대시보드</a>
+        <a href="#">예약관리</a>
+        <a href="#">상품관리</a>
+        <a href="#">정산관리</a>
+        <a href="#">리포트</a>
+        <a href="#">계정관리</a>
+      </nav>
+      <div class="partner-user">참좋은여행 · <strong>운영팀장</strong> 님</div>
+    </div>
+
+    <!-- 본문 -->
+    <div class="db-body">
+
+      <div class="db-greeting">
+        <div class="hello">안녕하세요, <span class="name">참좋은여행</span> 님 👋</div>
+        <div class="date">2026년 6월 16일 (월) · 출발 임박 예약을 우선 확인하세요</div>
+      </div>
+
+      <!-- 오늘의 할 일 (4-카드) -->
+      <div class="today-row">
+        <div class="today-card urgent">
+          <div class="icon">📥</div>
+          <div class="label">처리 대기 (예약접수)</div>
+          <div class="number">2 <span style="font-size:14px;color:#888;font-weight:500;">건</span></div>
+          <div class="desc">고객 확인 + 출발 가능 여부 체크 필요</div>
+          <div class="cta">바로 처리 →</div>
+        </div>
+        <div class="today-card danger">
+          <div class="icon">💰</div>
+          <div class="label">잔금 미입금</div>
+          <div class="number">1 <span style="font-size:14px;color:#888;font-weight:500;">건</span></div>
+          <div class="desc">결제 마감 임박 · 1,838,000원</div>
+          <div class="cta">결제 안내 →</div>
+        </div>
+        <div class="today-card">
+          <div class="icon">✈️</div>
+          <div class="label">출발 임박 (D-3 이내)</div>
+          <div class="number">8 <span style="font-size:14px;color:#888;font-weight:500;">건</span></div>
+          <div class="desc">PNR/바우처 발송 확인</div>
+          <div class="cta">목록 보기 →</div>
+        </div>
+        <div class="today-card">
+          <div class="icon">🛑</div>
+          <div class="label">취소 요청</div>
+          <div class="number">0 <span style="font-size:14px;color:#888;font-weight:500;">건</span></div>
+          <div class="desc">고객 취소 의사 대기</div>
+          <div class="cta">처리하기 →</div>
+        </div>
+      </div>
+
+      <!-- 메인 그리드 -->
+      <div class="db-main">
+
+        <!-- 좌측: 모객 현황 + KPI -->
+        <div>
+
+          <!-- 이번달 모객 현황 -->
+          <div class="db-widget">
+            <h3>📊 이번달 출발 행사 모객 현황</h3>
+            <div class="sub">2026년 6월 출발 예정 행사 · 모객률 기준 정렬</div>
+            <div class="moga-list">
+              <div class="moga-row">
+                <div class="info">
+                  <div class="name">상하이 자유여행 4일 #하버플라자 <span class="badge-sm good">달성</span></div>
+                  <div class="meta">6/06 출발 · 정원 20명 · 예약 18명</div>
+                </div>
+                <div class="bar-wrap">
+                  <div class="bar-bg"><div class="bar-fill" style="width:90%;"></div></div>
+                </div>
+                <div class="pct">90%</div>
+              </div>
+              <div class="moga-row">
+                <div class="info">
+                  <div class="name">방콕/파타야 5일 #센타라그랜드 <span class="badge-sm good">달성</span></div>
+                  <div class="meta">6/10 출발 · 정원 25명 · 예약 21명</div>
+                </div>
+                <div class="bar-wrap">
+                  <div class="bar-bg"><div class="bar-fill" style="width:84%;"></div></div>
+                </div>
+                <div class="pct">84%</div>
+              </div>
+              <div class="moga-row">
+                <div class="info">
+                  <div class="name">오사카/교토 3박4일 #호텔뉴오타니 <span class="badge-sm warn">주의</span></div>
+                  <div class="meta">6/18 출발 · 정원 30명 · 예약 17명</div>
+                </div>
+                <div class="bar-wrap">
+                  <div class="bar-bg"><div class="bar-fill warn" style="width:56%;"></div></div>
+                </div>
+                <div class="pct">56%</div>
+              </div>
+              <div class="moga-row">
+                <div class="info">
+                  <div class="name">다낭 5일 자유여행 #나만 골든베이 <span class="badge-sm danger">미달 위험</span></div>
+                  <div class="meta">6/22 출발 · 정원 20명 · 예약 6명</div>
+                </div>
+                <div class="bar-wrap">
+                  <div class="bar-bg"><div class="bar-fill danger" style="width:30%;"></div></div>
+                </div>
+                <div class="pct">30%</div>
+              </div>
+              <div class="moga-row">
+                <div class="info">
+                  <div class="name">하노이/하롱베이 4일 <span class="badge-sm danger">미달 위험</span></div>
+                  <div class="meta">6/25 출발 · 정원 22명 · 예약 5명</div>
+                </div>
+                <div class="bar-wrap">
+                  <div class="bar-bg"><div class="bar-fill danger" style="width:23%;"></div></div>
+                </div>
+                <div class="pct">23%</div>
+              </div>
+            </div>
+            <div style="text-align:right;margin-top:10px;font-size:11px;color:#1a73e8;font-weight:700;cursor:pointer;">전체 행사 보기 →</div>
+          </div>
+
+          <!-- KPI -->
+          <div class="db-widget">
+            <h3>📈 운영 지표 (최근 30일)</h3>
+            <div class="sub">우리 여행사의 운영 성과를 한눈에</div>
+            <div class="kpi-grid">
+              <div class="kpi-cell">
+                <div class="lbl">예약 처리 시간 (평균)</div>
+                <div class="val">2.3<span style="font-size:13px;">h</span></div>
+                <div class="delta">▼ 1.2h (지난달 대비)</div>
+              </div>
+              <div class="kpi-cell">
+                <div class="lbl">평균 모객 달성률</div>
+                <div class="val">76<span style="font-size:13px;">%</span></div>
+                <div class="delta">▲ 8%p</div>
+              </div>
+              <div class="kpi-cell">
+                <div class="lbl">취소율</div>
+                <div class="val">5.2<span style="font-size:13px;">%</span></div>
+                <div class="delta down">▲ 0.8%p</div>
+              </div>
+              <div class="kpi-cell">
+                <div class="lbl">고객 만족도 (NPS)</div>
+                <div class="val">8.4<span style="font-size:13px;">/10</span></div>
+                <div class="delta">▲ 0.3</div>
+              </div>
+            </div>
+          </div>
+
+        </div>
+
+        <!-- 우측: 정산 캘린더 + 알림 -->
+        <div>
+
+          <!-- 정산 캘린더 -->
+          <div class="db-widget">
+            <h3>💰 정산 입금 예정</h3>
+            <div class="sub">출발완료 후 지급 일정</div>
+            <div class="settle-list">
+              <div class="settle-row">
+                <div class="dot-day"><span class="d">25</span><span>6월</span></div>
+                <div class="body">
+                  <div class="label">5월 출발완료 정산</div>
+                  <div class="amt">38,420,000원</div>
+                </div>
+              </div>
+              <div class="settle-row">
+                <div class="dot-day"><span class="d">10</span><span>7월</span></div>
+                <div class="body">
+                  <div class="label">6월 1차 정산</div>
+                  <div class="amt">22,150,000원</div>
+                </div>
+              </div>
+              <div class="settle-row">
+                <div class="dot-day"><span class="d">25</span><span>7월</span></div>
+                <div class="body">
+                  <div class="label">6월 2차 정산</div>
+                  <div class="amt">28,780,000원</div>
+                </div>
+              </div>
+              <div class="settle-row" style="background:#e3f2fd;border-color:#90caf9;">
+                <div class="dot-day" style="background:#2e7d32;"><span class="d">∑</span><span>합계</span></div>
+                <div class="body">
+                  <div class="label" style="font-weight:700;">3개월 누적 정산 예정</div>
+                  <div class="amt" style="color:#2e7d32;">89,350,000원</div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- 알림 -->
+          <div class="db-widget">
+            <h3>🔔 알림</h3>
+            <div class="sub">우선 확인이 필요한 항목</div>
+            <div class="alert-list">
+              <div class="alert-row danger">
+                <div class="ico">💰</div>
+                <div class="txt">
+                  <strong>결제 마감 D-day</strong>
+                  HB2633517226 (오기웅 님) 잔금 1,838,000원 · 오늘까지
+                </div>
+              </div>
+              <div class="alert-row warn">
+                <div class="ico">⚠️</div>
+                <div class="txt">
+                  <strong>모객 미달 위험 행사 2건</strong>
+                  6/22 다낭 · 6/25 하노이 — 폐쇄/병합 검토
+                </div>
+              </div>
+              <div class="alert-row info">
+                <div class="ico">📢</div>
+                <div class="txt">
+                  <strong>트립스토어 공지</strong>
+                  6/20 정산 시스템 점검 (00:00~02:00)
+                </div>
+              </div>
+              <div class="alert-row info">
+                <div class="ico">📈</div>
+                <div class="txt">
+                  <strong>이번달 누적 매출</strong>
+                  지난달 동기 대비 +12% (1.2억원)
+                </div>
+              </div>
+            </div>
+          </div>
+
+        </div>
+
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ========================================================== -->
+<!-- 시나리오 (운영팀장의 하루)                                  -->
+<!-- ========================================================== -->
+<div class="section-wrap">
+  <div class="scenario">
+    <h3>📖 운영팀장 김 대리님의 새로운 아침</h3>
+    <p style="font-size:13px;color:#666;">파트너스 대시보드를 사용한 김 대리님의 하루는 이렇게 달라집니다.</p>
+
+    <div class="timeline">
+      <div class="timeline-step">
+        <div class="num">1</div>
+        <div class="title">9:00 출근, 로그인</div>
+        <div class="desc">대시보드 메인이 자동으로 떠서 "오늘 할 일 4가지"가 카드로 노출</div>
+      </div>
+      <div class="timeline-step">
+        <div class="num">2</div>
+        <div class="title">9:05 잔금 미입금 처리</div>
+        <div class="desc">결제 마감 D-day 알림 → 클릭 한 번에 고객에게 SMS 발송</div>
+      </div>
+      <div class="timeline-step">
+        <div class="num">3</div>
+        <div class="title">9:30 예약접수 2건 처리</div>
+        <div class="desc">고객 확인/출발 가능 체크리스트 클릭 후 [예약완료] 일괄 처리</div>
+      </div>
+      <div class="timeline-step">
+        <div class="num">4</div>
+        <div class="title">10:00 모객 미달 행사 대응</div>
+        <div class="desc">다낭 6/22 출발 행사 모객 30% → 사장님께 보고 후 병합 결정</div>
+      </div>
+      <div class="timeline-step">
+        <div class="num">5</div>
+        <div class="title">10:30 D-3 출발 임박 점검</div>
+        <div class="desc">8건 PNR/바우처 발송 상태 확인 → 미발송 건만 골라서 처리</div>
+      </div>
+    </div>
+
+    <div style="margin-top:24px;padding:16px;background:#e8f5e9;border-radius:10px;border-left:4px solid #2e7d32;">
+      <strong style="color:#2e7d32;">결과 — 1시간 30분이면 오전 운영 업무 마무리.</strong>
+      <span style="color:#555;font-size:12px;">기존 화면으로는 평균 3시간 소요되던 업무가 절반 이하로 줄어듭니다.</span>
+    </div>
+  </div>
+</div>
+
+<!-- ========================================================== -->
+<!-- 기대 효과                                                   -->
+<!-- ========================================================== -->
+<div class="section-wrap">
+  <div class="section-title">📈 도입 효과 (예상)</div>
+  <p class="section-desc">새 대시보드를 사용하면 여행사 운영팀이 이렇게 달라집니다.</p>
+
+  <div class="effect-grid">
+    <div class="effect-card">
+      <div class="icon">⏱️</div>
+      <div class="stat">-50%</div>
+      <div class="stat-sub">일일 운영 시간</div>
+      <div class="desc">매일 3시간 걸리던 예약 확인·처리 업무가 <strong>1시간 30분</strong>으로 단축</div>
+    </div>
+    <div class="effect-card">
+      <div class="icon">💸</div>
+      <div class="stat">+8%p</div>
+      <div class="stat-sub">모객 달성률</div>
+      <div class="desc">미달 위험 행사를 <strong>출발 D-7 시점에 미리 발견</strong>하여 폐쇄/병합 의사결정 가능</div>
+    </div>
+    <div class="effect-card">
+      <div class="icon">🎯</div>
+      <div class="stat">-30%</div>
+      <div class="stat-sub">잔금 미수금</div>
+      <div class="desc">결제 마감일 알림 자동화로 <strong>미입금 추적 누락 방지</strong></div>
+    </div>
+  </div>
+</div>
+
+<!-- ========================================================== -->
+<!-- 도입 일정                                                   -->
+<!-- ========================================================== -->
+<div class="section-wrap">
+  <div class="section-title">🗓️ 도입 일정</div>
+  <p class="section-desc">파트너스 개편은 단계적으로 진행됩니다 — 운영 중단 없이 자연스럽게 전환.</p>
+
+  <div style="background:#fff;border-radius:14px;padding:24px;border:1px solid #e0e0e0;">
+    <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:14px;">
+      <div style="padding:18px;background:#e3f2fd;border-radius:10px;border-left:4px solid #1a73e8;">
+        <div style="font-size:10px;font-weight:700;color:#1a73e8;letter-spacing:1px;margin-bottom:6px;">1단계 · 7월</div>
+        <div style="font-size:13px;font-weight:700;margin-bottom:6px;">시스템 기반 정비</div>
+        <div style="font-size:11px;color:#555;line-height:1.5;">예약상태 체계 통일 (예약접수 → 예약완료 흐름 정비)</div>
+      </div>
+      <div style="padding:18px;background:#f3e8ff;border-radius:10px;border-left:4px solid #7c3aed;">
+        <div style="font-size:10px;font-weight:700;color:#7c3aed;letter-spacing:1px;margin-bottom:6px;">2단계 · 8월</div>
+        <div style="font-size:13px;font-weight:700;margin-bottom:6px;">대시보드 베타 오픈</div>
+        <div style="font-size:11px;color:#555;line-height:1.5;">참여 희망 여행사 대상 우선 오픈 · 의견 수렴</div>
+      </div>
+      <div style="padding:18px;background:#fff3e0;border-radius:10px;border-left:4px solid #f57c00;">
+        <div style="font-size:10px;font-weight:700;color:#f57c00;letter-spacing:1px;margin-bottom:6px;">3단계 · 9월</div>
+        <div style="font-size:13px;font-weight:700;margin-bottom:6px;">전체 여행사 오픈</div>
+        <div style="font-size:11px;color:#555;line-height:1.5;">모든 파트너 여행사에 대시보드 기본 노출 전환</div>
+      </div>
+      <div style="padding:18px;background:#e8f5e9;border-radius:10px;border-left:4px solid #2e7d32;">
+        <div style="font-size:10px;font-weight:700;color:#2e7d32;letter-spacing:1px;margin-bottom:6px;">4단계 · 10월~</div>
+        <div style="font-size:13px;font-weight:700;margin-bottom:6px;">고도화</div>
+        <div style="font-size:11px;color:#555;line-height:1.5;">행사별 모객 보드, 워치리스트, 자동화 액션 등 단계 추가</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ========================================================== -->
+<!-- CTA                                                         -->
+<!-- ========================================================== -->
+<div class="section-wrap">
+  <div class="cta-box">
+    <div class="text">
+      <h3>💬 함께 만들어주세요</h3>
+      <p>여행사 운영팀의 의견이 가장 중요합니다. 의견 주시면 시안에 반영됩니다.</p>
+    </div>
+    <div class="btn-row">
+      <a href="#" class="cta-btn">의견 보내기</a>
+      <a href="#" class="cta-btn outline">베타 참여 신청</a>
+    </div>
+  </div>
+</div>
+
+<div style="text-align:center;padding:32px;font-size:11px;color:#aaa;">
+  ※ 본 화면은 제안 시안이며, 실제 개발 단계에서 디테일이 달라질 수 있습니다.<br>
+  트립스토어 영업실 · 2026-06-16
+</div>
+
+<script>
+function setMode(mode, btn) {
+  document.querySelectorAll('.mode-toggle button').forEach(b => b.classList.remove('on'));
+  btn.classList.add('on');
+  const hero = document.getElementById('hero');
+  const baSection = document.getElementById('ba-section');
+  if (mode === 'clean') {
+    hero.style.display = 'none';
+    baSection.style.display = 'none';
+    document.querySelectorAll('.scenario, .effect-grid, .cta-box').forEach(el => {
+      if (el.closest('.section-wrap')) el.closest('.section-wrap').style.display = 'none';
+    });
+  } else {
+    hero.style.display = '';
+    baSection.style.display = '';
+    document.querySelectorAll('.section-wrap').forEach(el => el.style.display = '');
+  }
+}
+</script>
+</body>
+</html>
