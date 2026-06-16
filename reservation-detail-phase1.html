@@ -194,12 +194,15 @@
       <div class="section" id="section-traveler">
         <div class="section-header">
           <h2>예약자 정보</h2>
+          <div class="actions">
+            <button class="btn btn-outline btn-sm" onclick="document.getElementById('modal-edit-traveler').classList.add('show')">수정하기</button>
+          </div>
         </div>
         <div class="section-body">
-          <div class="info-row"><span class="info-label">예약자</span><span class="info-value">오기웅</span></div>
-          <div class="info-row"><span class="info-label">생년월일</span><span class="info-value">1975-12-17</span></div>
-          <div class="info-row"><span class="info-label">이메일</span><span class="info-value">kipoongman@hanmail.net</span></div>
-          <div class="info-row"><span class="info-label">연락처</span><span class="info-value">010-2374-8449</span></div>
+          <div class="info-row"><span class="info-label">예약자</span><span class="info-value" id="traveler-name">오기웅</span></div>
+          <div class="info-row"><span class="info-label">생년월일</span><span class="info-value" id="traveler-birth">1975-12-17</span></div>
+          <div class="info-row"><span class="info-label">이메일</span><span class="info-value" id="traveler-email">kipoongman@hanmail.net</span></div>
+          <div class="info-row"><span class="info-label">연락처</span><span class="info-value" id="traveler-phone">010-2374-8449</span></div>
         </div>
       </div>
 
@@ -227,17 +230,20 @@
         <div class="section-header">
           <h2>예약 상태 관리</h2>
           <div class="actions">
-            <button class="btn btn-plus btn-sm btn-icon" onclick="document.getElementById('modal-customer-view').classList.add('show')">👤 고객 화면</button>
+            <button class="btn btn-outline btn-sm" onclick="document.getElementById('modal-edit-status').classList.add('show')">수정하기</button>
           </div>
         </div>
         <div class="section-body">
-          <div class="info-row"><span class="info-label">트립 예약상태</span><span class="info-value"><span class="badge green">예약완료</span></span></div>
-          <div class="info-row"><span class="info-label">여행사 예약상태</span><span class="info-value">예약완료</span></div>
-          <div class="info-row"><span class="info-label">트립 결제상태</span><span class="info-value"><span class="badge blue">결제완료</span></span></div>
+          <div class="info-row"><span class="info-label">예약상태 (관리)</span><span class="info-value"><span class="badge green" id="status-on-management">예약완료</span></span></div>
+          <div class="info-row"><span class="info-label">rsv.status (legacy)</span><span class="info-value"><span class="badge gray" id="status-rsv">출발대기</span></span></div>
+          <div class="info-row"><span class="info-label">트립 결제상태</span><span class="info-value"><span class="badge blue" id="status-payment">결제완료</span></span></div>
+          <div class="info-row"><span class="info-label">정산상태</span><span class="info-value"><span class="badge gray" id="status-settlement">정산대기</span></span></div>
+          <div class="info-row"><span class="info-label">지급상태</span><span class="info-value"><span class="badge gray" id="status-payout">지급대기</span></span></div>
         </div>
-        <div class="section-status-actions">
-          <button class="btn btn-danger" onclick="document.getElementById('modal-cancel-rsv').classList.add('show')">예약 취소</button>
-          <button class="btn btn-primary">예약완료 처리</button>
+        <div style="background:#fff8e1;border:1px solid #ffe082;border-radius:6px;padding:8px 12px;margin:0 16px 12px;font-size:11px;color:#5d4037;line-height:1.55;">
+          <strong>🔒 상태 변경 정책</strong><br>
+          · <strong>지급 전</strong>까지는 예약상태를 [예약접수] / [취소완료]로 되돌릴 수 있음<br>
+          · <strong>지급진행 · 지급완료</strong> 시점부터 예약 FIX → 되돌리기 불가, <strong>정산조정</strong>으로만 처리
         </div>
       </div>
 
@@ -1132,6 +1138,108 @@
 </div>
 
 <!-- ==================== 모달들 ==================== -->
+
+<!-- 예약자 정보 수정 모달 -->
+<div class="modal-overlay" id="modal-edit-traveler">
+  <div class="modal" style="width:520px;">
+    <div class="modal-header">
+      <h3>예약자 정보 수정</h3>
+      <button class="close" onclick="this.closest('.modal-overlay').classList.remove('show')">&times;</button>
+    </div>
+    <div class="modal-body">
+      <div style="background:#fff8e1;border:1px solid #ffe082;border-radius:6px;padding:8px 12px;font-size:11px;color:#5d4037;margin-bottom:16px;">
+        ⚠ 예약자 정보 전체 항목을 수정할 수 있습니다. 변경 이력은 자동 기록됩니다.
+      </div>
+      <div class="form-group">
+        <label>예약자명</label>
+        <input type="text" id="edit-traveler-name" value="오기웅">
+      </div>
+      <div class="form-group">
+        <label>생년월일</label>
+        <input type="date" id="edit-traveler-birth" value="1975-12-17">
+      </div>
+      <div class="form-group">
+        <label>이메일</label>
+        <input type="email" id="edit-traveler-email" value="kipoongman@hanmail.net">
+      </div>
+      <div class="form-group">
+        <label>연락처</label>
+        <input type="tel" id="edit-traveler-phone" value="010-2374-8449">
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-outline" onclick="this.closest('.modal-overlay').classList.remove('show')">취소</button>
+      <button class="btn btn-primary" onclick="saveTravelerInfo()">저장</button>
+    </div>
+  </div>
+</div>
+
+<!-- 예약상태 수정 모달 -->
+<div class="modal-overlay" id="modal-edit-status">
+  <div class="modal" style="width:680px;">
+    <div class="modal-header">
+      <h3>예약상태 수정</h3>
+      <button class="close" onclick="this.closest('.modal-overlay').classList.remove('show')">&times;</button>
+    </div>
+    <div class="modal-body">
+
+      <!-- 현재 상태 -->
+      <div style="background:#f5f5f5;border:1px solid #e0e0e0;border-radius:8px;padding:12px;margin-bottom:14px;">
+        <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px;font-size:11px;">
+          <div><div style="color:#888;margin-bottom:4px;">현재 예약상태 (관리)</div><span class="badge green" id="cur-status-mng">예약완료</span></div>
+          <div><div style="color:#888;margin-bottom:4px;">현재 rsv.status</div><span class="badge gray" id="cur-status-rsv">출발대기</span></div>
+          <div><div style="color:#888;margin-bottom:4px;">현재 결제상태</div><span class="badge blue" id="cur-status-pay">결제완료</span></div>
+        </div>
+        <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:10px;font-size:11px;margin-top:10px;border-top:1px dashed #d0d0d0;padding-top:10px;">
+          <div><div style="color:#888;margin-bottom:4px;">정산상태</div><span class="badge gray" id="cur-status-set">정산대기</span></div>
+          <div><div style="color:#888;margin-bottom:4px;">지급상태</div><span class="badge gray" id="cur-status-pay2">지급대기</span></div>
+        </div>
+      </div>
+
+      <!-- 매핑 안내 -->
+      <div style="background:#e8f4fd;border:1px solid #bbdefb;border-radius:8px;padding:10px 12px;font-size:11px;color:#0d47a1;line-height:1.6;margin-bottom:14px;">
+        <div style="font-weight:700;margin-bottom:4px;">📌 status_on_management ↔ rsv.status 매핑</div>
+        · 예약접수 ↔ 예약성공 &nbsp; · 예약완료 ↔ 출발대기 <span style="color:#d32f2f;">(결제완료 필수)</span><br>
+        · 취소요청 ↔ 취소신청 &nbsp; · 취소완료 ↔ 취소완료 &nbsp; · 출발완료 ↔ 출발완료<br>
+        · 취소진행 → 결제상태에 따라 분기
+      </div>
+
+      <!-- 변경할 상태 선택 -->
+      <div class="form-group">
+        <label>변경할 예약상태 (관리)</label>
+        <select id="new-status-mng" onchange="onStatusChange()">
+          <option value="예약접수" data-rsv="예약성공">예약접수 → rsv: 예약성공</option>
+          <option value="예약완료" data-rsv="출발대기" selected>예약완료 → rsv: 출발대기 (결제완료 필수)</option>
+          <option value="취소요청" data-rsv="취소신청">취소요청 → rsv: 취소신청</option>
+          <option value="취소완료" data-rsv="취소완료">취소완료 → rsv: 취소완료</option>
+          <option value="출발완료" data-rsv="출발완료">출발완료 → rsv: 출발완료</option>
+          <option value="취소진행" data-rsv="결제상태 의존">취소진행 → rsv: (결제상태 의존)</option>
+        </select>
+      </div>
+
+      <!-- 가드 메시지 영역 -->
+      <div id="status-guard-msg" style="display:none;background:#ffebee;border:1px solid #ef9a9a;border-radius:6px;padding:10px 12px;font-size:11px;color:#b71c1c;margin-bottom:14px;line-height:1.6;"></div>
+
+      <!-- 정책 안내 -->
+      <div style="background:#fff8e1;border:1px solid #ffe082;border-radius:8px;padding:10px 12px;font-size:11px;color:#5d4037;line-height:1.7;">
+        <strong>📋 처리 규칙</strong><br>
+        ① <strong>접수 시점</strong>: 결제완료여도 자동으로 [출발대기]로 넘어가지 않음 → 무조건 [예약접수=예약성공]으로 생성, <strong>여행사 파트너스 액션</strong>으로 [예약완료=출발대기] 전환<br>
+        ② <strong>정산완료</strong> = 정산데이터 생성(출발완료 기준)<br>
+        ③ <strong>지급 전</strong>까지는 예약상태를 [취소완료] / [예약접수]로 되돌릴 수 있음<br>
+        ④ <strong>지급진행 · 지급완료</strong> 시점부터 예약 FIX → 되돌리기 불가, <strong>정산조정</strong>으로만 처리
+      </div>
+
+      <div class="form-group" style="margin-top:14px;">
+        <label>변경 메모 (선택)</label>
+        <textarea id="status-change-memo" style="width:100%;padding:8px 12px;border:1px solid #d0d0d0;border-radius:6px;font-size:12px;min-height:60px;resize:vertical;" placeholder="상태 변경 사유 / 메모"></textarea>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-outline" onclick="this.closest('.modal-overlay').classList.remove('show')">취소</button>
+      <button class="btn btn-primary" id="btn-save-status" onclick="saveStatusChange()">저장</button>
+    </div>
+  </div>
+</div>
 
 <!-- 예약 취소 모달 (2단계) -->
 <div class="modal-overlay" id="modal-cancel-rsv">
@@ -4211,6 +4319,76 @@ function showToast(message) {
   document.body.appendChild(toast);
   setTimeout(() => { toast.style.opacity = '0'; toast.style.transition = 'opacity 0.3s'; }, 2000);
   setTimeout(() => toast.remove(), 2500);
+}
+
+// 예약자 정보 저장
+function saveTravelerInfo() {
+  const name = document.getElementById('edit-traveler-name').value.trim();
+  const birth = document.getElementById('edit-traveler-birth').value;
+  const email = document.getElementById('edit-traveler-email').value.trim();
+  const phone = document.getElementById('edit-traveler-phone').value.trim();
+  if (!name || !birth || !email || !phone) { alert('모든 항목을 입력해주세요.'); return; }
+  document.getElementById('traveler-name').textContent = name;
+  document.getElementById('traveler-birth').textContent = birth;
+  document.getElementById('traveler-email').textContent = email;
+  document.getElementById('traveler-phone').textContent = phone;
+  document.getElementById('modal-edit-traveler').classList.remove('show');
+  showToast('예약자 정보가 수정되었습니다.');
+}
+
+// 예약상태 변경 가드 (결제완료 / 지급 fix)
+function onStatusChange() {
+  const sel = document.getElementById('new-status-mng');
+  const opt = sel.options[sel.selectedIndex];
+  const newMng = sel.value;
+  const newRsv = opt.dataset.rsv;
+  const curPayment = document.getElementById('status-payment').textContent.trim();
+  const curPayout = document.getElementById('status-payout').textContent.trim();
+  const guard = document.getElementById('status-guard-msg');
+  const btnSave = document.getElementById('btn-save-status');
+  let msgs = [];
+
+  // 지급진행/지급완료 = 예약 FIX
+  if (curPayout === '지급진행' || curPayout === '지급완료') {
+    msgs.push('🔒 지급 상태가 [' + curPayout + ']이므로 예약상태를 변경할 수 없습니다. <strong>정산조정</strong>으로 처리하세요.');
+  }
+  // 예약완료(=출발대기) 전환 시 결제완료 필수
+  if (newMng === '예약완료' && curPayment !== '결제완료') {
+    msgs.push('⚠ [예약완료=출발대기]는 결제상태가 <strong>결제완료</strong>일 때만 가능합니다. 현재: ' + curPayment);
+  }
+
+  if (msgs.length) {
+    guard.innerHTML = msgs.join('<br>');
+    guard.style.display = 'block';
+    btnSave.disabled = true;
+    btnSave.style.opacity = '0.4';
+    btnSave.style.cursor = 'not-allowed';
+  } else {
+    guard.style.display = 'none';
+    btnSave.disabled = false;
+    btnSave.style.opacity = '1';
+    btnSave.style.cursor = 'pointer';
+  }
+}
+
+// 예약상태 저장
+function saveStatusChange() {
+  const sel = document.getElementById('new-status-mng');
+  const opt = sel.options[sel.selectedIndex];
+  const newMng = sel.value;
+  const newRsv = opt.dataset.rsv;
+  const mngBadge = document.getElementById('status-on-management');
+  const rsvBadge = document.getElementById('status-rsv');
+  // 상태별 배지 색상
+  const colorMap = {
+    '예약접수': 'gray', '예약완료': 'green', '취소요청': 'orange',
+    '취소완료': 'red', '출발완료': 'blue', '취소진행': 'orange'
+  };
+  mngBadge.textContent = newMng;
+  mngBadge.className = 'badge ' + (colorMap[newMng] || 'gray');
+  rsvBadge.textContent = newRsv;
+  document.getElementById('modal-edit-status').classList.remove('show');
+  showToast('예약상태가 [' + newMng + ' / ' + newRsv + ']로 변경되었습니다.');
 }
 </script>
 </body>
