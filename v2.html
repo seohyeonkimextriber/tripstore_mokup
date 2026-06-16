@@ -639,8 +639,7 @@ tbody tr:hover td { background: #fafafa; }
         </div>
         <div style="display:flex;gap:8px;">
           <button class="btn btn-default" onclick="openList(currentBoard)">취소</button>
-          <button class="btn btn-default" style="border-color:#faad14;color:#ad6800;">임시저장 (Draft)</button>
-          <button class="btn btn-primary btn-lg">게시 (운영중)</button>
+          <button class="btn btn-primary btn-lg">등록</button>
         </div>
       </div>
 
@@ -1194,14 +1193,9 @@ tbody tr:hover td { background: #fafafa; }
         <div class="status-flow">
           <span style="font-size:12px;font-weight:600;color:rgba(0,0,0,0.75);"><span id="save-cat-count">3</span>개 카테고리를 한 번에 등록합니다</span>
           <span style="color:rgba(0,0,0,0.3);margin:0 6px;">·</span>
-          <span class="status-pill draft">Draft</span>
-          <span>→</span>
-          <span>검토</span>
-          <span>→</span>
-          <span class="status-pill active">운영중</span>
+          <span style="font-size:11px;color:rgba(0,0,0,0.45);">등록 = 즉시 활성 · 삭제 시 매칭 상품에서 일괄 미표시</span>
         </div>
-        <button class="btn btn-default" style="border-color:#faad14;color:#ad6800;">전체 임시저장 (Draft)</button>
-        <button class="btn btn-primary btn-lg">전체 게시 (운영중)</button>
+        <button class="btn btn-primary btn-lg">전체 등록</button>
       </div>
       </div><!-- /step-2 -->
     </div>
@@ -1253,6 +1247,15 @@ tbody tr:hover td { background: #fafafa; }
         <span id="list-board-crumb" style="display:none;">숙박권 게시판</span>
       </div>
 
+      <!-- 운영 정책 안내 -->
+      <div style="padding:8px 12px;margin-bottom:8px;background:#fffbe6;border:1px solid #ffe58f;border-radius:6px;display:flex;align-items:flex-start;gap:8px;font-size:12px;line-height:1.5;color:#7c4a03;">
+        <span style="font-size:14px;">🗑</span>
+        <div>
+          <strong>POST 상태값 없음 — 등록 / 삭제 두 가지로만 관리.</strong>
+          POST를 <strong>삭제</strong>하면 매칭되어 노출되던 <strong>항공권 · 숙박권 · 투어·티켓 · 보험</strong>에서 <strong>즉시 미표시 + 매칭 관계 제거</strong>됩니다. 운영 일시중단이 필요한 경우도 삭제로 처리 (재등록 가능). 기존 예약은 스냅샷으로 보존.
+        </div>
+      </div>
+
       <!-- 게시판별 등록 가이드 (동적) -->
       <div id="board-guide" class="board-guide" style="display:none;">
         <div class="board-guide-head" onclick="this.parentElement.classList.toggle('collapsed')">
@@ -1271,9 +1274,6 @@ tbody tr:hover td { background: #fafafa; }
             <option>포함사항</option><option>유의사항</option><option>FAQ</option>
           </select>
           <input type="text" class="fi" placeholder="키워드 검색" style="flex:1;">
-          <select class="fi" style="width:110px;">
-            <option>상태 전체</option><option>운영중</option><option>Draft</option><option>중단</option>
-          </select>
           <div style="display:flex;border:1px solid #d9d9d9;border-radius:6px;overflow:hidden;margin-left:auto;">
             <button class="view-mode-btn active" data-mode="flat" onclick="switchListMode('flat')">📋 목록</button>
             <button class="view-mode-btn" data-mode="group" onclick="switchListMode('group')">📦 타겟 모음</button>
@@ -1288,7 +1288,6 @@ tbody tr:hover td { background: #fafafa; }
               <th>제목 · 범위</th>
               <th style="width:110px;">소유 조직</th>
               <th style="width:120px;">구성 블록</th>
-              <th style="width:70px;text-align:center;">상태</th>
               <th style="width:110px;">수정일시 ↓</th>
               <th style="width:130px;text-align:center;">관리</th>
             </tr>
@@ -1300,9 +1299,8 @@ tbody tr:hover td { background: #fafafa; }
               <td><div style="font-weight:600;">트립스토어만의 스페셜혜택 <span style="font-size:10px;background:#f0f5ff;color:#2f54eb;border-radius:3px;padding:1px 5px;margin-left:4px;">🌐 전체</span></div></td>
                             <td><span style="font-size:11px;padding:2px 8px;background:#f6ffed;color:#389e0d;border:1px solid #b7eb8f;border-radius:10px;font-weight:600;">🌐 전체</span></td>
               <td><span style="font-size:11px;color:rgba(0,0,0,0.55);">⭐ 혜택 2개</span></td>
-              <td style="text-align:center;"><span class="status-pill active">운영중</span></td>
               <td style="color:rgba(0,0,0,0.4);font-size:12px;">2026-04-22 14:30</td>
-              <td style="text-align:center;"><button class="btn btn-text btn-sm" onclick="showView('editor')">수정</button><button class="btn btn-text-danger btn-sm">중단</button></td>
+              <td style="text-align:center;"><button class="btn btn-text btn-sm" onclick="showView('editor')">수정</button><button class="btn btn-text-danger btn-sm" onclick="if(confirm('삭제 시 매칭되어 노출되던 항공권·숙박권·투어·티켓·보험에서 즉시 미표시됩니다. 진행하시겠어요?')){alert('삭제되었습니다.')}">삭제</button></td>
             </tr>
             <tr data-target="hotel_voucher">
               <td><div style="font-weight:600;font-size:12px;">🏨 숙박권 #103</div><div style="font-size:10px;color:rgba(0,0,0,0.4);">솔바이멜리아</div></td>
@@ -1310,9 +1308,8 @@ tbody tr:hover td { background: #fafafa; }
               <td><div style="font-weight:600;">BB 조식 포함사항 <span style="font-size:10px;background:#e6fffb;color:#13c2c2;border-radius:3px;padding:1px 5px;margin-left:4px;">🍽 식사=BB</span></div></td>
                             <td><span style="font-size:11px;padding:2px 8px;background:#f6ffed;color:#389e0d;border:1px solid #b7eb8f;border-radius:10px;font-weight:600;">🌐 전체</span></td>
               <td><span style="font-size:11px;color:rgba(0,0,0,0.55);">✓ 체크 3개</span></td>
-              <td style="text-align:center;"><span class="status-pill active">운영중</span></td>
               <td style="color:rgba(0,0,0,0.4);font-size:12px;">2026-04-21 10:00</td>
-              <td style="text-align:center;"><button class="btn btn-text btn-sm" onclick="showView('editor')">수정</button><button class="btn btn-text-danger btn-sm">중단</button></td>
+              <td style="text-align:center;"><button class="btn btn-text btn-sm" onclick="showView('editor')">수정</button><button class="btn btn-text-danger btn-sm" onclick="if(confirm('삭제 시 매칭되어 노출되던 항공권·숙박권·투어·티켓·보험에서 즉시 미표시됩니다. 진행하시겠어요?')){alert('삭제되었습니다.')}">삭제</button></td>
             </tr>
             <tr data-target="hotel_voucher">
               <td><div style="font-weight:600;font-size:12px;">🏨 숙박권 #103</div><div style="font-size:10px;color:rgba(0,0,0,0.4);">솔바이멜리아</div></td>
@@ -1320,9 +1317,8 @@ tbody tr:hover td { background: #fafafa; }
               <td><div style="font-weight:600;">얼리체크인 안내 <span style="font-size:10px;background:#fff2e8;color:#fa541c;border-radius:3px;padding:1px 5px;margin-left:4px;">⚙ 옵션=얼리체크인</span></div></td>
                             <td><span style="font-size:11px;padding:2px 8px;background:#f6ffed;color:#389e0d;border:1px solid #b7eb8f;border-radius:10px;font-weight:600;">🌐 전체</span></td>
               <td><span style="font-size:11px;color:rgba(0,0,0,0.55);">ℹ 안내 2개</span></td>
-              <td style="text-align:center;"><span class="status-pill active">운영중</span></td>
               <td style="color:rgba(0,0,0,0.4);font-size:12px;">2026-04-19 15:40</td>
-              <td style="text-align:center;"><button class="btn btn-text btn-sm" onclick="showView('editor')">수정</button><button class="btn btn-text-danger btn-sm">중단</button></td>
+              <td style="text-align:center;"><button class="btn btn-text btn-sm" onclick="showView('editor')">수정</button><button class="btn btn-text-danger btn-sm" onclick="if(confirm('삭제 시 매칭되어 노출되던 항공권·숙박권·투어·티켓·보험에서 즉시 미표시됩니다. 진행하시겠어요?')){alert('삭제되었습니다.')}">삭제</button></td>
             </tr>
             <tr data-target="hotel_voucher">
               <td><div style="font-weight:600;font-size:12px;">🏨 숙박권 #104</div><div style="font-size:10px;color:rgba(0,0,0,0.4);">씨셀스</div></td>
@@ -1330,9 +1326,8 @@ tbody tr:hover td { background: #fafafa; }
               <td><div style="font-weight:600;">씨셀스 푸꾸옥 소개</div></td>
                             <td><span style="font-size:11px;padding:2px 8px;background:#f0f5ff;color:#2f54eb;border:1px solid #adc6ff;border-radius:10px;font-weight:600;">🤝 TMG</span></td>
               <td><span style="font-size:11px;color:rgba(0,0,0,0.55);">📝 본문 · 🖼 이미지</span></td>
-              <td style="text-align:center;"><span class="status-pill draft">Draft</span></td>
               <td style="color:rgba(0,0,0,0.4);font-size:12px;">2026-05-30 18:00</td>
-              <td style="text-align:center;"><button class="btn btn-text btn-sm" onclick="showView('editor')">수정</button><button class="btn btn-primary btn-sm" style="background:#52c41a;border-color:#52c41a;">게시</button></td>
+              <td style="text-align:center;"><button class="btn btn-text btn-sm" onclick="showView('editor')">수정</button><button class="btn btn-text btn-sm" onclick="showView('editor')">상세</button></td>
             </tr>
             <tr data-target="flight_voucher">
               <td><div style="font-weight:600;font-size:12px;">✈️ 항공권 #A-247</div><div style="font-size:10px;color:rgba(0,0,0,0.4);">VN ICN↔PQC</div></td>
@@ -1340,9 +1335,8 @@ tbody tr:hover td { background: #fafafa; }
               <td><div style="font-weight:600;">베트남항공 이코노미 수하물 <span style="font-size:10px;background:#f0f5ff;color:#2f54eb;border-radius:3px;padding:1px 5px;margin-left:4px;">🌐 전체</span></div></td>
                             <td><span style="font-size:11px;padding:2px 8px;background:#f6ffed;color:#389e0d;border:1px solid #b7eb8f;border-radius:10px;font-weight:600;">🌐 전체</span></td>
               <td><span style="font-size:11px;color:rgba(0,0,0,0.55);">📊 표 (구분/무게/크기)</span></td>
-              <td style="text-align:center;"><span class="status-pill active">운영중</span></td>
               <td style="color:rgba(0,0,0,0.4);font-size:12px;">2026-04-18 09:00</td>
-              <td style="text-align:center;"><button class="btn btn-text btn-sm" onclick="showView('editor')">수정</button><button class="btn btn-text-danger btn-sm">중단</button></td>
+              <td style="text-align:center;"><button class="btn btn-text btn-sm" onclick="showView('editor')">수정</button><button class="btn btn-text-danger btn-sm" onclick="if(confirm('삭제 시 매칭되어 노출되던 항공권·숙박권·투어·티켓·보험에서 즉시 미표시됩니다. 진행하시겠어요?')){alert('삭제되었습니다.')}">삭제</button></td>
             </tr>
             <tr data-target="flight_voucher">
               <td><div style="font-weight:600;font-size:12px;">✈️ 항공권 #A-247</div><div style="font-size:10px;color:rgba(0,0,0,0.4);">VN ICN↔PQC</div></td>
@@ -1350,9 +1344,8 @@ tbody tr:hover td { background: #fafafa; }
               <td><div style="font-weight:600;">프리미엄 이코노미 혜택 <span style="font-size:10px;background:#f9f0ff;color:#722ed1;border-radius:3px;padding:1px 5px;margin-left:4px;">💺 좌석=프리미엄</span></div></td>
                             <td><span style="font-size:11px;padding:2px 8px;background:#f6ffed;color:#389e0d;border:1px solid #b7eb8f;border-radius:10px;font-weight:600;">🌐 전체</span></td>
               <td><span style="font-size:11px;color:rgba(0,0,0,0.55);">✓ 체크 3개</span></td>
-              <td style="text-align:center;"><span class="status-pill active">운영중</span></td>
               <td style="color:rgba(0,0,0,0.4);font-size:12px;">2026-04-17 14:00</td>
-              <td style="text-align:center;"><button class="btn btn-text btn-sm" onclick="showView('editor')">수정</button><button class="btn btn-text-danger btn-sm">중단</button></td>
+              <td style="text-align:center;"><button class="btn btn-text btn-sm" onclick="showView('editor')">수정</button><button class="btn btn-text-danger btn-sm" onclick="if(confirm('삭제 시 매칭되어 노출되던 항공권·숙박권·투어·티켓·보험에서 즉시 미표시됩니다. 진행하시겠어요?')){alert('삭제되었습니다.')}">삭제</button></td>
             </tr>
             <tr data-target="tour">
               <td><div style="font-weight:600;font-size:12px;">🎫 투어 #T-589</div><div style="font-size:10px;color:rgba(0,0,0,0.4);">호핑+케이블카</div></td>
@@ -1360,9 +1353,8 @@ tbody tr:hover td { background: #fafafa; }
               <td><div style="font-weight:600;">호핑투어 하이라이트 <span style="font-size:10px;background:#f0f5ff;color:#2f54eb;border-radius:3px;padding:1px 5px;margin-left:4px;">🌐 전체</span></div></td>
                             <td><span style="font-size:11px;padding:2px 8px;background:#f0f5ff;color:#2f54eb;border:1px solid #adc6ff;border-radius:10px;font-weight:600;">🤝 TMG</span></td>
               <td><span style="font-size:11px;color:rgba(0,0,0,0.55);">🎯 포인트 3개</span></td>
-              <td style="text-align:center;"><span class="status-pill active">운영중</span></td>
               <td style="color:rgba(0,0,0,0.4);font-size:12px;">2026-04-17 16:20</td>
-              <td style="text-align:center;"><button class="btn btn-text btn-sm" onclick="showView('editor')">수정</button><button class="btn btn-text-danger btn-sm">중단</button></td>
+              <td style="text-align:center;"><button class="btn btn-text btn-sm" onclick="showView('editor')">수정</button><button class="btn btn-text-danger btn-sm" onclick="if(confirm('삭제 시 매칭되어 노출되던 항공권·숙박권·투어·티켓·보험에서 즉시 미표시됩니다. 진행하시겠어요?')){alert('삭제되었습니다.')}">삭제</button></td>
             </tr>
             <tr data-target="tour">
               <td><div style="font-weight:600;font-size:12px;">🎫 투어 #T-401</div><div style="font-size:10px;color:rgba(0,0,0,0.4);">선셋 크루즈</div></td>
@@ -1370,9 +1362,8 @@ tbody tr:hover td { background: #fafafa; }
               <td><div style="font-weight:600;">선셋 크루즈 포함사항</div></td>
                             <td><span style="font-size:11px;padding:2px 8px;background:#f0f5ff;color:#2f54eb;border:1px solid #adc6ff;border-radius:10px;font-weight:600;">🤝 TMG</span></td>
               <td><span style="font-size:11px;color:rgba(0,0,0,0.55);">✓ 체크 4개</span></td>
-              <td style="text-align:center;"><span class="status-pill draft">Draft</span></td>
               <td style="color:rgba(0,0,0,0.4);font-size:12px;">2026-04-16 09:30</td>
-              <td style="text-align:center;"><button class="btn btn-text btn-sm" onclick="showView('editor')">수정</button><button class="btn btn-primary btn-sm" style="background:#52c41a;border-color:#52c41a;">게시</button></td>
+              <td style="text-align:center;"><button class="btn btn-text btn-sm" onclick="showView('editor')">수정</button><button class="btn btn-text btn-sm" onclick="showView('editor')">상세</button></td>
             </tr>
             <tr data-target="insurance">
               <td><div style="font-weight:600;font-size:12px;">🛡 보험 #I-021</div><div style="font-size:10px;color:rgba(0,0,0,0.4);">여행자보험 플러스</div></td>
@@ -1380,9 +1371,8 @@ tbody tr:hover td { background: #fafafa; }
               <td><div style="font-weight:600;">플러스 플랜 보장항목 <span style="font-size:10px;background:#f9f0ff;color:#722ed1;border-radius:3px;padding:1px 5px;margin-left:4px;">📋 플랜=플러스</span></div></td>
                             <td><span style="font-size:11px;padding:2px 8px;background:#f6ffed;color:#389e0d;border:1px solid #b7eb8f;border-radius:10px;font-weight:600;">🌐 전체</span></td>
               <td><span style="font-size:11px;color:rgba(0,0,0,0.55);">✓ 체크 4개</span></td>
-              <td style="text-align:center;"><span class="status-pill active">운영중</span></td>
               <td style="color:rgba(0,0,0,0.4);font-size:12px;">2026-05-15 11:20</td>
-              <td style="text-align:center;"><button class="btn btn-text btn-sm" onclick="showView('editor')">수정</button><button class="btn btn-text-danger btn-sm">중단</button></td>
+              <td style="text-align:center;"><button class="btn btn-text btn-sm" onclick="showView('editor')">수정</button><button class="btn btn-text-danger btn-sm" onclick="if(confirm('삭제 시 매칭되어 노출되던 항공권·숙박권·투어·티켓·보험에서 즉시 미표시됩니다. 진행하시겠어요?')){alert('삭제되었습니다.')}">삭제</button></td>
             </tr>
             <tr data-target="insurance">
               <td><div style="font-weight:600;font-size:12px;">🛡 보험 #I-021</div><div style="font-size:10px;color:rgba(0,0,0,0.4);">여행자보험 플러스</div></td>
@@ -1390,9 +1380,8 @@ tbody tr:hover td { background: #fafafa; }
               <td><div style="font-weight:600;">표준 면책 항목 <span style="font-size:10px;background:#f0f5ff;color:#2f54eb;border-radius:3px;padding:1px 5px;margin-left:4px;">🌐 전체</span></div></td>
                             <td><span style="font-size:11px;padding:2px 8px;background:#f6ffed;color:#389e0d;border:1px solid #b7eb8f;border-radius:10px;font-weight:600;">🌐 전체</span></td>
               <td><span style="font-size:11px;color:rgba(0,0,0,0.55);">✗ 체크 3개</span></td>
-              <td style="text-align:center;"><span class="status-pill active">운영중</span></td>
               <td style="color:rgba(0,0,0,0.4);font-size:12px;">2026-05-12 16:40</td>
-              <td style="text-align:center;"><button class="btn btn-text btn-sm" onclick="showView('editor')">수정</button><button class="btn btn-text-danger btn-sm">중단</button></td>
+              <td style="text-align:center;"><button class="btn btn-text btn-sm" onclick="showView('editor')">수정</button><button class="btn btn-text-danger btn-sm" onclick="if(confirm('삭제 시 매칭되어 노출되던 항공권·숙박권·투어·티켓·보험에서 즉시 미표시됩니다. 진행하시겠어요?')){alert('삭제되었습니다.')}">삭제</button></td>
             </tr>
             <tr data-target="org">
               <td><div style="font-weight:600;font-size:12px;">🏢 org</div><div style="font-size:10px;color:rgba(0,0,0,0.4);">트립스토어 전사</div></td>
@@ -1400,9 +1389,8 @@ tbody tr:hover td { background: #fafafa; }
               <td><div style="font-weight:600;">예약 표준 약관 4종</div></td>
                             <td><span style="font-size:11px;padding:2px 8px;background:#e6f4ff;color:#1677ff;border:1px solid #91caff;border-radius:10px;font-weight:600;">🏢 본사</span></td>
               <td><span style="font-size:11px;color:rgba(0,0,0,0.55);">ℹ 안내 4개</span></td>
-              <td style="text-align:center;"><span class="status-pill active">운영중</span></td>
               <td style="color:rgba(0,0,0,0.4);font-size:12px;">2026-04-05 10:00</td>
-              <td style="text-align:center;"><button class="btn btn-text btn-sm" onclick="showView('editor')">수정</button><button class="btn btn-text-danger btn-sm">중단</button></td>
+              <td style="text-align:center;"><button class="btn btn-text btn-sm" onclick="showView('editor')">수정</button><button class="btn btn-text-danger btn-sm" onclick="if(confirm('삭제 시 매칭되어 노출되던 항공권·숙박권·투어·티켓·보험에서 즉시 미표시됩니다. 진행하시겠어요?')){alert('삭제되었습니다.')}">삭제</button></td>
             </tr>
             <tr data-target="org">
               <td><div style="font-weight:600;font-size:12px;">🏢 org</div><div style="font-size:10px;color:rgba(0,0,0,0.4);">트립스토어 전사</div></td>
@@ -1410,9 +1398,8 @@ tbody tr:hover td { background: #fafafa; }
               <td><div style="font-weight:600;">표준 환불 정책</div></td>
                             <td><span style="font-size:11px;padding:2px 8px;background:#e6f4ff;color:#1677ff;border:1px solid #91caff;border-radius:10px;font-weight:600;">🏢 본사</span></td>
               <td><span style="font-size:11px;color:rgba(0,0,0,0.55);">✓ 체크 4개</span></td>
-              <td style="text-align:center;"><span class="status-pill active">운영중</span></td>
               <td style="color:rgba(0,0,0,0.4);font-size:12px;">2026-04-03 09:30</td>
-              <td style="text-align:center;"><button class="btn btn-text btn-sm" onclick="showView('editor')">수정</button><button class="btn btn-text-danger btn-sm">중단</button></td>
+              <td style="text-align:center;"><button class="btn btn-text btn-sm" onclick="showView('editor')">수정</button><button class="btn btn-text-danger btn-sm" onclick="if(confirm('삭제 시 매칭되어 노출되던 항공권·숙박권·투어·티켓·보험에서 즉시 미표시됩니다. 진행하시겠어요?')){alert('삭제되었습니다.')}">삭제</button></td>
             </tr>
             <tr data-target="org">
               <td><div style="font-weight:600;font-size:12px;">🏢 org</div><div style="font-size:10px;color:rgba(0,0,0,0.4);">트립스토어 전사</div></td>
@@ -1420,9 +1407,8 @@ tbody tr:hover td { background: #fafafa; }
               <td><div style="font-weight:600;">1인 예약 안내</div></td>
                             <td><span style="font-size:11px;padding:2px 8px;background:#e6f4ff;color:#1677ff;border:1px solid #91caff;border-radius:10px;font-weight:600;">🏢 본사</span></td>
               <td><span style="font-size:11px;color:rgba(0,0,0,0.55);">⚠️ 유의 3개</span></td>
-              <td style="text-align:center;"><span class="status-pill active">운영중</span></td>
               <td style="color:rgba(0,0,0,0.4);font-size:12px;">2026-04-03 09:30</td>
-              <td style="text-align:center;"><button class="btn btn-text btn-sm" onclick="showView('editor')">수정</button><button class="btn btn-text-danger btn-sm">중단</button></td>
+              <td style="text-align:center;"><button class="btn btn-text btn-sm" onclick="showView('editor')">수정</button><button class="btn btn-text-danger btn-sm" onclick="if(confirm('삭제 시 매칭되어 노출되던 항공권·숙박권·투어·티켓·보험에서 즉시 미표시됩니다. 진행하시겠어요?')){alert('삭제되었습니다.')}">삭제</button></td>
             </tr>
             <tr data-target="org">
               <td><div style="font-weight:600;font-size:12px;">🏢 org</div><div style="font-size:10px;color:rgba(0,0,0,0.4);">트립스토어 전사</div></td>
@@ -1430,9 +1416,8 @@ tbody tr:hover td { background: #fafafa; }
               <td><div style="font-weight:600;">예약 필수 FAQ</div></td>
                             <td><span style="font-size:11px;padding:2px 8px;background:#f6ffed;color:#389e0d;border:1px solid #b7eb8f;border-radius:10px;font-weight:600;">🌐 전체</span></td>
               <td><span style="font-size:11px;color:rgba(0,0,0,0.55);">❓ FAQ 8개</span></td>
-              <td style="text-align:center;"><span class="status-pill active">운영중</span></td>
               <td style="color:rgba(0,0,0,0.4);font-size:12px;">2026-04-01 11:15</td>
-              <td style="text-align:center;"><button class="btn btn-text btn-sm" onclick="showView('editor')">수정</button><button class="btn btn-text-danger btn-sm">중단</button></td>
+              <td style="text-align:center;"><button class="btn btn-text btn-sm" onclick="showView('editor')">수정</button><button class="btn btn-text-danger btn-sm" onclick="if(confirm('삭제 시 매칭되어 노출되던 항공권·숙박권·투어·티켓·보험에서 즉시 미표시됩니다. 진행하시겠어요?')){alert('삭제되었습니다.')}">삭제</button></td>
             </tr>
           </tbody>
         </table>
@@ -1467,7 +1452,7 @@ tbody tr:hover td { background: #fafafa; }
                 <div class="tgrp-progress"><div class="tgrp-bar"><div class="tgrp-bar-fill" style="width:25%;background:#faad14;"></div></div><span><strong>2</strong>/8</span></div>
               </div>
               <div class="tgrp-cats">
-                <div class="tgrp-cat" onclick="showView('editor')"><span class="tgrp-cat-status draft">D</span><span class="tgrp-cat-name">소개 <span style="font-size:10px;color:#d48806;">(Draft)</span></span><span class="tgrp-cat-action">편집 →</span></div>
+                <div class="tgrp-cat" onclick="showView('editor')"><span class="tgrp-cat-status filled">✓</span><span class="tgrp-cat-name">소개</span><span class="tgrp-cat-action">편집 →</span></div>
                 <div class="tgrp-cat" onclick="showView('editor')"><span class="tgrp-cat-status filled">✓</span><span class="tgrp-cat-name">스페셜혜택</span><span class="tgrp-cat-action">편집 →</span></div>
                 <div class="tgrp-cat empty" onclick="showView('editor')"><span class="tgrp-cat-status empty">+</span><span class="tgrp-cat-name">핵심포인트</span><span class="tgrp-cat-action">등록 →</span></div>
               </div>
