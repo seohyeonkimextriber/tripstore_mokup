@@ -235,7 +235,7 @@
         </div>
         <div class="section-body">
           <div class="info-row"><span class="info-label">트립 예약상태 <span style="font-size:10px;color:#999;">(legacy · status_on_management)</span></span><span class="info-value"><span class="badge green" id="status-on-management">예약완료</span></span></div>
-          <div class="info-row"><span class="info-label">rsv.status <span style="font-size:10px;color:#1565c0;">(신규 예약 원장)</span></span><span class="info-value"><span class="badge gray" id="status-rsv">출발대기</span></span></div>
+          <div class="info-row"><span class="info-label">rsv.status <span style="font-size:10px;color:#1565c0;">(신규 시스템)</span></span><span class="info-value"><span class="badge gray" id="status-rsv">출발대기</span></span></div>
           <div class="info-row"><span class="info-label">트립 결제상태</span><span class="info-value"><span class="badge blue" id="status-payment">결제완료</span></span></div>
           <div class="info-row"><span class="info-label">정산상태</span><span class="info-value"><span class="badge gray" id="status-settlement">정산대기</span></span></div>
           <div class="info-row"><span class="info-label">지급상태</span><span class="info-value"><span class="badge gray" id="status-payout">지급대기</span></span></div>
@@ -289,7 +289,7 @@
       </div>
     </div>
 
-    <!-- 4. 예약 금액 관리 (원장 기반) -->
+    <!-- 4. 예약 금액 관리 -->
     <div class="section">
       <div class="section-header">
         <h2>예약 금액 관리</h2>
@@ -329,7 +329,7 @@
         </div>
 
         <div class="highlight-box">
-          <strong>금액 직접 수정 불가</strong> — 모든 변동은 [+금액 추가] 또는 [−금액 차감]으로만 처리되며 신규 원장(1000/2000~/3000~)에 자동 기록됩니다.
+          <strong>금액 직접 수정 불가</strong> — 모든 변동은 [+금액 추가] 또는 [−금액 차감]으로만 처리되며 자동 기록됩니다.
         </div>
 
         <!-- ===== 상단 3-카드 요약 (예약금액 / 할인금액 / 위약금) ===== -->
@@ -413,21 +413,21 @@
         <div style="background:#e3f2fd;border:2px solid #1565c0;border-radius:8px;padding:12px 16px;margin-bottom:16px;display:flex;justify-content:space-between;align-items:center;">
           <div>
             <div style="font-size:11px;color:#1565c0;font-weight:700;margin-bottom:2px;">결제 필요 금액</div>
-            <div style="font-size:10px;color:#666;">= 상품금액(1000) − 할인(2000~/3000~) ± 조정(8000)</div>
+            <div style="font-size:10px;color:#666;">= 상품금액 − 할인 ± 조정</div>
           </div>
           <div style="font-family:monospace;font-weight:700;color:#1565c0;font-size:22px;" id="amount-need-pay">2,038,000</div>
         </div>
 
-        <!-- 원장 기반 예약금액 항목 (100/200/300) -->
+        <!-- 예약 금액 상세 -->
         <div class="subsection">
           <div class="subsection-title" style="display:flex;align-items:center;justify-content:space-between;">
-            <span>예약금액 원장 항목</span>
+            <span>예약 금액 상세</span>
             <label style="display:flex;align-items:center;gap:4px;font-size:11px;font-weight:400;cursor:pointer;background:#f5f5f5;padding:3px 8px;border-radius:4px;border:1px solid #e0e0e0;">
-              <input type="checkbox" onchange="toggleBasicPerPerson(this.checked)" id="basic-per-person-toggle"> 인원별
+              <input type="checkbox" onchange="toggleBasicPerPerson(this.checked)" id="basic-per-person-toggle" checked> 인원별
             </label>
           </div>
           <!-- 합산 보기 -->
-          <div id="basic-rsv-summary">
+          <div id="basic-rsv-summary" style="display:none;">
             <table id="discount-table">
               <thead><tr><th style="width:60px;">코드</th><th>항목</th><th>상세</th><th class="text-right">1인</th><th class="text-center">인원</th><th class="text-right">합계</th></tr></thead>
               <tbody id="discount-tbody">
@@ -456,8 +456,8 @@
             </table>
           </div>
 
-          <!-- 인원별 보기 (매트릭스) -->
-          <div id="basic-rsv-per-person" style="display:none;">
+          <!-- 인원별 보기 (매트릭스, 디폴트) -->
+          <div id="basic-rsv-per-person">
             <div style="overflow-x:auto;border:1px solid #e0e0e0;border-radius:8px;">
               <table style="width:100%;font-size:11px;border-collapse:collapse;min-width:880px;">
                 <thead>
@@ -557,11 +557,11 @@
         <div style="background:linear-gradient(135deg, #faf5ff 0%, #f3e8ff 100%); border:1px solid #c084fc; border-radius:8px; padding:12px 14px; margin-bottom:12px;">
           <div style="display:flex;align-items:center;gap:6px;margin-bottom:6px;">
             <span style="background:#7c3aed;color:#fff;font-size:9px;padding:2px 8px;border-radius:3px;font-weight:700;letter-spacing:0.3px;">🟢 1차 별도 트랙</span>
-            <span style="font-size:12px;font-weight:700;color:#6b21a8;">중복 할인 적용 구조 — 신규 원장 오픈과 동시</span>
+            <span style="font-size:12px;font-weight:700;color:#6b21a8;">중복 할인 적용 구조 — 신규 시스템 오픈과 동시</span>
           </div>
           <div style="font-size:11px;color:#581c87;line-height:1.65;">
-            한 예약에 <strong>여러 할인을 동시 적용</strong>할 수 있도록 쿠폰 시스템을 <strong>"할인 시스템"</strong>으로 확장합니다. Legacy 시스템은 구조상 중복할인 불가 → 신규 원장의 +/− 항목 누적 구조에서 자연스럽게 흡수.<br>
-            <span style="font-size:10px;color:#7e22ce;">담당: 재원님 · 6월 말 일정 합의 · 원장 오픈과 반드시 동시 오픈</span>
+            한 예약에 <strong>여러 할인을 동시 적용</strong>할 수 있도록 쿠폰 시스템을 <strong>"할인 시스템"</strong>으로 확장합니다. Legacy 시스템은 구조상 중복할인 불가 → 신규 시스템의 +/− 항목 누적 구조에서 자연스럽게 흡수.<br>
+            <span style="font-size:10px;color:#7e22ce;">담당: 재원님 · 6월 말 일정 합의 · 신규 시스템 오픈과 반드시 동시 오픈</span>
           </div>
         </div>
 
@@ -581,7 +581,7 @@
         <div class="coupon-card" style="margin-top:8px; background:#fafaf9; border:1px dashed #d4d4d8; opacity:0.85;">
           <div class="coupon-info">
             <div class="coupon-name">즉시결제할인 <span style="font-size:9px;background:#fef3c7;color:#92400e;padding:1px 6px;border-radius:3px;margin-left:4px;font-weight:700;">즉시할인</span> <span style="font-size:9px;background:#dcfce7;color:#166534;padding:1px 6px;border-radius:3px;margin-left:2px;font-weight:700;">1차 오픈 예정</span></div>
-            <div class="coupon-detail" style="color:#71717a;">결제 시점 즉시 적용 · 쿠폰과 <strong>중복 적용 가능</strong> · 원장 오픈과 동시 오픈</div>
+            <div class="coupon-detail" style="color:#71717a;">결제 시점 즉시 적용 · 쿠폰과 <strong>중복 적용 가능</strong> · 신규 시스템 오픈과 동시 오픈</div>
           </div>
           <div class="coupon-amount" style="color:#a1a1aa;font-style:italic;">예: -5,000</div>
         </div>
@@ -1297,7 +1297,7 @@
       <div style="background:#f5f5f5;border:1px solid #e0e0e0;border-radius:8px;padding:12px;margin-bottom:14px;">
         <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px;font-size:11px;">
           <div><div style="color:#888;margin-bottom:4px;">현재 트립 예약상태 <span style="color:#999;">(legacy)</span></div><span class="badge green" id="cur-status-mng">예약완료</span></div>
-          <div><div style="color:#888;margin-bottom:4px;">현재 rsv.status <span style="color:#1565c0;">(신규 원장)</span></div><span class="badge gray" id="cur-status-rsv">출발대기</span></div>
+          <div><div style="color:#888;margin-bottom:4px;">현재 rsv.status <span style="color:#1565c0;">(신규 시스템)</span></div><span class="badge gray" id="cur-status-rsv">출발대기</span></div>
           <div><div style="color:#888;margin-bottom:4px;">현재 결제상태</div><span class="badge blue" id="cur-status-pay">결제완료</span></div>
         </div>
         <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:10px;font-size:11px;margin-top:10px;border-top:1px dashed #d0d0d0;padding-top:10px;">
@@ -1548,9 +1548,9 @@
         </div>
       </div>
 
-      <!-- 원장 자동 생성 항목 -->
+      <!-- 자동 생성 항목 -->
       <div style="background:#f5f5f5;border-radius:8px;padding:12px;margin-bottom:16px;">
-        <div style="font-size:11px;font-weight:700;color:#888;margin-bottom:6px;">원장 자동 생성 항목</div>
+        <div style="font-size:11px;font-weight:700;color:#888;margin-bottom:6px;">자동 생성 항목</div>
         <div style="display:flex;flex-direction:column;gap:3px;font-size:11px;" id="cancel-ledger-items">
           <div style="display:flex;align-items:center;gap:6px;">
             <span class="code charge" style="padding:1px 6px;border-radius:3px;font-family:monospace;font-size:10px;font-weight:700;">100</span>
@@ -1774,7 +1774,7 @@
     <div class="modal-header"><h3>+ 인원 추가</h3><button class="close" onclick="this.closest('.modal-overlay').classList.remove('show')">&times;</button></div>
     <div class="modal-body">
       <div style="background:#e3f2fd;border-radius:8px;padding:10px 14px;font-size:12px;color:#1565c0;margin-bottom:16px;">
-        연령 구분 + 인원 수 조합을 여러 개 추가할 수 있습니다. 각 인원별 <strong>상품정가(100)</strong>와 <strong>특가할인(202)</strong>이 원장에 자동 생성됩니다.
+        연령 구분 + 인원 수 조합을 여러 개 추가할 수 있습니다. 각 인원별 <strong>상품정가</strong>와 <strong>특가할인</strong>이 자동 생성됩니다.
       </div>
 
       <!-- 추가 행 테이블 -->
@@ -1837,7 +1837,7 @@
     <div class="modal-header"><h3>- 인원 삭제</h3><button class="close" onclick="this.closest('.modal-overlay').classList.remove('show')">&times;</button></div>
     <div class="modal-body">
       <div style="background:#ffebee;border-radius:8px;padding:10px 14px;font-size:12px;color:#d32f2f;margin-bottom:16px;">
-        삭제할 인원을 선택하세요. 선택된 인원의 모든 원장 항목이 <strong>역분개(취소)</strong> 처리됩니다.<br>
+        삭제할 인원을 선택하세요. 선택된 인원의 모든 항목이 <strong>자동 취소 처리</strong>됩니다.<br>
         <span style="font-size:11px;opacity:0.8;">예약자도 삭제 가능. 전원 삭제 시 예약 전체 취소 흐름으로 전환됩니다.<br>
         삭제 후 자동으로 [+금액 추가] 모달이 열리며 취소위약금을 입력할 수 있습니다.</span>
       </div>
@@ -2003,7 +2003,7 @@
     <div class="modal-body">
       <div style="background:#e3f2fd;border-radius:8px;padding:10px 14px;font-size:12px;color:#1565c0;margin-bottom:16px;">
         할인/취소 등 고객에게 유리한 금액 변동 시 사용합니다. <strong>결제 필요 금액이 감소</strong>합니다.<br>
-        <span style="font-size:11px;opacity:0.8;">확인 시 원장에 해당 항목이 자동 생성됩니다.</span>
+        <span style="font-size:11px;opacity:0.8;">확인 시 해당 항목이 자동 생성됩니다.</span>
       </div>
       <div class="form-group">
         <label>대상 여행자</label>
@@ -2053,7 +2053,7 @@
 
       <!-- 원장 생성 예정 -->
       <div id="add-ledger-preview" style="display:none;background:#f5f5f5;border-radius:8px;padding:10px 12px;margin-top:10px;">
-        <div style="font-size:10px;font-weight:600;color:#888;margin-bottom:4px;">원장 자동 생성 항목</div>
+        <div style="font-size:10px;font-weight:600;color:#888;margin-bottom:4px;">자동 생성 항목</div>
         <div style="display:flex;align-items:center;gap:8px;font-size:11px;">
           <span style="background:#fce4ec;color:#880e4f;padding:1px 6px;border-radius:3px;font-family:monospace;font-size:10px;font-weight:700;" id="add-ledger-code">202</span>
           <span id="add-ledger-desc">추가할인</span>
@@ -2078,7 +2078,7 @@
     <div class="modal-body">
       <div style="background:#fff3e0;border-radius:8px;padding:10px 14px;font-size:12px;color:#e65100;margin-bottom:16px;">
         <strong>인원 취소에 따라서 발생하는 취소위약금이 있는 경우 금액을 입력해주세요.</strong><br>
-        <span style="font-size:11px;opacity:0.8;">위약금이 필요 없으면 모달을 닫으세요. 확인 시 원장에 해당 항목(800)이 자동 생성됩니다.</span>
+        <span style="font-size:11px;opacity:0.8;">위약금이 필요 없으면 모달을 닫으세요. 확인 시 해당 항목이 자동 생성됩니다.</span>
       </div>
       <div class="form-group">
         <label>대상 여행자</label>
@@ -2128,7 +2128,7 @@
 
       <!-- 원장 생성 예정 -->
       <div id="sub-ledger-preview" style="display:none;background:#f5f5f5;border-radius:8px;padding:10px 12px;margin-top:10px;">
-        <div style="font-size:10px;font-weight:600;color:#888;margin-bottom:4px;">원장 자동 생성 항목</div>
+        <div style="font-size:10px;font-weight:600;color:#888;margin-bottom:4px;">자동 생성 항목</div>
         <div style="display:flex;align-items:center;gap:8px;font-size:11px;">
           <span style="background:#e8eaf6;color:#283593;padding:1px 6px;border-radius:3px;font-family:monospace;font-size:10px;font-weight:700;" id="sub-ledger-code">202</span>
           <span id="sub-ledger-desc">할인 취소 (환수)</span>
@@ -2727,7 +2727,7 @@ function executeAddPax() {
   const tbody = document.getElementById('add-pax-tbody');
   while (tbody.children.length > 1) tbody.removeChild(tbody.lastChild);
 
-  showToast(`인원 추가 완료: ${msgs.join(', ')} → 원장에 상품정가(100) + 특가(202) 자동 생성`);
+  showToast(`인원 추가 완료: ${msgs.join(', ')} → 상품정가 + 특가 자동 생성`);
 }
 
 // --- 인원 삭제 ---
@@ -3848,7 +3848,7 @@ function executeAddPayment() {
   document.getElementById('addpay-ledger-preview').style.display = 'none';
   updateAddPaymentFields();
 
-  showToast(`결제 추가 완료: ${ownerName.split(' ')[0]} ${amount.toLocaleString()}원 (${extCode}) · 원장 ${code} 자동 생성`);
+  showToast(`결제 추가 완료: ${ownerName.split(' ')[0]} ${amount.toLocaleString()}원 (${extCode}) · 자동 기록`);
 }
 
 // 조정 반영된 전체 재계산
