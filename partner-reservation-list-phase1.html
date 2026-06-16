@@ -1,0 +1,408 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<title>파트너스 예약 목록 — Phase 1</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: -apple-system, BlinkMacSystemFont, 'Pretendard', sans-serif; background: #f5f7fa; color: #333; font-size: 13px; line-height: 1.5; }
+
+  /* ==== 파트너스 글로벌 네비 ==== */
+  .partner-nav { background: #fff; border-bottom: 1px solid #e0e0e0; padding: 0 32px; display: flex; align-items: center; height: 56px; position: sticky; top: 0; z-index: 100; }
+  .partner-logo { display: flex; align-items: center; gap: 8px; font-weight: 700; font-size: 14px; color: #1a1a1a; margin-right: 32px; }
+  .partner-logo .logo-mark { width: 32px; height: 32px; background: #1a1a1a; color: #fff; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-weight: 800; }
+  .partner-menu { display: flex; gap: 4px; flex: 1; }
+  .partner-menu a { padding: 8px 14px; color: #666; font-size: 13px; font-weight: 500; text-decoration: none; border-radius: 6px; }
+  .partner-menu a.active { color: #1a73e8; font-weight: 700; border-bottom: 2px solid #1a73e8; border-radius: 0; padding-bottom: 18px; margin-bottom: -18px; }
+  .partner-user { display: flex; align-items: center; gap: 8px; font-size: 12px; color: #666; }
+  .partner-user strong { color: #1a1a1a; font-weight: 700; }
+
+  .container { max-width: 1480px; margin: 0 auto; padding: 20px 32px; }
+
+  /* ==== 페이지 헤더 ==== */
+  .page-header { padding-bottom: 12px; margin-bottom: 16px; }
+  .breadcrumb { font-size: 11px; color: #888; margin-bottom: 6px; }
+  .page-title { font-size: 22px; font-weight: 700; color: #1a1a1a; }
+
+  /* ==== 서브탭 ==== */
+  .subtabs { display: flex; gap: 0; border-bottom: 1px solid #e0e0e0; margin-bottom: 16px; background: #fff; padding: 0 12px; border-radius: 10px 10px 0 0; box-shadow: 0 1px 3px rgba(0,0,0,0.04); }
+  .subtab { padding: 14px 24px; cursor: pointer; font-size: 13px; font-weight: 500; color: #666; border-bottom: 3px solid transparent; margin-bottom: -1px; display: flex; align-items: center; gap: 6px; }
+  .subtab.active { color: #1a73e8; font-weight: 700; border-bottom-color: #1a73e8; }
+  .subtab .count { font-size: 11px; color: #888; font-weight: 500; }
+  .subtab.active .count { color: #1a73e8; }
+  .subtab.urgent .count { color: #d32f2f; font-weight: 700; }
+
+  /* ==== 필터 박스 ==== */
+  .filter-box { background: #fff; border: 1px solid #cfe2ff; border-radius: 10px; padding: 16px; margin-bottom: 16px; }
+  .filter-grid { display: grid; grid-template-columns: repeat(8, 1fr); gap: 12px; margin-bottom: 12px; }
+  .filter-grid-2 { display: grid; grid-template-columns: repeat(7, 1fr) auto; gap: 12px; align-items: end; }
+  .filter-cell { display: flex; flex-direction: column; }
+  .filter-cell label { font-size: 11px; color: #666; font-weight: 600; margin-bottom: 4px; }
+  .filter-cell input, .filter-cell select { padding: 7px 10px; border: 1px solid #d0d0d0; border-radius: 6px; font-size: 12px; background: #fff; }
+  .filter-cell input::placeholder, .filter-cell select { color: #aaa; }
+  .filter-actions { display: flex; gap: 6px; align-items: center; }
+
+  /* ==== 버튼 ==== */
+  .btn { padding: 7px 14px; border-radius: 6px; font-size: 12px; font-weight: 600; cursor: pointer; border: 1px solid transparent; background: #fff; transition: all 0.15s; white-space: nowrap; }
+  .btn-sm { padding: 5px 10px; font-size: 11px; }
+  .btn-primary { background: #1a73e8; color: #fff; border-color: #1a73e8; }
+  .btn-primary:hover { background: #1557b0; }
+  .btn-dark { background: #1a1a1a; color: #fff; border-color: #1a1a1a; }
+  .btn-outline { background: #fff; color: #333; border-color: #d0d0d0; }
+  .btn-outline:hover { background: #f5f5f5; }
+  .btn-success { background: #2e7d32; color: #fff; border-color: #2e7d32; }
+  .btn-warn { background: #f57c00; color: #fff; border-color: #f57c00; }
+  .btn-danger { background: #d32f2f; color: #fff; border-color: #d32f2f; }
+
+  /* ==== 액션 바 ==== */
+  .action-bar { background: #fff; border: 1px solid #e0e0e0; border-radius: 10px; padding: 12px 16px; margin-bottom: 12px; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 8px; }
+  .action-bar .left { display: flex; align-items: center; gap: 14px; }
+  .action-bar .count-label { font-size: 13px; font-weight: 600; color: #333; }
+  .action-bar .count-label strong { color: #1a73e8; }
+  .action-bar .right { display: flex; align-items: center; gap: 6px; }
+  .selected-count { font-size: 12px; color: #666; }
+  .selected-count strong { color: #1a73e8; }
+  .toggle-chk { display: flex; align-items: center; gap: 6px; font-size: 12px; color: #5d4037; background: #fff8e1; border: 1px solid #ffc107; padding: 4px 10px; border-radius: 6px; cursor: pointer; }
+
+  /* ==== 테이블 ==== */
+  .table-wrap { background: #fff; border-radius: 10px; box-shadow: 0 1px 3px rgba(0,0,0,0.04); overflow: hidden; }
+  table.list { width: 100%; border-collapse: collapse; font-size: 12px; }
+  table.list thead { background: #fafbfc; border-bottom: 2px solid #e0e0e0; }
+  table.list th { padding: 12px 8px; text-align: left; font-size: 11px; font-weight: 700; color: #555; white-space: nowrap; }
+  table.list td { padding: 12px 8px; border-bottom: 1px solid #f0f0f0; vertical-align: middle; }
+  table.list tr:hover { background: #fafafa; }
+  table.list tr.unpaid { background: #fffbe6; }
+  table.list tr.unpaid:hover { background: #fff8d0; }
+  table.list .text-right { text-align: right; }
+  table.list .text-center { text-align: center; }
+  table.list .text-mono { font-family: monospace; }
+  table.list a.link { color: #1a73e8; text-decoration: none; font-weight: 600; }
+  table.list a.link:hover { text-decoration: underline; }
+
+  /* ==== 배지 ==== */
+  .badge { font-size: 10px; padding: 2px 8px; border-radius: 4px; font-weight: 700; display: inline-block; }
+  .badge.green { background: #e8f5e9; color: #2e7d32; }
+  .badge.blue { background: #e3f2fd; color: #1565c0; }
+  .badge.orange { background: #fff3e0; color: #e65100; }
+  .badge.red { background: #ffebee; color: #c62828; }
+  .badge.gray { background: #f5f5f5; color: #666; }
+  .badge.purple { background: #f3e8ff; color: #6b21a8; }
+  .badge.outline { background: #fff; border: 1px solid #d0d0d0; color: #666; }
+
+  /* sub-status indicator */
+  .sub-progress { display: inline-flex; gap: 2px; margin-left: 6px; vertical-align: middle; }
+  .sub-progress .dot { width: 6px; height: 6px; border-radius: 50%; background: #e0e0e0; }
+  .sub-progress .dot.done { background: #2e7d32; }
+  .sub-progress .dot.active { background: #f57c00; }
+
+  /* paid indicator */
+  .paid-state { display: inline-flex; align-items: center; gap: 4px; }
+  .paid-state.unpaid { color: #c62828; font-weight: 700; }
+  .paid-state.partial { color: #e65100; font-weight: 600; }
+  .paid-state.done { color: #2e7d32; }
+
+  /* ==== Pagination ==== */
+  .pagination { display: flex; justify-content: center; align-items: center; gap: 6px; padding: 16px 0; }
+  .pagination button { background: #fff; border: 1px solid #d0d0d0; padding: 6px 10px; border-radius: 6px; font-size: 12px; cursor: pointer; min-width: 32px; }
+  .pagination button.active { background: #1a73e8; color: #fff; border-color: #1a73e8; }
+
+  /* ==== Compare 배너 ==== */
+  .compare-banner { background: linear-gradient(135deg, #f0f7ff 0%, #e3f2fd 100%); border: 1px solid #90caf9; border-radius: 10px; padding: 12px 16px; margin-bottom: 16px; font-size: 11px; color: #0d47a1; }
+  .compare-banner a { color: #1a73e8; font-weight: 600; }
+</style>
+</head>
+<body>
+
+<!-- ==================== 파트너스 글로벌 네비 ==================== -->
+<div class="partner-nav">
+  <div class="partner-logo">
+    <div class="logo-mark">E</div>
+    <div>트립<br><span style="font-size:11px;font-weight:500;">파트너스</span></div>
+  </div>
+  <nav class="partner-menu">
+    <a href="#">상품관리</a>
+    <a href="#" class="active">예약관리</a>
+    <a href="#">업무요청</a>
+    <a href="#">정산관리</a>
+    <a href="#">게시판</a>
+    <a href="#">리포트</a>
+    <a href="#">계정관리</a>
+    <a href="#">권역별 예약금 설정</a>
+  </nav>
+  <div class="partner-user">
+    <span>참좋은여행</span> · <strong>참좋은여행TS</strong> 님 반가워요!
+    <span style="margin-left:6px;">👤</span>
+  </div>
+</div>
+
+<div class="container">
+
+  <!-- 비교 배너 -->
+  <div class="compare-banner">
+    🚦 <strong>파트너스 예약 목록</strong>은 여행사 관점입니다. 어드민 화면 ↔ <a href="./reservation-detail-phase1.html">어드민 예약 상세</a> · 파트너스 상세 ↔ <a href="./partner-reservation-detail-phase1.html">파트너스 예약 상세</a>
+  </div>
+
+  <!-- 페이지 헤더 -->
+  <div class="page-header">
+    <div class="breadcrumb">예약관리</div>
+    <div class="page-title">예약관리</div>
+  </div>
+
+  <!-- 서브탭 -->
+  <div class="subtabs">
+    <div class="subtab active urgent" onclick="switchSubtab(this, '예약접수')">
+      예약접수 <span class="count">(2)</span>
+    </div>
+    <div class="subtab" onclick="switchSubtab(this, '예약완료')">
+      예약완료 <span class="count">(375)</span>
+    </div>
+    <div class="subtab" onclick="switchSubtab(this, '취소요청')">
+      취소요청 <span class="count">(0)</span>
+    </div>
+    <div class="subtab" onclick="switchSubtab(this, '예약취소')">
+      예약취소 <span class="count">(12)</span>
+    </div>
+    <div class="subtab" onclick="switchSubtab(this, '출발완료')">
+      출발완료 <span class="count">(1,840)</span>
+    </div>
+    <div class="subtab" onclick="switchSubtab(this, '전체예약')">
+      전체예약 <span class="count">(2,229)</span>
+    </div>
+  </div>
+
+  <!-- 필터 -->
+  <div class="filter-box">
+    <div class="filter-grid">
+      <div class="filter-cell">
+        <label>예약채널</label>
+        <select><option>전체</option><option>트립스토어</option><option>SSG</option><option>11번가</option><option>NOL</option></select>
+      </div>
+      <div class="filter-cell">
+        <label>결제유형</label>
+        <select><option>전체</option><option>전액결제</option><option>예약금결제</option><option>나중에결제</option><option>여행사결제</option></select>
+      </div>
+      <div class="filter-cell">
+        <label>결제상태</label>
+        <select><option>전체</option><option>결제대기</option><option>결제진행</option><option>결제완료</option><option>환불대기</option><option>환불완료</option></select>
+      </div>
+      <div class="filter-cell">
+        <label>예약번호</label>
+        <input type="text" placeholder="예약번호">
+      </div>
+      <div class="filter-cell">
+        <label>채널사 주문번호</label>
+        <input type="text" placeholder="채널사 주문번호">
+      </div>
+      <div class="filter-cell">
+        <label>국가</label>
+        <input type="text" placeholder="국가">
+      </div>
+      <div class="filter-cell">
+        <label>여행지</label>
+        <input type="text" placeholder="여행지">
+      </div>
+      <div class="filter-cell">
+        <label>예약자명</label>
+        <input type="text" placeholder="예약자명">
+      </div>
+    </div>
+    <div class="filter-grid-2">
+      <div class="filter-cell">
+        <label>연락처</label>
+        <input type="text" placeholder="연락처">
+      </div>
+      <div class="filter-cell">
+        <label>상품코드</label>
+        <input type="text" placeholder="상품코드">
+      </div>
+      <div class="filter-cell">
+        <label>행사코드</label>
+        <input type="text" placeholder="행사코드">
+      </div>
+      <div class="filter-cell">
+        <label>행사명</label>
+        <input type="text" placeholder="행사명">
+      </div>
+      <div class="filter-cell">
+        <label>출발기간</label>
+        <input type="text" placeholder="출발일(기간) →">
+      </div>
+      <div class="filter-cell">
+        <label>예약기간</label>
+        <input type="text" placeholder="예약일(기간) →">
+      </div>
+      <div class="filter-actions">
+        <button class="btn btn-dark">🔍 검색</button>
+        <button class="btn btn-outline">엑셀 ▾</button>
+        <button class="btn btn-outline">초기화</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 액션 바 -->
+  <div class="action-bar">
+    <div class="left">
+      <span class="count-label">총 예약건: <strong>2건</strong></span>
+      <span class="selected-count"><strong id="selected-num">0</strong>개 예약이 선택되었습니다.</span>
+      <button class="btn btn-success btn-sm" id="bulk-complete-btn" disabled style="opacity:0.4;cursor:not-allowed;">예약완료 상태로 변경</button>
+      <label class="toggle-chk">
+        <input type="checkbox" id="unpaid-only" onchange="toggleUnpaid(this.checked)">
+        무통장 미입금 건 표시
+      </label>
+    </div>
+    <div class="right">
+      <button class="btn btn-outline btn-sm">컬럼 사용자화</button>
+    </div>
+  </div>
+
+  <!-- 테이블 -->
+  <div class="table-wrap">
+    <table class="list">
+      <thead>
+        <tr>
+          <th style="width:32px;text-align:center;"><input type="checkbox" id="check-all" onclick="toggleAll(this.checked)"></th>
+          <th style="width:90px;">예약상태</th>
+          <th style="width:120px;">예약번호</th>
+          <th style="width:120px;">채널 주문번호</th>
+          <th style="width:90px;">예약자</th>
+          <th style="width:110px;">연락처</th>
+          <th>여행지 / 행사명</th>
+          <th style="width:60px;text-align:center;">인원</th>
+          <th style="width:100px;">출도착일</th>
+          <th style="width:110px;text-align:right;">판매금액</th>
+          <th style="width:100px;text-align:center;">결제상태</th>
+          <th style="width:110px;">예약일시</th>
+        </tr>
+      </thead>
+      <tbody id="list-body">
+
+        <!-- ROW 1: 예약접수 + 미입금 -->
+        <tr class="unpaid" data-status="예약접수" data-unpaid="true">
+          <td class="text-center"><input type="checkbox" class="row-chk" onchange="updateSelected()"></td>
+          <td>
+            <span class="badge orange">예약접수</span>
+            <div class="sub-progress" title="① 고객확인 ② 출발가능 ③ 잔액결제">
+              <span class="dot active" title="고객확인"></span>
+              <span class="dot" title="출발가능"></span>
+              <span class="dot" title="잔액결제"></span>
+            </div>
+          </td>
+          <td><a href="./partner-reservation-detail-phase1.html" class="link text-mono">HB2633517226</a></td>
+          <td class="text-mono" style="color:#888;">-</td>
+          <td>오기웅</td>
+          <td class="text-mono">010-2374-8449</td>
+          <td>
+            <div style="font-weight:600;">상하이 자유여행 4일 #하버플라자</div>
+            <div style="font-size:10px;color:#888;margin-top:2px;">CCB101260606CZ2 · 중국남방항공 · 인천출발</div>
+          </td>
+          <td class="text-center">3</td>
+          <td class="text-mono">06-06 → 06-09</td>
+          <td class="text-right text-mono"><strong>2,038,000</strong></td>
+          <td class="text-center">
+            <span class="paid-state partial">결제진행</span>
+            <div style="font-size:9px;color:#c62828;font-weight:700;margin-top:2px;">잔액 1,838,000 미입금</div>
+          </td>
+          <td class="text-mono" style="font-size:11px;">2026-04-07 08:43</td>
+        </tr>
+
+        <!-- ROW 2: 예약접수, 결제완료 -->
+        <tr data-status="예약접수" data-unpaid="false">
+          <td class="text-center"><input type="checkbox" class="row-chk" onchange="updateSelected()"></td>
+          <td>
+            <span class="badge orange">예약접수</span>
+            <div class="sub-progress">
+              <span class="dot done"></span>
+              <span class="dot done"></span>
+              <span class="dot done"></span>
+            </div>
+          </td>
+          <td><a href="./partner-reservation-detail-phase1.html" class="link text-mono">HB2633517512</a></td>
+          <td class="text-mono">SSG-2026040712</td>
+          <td>김민지</td>
+          <td class="text-mono">010-8821-3344</td>
+          <td>
+            <div style="font-weight:600;">방콕/파타야 5일 #센타라그랜드</div>
+            <div style="font-size:10px;color:#888;margin-top:2px;">CCB201260710TG3 · 타이항공 · 인천출발</div>
+          </td>
+          <td class="text-center">2</td>
+          <td class="text-mono">07-10 → 07-14</td>
+          <td class="text-right text-mono"><strong>1,580,000</strong></td>
+          <td class="text-center">
+            <span class="paid-state done">결제완료</span>
+          </td>
+          <td class="text-mono" style="font-size:11px;">2026-04-07 11:22</td>
+        </tr>
+
+      </tbody>
+    </table>
+  </div>
+
+  <!-- 페이지네이션 -->
+  <div class="pagination">
+    <button>‹</button>
+    <button class="active">1</button>
+    <button>›</button>
+  </div>
+
+</div>
+
+<script>
+function switchSubtab(el, status) {
+  document.querySelectorAll('.subtab').forEach(t => t.classList.remove('active'));
+  el.classList.add('active');
+  // 데모용: 탭 변경 시 row 필터링 흉내
+  const rows = document.querySelectorAll('#list-body tr');
+  let visible = 0;
+  rows.forEach(r => {
+    if (status === '전체예약') { r.style.display = ''; visible++; return; }
+    if (r.dataset.status === status) { r.style.display = ''; visible++; }
+    else { r.style.display = 'none'; }
+  });
+  // 무통장 미입금 체크 초기화
+  document.getElementById('unpaid-only').checked = false;
+  document.getElementById('check-all').checked = false;
+  document.querySelectorAll('.row-chk').forEach(c => c.checked = false);
+  updateSelected();
+}
+
+function toggleUnpaid(checked) {
+  const rows = document.querySelectorAll('#list-body tr');
+  rows.forEach(r => {
+    if (!checked) { r.style.display = ''; return; }
+    if (r.dataset.unpaid === 'true') r.style.display = '';
+    else r.style.display = 'none';
+  });
+}
+
+function toggleAll(checked) {
+  document.querySelectorAll('.row-chk').forEach(c => {
+    const row = c.closest('tr');
+    if (row.style.display !== 'none') c.checked = checked;
+  });
+  updateSelected();
+}
+
+function updateSelected() {
+  const n = document.querySelectorAll('.row-chk:checked').length;
+  document.getElementById('selected-num').textContent = n;
+  const btn = document.getElementById('bulk-complete-btn');
+  if (n > 0) {
+    btn.disabled = false;
+    btn.style.opacity = '1';
+    btn.style.cursor = 'pointer';
+  } else {
+    btn.disabled = true;
+    btn.style.opacity = '0.4';
+    btn.style.cursor = 'not-allowed';
+  }
+}
+
+document.getElementById('bulk-complete-btn').addEventListener('click', function() {
+  const n = document.querySelectorAll('.row-chk:checked').length;
+  if (n === 0) return;
+  if (!confirm(`${n}건을 [예약완료] 상태로 변경하시겠습니까?\n\n각 건의 고객확인 / 출발가능 / 잔액결제가 모두 완료되었는지 확인 후 진행하세요.`)) return;
+  alert(`${n}건이 예약완료 처리되었습니다. (목업)`);
+});
+</script>
+</body>
+</html>
