@@ -1,0 +1,613 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<title>예약상태 정의 — 옵션1 vs 옵션2 비교</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: -apple-system, BlinkMacSystemFont, 'Pretendard', sans-serif; background: #f5f7fa; color: #333; font-size: 14px; line-height: 1.6; }
+
+  /* ==== 헤더 ==== */
+  .hero { background: linear-gradient(135deg, #1a73e8 0%, #0d47a1 100%); color: #fff; padding: 36px 32px; }
+  .hero-inner { max-width: 1280px; margin: 0 auto; }
+  .hero .tag { display: inline-block; background: rgba(255,255,255,0.2); padding: 4px 12px; border-radius: 999px; font-size: 11px; font-weight: 600; margin-bottom: 10px; }
+  .hero h1 { font-size: 26px; font-weight: 800; margin-bottom: 6px; }
+  .hero .sub { font-size: 13px; opacity: 0.92; max-width: 800px; }
+
+  /* ==== 컨테이너 ==== */
+  .container { max-width: 1280px; margin: 0 auto; padding: 28px 32px; }
+
+  /* ==== 핵심 질문 박스 ==== */
+  .key-q { background: #fff; border: 2px solid #ffc107; border-radius: 14px; padding: 20px 24px; margin-bottom: 24px; }
+  .key-q .tag { font-size: 11px; font-weight: 800; color: #e65100; letter-spacing: 1px; margin-bottom: 6px; }
+  .key-q .msg { font-size: 16px; font-weight: 700; color: #1a1a1a; line-height: 1.5; }
+  .key-q .msg strong { background: #fff8e1; padding: 0 6px; border-radius: 4px; }
+
+  /* ==== 옵션 카드 (좌우 비교) ==== */
+  .option-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 24px; }
+  .option-card { background: #fff; border-radius: 14px; padding: 26px 28px; box-shadow: 0 2px 12px rgba(0,0,0,0.04); border-top: 4px solid #d0d0d0; }
+  .option-card.opt1 { border-top-color: #1a73e8; }
+  .option-card.opt2 { border-top-color: #7c3aed; }
+  .opt-header { display: flex; align-items: center; gap: 10px; margin-bottom: 14px; }
+  .opt-header .num { background: #1a73e8; color: #fff; width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 13px; }
+  .opt-card.opt2 .opt-header .num, .option-card.opt2 .opt-header .num { background: #7c3aed; }
+  .opt-header .title { font-size: 18px; font-weight: 800; }
+  .opt-header .sub { font-size: 12px; color: #888; font-weight: 500; }
+  .opt-summary { padding: 14px; background: #fafbfc; border-radius: 8px; margin-bottom: 16px; font-size: 13px; color: #333; line-height: 1.6; border-left: 4px solid #1a73e8; }
+  .option-card.opt2 .opt-summary { border-left-color: #7c3aed; }
+
+  /* ==== 상태 흐름 (좁은 버전) ==== */
+  .flow-mini { display: flex; align-items: center; gap: 4px; margin: 14px 0; flex-wrap: wrap; }
+  .flow-pill { padding: 8px 12px; background: #fff; border: 2px solid #d0d0d0; border-radius: 8px; font-size: 12px; font-weight: 700; text-align: center; }
+  .flow-pill.start { border-color: #f57c00; background: #fff8e1; color: #e65100; }
+  .flow-pill.mid { border-color: #1a73e8; background: #e3f2fd; color: #1565c0; }
+  .flow-pill.wait { border-color: #7c3aed; background: #f3e8ff; color: #6b21a8; }
+  .flow-pill.done { border-color: #2e7d32; background: #e8f5e9; color: #2e7d32; }
+  .flow-pill .micro { font-size: 9px; color: #888; font-weight: 500; display: block; }
+  .flow-sep { color: #1a73e8; font-weight: 800; font-size: 16px; }
+  .flow-sep .cond { font-size: 9px; display: block; color: #888; font-weight: 700; white-space: nowrap; }
+
+  /* ==== 정의 표 ==== */
+  table.def { width: 100%; border-collapse: collapse; margin: 14px 0; font-size: 12px; }
+  table.def th { background: #fafbfc; padding: 10px 8px; text-align: left; font-weight: 700; color: #555; border-bottom: 2px solid #e0e0e0; }
+  table.def td { padding: 10px 8px; border-bottom: 1px solid #f0f0f0; vertical-align: top; }
+  table.def .status { font-weight: 700; }
+  table.def .status.s1 { color: #e65100; }
+  table.def .status.s2 { color: #1565c0; }
+  table.def .status.s3 { color: #6b21a8; }
+  table.def .status.s4 { color: #2e7d32; }
+  table.def .auto { font-size: 9px; background: #2e7d32; color: #fff; padding: 1px 5px; border-radius: 3px; margin-left: 4px; font-weight: 700; }
+  table.def .manual { font-size: 9px; background: #f57c00; color: #fff; padding: 1px 5px; border-radius: 3px; margin-left: 4px; font-weight: 700; }
+
+  /* ==== 장단점 ==== */
+  .prosconsmod { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 14px; }
+  .pc-box { padding: 14px; border-radius: 8px; font-size: 12px; line-height: 1.6; }
+  .pc-box.pros { background: #e8f5e9; }
+  .pc-box.cons { background: #ffebee; }
+  .pc-box .ph { font-size: 11px; font-weight: 800; margin-bottom: 6px; }
+  .pc-box.pros .ph { color: #1b5e20; }
+  .pc-box.cons .ph { color: #b71c1c; }
+  .pc-box ul { list-style: none; padding: 0; }
+  .pc-box li { padding: 3px 0; padding-left: 16px; position: relative; }
+  .pc-box.pros li::before { content: "✓"; position: absolute; left: 0; color: #2e7d32; font-weight: 800; }
+  .pc-box.cons li::before { content: "✗"; position: absolute; left: 0; color: #c62828; font-weight: 800; }
+
+  /* ==== 화면 시안 (브라우저 mockup) ==== */
+  .screen-section { background: #fff; border-radius: 14px; padding: 24px 28px; margin-bottom: 24px; box-shadow: 0 2px 12px rgba(0,0,0,0.04); }
+  .screen-section h3 { font-size: 16px; font-weight: 800; margin-bottom: 4px; }
+  .screen-section .lead { font-size: 12px; color: #888; margin-bottom: 16px; }
+  .browser-bar { background: #f0f0f0; padding: 8px 12px; border-radius: 8px 8px 0 0; display: flex; align-items: center; gap: 6px; border: 1px solid #e0e0e0; border-bottom: none; }
+  .browser-bar .dot { width: 10px; height: 10px; border-radius: 50%; }
+  .browser-bar .red { background: #ff5f57; }
+  .browser-bar .yellow { background: #febc2e; }
+  .browser-bar .green { background: #28c840; }
+  .browser-bar .url { background: #fff; flex: 1; padding: 3px 10px; border-radius: 4px; font-size: 10px; color: #666; margin-left: 10px; font-family: monospace; }
+  .screen-frame { border: 1px solid #e0e0e0; border-radius: 0 0 8px 8px; overflow: hidden; }
+
+  /* ==== 미니 파트너스 화면 ==== */
+  .mini-page { background: #fff; padding: 18px 22px; font-size: 11px; }
+  .mini-title { font-size: 16px; font-weight: 700; margin-bottom: 14px; }
+  .mini-tabs { display: flex; gap: 0; border-bottom: 1px solid #e0e0e0; margin-bottom: 14px; }
+  .mini-tab { padding: 10px 14px; cursor: pointer; font-size: 11px; font-weight: 500; color: #666; border-bottom: 2px solid transparent; margin-bottom: -1px; }
+  .mini-tab.active { color: #1a73e8; font-weight: 700; border-bottom-color: #1a73e8; }
+  .mini-tab.new { color: #7c3aed; font-weight: 700; position: relative; }
+  .mini-tab.new::after { content: "NEW"; position: absolute; top: -2px; right: -2px; background: #d32f2f; color: #fff; font-size: 8px; padding: 1px 4px; border-radius: 3px; font-weight: 800; }
+  .mini-tab .ct { font-size: 10px; color: #888; }
+  .mini-tab.active .ct { color: #1a73e8; }
+  .mini-tab.new .ct { color: #7c3aed; }
+
+  /* sub-status pill */
+  .sub-pills { display: flex; gap: 6px; padding: 12px 0; flex-wrap: wrap; }
+  .sub-pill-x { padding: 5px 12px; background: #fff; border: 1px solid #d0d0d0; border-radius: 999px; font-size: 11px; font-weight: 600; color: #666; cursor: pointer; }
+  .sub-pill-x.active { background: #7c3aed; color: #fff; border-color: #7c3aed; }
+  .sub-pill-x.flag1 { background: #fff8e1; border-color: #ffc107; color: #e65100; }
+  .sub-pill-x.flag1.active { background: #f57c00; color: #fff; border-color: #f57c00; }
+  .sub-pill-x.flag2 { background: #ffebee; border-color: #ef5350; color: #c62828; }
+  .sub-pill-x.flag2.active { background: #d32f2f; color: #fff; border-color: #d32f2f; }
+  .sub-pill-x .ct { font-size: 10px; opacity: 0.9; margin-left: 4px; }
+
+  .mini-filters { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 12px; }
+  .mini-fil { padding: 5px 9px; background: #fafbfc; border: 1px solid #e0e0e0; border-radius: 5px; font-size: 10px; color: #888; }
+
+  .mini-action-bar { display: flex; align-items: center; justify-content: space-between; padding: 8px 12px; background: #fafbfc; border: 1px solid #e0e0e0; border-radius: 6px; margin-bottom: 8px; font-size: 11px; }
+  .mini-action-bar button { padding: 4px 10px; background: #fff; border: 1px solid #d0d0d0; border-radius: 4px; font-size: 10px; font-weight: 600; cursor: pointer; }
+  .mini-action-bar button.primary { background: #1a73e8; color: #fff; border-color: #1a73e8; }
+  .mini-action-bar button.success { background: #2e7d32; color: #fff; border-color: #2e7d32; }
+
+  /* 미니 테이블 */
+  table.mini { width: 100%; border-collapse: collapse; font-size: 10px; }
+  table.mini th { background: #fafbfc; padding: 6px 6px; text-align: left; border-bottom: 1px solid #e0e0e0; font-size: 10px; font-weight: 700; color: #666; }
+  table.mini td { padding: 7px 6px; border-bottom: 1px solid #f0f0f0; vertical-align: middle; }
+  table.mini .badge-mini { font-size: 9px; padding: 1px 5px; border-radius: 3px; font-weight: 700; }
+  table.mini .b-recv { background: #fff3e0; color: #e65100; }
+  table.mini .b-done { background: #e8f5e9; color: #2e7d32; }
+  table.mini .b-wait { background: #f3e8ff; color: #6b21a8; }
+  table.mini .b-dep { background: #e3f2fd; color: #1565c0; }
+  table.mini .b-flag1 { background: #fff8e1; color: #e65100; }
+  table.mini .b-flag2 { background: #ffebee; color: #c62828; }
+  table.mini .sub-mini { display: inline-flex; gap: 2px; margin-left: 4px; }
+  table.mini .sub-mini .d { width: 6px; height: 6px; border-radius: 50%; background: #e0e0e0; display: inline-block; }
+  table.mini .sub-mini .d.on { background: #2e7d32; }
+  table.mini .sub-mini .d.off { background: #f57c00; }
+  table.mini .tm { font-family: monospace; }
+  table.mini tr.unpaid { background: #fffbe6; }
+
+  /* ==== 옵션 2 가이드 박스 ==== */
+  .guide-box { background: linear-gradient(135deg, #f3e8ff 0%, #e9d5ff 100%); border-left: 4px solid #7c3aed; border-radius: 0 8px 8px 0; padding: 12px 14px; margin: 10px 0 14px; font-size: 11px; color: #4a148c; line-height: 1.6; }
+  .guide-box strong { color: #6b21a8; display: block; margin-bottom: 4px; }
+
+  /* ==== 비교 표 (최종) ==== */
+  table.compare { width: 100%; border-collapse: collapse; font-size: 12px; background: #fff; border-radius: 12px; overflow: hidden; box-shadow: 0 2px 12px rgba(0,0,0,0.04); }
+  table.compare th, table.compare td { padding: 12px 14px; text-align: left; vertical-align: top; }
+  table.compare thead th { background: #1a1a1a; color: #fff; font-weight: 700; font-size: 12px; }
+  table.compare thead th:first-child { background: #fafbfc; color: #555; font-weight: 700; }
+  table.compare tbody tr { border-bottom: 1px solid #f0f0f0; }
+  table.compare tbody tr:nth-child(odd) { background: #fafbfc; }
+  table.compare tbody td:first-child { font-weight: 700; color: #1a1a1a; width: 180px; }
+  table.compare .opt1-cell { background: #f0f7ff; }
+  table.compare .opt2-cell { background: #faf5ff; }
+
+  .section-title { font-size: 22px; font-weight: 800; margin-bottom: 6px; color: #1a1a1a; }
+  .section-desc { font-size: 13px; color: #666; margin-bottom: 16px; }
+</style>
+</head>
+<body>
+
+<!-- ==================== 헤더 ==================== -->
+<div class="hero">
+  <div class="hero-inner">
+    <div class="tag">📐 의사결정 비교 자료</div>
+    <h1>예약상태 정의 — 옵션 1 vs 옵션 2</h1>
+    <p class="sub">"출발대기"를 어떻게 다룰지에 대한 두 가지 방안 비교. 영업실·개발팀과 합의 후 노션 정책 페이지로 이관 예정.</p>
+  </div>
+</div>
+
+<div class="container">
+
+  <!-- ==================== 핵심 질문 ==================== -->
+  <div class="key-q">
+    <div class="tag">🎯 풀어야 할 질문</div>
+    <div class="msg">"출발대기"는 <strong>새 상태값</strong>으로 추가할까, <strong>예약접수 단계의 sub-status로 흡수</strong>할까?</div>
+  </div>
+
+  <!-- ==================== 옵션 정의 좌우 비교 ==================== -->
+  <div class="option-grid">
+
+    <!-- 옵션 1 -->
+    <div class="option-card opt1">
+      <div class="opt-header">
+        <div class="num">1</div>
+        <div>
+          <div class="title">옵션 1</div>
+          <div class="sub">"출발대기" 신규 상태값 추가</div>
+        </div>
+      </div>
+
+      <div class="opt-summary">
+        기존 흐름에 <strong>"출발대기"</strong>를 별도 상태값으로 추가합니다. <strong>예약완료</strong>는 여행사 확정만 떨어진 단계, <strong>출발대기</strong>는 결제까지 완료된 단계로 분리.
+      </div>
+
+      <div class="flow-mini">
+        <div class="flow-pill start">예약접수<span class="micro">신규 진입</span></div>
+        <div class="flow-sep">▶<span class="cond">여행사 확정</span></div>
+        <div class="flow-pill mid">예약완료<span class="micro">결제 대기</span></div>
+        <div class="flow-sep">▶<span class="cond">결제완료 자동</span></div>
+        <div class="flow-pill wait">출발대기<span class="micro">신규 ★</span></div>
+        <div class="flow-sep">▶<span class="cond">출발일</span></div>
+        <div class="flow-pill done">출발완료</div>
+      </div>
+
+      <table class="def">
+        <thead><tr><th style="width:90px;">상태</th><th>정의</th></tr></thead>
+        <tbody>
+          <tr><td><span class="status s1">예약접수</span></td><td>여행사 담당자의 확정 대기. 고객 확인 + 출발 가능 확인 필요</td></tr>
+          <tr><td><span class="status s2">예약완료</span></td><td>여행사 확정 완료. 단, <strong>결제는 별도 추적</strong> (잔금 미입금 가능)</td></tr>
+          <tr><td><span class="status s3">출발대기 <span style="font-size:9px;background:#7c3aed;color:#fff;padding:1px 4px;border-radius:3px;">신규</span></span></td><td>여행사 확정 + 결제완료 모두 충족. 출발 대기 <span class="auto">🤖 자동</span></td></tr>
+          <tr><td><span class="status s4">출발완료</span></td><td>출발일 도래. 정산 단계로 <span class="auto">🤖 자동</span></td></tr>
+        </tbody>
+      </table>
+
+      <div class="prosconsmod">
+        <div class="pc-box pros">
+          <div class="ph">👍 장점</div>
+          <ul>
+            <li>각 상태 의미가 단계별로 정확히 분리됨</li>
+            <li>"예약완료 + 미입금" 케이스 명확히 표현</li>
+            <li>결제 추적 단계 시각화 강함</li>
+            <li>화면(스크린샷)에 탭 하나만 추가 — 익숙함</li>
+          </ul>
+        </div>
+        <div class="pc-box cons">
+          <div class="ph">👎 단점</div>
+          <ul>
+            <li>상태값 1개 추가 → 시스템 복잡도↑</li>
+            <li>운영자가 "예약완료 vs 출발대기" 차이 헷갈릴 수 있음</li>
+            <li>"예약완료"라는 단어가 실제 "완료"가 아님 (혼선)</li>
+            <li>탭이 7개로 늘어남 (좁아짐)</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <!-- 옵션 2 -->
+    <div class="option-card opt2">
+      <div class="opt-header">
+        <div class="num" style="background:#7c3aed;">2</div>
+        <div>
+          <div class="title">옵션 2</div>
+          <div class="sub">예약접수 sub-status로 흡수</div>
+        </div>
+      </div>
+
+      <div class="opt-summary">
+        <strong>"출발대기"</strong>의 정의 자체가 <strong>"결제완료 + 갈 수 있는 상태"</strong>이므로, <strong>예약완료 = 출발대기</strong>로 의미 통합. 진행 중 케이스는 <strong>예약접수 탭 안의 sub-status</strong>로 관리.
+      </div>
+
+      <div class="flow-mini">
+        <div class="flow-pill start">예약접수<span class="micro">진행 중</span></div>
+        <div class="flow-sep">▶<span class="cond">2가지 모두 OK</span></div>
+        <div class="flow-pill wait">예약완료<span class="micro">= 출발대기</span></div>
+        <div class="flow-sep">▶<span class="cond">출발일</span></div>
+        <div class="flow-pill done">출발완료</div>
+      </div>
+
+      <div style="background:#faf5ff;border:1px dashed #c084fc;border-radius:8px;padding:10px 12px;margin:10px 0;font-size:11px;color:#581c87;line-height:1.6;">
+        <strong style="color:#6b21a8;display:block;margin-bottom:4px;">📌 예약접수 탭 안의 2가지 관리 포인트</strong>
+        ① <strong>접수 신청 확인 건</strong> — 여행사 담당자가 고객/출발 확인 필요<br>
+        ② <strong>결제 필요 건</strong> — 잔금 결제 대기 (시스템이 자동 추적)<br>
+        → 두 가지 모두 OK가 되면 <strong>예약완료(=출발대기)</strong>로 자동 전환
+      </div>
+
+      <table class="def">
+        <thead><tr><th style="width:90px;">상태</th><th>정의</th></tr></thead>
+        <tbody>
+          <tr><td><span class="status s1">예약접수</span></td><td>진행 중 (접수 확인 ❌ or 결제 ❌). <strong>sub-status로 세부 단계 표시</strong></td></tr>
+          <tr><td><span class="status s3">예약완료</span><br><span style="font-size:9px;color:#888;">(= 출발대기 의미)</span></td><td>접수 확인 ✅ + 결제완료 ✅ <strong>모두 충족</strong>. 출발 대기 <span class="auto">🤖 자동</span></td></tr>
+          <tr><td><span class="status s4">출발완료</span></td><td>출발일 도래. 정산 단계로 <span class="auto">🤖 자동</span></td></tr>
+        </tbody>
+      </table>
+
+      <div class="prosconsmod">
+        <div class="pc-box pros">
+          <div class="ph">👍 장점</div>
+          <ul>
+            <li>상태값 추가 없음 → 시스템 단순</li>
+            <li>"예약완료 = 진짜 완료" 직관적</li>
+            <li>탭 6개 그대로 유지 (변화 비용 낮음)</li>
+            <li>예약접수 탭 안에서 모든 진행 케이스 통합 관리</li>
+            <li>운영자가 한 탭 안에서 일 처리 (집중도↑)</li>
+          </ul>
+        </div>
+        <div class="pc-box cons">
+          <div class="ph">👎 단점</div>
+          <ul>
+            <li>예약접수 탭이 다양한 케이스 섞임 → 시각화 중요</li>
+            <li>sub-status 개념 도입 → 운영자 학습 필요</li>
+            <li>"여행사가 OK했는데 왜 예약완료 아니지?" 초기 혼선 가능</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- ==================== 옵션 1 화면 시안 ==================== -->
+  <div class="screen-section">
+    <h3>🖥️ 옵션 1 화면 시안 — 탭에 [출발대기] 추가</h3>
+    <p class="lead">기존 스크린샷 그대로 + 탭 1개 추가. "예약완료(385)"와 "출발대기(NEW)" 분리.</p>
+
+    <div class="browser-bar">
+      <div class="dot red"></div><div class="dot yellow"></div><div class="dot green"></div>
+      <div class="url">partners.tripstore.kr/reservation</div>
+    </div>
+    <div class="screen-frame">
+      <div class="mini-page">
+        <div class="mini-title">예약관리</div>
+        <div class="mini-tabs">
+          <div class="mini-tab active">예약접수 <span class="ct">(70)</span></div>
+          <div class="mini-tab">예약완료 <span class="ct">(385)</span></div>
+          <div class="mini-tab new">출발대기 <span class="ct">(212)</span></div>
+          <div class="mini-tab">취소요청 <span class="ct">(3)</span></div>
+          <div class="mini-tab">예약취소 <span class="ct">(12)</span></div>
+          <div class="mini-tab">출발완료 <span class="ct">(1,840)</span></div>
+          <div class="mini-tab">전체예약 <span class="ct">(2,522)</span></div>
+        </div>
+
+        <div class="mini-filters">
+          <span class="mini-fil">예약채널</span>
+          <span class="mini-fil">결제유형</span>
+          <span class="mini-fil">결제상태</span>
+          <span class="mini-fil">예약번호</span>
+          <span class="mini-fil">채널 주문번호</span>
+          <span class="mini-fil">국가</span>
+          <span class="mini-fil">여행지</span>
+          <span class="mini-fil">예약자명</span>
+          <span class="mini-fil">+ 6 more...</span>
+        </div>
+
+        <div class="mini-action-bar">
+          <div>총 예약건: <strong>70건</strong> · 0개 선택됨</div>
+          <div style="display:flex;gap:4px;">
+            <button class="success">예약완료 상태로 변경</button>
+            <button>무통장 미입금 표시</button>
+            <button>컬럼 사용자화</button>
+          </div>
+        </div>
+
+        <table class="mini">
+          <thead>
+            <tr>
+              <th style="width:18px;"><input type="checkbox"></th>
+              <th>상태</th>
+              <th>예약번호</th>
+              <th>예약자</th>
+              <th>여행지/행사명</th>
+              <th>출발일</th>
+              <th style="text-align:right;">판매금액</th>
+              <th>결제상태</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><input type="checkbox"></td>
+              <td><span class="badge-mini b-recv">예약접수</span></td>
+              <td class="tm">RB202606-1610748</td>
+              <td>김태이</td>
+              <td>방콕/파타야 5일 #선셋요트투어</td>
+              <td class="tm">2026-10-23</td>
+              <td style="text-align:right;" class="tm">958,000</td>
+              <td>결제완료</td>
+            </tr>
+            <tr class="unpaid">
+              <td><input type="checkbox"></td>
+              <td><span class="badge-mini b-done">예약완료</span></td>
+              <td class="tm">RB202606-1610528</td>
+              <td>황종환</td>
+              <td>홍콩/마카오 4일 #TOP PICK</td>
+              <td class="tm">2026-07-16</td>
+              <td style="text-align:right;" class="tm">3,447,000</td>
+              <td style="color:#c62828;font-weight:700;">잔금 미입금</td>
+            </tr>
+            <tr>
+              <td><input type="checkbox"></td>
+              <td><span class="badge-mini b-wait">출발대기</span></td>
+              <td class="tm">RB202606-1609822</td>
+              <td>박지훈</td>
+              <td>오사카/교토 4일 #호텔뉴오타니</td>
+              <td class="tm">2026-06-18</td>
+              <td style="text-align:right;" class="tm">2,450,000</td>
+              <td>결제완료</td>
+            </tr>
+          </tbody>
+        </table>
+
+      </div>
+    </div>
+  </div>
+
+  <!-- ==================== 옵션 2 화면 시안 ==================== -->
+  <div class="screen-section">
+    <h3>🖥️ 옵션 2 화면 시안 — 예약접수 탭 안에 sub-status 2개</h3>
+    <p class="lead">탭은 6개 그대로 유지. 예약접수 탭 안에 <strong>"접수 신청 확인 / 결제 필요"</strong> 두 관리 포인트를 sub-status pill로 노출.</p>
+
+    <div class="browser-bar">
+      <div class="dot red"></div><div class="dot yellow"></div><div class="dot green"></div>
+      <div class="url">partners.tripstore.kr/reservation</div>
+    </div>
+    <div class="screen-frame">
+      <div class="mini-page">
+        <div class="mini-title">예약관리</div>
+        <div class="mini-tabs">
+          <div class="mini-tab active">예약접수 <span class="ct">(70)</span></div>
+          <div class="mini-tab">예약완료 <span class="ct">(597)</span></div>
+          <div class="mini-tab">취소요청 <span class="ct">(3)</span></div>
+          <div class="mini-tab">예약취소 <span class="ct">(12)</span></div>
+          <div class="mini-tab">출발완료 <span class="ct">(1,840)</span></div>
+          <div class="mini-tab">전체예약 <span class="ct">(2,522)</span></div>
+        </div>
+
+        <div class="guide-box">
+          <strong>📌 예약접수 단계 — 다음 2가지 모두 OK가 되면 [예약완료]로 자동 전환됩니다</strong>
+          ① <strong>접수 신청 확인 건</strong> (여행사 액션 필요) · ② <strong>결제 필요 건</strong> (시스템 자동 추적). 한쪽이라도 미충족이면 이 탭에 머무릅니다.
+        </div>
+
+        <div class="sub-pills">
+          <span class="sub-pill-x active">전체 <span class="ct">70</span></span>
+          <span class="sub-pill-x flag1">① 접수 신청 확인 필요 <span class="ct">28</span></span>
+          <span class="sub-pill-x flag2">② 결제 필요 건 <span class="ct">31</span></span>
+          <span class="sub-pill-x">①+② 둘 다 필요 <span class="ct">11</span></span>
+          <span class="sub-pill-x">곧 자동 완료 (모두 OK) <span class="ct">0</span></span>
+        </div>
+
+        <div class="mini-filters">
+          <span class="mini-fil">예약채널</span>
+          <span class="mini-fil">결제유형</span>
+          <span class="mini-fil">결제상태</span>
+          <span class="mini-fil">예약번호</span>
+          <span class="mini-fil">국가</span>
+          <span class="mini-fil">여행지</span>
+          <span class="mini-fil">예약자명</span>
+          <span class="mini-fil">+ 6 more...</span>
+        </div>
+
+        <div class="mini-action-bar">
+          <div>총 예약건: <strong>70건</strong> · 0개 선택됨</div>
+          <div style="display:flex;gap:4px;">
+            <button class="success">접수 확인 처리 (일괄)</button>
+            <button>미입금 안내 SMS (일괄)</button>
+            <button>컬럼 사용자화</button>
+          </div>
+        </div>
+
+        <table class="mini">
+          <thead>
+            <tr>
+              <th style="width:18px;"><input type="checkbox"></th>
+              <th>sub-status</th>
+              <th>예약번호</th>
+              <th>예약자</th>
+              <th>여행지/행사명</th>
+              <th>출발일</th>
+              <th style="text-align:right;">판매금액</th>
+              <th>결제상태</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><input type="checkbox"></td>
+              <td>
+                <span class="badge-mini b-flag1">① 접수 확인 필요</span>
+                <span class="sub-mini"><span class="d off"></span><span class="d on"></span></span>
+              </td>
+              <td class="tm">RB202606-1610748</td>
+              <td>김태이</td>
+              <td>방콕/파타야 5일 #선셋요트투어</td>
+              <td class="tm">2026-10-23</td>
+              <td style="text-align:right;" class="tm">958,000</td>
+              <td style="color:#2e7d32;">결제완료 ✅</td>
+            </tr>
+            <tr class="unpaid">
+              <td><input type="checkbox"></td>
+              <td>
+                <span class="badge-mini b-flag2">② 결제 필요</span>
+                <span class="sub-mini"><span class="d on"></span><span class="d off"></span></span>
+              </td>
+              <td class="tm">RB202606-1610528</td>
+              <td>황종환</td>
+              <td>홍콩/마카오 4일 #TOP PICK</td>
+              <td class="tm">2026-07-16</td>
+              <td style="text-align:right;" class="tm">3,447,000</td>
+              <td style="color:#c62828;font-weight:700;">잔금 1,838,000 미입금</td>
+            </tr>
+            <tr class="unpaid">
+              <td><input type="checkbox"></td>
+              <td>
+                <span class="badge-mini b-flag1">①+②</span>
+                <span class="sub-mini"><span class="d off"></span><span class="d off"></span></span>
+              </td>
+              <td class="tm">RB202606-1611002</td>
+              <td>이수진</td>
+              <td>다낭 5일 자유여행</td>
+              <td class="tm">2026-08-05</td>
+              <td style="text-align:right;" class="tm">2,160,000</td>
+              <td style="color:#e65100;font-weight:600;">예약금 결제 진행</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <div style="margin-top:12px;padding:10px;background:#e8f5e9;border-radius:6px;font-size:10px;color:#1b5e20;">
+          💡 <strong>두 dot 모두 초록(✅)이 되면 자동으로 예약완료(=출발대기) 탭으로 이동합니다.</strong> 운영자 추가 액션 불필요.
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <!-- ==================== 최종 비교 표 ==================== -->
+  <div class="screen-section">
+    <h3>📊 옵션 비교 한눈에</h3>
+    <p class="lead">정책·운영·시스템 관점에서 핵심 항목별 비교.</p>
+
+    <table class="compare">
+      <thead>
+        <tr>
+          <th style="width:200px;">비교 항목</th>
+          <th>옵션 1 · 출발대기 신규 추가</th>
+          <th>옵션 2 · sub-status 흡수</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>상태값 개수</td>
+          <td class="opt1-cell">4개 (예약접수/예약완료/<strong>출발대기 ★</strong>/출발완료)</td>
+          <td class="opt2-cell">3개 (예약접수/<strong>예약완료(=출발대기)</strong>/출발완료)</td>
+        </tr>
+        <tr>
+          <td>탭 개수 (정상 흐름)</td>
+          <td class="opt1-cell">5개 → <strong>+1 = 6개</strong> (전체 7개)</td>
+          <td class="opt2-cell">5개 그대로 (전체 6개)</td>
+        </tr>
+        <tr>
+          <td>예약완료의 의미</td>
+          <td class="opt1-cell">여행사 OK만 (결제 미입금 가능)</td>
+          <td class="opt2-cell"><strong>여행사 OK + 결제완료 모두</strong></td>
+        </tr>
+        <tr>
+          <td>결제 미입금 케이스</td>
+          <td class="opt1-cell">"예약완료" 상태 + 결제 미입금 = 별도 alert</td>
+          <td class="opt2-cell">"예약접수" 안의 <strong>② 결제 필요 건</strong></td>
+        </tr>
+        <tr>
+          <td>여행사 확정만 떨어진 케이스</td>
+          <td class="opt1-cell">바로 "예약완료" 진입</td>
+          <td class="opt2-cell">"예약접수" 안의 <strong>① 접수 확인 OK</strong></td>
+        </tr>
+        <tr>
+          <td>자동 전환 트리거</td>
+          <td class="opt1-cell">예약완료 + 결제완료 → 출발대기</td>
+          <td class="opt2-cell">접수 확인 + 결제완료 → 예약완료</td>
+        </tr>
+        <tr>
+          <td>legacy 시스템 호환</td>
+          <td class="opt1-cell">"출발대기" 상태값 신규 추가 (마이그레이션 필요)</td>
+          <td class="opt2-cell">기존 "예약완료" 의미 재해석 (DB 변경 최소)</td>
+        </tr>
+        <tr>
+          <td>운영자 멘탈모델</td>
+          <td class="opt1-cell">3단계 (접수 → 완료 → 출발대기)</td>
+          <td class="opt2-cell">2단계 (진행중 → 완료)</td>
+        </tr>
+        <tr>
+          <td>화면 변화 (vs 현재)</td>
+          <td class="opt1-cell">탭 1개 추가, 나머지 그대로</td>
+          <td class="opt2-cell">예약접수 탭 안에 sub-status 영역 추가</td>
+        </tr>
+        <tr>
+          <td>여행사 학습 비용</td>
+          <td class="opt1-cell">낮음 (탭만 추가)</td>
+          <td class="opt2-cell">중간 (sub-status 개념 익숙해져야)</td>
+        </tr>
+        <tr>
+          <td>운영 효율 (KPI 측정)</td>
+          <td class="opt1-cell">단계별 측정 가능</td>
+          <td class="opt2-cell">①/②의 처리 시간 분리 측정 가능</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- ==================== 결정 도움 영역 ==================== -->
+  <div class="screen-section" style="background:linear-gradient(135deg, #fff8e1 0%, #ffecb3 100%); border:1px solid #ffc107;">
+    <h3 style="color:#5d4037;">💡 결정 가이드</h3>
+    <p class="lead" style="color:#5d4037;">어느 쪽을 선택해도 정답입니다. 우선순위가 다를 뿐.</p>
+
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:10px;">
+      <div style="background:rgba(255,255,255,0.7);border-radius:10px;padding:16px;border-left:4px solid #1a73e8;">
+        <div style="font-size:12px;font-weight:800;color:#0d47a1;margin-bottom:8px;">옵션 1을 선택하세요 — 만약</div>
+        <ul style="font-size:12px;color:#0d47a1;padding-left:18px;line-height:1.8;">
+          <li>여행사가 <strong>탭 변화 최소화</strong>를 원할 때</li>
+          <li>상태별 KPI/통계를 <strong>단계별로 명확히</strong> 측정하고 싶을 때</li>
+          <li>"예약완료지만 미입금" 케이스를 <strong>독립 시각화</strong>하고 싶을 때</li>
+          <li>탭이 7개여도 부담 없을 때</li>
+        </ul>
+      </div>
+      <div style="background:rgba(255,255,255,0.7);border-radius:10px;padding:16px;border-left:4px solid #7c3aed;">
+        <div style="font-size:12px;font-weight:800;color:#4a148c;margin-bottom:8px;">옵션 2를 선택하세요 — 만약</div>
+        <ul style="font-size:12px;color:#4a148c;padding-left:18px;line-height:1.8;">
+          <li>"예약완료"라는 단어가 <strong>진짜 완료 의미</strong>이길 원할 때</li>
+          <li>시스템/DB <strong>변경 최소화</strong>가 중요할 때</li>
+          <li>여행사 운영자가 <strong>한 탭에서 모든 진행 케이스</strong>를 보길 원할 때</li>
+          <li>sub-status 개념 도입에 거부감 없을 때</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <div style="text-align:center;padding:24px;font-size:11px;color:#aaa;">
+    트립스토어 PM · 2026-06-16 · 영업실·개발팀 합의 후 노션 정책 페이지로 이관
+  </div>
+
+</div>
+
+</body>
+</html>
