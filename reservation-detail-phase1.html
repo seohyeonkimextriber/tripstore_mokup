@@ -230,7 +230,7 @@
         <div class="section-header">
           <h2>예약 상태 관리</h2>
           <div class="actions">
-            <button class="btn btn-outline btn-sm" onclick="document.getElementById('modal-edit-status').classList.add('show')">수정하기</button>
+            <button class="btn btn-outline btn-sm" onclick="openStatusModal()">수정하기</button>
           </div>
         </div>
         <div class="section-body">
@@ -1196,25 +1196,22 @@
         </div>
       </div>
 
-      <!-- 매핑 안내 -->
-      <div style="background:#e8f4fd;border:1px solid #bbdefb;border-radius:8px;padding:10px 12px;font-size:11px;color:#0d47a1;line-height:1.6;margin-bottom:14px;">
-        <div style="font-weight:700;margin-bottom:4px;">📌 트립 예약상태(legacy) ↔ rsv.status(신규 원장) 매핑</div>
-        · 예약접수 ↔ 예약성공 &nbsp; · 예약완료 ↔ 출발대기 <span style="color:#d32f2f;">(결제완료 필수)</span><br>
-        · 취소요청 ↔ 취소신청 &nbsp; · 취소완료 ↔ 취소완료 &nbsp; · 출발완료 ↔ 출발완료<br>
-        · (legacy 없음) ↔ 취소진행 → 결제상태에 따라 분기
+      <!-- 전이 룰 안내 -->
+      <div style="background:#e8f4fd;border:1px solid #bbdefb;border-radius:8px;padding:10px 12px;font-size:11px;color:#0d47a1;line-height:1.7;margin-bottom:14px;">
+        <div style="font-weight:700;margin-bottom:4px;">📌 예약상태 전이 룰 (현재 화면 기준)</div>
+        · 예약접수 → 취소완료 / 예약완료<br>
+        · 예약완료 → 취소완료 / 출발완료 <span style="color:#d32f2f;">(출발일 경과 필수)</span><br>
+        · 취소완료 → 예약접수 <span style="color:#666;">(되돌리기)</span><br>
+        · 출발완료 → 예약접수 <span style="color:#666;">(되돌리기)</span>
       </div>
 
       <!-- 변경할 상태 선택 -->
       <div class="form-group">
         <label>변경할 트립 예약상태 (legacy)</label>
         <select id="new-status-mng" onchange="onStatusChange()">
-          <option value="예약접수" data-rsv="예약성공">예약접수 → rsv.status: 예약성공</option>
-          <option value="예약완료" data-rsv="출발대기" selected>예약완료 → rsv.status: 출발대기 (결제완료 필수)</option>
-          <option value="취소요청" data-rsv="취소신청">취소요청 → rsv.status: 취소신청</option>
-          <option value="취소완료" data-rsv="취소완료">취소완료 → rsv.status: 취소완료</option>
-          <option value="출발완료" data-rsv="출발완료">출발완료 → rsv.status: 출발완료</option>
+          <!-- 옵션은 현재 상태에 따라 JS에서 동적 채움 -->
         </select>
-        <div class="help" style="margin-top:4px;">※ <strong>취소진행</strong>은 legacy에 대응값이 없는 신규 원장 전용 상태 (결제상태에 따라 시스템이 자동 분기)</div>
+        <div class="help" id="status-rsv-preview" style="margin-top:4px;color:#1565c0;"></div>
       </div>
 
       <!-- 가드 메시지 영역 -->
@@ -4336,57 +4333,151 @@ function saveTravelerInfo() {
   showToast('예약자 정보가 수정되었습니다.');
 }
 
-// 예약상태 변경 가드 (결제완료 / 지급 fix)
+// 예약상태 전이 룰 (트립 예약상태 legacy 기준)
+const STATUS_TRANSITION_RULES = {
+  '예약접수': [
+    { to: '취소완료', rsv: '취소완료', label: '취소완료 (취소 처리)' },
+    { to: '예약완료', rsv: '출발대기', label: '예약완료 (출발대기 전환 · 결제완료 필수)', requirePayment: true }
+  ],
+  '예약완료': [
+    { to: '취소완료', rsv: '취소완료', label: '취소완료 (취소 처리)' },
+    { to: '출발완료', rsv: '출발완료', label: '출발완료 (출발일 경과 필수)', requireDeparturePassed: true }
+  ],
+  '취소완료': [
+    { to: '예약접수', rsv: '예약성공', label: '예약접수 (되돌리기)', isRevert: true }
+  ],
+  '출발완료': [
+    { to: '예약접수', rsv: '예약성공', label: '예약접수 (되돌리기)', isRevert: true }
+  ]
+};
+
+// 모달 오픈 시 현재 상태 기준으로 옵션 채우기
+function openStatusModal() {
+  const curMng = document.getElementById('status-on-management').textContent.trim();
+  const curRsv = document.getElementById('status-rsv').textContent.trim();
+  const curPayment = document.getElementById('status-payment').textContent.trim();
+  const curSet = document.getElementById('status-settlement').textContent.trim();
+  const curPay2 = document.getElementById('status-payout').textContent.trim();
+
+  // 현재 상태 카드 갱신
+  document.getElementById('cur-status-mng').textContent = curMng;
+  document.getElementById('cur-status-rsv').textContent = curRsv;
+  document.getElementById('cur-status-pay').textContent = curPayment;
+  document.getElementById('cur-status-set').textContent = curSet;
+  document.getElementById('cur-status-pay2').textContent = curPay2;
+
+  // 옵션 채우기
+  const sel = document.getElementById('new-status-mng');
+  sel.innerHTML = '';
+  const rules = STATUS_TRANSITION_RULES[curMng] || [];
+
+  if (rules.length === 0) {
+    const o = document.createElement('option');
+    o.textContent = '— 변경 가능한 상태 없음 —';
+    o.disabled = true;
+    o.selected = true;
+    sel.appendChild(o);
+  } else {
+    const placeholder = document.createElement('option');
+    placeholder.value = '';
+    placeholder.textContent = '— 변경할 상태 선택 —';
+    placeholder.disabled = true;
+    placeholder.selected = true;
+    sel.appendChild(placeholder);
+    rules.forEach(r => {
+      const o = document.createElement('option');
+      o.value = r.to;
+      o.dataset.rsv = r.rsv;
+      o.dataset.requirePayment = r.requirePayment ? '1' : '';
+      o.dataset.requireDeparturePassed = r.requireDeparturePassed ? '1' : '';
+      o.dataset.isRevert = r.isRevert ? '1' : '';
+      o.textContent = r.label;
+      sel.appendChild(o);
+    });
+  }
+
+  document.getElementById('status-guard-msg').style.display = 'none';
+  document.getElementById('status-rsv-preview').textContent = '';
+  document.getElementById('modal-edit-status').classList.add('show');
+  onStatusChange();
+}
+
+// 예약상태 변경 가드
 function onStatusChange() {
   const sel = document.getElementById('new-status-mng');
+  if (!sel.value || sel.options[sel.selectedIndex].disabled) {
+    document.getElementById('status-rsv-preview').textContent = '';
+    document.getElementById('status-guard-msg').style.display = 'none';
+    setSaveDisabled(true);
+    return;
+  }
   const opt = sel.options[sel.selectedIndex];
   const newMng = sel.value;
   const newRsv = opt.dataset.rsv;
   const curPayment = document.getElementById('status-payment').textContent.trim();
   const curPayout = document.getElementById('status-payout').textContent.trim();
   const guard = document.getElementById('status-guard-msg');
-  const btnSave = document.getElementById('btn-save-status');
+  const preview = document.getElementById('status-rsv-preview');
   let msgs = [];
+
+  preview.innerHTML = '→ rsv.status: <strong>' + newRsv + '</strong>';
 
   // 지급진행/지급완료 = 예약 FIX
   if (curPayout === '지급진행' || curPayout === '지급완료') {
     msgs.push('🔒 지급 상태가 [' + curPayout + ']이므로 예약상태를 변경할 수 없습니다. <strong>정산조정</strong>으로 처리하세요.');
   }
-  // 예약완료(=출발대기) 전환 시 결제완료 필수
-  if (newMng === '예약완료' && curPayment !== '결제완료') {
+  // 예약완료 전환 시 결제완료 필수
+  if (opt.dataset.requirePayment === '1' && curPayment !== '결제완료') {
     msgs.push('⚠ [예약완료=출발대기]는 결제상태가 <strong>결제완료</strong>일 때만 가능합니다. 현재: ' + curPayment);
+  }
+  // 출발완료 전환 시 출발일 경과 필수
+  if (opt.dataset.requireDeparturePassed === '1') {
+    const depStr = (document.getElementById('info-dep-arr').textContent || '').split('→')[0].trim();
+    const depDate = new Date(depStr);
+    const today = new Date(); today.setHours(0,0,0,0);
+    if (isNaN(depDate.getTime()) || depDate > today) {
+      msgs.push('⚠ [출발완료]는 <strong>출발일이 경과한 이후</strong>에만 변경 가능합니다. 출발일: ' + depStr);
+    }
   }
 
   if (msgs.length) {
     guard.innerHTML = msgs.join('<br>');
     guard.style.display = 'block';
-    btnSave.disabled = true;
-    btnSave.style.opacity = '0.4';
-    btnSave.style.cursor = 'not-allowed';
+    setSaveDisabled(true);
   } else {
     guard.style.display = 'none';
-    btnSave.disabled = false;
-    btnSave.style.opacity = '1';
-    btnSave.style.cursor = 'pointer';
+    setSaveDisabled(false);
   }
+}
+
+function setSaveDisabled(disabled) {
+  const btnSave = document.getElementById('btn-save-status');
+  btnSave.disabled = disabled;
+  btnSave.style.opacity = disabled ? '0.4' : '1';
+  btnSave.style.cursor = disabled ? 'not-allowed' : 'pointer';
 }
 
 // 예약상태 저장
 function saveStatusChange() {
   const sel = document.getElementById('new-status-mng');
+  if (!sel.value) return;
   const opt = sel.options[sel.selectedIndex];
   const newMng = sel.value;
   const newRsv = opt.dataset.rsv;
   const mngBadge = document.getElementById('status-on-management');
   const rsvBadge = document.getElementById('status-rsv');
-  // 상태별 배지 색상
   const colorMap = {
     '예약접수': 'gray', '예약완료': 'green', '취소요청': 'orange',
+    '취소완료': 'red', '출발완료': 'blue', '취소진행': 'orange'
+  };
+  const rsvColorMap = {
+    '예약성공': 'gray', '출발대기': 'green', '취소신청': 'orange',
     '취소완료': 'red', '출발완료': 'blue', '취소진행': 'orange'
   };
   mngBadge.textContent = newMng;
   mngBadge.className = 'badge ' + (colorMap[newMng] || 'gray');
   rsvBadge.textContent = newRsv;
+  rsvBadge.className = 'badge ' + (rsvColorMap[newRsv] || 'gray');
   document.getElementById('modal-edit-status').classList.remove('show');
   showToast('예약상태가 [' + newMng + ' / ' + newRsv + ']로 변경되었습니다.');
 }
