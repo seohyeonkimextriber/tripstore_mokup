@@ -1,0 +1,677 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<title>파트너스 예약 상세 — Phase 1</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: -apple-system, BlinkMacSystemFont, 'Pretendard', sans-serif; background: #f5f7fa; color: #333; font-size: 13px; line-height: 1.5; }
+
+  /* ==== 파트너스 글로벌 네비 ==== */
+  .partner-nav { background: #fff; border-bottom: 1px solid #e0e0e0; padding: 0 32px; display: flex; align-items: center; height: 56px; position: sticky; top: 0; z-index: 100; }
+  .partner-logo { display: flex; align-items: center; gap: 8px; font-weight: 700; font-size: 14px; color: #1a1a1a; margin-right: 32px; }
+  .partner-logo .logo-mark { width: 32px; height: 32px; background: #1a1a1a; color: #fff; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-weight: 800; }
+  .partner-menu { display: flex; gap: 4px; flex: 1; }
+  .partner-menu a { padding: 8px 14px; color: #666; font-size: 13px; font-weight: 500; text-decoration: none; border-radius: 6px; }
+  .partner-menu a.active { color: #1a73e8; font-weight: 700; border-bottom: 2px solid #1a73e8; border-radius: 0; padding-bottom: 18px; margin-bottom: -18px; }
+  .partner-user { display: flex; align-items: center; gap: 8px; font-size: 12px; color: #666; }
+  .partner-user strong { color: #1a1a1a; font-weight: 700; }
+
+  .container { max-width: 1400px; margin: 0 auto; padding: 20px 32px; }
+
+  /* ==== 페이지 헤더 ==== */
+  .page-header { background: #fff; border-radius: 12px; padding: 16px 20px; margin-bottom: 16px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 1px 3px rgba(0,0,0,0.04); }
+  .breadcrumb { font-size: 11px; color: #888; margin-bottom: 6px; }
+  .page-title { font-size: 18px; font-weight: 700; display: flex; align-items: center; gap: 10px; }
+  .rsv-code { font-family: monospace; font-size: 14px; color: #666; background: #f5f5f5; padding: 3px 8px; border-radius: 4px; }
+
+  /* ==== 탭 ==== */
+  .tabs { display: flex; gap: 4px; border-bottom: 1px solid #e0e0e0; margin-bottom: 16px; background: #fff; padding: 0 8px; border-radius: 12px 12px 0 0; }
+  .tab { padding: 12px 20px; cursor: pointer; font-size: 13px; font-weight: 500; color: #888; border-bottom: 2px solid transparent; margin-bottom: -1px; }
+  .tab.active { color: #1a73e8; font-weight: 700; border-bottom-color: #1a73e8; }
+  .tab-content { display: none; }
+  .tab-content.active { display: block; }
+
+  /* ==== 섹션 ==== */
+  .section-row { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px; margin-bottom: 12px; }
+  .section { background: #fff; border-radius: 12px; padding: 0; margin-bottom: 12px; box-shadow: 0 1px 3px rgba(0,0,0,0.04); overflow: hidden; }
+  .section-header { padding: 14px 18px; border-bottom: 1px solid #f0f0f0; display: flex; justify-content: space-between; align-items: center; background: #fafbfc; }
+  .section-header h2 { font-size: 13px; font-weight: 700; color: #333; }
+  .section-body { padding: 16px 18px; }
+
+  /* ==== 정보 행 ==== */
+  .info-row { display: flex; padding: 5px 0; font-size: 12px; align-items: center; }
+  .info-label { color: #888; min-width: 100px; }
+  .info-value { color: #1a1a1a; font-weight: 500; flex: 1; }
+  .text-mono { font-family: monospace; }
+
+  /* ==== 배지 ==== */
+  .badge { font-size: 10px; padding: 2px 8px; border-radius: 4px; font-weight: 700; }
+  .badge.green { background: #e8f5e9; color: #2e7d32; }
+  .badge.blue { background: #e3f2fd; color: #1565c0; }
+  .badge.orange { background: #fff3e0; color: #e65100; }
+  .badge.red { background: #ffebee; color: #c62828; }
+  .badge.gray { background: #f5f5f5; color: #666; }
+  .badge.purple { background: #f3e8ff; color: #6b21a8; }
+
+  /* ==== 버튼 ==== */
+  .btn { padding: 7px 14px; border-radius: 6px; font-size: 12px; font-weight: 600; cursor: pointer; border: 1px solid transparent; background: #fff; transition: all 0.15s; }
+  .btn-sm { padding: 4px 10px; font-size: 11px; }
+  .btn-primary { background: #1a73e8; color: #fff; border-color: #1a73e8; }
+  .btn-primary:hover { background: #1557b0; }
+  .btn-outline { background: #fff; color: #333; border-color: #d0d0d0; }
+  .btn-outline:hover { background: #f5f5f5; }
+  .btn-danger { background: #d32f2f; color: #fff; border-color: #d32f2f; }
+  .btn-success { background: #2e7d32; color: #fff; border-color: #2e7d32; }
+  .btn-warn { background: #f57c00; color: #fff; border-color: #f57c00; }
+
+  /* ==== sub-status pills (예약접수 안의 단계) ==== */
+  .substatus-row { display: flex; gap: 8px; padding: 12px 18px; background: #fffbe6; border-top: 1px solid #ffe082; }
+  .substatus-pill { display: flex; align-items: center; gap: 6px; font-size: 11px; color: #5d4037; }
+  .substatus-pill .dot { width: 8px; height: 8px; border-radius: 50%; background: #d0d0d0; }
+  .substatus-pill .dot.active { background: #f57c00; box-shadow: 0 0 0 3px rgba(245,124,0,0.2); }
+  .substatus-pill .dot.done { background: #2e7d32; }
+  .substatus-pill.done { color: #2e7d32; text-decoration: line-through; opacity: 0.7; }
+
+  /* ==== alert 박스 ==== */
+  .alert { padding: 12px 16px; border-radius: 8px; font-size: 12px; display: flex; align-items: flex-start; gap: 10px; margin-bottom: 12px; line-height: 1.6; }
+  .alert.warn { background: #fff8e1; border: 1px solid #ffc107; color: #5d4037; }
+  .alert.danger { background: #ffebee; border: 1px solid #ef5350; color: #b71c1c; }
+  .alert.info { background: #e3f2fd; border: 1px solid #64b5f6; color: #0d47a1; }
+  .alert .icon { font-size: 16px; line-height: 1; }
+  .alert .body { flex: 1; }
+  .alert .body strong { display: block; font-weight: 700; margin-bottom: 2px; }
+
+  /* ==== 금액 카드 ==== */
+  .amount-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-bottom: 16px; }
+  .amount-card { background: #fff; border: 1px solid #e0e0e0; border-radius: 10px; padding: 14px 16px; }
+  .amount-card .label { font-size: 11px; color: #666; font-weight: 600; margin-bottom: 8px; }
+  .amount-card .value { font-size: 20px; font-family: monospace; font-weight: 700; color: #1a1a1a; }
+  .amount-card .sub { font-size: 10px; color: #888; margin-top: 4px; }
+  .amount-card.primary { background: #e3f2fd; border-color: #1565c0; }
+  .amount-card.primary .label { color: #1565c0; }
+  .amount-card.primary .value { color: #1565c0; }
+  .amount-card.danger { background: #ffebee; border-color: #ef5350; }
+  .amount-card.danger .value { color: #c62828; }
+
+  /* ==== 매트릭스 테이블 ==== */
+  .matrix-table { width: 100%; font-size: 11px; border-collapse: collapse; }
+  .matrix-table thead tr { background: #f5f5f5; border-bottom: 2px solid #e0e0e0; }
+  .matrix-table th { padding: 10px 8px; text-align: left; font-weight: 600; color: #666; }
+  .matrix-table td { padding: 10px 8px; border-bottom: 1px solid #f0f0f0; }
+  .matrix-table tfoot tr { background: #fafafa; border-top: 2px solid #333; font-weight: 700; }
+  .text-right { text-align: right; }
+  .text-center { text-align: center; }
+
+  /* ==== 모달 ==== */
+  .modal-overlay { display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.4); z-index: 200; align-items: center; justify-content: center; }
+  .modal-overlay.show { display: flex; }
+  .modal { background: #fff; border-radius: 12px; width: 560px; max-height: 80vh; overflow-y: auto; box-shadow: 0 20px 60px rgba(0,0,0,0.2); }
+  .modal-header { padding: 16px 24px; border-bottom: 1px solid #e8e8e8; display: flex; justify-content: space-between; align-items: center; }
+  .modal-header h3 { font-size: 14px; font-weight: 700; }
+  .modal-header .close { background: none; border: none; font-size: 22px; cursor: pointer; color: #999; padding: 0; }
+  .modal-body { padding: 20px 24px; }
+  .modal-footer { padding: 14px 24px; border-top: 1px solid #e8e8e8; display: flex; justify-content: flex-end; gap: 8px; }
+  .form-group { margin-bottom: 14px; }
+  .form-group label { display: block; font-size: 12px; font-weight: 600; color: #666; margin-bottom: 6px; }
+  .form-group input, .form-group select, .form-group textarea { width: 100%; padding: 8px 12px; border: 1px solid #d0d0d0; border-radius: 6px; font-size: 12px; }
+
+  /* ==== Compare 표 (어드민 vs 파트너스) ==== */
+  .compare-banner { background: linear-gradient(135deg, #f0f7ff 0%, #e3f2fd 100%); border: 1px solid #90caf9; border-radius: 10px; padding: 12px 16px; margin-bottom: 16px; font-size: 11px; color: #0d47a1; }
+  .compare-banner a { color: #1a73e8; font-weight: 600; }
+</style>
+</head>
+<body>
+
+<!-- ==================== 파트너스 글로벌 네비 ==================== -->
+<div class="partner-nav">
+  <div class="partner-logo">
+    <div class="logo-mark">E</div>
+    <div>트립<br><span style="font-size:11px;font-weight:500;">파트너스</span></div>
+  </div>
+  <nav class="partner-menu">
+    <a href="#">상품관리</a>
+    <a href="#" class="active">예약관리</a>
+    <a href="#">업무요청</a>
+    <a href="#">정산관리</a>
+    <a href="#">게시판</a>
+    <a href="#">리포트</a>
+    <a href="#">계정관리</a>
+    <a href="#">권역별 예약금 설정</a>
+  </nav>
+  <div class="partner-user">
+    <span>참좋은여행</span> · <strong>참좋은여행TS</strong> 님 반가워요!
+    <span style="margin-left:6px;">👤</span>
+  </div>
+</div>
+
+<div class="container">
+
+  <!-- 어드민과의 차이 안내 -->
+  <div class="compare-banner">
+    🚦 <strong>파트너스 화면</strong>은 여행사 관점입니다. 어드민(CS팀)이 보는 정보와 다릅니다. 어드민 화면 ↔ <a href="./reservation-detail-phase1.html">어드민 예약 상세 보기</a>
+  </div>
+
+  <!-- 페이지 헤더 -->
+  <div class="page-header">
+    <div>
+      <div class="breadcrumb">예약관리 &nbsp;›&nbsp; 예약접수 &nbsp;›&nbsp; 예약 상세</div>
+      <div class="page-title">
+        예약 상세
+        <span class="rsv-code">HB2633517226</span>
+        <span class="badge orange" id="page-status-badge">예약접수</span>
+      </div>
+    </div>
+    <div style="display:flex;gap:8px;">
+      <button class="btn btn-outline btn-sm" onclick="window.history.back()">← 목록</button>
+    </div>
+  </div>
+
+  <!-- 탭 -->
+  <div class="tabs">
+    <div class="tab active" onclick="switchTab('basic')">기본</div>
+    <div class="tab" onclick="switchTab('settlement')">정산</div>
+    <div class="tab" onclick="switchTab('history')">이력</div>
+  </div>
+
+  <!-- ==================== 기본 탭 ==================== -->
+  <div id="tab-basic" class="tab-content active">
+
+    <!-- 예약접수 sub-status alert (예약접수 상태일 때만 노출) -->
+    <div class="alert warn" id="substatus-alert">
+      <div class="icon">⚠</div>
+      <div class="body">
+        <strong>예약접수 단계 — 다음 확인 후 [예약완료 처리]를 진행하세요</strong>
+        <div style="display:flex;gap:18px;margin-top:8px;flex-wrap:wrap;">
+          <span class="substatus-pill"><span class="dot active"></span>① 고객 확인 (출발 의사)</span>
+          <span class="substatus-pill"><span class="dot"></span>② 상품 출발 가능 여부</span>
+          <span class="substatus-pill"><span class="dot"></span>③ 잔액 결제 확인</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- 1행: 예약자 / 예약정보 / 예약상태 관리 -->
+    <div class="section-row">
+
+      <!-- 예약자 정보 -->
+      <div class="section">
+        <div class="section-header">
+          <h2>예약자 정보</h2>
+        </div>
+        <div class="section-body">
+          <div class="info-row"><span class="info-label">예약자</span><span class="info-value">오기웅</span></div>
+          <div class="info-row"><span class="info-label">생년월일</span><span class="info-value">1975-12-17</span></div>
+          <div class="info-row"><span class="info-label">이메일</span><span class="info-value">kipoongman@hanmail.net</span></div>
+          <div class="info-row"><span class="info-label">연락처</span><span class="info-value">010-2374-8449</span></div>
+          <div class="info-row"><span class="info-label">국가</span><span class="info-value">대한민국</span></div>
+        </div>
+      </div>
+
+      <!-- 예약 정보 -->
+      <div class="section">
+        <div class="section-header">
+          <h2>예약 정보</h2>
+        </div>
+        <div class="section-body">
+          <div class="info-row"><span class="info-label">예약채널</span><span class="info-value">트립스토어</span></div>
+          <div class="info-row"><span class="info-label">예약번호</span><span class="info-value text-mono">HB2633517226</span></div>
+          <div class="info-row"><span class="info-label">채널사 주문번호</span><span class="info-value">-</span></div>
+          <div class="info-row"><span class="info-label">결제유형</span><span class="info-value">예약금결제 (잔금 미결제)</span></div>
+          <div class="info-row"><span class="info-label">예약일시</span><span class="info-value">2026-04-07 08:43</span></div>
+        </div>
+      </div>
+
+      <!-- 예약 상태 관리 -->
+      <div class="section">
+        <div class="section-header">
+          <h2>예약 상태 관리</h2>
+        </div>
+        <div class="section-body">
+          <div class="info-row"><span class="info-label">예약상태</span><span class="info-value"><span class="badge orange" id="status-rsv">예약접수</span></span></div>
+          <div class="info-row"><span class="info-label">결제상태</span><span class="info-value"><span class="badge blue" id="status-payment">결제진행</span> <span style="font-size:10px;color:#888;">(예약금 결제 완료)</span></span></div>
+          <div class="info-row"><span class="info-label">출발일</span><span class="info-value text-mono">2026-06-06</span></div>
+          <div class="info-row"><span class="info-label">출발 잔여</span><span class="info-value" style="color:#e65100;font-weight:700;">D-기간 산정 중</span></div>
+        </div>
+        <div style="padding:12px 18px;border-top:1px solid #f0f0f0;display:flex;gap:8px;background:#fafbfc;">
+          <button class="btn btn-success btn-sm" style="flex:1;" onclick="openCompleteModal()">예약완료 처리</button>
+          <button class="btn btn-danger btn-sm" style="flex:1;" onclick="openCancelModal()">예약취소 처리</button>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- 잔액 결제 미입금 alert -->
+    <div class="alert danger">
+      <div class="icon">💰</div>
+      <div class="body">
+        <strong>잔액 결제 미입금 — 무통장 입금 대기 중</strong>
+        잔여 결제 필요 금액: <strong style="font-family:monospace;">1,838,000원</strong> · 결제 마감일: <strong>2026-05-25</strong>
+        <div style="margin-top:6px;font-size:11px;color:#888;">잔액 결제가 완료되어야 예약완료 처리가 가능합니다.</div>
+      </div>
+      <button class="btn btn-warn btn-sm" style="white-space:nowrap;">결제 확인</button>
+    </div>
+
+    <!-- 여행 상품 정보 -->
+    <div class="section">
+      <div class="section-header">
+        <h2>여행 상품 정보</h2>
+      </div>
+      <div class="section-body">
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:24px;">
+          <div>
+            <div class="info-row"><span class="info-label">여행지</span><span class="info-value">상하이(상해)</span></div>
+            <div class="info-row"><span class="info-label">상품코드</span><span class="info-value text-mono">CCB1017B71284A0</span></div>
+            <div class="info-row"><span class="info-label">행사코드</span><span class="info-value text-mono">CCB101260606CZ2</span></div>
+            <div class="info-row"><span class="info-label">상품유형</span><span class="info-value">AIRTEL</span></div>
+          </div>
+          <div>
+            <div class="info-row"><span class="info-label">여행기간</span><span class="info-value">3박4일</span></div>
+            <div class="info-row"><span class="info-label">출도착일</span><span class="info-value text-mono">2026-06-06 → 2026-06-09</span></div>
+            <div class="info-row"><span class="info-label">항공사</span><span class="info-value">중국남방항공</span></div>
+            <div class="info-row"><span class="info-label">출발지</span><span class="info-value">인천</span></div>
+          </div>
+        </div>
+        <div style="margin-top:10px;padding-top:10px;border-top:1px dashed #e0e0e0;">
+          <div class="info-row"><span class="info-label">행사명</span><span class="info-value" style="font-size:11px;">상하이 자유여행 4일 #하버플라자 ★중국비자대행★ 12만원 할인★전일정 호텔조식 포함</span></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 예약 금액 (파트너스 = 정산금액 중심) -->
+    <div class="section">
+      <div class="section-header">
+        <h2>예약 금액 <span style="font-size:11px;font-weight:500;color:#888;margin-left:6px;">여행사 수령액 기준</span></h2>
+      </div>
+      <div class="section-body">
+
+        <!-- 인원 구성 -->
+        <div style="background:#f0f7ff;border:1px solid #bbdefb;border-radius:8px;padding:12px 16px;margin-bottom:16px;display:flex;justify-content:space-between;align-items:center;">
+          <div>
+            <div style="font-size:11px;color:#1565c0;font-weight:600;margin-bottom:4px;">인원 구성</div>
+            <div style="display:flex;gap:6px;align-items:center;font-size:13px;font-weight:600;">
+              <span class="badge blue">성인 3</span>
+              <span style="color:#888;font-weight:400;font-size:12px;">총 3명</span>
+            </div>
+          </div>
+          <div style="text-align:right;">
+            <div style="font-size:10px;color:#888;">1인 판매가</div>
+            <div style="font-family:monospace;font-weight:700;font-size:16px;color:#1565c0;">686,000</div>
+          </div>
+        </div>
+
+        <!-- 3-카드 요약 -->
+        <div class="amount-grid">
+          <div class="amount-card">
+            <div class="label">총 판매금액</div>
+            <div class="value">2,038,000</div>
+            <div class="sub">상품 2,097,000 − 할인 59,000</div>
+          </div>
+          <div class="amount-card">
+            <div class="label">플랫폼 수수료 <span style="color:#aaa;font-weight:400;">(8.8%)</span></div>
+            <div class="value" style="color:#d32f2f;">-179,344</div>
+            <div class="sub">트립스토어 마진 (VAT 포함)</div>
+          </div>
+          <div class="amount-card primary">
+            <div class="label">정산 예정 금액 <span style="font-size:9px;color:#1565c0;">(여행사 수령)</span></div>
+            <div class="value">1,858,656</div>
+            <div class="sub">출발완료 후 정산일에 입금</div>
+          </div>
+        </div>
+
+        <!-- 인원별 매트릭스 -->
+        <div style="margin-top:16px;">
+          <div style="font-size:12px;font-weight:600;color:#555;margin-bottom:8px;">인원별 금액 상세</div>
+          <div style="overflow-x:auto;border:1px solid #e0e0e0;border-radius:8px;">
+            <table class="matrix-table" style="min-width:760px;">
+              <thead>
+                <tr>
+                  <th style="width:60px;">인원</th>
+                  <th>이름</th>
+                  <th class="text-right">1인 상품가</th>
+                  <th class="text-right">여행사 특가</th>
+                  <th class="text-right">1인 판매가</th>
+                  <th class="text-right">1인 위약금</th>
+                  <th class="text-center">상태</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td><span class="badge blue">성인</span></td>
+                  <td style="font-weight:600;">오기웅 <span style="font-size:10px;color:#888;font-weight:400;">(예약자)</span></td>
+                  <td class="text-right text-mono">699,000</td>
+                  <td class="text-right text-mono" style="color:#d32f2f;">-13,000</td>
+                  <td class="text-right text-mono" style="font-weight:700;color:#1565c0;">686,000</td>
+                  <td class="text-right text-mono" style="color:#bbb;">0</td>
+                  <td class="text-center"><span class="badge green">승인</span></td>
+                </tr>
+                <tr>
+                  <td><span class="badge blue">성인</span></td>
+                  <td style="font-weight:600;">동행 2</td>
+                  <td class="text-right text-mono">699,000</td>
+                  <td class="text-right text-mono" style="color:#d32f2f;">-13,000</td>
+                  <td class="text-right text-mono" style="font-weight:700;color:#1565c0;">686,000</td>
+                  <td class="text-right text-mono" style="color:#bbb;">0</td>
+                  <td class="text-center"><span class="badge green">승인</span></td>
+                </tr>
+                <tr>
+                  <td><span class="badge blue">성인</span></td>
+                  <td style="font-weight:600;">동행 3</td>
+                  <td class="text-right text-mono">699,000</td>
+                  <td class="text-right text-mono" style="color:#d32f2f;">-13,000</td>
+                  <td class="text-right text-mono" style="font-weight:700;color:#1565c0;">686,000</td>
+                  <td class="text-right text-mono" style="color:#bbb;">0</td>
+                  <td class="text-center"><span class="badge green">승인</span></td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <td colspan="2">합계 (3명)</td>
+                  <td class="text-right text-mono">2,097,000</td>
+                  <td class="text-right text-mono" style="color:#d32f2f;">-39,000</td>
+                  <td class="text-right text-mono" style="color:#1565c0;">2,058,000</td>
+                  <td class="text-right text-mono" style="color:#bbb;">0</td>
+                  <td class="text-center" style="color:#888;">-</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div>
+          <div style="font-size:10px;color:#888;margin-top:6px;line-height:1.5;">※ 예약 단위 쿠폰(20,000원)은 트립스토어 플랫폼 부담이므로 여행사 정산에는 영향 없음.</div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- 결제 정보 (간략) -->
+    <div class="section">
+      <div class="section-header">
+        <h2>결제 정보</h2>
+      </div>
+      <div class="section-body">
+        <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:14px;">
+          <div class="amount-card">
+            <div class="label">결제 필요 금액</div>
+            <div class="value">2,038,000</div>
+          </div>
+          <div class="amount-card">
+            <div class="label">결제 완료 금액 <span style="font-size:9px;">(예약금)</span></div>
+            <div class="value" style="color:#2e7d32;">200,000</div>
+          </div>
+          <div class="amount-card danger">
+            <div class="label">미입금 (잔액)</div>
+            <div class="value">1,838,000</div>
+            <div class="sub" style="color:#c62828;font-weight:600;">결제 마감일: 2026-05-25</div>
+          </div>
+        </div>
+        <div style="background:#fafafa;border-radius:8px;padding:12px 14px;font-size:11px;color:#666;">
+          ※ 파트너스에서는 결제 PG/카드사 등 세부 정보는 노출하지 않습니다. 자세한 결제 내역은 트립스토어 어드민에서 확인.
+        </div>
+      </div>
+    </div>
+
+    <!-- 메모 -->
+    <div class="section">
+      <div class="section-header">
+        <h2>여행사 메모</h2>
+        <button class="btn btn-primary btn-sm">+ 메모 추가</button>
+      </div>
+      <div class="section-body">
+        <div style="text-align:center;padding:24px;color:#bbb;font-size:12px;">등록된 메모가 없습니다.</div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- ==================== 정산 탭 ==================== -->
+  <div id="tab-settlement" class="tab-content">
+    <div class="section">
+      <div class="section-header">
+        <h2>정산 정보</h2>
+      </div>
+      <div class="section-body">
+        <div class="alert info">
+          <div class="icon">💡</div>
+          <div class="body">
+            <strong>정산은 출발완료 후 진행됩니다</strong>
+            현재 예약 상태: <span class="badge orange">예약접수</span> → 출발완료 후 정산 데이터가 생성되며, 다음 정산일에 자동 입금됩니다.
+          </div>
+        </div>
+        <div class="amount-grid" style="grid-template-columns:repeat(4,1fr);">
+          <div class="amount-card">
+            <div class="label">판매금액</div>
+            <div class="value">2,038,000</div>
+          </div>
+          <div class="amount-card">
+            <div class="label">플랫폼이용료</div>
+            <div class="value" style="color:#d32f2f;">-179,344</div>
+          </div>
+          <div class="amount-card">
+            <div class="label">위약금</div>
+            <div class="value" style="color:#bbb;">0</div>
+          </div>
+          <div class="amount-card primary">
+            <div class="label">정산 예정 금액</div>
+            <div class="value">1,858,656</div>
+          </div>
+        </div>
+        <div style="margin-top:16px;">
+          <div style="font-size:12px;font-weight:600;color:#555;margin-bottom:8px;">정산 일정</div>
+          <table class="matrix-table" style="border:1px solid #e0e0e0;border-radius:8px;">
+            <thead>
+              <tr>
+                <th>구분</th>
+                <th>예상 일자</th>
+                <th class="text-right">금액</th>
+                <th class="text-center">상태</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>출발완료 예정</td>
+                <td>2026-06-09</td>
+                <td class="text-right text-mono">-</td>
+                <td class="text-center"><span class="badge gray">대기</span></td>
+              </tr>
+              <tr>
+                <td>정산 마감</td>
+                <td>2026-06-말</td>
+                <td class="text-right text-mono">1,858,656</td>
+                <td class="text-center"><span class="badge gray">대기</span></td>
+              </tr>
+              <tr>
+                <td>지급일</td>
+                <td>2026-07-15</td>
+                <td class="text-right text-mono">1,858,656</td>
+                <td class="text-center"><span class="badge gray">대기</span></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ==================== 이력 탭 ==================== -->
+  <div id="tab-history" class="tab-content">
+    <div class="section">
+      <div class="section-header">
+        <h2>예약 이력</h2>
+      </div>
+      <div class="section-body">
+        <div style="display:flex;flex-direction:column;gap:0;">
+          <div style="display:flex;gap:14px;padding:12px 0;border-bottom:1px solid #f0f0f0;">
+            <div style="width:6px;background:#1a73e8;border-radius:3px;"></div>
+            <div style="flex:1;">
+              <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px;">
+                <strong style="font-size:13px;">예약 접수</strong>
+                <span style="font-size:10px;color:#888;font-family:monospace;">2026-04-07 08:43</span>
+              </div>
+              <div style="font-size:11px;color:#666;">트립스토어 → 파트너스로 예약 접수됨. 예약금 200,000원 결제 완료.</div>
+            </div>
+          </div>
+          <div style="display:flex;gap:14px;padding:12px 0;border-bottom:1px solid #f0f0f0;">
+            <div style="width:6px;background:#e0e0e0;border-radius:3px;"></div>
+            <div style="flex:1;">
+              <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px;">
+                <strong style="font-size:13px;color:#aaa;">예약 완료 (대기)</strong>
+                <span style="font-size:10px;color:#bbb;">—</span>
+              </div>
+              <div style="font-size:11px;color:#aaa;">고객 확인 + 출발 가능 + 잔액 결제 완료 후 처리.</div>
+            </div>
+          </div>
+          <div style="display:flex;gap:14px;padding:12px 0;">
+            <div style="width:6px;background:#e0e0e0;border-radius:3px;"></div>
+            <div style="flex:1;">
+              <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px;">
+                <strong style="font-size:13px;color:#aaa;">출발 완료 (대기)</strong>
+                <span style="font-size:10px;color:#bbb;">2026-06-09 예정</span>
+              </div>
+              <div style="font-size:11px;color:#aaa;">출발일 자동 도래 시 시스템 batch로 자동 전환.</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<!-- ==================== 모달: 예약완료 처리 ==================== -->
+<div class="modal-overlay" id="modal-complete">
+  <div class="modal">
+    <div class="modal-header" style="background:#2e7d32;color:#fff;">
+      <h3 style="color:#fff;">예약완료 처리</h3>
+      <button class="close" onclick="this.closest('.modal-overlay').classList.remove('show')" style="color:#fff;">&times;</button>
+    </div>
+    <div class="modal-body">
+      <div class="alert warn" style="margin-bottom:14px;">
+        <div class="icon">⚠</div>
+        <div class="body">
+          <strong>예약완료 처리 전 확인사항</strong>
+          아래 3가지 항목을 모두 확인했는지 체크하세요.
+        </div>
+      </div>
+      <div class="form-group">
+        <label style="display:flex;align-items:flex-start;gap:8px;padding:10px;border:1px solid #e0e0e0;border-radius:8px;margin-bottom:8px;cursor:pointer;">
+          <input type="checkbox" id="chk-customer" style="margin-top:2px;">
+          <div>
+            <div style="font-weight:700;font-size:12px;">① 고객 확인 완료</div>
+            <div style="font-size:11px;color:#888;margin-top:2px;">예약자 오기웅 (010-2374-8449) 통화 또는 SMS로 출발 의사 확인</div>
+          </div>
+        </label>
+        <label style="display:flex;align-items:flex-start;gap:8px;padding:10px;border:1px solid #e0e0e0;border-radius:8px;margin-bottom:8px;cursor:pointer;">
+          <input type="checkbox" id="chk-product" style="margin-top:2px;">
+          <div>
+            <div style="font-weight:700;font-size:12px;">② 상품 출발 가능 확인 완료</div>
+            <div style="font-size:11px;color:#888;margin-top:2px;">상하이 자유여행 4일 (2026-06-06 출발) 모객·항공·객실 모두 확정</div>
+          </div>
+        </label>
+        <label style="display:flex;align-items:flex-start;gap:8px;padding:10px;border:1px solid #ef5350;border-radius:8px;background:#ffebee;cursor:pointer;">
+          <input type="checkbox" id="chk-payment" style="margin-top:2px;">
+          <div>
+            <div style="font-weight:700;font-size:12px;color:#b71c1c;">③ 잔액 결제 확인 완료 <span style="font-size:10px;color:#d32f2f;">(필수)</span></div>
+            <div style="font-size:11px;color:#5d4037;margin-top:2px;">미입금 잔액: <strong style="font-family:monospace;">1,838,000원</strong> · 결제 마감 2026-05-25</div>
+          </div>
+        </label>
+      </div>
+      <div class="form-group">
+        <label>처리 메모 (선택)</label>
+        <textarea rows="3" placeholder="처리 사유 / 특이사항 입력"></textarea>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-outline" onclick="this.closest('.modal-overlay').classList.remove('show')">취소</button>
+      <button class="btn btn-success" onclick="confirmComplete()">예약완료 처리</button>
+    </div>
+  </div>
+</div>
+
+<!-- ==================== 모달: 예약취소 처리 ==================== -->
+<div class="modal-overlay" id="modal-cancel">
+  <div class="modal">
+    <div class="modal-header" style="background:#d32f2f;color:#fff;">
+      <h3 style="color:#fff;">예약취소 처리</h3>
+      <button class="close" onclick="this.closest('.modal-overlay').classList.remove('show')" style="color:#fff;">&times;</button>
+    </div>
+    <div class="modal-body">
+      <div class="alert danger" style="margin-bottom:14px;">
+        <div class="icon">⚠</div>
+        <div class="body">
+          <strong>예약을 취소하시겠습니까?</strong>
+          취소 후 트립스토어 어드민에서 환불 처리가 진행됩니다. 위약금이 있는 경우 별도 산정됩니다.
+        </div>
+      </div>
+      <div class="form-group">
+        <label>취소 사유 <span style="color:#d32f2f;">*</span></label>
+        <select>
+          <option>모객 부족</option>
+          <option>상품 출발 불가 (천재지변/항공 결항 등)</option>
+          <option>고객 변심</option>
+          <option>이용조건 불일치</option>
+          <option>중복 예약</option>
+          <option>기타</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>상세 사유 (선택)</label>
+        <textarea rows="3" placeholder="상세 메모 입력"></textarea>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-outline" onclick="this.closest('.modal-overlay').classList.remove('show')">닫기</button>
+      <button class="btn btn-danger" onclick="confirmCancel()">예약취소 처리</button>
+    </div>
+  </div>
+</div>
+
+<script>
+function switchTab(name) {
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+  event.currentTarget.classList.add('active');
+  document.getElementById('tab-' + name).classList.add('active');
+}
+
+function openCompleteModal() {
+  document.getElementById('modal-complete').classList.add('show');
+}
+function openCancelModal() {
+  document.getElementById('modal-cancel').classList.add('show');
+}
+
+function confirmComplete() {
+  const c1 = document.getElementById('chk-customer').checked;
+  const c2 = document.getElementById('chk-product').checked;
+  const c3 = document.getElementById('chk-payment').checked;
+  if (!c1 || !c2 || !c3) {
+    alert('3가지 확인 항목을 모두 체크해야 예약완료 처리가 가능합니다.');
+    return;
+  }
+  document.getElementById('status-rsv').textContent = '예약완료';
+  document.getElementById('status-rsv').className = 'badge green';
+  document.getElementById('page-status-badge').textContent = '예약완료';
+  document.getElementById('page-status-badge').className = 'badge green';
+  document.getElementById('substatus-alert').style.display = 'none';
+  document.getElementById('modal-complete').classList.remove('show');
+  showToast('예약완료 처리되었습니다.');
+}
+function confirmCancel() {
+  document.getElementById('status-rsv').textContent = '예약취소';
+  document.getElementById('status-rsv').className = 'badge red';
+  document.getElementById('page-status-badge').textContent = '예약취소';
+  document.getElementById('page-status-badge').className = 'badge red';
+  document.getElementById('substatus-alert').style.display = 'none';
+  document.getElementById('modal-cancel').classList.remove('show');
+  showToast('예약취소 처리되었습니다. 어드민에서 환불 처리가 진행됩니다.');
+}
+
+function showToast(message) {
+  const toast = document.createElement('div');
+  toast.style.cssText = 'position:fixed;bottom:80px;left:50%;transform:translateX(-50%);background:#1a1a1a;color:#fff;padding:12px 24px;border-radius:8px;font-size:13px;z-index:999;box-shadow:0 4px 20px rgba(0,0,0,0.3);';
+  toast.textContent = '✓ ' + message;
+  document.body.appendChild(toast);
+  setTimeout(() => { toast.style.opacity = '0'; toast.style.transition = 'opacity 0.3s'; }, 2000);
+  setTimeout(() => toast.remove(), 2500);
+}
+</script>
+</body>
+</html>
