@@ -1,0 +1,448 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<title>대시보드 · 트립 파트너스</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: -apple-system, BlinkMacSystemFont, 'Pretendard', sans-serif; background: #f5f7fa; color: #333; font-size: 13px; line-height: 1.5; }
+
+  /* ==== 글로벌 네비 ==== */
+  .partner-nav { background: #fff; border-bottom: 1px solid #e0e0e0; padding: 0 32px; display: flex; align-items: center; height: 56px; position: sticky; top: 0; z-index: 100; }
+  .partner-logo { display: flex; align-items: center; gap: 8px; font-weight: 700; font-size: 14px; color: #1a1a1a; margin-right: 32px; }
+  .partner-logo .logo-mark { width: 32px; height: 32px; background: #1a1a1a; color: #fff; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-weight: 800; }
+  .partner-menu { display: flex; gap: 4px; flex: 1; }
+  .partner-menu a { padding: 8px 14px; color: #666; font-size: 13px; font-weight: 500; text-decoration: none; border-radius: 6px; }
+  .partner-menu a:hover { background: #f5f5f5; }
+  .partner-menu a.active { color: #1a73e8; font-weight: 700; border-bottom: 2px solid #1a73e8; border-radius: 0; padding-bottom: 18px; margin-bottom: -18px; background: transparent; }
+  .partner-user { display: flex; align-items: center; gap: 8px; font-size: 12px; color: #666; }
+  .partner-user strong { color: #1a1a1a; font-weight: 700; }
+
+  /* ==== 컨테이너 ==== */
+  .container { max-width: 1400px; margin: 0 auto; padding: 24px 32px; }
+
+  /* ==== 인사말 ==== */
+  .greeting-row { display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 20px; }
+  .greeting-row .hello { font-size: 22px; font-weight: 700; color: #1a1a1a; }
+  .greeting-row .hello .name { color: #1a73e8; }
+  .greeting-row .hello .sub { display: block; font-size: 12px; color: #888; font-weight: 400; margin-top: 4px; }
+  .greeting-row .quick { display: flex; gap: 6px; }
+  .quick-btn { padding: 8px 14px; background: #fff; border: 1px solid #d0d0d0; border-radius: 8px; font-size: 12px; font-weight: 600; color: #333; cursor: pointer; }
+  .quick-btn:hover { background: #f5f5f5; }
+
+  /* ==== 오늘 할 일 (상단 4-카드) ==== */
+  .today-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; margin-bottom: 20px; }
+  .today-card { background: #fff; border-radius: 12px; padding: 18px 20px; border: 1px solid #e0e0e0; cursor: pointer; transition: all 0.15s; text-decoration: none; color: inherit; display: block; }
+  .today-card:hover { transform: translateY(-2px); box-shadow: 0 6px 18px rgba(0,0,0,0.08); }
+  .today-card .top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
+  .today-card .top .label { font-size: 11px; color: #666; font-weight: 700; }
+  .today-card .top .icon { font-size: 18px; }
+  .today-card .number { font-size: 30px; font-weight: 800; font-family: monospace; color: #1a1a1a; line-height: 1; }
+  .today-card .unit { font-size: 14px; color: #888; font-weight: 500; margin-left: 4px; }
+  .today-card .desc { font-size: 11px; color: #666; margin-top: 6px; }
+  .today-card .cta { display: inline-block; margin-top: 10px; font-size: 11px; color: #1a73e8; font-weight: 700; }
+  .today-card.urgent { background: #fff8e1; border-color: #ffb74d; }
+  .today-card.urgent .number { color: #e65100; }
+  .today-card.urgent .cta { color: #e65100; }
+  .today-card.danger { background: #ffebee; border-color: #ef5350; }
+  .today-card.danger .number { color: #c62828; }
+  .today-card.danger .cta { color: #c62828; }
+
+  /* ==== 메인 그리드 (2-col) ==== */
+  .main-grid { display: grid; grid-template-columns: 2fr 1fr; gap: 14px; }
+  .widget { background: #fff; border-radius: 12px; border: 1px solid #e0e0e0; margin-bottom: 14px; overflow: hidden; }
+  .widget-header { padding: 14px 18px; border-bottom: 1px solid #f0f0f0; display: flex; justify-content: space-between; align-items: center; background: #fafbfc; }
+  .widget-header h3 { font-size: 13px; font-weight: 700; color: #1a1a1a; }
+  .widget-header .sub { font-size: 11px; color: #888; font-weight: 400; margin-left: 6px; }
+  .widget-header .link { font-size: 11px; color: #1a73e8; font-weight: 600; cursor: pointer; text-decoration: none; }
+  .widget-body { padding: 14px 18px; }
+
+  /* 모객 현황 */
+  .moga-list { display: flex; flex-direction: column; gap: 8px; }
+  .moga-row { display: flex; align-items: center; gap: 12px; padding: 10px 12px; background: #fafbfc; border-radius: 8px; border: 1px solid #f0f0f0; cursor: pointer; transition: all 0.1s; }
+  .moga-row:hover { background: #f0f7ff; border-color: #bbdefb; }
+  .moga-row .info { flex: 1; min-width: 0; }
+  .moga-row .name { font-size: 12px; font-weight: 700; color: #1a1a1a; margin-bottom: 4px; display: flex; align-items: center; gap: 6px; }
+  .moga-row .meta { font-size: 10px; color: #888; }
+  .moga-row .bar-wrap { width: 140px; display: flex; flex-direction: column; gap: 4px; }
+  .moga-row .bar-bg { background: #e0e0e0; border-radius: 999px; height: 8px; overflow: hidden; }
+  .moga-row .bar-fill { height: 100%; background: linear-gradient(90deg, #2e7d32, #66bb6a); border-radius: 999px; }
+  .moga-row .bar-fill.warn { background: linear-gradient(90deg, #f57c00, #ffb74d); }
+  .moga-row .bar-fill.danger { background: linear-gradient(90deg, #c62828, #ef5350); }
+  .moga-row .pct { font-size: 11px; font-weight: 700; text-align: right; color: #1a1a1a; font-family: monospace; min-width: 44px; }
+  .badge-sm { font-size: 9px; padding: 1px 6px; border-radius: 3px; font-weight: 700; }
+  .badge-sm.good { background: #e8f5e9; color: #2e7d32; }
+  .badge-sm.warn { background: #fff3e0; color: #e65100; }
+  .badge-sm.danger { background: #ffebee; color: #c62828; }
+
+  /* 정산 입금 */
+  .settle-list { display: flex; flex-direction: column; gap: 8px; }
+  .settle-row { display: flex; align-items: center; gap: 10px; padding: 10px; background: #fafbfc; border-radius: 8px; border: 1px solid #f0f0f0; }
+  .settle-row .dot-day { background: #1a73e8; color: #fff; width: 42px; height: 42px; border-radius: 8px; display: flex; flex-direction: column; align-items: center; justify-content: center; font-size: 9px; font-weight: 700; flex-shrink: 0; line-height: 1.1; }
+  .settle-row .dot-day .d { font-size: 16px; }
+  .settle-row .body { flex: 1; }
+  .settle-row .label { font-size: 11px; color: #666; margin-bottom: 2px; }
+  .settle-row .amt { font-size: 13px; font-weight: 700; font-family: monospace; color: #1a73e8; }
+  .settle-row.total { background: #e3f2fd; border-color: #90caf9; }
+  .settle-row.total .dot-day { background: #2e7d32; }
+  .settle-row.total .amt { color: #2e7d32; }
+
+  /* KPI */
+  .kpi-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+  .kpi-cell { background: #fafbfc; border: 1px solid #f0f0f0; border-radius: 8px; padding: 12px; }
+  .kpi-cell .lbl { font-size: 10px; color: #888; font-weight: 600; }
+  .kpi-cell .val { font-size: 22px; font-weight: 800; color: #1a73e8; font-family: monospace; margin-top: 4px; line-height: 1; }
+  .kpi-cell .val span { font-size: 12px; color: #666; }
+  .kpi-cell .delta { font-size: 10px; color: #2e7d32; font-weight: 700; margin-top: 4px; }
+  .kpi-cell .delta.down { color: #c62828; }
+
+  /* 알림 */
+  .alert-list { display: flex; flex-direction: column; gap: 8px; }
+  .alert-row { display: flex; gap: 10px; padding: 10px 12px; border-radius: 8px; font-size: 11px; line-height: 1.5; }
+  .alert-row.warn { background: #fff8e1; border: 1px solid #ffe082; }
+  .alert-row.danger { background: #ffebee; border: 1px solid #ffcdd2; }
+  .alert-row.info { background: #e3f2fd; border: 1px solid #bbdefb; }
+  .alert-row .ico { font-size: 14px; line-height: 1.2; }
+  .alert-row .txt { flex: 1; }
+  .alert-row strong { display: block; margin-bottom: 2px; }
+
+  /* 최근 예약 */
+  table.recent { width: 100%; border-collapse: collapse; font-size: 12px; }
+  table.recent th { padding: 10px 8px; text-align: left; font-size: 11px; font-weight: 700; color: #666; background: #fafbfc; border-bottom: 1px solid #e0e0e0; }
+  table.recent td { padding: 10px 8px; border-bottom: 1px solid #f0f0f0; }
+  table.recent tr:hover { background: #fafafa; }
+  table.recent a.link { color: #1a73e8; text-decoration: none; font-weight: 600; font-family: monospace; }
+  table.recent .badge-sm.proc { background: #fff3e0; color: #e65100; }
+  table.recent .badge-sm.done { background: #e8f5e9; color: #2e7d32; }
+  table.recent .badge-sm.dep { background: #e3f2fd; color: #1565c0; }
+  table.recent .text-right { text-align: right; }
+  table.recent .text-mono { font-family: monospace; }
+</style>
+</head>
+<body>
+
+<!-- ==================== 글로벌 네비 ==================== -->
+<div class="partner-nav">
+  <div class="partner-logo">
+    <div class="logo-mark">E</div>
+    <div>트립<br><span style="font-size:11px;font-weight:500;">파트너스</span></div>
+  </div>
+  <nav class="partner-menu">
+    <a href="#" class="active">대시보드</a>
+    <a href="./partner-reservation-list-phase1.html">예약관리</a>
+    <a href="#">상품관리</a>
+    <a href="#">정산관리</a>
+    <a href="#">업무요청</a>
+    <a href="#">게시판</a>
+    <a href="#">리포트</a>
+    <a href="#">계정관리</a>
+  </nav>
+  <div class="partner-user">
+    <span>참좋은여행</span> · <strong>참좋은여행TS</strong> 님
+    <span style="margin-left:6px;">👤</span>
+  </div>
+</div>
+
+<div class="container">
+
+  <!-- 인사말 -->
+  <div class="greeting-row">
+    <div class="hello">
+      안녕하세요, <span class="name">참좋은여행</span> 님 👋
+      <span class="sub">2026년 6월 16일 (월) · 오늘 처리할 일을 확인하세요.</span>
+    </div>
+    <div class="quick">
+      <button class="quick-btn">📊 리포트</button>
+      <button class="quick-btn">💬 의견 보내기</button>
+      <button class="quick-btn">⚙️ 컬럼 설정</button>
+    </div>
+  </div>
+
+  <!-- 오늘 할 일 (4-카드) -->
+  <div class="today-row">
+    <a href="./partner-reservation-list-phase1.html" class="today-card urgent">
+      <div class="top"><span class="label">처리 대기 (예약접수)</span><span class="icon">📥</span></div>
+      <div class="number">2<span class="unit">건</span></div>
+      <div class="desc">고객 확인 + 출발 가능 여부 체크 필요</div>
+      <div class="cta">바로 처리 →</div>
+    </a>
+    <a href="./partner-reservation-list-phase1.html" class="today-card danger">
+      <div class="top"><span class="label">잔금 미입금</span><span class="icon">💰</span></div>
+      <div class="number">1<span class="unit">건</span></div>
+      <div class="desc">결제 마감 임박 · 1,838,000원</div>
+      <div class="cta">결제 안내 →</div>
+    </a>
+    <a href="./partner-reservation-list-phase1.html" class="today-card">
+      <div class="top"><span class="label">출발 임박 (D-3 이내)</span><span class="icon">✈️</span></div>
+      <div class="number">8<span class="unit">건</span></div>
+      <div class="desc">PNR/바우처 발송 상태 확인</div>
+      <div class="cta">목록 보기 →</div>
+    </a>
+    <a href="./partner-reservation-list-phase1.html" class="today-card">
+      <div class="top"><span class="label">취소 요청</span><span class="icon">🛑</span></div>
+      <div class="number">0<span class="unit">건</span></div>
+      <div class="desc">고객 취소 의사 대기</div>
+      <div class="cta">처리하기 →</div>
+    </a>
+  </div>
+
+  <!-- 메인 그리드 -->
+  <div class="main-grid">
+
+    <!-- ===== 좌측 컬럼 ===== -->
+    <div>
+
+      <!-- 모객 현황 -->
+      <div class="widget">
+        <div class="widget-header">
+          <h3>📊 이번달 출발 행사 모객 현황 <span class="sub">2026년 6월 출발 · 모객률 정렬</span></h3>
+          <a href="#" class="link">전체 행사 보기 →</a>
+        </div>
+        <div class="widget-body">
+          <div class="moga-list">
+            <div class="moga-row">
+              <div class="info">
+                <div class="name">상하이 자유여행 4일 #하버플라자 <span class="badge-sm good">달성</span></div>
+                <div class="meta">6/06 출발 · 정원 20명 · 예약 18명</div>
+              </div>
+              <div class="bar-wrap"><div class="bar-bg"><div class="bar-fill" style="width:90%;"></div></div></div>
+              <div class="pct">90%</div>
+            </div>
+            <div class="moga-row">
+              <div class="info">
+                <div class="name">방콕/파타야 5일 #센타라그랜드 <span class="badge-sm good">달성</span></div>
+                <div class="meta">6/10 출발 · 정원 25명 · 예약 21명</div>
+              </div>
+              <div class="bar-wrap"><div class="bar-bg"><div class="bar-fill" style="width:84%;"></div></div></div>
+              <div class="pct">84%</div>
+            </div>
+            <div class="moga-row">
+              <div class="info">
+                <div class="name">오사카/교토 3박4일 #호텔뉴오타니 <span class="badge-sm warn">주의</span></div>
+                <div class="meta">6/18 출발 · 정원 30명 · 예약 17명</div>
+              </div>
+              <div class="bar-wrap"><div class="bar-bg"><div class="bar-fill warn" style="width:56%;"></div></div></div>
+              <div class="pct">56%</div>
+            </div>
+            <div class="moga-row">
+              <div class="info">
+                <div class="name">다낭 5일 자유여행 #나만 골든베이 <span class="badge-sm danger">미달 위험</span></div>
+                <div class="meta">6/22 출발 · 정원 20명 · 예약 6명</div>
+              </div>
+              <div class="bar-wrap"><div class="bar-bg"><div class="bar-fill danger" style="width:30%;"></div></div></div>
+              <div class="pct">30%</div>
+            </div>
+            <div class="moga-row">
+              <div class="info">
+                <div class="name">하노이/하롱베이 4일 <span class="badge-sm danger">미달 위험</span></div>
+                <div class="meta">6/25 출발 · 정원 22명 · 예약 5명</div>
+              </div>
+              <div class="bar-wrap"><div class="bar-bg"><div class="bar-fill danger" style="width:23%;"></div></div></div>
+              <div class="pct">23%</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 최근 처리 예약 -->
+      <div class="widget">
+        <div class="widget-header">
+          <h3>🕒 최근 예약 활동</h3>
+          <a href="./partner-reservation-list-phase1.html" class="link">예약관리 →</a>
+        </div>
+        <div class="widget-body" style="padding:0;">
+          <table class="recent">
+            <thead>
+              <tr>
+                <th style="width:90px;">상태</th>
+                <th style="width:120px;">예약번호</th>
+                <th>예약자 / 상품</th>
+                <th style="width:90px;">출발일</th>
+                <th class="text-right" style="width:110px;">판매금액</th>
+                <th style="width:90px;">활동</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><span class="badge-sm proc">예약접수</span></td>
+                <td><a href="./partner-reservation-detail-phase1.html" class="link">HB2633517226</a></td>
+                <td>오기웅 · 상하이 자유여행 4일</td>
+                <td class="text-mono">06-06</td>
+                <td class="text-right text-mono">2,038,000</td>
+                <td style="color:#888;font-size:11px;">방금 전</td>
+              </tr>
+              <tr>
+                <td><span class="badge-sm proc">예약접수</span></td>
+                <td><a href="./partner-reservation-detail-phase1.html" class="link">HB2633517512</a></td>
+                <td>김민지 · 방콕/파타야 5일</td>
+                <td class="text-mono">07-10</td>
+                <td class="text-right text-mono">1,580,000</td>
+                <td style="color:#888;font-size:11px;">3시간 전</td>
+              </tr>
+              <tr>
+                <td><span class="badge-sm done">예약완료</span></td>
+                <td><a href="./partner-reservation-detail-phase1.html" class="link">HB2633516890</a></td>
+                <td>박지훈 · 오사카/교토 4일</td>
+                <td class="text-mono">06-18</td>
+                <td class="text-right text-mono">2,450,000</td>
+                <td style="color:#888;font-size:11px;">어제</td>
+              </tr>
+              <tr>
+                <td><span class="badge-sm dep">출발완료</span></td>
+                <td><a href="./partner-reservation-detail-phase1.html" class="link">HB2633516112</a></td>
+                <td>이수정 · 후쿠오카 3일</td>
+                <td class="text-mono">06-09</td>
+                <td class="text-right text-mono">1,220,000</td>
+                <td style="color:#888;font-size:11px;">2일 전</td>
+              </tr>
+              <tr>
+                <td><span class="badge-sm done">예약완료</span></td>
+                <td><a href="./partner-reservation-detail-phase1.html" class="link">HB2633515773</a></td>
+                <td>최영진 · 다낭 5일</td>
+                <td class="text-mono">06-22</td>
+                <td class="text-right text-mono">1,890,000</td>
+                <td style="color:#888;font-size:11px;">3일 전</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- KPI -->
+      <div class="widget">
+        <div class="widget-header">
+          <h3>📈 운영 지표 <span class="sub">최근 30일</span></h3>
+          <a href="#" class="link">리포트 →</a>
+        </div>
+        <div class="widget-body">
+          <div class="kpi-grid">
+            <div class="kpi-cell">
+              <div class="lbl">예약 처리 시간 (평균)</div>
+              <div class="val">2.3<span>h</span></div>
+              <div class="delta">▼ 1.2h (지난달 대비)</div>
+            </div>
+            <div class="kpi-cell">
+              <div class="lbl">평균 모객 달성률</div>
+              <div class="val">76<span>%</span></div>
+              <div class="delta">▲ 8%p</div>
+            </div>
+            <div class="kpi-cell">
+              <div class="lbl">취소율</div>
+              <div class="val">5.2<span>%</span></div>
+              <div class="delta down">▲ 0.8%p</div>
+            </div>
+            <div class="kpi-cell">
+              <div class="lbl">고객 만족도 (NPS)</div>
+              <div class="val">8.4<span>/10</span></div>
+              <div class="delta">▲ 0.3</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- ===== 우측 컬럼 ===== -->
+    <div>
+
+      <!-- 정산 입금 예정 -->
+      <div class="widget">
+        <div class="widget-header">
+          <h3>💰 정산 입금 예정</h3>
+          <a href="#" class="link">정산관리 →</a>
+        </div>
+        <div class="widget-body">
+          <div class="settle-list">
+            <div class="settle-row">
+              <div class="dot-day"><span class="d">25</span><span>6월</span></div>
+              <div class="body">
+                <div class="label">5월 출발완료 정산</div>
+                <div class="amt">38,420,000원</div>
+              </div>
+            </div>
+            <div class="settle-row">
+              <div class="dot-day"><span class="d">10</span><span>7월</span></div>
+              <div class="body">
+                <div class="label">6월 1차 정산</div>
+                <div class="amt">22,150,000원</div>
+              </div>
+            </div>
+            <div class="settle-row">
+              <div class="dot-day"><span class="d">25</span><span>7월</span></div>
+              <div class="body">
+                <div class="label">6월 2차 정산</div>
+                <div class="amt">28,780,000원</div>
+              </div>
+            </div>
+            <div class="settle-row total">
+              <div class="dot-day"><span class="d">∑</span><span>합계</span></div>
+              <div class="body">
+                <div class="label" style="font-weight:700;">3개월 누적 예정</div>
+                <div class="amt">89,350,000원</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 알림 -->
+      <div class="widget">
+        <div class="widget-header">
+          <h3>🔔 알림</h3>
+          <a href="#" class="link">모두 보기 →</a>
+        </div>
+        <div class="widget-body">
+          <div class="alert-list">
+            <div class="alert-row danger">
+              <div class="ico">💰</div>
+              <div class="txt">
+                <strong>결제 마감 D-day</strong>
+                HB2633517226 (오기웅 님) 잔금 1,838,000원
+              </div>
+            </div>
+            <div class="alert-row warn">
+              <div class="ico">⚠️</div>
+              <div class="txt">
+                <strong>모객 미달 위험 행사 2건</strong>
+                6/22 다낭 · 6/25 하노이 — 폐쇄/병합 검토
+              </div>
+            </div>
+            <div class="alert-row info">
+              <div class="ico">📢</div>
+              <div class="txt">
+                <strong>트립스토어 공지</strong>
+                6/20 정산 시스템 점검 (00:00~02:00)
+              </div>
+            </div>
+            <div class="alert-row info">
+              <div class="ico">📈</div>
+              <div class="txt">
+                <strong>이번달 누적 매출</strong>
+                지난달 동기 대비 +12% (1.2억원)
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 빠른 액션 -->
+      <div class="widget">
+        <div class="widget-header">
+          <h3>⚡ 빠른 액션</h3>
+        </div>
+        <div class="widget-body" style="display:flex;flex-direction:column;gap:8px;">
+          <button class="quick-btn" style="width:100%;text-align:left;">📋 신규 행사 등록</button>
+          <button class="quick-btn" style="width:100%;text-align:left;">📧 미입금 고객 일괄 안내</button>
+          <button class="quick-btn" style="width:100%;text-align:left;">📥 엑셀 다운로드</button>
+          <button class="quick-btn" style="width:100%;text-align:left;">⚙️ 알림 설정</button>
+        </div>
+      </div>
+
+    </div>
+
+  </div>
+
+</div>
+
+</body>
+</html>
