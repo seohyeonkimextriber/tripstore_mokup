@@ -234,8 +234,8 @@
           </div>
         </div>
         <div class="section-body">
-          <div class="info-row"><span class="info-label">예약상태 (관리)</span><span class="info-value"><span class="badge green" id="status-on-management">예약완료</span></span></div>
-          <div class="info-row"><span class="info-label">rsv.status (legacy)</span><span class="info-value"><span class="badge gray" id="status-rsv">출발대기</span></span></div>
+          <div class="info-row"><span class="info-label">트립 예약상태 <span style="font-size:10px;color:#999;">(legacy · status_on_management)</span></span><span class="info-value"><span class="badge green" id="status-on-management">예약완료</span></span></div>
+          <div class="info-row"><span class="info-label">rsv.status <span style="font-size:10px;color:#1565c0;">(신규 예약 원장)</span></span><span class="info-value"><span class="badge gray" id="status-rsv">출발대기</span></span></div>
           <div class="info-row"><span class="info-label">트립 결제상태</span><span class="info-value"><span class="badge blue" id="status-payment">결제완료</span></span></div>
           <div class="info-row"><span class="info-label">정산상태</span><span class="info-value"><span class="badge gray" id="status-settlement">정산대기</span></span></div>
           <div class="info-row"><span class="info-label">지급상태</span><span class="info-value"><span class="badge gray" id="status-payout">지급대기</span></span></div>
@@ -1186,8 +1186,8 @@
       <!-- 현재 상태 -->
       <div style="background:#f5f5f5;border:1px solid #e0e0e0;border-radius:8px;padding:12px;margin-bottom:14px;">
         <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px;font-size:11px;">
-          <div><div style="color:#888;margin-bottom:4px;">현재 예약상태 (관리)</div><span class="badge green" id="cur-status-mng">예약완료</span></div>
-          <div><div style="color:#888;margin-bottom:4px;">현재 rsv.status</div><span class="badge gray" id="cur-status-rsv">출발대기</span></div>
+          <div><div style="color:#888;margin-bottom:4px;">현재 트립 예약상태 <span style="color:#999;">(legacy)</span></div><span class="badge green" id="cur-status-mng">예약완료</span></div>
+          <div><div style="color:#888;margin-bottom:4px;">현재 rsv.status <span style="color:#1565c0;">(신규 원장)</span></div><span class="badge gray" id="cur-status-rsv">출발대기</span></div>
           <div><div style="color:#888;margin-bottom:4px;">현재 결제상태</div><span class="badge blue" id="cur-status-pay">결제완료</span></div>
         </div>
         <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:10px;font-size:11px;margin-top:10px;border-top:1px dashed #d0d0d0;padding-top:10px;">
@@ -1198,23 +1198,23 @@
 
       <!-- 매핑 안내 -->
       <div style="background:#e8f4fd;border:1px solid #bbdefb;border-radius:8px;padding:10px 12px;font-size:11px;color:#0d47a1;line-height:1.6;margin-bottom:14px;">
-        <div style="font-weight:700;margin-bottom:4px;">📌 status_on_management ↔ rsv.status 매핑</div>
+        <div style="font-weight:700;margin-bottom:4px;">📌 트립 예약상태(legacy) ↔ rsv.status(신규 원장) 매핑</div>
         · 예약접수 ↔ 예약성공 &nbsp; · 예약완료 ↔ 출발대기 <span style="color:#d32f2f;">(결제완료 필수)</span><br>
         · 취소요청 ↔ 취소신청 &nbsp; · 취소완료 ↔ 취소완료 &nbsp; · 출발완료 ↔ 출발완료<br>
-        · 취소진행 → 결제상태에 따라 분기
+        · (legacy 없음) ↔ 취소진행 → 결제상태에 따라 분기
       </div>
 
       <!-- 변경할 상태 선택 -->
       <div class="form-group">
-        <label>변경할 예약상태 (관리)</label>
+        <label>변경할 트립 예약상태 (legacy)</label>
         <select id="new-status-mng" onchange="onStatusChange()">
-          <option value="예약접수" data-rsv="예약성공">예약접수 → rsv: 예약성공</option>
-          <option value="예약완료" data-rsv="출발대기" selected>예약완료 → rsv: 출발대기 (결제완료 필수)</option>
-          <option value="취소요청" data-rsv="취소신청">취소요청 → rsv: 취소신청</option>
-          <option value="취소완료" data-rsv="취소완료">취소완료 → rsv: 취소완료</option>
-          <option value="출발완료" data-rsv="출발완료">출발완료 → rsv: 출발완료</option>
-          <option value="취소진행" data-rsv="결제상태 의존">취소진행 → rsv: (결제상태 의존)</option>
+          <option value="예약접수" data-rsv="예약성공">예약접수 → rsv.status: 예약성공</option>
+          <option value="예약완료" data-rsv="출발대기" selected>예약완료 → rsv.status: 출발대기 (결제완료 필수)</option>
+          <option value="취소요청" data-rsv="취소신청">취소요청 → rsv.status: 취소신청</option>
+          <option value="취소완료" data-rsv="취소완료">취소완료 → rsv.status: 취소완료</option>
+          <option value="출발완료" data-rsv="출발완료">출발완료 → rsv.status: 출발완료</option>
         </select>
+        <div class="help" style="margin-top:4px;">※ <strong>취소진행</strong>은 legacy에 대응값이 없는 신규 원장 전용 상태 (결제상태에 따라 시스템이 자동 분기)</div>
       </div>
 
       <!-- 가드 메시지 영역 -->
