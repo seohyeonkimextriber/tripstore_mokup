@@ -173,6 +173,55 @@
     <p>상태값은 <strong>예약접수 → 예약완료 → 출발대기 → 출발완료</strong> 4단계 유지. 출발확정 여부는 <strong>출발대기 안의 boolean flag</strong>로 처리. 자동 매핑 안 된 건도 자연스럽게 출발완료로 흐름.</p>
   </div>
 
+  <!-- ==================== 🚦 작업 범위 분리 (Highest Priority) ==================== -->
+  <div style="background:linear-gradient(135deg, #fef3c7 0%, #fde68a 100%); border:3px solid #d97706; border-radius:16px; padding:28px 32px; margin-bottom:18px;">
+    <div style="font-size:11px;font-weight:800;color:#92400e;letter-spacing:1.5px;margin-bottom:8px;">🚦 작업 범위 분리</div>
+    <h2 style="font-size:22px;font-weight:800;color:#78350f;margin-bottom:8px;letter-spacing:-0.3px;">1차 (원장) vs 2차 (운영/UX) — 다른 PM 인계</h2>
+    <p style="font-size:14px;color:#78350f;line-height:1.7;margin-bottom:18px;">
+      작업 범위를 두 트랙으로 분리합니다. <strong>1차는 원장에 영향 있는 최소 범위만</strong>, <strong>2차는 출발확정 관련 모든 결정</strong> (다른 PM이 이어서 진행).
+    </p>
+
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;">
+      <!-- 1차 -->
+      <div style="background:#fff;border:2px solid #16a34a;border-radius:12px;padding:20px 22px;">
+        <div style="display:inline-block;padding:4px 12px;border-radius:999px;background:#16a34a;color:#fff;font-size:10px;font-weight:800;letter-spacing:0.5px;margin-bottom:10px;">⭐ 1차 · 신규 원장 트랙</div>
+        <h3 style="font-size:16px;font-weight:800;color:#15803d;margin-bottom:10px;">결제완료 → 출발대기 자동 (최소 범위)</h3>
+        <ul style="padding-left:20px;font-size:12px;color:#14532d;line-height:1.8;">
+          <li>rsv.status enum에 <strong>출발대기</strong> 추가</li>
+          <li>예약완료 + <strong>결제완료</strong> → 자동 출발대기 전환</li>
+          <li>status_on_management 매핑 룰 정정 (노션)</li>
+          <li>출발일 도래 시 출발대기 → 출발완료 자동 전환</li>
+        </ul>
+        <div style="margin-top:12px;padding:10px 12px;background:#f0fdf4;border-radius:6px;font-size:11px;color:#15803d;line-height:1.6;">
+          ✅ <strong>여기까지가 신규 원장 영향 범위</strong> · 단순·롤백 쉬움·개발 비용↓
+        </div>
+      </div>
+
+      <!-- 2차 -->
+      <div style="background:#fff;border:2px solid #8b5cf6;border-radius:12px;padding:20px 22px;">
+        <div style="display:inline-block;padding:4px 12px;border-radius:999px;background:#8b5cf6;color:#fff;font-size:10px;font-weight:800;letter-spacing:0.5px;margin-bottom:10px;">📦 2차 · 운영/UX 트랙 (다른 PM 인계)</div>
+        <h3 style="font-size:16px;font-weight:800;color:#6b21a8;margin-bottom:10px;">출발확정 sub-flag + UX + 정책</h3>
+        <ul style="padding-left:20px;font-size:12px;color:#4c1d95;line-height:1.8;">
+          <li>출발대기 안에 <strong>departure_confirmed: bool</strong> 추가</li>
+          <li>sub-flag 트리거 (B 모객 충족, C 시그널, AIRTEL, 수동)</li>
+          <li>고객 화면 라벨 분기 (확정/미확정)</li>
+          <li>파트너스 UI (확정 처리 버튼, 모달 옵션)</li>
+          <li>기간 정책 D-N (영업실 합의 후)</li>
+          <li>토글/Lock 정책 (5개 옵션 중 선택)</li>
+          <li>알림 정책 (확정 전환 시 푸시/SMS)</li>
+          <li>메이저 3사 시그널 추가 협의</li>
+        </ul>
+        <div style="margin-top:12px;padding:10px 12px;background:#f3e8ff;border-radius:6px;font-size:11px;color:#6b21a8;line-height:1.6;">
+          📦 <strong>예약 원장과 무관한 영역</strong> · 다른 PM이 이어서 진행 가능
+        </div>
+      </div>
+    </div>
+
+    <div style="margin-top:16px;padding:14px 18px;background:rgba(255,255,255,0.7);border-radius:8px;border:1px dashed #d97706;font-size:12px;color:#78350f;line-height:1.7;">
+      <strong>💡 분리의 의미</strong> · 1차 = 원장 마이그레이션 위험 최소화 + 빠른 오픈 / 2차 = 충분한 시간 두고 운영 데이터 보면서 정교화. <strong>1차 오픈 시점에 2차는 미확정 상태 그대로 출발대기로 두면 됨 (자연 흐름).</strong>
+    </div>
+  </div>
+
   <!-- ==================== 1. 흐름 비교 ==================== -->
   <div class="section">
     <div class="section-head">
@@ -489,8 +538,72 @@
     </div>
   </div>
 
+  <!-- ==================== 📦 2차 인계용 명세 ==================== -->
+  <div class="section" style="background:linear-gradient(135deg, #faf5ff 0%, #f3e8ff 100%);border:2px solid #8b5cf6;">
+    <div class="section-head">
+      <div class="section-num" style="background:#8b5cf6;">📦</div>
+      <h2 style="color:#6b21a8;">2차 작업 인계용 명세 (다른 PM 인수인계)</h2>
+      <div class="lead" style="color:#7c3aed;">신규 원장과 무관 · 별도 트랙으로 진행</div>
+    </div>
+
+    <div style="background:#fff;border-radius:10px;padding:18px 22px;margin-bottom:14px;">
+      <h3 style="font-size:14px;font-weight:800;color:#6b21a8;margin-bottom:10px;">📋 2차 작업 컨텍스트</h3>
+      <ul style="padding-left:20px;font-size:12px;color:#475569;line-height:1.8;">
+        <li><strong>전제 조건</strong>: 1차(결제완료 → 출발대기) 작업 완료 후 시작</li>
+        <li><strong>목표</strong>: 출발대기 안에서 "확정 vs 미확정" 분기를 통한 운영 효율 + 고객 UX 개선</li>
+        <li><strong>핵심 데이터</strong>: 자동 매핑 가능 영역 = 예약완료 1,946건 중 1,342건 (69%)</li>
+        <li><strong>관련 자료</strong>: 데이터 분석 / Lock 정책 / 옵션 비교 / 외부 사례 리서치 페이지 (하단 링크)</li>
+      </ul>
+    </div>
+
+    <div style="background:#fff;border-radius:10px;padding:18px 22px;margin-bottom:14px;">
+      <h3 style="font-size:14px;font-weight:800;color:#6b21a8;margin-bottom:10px;">✅ 2차에서 결정·작업할 항목 (체크리스트)</h3>
+
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;font-size:12px;">
+        <div>
+          <div style="font-weight:800;color:#6b21a8;margin-bottom:6px;font-size:11px;letter-spacing:0.3px;">🎯 정책 결정</div>
+          <ul style="padding-left:18px;line-height:1.8;color:#4c1d95;">
+            <li>토글/Lock 정책 5개 옵션 중 결정 (A/B/C/D/E)</li>
+            <li>기간 정책 D-N (D-7 / D-14 / D-20)</li>
+            <li>여행사별 차등 기준 여부</li>
+            <li>모객 미달 시 처리 (폐쇄/병합/단독출발)</li>
+            <li>고객 알림 정책 (확정 전환 시 푸시/SMS)</li>
+            <li>고객 화면 라벨 문구 컨펌</li>
+            <li>파트너스 UI 권한 부여 범위</li>
+            <li>노션 매핑 정정 (내일투어/보물섬투어 → 출발확정)</li>
+          </ul>
+        </div>
+        <div>
+          <div style="font-weight:800;color:#6b21a8;margin-bottom:6px;font-size:11px;letter-spacing:0.3px;">🔧 개발·시스템</div>
+          <ul style="padding-left:18px;line-height:1.8;color:#4c1d95;">
+            <li><code>departure_confirmed: bool</code> 컬럼 추가</li>
+            <li>5-Track 룰 구현 (B/C/AIRTEL/수동/자연흐름)</li>
+            <li>고객 화면 분기 UI 구현</li>
+            <li>파트너스 [확정 처리] 버튼/모달 옵션</li>
+            <li>알림 시스템 (확정 전환·임박 D-N 알림)</li>
+            <li>운영자 강제 Lock 권한</li>
+            <li>메이저 3사 시그널 추가 협의 (장기)</li>
+            <li>출발확정 KPI 측정 (자동률 / 토글 빈도 / 운영자 액션 빈도)</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <div style="background:#fff;border-radius:10px;padding:18px 22px;">
+      <h3 style="font-size:14px;font-weight:800;color:#6b21a8;margin-bottom:10px;">🗂️ 인계 시 같이 전달할 자료 6개</h3>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;font-size:12px;">
+        <a href="./departure-confirm-data-analysis.html" style="display:block;padding:10px 12px;background:#fafbfc;border-radius:6px;text-decoration:none;color:#475569;border:1px solid #e2e8f0;">📊 데이터 분석 v3 (예약완료 1,946건, 자동 69%)</a>
+        <a href="./departure-confirm-research.html" style="display:block;padding:10px 12px;background:#fafbfc;border-radius:6px;text-decoration:none;color:#475569;border:1px solid #e2e8f0;">🔍 외부 사례 리서치 (업계 신뢰 이슈 등)</a>
+        <a href="./departure-confirm-lock-policy.html" style="display:block;padding:10px 12px;background:#fafbfc;border-radius:6px;text-decoration:none;color:#475569;border:1px solid #e2e8f0;">🔒 Lock 정책 5개 옵션 (A~E)</a>
+        <a href="./reservation-status-option-compare.html" style="display:block;padding:10px 12px;background:#fafbfc;border-radius:6px;text-decoration:none;color:#475569;border:1px solid #e2e8f0;">📐 옵션1 vs 옵션2 비교 (이전 단계)</a>
+        <a href="./departure-confirm-sales-brief.html" style="display:block;padding:10px 12px;background:#fafbfc;border-radius:6px;text-decoration:none;color:#475569;border:1px solid #e2e8f0;">📋 영업실 브리프 (의사결정 자료)</a>
+        <a href="https://www.notion.so/tripstore/38186ade8e778033805cd8b696b2f592" target="_blank" style="display:block;padding:10px 12px;background:#fafbfc;border-radius:6px;text-decoration:none;color:#475569;border:1px solid #e2e8f0;">📝 노션 정책 페이지</a>
+      </div>
+    </div>
+  </div>
+
   <div style="text-align:center;padding:28px 0;font-size:11px;color:#94a3b8;">
-    트립스토어 PM · 2026-06-17 · 영업실·운영팀 결정 후 개발 일정 합의
+    트립스토어 PM · 2026-06-17 · 1차 = 신규 원장 트랙 / 2차 = 운영·UX 트랙 (다른 PM 인계)
   </div>
 
 </div>
