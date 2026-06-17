@@ -2,7 +2,7 @@
 <html lang="ko">
 <head>
 <meta charset="UTF-8">
-<title>신규 예약시스템 스키마 — PM 가이드 v2</title>
+<title>신규 예약시스템 스키마 — PM 가이드 v3</title>
 <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
 <script>document.addEventListener('DOMContentLoaded',()=>{mermaid.initialize({startOnLoad:true,theme:'default',themeVariables:{fontFamily:'-apple-system,BlinkMacSystemFont,sans-serif'}});});</script>
 <style>
@@ -76,6 +76,14 @@ code, .code-inline {
 .map-grid .full { grid-column: 1 / -1; font-size: 12px; color: #6b7280;
   padding: 4px 0; border-bottom: 1px dashed #e5e7eb; margin-top: 4px; }
 .map-grid .full b { color: #4338ca; }
+.map-grid .none {
+  background: #f3f4f6; color: #6b7280; padding: 5px 10px; border-radius: 5px;
+  font-family: "SF Mono", Consolas, monospace; font-size: 12px;
+}
+.map-grid .ne {
+  background: #dcfce7; color: #166534; font-size: 9px; padding: 1px 5px;
+  border-radius: 3px; font-family: -apple-system, sans-serif; margin-left: 3px;
+}
 
 /* Mermaid */
 .mermaid {
@@ -111,101 +119,166 @@ code, .code-inline {
 }
 .tcard-header .tname { font-family: "SF Mono", Consolas, monospace; font-size: 16px; font-weight: 600; }
 .tcard-header .tkr { font-size: 13px; opacity: 0.95; }
-.tcard-body {
-  display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 0;
-}
-.tcard-left { padding: 16px 18px; border-right: 1px solid #e5e7eb; min-height: 480px; }
-.tcard-right { padding: 16px 18px; min-height: 480px; }
-.tcard-left h4 { margin-top: 0; }
 
-/* Column table */
-table.col-table {
-  width: 100%; border-collapse: collapse; font-size: 12.5px;
-}
-table.col-table th, table.col-table td {
-  padding: 7px 8px; text-align: left; border-bottom: 1px solid #f1f5f9; vertical-align: top;
-}
-table.col-table th {
-  background: #f8fafc; font-weight: 600; font-size: 11px;
-  color: #475569; text-transform: uppercase; letter-spacing: 0.4px;
-}
-table.col-table td.cn {
-  font-family: "SF Mono", Consolas, monospace; color: #4338ca; font-size: 12px; white-space: nowrap;
-}
-table.col-table td.ct {
-  font-family: "SF Mono", Consolas, monospace; color: #64748b; font-size: 11px; white-space: nowrap;
-}
-.pk, .fk, .nl, .ne {
-  font-size: 10px; padding: 1px 5px; border-radius: 3px; margin-left: 3px; font-weight: 600;
-  vertical-align: middle;
-}
-.pk { background: #fef3c7; color: #92400e; }
-.fk { background: #dbeafe; color: #1e40af; }
-.nl { background: #f3f4f6; color: #6b7280; font-weight: 500; }
-.ne { background: #dcfce7; color: #166534; }
-
-/* Inner Tabs (in card right) */
+/* Inner Tabs (5 tabs) */
 .inner-tabs {
-  display: flex; gap: 4px; background: #f1f5f9; padding: 3px;
-  border-radius: 8px; margin-bottom: 12px;
+  display: flex; gap: 2px; background: #f8fafc; padding: 6px;
+  border-bottom: 1px solid #e5e7eb;
 }
 .inner-tabs button {
-  flex: 1; border: none; background: transparent; padding: 6px 8px;
-  border-radius: 5px; cursor: pointer; font-size: 12px; color: #475569;
-  font-weight: 500; font-family: inherit;
+  flex: 1; border: none; background: transparent; padding: 8px 6px;
+  border-radius: 6px; cursor: pointer; font-size: 12.5px; color: #475569;
+  font-weight: 500; font-family: inherit; transition: all 0.15s;
 }
-.inner-tabs button:hover { background: #e0e7ff; }
+.inner-tabs button:hover { background: #e0e7ff; color: #4338ca; }
 .inner-tabs button.cur { background: white; color: #4338ca; box-shadow: 0 1px 3px rgba(0,0,0,0.08); font-weight: 600; }
-.inner-content { display: none; font-size: 13px; line-height: 1.65; }
+.inner-content { display: none; padding: 18px 20px; font-size: 13px; line-height: 1.65; }
 .inner-content.cur { display: block; }
-.inner-content ul { margin: 4px 0 0; padding-left: 18px; }
+.inner-content > p { margin: 6px 0; }
+.inner-content ul { margin: 6px 0; padding-left: 20px; }
 .inner-content ul li { margin: 3px 0; }
-.inner-content p { margin: 4px 0; }
 
-/* Mapping box */
-.mapping {
-  background: #f8fafc; border-radius: 8px; padding: 10px 12px; font-size: 12.5px;
-  margin: 8px 0; border: 1px solid #e2e8f0;
+/* 5-Column Table */
+table.col5 {
+  width: 100%; border-collapse: collapse; font-size: 12.5px;
+  background: white; margin: 0;
 }
-.mapping .row { display: grid; grid-template-columns: 1fr 18px 1fr; gap: 6px; align-items: center; margin: 4px 0; }
-.mapping .o { background: #fef2f2; color: #991b1b; padding: 3px 7px; border-radius: 4px;
-  font-family: "SF Mono", Consolas, monospace; font-size: 11.5px; }
-.mapping .n { background: #ecfdf5; color: #065f46; padding: 3px 7px; border-radius: 4px;
-  font-family: "SF Mono", Consolas, monospace; font-size: 11.5px; }
-.mapping .a { text-align: center; color: #9ca3af; }
-.mapping .note { color: #6b7280; font-size: 11.5px; margin-top: 6px; padding-top: 6px;
-  border-top: 1px dashed #cbd5e1; }
-.mapping .none { background: #ecfdf5; color: #065f46; padding: 3px 8px; border-radius: 4px;
-  font-size: 11.5px; display: inline-block; }
+table.col5 th, table.col5 td {
+  padding: 9px 11px; text-align: left;
+  border-bottom: 1px solid #f1f5f9; vertical-align: top;
+}
+table.col5 thead { background: #f8fafc; position: sticky; top: 50px; z-index: 5; }
+table.col5 th {
+  background: #f8fafc; font-weight: 600; font-size: 11px;
+  color: #475569; text-transform: uppercase; letter-spacing: 0.4px;
+  border-bottom: 2px solid #e5e7eb;
+}
+table.col5 td.cn {
+  font-family: "SF Mono", Consolas, monospace; color: #4338ca; font-size: 12px;
+  white-space: nowrap; font-weight: 600;
+}
+table.col5 td.ct {
+  font-family: "SF Mono", Consolas, monospace; color: #64748b; font-size: 11.5px; white-space: nowrap;
+}
+table.col5 td.cex {
+  font-family: "SF Mono", Consolas, monospace; color: #065f46; font-size: 11.5px;
+  background: #f0fdf4; border-radius: 3px;
+}
+table.col5 td.cdesc { font-size: 12.5px; color: #374151; }
+table.col5 td.csub { font-size: 11.5px; color: #475569; line-height: 1.7; }
+table.col5 td.csub code { font-size: 10.5px; padding: 1px 4px; }
+table.col5 .pk, table.col5 .fk, table.col5 .nl {
+  font-size: 9.5px; padding: 1px 4px; border-radius: 3px; margin-left: 3px; font-weight: 600;
+  vertical-align: middle; font-family: -apple-system, sans-serif;
+}
+table.col5 .pk { background: #fef3c7; color: #92400e; }
+table.col5 .fk { background: #dbeafe; color: #1e40af; }
+table.col5 .nl { background: #f3f4f6; color: #6b7280; font-weight: 500; }
+table.col5 .alert {
+  background: #fef3c7; color: #92400e; font-size: 10.5px; padding: 1px 5px;
+  border-radius: 3px; margin-left: 3px; font-family: -apple-system, sans-serif;
+}
 
-/* Policy list */
+/* Intent / Legacy / Policy 콘텐츠 영역 */
+.responsibility-box {
+  background: linear-gradient(135deg, #eef2ff 0%, #f5f3ff 100%);
+  border-left: 4px solid #6366f1; padding: 12px 16px; border-radius: 0 8px 8px 0;
+  margin: 8px 0 14px; font-size: 13px;
+}
+.responsibility-box b { color: #4338ca; }
+.row-2col {
+  display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin: 12px 0;
+}
+.row-2col > div {
+  background: #f8fafc; border-radius: 8px; padding: 12px 14px;
+  border: 1px solid #e2e8f0;
+}
+.row-2col h4 { margin-top: 0; font-size: 12px; color: #4338ca; }
+.faq-item {
+  border-left: 3px solid #cbd5e1; padding: 6px 12px; margin: 8px 0;
+  background: #fafbfc; border-radius: 0 6px 6px 0;
+}
+.faq-item .q { font-weight: 600; color: #1e293b; font-size: 12.5px; margin-bottom: 3px; }
+.faq-item .q::before { content: "Q. "; color: #6366f1; }
+.faq-item .a { color: #475569; font-size: 12.5px; }
+.faq-item .a::before { content: "A. "; color: #10b981; font-weight: 600; }
+
+/* Mapping table */
+table.mtable {
+  width: 100%; border-collapse: collapse; font-size: 12px;
+  background: white; margin: 8px 0;
+}
+table.mtable th, table.mtable td {
+  padding: 7px 10px; text-align: left; border-bottom: 1px solid #f1f5f9; vertical-align: top;
+}
+table.mtable th { background: #f8fafc; font-size: 11px; color: #475569; font-weight: 600; }
+table.mtable .o { background: #fef2f2; color: #991b1b; padding: 2px 7px; border-radius: 4px;
+  font-family: "SF Mono", Consolas, monospace; font-size: 11px; white-space: nowrap; display: inline-block; }
+table.mtable .n { background: #ecfdf5; color: #065f46; padding: 2px 7px; border-radius: 4px;
+  font-family: "SF Mono", Consolas, monospace; font-size: 11px; white-space: nowrap; display: inline-block; }
+table.mtable .none { background: #f3f4f6; color: #6b7280; padding: 2px 7px; border-radius: 4px;
+  font-family: "SF Mono", Consolas, monospace; font-size: 11px; white-space: nowrap; display: inline-block; }
+table.mtable .rule { color: #475569; font-size: 11.5px; }
+table.mtable .risk {
+  font-size: 10px; padding: 1px 5px; border-radius: 3px; font-weight: 600;
+  display: inline-block; margin-right: 3px;
+}
+.risk-low { background: #d1fae5; color: #065f46; }
+.risk-mid { background: #fef3c7; color: #92400e; }
+.risk-high { background: #fee2e2; color: #991b1b; }
+
+/* SQL pseudo */
+.sql-block {
+  background: #0f172a; color: #e2e8f0; padding: 12px 14px; border-radius: 8px;
+  font-family: "SF Mono", Consolas, monospace; font-size: 11.5px; overflow-x: auto;
+  line-height: 1.6; margin: 10px 0;
+}
+.sql-block .kw { color: #93c5fd; }
+.sql-block .str { color: #fcd34d; }
+.sql-block .num { color: #86efac; }
+.sql-block .com { color: #64748b; font-style: italic; }
+.sql-block .fn { color: #f9a8d4; }
+.sql-block .lbl {
+  display: block; font-family: -apple-system, sans-serif;
+  font-size: 10.5px; color: #94a3b8; margin-bottom: 6px;
+  text-transform: uppercase; letter-spacing: 0.5px;
+}
+
+/* Policy items */
 .policy-item {
-  background: #fffbeb; border-left: 3px solid #f59e0b; padding: 8px 12px;
+  background: #fffbeb; border-left: 3px solid #f59e0b; padding: 10px 14px;
   border-radius: 0 6px 6px 0; margin: 8px 0; font-size: 12.5px;
 }
 .policy-item .lbl {
-  font-size: 10px; font-weight: 700; color: #92400e; letter-spacing: 0.5px;
-  text-transform: uppercase; margin-bottom: 3px;
+  font-size: 10.5px; font-weight: 700; color: #92400e; letter-spacing: 0.5px;
+  text-transform: uppercase; margin-bottom: 4px;
 }
-.policy-item .body { color: #374151; }
+.policy-item .body { color: #374151; line-height: 1.6; }
+.policy-item .body b { color: #1e293b; }
+.policy-item .body ul { margin: 4px 0 0; padding-left: 18px; }
 .policy-item .status {
-  display: inline-block; font-size: 10px; padding: 1px 6px; border-radius: 3px;
-  margin-left: 4px; font-weight: 600; vertical-align: middle;
+  display: inline-block; font-size: 9.5px; padding: 1px 6px; border-radius: 3px;
+  margin-left: 4px; font-weight: 700; vertical-align: middle; letter-spacing: 0.3px;
 }
 .st-todo { background: #fef3c7; color: #92400e; }
 .st-decided { background: #d1fae5; color: #065f46; }
 .st-urgent { background: #fee2e2; color: #991b1b; }
+.st-review { background: #dbeafe; color: #1e40af; }
 
 /* Example block */
 .example {
-  background: #f0fdf4; border: 1px solid #bbf7d0; border-radius: 6px;
-  padding: 8px 12px; margin: 6px 0; font-size: 11.5px;
+  background: #f0fdf4; border: 1px solid #bbf7d0; border-radius: 8px;
+  padding: 10px 14px; margin: 8px 0; font-size: 11.5px;
   font-family: "SF Mono", Consolas, monospace; color: #166534; overflow-x: auto;
-  line-height: 1.6;
+  line-height: 1.65;
 }
 .example .lbl {
-  font-family: -apple-system, sans-serif; font-size: 10px; font-weight: 700;
-  letter-spacing: 0.5px; color: #15803d; margin-bottom: 4px; display: block;
+  font-family: -apple-system, sans-serif; font-size: 10.5px; font-weight: 700;
+  letter-spacing: 0.5px; color: #15803d; margin-bottom: 5px; display: block;
+}
+.example .desc {
+  font-family: -apple-system, sans-serif; color: #475569; font-size: 11.5px;
+  margin-top: 4px; padding-top: 4px; border-top: 1px dashed #cbd5e1;
 }
 
 /* Scenario cards */
@@ -218,12 +291,8 @@ table.col-table td.ct {
   padding: 14px 16px; font-size: 12.5px;
 }
 .sc-card h3 { margin: 0 0 8px; font-size: 14px; }
-.sc-card .compare {
-  display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 8px;
-}
-.sc-card .compare > div {
-  padding: 8px 10px; border-radius: 6px; font-size: 11.5px; line-height: 1.5;
-}
+.sc-card .compare { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 8px; }
+.sc-card .compare > div { padding: 8px 10px; border-radius: 6px; font-size: 11.5px; line-height: 1.5; }
 .sc-card .sc-old { background: #fef2f2; color: #7f1d1d; border-left: 3px solid #ef4444; }
 .sc-card .sc-new { background: #ecfdf5; color: #064e3b; border-left: 3px solid #10b981; }
 .sc-card .sc-lbl { font-weight: 700; font-size: 10px; letter-spacing: 0.5px; display: block; margin-bottom: 3px; }
@@ -236,8 +305,7 @@ table.col-table td.ct {
 /* Policy table */
 .policy-table {
   width: 100%; border-collapse: collapse; font-size: 12.5px;
-  background: white; border-radius: 10px; overflow: hidden;
-  border: 1px solid #e5e7eb;
+  background: white; border-radius: 10px; overflow: hidden; border: 1px solid #e5e7eb;
 }
 .policy-table th, .policy-table td {
   padding: 9px 12px; text-align: left; border-bottom: 1px solid #f1f5f9; vertical-align: top;
@@ -264,14 +332,17 @@ table.col-table td.ct {
 .mig-card ul { margin: 4px 0 0; padding-left: 16px; }
 .mig-card ul li { margin: 2px 0; }
 
+.alert-box {
+  background: #fff7ed; border: 1px solid #fed7aa; border-radius: 6px;
+  padding: 8px 12px; margin: 8px 0; font-size: 12px; color: #9a3412;
+}
+.alert-box b { color: #7c2d12; }
+
 .footer { text-align: center; color: #9ca3af; font-size: 12px; margin-top: 40px;
   padding-top: 20px; border-top: 1px dashed #e5e7eb; }
 
-/* Responsive */
 @media (max-width: 900px) {
-  .tcard-body { grid-template-columns: 1fr; }
-  .tcard-left { border-right: none; border-bottom: 1px solid #e5e7eb; min-height: auto; }
-  .tcard-right { min-height: auto; }
+  .row-2col { grid-template-columns: 1fr; }
 }
 </style>
 </head>
@@ -286,19 +357,20 @@ table.col-table td.ct {
   <a href="#s5">⑤ 마이그</a>
 </nav>
 
-<h1>🧭 신규 예약시스템 스키마 — PM 가이드 v2</h1>
+<h1>🧭 신규 예약시스템 스키마 — PM 가이드 v3</h1>
 <div class="subtitle">
 ts_*(현행) → rsv_*(신규) 전환의 <b>"무엇이 어디로 가고, 무엇을 정해야 하는가"</b>를 한 화면에서 보는 가이드.
-각 테이블별 <b>컬럼·legacy 매핑·마이그 정책·예시</b>를 카드 내부 탭으로 전환.
+테이블별 <b>5탭 — 컬럼 · 의도 · Legacy 매핑 · 마이그 정책 · 예시</b>로 정리.
 </div>
 
 <div class="intro">
   <p>📒 <b>설계 한 줄.</b> 예약 = <code>rsv_ledgers</code> 1행. 모든 금액 흐름은 <code>rsv_ledger_items</code> 의 시계열 다중 행.</p>
   <p>🔁 <b>전환 한 줄.</b> ts_reservation_order의 <b>컬럼들</b> → rsv_ledger_items의 <b>다중 행</b>으로 분해. 결제주체 둘이면 예약을 쪼개야 했던 구조 해소.</p>
   <p>📋 <b>관리 한 줄.</b> 39개 원장 항목 코드는 <code>rsv_ledger_item_types</code> enum 마스터. 신규 항목 추가 시 PM이 정책 정의 → 개발 enum 등록 요청.</p>
+  <p>🆕 <b>v3 업데이트(2026-06-17).</b> 예약상태 <b>4단계 채택 방향</b> 반영 (접수→완료→출발대기→출발완료). 출발확정 단계 추가는 별도 미팅 예정.</p>
 </div>
 
-<!-- ⓪ 한눈에 매핑 -->
+<!-- ⓪ -->
 <h2 id="s0"><span class="num">⓪</span> Legacy → 신규 전체 매핑 한눈에</h2>
 
 <div class="map-grid">
@@ -327,19 +399,16 @@ ts_*(현행) → rsv_*(신규) 전환의 <b>"무엇이 어디로 가고, 무엇�
   <div class="old">ts_settlement</div><div class="arrow">→</div><div class="new">rsv_ledger_items (500/900)</div>
   <div class="full">정산 → 원장 항목으로 통합.</div>
 
-  <div style="background:#f3f4f6; color:#6b7280; padding:3px 7px; border-radius:4px; font-family:'SF Mono'; font-size:11.5px;">(travels 컬럼 내장)</div>
-  <div class="arrow">+</div>
-  <div class="new">rsv_travels <span style="background:#dcfce7; color:#166534; font-size:9px; padding:1px 5px; border-radius:3px; font-family:-apple-system; margin-left:3px;">신규</span></div>
+  <div class="none">(travels 컬럼 내장)</div><div class="arrow">+</div>
+  <div class="new">rsv_travels<span class="ne">신규</span></div>
   <div class="full">행사 연결 정규화 → 행사이동 이력 표현 가능.</div>
 
-  <div style="background:#f3f4f6; color:#6b7280; padding:3px 7px; border-radius:4px; font-family:'SF Mono'; font-size:11.5px;">(없음)</div>
-  <div class="arrow">+</div>
-  <div class="new">rsv_channel_links <span style="background:#dcfce7; color:#166534; font-size:9px; padding:1px 5px; border-radius:3px; font-family:-apple-system; margin-left:3px;">신규</span></div>
+  <div class="none">(채널별 ad-hoc)</div><div class="arrow">+</div>
+  <div class="new">rsv_channel_links<span class="ne">신규</span></div>
   <div class="full">채널사 주문번호 다중 매핑 (sync 채널 부채 흡수).</div>
 
-  <div style="background:#f3f4f6; color:#6b7280; padding:3px 7px; border-radius:4px; font-family:'SF Mono'; font-size:11.5px;">(하드코딩)</div>
-  <div class="arrow">+</div>
-  <div class="new">rsv_ledger_item_types <span style="background:#dcfce7; color:#166534; font-size:9px; padding:1px 5px; border-radius:3px; font-family:-apple-system; margin-left:3px;">신규</span></div>
+  <div class="none">(하드코딩)</div><div class="arrow">+</div>
+  <div class="new">rsv_ledger_item_types<span class="ne">신규</span></div>
   <div class="full">39개 원장 코드 enum 마스터 (마이그레이션 없이 항목 추가).</div>
 </div>
 
@@ -362,8 +431,8 @@ erDiagram
     RSV_LEDGER_ITEM_TYPES ||--o{ RSV_LEDGER_ITEMS : "type"
 </div>
 
-<!-- ② 테이블 7개 (탭) -->
-<h2 id="s2"><span class="num">②</span> 핵심 테이블 7개 — 카드 내부 탭으로 전환</h2>
+<!-- ② 테이블 7개 -->
+<h2 id="s2"><span class="num">②</span> 핵심 테이블 7개 — 5탭으로 한 번에 하나만</h2>
 
 <div class="table-tabs" id="ttabs">
   <button data-t="t1" class="cur"><span class="tname">rsv_ledgers</span><span class="tkr">★ 마스터</span></button>
@@ -379,91 +448,294 @@ erDiagram
 <div class="tcard cur" id="t1">
   <div class="tcard-header">
     <div><span class="tname">rsv_ledgers</span></div>
-    <div class="tkr">예약원장 마스터 — 한 예약 = 한 행</div>
+    <div class="tkr">예약원장 마스터 · 한 예약 = 한 행</div>
   </div>
-  <div class="tcard-body">
-    <div class="tcard-left">
-      <h4>📐 컬럼</h4>
-      <table class="col-table">
-        <thead><tr><th>컬럼</th><th>타입</th><th>의미</th></tr></thead>
-        <tbody>
-        <tr><td class="cn">id<span class="pk">PK</span></td><td class="ct">bigint</td><td>원장 ID</td></tr>
-        <tr><td class="cn">code</td><td class="ct">varchar</td><td>예약코드 <code>26042623-1700101V</code></td></tr>
-        <tr><td class="cn">channel</td><td class="ct">varchar</td><td>판매 채널 <code>tripstore</code>/<code>ssg</code>/<code>street11</code>/<code>kakaoshopping</code>/<code>thehyundaitravel</code>/<code>myrealtrip</code>/<code>nol</code></td></tr>
-        <tr><td class="cn">agency</td><td class="ct">varchar</td><td>여행사 시스템 (모두투어/하나투어)</td></tr>
-        <tr><td class="cn">booker_user_id</td><td class="ct">bigint</td><td>예약자 회원 ID</td></tr>
-        <tr><td class="cn">booker_profile_id</td><td class="ct">bigint</td><td>예약자 프로필 ID</td></tr>
-        <tr><td class="cn">booker_name</td><td class="ct">varchar</td><td>예약자명 (스냅샷)</td></tr>
-        <tr><td class="cn">booker_mobile</td><td class="ct">varchar</td><td>예약자 연락처 (스냅샷)</td></tr>
-        <tr><td class="cn">booker_email</td><td class="ct">varchar</td><td>예약자 이메일</td></tr>
-        <tr><td class="cn">booker_gender</td><td class="ct">varchar</td><td>예약자 성별</td></tr>
-        <tr><td class="cn">booker_birthday</td><td class="ct">date</td><td>예약자 생년월일</td></tr>
-        <tr><td class="cn">status</td><td class="ct">varchar</td><td>예약 상태 — RESERVED / CANCELED / DEPARTED</td></tr>
-        <tr><td class="cn">created_at</td><td class="ct">timestamp</td><td>예약 생성 시각</td></tr>
-        <tr><td class="cn">updated_at</td><td class="ct">timestamp</td><td>마지막 변경 시각</td></tr>
-        </tbody>
-      </table>
+  <div class="inner-tabs">
+    <button data-it="cols" class="cur">📐 컬럼</button>
+    <button data-it="intent">🎯 의도</button>
+    <button data-it="legacy">🔁 Legacy 매핑</button>
+    <button data-it="policy">📋 마이그 정책</button>
+    <button data-it="ex">📌 예시</button>
+  </div>
+
+  <div class="inner-content cur" data-it="cols">
+    <table class="col5">
+      <thead><tr><th style="width:14%">컬럼</th><th style="width:10%">타입</th><th style="width:18%">예시값</th><th style="width:24%">설명</th><th>하위컬럼 / 가능한 값</th></tr></thead>
+      <tbody>
+      <tr>
+        <td class="cn">id<span class="pk">PK</span></td><td class="ct">bigint</td>
+        <td class="cex">L-10456789</td><td class="cdesc">원장 ID (AUTO_INCREMENT)</td>
+        <td class="csub">시스템 내부 식별자. 운영자 화면에는 노출 X.</td>
+      </tr>
+      <tr>
+        <td class="cn">code</td><td class="ct">varchar(32)</td>
+        <td class="cex">26042623-1700101V</td><td class="cdesc">예약코드 (운영자·고객 가시)</td>
+        <td class="csub">
+          포맷: <code>YYMMDDHH-NNNNNNNV</code><br>
+          　• <code>YYMMDD</code> 예약 일자<br>
+          　• <code>HH</code> 예약 시각<br>
+          　• <code>NNNNNNN</code> 일련번호<br>
+          　• <code>V</code> 채널 분류 suffix
+        </td>
+      </tr>
+      <tr>
+        <td class="cn">channel</td><td class="ct">varchar(32)</td>
+        <td class="cex">tripstore</td><td class="cdesc">판매 채널 식별자 enum</td>
+        <td class="csub">
+          　• <code>tripstore</code> 직판 (defaultPaymentOwner=PLATFORM)<br>
+          　• <code>ssg</code> SSG.COM (sync, owner=CHANNEL)<br>
+          　• <code>street11</code> 11번가 (sync)<br>
+          　• <code>kakaoshopping</code> 카카오쇼핑 (sync)<br>
+          　• <code>nol</code> NOL인터파크 (sync)<br>
+          　• <code>thehyundaitravel</code> 더현대트래블<br>
+          　• <code>myrealtrip</code> 마이리얼트립<br>
+          　• <code>maumaum</code> 맘맘
+        </td>
+      </tr>
+      <tr>
+        <td class="cn">agency</td><td class="ct">varchar(16)</td>
+        <td class="cex">AG-018</td><td class="cdesc">여행사 시스템 식별자</td>
+        <td class="csub">
+          　• <code>AG-018</code> 모두투어<br>
+          　• <code>AG-019</code> 하나투어<br>
+          　• <code>AG-021</code> 노랑풍선<br>
+          　• <code>AG-099</code> 인디비(자체)<br>
+          한 원장 = 단일 여행사 (다중 매핑 금지)
+        </td>
+      </tr>
+      <tr>
+        <td class="cn">booker_user_id<span class="fk">FK</span><span class="nl">NULL</span></td>
+        <td class="ct">bigint</td><td class="cex">U-882011</td>
+        <td class="cdesc">예약자 회원 ID (members.id 참조)</td>
+        <td class="csub">비회원 예약 시 NULL 허용</td>
+      </tr>
+      <tr>
+        <td class="cn">booker_profile_id<span class="fk">FK</span></td>
+        <td class="ct">bigint</td><td class="cex">PR-7711</td>
+        <td class="cdesc">예약자 여행자 프로필 ID</td>
+        <td class="csub">회원의 여러 여행자 프로필 중 예약 본인 식별</td>
+      </tr>
+      <tr>
+        <td class="cn">booker_name</td><td class="ct">varchar(60)</td>
+        <td class="cex">김여행</td><td class="cdesc">예약자 명 (스냅샷)</td>
+        <td class="csub">회원정보 변경에도 보존. 영문명도 동일 컬럼.</td>
+      </tr>
+      <tr>
+        <td class="cn">booker_mobile</td><td class="ct">varchar(20)</td>
+        <td class="cex">010-2374-8449</td><td class="cdesc">예약자 연락처 (스냅샷)</td>
+        <td class="csub">국가코드 포함 가능 형태. 마스킹은 출력 레이어에서.</td>
+      </tr>
+      <tr>
+        <td class="cn">booker_email</td><td class="ct">varchar(120)</td>
+        <td class="cex">kim@example.com</td><td class="cdesc">예약자 이메일 (스냅샷)</td>
+        <td class="csub">개인정보 정책 영향 — 마스킹 정책 별도</td>
+      </tr>
+      <tr>
+        <td class="cn">booker_gender</td><td class="ct">varchar(1)</td>
+        <td class="cex">F</td><td class="cdesc">예약자 성별</td>
+        <td class="csub">
+          　• <code>F</code> 여성<br>
+          　• <code>M</code> 남성<br>
+          　• <code>N</code> 미입력
+        </td>
+      </tr>
+      <tr>
+        <td class="cn">booker_birthday</td><td class="ct">date</td>
+        <td class="cex">1990-03-12</td><td class="cdesc">예약자 생년월일</td>
+        <td class="csub">미성년자 예약 가능 여부 검증용</td>
+      </tr>
+      <tr>
+        <td class="cn">status</td><td class="ct">varchar(16)</td>
+        <td class="cex">접수</td>
+        <td class="cdesc">예약 상태 (4단계 채택 방향)<span class="alert">2026-06-17</span></td>
+        <td class="csub">
+          　• <code>접수</code> 예약 들어옴 (결제 전)<br>
+          　• <code>완료</code> 결제 완료<br>
+          　• <code>출발대기</code> 결제완료 + 출발 전<br>
+          　• <code>출발완료</code> 출발 처리됨<br>
+          　• <code>취소</code> 단계 무관 분기<br>
+          ⚠️ <code>출발확정</code> 단계 추가는 메이저 4사·운영팀 확인 후 별도 미팅
+        </td>
+      </tr>
+      <tr>
+        <td class="cn">created_at</td><td class="ct">timestamp</td>
+        <td class="cex">2026-04-26 23:17:01</td>
+        <td class="cdesc">예약 생성 시각 (불변)</td>
+        <td class="csub">DEFAULT NOW()</td>
+      </tr>
+      <tr>
+        <td class="cn">updated_at</td><td class="ct">timestamp</td>
+        <td class="cex">2026-04-27 14:38:22</td>
+        <td class="cdesc">마지막 변경 시각</td>
+        <td class="csub">ON UPDATE NOW(). 자세한 변경 이력은 _aud 테이블 참조.</td>
+      </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="inner-content" data-it="intent">
+    <div class="responsibility-box">
+      <b>🎯 책임 (Single Responsibility)</b><br>
+      예약 1건의 <b>정체성</b>을 단일 행으로 표현. 누구의(booker_*) / 어디서(channel) / 무엇을(agency)이라는 식별 정보만 보유.
+      금액·결제·정산·여행자·행사 세부는 모두 별도 테이블에 위임.
     </div>
-    <div class="tcard-right">
-      <div class="inner-tabs">
-        <button data-it="intent" class="cur">의도</button>
-        <button data-it="legacy">Legacy 매핑</button>
-        <button data-it="policy">마이그 정책</button>
-        <button data-it="example">예시</button>
-      </div>
-      <div class="inner-content cur" data-it="intent">
-        <p><b>🎯 이 테이블이 하는 일</b></p>
-        <p>"이 예약이 누구의 것이고, 어떤 채널·여행사에 속하는지" 정체성을 담음. <b>한 예약 = 한 행</b>이며, 모든 금액·여행자·행사는 이 원장 1행을 중심으로 매달림.</p>
-        <p><b>왜 이렇게?</b></p>
+
+    <div class="row-2col">
+      <div>
+        <h4>왜 이렇게 설계됐나</h4>
         <ul>
-          <li>예약 = 1행이라는 정체성을 잃지 않기 위해. 결제주체가 둘이어도 원장은 하나.</li>
-          <li>예약자 정보(booker_*)는 스냅샷으로 보존 — 회원 정보 변경에 흔들리지 않음.</li>
-          <li>channel · agency는 식별자만. 결제·정산 분기는 ledger_items가 담당.</li>
+          <li>결제주체가 둘이어도 원장 자체는 하나 → 예약 정체성 보존</li>
+          <li>booker_* 스냅샷 — 회원정보 변경에 예약 기록이 흔들리지 않음</li>
+          <li>channel/agency는 식별자만. 결제·정산 분기는 ledger_items의 type 코드가 담당</li>
+          <li>한 원장에 다중 여행사 매핑 금지 (당사자 모델 도메인 룰)</li>
         </ul>
       </div>
-      <div class="inner-content" data-it="legacy">
-        <p><b>🔁 어디서 왔나</b></p>
-        <div class="mapping">
-          <div class="row"><span class="o">ts_reservation.reservation_id</span><span class="a">→</span><span class="n">rsv_ledgers.id</span></div>
-          <div class="row"><span class="o">ts_reservation.reservation_code</span><span class="a">→</span><span class="n">rsv_ledgers.code</span></div>
-          <div class="row"><span class="o">ts_reservation.user_name</span><span class="a">→</span><span class="n">rsv_ledgers.booker_name</span></div>
-          <div class="row"><span class="o">ts_reservation.user_mobile</span><span class="a">→</span><span class="n">rsv_ledgers.booker_mobile</span></div>
-          <div class="row"><span class="o">ts_reservation.agency_id</span><span class="a">→</span><span class="n">rsv_ledgers.agency</span></div>
-          <div class="row"><span class="o">ts_reservation.reservation_status</span><span class="a">→</span><span class="n">rsv_ledgers.status</span></div>
-          <div class="row"><span class="o">ts_member_reservation.*</span><span class="a">⇒</span><span class="n">booker_user_id / booker_profile_id</span></div>
-          <div class="note">⚠️ <b>ts_member_reservation_management</b> 소멸 — 신규 구조의 어디로 가는지 확인 필요</div>
-        </div>
+      <div>
+        <h4>주변 테이블과의 관계</h4>
+        <ul>
+          <li><code>rsv_travels</code> ← 1:N (행사 이동 이력)</li>
+          <li><code>rsv_channel_links</code> ← 1:N (채널 주문번호 다중)</li>
+          <li><code>rsv_agency_links</code> ← 1:N (행사이동 시 신규 발급)</li>
+          <li><code>rsv_travelers</code> ← 1:N (개별 승객)</li>
+          <li><code>rsv_ledger_items</code> ← 1:N (모든 금액 거래)</li>
+        </ul>
       </div>
-      <div class="inner-content" data-it="policy">
-        <div class="policy-item">
-          <div class="lbl">channel enum 관리 <span class="status st-todo">정리 필요</span></div>
-          <div class="body">sync 채널(SSG/11번가/카카오쇼핑/NOL/맘맘) 추가 시 정책 정리 → 개발 enum 등록 요청. defaultPaymentOwner도 함께 정의.</div>
-        </div>
-        <div class="policy-item">
-          <div class="lbl">예약 status 전이도 <span class="status st-todo">정리 필요</span></div>
-          <div class="body">RESERVED → CANCELED / DEPARTED 흐름 정책문서 별도 관리. 마이그 시 ts_reservation_status 값 매핑 검증.</div>
-        </div>
-        <div class="policy-item">
-          <div class="lbl">booker_* 스냅샷 정책 <span class="status st-decided">결정</span></div>
-          <div class="body">회원 정보 변경돼도 원장의 예약자 정보는 그 시점 값 그대로 보존. 개인정보 정책 영향 — 마스킹 정책 별도.</div>
-        </div>
-        <div class="policy-item">
-          <div class="lbl">ts_member_reservation_management 처리 <span class="status st-urgent">확인 필요</span></div>
-          <div class="body">신규 구조의 어느 테이블로 가는지 미확정. 메모/추가관리정보 흡수 위치 결정 필요.</div>
-        </div>
+    </div>
+
+    <h4>자주 받는 질문</h4>
+    <div class="faq-item">
+      <div class="q">예약자가 회원정보(이름/연락처)를 바꾸면 원장에도 반영되나요?</div>
+      <div class="a">반영 안 됨. booker_*는 예약 시점 <b>스냅샷</b>. 회원 마스터(members)의 최신값은 booker_user_id로 join해서 별도 조회.</div>
+    </div>
+    <div class="faq-item">
+      <div class="q">한 예약에 채널 2개(SSG + 트립스토어) 동시에 가능한가?</div>
+      <div class="a">불가. <code>rsv_ledgers.channel</code>은 단일 값. 다른 채널 예약은 별개 원장. 결제주체 둘 → 한 원장 + ledger_items 다중 행으로 표현.</div>
+    </div>
+    <div class="faq-item">
+      <div class="q">status 4단계 외에 환불·부분취소는 어떻게 표현되나?</div>
+      <div class="a">status는 예약 전체의 큰 흐름만. 환불·부분취소·인원취소 등 세부 분기는 <code>rsv_ledger_items</code>에 시계열 행으로 추적.</div>
+    </div>
+    <div class="faq-item">
+      <div class="q">비회원 예약 처리는?</div>
+      <div class="a"><code>booker_user_id=NULL</code> 허용. booker_name/mobile/email은 입력값 보존.</div>
+    </div>
+  </div>
+
+  <div class="inner-content" data-it="legacy">
+    <h4>컬럼 매핑표</h4>
+    <table class="mtable">
+      <thead><tr><th style="width:30%">이전 (ts_*)</th><th style="width:25%">신규 (rsv_*)</th><th style="width:14%">위험도</th><th>변환 규칙</th></tr></thead>
+      <tbody>
+      <tr><td><span class="o">ts_reservation.reservation_id</span></td><td><span class="n">rsv_ledgers.id</span></td><td><span class="risk risk-low">낮음</span></td><td class="rule">동일 매핑 (값 유지)</td></tr>
+      <tr><td><span class="o">ts_reservation.reservation_code</span></td><td><span class="n">rsv_ledgers.code</span></td><td><span class="risk risk-low">낮음</span></td><td class="rule">그대로</td></tr>
+      <tr><td><span class="o">ts_reservation.user_name</span></td><td><span class="n">rsv_ledgers.booker_name</span></td><td><span class="risk risk-low">낮음</span></td><td class="rule">컬럼명 통일</td></tr>
+      <tr><td><span class="o">ts_reservation.user_mobile</span></td><td><span class="n">rsv_ledgers.booker_mobile</span></td><td><span class="risk risk-low">낮음</span></td><td class="rule">컬럼명 통일</td></tr>
+      <tr><td><span class="o">ts_reservation.agency_id</span></td><td><span class="n">rsv_ledgers.agency</span></td><td><span class="risk risk-mid">중간</span></td><td class="rule">int → varchar 변환 + enum 정합 검증</td></tr>
+      <tr><td><span class="o">ts_reservation.reservation_status</span></td><td><span class="n">rsv_ledgers.status</span></td><td><span class="risk risk-high">높음</span></td><td class="rule"><b>4단계로 압축</b> — 기존 다단계 status 매핑 룰 확정 필요</td></tr>
+      <tr><td><span class="o">ts_member_reservation.*</span></td><td><span class="n">rsv_ledgers.booker_user_id / profile_id</span></td><td><span class="risk risk-mid">중간</span></td><td class="rule">FK 추출 후 본 테이블에 내장</td></tr>
+      <tr><td><span class="o">(없음)</span></td><td><span class="n">booker_email / gender / birthday</span></td><td><span class="risk risk-mid">중간</span></td><td class="rule">members 마스터에서 join 후 스냅샷 채움</td></tr>
+      <tr><td><span class="o">ts_member_reservation_management</span></td><td><span class="none">(소멸 추정)</span></td><td><span class="risk risk-high">높음</span></td><td class="rule">⚠️ 신규 구조 어디로 가는지 미확정</td></tr>
+      </tbody>
+    </table>
+
+    <h4>변환 룰 (pseudo SQL)</h4>
+    <div class="sql-block">
+<span class="lbl">ts_reservation → rsv_ledgers 배치 변환</span>
+<span class="kw">INSERT INTO</span> rsv_ledgers (id, code, channel, agency, booker_user_id,
+  booker_name, booker_mobile, booker_email, booker_gender, booker_birthday,
+  status, created_at, updated_at)
+<span class="kw">SELECT</span>
+  r.reservation_id <span class="kw">AS</span> id,
+  r.reservation_code <span class="kw">AS</span> code,
+  <span class="fn">map_channel</span>(r.channel_source) <span class="kw">AS</span> channel,    <span class="com">-- enum 변환</span>
+  <span class="fn">CONCAT</span>(<span class="str">'AG-'</span>, <span class="fn">LPAD</span>(r.agency_id, <span class="num">3</span>, <span class="str">'0'</span>)),
+  r.member_id, r.user_name, r.user_mobile,
+  m.email, m.gender, m.birthday,                       <span class="com">-- members join</span>
+  <span class="fn">map_status_4step</span>(r.reservation_status) <span class="kw">AS</span> status, <span class="com">-- ⚠ 4단계 압축</span>
+  r.created_at, r.updated_at
+<span class="kw">FROM</span> ts_reservation r
+<span class="kw">LEFT JOIN</span> members m <span class="kw">ON</span> m.id = r.member_id;</div>
+
+    <div class="alert-box">
+      ⚠️ <b>데이터 손실 위험 항목</b>
+      <ul style="margin: 4px 0 0; padding-left: 18px;">
+        <li><b>reservation_status → status</b>: 기존 다단계 → 4단계 압축 시 중간 상태 정보 손실 가능. <code>map_status_4step()</code> 정의 필요.</li>
+        <li><b>ts_member_reservation_management</b>: 추가 관리 정보(메모·플래그) 흡수 위치 미정.</li>
+        <li><b>비회원 예약</b>: member_id NULL인 경우 booker_email/gender/birthday는 reservation 자체 컬럼에서 가져옴 (members join X).</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="inner-content" data-it="policy">
+    <div class="policy-item">
+      <div class="lbl">예약 status 4단계 매핑 룰 <span class="status st-urgent">결정 필요</span></div>
+      <div class="body">
+        <b>채택 방향(2026-06-17 미팅):</b> 접수 → 완료 → 출발대기 → 출발완료 + 취소.<br>
+        기존 ts_reservation_status의 RESERVED/CONFIRMED/PAYMENT_DONE/DEPARTED 등 다단계 값을 4단계로 어떻게 매핑할지 룰 확정 필요.
+        <ul>
+          <li>RESERVED → 접수</li>
+          <li>CONFIRMED + 결제전 → 접수 / 결제후 → 완료</li>
+          <li>PAYMENT_DONE → 완료 또는 출발대기 (출발일 기준 분기)</li>
+          <li>DEPARTED → 출발완료</li>
+        </ul>
       </div>
-      <div class="inner-content" data-it="example">
-        <div class="example">
-          <span class="lbl">📌 예시 1행</span>
-          id=L-10456789 · code=<b>26042623-1700101V</b> · channel=<b>tripstore</b> · agency=<b>AG-018(모두투어)</b><br>
-          booker_user_id=U-882011 · booker_name=김여행 · booker_mobile=010-2374-8449 · status=<b>RESERVED</b>
-        </div>
-        <div class="example">
-          <span class="lbl">📌 SSG 채널 예약</span>
-          id=L-99999 · code=26042623-9999X · channel=<b>ssg</b> · agency=AG-018<br>
-          booker_name=홍길동 · status=RESERVED
-        </div>
+    </div>
+    <div class="policy-item">
+      <div class="lbl">출발확정 단계 추가 검토 <span class="status st-review">별도 미팅 예정</span></div>
+      <div class="body">
+        "출발확정" 상태 추가 여부 별도 논의 중.<br>
+        <b>선결과제:</b>
+        <ul>
+          <li>메이저 4개 여행사에서 출발확정 처리 가능한지 확인</li>
+          <li>운영팀에서 "출발확정 관리" 운영 가능한지 확인</li>
+          <li>외부 사례 + 운영 룰 제안 자료 준비</li>
+        </ul>
       </div>
+    </div>
+    <div class="policy-item">
+      <div class="lbl">channel enum 관리 거버넌스 <span class="status st-todo">정리 필요</span></div>
+      <div class="body">sync 채널 추가될 때마다 정책 정리 → 개발 enum 등록 요청 흐름 명문화. defaultPaymentOwner 함께 정의.</div>
+    </div>
+    <div class="policy-item">
+      <div class="lbl">booker_* 스냅샷 정책 <span class="status st-decided">결정</span></div>
+      <div class="body">회원 정보 변경돼도 원장의 예약자 정보는 그 시점 그대로 보존. 마스킹 정책은 별도 (출력 레이어).</div>
+    </div>
+    <div class="policy-item">
+      <div class="lbl">ts_member_reservation_management 처리 <span class="status st-urgent">확인 필요</span></div>
+      <div class="body">신규 구조의 어느 테이블로 가는지 미확정. 메모·추가관리정보 흡수 위치 결정 필요.</div>
+    </div>
+    <div class="policy-item">
+      <div class="lbl">다중 여행사 매핑 금지 <span class="status st-decided">결정</span></div>
+      <div class="body">한 원장에 여러 여행사 매핑은 도메인 규칙으로 차단. 당사자 모델의 identity consistency 룰.</div>
+    </div>
+  </div>
+
+  <div class="inner-content" data-it="ex">
+    <div class="example">
+      <span class="lbl">📌 일반 직판 (3명 가족 패키지)</span>
+      id=L-10456789 · code=<b>26042623-1700101V</b> · channel=<b>tripstore</b> · agency=AG-018<br>
+      booker_user_id=U-882011 · booker_name=김여행 · booker_mobile=010-2374-8449<br>
+      booker_email=kim@example.com · booker_gender=F · booker_birthday=1990-03-12<br>
+      status=<b>완료</b> · created_at=2026-04-26 23:17:01
+      <div class="desc">트립스토어 직판 + 모두투어 + 카드 결제 완료 상태</div>
+    </div>
+    <div class="example">
+      <span class="lbl">📌 SSG sync 채널</span>
+      id=L-99001 · code=26042623-9001S · channel=<b>ssg</b> · agency=AG-019<br>
+      booker_user_id=NULL · booker_name=홍길동 · status=<b>출발대기</b>
+      <div class="desc">비회원 예약 (booker_user_id NULL). SSG에서 결제 → 채널수금. 출발일 D-7.</div>
+    </div>
+    <div class="example">
+      <span class="lbl">📌 인디비(자체 PB) 예약</span>
+      id=L-77777 · code=26042623-7777P · channel=<b>tripstore</b> · agency=<b>AG-099</b><br>
+      booker_user_id=U-555 · status=<b>접수</b>
+      <div class="desc">인디비 PB 상품 — 자체 여행사(AG-099). 결제 전 접수 단계.</div>
+    </div>
+    <div class="example">
+      <span class="lbl">📌 취소 케이스</span>
+      id=L-12345 · status=<b>취소</b> · updated_at=2026-04-28 11:20<br>
+      → ledger_items에 역분개 + 위약금(800) + 환불(703) 행 누적
+      <div class="desc">status는 취소로 단일 변경. 금액 흐름은 ledger_items에서 추적.</div>
     </div>
   </div>
 </div>
@@ -472,79 +744,156 @@ erDiagram
 <div class="tcard" id="t2">
   <div class="tcard-header">
     <div><span class="tname">rsv_travels</span></div>
-    <div class="tkr">예약된 행사 — 행사이동 이력</div>
+    <div class="tkr">예약된 행사 · 행사이동 이력 표현</div>
   </div>
-  <div class="tcard-body">
-    <div class="tcard-left">
-      <h4>📐 컬럼</h4>
-      <table class="col-table">
-        <thead><tr><th>컬럼</th><th>타입</th><th>의미</th></tr></thead>
-        <tbody>
-        <tr><td class="cn">id<span class="pk">PK</span></td><td class="ct">bigint</td><td>레코드 ID</td></tr>
-        <tr><td class="cn">ledger_id<span class="fk">FK</span></td><td class="ct">bigint</td><td>속한 원장</td></tr>
-        <tr><td class="cn">travel_id</td><td class="ct">varchar</td><td>행사 코드 <code>CCB1012-26050801</code></td></tr>
-        <tr><td class="cn">valid</td><td class="ct">boolean</td><td>현재 유효한 행사인지 (행사 이동 후 이전 행 false)</td></tr>
-        <tr><td class="cn">moved_at</td><td class="ct">timestamp<span class="nl">NULL</span></td><td>행사 이동 시각 (이전 행에 기록)</td></tr>
-        <tr><td class="cn">moved_reason</td><td class="ct">varchar<span class="nl">NULL</span></td><td>이동 사유 (운영자 입력)</td></tr>
-        <tr><td class="cn">created_at</td><td class="ct">timestamp</td><td>생성 시각</td></tr>
-        </tbody>
-      </table>
+  <div class="inner-tabs">
+    <button data-it="cols" class="cur">📐 컬럼</button>
+    <button data-it="intent">🎯 의도</button>
+    <button data-it="legacy">🔁 Legacy 매핑</button>
+    <button data-it="policy">📋 마이그 정책</button>
+    <button data-it="ex">📌 예시</button>
+  </div>
+
+  <div class="inner-content cur" data-it="cols">
+    <table class="col5">
+      <thead><tr><th style="width:16%">컬럼</th><th style="width:12%">타입</th><th style="width:18%">예시값</th><th style="width:24%">설명</th><th>하위컬럼 / 가능한 값</th></tr></thead>
+      <tbody>
+      <tr><td class="cn">id<span class="pk">PK</span></td><td class="ct">bigint</td><td class="cex">RT-2202</td><td class="cdesc">레코드 ID</td><td class="csub">행사 매핑 일련번호</td></tr>
+      <tr><td class="cn">ledger_id<span class="fk">FK</span></td><td class="ct">bigint</td><td class="cex">L-10456789</td><td class="cdesc">속한 원장</td><td class="csub">rsv_ledgers.id 참조</td></tr>
+      <tr><td class="cn">travel_id</td><td class="ct">varchar(40)</td><td class="cex">CCB1012-26050801</td><td class="cdesc">행사 코드 (행사·상품 도메인)</td><td class="csub">포맷: <code>{상품코드}-{출발일자YYMMDDNN}</code></td></tr>
+      <tr><td class="cn">valid</td><td class="ct">boolean</td><td class="cex">true</td><td class="cdesc">현재 유효한 행사인지</td><td class="csub">
+        　• <code>true</code> 현재 유효<br>
+        　• <code>false</code> 행사이동 후 비활성<br>
+        한 원장에 valid=true 행은 1개만 허용 (제약)
+      </td></tr>
+      <tr><td class="cn">moved_at</td><td class="ct">timestamp<span class="nl">NULL</span></td><td class="cex">2026-05-02 14:30</td><td class="cdesc">행사 이동 시각</td><td class="csub">이전 행에 기록 (valid=false 행)</td></tr>
+      <tr><td class="cn">moved_reason</td><td class="ct">varchar(120)<span class="nl">NULL</span></td><td class="cex">고객 요청 (일정 변경)</td><td class="cdesc">이동 사유 (운영자 입력)</td><td class="csub">
+        　• 고객 요청<br>
+        　• 행사 마감<br>
+        　• 운영자 조정<br>
+        　• 기타 (자유 입력)
+      </td></tr>
+      <tr><td class="cn">created_at</td><td class="ct">timestamp</td><td class="cex">2026-04-26 23:17:01</td><td class="cdesc">생성 시각</td><td class="csub"></td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="inner-content" data-it="intent">
+    <div class="responsibility-box">
+      <b>🎯 책임</b><br>
+      예약이 어떤 행사에 연결돼있는지 매핑 + <b>행사이동 이력 자동 보존</b>.
+      기존 행 valid=false로 두고 새 행 추가 → 이력 테이블 따로 만들 필요 없음.
     </div>
-    <div class="tcard-right">
-      <div class="inner-tabs">
-        <button data-it="intent" class="cur">의도</button>
-        <button data-it="legacy">Legacy 매핑</button>
-        <button data-it="policy">마이그 정책</button>
-        <button data-it="example">예시</button>
-      </div>
-      <div class="inner-content cur" data-it="intent">
-        <p><b>🎯 이 테이블이 하는 일</b></p>
-        <p>예약이 어떤 행사(travel)에 연결돼있는지 매핑. <b>행사 이동 시 기존 행 valid=false로 두고 새 행 추가</b> → 이력 자동 보존.</p>
-        <p><b>왜 분리됐나?</b></p>
+
+    <div class="row-2col">
+      <div>
+        <h4>왜 분리됐나</h4>
         <ul>
-          <li>현행은 ts_reservation에 travel_id가 1컬럼 압축돼있어 행사이동 이력이 사라짐.</li>
-          <li>신규는 별도 테이블 + valid 토글 → 이력 테이블 따로 안 만들어도 됨.</li>
-          <li>마감 행사 이동·다중 행사 매핑(2차) 대응 여지 확보.</li>
+          <li>현행은 ts_reservation에 travel_id가 1컬럼 압축 → 이동 이력 사라짐</li>
+          <li>신규는 별도 테이블 + valid 토글 → 이력 자동 보존</li>
+          <li>다중 행사 매핑(2차 과제) 대응 여지 확보</li>
+          <li>마감 행사 이동 같은 예외 케이스 흡수 가능</li>
         </ul>
       </div>
-      <div class="inner-content" data-it="legacy">
-        <p><b>🔁 어디서 왔나</b></p>
-        <div class="mapping">
-          <div class="row"><span class="o">ts_reservation.travel_id</span><span class="a">→</span><span class="n">rsv_travels.travel_id (valid=true 행 1개)</span></div>
-          <div class="row"><span class="o">ts_reservation.product_code</span><span class="a">⊃</span><span class="n">travel_id에 흡수 (정합 검증)</span></div>
-          <div class="row"><span class="o">행사이동 이력 (없음)</span><span class="a">+</span><span class="n">rsv_travels 신규 행 추가로 표현</span></div>
-          <div class="note">💡 현행 데이터는 행사이동 이력이 컬럼 덮어쓰기로 사라짐 → 마이그 시 <b>현재 상태 1행만 valid=true로 생성</b>.</div>
-        </div>
+      <div>
+        <h4>제약 (도메인 룰)</h4>
+        <ul>
+          <li>한 원장에 valid=true 행은 항상 1개 (UNIQUE 제약)</li>
+          <li>moved_at은 valid=false 행에만 기록</li>
+          <li>여행자(travelers)와 행사 변경은 동기화 — travel_id 변경 시 travelers의 rsv_travel_id도 새 행 참조</li>
+        </ul>
       </div>
-      <div class="inner-content" data-it="policy">
-        <div class="policy-item">
-          <div class="lbl">행사이동 정책 <span class="status st-decided">결정</span></div>
-          <div class="body">새 행 추가 + 기존 행 valid=false 토글. moved_at/moved_reason 기록. 별도 이력 테이블 불필요.</div>
-        </div>
-        <div class="policy-item">
-          <div class="lbl">마감 행사 이동 허용 <span class="status st-todo">정리 필요</span></div>
-          <div class="body">행사 ID 검증 로직 풀어주면 됨. 재고 무관 정책 메모 필요.</div>
-        </div>
-        <div class="policy-item">
-          <div class="lbl">이전 행사(valid=false) 노출 <span class="status st-todo">정리 필요</span></div>
-          <div class="body">운영자: 디폴트 노출 / 사용자: 숨김 — UX 정책 결정.</div>
-        </div>
-        <div class="policy-item">
-          <div class="lbl">행사이동 어뷰징 통제 <span class="status st-urgent">영업실 협의</span></div>
-          <div class="body">운영자가 너무 빈번하게 사용할 우려 → 횟수 제한·승인 워크플로 검토.</div>
-        </div>
+    </div>
+
+    <h4>자주 받는 질문</h4>
+    <div class="faq-item">
+      <div class="q">행사이동 시 금액은 어떻게 계산되나?</div>
+      <div class="a">travels 새 행 추가 + ledger_items에 100/202/301 등 차액 행 자동 추가. 행사 단가 차이만큼 100 신규 행, 특가 갱신은 202 신규 행.</div>
+    </div>
+    <div class="faq-item">
+      <div class="q">행사이동 횟수 제한은?</div>
+      <div class="a">시스템적으로는 무제한. 다만 영업실 어뷰징 우려 → 횟수 제한·승인 워크플로 검토 중.</div>
+    </div>
+  </div>
+
+  <div class="inner-content" data-it="legacy">
+    <h4>컬럼 매핑표</h4>
+    <table class="mtable">
+      <thead><tr><th style="width:30%">이전 (ts_*)</th><th style="width:25%">신규 (rsv_*)</th><th style="width:14%">위험도</th><th>변환 규칙</th></tr></thead>
+      <tbody>
+      <tr><td><span class="o">ts_reservation.travel_id</span></td><td><span class="n">rsv_travels.travel_id (valid=true 1행)</span></td><td><span class="risk risk-low">낮음</span></td><td class="rule">현재 값을 valid=true 행 1개로 생성</td></tr>
+      <tr><td><span class="o">ts_reservation.product_code</span></td><td><span class="n">travel_id에 흡수</span></td><td><span class="risk risk-mid">중간</span></td><td class="rule">travel_id 첫 부분과 정합 검증</td></tr>
+      <tr><td><span class="o">행사이동 이력</span></td><td><span class="none">(없음)</span></td><td><span class="risk risk-high">높음</span></td><td class="rule">현행은 컬럼 덮어쓰기로 이력 사라짐 → <b>마이그 시점 데이터만 valid=true</b></td></tr>
+      </tbody>
+    </table>
+
+    <h4>변환 룰 (pseudo SQL)</h4>
+    <div class="sql-block">
+<span class="lbl">ts_reservation → rsv_travels (1행 생성)</span>
+<span class="kw">INSERT INTO</span> rsv_travels (ledger_id, travel_id, valid, created_at)
+<span class="kw">SELECT</span>
+  reservation_id,
+  travel_id,
+  <span class="kw">true</span> <span class="kw">AS</span> valid,
+  created_at
+<span class="kw">FROM</span> ts_reservation;
+
+<span class="com">-- 행사이동 이력은 마이그 후 운영 단계부터 누적</span></div>
+
+    <div class="alert-box">
+      ⚠️ 현행 데이터에는 행사이동 이력이 없으므로 마이그 시점에는 <b>1예약 = 1행(valid=true)</b>만 생성. 마이그 이후 운영 단계에서 행사이동 발생 시부터 valid=false 행이 누적됨.
+    </div>
+  </div>
+
+  <div class="inner-content" data-it="policy">
+    <div class="policy-item">
+      <div class="lbl">행사이동 정책 <span class="status st-decided">결정</span></div>
+      <div class="body">새 행 추가 + 기존 행 valid=false 토글. moved_at/moved_reason 기록. 별도 이력 테이블 불필요.</div>
+    </div>
+    <div class="policy-item">
+      <div class="lbl">마감 행사 이동 허용 <span class="status st-todo">정리 필요</span></div>
+      <div class="body">행사 ID 검증 로직 풀어주면 됨. 재고 무관 정책 메모 + 운영자 권한 정의 필요.</div>
+    </div>
+    <div class="policy-item">
+      <div class="lbl">이전 행사(valid=false) 노출 <span class="status st-todo">정리 필요</span></div>
+      <div class="body">운영자: 디폴트 노출 / 사용자: 숨김 — UX 정책 결정. 어드민 화면 토글 옵션 검토.</div>
+    </div>
+    <div class="policy-item">
+      <div class="lbl">행사이동 어뷰징 통제 <span class="status st-urgent">영업실 협의</span></div>
+      <div class="body">
+        운영자가 빈번하게 사용할 우려.<br>
+        <b>검토안:</b>
+        <ul>
+          <li>1예약 행사이동 횟수 제한 (예: 3회까지)</li>
+          <li>일정 기간 내 N회 초과 시 승인 워크플로</li>
+          <li>이동 사유 필수 입력 + 운영 로그 모니터링</li>
+        </ul>
       </div>
-      <div class="inner-content" data-it="example">
-        <div class="example">
-          <span class="lbl">📌 행사 이동 전·후</span>
-          RT-2201 · ledger=L-10456789 · travel_id=<s>CCB1012-26050801</s> · <b>valid=false</b> · moved_at=05-02<br>
-          RT-2202 · ledger=L-10456789 · travel_id=<b>CCB1012-26051501</b> · valid=true
-        </div>
-        <div class="example">
-          <span class="lbl">📌 일반 (이동 없음)</span>
-          RT-2200 · ledger=L-10456780 · travel_id=AAA0801-26050101 · valid=true
-        </div>
-      </div>
+    </div>
+    <div class="policy-item">
+      <div class="lbl">행사이동 시 금액 변경 자동화 룰 <span class="status st-todo">정리 필요</span></div>
+      <div class="body">100(상품가) 차액 + 202(특가) 갱신 + 301/302(쿠폰) 재계산을 ledger_items에 자동 행 추가하는 룰 명문화.</div>
+    </div>
+  </div>
+
+  <div class="inner-content" data-it="ex">
+    <div class="example">
+      <span class="lbl">📌 행사 이동 전·후 (2행)</span>
+      RT-2201 · ledger=L-10456789 · travel_id=<s>CCB1012-26050801</s> · <b>valid=false</b> · moved_at=2026-05-02 · moved_reason=고객 요청<br>
+      RT-2202 · ledger=L-10456789 · travel_id=<b>CCB1012-26051501</b> · valid=true · moved_at=NULL
+      <div class="desc">5월 8일 출발 → 5월 15일로 이동. 이전 행은 valid=false로 보존.</div>
+    </div>
+    <div class="example">
+      <span class="lbl">📌 일반 (이동 없음)</span>
+      RT-2200 · ledger=L-10456780 · travel_id=AAA0801-26050101 · valid=true
+      <div class="desc">예약 후 행사 이동 없이 진행 — 가장 흔한 케이스.</div>
+    </div>
+    <div class="example">
+      <span class="lbl">📌 2회 이동</span>
+      RT-3001 · valid=false · moved_at=05-02 · moved_reason=고객 요청<br>
+      RT-3002 · valid=false · moved_at=05-08 · moved_reason=행사 마감<br>
+      RT-3003 · valid=true · moved_at=NULL
+      <div class="desc">고객 요청으로 1차 이동 → 그 행사도 마감되어 2차 이동.</div>
     </div>
   </div>
 </div>
@@ -553,81 +902,136 @@ erDiagram
 <div class="tcard" id="t3">
   <div class="tcard-header">
     <div><span class="tname">rsv_channel_links</span></div>
-    <div class="tkr">채널사 주문 매핑 — sync 채널 부채 흡수</div>
+    <div class="tkr">채널사 주문 매핑 · sync 채널 부채 흡수</div>
   </div>
-  <div class="tcard-body">
-    <div class="tcard-left">
-      <h4>📐 컬럼</h4>
-      <table class="col-table">
-        <thead><tr><th>컬럼</th><th>타입</th><th>의미</th></tr></thead>
-        <tbody>
-        <tr><td class="cn">id<span class="pk">PK</span></td><td class="ct">bigint</td><td>레코드 ID</td></tr>
-        <tr><td class="cn">ledger_id<span class="fk">FK</span></td><td class="ct">bigint</td><td>속한 원장</td></tr>
-        <tr><td class="cn">rsv_travel_id<span class="fk">FK</span></td><td class="ct">bigint</td><td>어느 행사의 채널 주문번호인지</td></tr>
-        <tr><td class="cn">channel_rsv_code</td><td class="ct">varchar</td><td>채널사 주문번호 (예: <code>SSG-O-20260426-A0091</code>)</td></tr>
-        <tr><td class="cn">channel_rsv_status</td><td class="ct">varchar<span class="nl">NULL</span></td><td>채널측 주문 상태 (있는 채널만)</td></tr>
-        <tr><td class="cn">received_at</td><td class="ct">timestamp<span class="nl">NULL</span></td><td>채널측 주문번호 수신 시각 (sync 채널 늦게 들어오는 케이스)</td></tr>
-        <tr><td class="cn">created_at</td><td class="ct">timestamp</td><td>생성 시각</td></tr>
-        </tbody>
-      </table>
+  <div class="inner-tabs">
+    <button data-it="cols" class="cur">📐 컬럼</button>
+    <button data-it="intent">🎯 의도</button>
+    <button data-it="legacy">🔁 Legacy 매핑</button>
+    <button data-it="policy">📋 마이그 정책</button>
+    <button data-it="ex">📌 예시</button>
+  </div>
+
+  <div class="inner-content cur" data-it="cols">
+    <table class="col5">
+      <thead><tr><th style="width:16%">컬럼</th><th style="width:12%">타입</th><th style="width:18%">예시값</th><th style="width:24%">설명</th><th>하위컬럼 / 가능한 값</th></tr></thead>
+      <tbody>
+      <tr><td class="cn">id<span class="pk">PK</span></td><td class="ct">bigint</td><td class="cex">CL-4401</td><td class="cdesc">레코드 ID</td><td class="csub"></td></tr>
+      <tr><td class="cn">ledger_id<span class="fk">FK</span></td><td class="ct">bigint</td><td class="cex">L-10456789</td><td class="cdesc">속한 원장</td><td class="csub"></td></tr>
+      <tr><td class="cn">rsv_travel_id<span class="fk">FK</span></td><td class="ct">bigint</td><td class="cex">RT-2202</td><td class="cdesc">어느 행사의 채널 주문번호인지</td><td class="csub">행사이동 시 새 travel_id로 갱신</td></tr>
+      <tr><td class="cn">channel_rsv_code</td><td class="ct">varchar(60)<span class="nl">NULL</span></td><td class="cex">SSG-O-20260426-A0091</td><td class="cdesc">채널사 측 주문번호</td><td class="csub">
+        포맷 채널별 상이:<br>
+        　• 트립직판: <code>TS-{code}</code> 자동 생성<br>
+        　• SSG: <code>SSG-O-{YYYYMMDD}-{seq}</code><br>
+        　• 11번가: <code>ST-{order_no}</code><br>
+        　• 카카오쇼핑: <code>KKO-{seq}</code><br>
+        　• NOL: <code>NOL-Q-{seq}</code><br>
+        sync 채널 지연 수신 시 NULL 허용
+      </td></tr>
+      <tr><td class="cn">channel_rsv_status</td><td class="ct">varchar(20)<span class="nl">NULL</span></td><td class="cex">CONFIRMED</td><td class="cdesc">채널측 주문 상태</td><td class="csub">채널별 상이. 채널 보유 채널만 채움.</td></tr>
+      <tr><td class="cn">received_at</td><td class="ct">timestamp<span class="nl">NULL</span></td><td class="cex">2026-04-26 23:30:11</td><td class="cdesc">채널측 주문번호 수신 시각</td><td class="csub">sync 채널 늦게 들어오는 케이스 대응</td></tr>
+      <tr><td class="cn">created_at</td><td class="ct">timestamp</td><td class="cex">2026-04-26 23:17:01</td><td class="cdesc">생성 시각</td><td class="csub">예약 생성 시점</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="inner-content" data-it="intent">
+    <div class="responsibility-box">
+      <b>🎯 책임</b><br>
+      예약이 어떤 채널사(SSG/11번가/카카오쇼핑/NOL 등)의 어떤 주문번호와 매핑됐는지.
+      <b>채널사 주문번호가 바뀌거나 추가되어도 행 추가로 대응</b>.
     </div>
-    <div class="tcard-right">
-      <div class="inner-tabs">
-        <button data-it="intent" class="cur">의도</button>
-        <button data-it="legacy">Legacy 매핑</button>
-        <button data-it="policy">마이그 정책</button>
-        <button data-it="example">예시</button>
-      </div>
-      <div class="inner-content cur" data-it="intent">
-        <p><b>🎯 이 테이블이 하는 일</b></p>
-        <p>예약이 어떤 채널사(SSG/11번가/카카오쇼핑/NOL/THT)의 어떤 주문번호와 매핑됐는지. <b>채널사 주문번호가 바뀌거나 추가되어도 행 추가로 대응</b>.</p>
-        <p><b>왜 신규 테이블?</b></p>
+
+    <div class="row-2col">
+      <div>
+        <h4>왜 신규 테이블?</h4>
         <ul>
-          <li>현행은 sync 채널별로 ad-hoc하게 흩어져 있음 (테이블·컬럼 일관성 없음).</li>
-          <li>신규는 한 자리에서 다중 매핑 표현. 결제이관(2차 과제) 대비.</li>
+          <li>현행은 sync 채널별로 ad-hoc 컬럼/테이블에 흩어짐 (일관성 없음)</li>
+          <li>신규는 한 자리에서 다중 매핑 표현</li>
+          <li>결제이관(2차 과제) 대비 — 행 이동 + ledger_items 이전 가능</li>
+          <li>sync 채널 주문번호 지연 수신 케이스 표현 (NULL 허용 + 이후 업데이트)</li>
         </ul>
       </div>
-      <div class="inner-content" data-it="legacy">
-        <p><b>🔁 어디서 왔나</b></p>
-        <div class="mapping">
-          <div class="row"><span class="o">(채널별 ad-hoc 컬럼/테이블)</span><span class="a">⇒</span><span class="n">rsv_channel_links 신규</span></div>
-          <div class="row"><span class="o">트립직판 예약 (channel=tripstore)</span><span class="a">→</span><span class="n">channel_rsv_code = <code>TS-{code}</code> 자동 생성</span></div>
-          <div class="row"><span class="o">SSG/11번가/카카오쇼핑/NOL 매핑 테이블</span><span class="a">→</span><span class="n">channel_rsv_code 컬럼으로 통합</span></div>
-          <div class="note">💡 마이그 시점에 sync 채널 주문번호 보유 여부 케이스 확인 필요. <b>NULL 허용</b> 고려.</div>
-        </div>
+      <div>
+        <h4>sync 채널이란</h4>
+        <ul>
+          <li>SSG / 11번가 / NOL / 카카오쇼핑 (4종)</li>
+          <li>defaultPaymentOwner = CHANNEL (채널이 결제 보유)</li>
+          <li>ledger_items type=400(고객결제 채널수금) + 500(채널→플랫폼 자금이전)</li>
+          <li><b>네이버쇼핑은 sync 아님</b> (PG 직결, 2026-06-09 정정)</li>
+        </ul>
       </div>
-      <div class="inner-content" data-it="policy">
-        <div class="policy-item">
-          <div class="lbl">채널사 주문번호 변경 케이스 <span class="status st-todo">정리 필요</span></div>
-          <div class="body">새 행 추가 vs 기존 행 업데이트 — 이력 보존 관점에서 <b>새 행 추가</b> 권장. 정책 명문화.</div>
-        </div>
-        <div class="policy-item">
-          <div class="lbl">결제이관 케이스 (2차) <span class="status st-todo">정리 필요</span></div>
-          <div class="body">이 테이블 행 이동 + ledger_items 옮기는 로직 설계 필요. 1차에서는 제외.</div>
-        </div>
-        <div class="policy-item">
-          <div class="lbl">sync 채널 주문번호 늦게 오는 케이스 <span class="status st-urgent">정리 필요</span></div>
-          <div class="body">예약 생성 시점에 채널 주문번호 없을 수 있음. received_at NULL 허용 + 추후 업데이트 룰.</div>
-        </div>
-        <div class="policy-item">
-          <div class="lbl">직판 channel_rsv_code 표기 <span class="status st-todo">정리 필요</span></div>
-          <div class="body">자동 생성 prefix(TS-) vs NULL — 운영 가독성 vs 데이터 정합 트레이드오프.</div>
-        </div>
-      </div>
-      <div class="inner-content" data-it="example">
-        <div class="example">
-          <span class="lbl">📌 트립직판</span>
-          CL-4401 · ledger=L-10456789 · travel=RT-2202 · channel_rsv_code=<b>TS-26042623-1700101V</b>
-        </div>
-        <div class="example">
-          <span class="lbl">📌 SSG 채널</span>
-          CL-4402 · ledger=L-99999 · travel=RT-9999 · channel_rsv_code=<b>SSG-O-20260426-A0091</b> · received_at=04-26 23:30
-        </div>
-        <div class="example">
-          <span class="lbl">📌 NOL (지연 수신)</span>
-          CL-4403 · ledger=L-99888 · channel_rsv_code=NULL · created_at=04-26 / 이후 NOL-Q-26042699Z 수신 → 행 업데이트
-        </div>
-      </div>
+    </div>
+
+    <h4>자주 받는 질문</h4>
+    <div class="faq-item">
+      <div class="q">트립직판 예약도 이 테이블에 행이 생기나?</div>
+      <div class="a">생김. channel_rsv_code = <code>TS-{code}</code> 자동 생성 (정합 유지). 운영자 화면 통일성 + 향후 결제이관 대비.</div>
+    </div>
+    <div class="faq-item">
+      <div class="q">SSG 주문번호가 늦게 도착하면?</div>
+      <div class="a">예약 생성 시점에 channel_rsv_code=NULL · received_at=NULL로 행 생성. 채널 콜백 수신 시 UPDATE.</div>
+    </div>
+    <div class="faq-item">
+      <div class="q">한 예약에 채널 주문번호가 2개 생기는 케이스는?</div>
+      <div class="a">결제이관(2차 과제)에서 발생. 기존 행 그대로 두고 새 행 추가. 운영 정책으로 어느 행이 active인지 표시 룰 필요.</div>
+    </div>
+  </div>
+
+  <div class="inner-content" data-it="legacy">
+    <h4>컬럼 매핑표</h4>
+    <table class="mtable">
+      <thead><tr><th style="width:30%">이전 (ts_*)</th><th style="width:25%">신규 (rsv_*)</th><th style="width:14%">위험도</th><th>변환 규칙</th></tr></thead>
+      <tbody>
+      <tr><td><span class="o">(채널별 ad-hoc 컬럼/테이블)</span></td><td><span class="n">rsv_channel_links</span></td><td><span class="risk risk-high">높음</span></td><td class="rule">채널별 다른 위치에서 정규화 추출</td></tr>
+      <tr><td><span class="o">트립직판 (channel=tripstore)</span></td><td><span class="n">channel_rsv_code = TS-{code}</span></td><td><span class="risk risk-low">낮음</span></td><td class="rule">자동 생성</td></tr>
+      <tr><td><span class="o">SSG/11번가/카카오쇼핑/NOL 매핑 테이블</span></td><td><span class="n">channel_rsv_code 단일 컬럼</span></td><td><span class="risk risk-high">높음</span></td><td class="rule">⚠️ 각 채널별 마이그 룰 별도 작성 필요</td></tr>
+      </tbody>
+    </table>
+
+    <div class="alert-box">
+      ⚠️ <b>마이그 시점에 sync 채널 주문번호 보유 여부 케이스 확인 필요.</b><br>
+      현행 데이터의 sync 채널별 저장 위치를 추적하여 마이그 룰 작성. NULL 허용 정책으로 빈 케이스 대응.
+    </div>
+  </div>
+
+  <div class="inner-content" data-it="policy">
+    <div class="policy-item">
+      <div class="lbl">채널사 주문번호 변경 처리 <span class="status st-todo">정리 필요</span></div>
+      <div class="body">새 행 추가 vs 기존 행 업데이트 — 이력 보존 관점에서 <b>새 행 추가</b> 권장. 정책 명문화 필요.</div>
+    </div>
+    <div class="policy-item">
+      <div class="lbl">결제이관 케이스 (2차) <span class="status st-todo">2차 과제</span></div>
+      <div class="body">이 테이블 행 이동 + ledger_items 옮기는 로직 설계 필요. 1차에서는 제외.</div>
+    </div>
+    <div class="policy-item">
+      <div class="lbl">sync 채널 주문번호 지연 수신 <span class="status st-urgent">정리 필요</span></div>
+      <div class="body">예약 생성 시점에 채널 주문번호 없을 수 있음. received_at NULL 허용 + 추후 업데이트 룰 + 시한 초과 시 알림.</div>
+    </div>
+    <div class="policy-item">
+      <div class="lbl">직판 channel_rsv_code 표기 정책 <span class="status st-todo">정리 필요</span></div>
+      <div class="body">자동 생성 prefix(TS-) vs NULL — 운영 가독성 vs 데이터 정합 트레이드오프. 권장: TS- prefix 자동 생성.</div>
+    </div>
+  </div>
+
+  <div class="inner-content" data-it="ex">
+    <div class="example">
+      <span class="lbl">📌 트립직판</span>
+      CL-4401 · ledger=L-10456789 · travel=RT-2202<br>
+      channel_rsv_code=<b>TS-26042623-1700101V</b> · received_at=2026-04-26 23:17 · channel_rsv_status=NULL
+      <div class="desc">트립스토어 자체 발급 코드. 즉시 생성.</div>
+    </div>
+    <div class="example">
+      <span class="lbl">📌 SSG 정상 수신</span>
+      CL-4402 · ledger=L-99001 · travel=RT-9999<br>
+      channel_rsv_code=<b>SSG-O-20260426-A0091</b> · received_at=2026-04-26 23:30 · channel_rsv_status=CONFIRMED
+      <div class="desc">SSG에서 주문 콜백 정상 수신.</div>
+    </div>
+    <div class="example">
+      <span class="lbl">📌 NOL 지연 수신</span>
+      CL-4403 · ledger=L-99888 · channel_rsv_code=<b>NULL</b> · received_at=NULL · created_at=2026-04-26<br>
+      → 4월 27일 NOL-Q-26042699Z 수신 → UPDATE channel_rsv_code, received_at
+      <div class="desc">예약 생성 시점에 채널 주문번호 없음. 추후 콜백으로 UPDATE.</div>
     </div>
   </div>
 </div>
@@ -636,77 +1040,151 @@ erDiagram
 <div class="tcard" id="t4">
   <div class="tcard-header">
     <div><span class="tname">rsv_agency_links</span></div>
-    <div class="tkr">여행사 예약 링크</div>
+    <div class="tkr">여행사 예약 링크 · 다중 매핑 가능</div>
   </div>
-  <div class="tcard-body">
-    <div class="tcard-left">
-      <h4>📐 컬럼</h4>
-      <table class="col-table">
-        <thead><tr><th>컬럼</th><th>타입</th><th>의미</th></tr></thead>
-        <tbody>
-        <tr><td class="cn">id<span class="pk">PK</span></td><td class="ct">bigint</td><td>레코드 ID</td></tr>
-        <tr><td class="cn">ledger_id<span class="fk">FK</span></td><td class="ct">bigint</td><td>속한 원장</td></tr>
-        <tr><td class="cn">rsv_travel_id<span class="fk">FK</span></td><td class="ct">bigint</td><td>어느 행사의 여행사 예약번호인지</td></tr>
-        <tr><td class="cn">agency_rsv_code</td><td class="ct">varchar</td><td>여행사 측 예약번호 (예: <code>HND-26042699Z</code>)</td></tr>
-        <tr><td class="cn">rsv_status</td><td class="ct">varchar</td><td>여행사 예약 상태 (legacy 페이드아웃 대상)</td></tr>
-        <tr><td class="cn">pay_status</td><td class="ct">varchar</td><td>여행사 결제 상태 (legacy 페이드아웃 대상)</td></tr>
-        <tr><td class="cn">last_synced_at</td><td class="ct">timestamp<span class="nl">NULL</span></td><td>여행사 상태 마지막 동기화 시각</td></tr>
-        <tr><td class="cn">created_at</td><td class="ct">timestamp</td><td>생성 시각</td></tr>
-        </tbody>
-      </table>
+  <div class="inner-tabs">
+    <button data-it="cols" class="cur">📐 컬럼</button>
+    <button data-it="intent">🎯 의도</button>
+    <button data-it="legacy">🔁 Legacy 매핑</button>
+    <button data-it="policy">📋 마이그 정책</button>
+    <button data-it="ex">📌 예시</button>
+  </div>
+
+  <div class="inner-content cur" data-it="cols">
+    <table class="col5">
+      <thead><tr><th style="width:16%">컬럼</th><th style="width:12%">타입</th><th style="width:18%">예시값</th><th style="width:24%">설명</th><th>하위컬럼 / 가능한 값</th></tr></thead>
+      <tbody>
+      <tr><td class="cn">id<span class="pk">PK</span></td><td class="ct">bigint</td><td class="cex">AL-3301</td><td class="cdesc">레코드 ID</td><td class="csub"></td></tr>
+      <tr><td class="cn">ledger_id<span class="fk">FK</span></td><td class="ct">bigint</td><td class="cex">L-10456789</td><td class="cdesc">속한 원장</td><td class="csub"></td></tr>
+      <tr><td class="cn">rsv_travel_id<span class="fk">FK</span></td><td class="ct">bigint</td><td class="cex">RT-2202</td><td class="cdesc">어느 행사의 여행사 예약번호인지</td><td class="csub">행사이동 시 새 발급되면 새 행</td></tr>
+      <tr><td class="cn">agency_rsv_code</td><td class="ct">varchar(40)</td><td class="cex">HND-26042699Z</td><td class="cdesc">여행사 측 예약번호</td><td class="csub">여행사별 포맷 상이</td></tr>
+      <tr><td class="cn">rsv_status</td><td class="ct">varchar(20)</td><td class="cex">CONFIRMED</td><td class="cdesc">여행사 예약 상태<span class="alert">페이드아웃</span></td><td class="csub">
+        　• <code>PENDING</code> 처리 대기<br>
+        　• <code>CONFIRMED</code> 여행사 확정<br>
+        　• <code>CANCELED</code> 취소<br>
+        　• <code>FAILED</code> 처리 실패<br>
+        1차 9번 과제로 페이드아웃 예정
+      </td></tr>
+      <tr><td class="cn">pay_status</td><td class="ct">varchar(20)</td><td class="cex">PAID</td><td class="cdesc">여행사 결제 상태<span class="alert">페이드아웃</span></td><td class="csub">
+        　• <code>WAITING</code> 결제 전<br>
+        　• <code>PAID</code> 결제 완료<br>
+        　• <code>REFUNDED</code> 환불<br>
+        ledger_items 흐름으로 일원화 예정
+      </td></tr>
+      <tr><td class="cn">last_synced_at</td><td class="ct">timestamp<span class="nl">NULL</span></td><td class="cex">2026-04-27 02:00</td><td class="cdesc">여행사 상태 마지막 동기화</td><td class="csub">배치 동기화 추적용</td></tr>
+      <tr><td class="cn">created_at</td><td class="ct">timestamp</td><td class="cex">2026-04-26 23:17:05</td><td class="cdesc">생성 시각</td><td class="csub"></td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="inner-content" data-it="intent">
+    <div class="responsibility-box">
+      <b>🎯 책임</b><br>
+      예약이 어느 여행사의 어떤 예약번호로 처리되는지.
+      <b>여행사 예약번호가 다중·교체될 수 있어서 별도 분리</b>.
     </div>
-    <div class="tcard-right">
-      <div class="inner-tabs">
-        <button data-it="intent" class="cur">의도</button>
-        <button data-it="legacy">Legacy 매핑</button>
-        <button data-it="policy">마이그 정책</button>
-        <button data-it="example">예시</button>
-      </div>
-      <div class="inner-content cur" data-it="intent">
-        <p><b>🎯 이 테이블이 하는 일</b></p>
-        <p>예약이 어느 여행사의 어떤 예약번호로 처리되는지. <b>여행사 예약번호가 다중·교체될 수 있어서 별도 분리</b>.</p>
-        <p><b>왜 분리됐나?</b></p>
+
+    <div class="row-2col">
+      <div>
+        <h4>왜 분리됐나</h4>
         <ul>
-          <li>행사이동 시 여행사 예약번호가 새로 발급되는 케이스 → 다중 매핑 필요.</li>
-          <li>rsv_status/pay_status는 여행사 시스템 상태 — 점진적 페이드아웃 대상.</li>
+          <li>행사이동 시 여행사 예약번호 새로 발급되는 케이스 → 다중 매핑 필요</li>
+          <li>rsv_status/pay_status는 여행사 시스템 상태 — 점진적 페이드아웃 대상</li>
+          <li>여행사 API 호출 결과·동기화 추적 분리</li>
         </ul>
       </div>
-      <div class="inner-content" data-it="legacy">
-        <p><b>🔁 어디서 왔나</b></p>
-        <div class="mapping">
-          <div class="row"><span class="o">ts_agency_reservation_detail</span><span class="a">→</span><span class="n">rsv_agency_links (거의 1:1)</span></div>
-          <div class="row"><span class="o">agency_reservation_code</span><span class="a">→</span><span class="n">agency_rsv_code (이름 통일)</span></div>
-          <div class="row"><span class="o">agency_status</span><span class="a">→</span><span class="n">rsv_status</span></div>
-          <div class="row"><span class="o">agency_payment_status</span><span class="a">→</span><span class="n">pay_status</span></div>
-          <div class="row"><span class="o">ts_agency_status_fail_logs</span><span class="a">?</span><span class="n">(별도 유지 추정)</span></div>
-          <div class="note">💡 현행은 1예약=1행. 신규는 다중행 허용이지만 마이그 시점에는 1행만 생성.</div>
-        </div>
+      <div>
+        <h4>다른 테이블과의 차이</h4>
+        <ul>
+          <li><code>rsv_channel_links</code> = <b>판매 채널</b> 주문번호 (SSG, 11번가 등)</li>
+          <li><code>rsv_agency_links</code> = <b>여행사</b> 예약번호 (모두투어, 하나투어 등)</li>
+          <li>둘 다 다중 매핑 가능 + 행사이동 대응</li>
+        </ul>
       </div>
-      <div class="inner-content" data-it="policy">
-        <div class="policy-item">
-          <div class="lbl">행사이동 시 여행사 예약번호 <span class="status st-todo">정리 필요</span></div>
-          <div class="body">"동일 코드 유지" vs "새로 발급" — 운영자 선택 가능하게? 여행사 시스템별 정책 차이 정리.</div>
-        </div>
-        <div class="policy-item">
-          <div class="lbl">rsv_status / pay_status 페이드아웃 <span class="status st-todo">1차 9번 과제</span></div>
-          <div class="body">신규는 ledger.status + ledger_items 흐름으로 일원화. 여행사 상태값은 점진적 제거 → 일정 정리 필요.</div>
-        </div>
-        <div class="policy-item">
-          <div class="lbl">다중 여행사 매핑 금지 <span class="status st-decided">결정</span></div>
-          <div class="body">한 원장에 여러 여행사 매핑은 도메인 규칙으로 차단 (당사자 모델 규칙).</div>
-        </div>
+    </div>
+
+    <h4>자주 받는 질문</h4>
+    <div class="faq-item">
+      <div class="q">한 예약에 여행사 예약번호 2개 생기는 경우는?</div>
+      <div class="a">행사이동 시 여행사가 새 예약번호를 발급하는 경우. 기존 행 유지 + 새 행 추가. 운영자 화면에서 active 표시.</div>
+    </div>
+    <div class="faq-item">
+      <div class="q">rsv_status/pay_status는 왜 페이드아웃 대상인가?</div>
+      <div class="a">신규는 rsv_ledgers.status(4단계) + ledger_items 흐름으로 일원화. 여행사 상태는 외부 시스템 동기화용으로만 남기고 점진 제거.</div>
+    </div>
+  </div>
+
+  <div class="inner-content" data-it="legacy">
+    <h4>컬럼 매핑표</h4>
+    <table class="mtable">
+      <thead><tr><th style="width:30%">이전 (ts_*)</th><th style="width:25%">신규 (rsv_*)</th><th style="width:14%">위험도</th><th>변환 규칙</th></tr></thead>
+      <tbody>
+      <tr><td><span class="o">ts_agency_reservation_detail.id</span></td><td><span class="n">rsv_agency_links.id</span></td><td><span class="risk risk-low">낮음</span></td><td class="rule">그대로</td></tr>
+      <tr><td><span class="o">.reservation_id</span></td><td><span class="n">.ledger_id</span></td><td><span class="risk risk-low">낮음</span></td><td class="rule">FK 갱신</td></tr>
+      <tr><td><span class="o">.agency_reservation_code</span></td><td><span class="n">.agency_rsv_code</span></td><td><span class="risk risk-low">낮음</span></td><td class="rule">컬럼명 통일</td></tr>
+      <tr><td><span class="o">.agency_status</span></td><td><span class="n">.rsv_status</span></td><td><span class="risk risk-low">낮음</span></td><td class="rule">이름 변경</td></tr>
+      <tr><td><span class="o">.agency_payment_status</span></td><td><span class="n">.pay_status</span></td><td><span class="risk risk-low">낮음</span></td><td class="rule">이름 변경</td></tr>
+      <tr><td><span class="o">(없음)</span></td><td><span class="n">.rsv_travel_id</span></td><td><span class="risk risk-mid">중간</span></td><td class="rule">마이그 시 valid=true travels.id로 채움</td></tr>
+      <tr><td><span class="o">ts_agency_status_fail_logs</span></td><td><span class="none">(별도 유지 추정)</span></td><td><span class="risk risk-mid">중간</span></td><td class="rule">⚠️ 위치 확인 필요</td></tr>
+      </tbody>
+    </table>
+
+    <h4>변환 룰 (pseudo SQL)</h4>
+    <div class="sql-block">
+<span class="lbl">ts_agency_reservation_detail → rsv_agency_links</span>
+<span class="kw">INSERT INTO</span> rsv_agency_links (id, ledger_id, rsv_travel_id,
+  agency_rsv_code, rsv_status, pay_status, created_at)
+<span class="kw">SELECT</span>
+  a.id, a.reservation_id,
+  (<span class="kw">SELECT</span> t.id <span class="kw">FROM</span> rsv_travels t
+    <span class="kw">WHERE</span> t.ledger_id = a.reservation_id <span class="kw">AND</span> t.valid = <span class="kw">true</span>),
+  a.agency_reservation_code, a.agency_status, a.agency_payment_status, a.created_at
+<span class="kw">FROM</span> ts_agency_reservation_detail a;</div>
+  </div>
+
+  <div class="inner-content" data-it="policy">
+    <div class="policy-item">
+      <div class="lbl">행사이동 시 여행사 예약번호 처리 <span class="status st-todo">정리 필요</span></div>
+      <div class="body">
+        "동일 코드 유지" vs "새로 발급" — 운영자 선택 가능?
+        <ul>
+          <li>여행사 시스템별 정책 차이 정리 필요</li>
+          <li>모두투어/하나투어 등 메이저 4사 처리 방식 확인</li>
+        </ul>
       </div>
-      <div class="inner-content" data-it="example">
-        <div class="example">
-          <span class="lbl">📌 일반 1행</span>
-          AL-3301 · ledger=L-10456789 · travel=RT-2202 · agency_rsv_code=<b>HND-26042699Z</b> · rsv_status=CONFIRMED · pay_status=PAID
-        </div>
-        <div class="example">
-          <span class="lbl">📌 행사이동 시 새 예약번호 발급</span>
-          AL-3301 · agency_rsv_code=<s>HND-26042699Z</s> · 이전 행 (참조용)<br>
-          AL-3302 · agency_rsv_code=<b>HND-26050102K</b> · 신규 행 (rsv_travel_id 갱신)
-        </div>
-      </div>
+    </div>
+    <div class="policy-item">
+      <div class="lbl">rsv_status / pay_status 페이드아웃 일정 <span class="status st-todo">1차 9번 과제</span></div>
+      <div class="body">신규는 ledger.status + ledger_items 흐름으로 일원화. 여행사 상태값은 점진적 제거 → 단계별 일정 정리 필요.</div>
+    </div>
+    <div class="policy-item">
+      <div class="lbl">다중 여행사 매핑 금지 <span class="status st-decided">결정</span></div>
+      <div class="body">한 원장에 여러 여행사 매핑은 도메인 규칙으로 차단 (당사자 모델 규칙). DB 제약은 아니지만 애플리케이션 레이어에서 강제.</div>
+    </div>
+    <div class="policy-item">
+      <div class="lbl">여행사 동기화 실패 처리 <span class="status st-todo">정리 필요</span></div>
+      <div class="body">last_synced_at 일정 시간 이상 갱신 안 된 행 알림. ts_agency_status_fail_logs 마이그 위치 확정 후 정책 작성.</div>
+    </div>
+  </div>
+
+  <div class="inner-content" data-it="ex">
+    <div class="example">
+      <span class="lbl">📌 일반 (이동 없음)</span>
+      AL-3301 · ledger=L-10456789 · travel=RT-2202 · agency_rsv_code=<b>HND-26042699Z</b><br>
+      rsv_status=CONFIRMED · pay_status=PAID · last_synced_at=2026-04-27 02:00
+      <div class="desc">모두투어 확정 + 결제 완료 + 새벽 배치 동기화 정상.</div>
+    </div>
+    <div class="example">
+      <span class="lbl">📌 행사이동 시 새 예약번호 발급</span>
+      AL-3301 · agency_rsv_code=<s>HND-26042699Z</s> · 이전 행 (참조용 보존)<br>
+      AL-3302 · agency_rsv_code=<b>HND-26050102K</b> · 신규 발급 (rsv_travel_id 새 행 참조)
+      <div class="desc">5월 8일 → 5월 15일 이동, 모두투어가 새 예약번호 발급.</div>
+    </div>
+    <div class="example">
+      <span class="lbl">📌 동기화 실패</span>
+      AL-3303 · agency_rsv_code=NULL · rsv_status=<b>FAILED</b> · pay_status=WAITING<br>
+      last_synced_at=2026-04-27 02:00 (재시도 필요)
+      <div class="desc">여행사 API 호출 실패 — fail_logs에서 원인 추적.</div>
     </div>
   </div>
 </div>
@@ -715,85 +1193,158 @@ erDiagram
 <div class="tcard" id="t5">
   <div class="tcard-header">
     <div><span class="tname">rsv_travelers</span></div>
-    <div class="tkr">예약된 여행자 (Passengers) — 1명 = 1행</div>
+    <div class="tkr">예약된 여행자 (Passengers) · 1명 = 1행</div>
   </div>
-  <div class="tcard-body">
-    <div class="tcard-left">
-      <h4>📐 컬럼</h4>
-      <table class="col-table">
-        <thead><tr><th>컬럼</th><th>타입</th><th>의미</th></tr></thead>
-        <tbody>
-        <tr><td class="cn">id<span class="pk">PK</span></td><td class="ct">bigint</td><td>여행자 ID</td></tr>
-        <tr><td class="cn">ledger_id<span class="fk">FK</span></td><td class="ct">bigint</td><td>속한 원장</td></tr>
-        <tr><td class="cn">rsv_travel_id<span class="fk">FK</span></td><td class="ct">bigint</td><td>속한 행사</td></tr>
-        <tr><td class="cn">channel_link_id<span class="fk">FK</span></td><td class="ct">bigint</td><td>채널 측 매핑</td></tr>
-        <tr><td class="cn">agency_link_id<span class="fk">FK</span></td><td class="ct">bigint</td><td>여행사 측 매핑</td></tr>
-        <tr><td class="cn">age_group</td><td class="ct">varchar</td><td>ADULT / CHILD / INFANT</td></tr>
-        <tr><td class="cn">name</td><td class="ct">varchar</td><td>여행자 이름</td></tr>
-        <tr><td class="cn">gender</td><td class="ct">varchar</td><td>성별</td></tr>
-        <tr><td class="cn">birthday</td><td class="ct">date</td><td>생년월일</td></tr>
-        <tr><td class="cn">passport_no</td><td class="ct">varchar<span class="nl">NULL</span></td><td>여권번호 (해외 패키지)</td></tr>
-        <tr><td class="cn">status</td><td class="ct">varchar</td><td>ACTIVE / CANCELED</td></tr>
-        <tr><td class="cn">canceled_at</td><td class="ct">timestamp<span class="nl">NULL</span></td><td>취소 시각</td></tr>
-        </tbody>
-      </table>
+  <div class="inner-tabs">
+    <button data-it="cols" class="cur">📐 컬럼</button>
+    <button data-it="intent">🎯 의도</button>
+    <button data-it="legacy">🔁 Legacy 매핑</button>
+    <button data-it="policy">📋 마이그 정책</button>
+    <button data-it="ex">📌 예시</button>
+  </div>
+
+  <div class="inner-content cur" data-it="cols">
+    <table class="col5">
+      <thead><tr><th style="width:16%">컬럼</th><th style="width:12%">타입</th><th style="width:18%">예시값</th><th style="width:24%">설명</th><th>하위컬럼 / 가능한 값</th></tr></thead>
+      <tbody>
+      <tr><td class="cn">id<span class="pk">PK</span></td><td class="ct">bigint</td><td class="cex">P-5501</td><td class="cdesc">여행자 ID</td><td class="csub">passenger_id로 ledger_items에 참조됨</td></tr>
+      <tr><td class="cn">ledger_id<span class="fk">FK</span></td><td class="ct">bigint</td><td class="cex">L-10456789</td><td class="cdesc">속한 원장</td><td class="csub"></td></tr>
+      <tr><td class="cn">rsv_travel_id<span class="fk">FK</span></td><td class="ct">bigint</td><td class="cex">RT-2202</td><td class="cdesc">속한 행사</td><td class="csub">행사이동 시 새 행으로 갱신</td></tr>
+      <tr><td class="cn">channel_link_id<span class="fk">FK</span></td><td class="ct">bigint</td><td class="cex">CL-4401</td><td class="cdesc">채널 측 매핑</td><td class="csub">한 채널 주문번호에 속한 여행자</td></tr>
+      <tr><td class="cn">agency_link_id<span class="fk">FK</span></td><td class="ct">bigint</td><td class="cex">AL-3301</td><td class="cdesc">여행사 측 매핑</td><td class="csub">한 여행사 예약번호에 속한 여행자</td></tr>
+      <tr><td class="cn">age_group</td><td class="ct">varchar(10)</td><td class="cex">ADULT</td><td class="cdesc">연령대 분류</td><td class="csub">
+        　• <code>ADULT</code> 성인 (만 12세 이상)<br>
+        　• <code>CHILD</code> 아동 (만 2~12세)<br>
+        　• <code>INFANT</code> 유아 (만 2세 미만)<br>
+        연령대별 가격 분배 기준
+      </td></tr>
+      <tr><td class="cn">name</td><td class="ct">varchar(60)</td><td class="cex">김여행</td><td class="cdesc">여행자 이름</td><td class="csub">영문명 필요 시 별도 컬럼 또는 동일 컬럼</td></tr>
+      <tr><td class="cn">gender</td><td class="ct">varchar(1)</td><td class="cex">F</td><td class="cdesc">성별</td><td class="csub">　• <code>F</code> · <code>M</code> · <code>N</code></td></tr>
+      <tr><td class="cn">birthday</td><td class="ct">date</td><td class="cex">1990-03-12</td><td class="cdesc">생년월일</td><td class="csub">age_group 검증용</td></tr>
+      <tr><td class="cn">passport_no</td><td class="ct">varchar(20)<span class="nl">NULL</span></td><td class="cex">M12345678</td><td class="cdesc">여권번호</td><td class="csub">해외 패키지/항공권 필수, 국내는 NULL</td></tr>
+      <tr><td class="cn">status</td><td class="ct">varchar(16)</td><td class="cex">ACTIVE</td><td class="cdesc">여행자 상태</td><td class="csub">
+        　• <code>ACTIVE</code> 정상<br>
+        　• <code>CANCELED</code> 취소됨 (행 삭제 X)
+      </td></tr>
+      <tr><td class="cn">canceled_at</td><td class="ct">timestamp<span class="nl">NULL</span></td><td class="cex">2026-04-30 11:20</td><td class="cdesc">취소 시각</td><td class="csub">status=CANCELED일 때만 채움</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="inner-content" data-it="intent">
+    <div class="responsibility-box">
+      <b>🎯 책임</b><br>
+      예약에 들어가는 <b>개별 여행자(승객) 1명 = 1행</b>.
+      각 여행자가 어떤 채널·여행사 링크에 속하는지 양쪽 매핑 보유 → 인원별 결제·정산·취소 분기 가능.
     </div>
-    <div class="tcard-right">
-      <div class="inner-tabs">
-        <button data-it="intent" class="cur">의도</button>
-        <button data-it="legacy">Legacy 매핑</button>
-        <button data-it="policy">마이그 정책</button>
-        <button data-it="example">예시</button>
-      </div>
-      <div class="inner-content cur" data-it="intent">
-        <p><b>🎯 이 테이블이 하는 일</b></p>
-        <p>예약에 들어가는 <b>개별 여행자(승객) 1명 = 1행</b>. 각 여행자가 어떤 채널·여행사 링크에 속하는지 양쪽 매핑 보유.</p>
-        <p><b>왜 양쪽 매핑?</b></p>
+
+    <div class="row-2col">
+      <div>
+        <h4>왜 양쪽 매핑인가</h4>
         <ul>
-          <li>인원별 결제·정산 분기를 위해. 인원 1명만 환불·취소되는 경우 추적.</li>
-          <li>ledger_items.passenger_id로 인원별 금액 분배 매핑.</li>
+          <li>인원별 결제·정산 분기를 위해</li>
+          <li>인원 1명만 환불·취소되는 케이스 추적</li>
+          <li>ledger_items.passenger_id로 인원별 금액 분배</li>
+          <li>행사이동 시 일부 인원만 이동도 가능 (다중 행사 매핑)</li>
         </ul>
       </div>
-      <div class="inner-content" data-it="legacy">
-        <p><b>🔁 어디서 왔나</b></p>
-        <div class="mapping">
-          <div class="row"><span class="o">ts_reservation_travelers</span><span class="a">→</span><span class="n">rsv_travelers (1:1)</span></div>
-          <div class="row"><span class="o">traveler_id</span><span class="a">→</span><span class="n">id</span></div>
-          <div class="row"><span class="o">is_booker=Y</span><span class="a">⇒</span><span class="n">rsv_ledgers.booker_user_id 와 매칭</span></div>
-          <div class="row"><span class="o">(없음)</span><span class="a">+</span><span class="n">channel_link_id / agency_link_id 신규 추가</span></div>
-          <div class="note">💡 현행에는 양쪽 매핑이 없음 → 마이그 시점에 같은 행사·채널·여행사 링크 ID로 일괄 채움.</div>
-        </div>
+      <div>
+        <h4>인원별 금액 분배 룰</h4>
+        <ul>
+          <li>type=100(상품가): 인원별 행 → passenger_id 채움</li>
+          <li>type=202(특가): 인원별 행</li>
+          <li>type=800(위약금): 인원별 또는 전체 — 정책 결정 필요</li>
+          <li>type=301(쿠폰): 예약 전체 1행 → passenger_id=NULL</li>
+        </ul>
       </div>
-      <div class="inner-content" data-it="policy">
-        <div class="policy-item">
-          <div class="lbl">인원 삭제 정책 <span class="status st-decided">결정</span></div>
-          <div class="body">status=CANCELED로 두고 ledger_items에 역분개 추가 (행 자체 삭제 X). canceled_at 기록.</div>
-        </div>
-        <div class="policy-item">
-          <div class="lbl">예약자 식별 방식 <span class="status st-todo">정리 필요</span></div>
-          <div class="body">booker_user_id (원장 마스터) vs travelers의 is_booker 플래그 — 둘 중 단일 소스 결정.</div>
-        </div>
-        <div class="policy-item">
-          <div class="lbl">인원별 금액 분배 룰 <span class="status st-urgent">1차 마이그 핵심</span></div>
-          <div class="body">ts_reservation_order의 합산 금액 → 인원별 분배: <b>균등 vs 예약자 귀속 vs 연령대 비율</b>. 케이스별 정의.</div>
-        </div>
-        <div class="policy-item">
-          <div class="lbl">취소완료 인원 데이터 일치 <span class="status st-urgent">1차 5/6/7번</span></div>
-          <div class="body">어드민·파트너스 표시 기준 통일 후 마이그. CANCELED 인원 노출 정책 통일.</div>
-        </div>
+    </div>
+
+    <h4>자주 받는 질문</h4>
+    <div class="faq-item">
+      <div class="q">인원 1명만 취소되면 어떻게 표현되나?</div>
+      <div class="a">travelers.status=CANCELED + ledger_items에 해당 인원의 100/202/… 역분개 행 추가. 행 자체 삭제 X.</div>
+    </div>
+    <div class="faq-item">
+      <div class="q">예약자 본인은 어떻게 식별하나?</div>
+      <div class="a">rsv_ledgers.booker_user_id / booker_profile_id 와 travelers를 join. 단일 소스 — booker_user_id가 SSOT.</div>
+    </div>
+    <div class="faq-item">
+      <div class="q">여권번호는 언제 필수인가?</div>
+      <div class="a">해외 패키지·국제선 항공권. 국내·일부 상품은 NULL 허용. 상품 단계에서 필수 여부 결정.</div>
+    </div>
+  </div>
+
+  <div class="inner-content" data-it="legacy">
+    <h4>컬럼 매핑표</h4>
+    <table class="mtable">
+      <thead><tr><th style="width:30%">이전 (ts_*)</th><th style="width:25%">신규 (rsv_*)</th><th style="width:14%">위험도</th><th>변환 규칙</th></tr></thead>
+      <tbody>
+      <tr><td><span class="o">ts_reservation_travelers.traveler_id</span></td><td><span class="n">rsv_travelers.id</span></td><td><span class="risk risk-low">낮음</span></td><td class="rule">그대로</td></tr>
+      <tr><td><span class="o">.reservation_id</span></td><td><span class="n">.ledger_id</span></td><td><span class="risk risk-low">낮음</span></td><td class="rule">FK 갱신</td></tr>
+      <tr><td><span class="o">.name / gender / birthday</span></td><td><span class="n">.name / gender / birthday</span></td><td><span class="risk risk-low">낮음</span></td><td class="rule">그대로</td></tr>
+      <tr><td><span class="o">.age_group</span></td><td><span class="n">.age_group</span></td><td><span class="risk risk-low">낮음</span></td><td class="rule">enum 매핑 검증</td></tr>
+      <tr><td><span class="o">.is_booker</span></td><td><span class="n">(소멸) booker_user_id 매칭으로 대체</span></td><td><span class="risk risk-mid">중간</span></td><td class="rule">SSOT 단일화</td></tr>
+      <tr><td><span class="o">(없음)</span></td><td><span class="n">.rsv_travel_id</span></td><td><span class="risk risk-mid">중간</span></td><td class="rule">valid=true travels.id로 일괄 채움</td></tr>
+      <tr><td><span class="o">(없음)</span></td><td><span class="n">.channel_link_id / agency_link_id</span></td><td><span class="risk risk-mid">중간</span></td><td class="rule">같은 ledger의 단일 행 ID로 채움</td></tr>
+      <tr><td><span class="o">(없음)</span></td><td><span class="n">.passport_no</span></td><td><span class="risk risk-mid">중간</span></td><td class="rule">기존 데이터 별도 저장 위치에서 join (확인 필요)</td></tr>
+      </tbody>
+    </table>
+
+    <div class="alert-box">
+      ⚠️ <b>현행 데이터 한계</b>: channel_link_id/agency_link_id가 현행에는 없음. 마이그 시점에 같은 ledger의 channel_links/agency_links 단일 행 ID로 일괄 채움 (1:1 케이스만).
+    </div>
+  </div>
+
+  <div class="inner-content" data-it="policy">
+    <div class="policy-item">
+      <div class="lbl">인원 삭제 정책 <span class="status st-decided">결정</span></div>
+      <div class="body">status=CANCELED로 두고 ledger_items에 역분개 추가 (행 자체 삭제 X). canceled_at 기록.</div>
+    </div>
+    <div class="policy-item">
+      <div class="lbl">예약자 식별 SSOT <span class="status st-decided">결정</span></div>
+      <div class="body">rsv_ledgers.booker_user_id / booker_profile_id 가 SSOT. travelers에서는 별도 플래그 없음. is_booker 컬럼 폐기.</div>
+    </div>
+    <div class="policy-item">
+      <div class="lbl">인원별 금액 분배 룰 (마이그) <span class="status st-urgent">1차 마이그 핵심</span></div>
+      <div class="body">
+        ts_reservation_order의 합산 금액 → 인원별 분배 방식:
+        <ul>
+          <li><b>옵션 A</b>: 균등 분배 (총액/N)</li>
+          <li><b>옵션 B</b>: 예약자 1명에 귀속</li>
+          <li><b>옵션 C</b>: age_group별 비율 분배 (성인 100% / 아동 70% / 유아 10%)</li>
+        </ul>
+        영업운영팀+개발실 협의 필요.
       </div>
-      <div class="inner-content" data-it="example">
-        <div class="example">
-          <span class="lbl">📌 3명 가족</span>
-          P-5501 · ledger=L-10456789 · age=ADULT · name=김여행 · status=ACTIVE<br>
-          P-5502 · ledger=L-10456789 · age=ADULT · name=이동행 · status=ACTIVE<br>
-          P-5503 · ledger=L-10456789 · age=CHILD · name=김아동 · status=ACTIVE
-        </div>
-        <div class="example">
-          <span class="lbl">📌 1명 취소</span>
-          P-5503 · status=<b>CANCELED</b> · canceled_at=04-30 → ledger_items에 역분개 행 추가됨
-        </div>
-      </div>
+    </div>
+    <div class="policy-item">
+      <div class="lbl">취소완료 인원 데이터 일치 <span class="status st-urgent">1차 5/6/7번</span></div>
+      <div class="body">어드민·파트너스 표시 기준 차이 → 통일 후 마이그. CANCELED 인원 노출 정책 통일.</div>
+    </div>
+    <div class="policy-item">
+      <div class="lbl">여권번호 마이그 위치 <span class="status st-todo">확인 필요</span></div>
+      <div class="body">현행에 별도 저장 위치 추적 필요. 해외 상품 한정 NULL 정책.</div>
+    </div>
+  </div>
+
+  <div class="inner-content" data-it="ex">
+    <div class="example">
+      <span class="lbl">📌 3명 가족 (성인 2 + 아동 1)</span>
+      P-5501 · age=ADULT · name=김여행 · gender=F · birthday=1990-03-12 · status=ACTIVE<br>
+      P-5502 · age=ADULT · name=이동행 · gender=M · birthday=1988-07-21 · status=ACTIVE<br>
+      P-5503 · age=CHILD · name=김아동 · gender=F · birthday=2018-11-04 · status=ACTIVE
+      <div class="desc">모두 같은 ledger/travel/channel_link/agency_link에 속함.</div>
+    </div>
+    <div class="example">
+      <span class="lbl">📌 1명 취소</span>
+      P-5503 · status=<b>CANCELED</b> · canceled_at=2026-04-30 11:20<br>
+      → ledger_items 역분개 행 추가 (type=100/202 –1,000,000/+30,000)<br>
+      → 위약금 행 (type=800 +200,000) + 환불 (type=703 –800,000)
+      <div class="desc">행은 보존, status만 변경 + ledger_items로 금액 흐름 표현.</div>
+    </div>
+    <div class="example">
+      <span class="lbl">📌 해외 패키지 (여권번호 필수)</span>
+      P-7701 · age=ADULT · passport_no=<b>M12345678</b> · birthday=1990-03-12
+      <div class="desc">해외 항공권 포함 패키지 — 여권번호 필수 입력.</div>
     </div>
   </div>
 </div>
@@ -802,113 +1353,206 @@ erDiagram
 <div class="tcard" id="t6">
   <div class="tcard-header">
     <div><span class="tname">rsv_ledger_items</span></div>
-    <div class="tkr">★ 원장 거래 항목 (가계부 행) — 시스템의 심장</div>
+    <div class="tkr">★ 원장 거래 항목 (가계부 행) · 시스템의 심장</div>
   </div>
-  <div class="tcard-body">
-    <div class="tcard-left">
-      <h4>📐 컬럼</h4>
-      <table class="col-table">
-        <thead><tr><th>컬럼</th><th>타입</th><th>의미</th></tr></thead>
-        <tbody>
-        <tr><td class="cn">id<span class="pk">PK</span></td><td class="ct">bigint</td><td>항목 ID</td></tr>
-        <tr><td class="cn">ledger_id<span class="fk">FK</span></td><td class="ct">bigint</td><td>속한 원장</td></tr>
-        <tr><td class="cn">type<span class="fk">FK</span></td><td class="ct">int</td><td>원장 항목 코드 (100~900) — types 마스터 참조</td></tr>
-        <tr><td class="cn">passenger_id<span class="fk">FK</span><span class="nl">NULL</span></td><td class="ct">bigint</td><td>인원별 항목이면 여행자 ID, 예약 전체(쿠폰 등)면 NULL</td></tr>
-        <tr><td class="cn">amount</td><td class="ct">decimal</td><td>금액 (부호 포함 +/−)</td></tr>
-        <tr><td class="cn">is_payment</td><td class="ct">boolean</td><td>결제 항목 빠른 필터</td></tr>
-        <tr><td class="cn">is_settlement</td><td class="ct">boolean</td><td>정산 항목 빠른 필터</td></tr>
-        <tr><td class="cn">memo</td><td class="ct">varchar<span class="nl">NULL</span></td><td>운영자 메모</td></tr>
-        <tr><td class="cn">ref_payment_id</td><td class="ct">bigint<span class="nl">NULL</span></td><td>외부 결제(PG) 트랜잭션 참조</td></tr>
-        <tr><td class="cn">ref_item_id</td><td class="ct">bigint<span class="nl">NULL</span></td><td>역분개 시 원본 항목 참조</td></tr>
-        <tr><td class="cn">created_at</td><td class="ct">timestamp</td><td>생성 시각 (시계열 정렬용)</td></tr>
-        </tbody>
-      </table>
+  <div class="inner-tabs">
+    <button data-it="cols" class="cur">📐 컬럼</button>
+    <button data-it="intent">🎯 의도</button>
+    <button data-it="legacy">🔁 Legacy 매핑</button>
+    <button data-it="policy">📋 마이그 정책</button>
+    <button data-it="ex">📌 예시</button>
+  </div>
+
+  <div class="inner-content cur" data-it="cols">
+    <table class="col5">
+      <thead><tr><th style="width:16%">컬럼</th><th style="width:12%">타입</th><th style="width:18%">예시값</th><th style="width:24%">설명</th><th>하위컬럼 / 가능한 값</th></tr></thead>
+      <tbody>
+      <tr><td class="cn">id<span class="pk">PK</span></td><td class="ct">bigint</td><td class="cex">LI-001</td><td class="cdesc">항목 ID</td><td class="csub"></td></tr>
+      <tr><td class="cn">ledger_id<span class="fk">FK</span></td><td class="ct">bigint</td><td class="cex">L-10456789</td><td class="cdesc">속한 원장</td><td class="csub"></td></tr>
+      <tr><td class="cn">type<span class="fk">FK</span></td><td class="ct">int</td><td class="cex">100</td><td class="cdesc">원장 항목 코드 (100~900)</td><td class="csub">
+        　• <code>100~199</code> CHARGE (예약금액)<br>
+        　• <code>200~299</code> DISCOUNT (할인)<br>
+        　• <code>300~399</code> COUPON<br>
+        　• <code>400~499</code> PAYMENT (결제)<br>
+        　• <code>500~599</code> TRANSFER (정산)<br>
+        　• <code>600~699</code> FEE (수수료)<br>
+        　• <code>700~799</code> REFUND (환불)<br>
+        　• <code>800~899</code> ADJUSTMENT (위약금)<br>
+        　• <code>900~999</code> CLOSING (결산)
+      </td></tr>
+      <tr><td class="cn">passenger_id<span class="fk">FK</span><span class="nl">NULL</span></td><td class="ct">bigint</td><td class="cex">P-5501</td><td class="cdesc">인원별 항목이면 여행자 ID</td><td class="csub">
+        　• <b>인원별 (값 채움):</b> 100, 202, 800<br>
+        　• <b>예약 전체 (NULL):</b> 300번대, 400번대, 500번대, 600번대, 700번대
+      </td></tr>
+      <tr><td class="cn">amount</td><td class="ct">decimal(15,2)</td><td class="cex">+1,000,000</td><td class="cdesc">금액 (부호 포함 +/−)</td><td class="csub">
+        부호 규약: types 마스터의 sign 컬럼 참조<br>
+        　• 들어옴 → <code>+</code><br>
+        　• 나감 → <code>−</code>
+      </td></tr>
+      <tr><td class="cn">is_payment</td><td class="ct">boolean</td><td class="cex">false</td><td class="cdesc">결제 항목 빠른 필터</td><td class="csub">type 400/700번대만 true</td></tr>
+      <tr><td class="cn">is_settlement</td><td class="ct">boolean</td><td class="cex">false</td><td class="cdesc">정산 항목 빠른 필터</td><td class="csub">type 500/600/900번대만 true</td></tr>
+      <tr><td class="cn">memo</td><td class="ct">varchar(200)<span class="nl">NULL</span></td><td class="cex">김여행 상품정가</td><td class="cdesc">운영자 메모 / 자동 생성 설명</td><td class="csub">자유 텍스트</td></tr>
+      <tr><td class="cn">ref_payment_id</td><td class="ct">bigint<span class="nl">NULL</span></td><td class="cex">PG-771</td><td class="cdesc">외부 결제(PG) 트랜잭션 참조</td><td class="csub">type=401 (PG 결제) 행에만 채움</td></tr>
+      <tr><td class="cn">ref_item_id</td><td class="ct">bigint<span class="nl">NULL</span></td><td class="cex">LI-003</td><td class="cdesc">역분개 시 원본 항목 참조</td><td class="csub">역분개·취소 행이 원본을 가리킴</td></tr>
+      <tr><td class="cn">created_at</td><td class="ct">timestamp</td><td class="cex">2026-04-26 23:17:01</td><td class="cdesc">생성 시각 (시계열 정렬)</td><td class="csub">UPDATE 절대 없음 — 모든 변동은 행 추가</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="inner-content" data-it="intent">
+    <div class="responsibility-box">
+      <b>🎯 책임 (시스템의 심장)</b><br>
+      예약에서 일어나는 <b>모든 금액 거래 1건 = 1행</b>. 상품가·할인·쿠폰·결제·환불·정산·위약금 전부 여기로.
+      <b>덮어쓰기 절대 없음 → 모든 이력 보존</b>.
     </div>
-    <div class="tcard-right">
-      <div class="inner-tabs">
-        <button data-it="intent" class="cur">의도</button>
-        <button data-it="legacy">Legacy 매핑</button>
-        <button data-it="policy">마이그 정책</button>
-        <button data-it="example">예시</button>
-      </div>
-      <div class="inner-content cur" data-it="intent">
-        <p><b>🎯 이 테이블이 하는 일 — 시스템의 심장</b></p>
-        <p>예약에서 일어나는 <b>모든 금액 거래 1건 = 1행</b>. 상품가·할인·쿠폰·결제·환불·정산·위약금 전부 여기에 들어옴. <b>덮어쓰기 절대 없음 → 모든 이력 보존</b>.</p>
-        <p><b>왜 다중 행?</b></p>
+
+    <div class="row-2col">
+      <div>
+        <h4>왜 다중 행인가</h4>
         <ul>
-          <li>분할결제·인원별 금액·역분개·정산을 자연스럽게 표현.</li>
-          <li>정책 변경(쿠폰 자동·위약금 1/n)이 행 추가/룰만으로 흡수.</li>
-          <li>주체별 잔액 = 코드 범위별 +/− 합산으로 즉시 계산.</li>
+          <li>분할결제·인원별 금액·역분개·정산을 자연스럽게 표현</li>
+          <li>정책 변경(쿠폰 자동·위약금 1/n)이 행 추가/룰만으로 흡수</li>
+          <li>주체별 잔액 = 코드 범위별 +/− 합산으로 즉시 계산</li>
+          <li>감사(audit) 추적 자동 — 누가 언제 무엇을 변경했는지</li>
         </ul>
       </div>
-      <div class="inner-content" data-it="legacy">
-        <p><b>🔁 어디서 왔나 (대분해)</b></p>
-        <div class="mapping">
-          <div class="row"><span class="o">ts_reservation_order.product_price</span><span class="a">⇒</span><span class="n">type=100 인원별 N행</span></div>
-          <div class="row"><span class="o">.discount_amount</span><span class="a">⇒</span><span class="n">type=202 인원별 N행</span></div>
-          <div class="row"><span class="o">.coupon_amount</span><span class="a">→</span><span class="n">type=301 예약전체 1행</span></div>
-          <div class="row"><span class="o">.coupon_canceled_at</span><span class="a">?</span><span class="n">값 있으면 type=302 행 생성</span></div>
-          <div class="row"><span class="o">.payment_amount</span><span class="a">⇒</span><span class="n">type=401 PG 트랜잭션별 N행</span></div>
-          <div class="row"><span class="o">ts_commissions.pg_fee</span><span class="a">→</span><span class="n">type=601 행</span></div>
-          <div class="row"><span class="o">.commission_amount</span><span class="a">→</span><span class="n">type=602 행</span></div>
-          <div class="row"><span class="o">ts_settlement.settlement_amount</span><span class="a">→</span><span class="n">type=500 행</span></div>
-          <div class="row"><span class="o">(위약금 — 기존 결제시스템)</span><span class="a">⇒</span><span class="n">type=800 행 (이전 시점 핵심)</span></div>
-          <div class="note">⚠️ <b>인원별 분배가 가장 큰 난제</b>. 현행 데이터에 인원별 금액이 없으면 균등 분배 or 예약자 귀속 룰 결정 필요.</div>
-        </div>
+      <div>
+        <h4>핵심 룰</h4>
+        <ul>
+          <li><b>SSOT</b>: 모든 변동은 [+추가] / [−차감] 행 추가로만</li>
+          <li><b>역분개</b>: 기존 행 삭제 X, 부호 반대 행 + ref_item_id로 원본 가리킴</li>
+          <li><b>결제 완료 시</b>: 고객 합계 = 0</li>
+          <li><b>결산 완료 시</b>: 모든 주체(고객·플랫폼·채널·여행사) 합계 = 0</li>
+        </ul>
       </div>
-      <div class="inner-content" data-it="policy">
-        <div class="policy-item">
-          <div class="lbl">금액 직접 수정 금지 <span class="status st-decided">결정 (SSOT)</span></div>
-          <div class="body">모든 변동은 [+추가] / [−차감] 행 추가로만 표현. 기존 행 절대 수정 X.</div>
-        </div>
-        <div class="policy-item">
-          <div class="lbl">passenger_id NULL 규약 <span class="status st-decided">결정</span></div>
-          <div class="body">쿠폰(300)·결제(400)·환불(700)·정산(500/600)은 NULL. 상품가(100)·특가(202)·위약금(800)은 인원별.</div>
-        </div>
-        <div class="policy-item">
-          <div class="lbl">39개 Sign 규약 <span class="status st-decided">정책문서</span></div>
-          <div class="body">코드 범위별 +/− 부호 정책: <code>2f486ade8e778066a2b6e7b705766d88</code>.</div>
-        </div>
-        <div class="policy-item">
-          <div class="lbl">인원별 금액 분배 룰 (마이그) <span class="status st-urgent">결정 필요</span></div>
-          <div class="body">현행에 인원별 금액 없음 → <b>균등 / 예약자 귀속 / 연령대 비율</b> 중 선택. 영업운영팀+개발실 논의.</div>
-        </div>
-        <div class="policy-item">
-          <div class="lbl">결제주체 둘로 쪼개진 예약 합치기 <span class="status st-urgent">결정 필요</span></div>
-          <div class="body">운영상 2건으로 나눴던 예약 → 한 원장으로 합칠지, 그대로 둘지 케이스 정리.</div>
-        </div>
-        <div class="policy-item">
-          <div class="lbl">위약금 1/n 처리 <span class="status st-urgent">서비스운영팀 협의</span></div>
-          <div class="body">type=800 인원별 분배 케이스. 일괄 부과 vs 1/n vs 비율 분배.</div>
-        </div>
-        <div class="policy-item">
-          <div class="lbl">쿠폰 자동처리 방향 <span class="status st-urgent">9/5 영업운영+개발실</span></div>
-          <div class="body">방향1 vs 방향2 — type=301/302 자동 처리 룰 확정 필요.</div>
-        </div>
-        <div class="policy-item">
-          <div class="lbl">결제·결산 잔액 검증 <span class="status st-decided">결정</span></div>
-          <div class="body">결제 완료 시: 고객 합계=0 / 결산 완료 시: 모든 주체 합계=0.</div>
-        </div>
+    </div>
+
+    <h4>자주 받는 질문</h4>
+    <div class="faq-item">
+      <div class="q">금액 수정이 필요하면?</div>
+      <div class="a">기존 행 수정 절대 X. 차액만큼 새 행 추가. 예: 1,000,000 → 1,050,000 변경 시 +50,000 새 행.</div>
+    </div>
+    <div class="faq-item">
+      <div class="q">분할결제 3건은 어떻게 표현되나?</div>
+      <div class="a">type=401 행 3개. 각 행마다 ref_payment_id로 PG 트랜잭션 연결. amount는 각각 분할 금액.</div>
+    </div>
+    <div class="faq-item">
+      <div class="q">왜 is_payment / is_settlement 빠른 필터를 둘까?</div>
+      <div class="a">type 범위 조건으로 매번 필터링하는 비용 절감. 인덱스도 더 효율적. type 코드 정책 변경에도 빠른 필터는 정합 유지.</div>
+    </div>
+  </div>
+
+  <div class="inner-content" data-it="legacy">
+    <h4>대분해 매핑 (1행 → N행)</h4>
+    <table class="mtable">
+      <thead><tr><th style="width:30%">이전 (ts_*)</th><th style="width:25%">신규 (rsv_*)</th><th style="width:14%">위험도</th><th>변환 규칙</th></tr></thead>
+      <tbody>
+      <tr><td><span class="o">ts_reservation_order.product_price</span></td><td><span class="n">type=100 인원별 N행</span></td><td><span class="risk risk-high">높음</span></td><td class="rule">인원수로 분배 (룰 결정 필요)</td></tr>
+      <tr><td><span class="o">.discount_amount</span></td><td><span class="n">type=202 인원별 N행</span></td><td><span class="risk risk-high">높음</span></td><td class="rule">인원수로 분배</td></tr>
+      <tr><td><span class="o">.coupon_amount</span></td><td><span class="n">type=301 예약전체 1행</span></td><td><span class="risk risk-low">낮음</span></td><td class="rule">passenger_id=NULL로 1행</td></tr>
+      <tr><td><span class="o">.coupon_canceled_at</span></td><td><span class="n">값 있으면 type=302 행 생성</span></td><td><span class="risk risk-mid">중간</span></td><td class="rule">NULL이면 스킵</td></tr>
+      <tr><td><span class="o">.payment_amount</span></td><td><span class="n">type=401 PG 트랜잭션별 N행</span></td><td><span class="risk risk-high">높음</span></td><td class="rule">PG 결제 테이블 join → 트랜잭션 단위 분해</td></tr>
+      <tr><td><span class="o">ts_commissions.pg_fee</span></td><td><span class="n">type=601 1행</span></td><td><span class="risk risk-mid">중간</span></td><td class="rule">정산 시점 행으로 생성</td></tr>
+      <tr><td><span class="o">.commission_amount</span></td><td><span class="n">type=602 1행</span></td><td><span class="risk risk-mid">중간</span></td><td class="rule">정산 시점 행</td></tr>
+      <tr><td><span class="o">ts_settlement.settlement_amount</span></td><td><span class="n">type=500 1행</span></td><td><span class="risk risk-mid">중간</span></td><td class="rule">대금이전 시점 행</td></tr>
+      <tr><td><span class="o">(위약금 — 기존 결제시스템)</span></td><td><span class="n">type=800 행</span></td><td><span class="risk risk-high">높음</span></td><td class="rule"><b>예약시스템으로 이동</b> — 출처 데이터 확인 필요</td></tr>
+      </tbody>
+    </table>
+
+    <h4>변환 룰 (pseudo SQL)</h4>
+    <div class="sql-block">
+<span class="lbl">ts_reservation_order.product_price → 인원별 type=100 행 N개 (균등 분배 케이스)</span>
+<span class="kw">INSERT INTO</span> rsv_ledger_items (ledger_id, type, passenger_id, amount, is_payment, memo, created_at)
+<span class="kw">SELECT</span>
+  o.reservation_id,
+  <span class="num">100</span>,
+  t.id <span class="kw">AS</span> passenger_id,
+  o.product_price / (<span class="kw">SELECT</span> <span class="fn">COUNT</span>(*) <span class="kw">FROM</span> rsv_travelers <span class="kw">WHERE</span> ledger_id = o.reservation_id),
+  <span class="kw">false</span>,
+  <span class="fn">CONCAT</span>(t.name, <span class="str">' 상품정가'</span>),
+  o.created_at
+<span class="kw">FROM</span> ts_reservation_order o
+<span class="kw">JOIN</span> rsv_travelers t <span class="kw">ON</span> t.ledger_id = o.reservation_id;
+
+<span class="com">-- 마찬가지로 discount_amount → type=202 인원별 N행</span>
+<span class="com">-- payment_amount → ts_payment_transaction join 후 401 다중 행</span></div>
+
+    <div class="alert-box">
+      ⚠️ <b>인원별 분배가 마이그 최대 난제</b>. 현행 데이터에 인원별 금액이 없으므로 분배 룰(균등/예약자 귀속/연령대 비율) 확정 후 마이그 진행. 위약금(800)은 현행 결제시스템에서 옮겨와야 하므로 출처·매핑 별도 작성.
+    </div>
+  </div>
+
+  <div class="inner-content" data-it="policy">
+    <div class="policy-item">
+      <div class="lbl">금액 직접 수정 금지 (SSOT) <span class="status st-decided">결정</span></div>
+      <div class="body">모든 변동은 [+추가] / [−차감] 행 추가로만 표현. 기존 행 절대 수정 X. DB 트리거 또는 애플리케이션 레이어에서 강제.</div>
+    </div>
+    <div class="policy-item">
+      <div class="lbl">passenger_id NULL 규약 <span class="status st-decided">결정</span></div>
+      <div class="body">쿠폰(300)·결제(400)·환불(700)·정산(500/600)은 NULL. 상품가(100)·특가(202)·위약금(800)은 인원별.</div>
+    </div>
+    <div class="policy-item">
+      <div class="lbl">39개 Sign 규약 <span class="status st-decided">정책문서</span></div>
+      <div class="body">코드 범위별 +/− 부호 정책: <code>2f486ade8e778066a2b6e7b705766d88</code>.</div>
+    </div>
+    <div class="policy-item">
+      <div class="lbl">인원별 금액 분배 룰 (마이그) <span class="status st-urgent">결정 필요</span></div>
+      <div class="body">
+        현행에 인원별 금액 없음 → 분배 옵션:
+        <ul>
+          <li><b>균등</b>: 가장 단순. 예약자/동행 구분 없음.</li>
+          <li><b>예약자 귀속</b>: 예약자에 전액. 위약금·취소 시 문제 발생 가능.</li>
+          <li><b>연령대 비율</b>: 상품 단가 표 기준. 정확하지만 마이그 복잡.</li>
+        </ul>
+        영업운영팀+개발실 협의 필요.
       </div>
-      <div class="inner-content" data-it="example">
-        <div class="example">
-          <span class="lbl">📌 예약 시점 7행 (인원별 상품가 + 특가 + 쿠폰)</span>
-          LI-001~003 · type=<b>100</b> · passenger=P-5501~3 · amount=<b>+1,000,000</b> ×3 (인원별)<br>
-          LI-004~006 · type=<b>202</b> · passenger=P-5501~3 · amount=<b>−30,000</b> ×3 (특가)<br>
-          LI-007 · type=<b>301</b> · passenger=<b>NULL</b> · amount=<b>−20,000</b> (쿠폰)
-        </div>
-        <div class="example">
-          <span class="lbl">📌 분할 결제 2행</span>
-          LI-008 · type=<b>401</b> · amount=<b>+1,500,000</b> · 04-27 09:12 · ref_payment_id=PG-771<br>
-          LI-009 · type=<b>401</b> · amount=<b>+1,390,000</b> · 04-27 14:38 · ref_payment_id=PG-892
-        </div>
-        <div class="example">
-          <span class="lbl">📌 1명 취소 + 위약금</span>
-          LI-100 · type=<b>100</b> · passenger=P-5503 · amount=<b>−1,000,000</b> · ref_item_id=LI-003 (역분개)<br>
-          LI-101 · type=<b>800</b> · passenger=P-5503 · amount=<b>+200,000</b> (위약금 20%)<br>
-          LI-102 · type=<b>703</b> · passenger=NULL · amount=<b>−800,000</b> (환불실행)
-        </div>
-      </div>
+    </div>
+    <div class="policy-item">
+      <div class="lbl">결제주체 둘로 쪼개진 예약 합치기 <span class="status st-urgent">결정 필요</span></div>
+      <div class="body">운영상 2건으로 만들었던 예약 → 한 원장으로 합칠지, 그대로 둘지 케이스 정리. 예약코드 매핑 보관 필요.</div>
+    </div>
+    <div class="policy-item">
+      <div class="lbl">위약금 1/n 처리 <span class="status st-urgent">서비스운영팀 협의</span></div>
+      <div class="body">type=800 인원별 분배 케이스 — 일괄 부과 vs 1/n vs 비율 분배.</div>
+    </div>
+    <div class="policy-item">
+      <div class="lbl">쿠폰 자동처리 방향 <span class="status st-urgent">9/5 영업운영+개발실</span></div>
+      <div class="body">방향1 vs 방향2 — type=301/302 자동 처리 룰 확정 필요. 행사이동·취소 시 쿠폰 재계산 룰 포함.</div>
+    </div>
+    <div class="policy-item">
+      <div class="lbl">결제·결산 잔액 검증 <span class="status st-decided">결정</span></div>
+      <div class="body">결제 완료 시: 고객 합계=0 / 결산 완료 시: 모든 주체 합계=0. CI 또는 배치 검증 자동화 필요.</div>
+    </div>
+  </div>
+
+  <div class="inner-content" data-it="ex">
+    <div class="example">
+      <span class="lbl">📌 예약 시점 7행 (3명 가족 + 쿠폰)</span>
+      LI-001~003 · type=<b>100</b> · passenger=P-5501~3 · amount=<b>+1,000,000</b> ×3<br>
+      LI-004~006 · type=<b>202</b> · passenger=P-5501~3 · amount=<b>−30,000</b> ×3<br>
+      LI-007 · type=<b>301</b> · passenger=<b>NULL</b> · amount=<b>−20,000</b> · memo=쿠폰 CP-3091
+      <div class="desc">총 2,890,000원 (상품 3,000,000 − 특가 90,000 − 쿠폰 20,000)</div>
+    </div>
+    <div class="example">
+      <span class="lbl">📌 분할 결제 2행</span>
+      LI-008 · type=<b>401</b> · amount=<b>+1,500,000</b> · 04-27 09:12 · ref_payment_id=PG-771<br>
+      LI-009 · type=<b>401</b> · amount=<b>+1,390,000</b> · 04-27 14:38 · ref_payment_id=PG-892
+      <div class="desc">예약자 + 동행자 각자 결제. 한 원장 안 다중 PG 트랜잭션.</div>
+    </div>
+    <div class="example">
+      <span class="lbl">📌 1명 취소 + 위약금 + 환불</span>
+      LI-100 · type=<b>100</b> · passenger=P-5503 · amount=<b>−1,000,000</b> · ref_item_id=LI-003 (역분개)<br>
+      LI-101 · type=<b>202</b> · passenger=P-5503 · amount=<b>+30,000</b> · ref_item_id=LI-006 (특가 환원)<br>
+      LI-102 · type=<b>800</b> · passenger=P-5503 · amount=<b>+200,000</b> (위약금 20%)<br>
+      LI-103 · type=<b>703</b> · passenger=NULL · amount=<b>−800,000</b> (환불실행)
+      <div class="desc">기존 행 보존 + 4개 행 추가로 취소·환불·위약금 표현.</div>
+    </div>
+    <div class="example">
+      <span class="lbl">📌 정산 시점 3행</span>
+      LI-010 · type=<b>500</b> · amount=<b>−2,565,000</b> · is_settlement=true (여행사 대금이전)<br>
+      LI-011 · type=<b>601</b> · amount=<b>−25,000</b> · is_settlement=true (PG 수수료)<br>
+      LI-012 · type=<b>602</b> · amount=<b>−300,000</b> · is_settlement=true (플랫폼 이용료)
+      <div class="desc">출발 완료 후 정산 시점에 일괄 생성.</div>
     </div>
   </div>
 </div>
@@ -917,89 +1561,155 @@ erDiagram
 <div class="tcard" id="t7">
   <div class="tcard-header">
     <div><span class="tname">rsv_ledger_item_types</span></div>
-    <div class="tkr">원장 항목 타입 마스터 (enum 정규화)</div>
+    <div class="tkr">원장 항목 타입 마스터 · enum 정규화</div>
   </div>
-  <div class="tcard-body">
-    <div class="tcard-left">
-      <h4>📐 컬럼 + 9범주 분류</h4>
-      <table class="col-table">
-        <thead><tr><th>컬럼</th><th>타입</th><th>의미</th></tr></thead>
-        <tbody>
-        <tr><td class="cn">type_code<span class="pk">PK</span></td><td class="ct">int</td><td>코드 (100~999)</td></tr>
-        <tr><td class="cn">name</td><td class="ct">varchar</td><td>항목명 (예: 상품정가)</td></tr>
-        <tr><td class="cn">category</td><td class="ct">varchar</td><td>9범주 enum</td></tr>
-        <tr><td class="cn">sign</td><td class="ct">char</td><td>+ / − 부호 규약</td></tr>
-        <tr><td class="cn">passenger_scope</td><td class="ct">varchar</td><td>PER_PERSON / WHOLE</td></tr>
-        <tr><td class="cn">active</td><td class="ct">boolean</td><td>현재 사용 여부</td></tr>
-        </tbody>
-      </table>
-      <table class="col-table" style="margin-top:10px;">
-        <thead><tr><th>범위</th><th>범주</th><th>예시</th></tr></thead>
-        <tbody>
-          <tr><td>100~199</td><td>CHARGE</td><td>100 상품정가</td></tr>
-          <tr><td>200~299</td><td>DISCOUNT</td><td>202 여행사특가</td></tr>
-          <tr><td>300~399</td><td>COUPON</td><td>301 쿠폰할인</td></tr>
-          <tr><td>400~499</td><td>PAYMENT</td><td>401 고객결제(플랫폼)</td></tr>
-          <tr><td>500~599</td><td>TRANSFER</td><td>500 여행사대금이전</td></tr>
-          <tr><td>600~699</td><td>FEE</td><td>601 PG수수료, 602 플랫폼이용료</td></tr>
-          <tr><td>700~799</td><td>REFUND</td><td>703 환불실행</td></tr>
-          <tr><td>800~899</td><td>ADJUSTMENT</td><td>800 취소위약금</td></tr>
-          <tr><td>900~999</td><td>CLOSING</td><td>결산</td></tr>
-        </tbody>
-      </table>
+  <div class="inner-tabs">
+    <button data-it="cols" class="cur">📐 컬럼</button>
+    <button data-it="intent">🎯 의도</button>
+    <button data-it="legacy">🔁 Legacy 매핑</button>
+    <button data-it="policy">📋 마이그 정책</button>
+    <button data-it="ex">📌 예시</button>
+  </div>
+
+  <div class="inner-content cur" data-it="cols">
+    <table class="col5">
+      <thead><tr><th style="width:16%">컬럼</th><th style="width:12%">타입</th><th style="width:14%">예시값</th><th style="width:24%">설명</th><th>하위컬럼 / 가능한 값</th></tr></thead>
+      <tbody>
+      <tr><td class="cn">type_code<span class="pk">PK</span></td><td class="ct">int</td><td class="cex">100</td><td class="cdesc">코드 (100~999)</td><td class="csub">9개 범주 코드 범위 룰 강제</td></tr>
+      <tr><td class="cn">name</td><td class="ct">varchar(60)</td><td class="cex">상품정가</td><td class="cdesc">항목명</td><td class="csub">한글 사용자 가시명</td></tr>
+      <tr><td class="cn">category</td><td class="ct">varchar(20)</td><td class="cex">CHARGE</td><td class="cdesc">9범주 enum</td><td class="csub">
+        　• <code>CHARGE</code> 예약금액<br>
+        　• <code>DISCOUNT</code> 할인<br>
+        　• <code>COUPON</code> 쿠폰<br>
+        　• <code>PAYMENT</code> 결제<br>
+        　• <code>TRANSFER</code> 정산이전<br>
+        　• <code>FEE</code> 수수료<br>
+        　• <code>REFUND</code> 환불<br>
+        　• <code>ADJUSTMENT</code> 조정/위약금<br>
+        　• <code>CLOSING</code> 결산
+      </td></tr>
+      <tr><td class="cn">sign</td><td class="ct">char(1)</td><td class="cex">+</td><td class="cdesc">부호 규약</td><td class="csub">
+        　• <code>+</code> 들어옴<br>
+        　• <code>−</code> 나감
+      </td></tr>
+      <tr><td class="cn">passenger_scope</td><td class="ct">varchar(16)</td><td class="cex">PER_PERSON</td><td class="cdesc">인원별 적용 여부</td><td class="csub">
+        　• <code>PER_PERSON</code> 인원별 행 (passenger_id 필수)<br>
+        　• <code>WHOLE</code> 예약 전체 1행 (passenger_id=NULL)
+      </td></tr>
+      <tr><td class="cn">active</td><td class="ct">boolean</td><td class="cex">true</td><td class="cdesc">현재 사용 여부</td><td class="csub">deprecated 항목은 false. 기존 데이터는 보존.</td></tr>
+      </tbody>
+    </table>
+
+    <h4 style="margin-top: 20px;">39개 원장 항목 코드 (전체)</h4>
+    <table class="col5">
+      <thead><tr><th style="width:10%">code</th><th style="width:22%">name</th><th style="width:14%">category</th><th style="width:10%">sign</th><th>scope</th></tr></thead>
+      <tbody>
+        <tr><td class="cn">100</td><td>상품정가</td><td class="ct">CHARGE</td><td class="ct">+</td><td class="ct">PER_PERSON</td></tr>
+        <tr><td class="cn">201</td><td>플랫폼특가</td><td class="ct">DISCOUNT</td><td class="ct">−</td><td class="ct">PER_PERSON</td></tr>
+        <tr><td class="cn">202</td><td>여행사특가할인</td><td class="ct">DISCOUNT</td><td class="ct">−</td><td class="ct">PER_PERSON</td></tr>
+        <tr><td class="cn">203</td><td>채널할인 / 보상할인</td><td class="ct">DISCOUNT</td><td class="ct">−</td><td class="ct">PER_PERSON</td></tr>
+        <tr><td class="cn">211</td><td>플랫폼추가할인</td><td class="ct">DISCOUNT</td><td class="ct">−</td><td class="ct">WHOLE</td></tr>
+        <tr><td class="cn">299</td><td>기타조정</td><td class="ct">DISCOUNT</td><td class="ct">±</td><td class="ct">WHOLE</td></tr>
+        <tr><td class="cn">301</td><td>쿠폰할인 (플랫폼)</td><td class="ct">COUPON</td><td class="ct">−</td><td class="ct">WHOLE</td></tr>
+        <tr><td class="cn">302</td><td>쿠폰해제</td><td class="ct">COUPON</td><td class="ct">+</td><td class="ct">WHOLE</td></tr>
+        <tr><td class="cn">400</td><td>고객결제 (채널수금)</td><td class="ct">PAYMENT</td><td class="ct">+</td><td class="ct">WHOLE</td></tr>
+        <tr><td class="cn">401</td><td>고객결제 (PG)</td><td class="ct">PAYMENT</td><td class="ct">+</td><td class="ct">WHOLE</td></tr>
+        <tr><td class="cn">410</td><td>PG → 플랫폼 정산</td><td class="ct">PAYMENT</td><td class="ct">+</td><td class="ct">WHOLE</td></tr>
+        <tr><td class="cn">500</td><td>채널 → 플랫폼 자금이전</td><td class="ct">TRANSFER</td><td class="ct">±</td><td class="ct">WHOLE</td></tr>
+        <tr><td class="cn">501</td><td>플랫폼 → 여행사 대금이전</td><td class="ct">TRANSFER</td><td class="ct">±</td><td class="ct">WHOLE</td></tr>
+        <tr><td class="cn">520</td><td>채널수수료 인식 (손익)</td><td class="ct">FEE</td><td class="ct">−</td><td class="ct">WHOLE</td></tr>
+        <tr><td class="cn">521</td><td>채널대금 지급 (자금)</td><td class="ct">TRANSFER</td><td class="ct">−</td><td class="ct">WHOLE</td></tr>
+        <tr><td class="cn">601</td><td>PG수수료</td><td class="ct">FEE</td><td class="ct">−</td><td class="ct">WHOLE</td></tr>
+        <tr><td class="cn">602</td><td>플랫폼이용료</td><td class="ct">FEE</td><td class="ct">−</td><td class="ct">WHOLE</td></tr>
+        <tr><td class="cn">606</td><td>PG부가세</td><td class="ct">FEE</td><td class="ct">−</td><td class="ct">WHOLE</td></tr>
+        <tr><td class="cn">703</td><td>환불실행 (플랫폼)</td><td class="ct">REFUND</td><td class="ct">−</td><td class="ct">WHOLE</td></tr>
+        <tr><td class="cn">800</td><td>취소위약금</td><td class="ct">ADJUSTMENT</td><td class="ct">+</td><td class="ct">PER_PERSON</td></tr>
+        <tr><td class="cn">810</td><td>정산기준금액 (매출인식)</td><td class="ct">CLOSING</td><td class="ct">±</td><td class="ct">WHOLE</td></tr>
+        <tr><td class="cn">811</td><td>공제금액 (플랫폼 수익)</td><td class="ct">CLOSING</td><td class="ct">±</td><td class="ct">WHOLE</td></tr>
+        <tr><td colspan="5" style="color:#9ca3af; font-style:italic; padding:8px 11px;">… 외 17개 항목 (총 39개)</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="inner-content" data-it="intent">
+    <div class="responsibility-box">
+      <b>🎯 책임</b><br>
+      39개 원장 항목 코드의 정체(이름·범주·부호·scope)를 enum 형태로 관리.
+      <b>하드코딩 방지 + 신규 항목 추가가 마이그레이션 없이 가능</b>.
     </div>
-    <div class="tcard-right">
-      <div class="inner-tabs">
-        <button data-it="intent" class="cur">의도</button>
-        <button data-it="legacy">Legacy 매핑</button>
-        <button data-it="policy">마이그 정책</button>
-        <button data-it="example">예시</button>
-      </div>
-      <div class="inner-content cur" data-it="intent">
-        <p><b>🎯 이 테이블이 하는 일</b></p>
-        <p>39개 원장 항목 코드의 정체(이름·범주·부호·범위)를 enum 형태로 관리. <b>하드코딩 방지 + 신규 항목 추가가 마이그레이션 없이 가능</b>.</p>
-        <p><b>왜 별도 마스터?</b></p>
+
+    <div class="row-2col">
+      <div>
+        <h4>왜 별도 마스터?</h4>
         <ul>
-          <li>신규 항목 추가가 잦음 (정책 변경에 따라). 코드 배포 없이 데이터로 추가.</li>
-          <li>9범주 고정 + 코드 범위 룰 강제 → 의미적 일관성.</li>
+          <li>신규 항목 추가가 잦음 (정책 변경에 따라)</li>
+          <li>코드 배포 없이 데이터로 추가 가능</li>
+          <li>9범주 고정 + 코드 범위 룰 강제 → 의미적 일관성</li>
+          <li>다국어 항목명 확장 여지 (name_en 등)</li>
         </ul>
       </div>
-      <div class="inner-content" data-it="legacy">
-        <p><b>🔁 어디서 왔나</b></p>
-        <div class="mapping">
-          <div class="row"><span class="none">신규 테이블 (legacy 없음)</span></div>
-          <div class="row"><span class="o">하드코딩 status/type 컬럼들</span><span class="a">⇒</span><span class="n">enum 마스터로 정규화</span></div>
-          <div class="note">💡 마이그은 단순 DDL + 시드 데이터 (39행). 운영 데이터 마이그 대상 아님.</div>
-        </div>
+      <div>
+        <h4>9범주 분류 의도</h4>
+        <ul>
+          <li><b>예약금액 영역</b>: 100/200/300/800</li>
+          <li><b>결제금액 영역</b>: 400/700</li>
+          <li><b>정산 영역</b>: 500/600/900</li>
+          <li>범주별 잔액 합산으로 주체별 잔고 즉시 계산</li>
+        </ul>
       </div>
-      <div class="inner-content" data-it="policy">
-        <div class="policy-item">
-          <div class="lbl">신규 항목 추가 프로세스 <span class="status st-decided">결정</span></div>
-          <div class="body">PM이 정의(코드/이름/범주/부호/scope) → 정책문서 등록 → 개발팀 enum 등록 요청.</div>
-        </div>
-        <div class="policy-item">
-          <div class="lbl">범주(category) 추가 금지 <span class="status st-decided">결정</span></div>
-          <div class="body">9개 범주(100~900) 고정. 새 항목은 기존 범주 코드 범위 안에서.</div>
-        </div>
-        <div class="policy-item">
-          <div class="lbl">부호 규약 일관성 <span class="status st-decided">정책문서</span></div>
-          <div class="body">같은 범주여도 항목별 +/− 다를 수 있음. <code>2f486ade8e778066a2b6e7b705766d88</code> 참조.</div>
-        </div>
-        <div class="policy-item">
-          <div class="lbl">deprecated 항목 처리 <span class="status st-todo">정리 필요</span></div>
-          <div class="body">정책 변경으로 안 쓰는 항목은 active=false 토글. 기존 데이터는 그대로 보존.</div>
-        </div>
+    </div>
+  </div>
+
+  <div class="inner-content" data-it="legacy">
+    <div class="alert-box">
+      💡 <b>Legacy 없음 (신규 테이블)</b><br>
+      현행은 status/type 컬럼에 하드코딩. 신규는 enum 마스터로 정규화.<br>
+      마이그은 단순 DDL + 시드 데이터(39행). 운영 데이터 마이그 대상 아님.
+    </div>
+
+    <div class="sql-block">
+<span class="lbl">시드 데이터 INSERT (39행)</span>
+<span class="kw">INSERT INTO</span> rsv_ledger_item_types (type_code, name, category, sign, passenger_scope, active) <span class="kw">VALUES</span>
+  (<span class="num">100</span>, <span class="str">'상품정가'</span>, <span class="str">'CHARGE'</span>, <span class="str">'+'</span>, <span class="str">'PER_PERSON'</span>, <span class="kw">true</span>),
+  (<span class="num">201</span>, <span class="str">'플랫폼특가'</span>, <span class="str">'DISCOUNT'</span>, <span class="str">'-'</span>, <span class="str">'PER_PERSON'</span>, <span class="kw">true</span>),
+  (<span class="num">202</span>, <span class="str">'여행사특가할인'</span>, <span class="str">'DISCOUNT'</span>, <span class="str">'-'</span>, <span class="str">'PER_PERSON'</span>, <span class="kw">true</span>),
+  ...
+  (<span class="num">800</span>, <span class="str">'취소위약금'</span>, <span class="str">'ADJUSTMENT'</span>, <span class="str">'+'</span>, <span class="str">'PER_PERSON'</span>, <span class="kw">true</span>);</div>
+  </div>
+
+  <div class="inner-content" data-it="policy">
+    <div class="policy-item">
+      <div class="lbl">신규 항목 추가 프로세스 <span class="status st-decided">결정</span></div>
+      <div class="body">
+        PM이 정의(코드/이름/범주/부호/scope) → 정책문서 등록 → 개발팀 enum 등록 요청.
+        <ul>
+          <li>코드 선택 시 9범주 범위 내에서 선택</li>
+          <li>부호·scope는 의미 명확화 후 결정</li>
+        </ul>
       </div>
-      <div class="inner-content" data-it="example">
-        <div class="example">
-          <span class="lbl">📌 마스터 행 예시</span>
-          {100, 상품정가, CHARGE, +, PER_PERSON, true}<br>
-          {202, 여행사특가할인, DISCOUNT, −, PER_PERSON, true}<br>
-          {301, 쿠폰할인(플랫폼), COUPON, −, WHOLE, true}<br>
-          {401, 고객결제(플랫폼), PAYMENT, +, WHOLE, true}<br>
-          {800, 취소위약금, ADJUSTMENT, +, PER_PERSON, true}
-        </div>
-      </div>
+    </div>
+    <div class="policy-item">
+      <div class="lbl">범주(category) 추가 금지 <span class="status st-decided">결정</span></div>
+      <div class="body">9개 범주(100~900) 고정. 새 항목은 기존 범주 코드 범위 안에서. 범주 자체를 늘리려면 시스템 재설계 수준 변경.</div>
+    </div>
+    <div class="policy-item">
+      <div class="lbl">부호 규약 일관성 <span class="status st-decided">정책문서</span></div>
+      <div class="body">같은 범주여도 항목별 +/− 다를 수 있음. <code>2f486ade8e778066a2b6e7b705766d88</code> 참조. ±(양방향)도 허용 — 케이스에 따라 결정.</div>
+    </div>
+    <div class="policy-item">
+      <div class="lbl">deprecated 항목 처리 <span class="status st-todo">정리 필요</span></div>
+      <div class="body">정책 변경으로 안 쓰는 항목은 active=false 토글. 기존 데이터는 그대로 보존. 마이그 도구는 active 무관 모두 표시.</div>
+    </div>
+  </div>
+
+  <div class="inner-content" data-it="ex">
+    <div class="example">
+      <span class="lbl">📌 마스터 행 예시 5개</span>
+      {type_code: 100, name: 상품정가, category: CHARGE, sign: +, passenger_scope: PER_PERSON, active: true}<br>
+      {type_code: 202, name: 여행사특가할인, category: DISCOUNT, sign: −, passenger_scope: PER_PERSON, active: true}<br>
+      {type_code: 301, name: 쿠폰할인(플랫폼), category: COUPON, sign: −, passenger_scope: WHOLE, active: true}<br>
+      {type_code: 401, name: 고객결제(PG), category: PAYMENT, sign: +, passenger_scope: WHOLE, active: true}<br>
+      {type_code: 800, name: 취소위약금, category: ADJUSTMENT, sign: +, passenger_scope: PER_PERSON, active: true}
     </div>
   </div>
 </div>
@@ -1019,30 +1729,26 @@ erDiagram
   <div class="compare">
     <div class="sc-old">
       <span class="sc-lbl">Legacy (ts_*)</span>
-      ts_reservation ×1 + ts_reservation_order ×1 (금액 컬럼 압축) + ts_reservation_travelers ×3 + ts_agency_reservation_detail ×1.
-      <b>인원별 금액 안 보임.</b>
+      ts_reservation ×1 + ts_reservation_order ×1 (금액 컬럼 압축) + ts_reservation_travelers ×3 + ts_agency_reservation_detail ×1. <b>인원별 금액 안 보임</b>.
     </div>
     <div class="sc-new">
       <span class="sc-lbl">신규 (rsv_*)</span>
-      원장 1 → 행사 1 → 채널/여행사 링크 각 1 → 여행자 3 → 원장 항목 7행(상품가 ×3, 특가 ×3, 쿠폰 ×1).
-      <b>인원별 금액 명시.</b>
+      원장 1 → 행사 1 → 채널/여행사 링크 각 1 → 여행자 3 → 원장 항목 7행. <b>인원별 금액 명시</b>. status=완료.
     </div>
   </div>
 </div>
 
 <div class="sc-card">
   <h3>📍 2. 분할 결제 (1차 9번)</h3>
-  <div>
-    <span class="tt">rsv_ledger_items (type=401) +2행</span>
-  </div>
+  <div><span class="tt">rsv_ledger_items (type=401) +2행</span></div>
   <div class="compare">
     <div class="sc-old">
       <span class="sc-lbl">Legacy (ts_*)</span>
-      ts_reservation_order.payment_amount 컬럼 덮어쓰기 + 별도 PG 결제 테이블 JOIN. <b>이력 추적 어려움</b>.
+      payment_amount 컬럼 덮어쓰기 + 별도 PG 결제 테이블 JOIN. <b>이력 추적 어려움</b>.
     </div>
     <div class="sc-new">
       <span class="sc-lbl">신규 (rsv_*)</span>
-      원장은 그대로. ledger_items에 type=401 결제 행 2개 추가. <b>예약 쪼갤 필요 X</b>. ref_payment_id로 PG 트랜잭션 매핑.
+      type=401 결제 행 2개 추가. <b>예약 쪼갤 필요 X</b>. ref_payment_id로 PG 트랜잭션 매핑.
     </div>
   </div>
 </div>
@@ -1057,12 +1763,11 @@ erDiagram
   <div class="compare">
     <div class="sc-old">
       <span class="sc-lbl">Legacy (ts_*)</span>
-      ts_reservation.travel_id 덮어쓰기. <b>이전 행사 정보 사라짐</b>. 금액 차액·쿠폰 재계산은 컬럼 덮어쓰기.
+      travel_id 덮어쓰기. <b>이전 행사 정보 사라짐</b>. 금액 차액·쿠폰 재계산은 컬럼 덮어쓰기.
     </div>
     <div class="sc-new">
       <span class="sc-lbl">신규 (rsv_*)</span>
-      travels 새 행 추가 + 기존 valid=false. 금액 차액·특가·쿠폰 재계산은 ledger_items 자동 행 추가.
-      <b>이력 완전 보존</b>.
+      travels 새 행 + 기존 valid=false. ledger_items 자동 행 추가. <b>이력 완전 보존</b>.
     </div>
   </div>
 </div>
@@ -1077,28 +1782,26 @@ erDiagram
   <div class="compare">
     <div class="sc-old">
       <span class="sc-lbl">Legacy (ts_*)</span>
-      ts_reservation_travelers 컬럼 변경 + ts_reservation_order 금액 컬럼 덮어쓰기. 위약금은 <b>결제시스템에서 따로 처리</b>.
+      travelers 컬럼 변경 + order 금액 덮어쓰기. 위약금은 <b>결제시스템에서 따로 처리</b>.
     </div>
     <div class="sc-new">
       <span class="sc-lbl">신규 (rsv_*)</span>
-      여행자 status 변경 + 해당 인원의 100/202/… 역분개 행 추가 + 위약금 행(800). 위약금이 <b>예약시스템으로 이동</b>.
+      여행자 status 변경 + 인원 역분개 + 위약금 행(800). <b>위약금이 예약시스템으로 이동</b>.
     </div>
   </div>
 </div>
 
 <div class="sc-card">
   <h3>📍 5. 부분 환불</h3>
-  <div>
-    <span class="tt">rsv_ledger_items (type=703 +1행)</span>
-  </div>
+  <div><span class="tt">rsv_ledger_items (type=703 +1행)</span></div>
   <div class="compare">
     <div class="sc-old">
       <span class="sc-lbl">Legacy (ts_*)</span>
-      별도 환불 테이블 + payment_amount 차감. <b>원본 결제와 환불의 연결 추적 어려움</b>.
+      별도 환불 테이블 + payment_amount 차감. <b>원본 결제와 환불 연결 추적 어려움</b>.
     </div>
     <div class="sc-new">
       <span class="sc-lbl">신규 (rsv_*)</span>
-      type=703 행 추가. 기존 결제 행(401) 그대로. ref_payment_id로 원본 PG 트랜잭션 연결.
+      type=703 행 추가. 기존 결제 행 그대로. ref_payment_id로 원본 PG 트랜잭션 연결.
     </div>
   </div>
 </div>
@@ -1106,7 +1809,7 @@ erDiagram
 <div class="sc-card">
   <h3>📍 6. 결제주체 둘 (채널 + 플랫폼) — 신규에서만 가능</h3>
   <div>
-    <span class="tt">rsv_ledgers ×1 (한 원장)</span>
+    <span class="tt">rsv_ledgers ×1</span>
     <span class="tt">rsv_ledger_items (type=400+401)</span>
   </div>
   <div class="compare">
@@ -1116,7 +1819,25 @@ erDiagram
     </div>
     <div class="sc-new">
       <span class="sc-lbl">신규 (rsv_*)</span>
-      한 원장 안에 type=400(채널결제) + type=401(플랫폼결제) 행 공존. 도메인적으로 자연스러움.
+      한 원장에 type=400(채널) + type=401(플랫폼) 행 공존. 도메인적으로 자연스러움.
+    </div>
+  </div>
+</div>
+
+<div class="sc-card">
+  <h3>📍 7. 출발 완료 후 정산</h3>
+  <div>
+    <span class="tt">rsv_ledgers.status=출발완료</span>
+    <span class="tt">rsv_ledger_items (500/601/602/810/811)</span>
+  </div>
+  <div class="compare">
+    <div class="sc-old">
+      <span class="sc-lbl">Legacy (ts_*)</span>
+      ts_settlement + ts_commissions 별도 테이블. <b>예약과 정산이 분리됨</b>.
+    </div>
+    <div class="sc-new">
+      <span class="sc-lbl">신규 (rsv_*)</span>
+      ledger_items에 500/601/602 추가 + 매출인식(810/811). <b>한 원장에서 전체 흐름 추적</b>.
     </div>
   </div>
 </div>
@@ -1131,24 +1852,31 @@ erDiagram
 <tr><th style="width:22%">주제</th><th style="width:24%">관련 테이블</th><th style="width:16%">상태</th><th>비고</th></tr>
 </thead>
 <tbody>
-<tr><td class="area"><b>원장 39개 Sign 규약</b></td><td><code>rsv_ledger_item_types</code></td><td><span class="status st-decided">결정</span></td><td>정책문서 <code>2f486ade8e778066a2b6e7b705766d88</code></td></tr>
-<tr><td class="area"><b>예약 상태 전이도</b></td><td><code>rsv_ledgers.status</code></td><td><span class="status st-todo">정리 필요</span></td><td>RESERVED → CANCELED → DEPARTED 흐름 별도 정리</td></tr>
-<tr><td class="area"><b>channel enum 관리</b></td><td><code>rsv_ledgers.channel</code></td><td><span class="status st-todo">정리 필요</span></td><td>sync 채널 추가 시 defaultPaymentOwner 함께 정의</td></tr>
-<tr><td class="area"><b>여행자 상태값</b></td><td><code>rsv_travelers.status</code></td><td><span class="status st-todo">정리 필요</span></td><td>ACTIVE/CANCELED 전이 룰</td></tr>
-<tr><td class="area"><b>쿠폰 자동 처리 방향</b></td><td>rsv_ledger_items(300번대) + rsv_coupons</td><td><span class="status st-urgent">9/5 협의</span></td><td>영업운영팀+개발실 — 방향1/방향2 결정</td></tr>
-<tr><td class="area"><b>인원 변경 시 역분개 룰</b></td><td>rsv_travelers + rsv_ledger_items</td><td><span class="status st-todo">정리 필요</span></td><td>케이스별 패턴 정의</td></tr>
-<tr><td class="area"><b>여행사 예약번호 다중 매핑</b></td><td><code>rsv_agency_links</code></td><td><span class="status st-todo">정리 필요</span></td><td>행사이동 정책에서 분기</td></tr>
-<tr><td class="area"><b>위약금 1/n 처리</b></td><td>rsv_ledger_items (type=800)</td><td><span class="status st-urgent">서비스운영 협의</span></td><td>일괄 vs 1/n vs 비율</td></tr>
+<tr><td class="area"><b>예약 status 4단계 채택</b></td><td><code>rsv_ledgers.status</code></td><td><span class="status st-review">결정 방향 (6/17)</span></td><td>접수→완료→출발대기→출발완료. ts_* 매핑 룰 확정 필요</td></tr>
+<tr><td class="area"><b>출발확정 단계 추가 검토</b></td><td><code>rsv_ledgers.status</code></td><td><span class="status st-review">별도 미팅</span></td><td>메이저 4사·운영팀 가능 여부 확인 후</td></tr>
 <tr><td class="area"><b>인원별 금액 분배 룰</b></td><td>rsv_ledger_items (100/202)</td><td><span class="status st-urgent">마이그 핵심</span></td><td>균등 / 예약자 귀속 / 연령대 비율</td></tr>
 <tr><td class="area"><b>결제주체 둘 → 한 원장 합치기</b></td><td>rsv_ledgers + rsv_ledger_items</td><td><span class="status st-urgent">마이그 핵심</span></td><td>운영상 쪼개진 예약 처리 방향</td></tr>
-<tr><td class="area"><b>채널사 주문번호 변경 처리</b></td><td><code>rsv_channel_links</code></td><td><span class="status st-todo">정리 필요</span></td><td>새 행 추가 권장</td></tr>
+<tr><td class="area"><b>위약금 1/n 처리</b></td><td>rsv_ledger_items (type=800)</td><td><span class="status st-urgent">서비스운영 협의</span></td><td>일괄 vs 1/n vs 비율</td></tr>
+<tr><td class="area"><b>쿠폰 자동 처리 방향</b></td><td>rsv_ledger_items(300번대)</td><td><span class="status st-urgent">9/5 협의</span></td><td>방향1/방향2 결정</td></tr>
 <tr><td class="area"><b>sync 채널 주문번호 지연 수신</b></td><td><code>rsv_channel_links</code></td><td><span class="status st-urgent">정리 필요</span></td><td>received_at NULL 허용 + 업데이트 룰</td></tr>
-<tr><td class="area"><b>여행사 상태값 페이드아웃</b></td><td><code>rsv_agency_links.rsv_status/pay_status</code></td><td><span class="status st-todo">1차 9번 과제</span></td><td>ledger 흐름으로 일원화 일정</td></tr>
 <tr><td class="area"><b>행사이동 어뷰징 통제</b></td><td><code>rsv_travels</code></td><td><span class="status st-urgent">영업실 협의</span></td><td>횟수 제한·승인 워크플로</td></tr>
 <tr><td class="area"><b>ts_member_reservation_management 처리</b></td><td>(소멸 추정)</td><td><span class="status st-urgent">확인 필요</span></td><td>신규 구조 어디로 가는지 미확정</td></tr>
-<tr><td class="area"><b>booker_* 스냅샷 정책</b></td><td><code>rsv_ledgers.booker_*</code></td><td><span class="status st-decided">결정</span></td><td>회원 정보 변경 무관 보존</td></tr>
+<tr><td class="area"><b>channel enum 관리 거버넌스</b></td><td><code>rsv_ledgers.channel</code></td><td><span class="status st-todo">정리 필요</span></td><td>sync 채널 추가 시 defaultPaymentOwner 함께</td></tr>
+<tr><td class="area"><b>여행자 상태값 전이 룰</b></td><td><code>rsv_travelers.status</code></td><td><span class="status st-todo">정리 필요</span></td><td>ACTIVE/CANCELED 전이</td></tr>
+<tr><td class="area"><b>인원 변경 시 역분개 룰</b></td><td>rsv_travelers + rsv_ledger_items</td><td><span class="status st-todo">정리 필요</span></td><td>케이스별 패턴 정의</td></tr>
+<tr><td class="area"><b>여행사 예약번호 다중 매핑</b></td><td><code>rsv_agency_links</code></td><td><span class="status st-todo">정리 필요</span></td><td>행사이동 정책에서 분기</td></tr>
+<tr><td class="area"><b>여행사 상태값 페이드아웃</b></td><td><code>rsv_agency_links.rsv_status/pay_status</code></td><td><span class="status st-todo">1차 9번</span></td><td>ledger 흐름 일원화 일정</td></tr>
+<tr><td class="area"><b>채널사 주문번호 변경 처리</b></td><td><code>rsv_channel_links</code></td><td><span class="status st-todo">정리 필요</span></td><td>새 행 추가 권장</td></tr>
+<tr><td class="area"><b>마감 행사 이동 허용</b></td><td><code>rsv_travels</code></td><td><span class="status st-todo">정리 필요</span></td><td>운영자 권한 + 재고 무관 정책</td></tr>
+<tr><td class="area"><b>이전 행사 노출 정책</b></td><td><code>rsv_travels (valid=false)</code></td><td><span class="status st-todo">정리 필요</span></td><td>운영자/사용자 UX 분기</td></tr>
+<tr><td class="area"><b>여권번호 마이그 위치</b></td><td><code>rsv_travelers.passport_no</code></td><td><span class="status st-todo">확인 필요</span></td><td>현행 저장 위치 추적</td></tr>
+<tr><td class="area"><b>deprecated 항목 처리</b></td><td><code>rsv_ledger_item_types.active</code></td><td><span class="status st-todo">정리 필요</span></td><td>active=false 토글 정책</td></tr>
 <tr><td class="area"><b>금액 직접 수정 금지 (SSOT)</b></td><td><code>rsv_ledger_items</code></td><td><span class="status st-decided">결정</span></td><td>모든 변동은 행 추가로만</td></tr>
+<tr><td class="area"><b>booker_* 스냅샷 정책</b></td><td><code>rsv_ledgers.booker_*</code></td><td><span class="status st-decided">결정</span></td><td>회원 정보 변경 무관 보존</td></tr>
+<tr><td class="area"><b>예약자 식별 SSOT</b></td><td><code>rsv_ledgers.booker_user_id</code></td><td><span class="status st-decided">결정</span></td><td>travelers.is_booker 폐기</td></tr>
 <tr><td class="area"><b>다중 여행사 매핑 금지</b></td><td><code>rsv_agency_links</code></td><td><span class="status st-decided">결정</span></td><td>당사자 모델 규칙</td></tr>
+<tr><td class="area"><b>39개 Sign 규약</b></td><td><code>rsv_ledger_item_types</code></td><td><span class="status st-decided">결정</span></td><td>정책문서 <code>2f486ade8e778066a2b6e7b705766d88</code></td></tr>
+<tr><td class="area"><b>결제·결산 잔액 검증</b></td><td><code>rsv_ledger_items</code></td><td><span class="status st-decided">결정</span></td><td>결제: 고객=0 / 결산: 모든 주체=0</td></tr>
 </tbody>
 </table>
 
@@ -1159,7 +1887,7 @@ erDiagram
 <div class="mig-card">
   <h4>📦 배치 현황</h4>
   <ul>
-    <li><b>2,565건 / 51 배치</b>로 분할 진행 (migration_batches_2026-06-05.csv)</li>
+    <li><b>2,565건 / 51 배치</b>로 분할 (migration_batches_2026-06-05.csv)</li>
     <li>배치 1 첫 코드: <code>26042623-1700101V</code></li>
   </ul>
 </div>
@@ -1183,6 +1911,15 @@ erDiagram
 </div>
 
 <div class="mig-card">
+  <h4>⚠️ status 4단계 매핑</h4>
+  <ul>
+    <li>기존 다단계 → 4단계 압축</li>
+    <li>map_status_4step() 함수 정의 필요</li>
+    <li>중간 상태 정보 손실 검토</li>
+  </ul>
+</div>
+
+<div class="mig-card">
   <h4>⚠️ 취소완료 인원 데이터</h4>
   <ul>
     <li>어드민/파트너스 표시 기준 차이</li>
@@ -1194,7 +1931,7 @@ erDiagram
   <h4>⚠️ BQ/예약지표 재정의</h4>
   <ul>
     <li>ledger_items 기반 쿼리 재작성 (1차 8번)</li>
-    <li>이전 BQ 대시보드 마이그 일정 정리</li>
+    <li>이전 BQ 대시보드 마이그 일정</li>
   </ul>
 </div>
 
@@ -1203,14 +1940,23 @@ erDiagram
   <ul>
     <li>현행은 결제시스템 보유</li>
     <li>신규는 예약시스템(type=800)으로 이동</li>
-    <li>이전 시점 위약금 데이터 마이그 위치 확인</li>
+    <li>이전 시점 위약금 마이그 위치 확인</li>
+  </ul>
+</div>
+
+<div class="mig-card">
+  <h4>⚠️ sync 채널 주문번호</h4>
+  <ul>
+    <li>채널별 ad-hoc 저장 위치 추적</li>
+    <li>마이그 룰 채널별 작성</li>
+    <li>지연 수신 케이스 NULL 허용</li>
   </ul>
 </div>
 </div>
 
 <div class="footer">
-ⓒ 2026 트립스토어 · PM 김서현 · v2 (2026-06-16) · 본 문서는 PM/기획 참조용 가이드이며 실제 운영 스키마와 일부 차이 있을 수 있음<br>
-관련: <code>reservation-system-for-ops.html</code> (운영용) · <code>reservation-schema-comparison.html</code> (개발용)
+ⓒ 2026 트립스토어 · PM 김서현 · v3 (2026-06-17) · 본 문서는 PM/기획 참조용 가이드이며 실제 운영 스키마와 일부 차이 있을 수 있음<br>
+관련: <code>reservation-system-for-ops.html</code> (운영용) · <code>reservation-schema-comparison.html</code> (개발용) · <code>reservation-status-decision.html</code> (상태값 결정안)
 </div>
 
 <script>
