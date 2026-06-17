@@ -139,7 +139,7 @@
   <div class="hero-inner">
     <div class="tag"><span class="dot"></span> 데이터 분석 v2 · 매칭 키 정정 후 재집계</div>
     <h1>출발확정 자동 매핑 가능성 — 5월 데이터 분석</h1>
-    <p class="sub"><strong>매칭 키 정정 후 결과가 완전히 뒤집혔습니다.</strong> 자동 매핑 가능 영역 60%+. A·B·C OR 합집합 기준, 상품 유형별 분리, 메이저 3사 포함 전체 여행사 99.6% 패키지 매칭.</p>
+    <p class="sub"><strong>"예약완료(A) 상태에서 출발확정 자동 처리 가능한 비율은 얼마?"</strong> — A를 분모로 두고 B(모객 충족) 또는 C(시그널) 충족하는 건 분석. 메이저 3사 포함 전체 73.7% 자동 매핑 가능.</p>
     <div class="meta">
       <span>📅 2026-06-17 (v2)</span>
       <span>🗄️ BigQuery: tripstore-352708</span>
@@ -153,18 +153,18 @@
 
   <!-- 변경 안내 -->
   <div class="update-notice">
-    <strong>📌 v1 → v2 변경사항</strong> · v1은 raw_data의 eventCode로 ts_packages 조인했으나 메이저 3사 raw_data에 해당 키가 없어 매칭률 36%였습니다. v2는 <strong>ts_reservation_order.package_code 경유</strong>로 조인하여 매칭률 99.6%로 개선. AND→OR 관계, 패키지/에어텔 분리, threshold 기준(잔여좌석=0 대신 booked≥threshold) 반영.
+    <strong>📌 분석 관점 정정 (v3)</strong> · A(예약완료)는 합집합 변수가 아니라 <strong>분모(대상)</strong>. 출발확정 자동 매핑 가능 여부는 "A 중에서 B 또는 C 충족하는 비율"로 봐야 정확합니다. AIRTEL은 인원 제약 없어 별도 룰(A∩AIRTEL은 모두 자동 가능).
   </div>
 
   <!-- 핵심 발견 (긍정으로 전환) -->
   <div class="key-finding">
     <div>
-      <div class="big-num">60<span class="pct-unit">%</span></div>
+      <div class="big-num">73.7<span class="pct-unit">%</span></div>
     </div>
     <div class="body">
       <div class="label">✅ 핵심 발견</div>
-      <h2>5월 예약의 60.1%가 자동 출발확정 매핑 가능</h2>
-      <p>1,992건 중 <strong>1,198건</strong>이 A·B·C 중 어느 하나 이상 충족. <strong>메이저 3사(하나투어/모두투어/노랑풍선)도 모두 자동화 가능</strong>합니다. 매칭 키만 정확히 잡으면 자동화는 결코 적은 영역이 아닙니다.</p>
+      <h2>예약완료 501건 중 369건(73.7%) 자동 출발확정 가능</h2>
+      <p>A=501건을 대상으로 <strong>B(모객 충족) 또는 C(시그널) 또는 AIRTEL(인원 무관)</strong>을 충족하는 건수. <strong>메이저 3사 모두 60%+ 자동화 가능</strong>: 하나투어 86.8% · 노랑풍선 78.7% · 모두투어 63.0%.</p>
     </div>
   </div>
 
@@ -200,64 +200,74 @@
     </div>
   </div>
 
-  <!-- 3변수 OR 분석 -->
+  <!-- A를 분모로 한 B/C 분석 -->
   <div class="section">
     <div class="section-head">
-      <div class="eyebrow">3-Variable OR Analysis</div>
-      <h2>3변수 합집합 분석</h2>
-      <p class="lead">A·B·C는 AND가 아닌 <strong>OR 관계</strong>. 어느 하나라도 충족하면 자동 매핑 후보.</p>
+      <div class="eyebrow">Analysis · A as Denominator</div>
+      <h2>A(예약완료) 대상 자동 매핑 분석</h2>
+      <p class="lead">A는 합집합 변수가 아니라 <strong>분모</strong>. 그 안에서 B(모객 충족) 또는 C(시그널) 또는 AIRTEL(인원 무관) 비율을 봅니다.</p>
     </div>
 
     <div class="venn">
       <div class="venn-vars">
         <div class="venn-var va">
-          <div class="vn">501<span class="vpct">/ 25.2%</span></div>
-          <div class="vlbl">A · 트립 예약완료</div>
-          <div class="vdesc">status_on_management = RESERVATION_CONFIRMATION</div>
+          <div class="vn">501<span class="vpct">건 (분모)</span></div>
+          <div class="vlbl">A · 트립 예약완료 (대상)</div>
+          <div class="vdesc">status_on_management = RESERVATION_CONFIRMATION<br><strong style="color:#1e40af;">출발대기 진입 후보군</strong></div>
         </div>
         <div class="venn-var vb">
-          <div class="vn">1,048<span class="vpct">/ 52.6%</span></div>
-          <div class="vlbl">B · 모객 인원 충족</div>
-          <div class="vdesc">booked_seats ≥ threshold_for_departure<br><strong style="color:#b45309;">가장 큰 자동화 동인</strong></div>
+          <div class="vn">357<span class="vpct">/ 71.3%</span></div>
+          <div class="vlbl">A ∩ B · 모객 인원 충족</div>
+          <div class="vdesc">PACKAGE: booked ≥ threshold<br><strong style="color:#b45309;">압도적 핵심 동인</strong></div>
         </div>
         <div class="venn-var vc">
-          <div class="vn">31<span class="vpct">/ 1.6%</span></div>
-          <div class="vlbl">C · 여행사 출발확정 시그널</div>
-          <div class="vdesc">E-Ticket 발송완료 / 발권완료 / 비자발송완료 / 출발확정</div>
+          <div class="vn">9<span class="vpct">/ 1.8%</span></div>
+          <div class="vlbl">A ∩ C · 여행사 시그널</div>
+          <div class="vdesc">E-Ticket 발송완료 / 발권완료 등<br>온라인투어 단독</div>
         </div>
       </div>
 
       <div class="union-box">
-        <div class="ub-label">A ∪ B ∪ C (OR 합집합) — 자동 매핑 가능 영역</div>
-        <div><span class="ub-num">1,198</span><span class="ub-pct">/ 1,992 = 60.1%</span></div>
+        <div class="ub-label">A ∩ (B ∪ C ∪ AIRTEL) — A 중 자동 출발확정 가능</div>
+        <div><span class="ub-num">369</span><span class="ub-pct">/ 501 = 73.7%</span></div>
       </div>
     </div>
 
     <div class="bar-chart" style="margin-top:18px;">
       <div class="bar-row">
-        <div class="b-label">B (모객 충족)</div>
-        <div class="b-track"><div class="b-fill" style="width:52.6%;background:#f59e0b;">1,048</div></div>
-        <div class="b-num">1,048건</div>
-        <div class="b-pct">52.6%</div>
-      </div>
-      <div class="bar-row">
-        <div class="b-label">A (예약완료)</div>
-        <div class="b-track"><div class="b-fill" style="width:25.2%;background:#2563eb;">501</div></div>
+        <div class="b-label">A (분모)</div>
+        <div class="b-track"><div class="b-fill" style="width:100%;background:#94a3b8;">501</div></div>
         <div class="b-num">501건</div>
-        <div class="b-pct">25.2%</div>
+        <div class="b-pct">100%</div>
       </div>
       <div class="bar-row">
-        <div class="b-label">C (시그널)</div>
-        <div class="b-track"><div class="b-fill" style="width:1.6%;background:#8b5cf6;">31</div></div>
-        <div class="b-num">31건</div>
-        <div class="b-pct">1.6%</div>
+        <div class="b-label">A ∩ AIRTEL</div>
+        <div class="b-track"><div class="b-fill" style="width:11.8%;background:#f59e0b;">59</div></div>
+        <div class="b-num">59건</div>
+        <div class="b-pct">11.8%</div>
       </div>
       <div class="bar-row">
-        <div class="b-label" style="color:#15803d;font-weight:800;">A ∪ B ∪ C</div>
-        <div class="b-track"><div class="b-fill" style="width:60.1%;background:#16a34a;">1,198</div></div>
-        <div class="b-num" style="color:#15803d;font-weight:800;">1,198건</div>
-        <div class="b-pct" style="color:#15803d;font-weight:800;">60.1%</div>
+        <div class="b-label">A ∩ B (모객)</div>
+        <div class="b-track"><div class="b-fill" style="width:71.3%;background:#3b82f6;">357</div></div>
+        <div class="b-num">357건</div>
+        <div class="b-pct">71.3%</div>
       </div>
+      <div class="bar-row">
+        <div class="b-label">A ∩ C (시그널)</div>
+        <div class="b-track"><div class="b-fill" style="width:1.8%;background:#8b5cf6;">9</div></div>
+        <div class="b-num">9건</div>
+        <div class="b-pct">1.8%</div>
+      </div>
+      <div class="bar-row">
+        <div class="b-label" style="color:#15803d;font-weight:800;">자동 매핑 합산</div>
+        <div class="b-track"><div class="b-fill" style="width:73.7%;background:#16a34a;">369</div></div>
+        <div class="b-num" style="color:#15803d;font-weight:800;">369건</div>
+        <div class="b-pct" style="color:#15803d;font-weight:800;">73.7%</div>
+      </div>
+    </div>
+
+    <div style="margin-top:14px;padding:12px 16px;background:#f8fafc;border-radius:8px;font-size:11px;color:#475569;line-height:1.6;">
+      ※ "자동 매핑 합산" = AIRTEL(인원무관) ∪ B(모객충족) ∪ C(시그널). 중복은 한 번만 카운트. <strong>나머지 132건(26.3%)은 운영자 수동 액션 필요</strong> (주로 PACKAGE 중 모객 미달 + 시그널 없는 케이스).
     </div>
   </div>
 
@@ -273,93 +283,87 @@
       <thead>
         <tr>
           <th>여행사</th>
-          <th>5월 예약</th>
-          <th>패키지 매칭</th>
-          <th>A 예약완료</th>
+          <th>A 예약완료 (분모)</th>
+          <th>AIRTEL</th>
+          <th>PACKAGE</th>
           <th>B 모객 충족</th>
           <th>C 시그널</th>
-          <th class="success-col">A ∪ B ∪ C</th>
-          <th>커버율</th>
+          <th class="success-col">자동 매핑</th>
+          <th class="success-col">A 대비 비율</th>
         </tr>
       </thead>
       <tbody>
         <tr>
           <td>하나투어 <span class="agency-tag major">메이저</span></td>
-          <td>437</td><td>432</td><td>114</td>
-          <td class="has-strong">260</td><td class="zero">0</td>
-          <td class="bg-success has-strong">277</td><td class="bg-success">63.4%</td>
+          <td>114</td><td>21</td><td>90</td>
+          <td class="has-strong">97</td><td class="zero">0</td>
+          <td class="bg-success has-strong">99</td><td class="bg-success has-strong">86.8%</td>
         </tr>
         <tr>
           <td>모두투어 <span class="agency-tag major">메이저</span></td>
-          <td>417</td><td>415</td><td>108</td>
-          <td class="has-strong">189</td><td class="zero">0</td>
-          <td class="bg-success has-strong">229</td><td class="bg-success">54.9%</td>
-        </tr>
-        <tr>
-          <td>노랑풍선 <span class="agency-tag major">메이저</span></td>
-          <td>347</td><td>346</td><td>75</td>
-          <td class="has-strong">207</td><td class="zero">0</td>
-          <td class="bg-success has-strong">223</td><td class="bg-success">64.3%</td>
+          <td>108</td><td>4</td><td>103</td>
+          <td class="has-strong">68</td><td class="zero">0</td>
+          <td class="bg-success has-strong">68</td><td class="bg-success has-strong">63.0%</td>
         </tr>
         <tr>
           <td>온라인투어 <span class="agency-tag go">시그널 보유</span></td>
-          <td>314</td><td>314</td><td>77</td>
-          <td class="has">138</td><td class="has-strong">31</td>
-          <td class="bg-success has-strong">176</td><td class="bg-success">56.1%</td>
+          <td>77</td><td>8</td><td>69</td>
+          <td class="has">45</td><td class="has-strong">9</td>
+          <td class="bg-success has-strong">47</td><td class="bg-success has-strong">61.0%</td>
+        </tr>
+        <tr>
+          <td>노랑풍선 <span class="agency-tag major">메이저</span></td>
+          <td>75</td><td>6</td><td>69</td>
+          <td class="has-strong">59</td><td class="zero">0</td>
+          <td class="bg-success has-strong">59</td><td class="bg-success has-strong">78.7%</td>
         </tr>
         <tr>
           <td>참좋은여행</td>
-          <td>242</td><td>242</td><td>74</td>
-          <td class="has">130</td><td class="zero">0</td>
-          <td class="bg-success has-strong">153</td><td class="bg-success">63.2%</td>
+          <td>74</td><td>5</td><td>69</td>
+          <td class="has">51</td><td class="zero">0</td>
+          <td class="bg-success has-strong">54</td><td class="bg-success has-strong">73.0%</td>
         </tr>
         <tr>
           <td>교원투어</td>
-          <td>149</td><td>149</td><td>31</td>
-          <td class="has">83</td><td class="zero">0</td>
-          <td class="bg-success has-strong">90</td><td class="bg-success">60.4%</td>
+          <td>31</td><td>6</td><td>25</td>
+          <td class="has">24</td><td class="zero">0</td>
+          <td class="bg-success has-strong">24</td><td class="bg-success has-strong">77.4%</td>
         </tr>
         <tr>
           <td>롯데관광</td>
-          <td>36</td><td>36</td><td>9</td>
-          <td>28</td><td class="zero">0</td>
-          <td class="bg-success has">30</td><td class="bg-success">83.3%</td>
+          <td>9</td><td>0</td><td>9</td>
+          <td>7</td><td class="zero">0</td>
+          <td class="bg-success has">7</td><td class="bg-success has-strong">77.8%</td>
         </tr>
         <tr>
           <td>웹투어</td>
-          <td>18</td><td>18</td><td>6</td>
-          <td>9</td><td class="zero">0</td>
-          <td class="bg-success has">10</td><td class="bg-success">55.6%</td>
+          <td>6</td><td>4</td><td>2</td>
+          <td>5</td><td class="zero">0</td>
+          <td class="bg-success has">5</td><td class="bg-success has-strong">83.3%</td>
         </tr>
         <tr>
           <td>에어텔닷컴</td>
-          <td>11</td><td>11</td><td>5</td>
+          <td>5</td><td>5</td><td>0</td>
           <td class="zero">0</td><td class="zero">0</td>
-          <td class="bg-success">5</td><td class="bg-success">45.5%</td>
+          <td class="bg-success has">5</td><td class="bg-success has-strong">100%</td>
         </tr>
         <tr>
           <td>한진관광</td>
-          <td>9</td><td>9</td><td>2</td>
+          <td>2</td><td>0</td><td>2</td>
           <td>1</td><td class="zero">0</td>
-          <td class="bg-success">2</td><td class="bg-success">22.2%</td>
+          <td class="bg-success">1</td><td class="bg-success">50.0%</td>
         </tr>
-        <tr>
-          <td>TRP</td>
-          <td>9</td><td>9</td><td>0</td>
-          <td>3</td><td class="zero">0</td>
-          <td class="bg-success">3</td><td class="bg-success">33.3%</td>
-        </tr>
-        <tr>
-          <td>보물섬투어</td>
-          <td>1</td><td>1</td><td>0</td>
-          <td class="zero">0</td><td class="zero">0</td>
-          <td class="zero">0</td><td>0%</td>
+        <tr style="font-weight:800;background:#f0fdf4;">
+          <td style="color:#15803d;">전체</td>
+          <td>501</td><td>59</td><td>438</td>
+          <td class="has-strong">357</td><td class="has-strong">9</td>
+          <td class="has-strong" style="color:#15803d;">369</td><td class="has-strong" style="color:#15803d;font-size:13px;">73.7%</td>
         </tr>
       </tbody>
     </table>
 
     <div style="margin-top:14px;font-size:11px;color:#64748b;line-height:1.6;">
-      ※ 메이저 3사도 ts_reservation_order.package_code 경유 조인으로 99% 매칭. <strong>B(모객 인원 충족)</strong>가 메이저 3사 자동화 핵심 동인.
+      ※ 자동 매핑 = AIRTEL(인원 무관) ∪ B(모객 충족) ∪ C(여행사 시그널). <strong>메이저 3사 평균 76%</strong>. 운영자 수동 처리는 평균 26%로 축소.
     </div>
   </div>
 
@@ -371,15 +375,15 @@
     </div>
 
     <div class="insight-box">
-      <div class="punch">자동 매핑 가능 영역 = 60.1% / 메이저 3사 모두 활용 가능 / B(모객 충족)가 압도적 핵심 동인</div>
+      <div class="punch">A=501건 대상 / 73.7% 자동 매핑 / 메이저 3사 평균 76%(하나 86.8% · 노랑 78.7% · 모두 63.0%) / B가 압도적 동인</div>
       <h3>📊 데이터가 말해주는 6가지</h3>
       <ol>
-        <li><strong>A ∪ B ∪ C = 60.1% (1,198 / 1,992)</strong> — 자동 출발확정 가능 영역이 절반 이상. 운영자 수동 부담 대폭 경감.</li>
-        <li><strong>B (모객 인원 충족)이 가장 큰 동인 — 52.6%</strong> — booked_seats ≥ threshold_for_departure가 단일 변수로 가장 강력. 메이저 3사도 모두 활용 가능.</li>
-        <li><strong>메이저 3사 자동화 가능</strong> — 하나투어 63.4% / 모두투어 54.9% / 노랑풍선 64.3%. v1 분석 결론("자동화 불가")은 매칭 키 오류였음.</li>
-        <li><strong>온라인투어(여기어때)만 C 시그널 보유 — 31건</strong> — E-Ticket 발송완료가 진짜 출발확정 시그널 역할. 다만 A∪B만으로도 메이저 3사 커버 가능.</li>
-        <li><strong>AIRTEL 9.8% / PACKAGE 89.8%</strong> — AIRTEL은 인원 무관(2인 이상이면 출발 가능)이라 결제완료=출발확정으로 자동 매핑 가능. PACKAGE는 threshold 기준.</li>
-        <li><strong>예약완료(A) 단독으로는 약함 — 25.2%</strong> — A∩B 같은 조합이 더 강력. 하지만 OR 관계로 B 단독으로도 자동화 가능.</li>
+        <li><strong>A 중 자동 매핑 가능 = 73.7% (369 / 501)</strong> — 출발대기 진입 후보(A)의 4분의 3이 시스템 자동 처리 가능. 운영자 수동 부담 26%로 축소.</li>
+        <li><strong>B(모객 인원 충족)이 압도적 핵심 동인 — A 대비 71.3%</strong> — booked_seats ≥ threshold_for_departure가 단일 변수로 가장 강력. PACKAGE 상품의 자동화 동력.</li>
+        <li><strong>메이저 3사 자동화 가능</strong> — 하나투어 86.8% / 노랑풍선 78.7% / 모두투어 63.0%. ts_reservation_order.package_code 경유 매칭 후 99% 조인 성공.</li>
+        <li><strong>C(시그널)은 온라인투어 단독 9건</strong> — A∩C가 적지만 보조 시그널로 가치 있음. E-Ticket 발송완료가 진짜 출발확정 신호.</li>
+        <li><strong>AIRTEL은 100% 자동 매핑</strong> — 인원 무관(2인 이상이면 출발) 룰이라 A∩AIRTEL=59건은 별도 조건 없이 자동 처리 가능. 에어텔닷컴 케이스 자동화율 100%.</li>
+        <li><strong>나머지 26.3%(132건)는 운영자 수동 영역</strong> — 주로 PACKAGE 중 모객 미달 + 시그널 없는 케이스. D-7 알림 + 운영자 [출발확정 처리] 액션 룰 필요.</li>
       </ol>
     </div>
   </div>
