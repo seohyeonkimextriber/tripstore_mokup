@@ -1,0 +1,499 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<title>출발확정 정책 — A 방향 (sub-flag) 채택</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: -apple-system, BlinkMacSystemFont, 'Pretendard', sans-serif; background: #fafbfc; color: #1a1a1a; font-size: 14px; line-height: 1.6; }
+
+  /* ===== HERO ===== */
+  .hero { background: linear-gradient(135deg, #064e3b 0%, #15803d 100%); color: #fff; padding: 44px 32px; }
+  .hero-inner { max-width: 1200px; margin: 0 auto; }
+  .hero .tag { display: inline-flex; align-items: center; gap: 8px; background: rgba(255,255,255,0.18); padding: 5px 14px; border-radius: 999px; font-size: 11px; font-weight: 700; margin-bottom: 16px; }
+  .hero .tag .dot { width: 6px; height: 6px; border-radius: 50%; background: #fde68a; }
+  .hero h1 { font-size: 28px; font-weight: 800; margin-bottom: 8px; letter-spacing: -0.3px; }
+  .hero .sub { font-size: 14px; opacity: 0.92; max-width: 820px; line-height: 1.7; }
+  .hero .meta { margin-top: 14px; display: flex; gap: 18px; font-size: 11px; opacity: 0.75; }
+
+  .container { max-width: 1200px; margin: 0 auto; padding: 32px; }
+
+  /* ===== DECISION BOX ===== */
+  .decision-box { background: linear-gradient(135deg, #f0fdf4 0%, #bbf7d0 100%); border: 2px solid #16a34a; border-radius: 14px; padding: 22px 26px; margin-bottom: 18px; }
+  .decision-box .label { font-size: 10px; font-weight: 800; color: #15803d; letter-spacing: 1.5px; margin-bottom: 6px; }
+  .decision-box h2 { font-size: 22px; font-weight: 800; color: #14532d; margin-bottom: 8px; letter-spacing: -0.3px; }
+  .decision-box p { font-size: 14px; color: #14532d; line-height: 1.7; }
+  .decision-box strong { background: #fff; padding: 1px 6px; border-radius: 3px; }
+
+  /* ===== SECTION ===== */
+  .section { background: #fff; border-radius: 14px; padding: 28px 32px; margin-bottom: 18px; box-shadow: 0 1px 3px rgba(0,0,0,0.04); }
+  .section-head { margin-bottom: 22px; display: flex; align-items: center; gap: 14px; }
+  .section-num { background: #15803d; color: #fff; width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 14px; flex-shrink: 0; }
+  .section-head h2 { font-size: 20px; font-weight: 800; letter-spacing: -0.3px; flex: 1; }
+  .section-head .lead { font-size: 11px; color: #64748b; }
+
+  /* ===== STATE FLOW ===== */
+  .flow-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-top: 14px; }
+  .flow-lane { padding: 18px 20px; border-radius: 12px; border: 2px solid; }
+  .flow-lane.auto { background: #f0fdf4; border-color: #16a34a; }
+  .flow-lane.manual { background: #fffbeb; border-color: #f59e0b; }
+  .flow-lane .lane-label { font-size: 10px; font-weight: 800; letter-spacing: 0.5px; margin-bottom: 8px; }
+  .flow-lane.auto .lane-label { color: #15803d; }
+  .flow-lane.manual .lane-label { color: #b45309; }
+  .flow-lane h3 { font-size: 15px; font-weight: 800; margin-bottom: 10px; }
+  .flow-track { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
+  .flow-node { background: #fff; border: 2px solid #e2e8f0; border-radius: 8px; padding: 8px 10px; font-size: 11px; font-weight: 700; flex: 1; min-width: 80px; text-align: center; line-height: 1.3; }
+  .flow-node.start { border-color: #f59e0b; }
+  .flow-node.confirm { border-color: #16a34a; background: #f0fdf4; }
+  .flow-node.unconfirm { border-color: #cbd5e1; }
+  .flow-node.done { border-color: #2563eb; background: #eff6ff; }
+  .flow-node .badge { display: inline-block; font-size: 9px; padding: 1px 5px; border-radius: 3px; margin-top: 3px; font-weight: 800; }
+  .flow-node .badge.on { background: #16a34a; color: #fff; }
+  .flow-node .badge.off { background: #94a3b8; color: #fff; }
+  .flow-arrow { color: #94a3b8; font-weight: 800; font-size: 14px; }
+
+  /* ===== 4-TRACK ===== */
+  .tracks { display: grid; grid-template-columns: repeat(5, 1fr); gap: 10px; }
+  .track-card { padding: 16px 18px; border-radius: 10px; border: 2px solid; }
+  .track-card.t1 { background: #fff7ed; border-color: #f59e0b; }
+  .track-card.t2 { background: #eff6ff; border-color: #2563eb; }
+  .track-card.t3 { background: #f3e8ff; border-color: #8b5cf6; }
+  .track-card.t4 { background: #fef3c7; border-color: #d97706; }
+  .track-card.t5 { background: #f1f5f9; border-color: #64748b; }
+  .track-card .tnum { display: inline-block; padding: 2px 8px; border-radius: 999px; font-size: 9px; font-weight: 800; letter-spacing: 0.5px; color: #fff; margin-bottom: 8px; }
+  .track-card.t1 .tnum { background: #f59e0b; }
+  .track-card.t2 .tnum { background: #2563eb; }
+  .track-card.t3 .tnum { background: #8b5cf6; }
+  .track-card.t4 .tnum { background: #d97706; }
+  .track-card.t5 .tnum { background: #64748b; }
+  .track-card h3 { font-size: 13px; font-weight: 800; margin-bottom: 6px; letter-spacing: -0.2px; }
+  .track-card .tdesc { font-size: 11px; color: #475569; line-height: 1.6; }
+  .track-card .timpact { margin-top: 8px; padding: 4px 8px; background: rgba(255,255,255,0.6); border-radius: 4px; font-size: 10px; font-weight: 700; }
+
+  /* ===== CUSTOMER SCREEN ===== */
+  .customer-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+  .customer-card { background: #fafbfc; border: 1px solid #e2e8f0; border-radius: 12px; padding: 22px 24px; }
+  .customer-card .cs-label { font-size: 11px; font-weight: 800; letter-spacing: 0.5px; margin-bottom: 12px; }
+  .customer-card.confirmed { border-color: #16a34a; }
+  .customer-card.confirmed .cs-label { color: #15803d; }
+  .customer-card.unconfirmed { border-color: #f59e0b; }
+  .customer-card.unconfirmed .cs-label { color: #b45309; }
+  .cs-phone { background: #fff; border-radius: 14px; padding: 20px; box-shadow: 0 4px 12px rgba(0,0,0,0.06); }
+  .cs-status { display: flex; justify-content: space-between; align-items: center; padding: 12px 0; border-bottom: 1px solid #f1f5f9; margin-bottom: 14px; }
+  .cs-status .cs-st-label { font-size: 12px; color: #64748b; font-weight: 700; }
+  .cs-status .cs-badge { display: inline-flex; align-items: center; gap: 6px; padding: 5px 12px; border-radius: 999px; font-weight: 800; font-size: 13px; }
+  .cs-badge.confirmed { background: #dcfce7; color: #15803d; }
+  .cs-badge.unconfirmed { background: #fef3c7; color: #b45309; }
+  .cs-step { display: flex; align-items: center; gap: 10px; padding: 8px 0; }
+  .cs-step .cs-num { width: 26px; height: 26px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 12px; flex-shrink: 0; }
+  .cs-step.done .cs-num { background: #16a34a; color: #fff; }
+  .cs-step.current .cs-num { background: #f59e0b; color: #fff; }
+  .cs-step.pending .cs-num { background: #e2e8f0; color: #94a3b8; }
+  .cs-step .cs-info { flex: 1; }
+  .cs-step .cs-name { font-size: 13px; font-weight: 700; color: #0f172a; }
+  .cs-step .cs-msg { font-size: 11px; color: #64748b; margin-top: 2px; line-height: 1.5; }
+  .cs-step.pending .cs-name { color: #94a3b8; }
+  .cs-line { width: 2px; height: 14px; background: #e2e8f0; margin-left: 12px; }
+  .cs-line.done { background: #16a34a; }
+
+  .cs-feature-note { margin-top: 14px; padding: 10px 12px; border-radius: 6px; font-size: 11px; line-height: 1.6; }
+  .cs-feature-note.confirmed { background: #f0fdf4; color: #15803d; }
+  .cs-feature-note.unconfirmed { background: #fffbeb; color: #b45309; }
+
+  /* ===== PARTNER UI ===== */
+  .partner-ui { background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 12px; padding: 20px; }
+  .partner-ui .ui-title { font-size: 13px; font-weight: 800; margin-bottom: 12px; color: #1e293b; }
+  .partner-modal { background: #fff; border-radius: 10px; padding: 18px 20px; box-shadow: 0 2px 8px rgba(0,0,0,0.04); border: 1px solid #e2e8f0; }
+  .partner-modal .pm-head { font-size: 14px; font-weight: 800; margin-bottom: 12px; padding-bottom: 10px; border-bottom: 1px solid #f1f5f9; }
+  .pm-check { display: flex; align-items: flex-start; gap: 10px; padding: 10px 12px; background: #fafbfc; border-radius: 6px; margin-bottom: 6px; border: 1px solid #e2e8f0; }
+  .pm-check.new { background: #fef3c7; border-color: #f59e0b; }
+  .pm-check input[type="checkbox"] { margin-top: 2px; }
+  .pm-check .pm-name { font-size: 12px; font-weight: 700; }
+  .pm-check .pm-desc { font-size: 11px; color: #64748b; margin-top: 2px; line-height: 1.5; }
+  .pm-check.new .pm-name { color: #b45309; }
+  .pm-actions { display: flex; gap: 8px; margin-top: 14px; justify-content: flex-end; }
+  .btn-mock { padding: 8px 16px; border-radius: 6px; font-size: 12px; font-weight: 700; cursor: pointer; border: 1px solid; }
+  .btn-mock.primary { background: #16a34a; color: #fff; border-color: #16a34a; }
+  .btn-mock.outline { background: #fff; color: #475569; border-color: #cbd5e1; }
+
+  /* ===== PERIOD POLICY ===== */
+  .period-box { background: linear-gradient(135deg, #fffbeb 0%, #fef3c7 100%); border-left: 5px solid #f59e0b; border-radius: 0 12px 12px 0; padding: 22px 26px; }
+  .period-box .label { font-size: 10px; font-weight: 800; color: #92400e; letter-spacing: 1.5px; margin-bottom: 6px; }
+  .period-box h3 { font-size: 18px; font-weight: 800; color: #78350f; margin-bottom: 10px; }
+  .period-box p { font-size: 13px; color: #78350f; line-height: 1.7; }
+  .period-options { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-top: 14px; }
+  .period-pick { background: #fff; border: 2px dashed #f59e0b; border-radius: 8px; padding: 14px; text-align: center; cursor: pointer; transition: all 0.15s; }
+  .period-pick:hover { transform: translateY(-2px); }
+  .period-pick .pn { font-size: 22px; font-weight: 800; color: #b45309; }
+  .period-pick .pl { font-size: 11px; color: #78350f; margin-top: 4px; font-weight: 600; }
+  .period-pick.recommended { background: #fef3c7; border-style: solid; }
+
+  /* ===== PARTNER ACTION TAB ===== */
+  .ptab-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+  .ptab-card { background: #fafbfc; border: 1px solid #e2e8f0; border-radius: 12px; padding: 18px 22px; }
+  .ptab-card h4 { font-size: 13px; font-weight: 800; margin-bottom: 10px; }
+  .ptab-list-row { display: flex; align-items: center; gap: 10px; padding: 8px 0; border-bottom: 1px solid #f1f5f9; }
+  .ptab-list-row .pr-name { flex: 1; font-size: 12px; }
+  .ptab-list-row .pr-status { font-size: 10px; padding: 2px 6px; border-radius: 3px; font-weight: 700; }
+  .pr-status.confirmed { background: #dcfce7; color: #166534; }
+  .pr-status.unconfirmed { background: #fef3c7; color: #92400e; }
+  .ptab-list-row button { padding: 4px 10px; border-radius: 4px; font-size: 10px; font-weight: 700; cursor: pointer; border: 1px solid; background: #16a34a; color: #fff; border-color: #16a34a; }
+
+  /* ===== TBD BOX ===== */
+  .tbd-box { background: linear-gradient(135deg, #fef2f2 0%, #fecaca 100%); border: 2px solid #dc2626; border-radius: 12px; padding: 20px 24px; }
+  .tbd-box .label { font-size: 10px; font-weight: 800; color: #991b1b; letter-spacing: 1.5px; margin-bottom: 6px; }
+  .tbd-box h3 { font-size: 16px; font-weight: 800; color: #7f1d1d; margin-bottom: 8px; }
+  .tbd-box ul { padding-left: 22px; margin-top: 8px; }
+  .tbd-box li { padding: 4px 0; font-size: 12px; color: #7f1d1d; line-height: 1.7; }
+  .tbd-box li strong { background: #fff; padding: 1px 5px; border-radius: 3px; }
+</style>
+</head>
+<body>
+
+<!-- ==================== HERO ==================== -->
+<div class="hero">
+  <div class="hero-inner">
+    <div class="tag"><span class="dot"></span> 정책 최종안 · A 방향 채택</div>
+    <h1>출발확정 정책 — sub-flag 방식</h1>
+    <p class="sub">"출발확정"을 별도 상태값이 아닌 <strong>출발대기의 sub-flag</strong>로 처리. 자동 매핑 + 운영자 수동 + 자연 흐름의 4-Track 정책.</p>
+    <div class="meta">
+      <span>📅 2026-06-17</span>
+      <span>👤 PM 김서현</span>
+      <span>🎯 A 방향 (사용자 결정)</span>
+    </div>
+  </div>
+</div>
+
+<div class="container">
+
+  <!-- ==================== 결정 박스 ==================== -->
+  <div class="decision-box">
+    <div class="label">✅ 최종 결정</div>
+    <h2>출발확정 = 출발대기의 sub-flag (별도 상태값 X)</h2>
+    <p>상태값은 <strong>예약접수 → 예약완료 → 출발대기 → 출발완료</strong> 4단계 유지. 출발확정 여부는 <strong>출발대기 안의 boolean flag</strong>로 처리. 자동 매핑 안 된 건도 자연스럽게 출발완료로 흐름.</p>
+  </div>
+
+  <!-- ==================== 1. 흐름 비교 ==================== -->
+  <div class="section">
+    <div class="section-head">
+      <div class="section-num">1</div>
+      <h2>두 가지 흐름</h2>
+      <div class="lead">자동 매핑 vs 자연 흐름</div>
+    </div>
+
+    <div class="flow-2">
+      <div class="flow-lane auto">
+        <div class="lane-label">🤖 자동 매핑 흐름 (70%)</div>
+        <h3>B/C/AIRTEL 충족 → 자동 확정</h3>
+        <div class="flow-track">
+          <div class="flow-node start">예약접수</div>
+          <div class="flow-arrow">▶</div>
+          <div class="flow-node">예약완료</div>
+          <div class="flow-arrow">▶</div>
+          <div class="flow-node confirm">출발대기<br><span class="badge on">확정 ✅</span></div>
+          <div class="flow-arrow">▶</div>
+          <div class="flow-node done">출발완료</div>
+        </div>
+      </div>
+      <div class="flow-lane manual">
+        <div class="lane-label">🌊 자연 흐름 (30%)</div>
+        <h3>자동 매핑 X → 미확정 그대로</h3>
+        <div class="flow-track">
+          <div class="flow-node start">예약접수</div>
+          <div class="flow-arrow">▶</div>
+          <div class="flow-node">예약완료</div>
+          <div class="flow-arrow">▶</div>
+          <div class="flow-node unconfirm">출발대기<br><span class="badge off">미확정</span></div>
+          <div class="flow-arrow">▶</div>
+          <div class="flow-node done">출발완료</div>
+        </div>
+        <div style="margin-top:10px;font-size:11px;color:#78350f;line-height:1.6;">
+          💡 운영자가 필요 시 [확정 처리] 가능. 안 해도 출발일 도래 시 자연스럽게 출발완료로.
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ==================== 2. 5-Track 룰 ==================== -->
+  <div class="section">
+    <div class="section-head">
+      <div class="section-num">2</div>
+      <h2>5-Track 정책 룰</h2>
+      <div class="lead">출발확정 sub-flag ON 조건</div>
+    </div>
+
+    <div class="tracks">
+      <div class="track-card t1">
+        <span class="tnum">TRACK 1</span>
+        <h3>AIRTEL + 결제완료</h3>
+        <div class="tdesc">에어텔/자유여행 = 인원 무관 자동 확정</div>
+        <div class="timpact">📊 220건 (11.3%)</div>
+      </div>
+      <div class="track-card t2">
+        <span class="tnum">TRACK 2 ⭐</span>
+        <h3>PACKAGE + 모객 충족</h3>
+        <div class="tdesc">booked ≥ threshold 시 자동 확정 (핵심)</div>
+        <div class="timpact">📊 1,299건 (66.8%)</div>
+      </div>
+      <div class="track-card t3">
+        <span class="tnum">TRACK 3</span>
+        <h3>여행사 시그널 (3사)</h3>
+        <div class="tdesc">온라인투어 + 내일투어 + 보물섬투어</div>
+        <div class="timpact">📊 27건 (1.4%)</div>
+      </div>
+      <div class="track-card t4">
+        <span class="tnum">TRACK 4 🆕</span>
+        <h3>여행사 담당자 수동</h3>
+        <div class="tdesc">파트너스에서 [확정 처리] 버튼 클릭</div>
+        <div class="timpact">📊 전세기·단독출발 등</div>
+      </div>
+      <div class="track-card t5">
+        <span class="tnum">TRACK 5 🆕</span>
+        <h3>자연 흐름</h3>
+        <div class="tdesc">위 4개 미해당 → 미확정 그대로 출발완료까지</div>
+        <div class="timpact">📊 ~30% (운영 부담 X)</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ==================== 3. 고객 화면 시안 ==================== -->
+  <div class="section">
+    <div class="section-head">
+      <div class="section-num">3</div>
+      <h2>고객 화면 시안 — 확정 여부에 따라 다르게</h2>
+      <div class="lead">출발 확정 vs 미확정 안내 차별화</div>
+    </div>
+
+    <div class="customer-grid">
+      <!-- 확정 ✅ -->
+      <div class="customer-card confirmed">
+        <div class="cs-label">CASE A · 출발확정 ✅ (70%)</div>
+        <div class="cs-phone">
+          <div class="cs-status">
+            <span class="cs-st-label">예약 상태</span>
+            <span class="cs-badge confirmed">🎉 출발 확정</span>
+          </div>
+          <div class="cs-step done">
+            <div class="cs-num">✓</div>
+            <div class="cs-info">
+              <div class="cs-name">예약 접수</div>
+              <div class="cs-msg">상품 확인 완료</div>
+            </div>
+          </div>
+          <div class="cs-line done"></div>
+          <div class="cs-step done">
+            <div class="cs-num">✓</div>
+            <div class="cs-info">
+              <div class="cs-name">예약 완료</div>
+              <div class="cs-msg">결제 완료 · 여행사 확정</div>
+            </div>
+          </div>
+          <div class="cs-line done"></div>
+          <div class="cs-step current">
+            <div class="cs-num">★</div>
+            <div class="cs-info">
+              <div class="cs-name" style="color:#15803d;">출발 확정 🎉</div>
+              <div class="cs-msg" style="color:#15803d;font-weight:600;">출발이 확정되었어요! 즐거운 여행 되세요.</div>
+            </div>
+          </div>
+        </div>
+        <div class="cs-feature-note confirmed">
+          💡 출발 확정 안내 + 위약금 룰 적용 시작 + PNR/바우처 발송 임박 안내
+        </div>
+      </div>
+
+      <!-- 미확정 -->
+      <div class="customer-card unconfirmed">
+        <div class="cs-label">CASE B · 미확정 (30%)</div>
+        <div class="cs-phone">
+          <div class="cs-status">
+            <span class="cs-st-label">예약 상태</span>
+            <span class="cs-badge unconfirmed">⏳ 출발 준비 중</span>
+          </div>
+          <div class="cs-step done">
+            <div class="cs-num">✓</div>
+            <div class="cs-info">
+              <div class="cs-name">예약 접수</div>
+              <div class="cs-msg">상품 확인 완료</div>
+            </div>
+          </div>
+          <div class="cs-line done"></div>
+          <div class="cs-step done">
+            <div class="cs-num">✓</div>
+            <div class="cs-info">
+              <div class="cs-name">예약 완료</div>
+              <div class="cs-msg">결제 완료 · 여행사 확정</div>
+            </div>
+          </div>
+          <div class="cs-line"></div>
+          <div class="cs-step current">
+            <div class="cs-num">●</div>
+            <div class="cs-info">
+              <div class="cs-name" style="color:#b45309;">출발 준비 중</div>
+              <div class="cs-msg">곧 출발 안내드릴게요. 모객 진행 중 입니다.</div>
+            </div>
+          </div>
+        </div>
+        <div class="cs-feature-note unconfirmed">
+          💡 "출발 준비 중" 안내 (확정 미명시) + 모객 진행 표시 가능 옵션
+        </div>
+      </div>
+    </div>
+
+    <div style="margin-top:14px;padding:12px 16px;background:#eff6ff;border-radius:8px;font-size:12px;color:#1e40af;line-height:1.6;">
+      📌 <strong>UX 핵심</strong> · 확정 = "출발 확정 🎉" (안심 메시지) / 미확정 = "출발 준비 중" (자연스러운 안내). 미확정 → 확정 전환 시 푸시 알림 가능.
+    </div>
+  </div>
+
+  <!-- ==================== 4. 파트너스 UI ==================== -->
+  <div class="section">
+    <div class="section-head">
+      <div class="section-num">4</div>
+      <h2>파트너스 UI 시안 — 여행사 담당자 액션</h2>
+      <div class="lead">TRACK 4 (수동 확정) 시각화</div>
+    </div>
+
+    <div class="ptab-grid">
+      <!-- 예약완료 처리 모달 -->
+      <div class="ptab-card">
+        <h4>A. 예약완료 처리 모달 (옵션 추가)</h4>
+        <div class="partner-modal">
+          <div class="pm-head">예약완료 처리</div>
+          <div class="pm-check">
+            <input type="checkbox">
+            <div>
+              <div class="pm-name">고객 확인 완료</div>
+              <div class="pm-desc">통화 또는 SMS로 출발 의사 확인</div>
+            </div>
+          </div>
+          <div class="pm-check">
+            <input type="checkbox">
+            <div>
+              <div class="pm-name">상품 출발 가능 확인 완료</div>
+              <div class="pm-desc">모객·항공·객실 확정</div>
+            </div>
+          </div>
+          <div class="pm-check new">
+            <input type="checkbox">
+            <div>
+              <div class="pm-name">🆕 결제완료 시 자동 출발확정 처리</div>
+              <div class="pm-desc">전세기·단독출발·미리 확정된 상품에 체크. 결제완료 떨어지면 출발대기 진입 즉시 확정 ✅</div>
+            </div>
+          </div>
+          <div class="pm-actions">
+            <button class="btn-mock outline">취소</button>
+            <button class="btn-mock primary">예약완료 처리</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- 출발대기 탭 액션 -->
+      <div class="ptab-card">
+        <h4>B. 출발대기 탭 — 확정 처리 액션</h4>
+        <div style="background:#fff;border-radius:8px;padding:14px;border:1px solid #e2e8f0;">
+          <div style="font-size:12px;font-weight:700;margin-bottom:10px;display:flex;justify-content:space-between;">
+            <span>출발대기 · 미확정 8건</span>
+            <span style="font-size:11px;color:#64748b;">일괄 처리 가능</span>
+          </div>
+          <div class="ptab-list-row">
+            <div class="pr-name">RB202607-1610748 김태이</div>
+            <span class="pr-status unconfirmed">미확정</span>
+            <button>확정 처리</button>
+          </div>
+          <div class="ptab-list-row">
+            <div class="pr-name">RB202607-1611002 이수진</div>
+            <span class="pr-status unconfirmed">미확정</span>
+            <button>확정 처리</button>
+          </div>
+          <div class="ptab-list-row" style="border-bottom:none;">
+            <div class="pr-name">RB202608-1612503 박지훈</div>
+            <span class="pr-status confirmed">확정 ✅</span>
+            <span style="font-size:10px;color:#64748b;">자동</span>
+          </div>
+        </div>
+        <div style="margin-top:10px;padding:10px 12px;background:#fffbeb;border-radius:6px;font-size:11px;color:#78350f;line-height:1.6;">
+          💡 자동 매핑 안 된 건도 출발대기에 자연스럽게 진입. 여행사 담당자가 필요 시 [확정 처리] 클릭 가능.
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ==================== 5. 기간 정책 (결정 필요) ==================== -->
+  <div class="section">
+    <div class="section-head">
+      <div class="section-num">5</div>
+      <h2>기간 정책 — 결정 필요 사항</h2>
+      <div class="lead">출발일 임박 시 자동 확정 액션</div>
+    </div>
+
+    <div class="period-box">
+      <div class="label">⚠️ 정책 결정 필요</div>
+      <h3>패키지 + 모객 충족이어도 D-N 시점에 자동 확정 액션이 필요할까?</h3>
+      <p>모객 충족 자동 매핑은 출발일에 상관없이 동작합니다. 하지만 운영 현실상 <strong>D-14 ~ D-20 시점에 출발 결정이 사실상 확정</strong>되는 경우가 많아, 그 시점에 자동 [확정 처리] 액션을 트리거하는 룰이 필요합니다.</p>
+
+      <div style="margin-top:14px;background:#fff;border-radius:8px;padding:14px 16px;">
+        <div style="font-size:12px;font-weight:800;color:#78350f;margin-bottom:10px;">🎯 검토 옵션</div>
+        <div style="font-size:12px;color:#78350f;line-height:1.7;">
+          <strong>케이스 1.</strong> 모객 충족(B) → 즉시 자동 확정 (지금 안)<br>
+          <strong>케이스 2.</strong> 모객 충족(B) + 출발일 D-N 이내 → 자동 확정 (시한 기반)<br>
+          <strong>케이스 3.</strong> 모객 충족 안 됐어도 출발일 D-N 시점에 강제 확정 액션 알림
+        </div>
+      </div>
+
+      <div style="margin-top:14px;font-size:12px;color:#78350f;font-weight:700;">D-N 기준 후보:</div>
+      <div class="period-options">
+        <div class="period-pick">
+          <div class="pn">D-7</div>
+          <div class="pl">출발 1주 전</div>
+        </div>
+        <div class="period-pick recommended">
+          <div class="pn">D-14</div>
+          <div class="pl">출발 2주 전 (사용자 제시)</div>
+        </div>
+        <div class="period-pick recommended">
+          <div class="pn">D-20</div>
+          <div class="pl">출발 3주 전 (사용자 제시)</div>
+        </div>
+      </div>
+
+      <div style="margin-top:14px;padding:12px 16px;background:#fff;border-radius:6px;font-size:12px;color:#78350f;line-height:1.7;">
+        <strong>💭 추가 검토 포인트</strong><br>
+        ① <strong>여행사별 다른 기준</strong> 가능할까? (하나투어 D-14 vs 패키지 D-20 등)<br>
+        ② <strong>모객 미달 행사</strong>는 D-N 시점에 폐쇄/병합 결정 알림과 함께 처리<br>
+        ③ <strong>전세기·단독출발</strong>은 여행사 수동 [확정 가능] 옵션으로 처리 (TRACK 4)
+      </div>
+    </div>
+  </div>
+
+  <!-- ==================== 6. TBD ==================== -->
+  <div class="section">
+    <div class="section-head">
+      <div class="section-num">6</div>
+      <h2>TBD · 정리 필요한 항목</h2>
+      <div class="lead">영업실·운영팀 협의 후 결정</div>
+    </div>
+
+    <div class="tbd-box">
+      <div class="label">📌 결정 대기</div>
+      <h3>다음 미팅에서 합의할 항목</h3>
+      <ul>
+        <li><strong>기간 정책 D-N 기준</strong> — D-7 / D-14 / D-20 중 (사용자 제안: D-14~20)</li>
+        <li><strong>여행사별 차등 기준</strong> 가능 여부 — 한 기준으로 통일 vs 여행사별 협의</li>
+        <li><strong>모객 미달 시 처리</strong> — D-N 시점에 폐쇄/병합 알림 자동화</li>
+        <li><strong>고객 알림 정책</strong> — 미확정 → 확정 전환 시 푸시/SMS 발송 여부</li>
+        <li><strong>고객 화면 라벨</strong> — "출발 확정" / "출발 준비 중" 문구 컨펌</li>
+        <li><strong>파트너스 UI 권한</strong> — 여행사 담당자가 수동 [확정 처리] 가능한 권한 부여</li>
+        <li><strong>메이저 3사 시그널 추가 협의</strong> — 60% 자동 매핑으로 일단 시작 후 영업실 후속</li>
+        <li><strong>노션 매핑 정정</strong> — 내일투어 `예약확정` / 보물섬투어 `확정` → 출발확정</li>
+      </ul>
+    </div>
+  </div>
+
+  <div style="text-align:center;padding:28px 0;font-size:11px;color:#94a3b8;">
+    트립스토어 PM · 2026-06-17 · 영업실·운영팀 결정 후 개발 일정 합의
+  </div>
+
+</div>
+
+</body>
+</html>
