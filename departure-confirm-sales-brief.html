@@ -1,0 +1,416 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<title>출발확정 도입 — 영업실 브리프</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: -apple-system, BlinkMacSystemFont, 'Pretendard', sans-serif; background: #fafbfc; color: #1a1a1a; font-size: 14px; line-height: 1.6; }
+
+  /* ===== HERO ===== */
+  .hero { background: linear-gradient(135deg, #0d1b2a 0%, #1a3957 100%); color: #fff; padding: 44px 32px; }
+  .hero-inner { max-width: 1200px; margin: 0 auto; }
+  .hero .tag { display: inline-flex; align-items: center; gap: 8px; background: rgba(255,255,255,0.15); padding: 5px 14px; border-radius: 999px; font-size: 11px; font-weight: 700; margin-bottom: 16px; letter-spacing: 0.5px; }
+  .hero .tag .dot { width: 6px; height: 6px; border-radius: 50%; background: #4ade80; }
+  .hero h1 { font-size: 32px; font-weight: 800; margin-bottom: 8px; letter-spacing: -0.5px; }
+  .hero .sub { font-size: 15px; opacity: 0.92; max-width: 840px; line-height: 1.7; }
+  .hero .meta { margin-top: 14px; display: flex; gap: 18px; font-size: 11px; opacity: 0.75; }
+
+  .container { max-width: 1200px; margin: 0 auto; padding: 32px; }
+
+  /* ===== TL;DR ===== */
+  .tldr { background: linear-gradient(135deg, #f0fdf4 0%, #bbf7d0 100%); border: 2px solid #16a34a; border-radius: 14px; padding: 24px 28px; margin-bottom: 20px; display: grid; grid-template-columns: auto 1fr; gap: 24px; align-items: center; }
+  .tldr .tldr-num { font-size: 80px; font-weight: 900; color: #15803d; font-family: 'SF Mono', Consolas, monospace; line-height: 1; letter-spacing: -3px; }
+  .tldr .tldr-num .pct { font-size: 36px; }
+  .tldr .label { font-size: 10px; font-weight: 800; color: #15803d; letter-spacing: 1.5px; margin-bottom: 6px; }
+  .tldr h2 { font-size: 22px; font-weight: 800; color: #14532d; margin-bottom: 8px; letter-spacing: -0.3px; }
+  .tldr p { font-size: 14px; color: #14532d; line-height: 1.7; }
+  .tldr strong { background: #fff; padding: 1px 6px; border-radius: 3px; }
+
+  /* ===== SECTION ===== */
+  .section { background: #fff; border-radius: 14px; padding: 26px 32px; margin-bottom: 16px; box-shadow: 0 1px 3px rgba(0,0,0,0.04); }
+  .section-head { margin-bottom: 18px; display: flex; align-items: center; gap: 14px; }
+  .section-num { background: #2563eb; color: #fff; width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 14px; flex-shrink: 0; }
+  .section-head h2 { font-size: 19px; font-weight: 800; letter-spacing: -0.3px; flex: 1; }
+  .section-head .lead { font-size: 11px; color: #64748b; }
+
+  /* ===== STAT GRID ===== */
+  .stat-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; }
+  .stat-card { background: #fff; border: 1px solid #e2e8f0; border-radius: 10px; padding: 14px 16px; }
+  .stat-card .stat-label { font-size: 10px; font-weight: 700; color: #64748b; letter-spacing: 0.3px; }
+  .stat-card .stat-num { font-size: 24px; font-weight: 800; font-family: 'SF Mono', Consolas, monospace; line-height: 1.1; margin-top: 4px; letter-spacing: -0.5px; }
+  .stat-card .stat-sub { font-size: 10px; color: #94a3b8; margin-top: 4px; }
+  .stat-card.success { background: #f0fdf4; border-color: #16a34a; }
+  .stat-card.success .stat-num { color: #15803d; }
+  .stat-card.primary { background: #eff6ff; border-color: #2563eb; }
+  .stat-card.primary .stat-num { color: #1e40af; }
+  .stat-card.warn { background: #fffbeb; border-color: #f59e0b; }
+  .stat-card.warn .stat-num { color: #b45309; }
+
+  /* ===== AGENCY MINI TABLE ===== */
+  table.mini { width: 100%; border-collapse: collapse; font-size: 12px; margin-top: 12px; }
+  table.mini th { padding: 8px 10px; background: #f8fafc; text-align: left; font-size: 11px; font-weight: 700; color: #64748b; border-bottom: 1px solid #e2e8f0; }
+  table.mini td { padding: 8px 10px; border-bottom: 1px solid #f1f5f9; }
+  table.mini .num { font-family: 'SF Mono', Consolas, monospace; font-weight: 600; text-align: right; }
+  table.mini .pct-cell { font-weight: 800; color: #15803d; text-align: right; }
+  table.mini .bar-bg { background: #e2e8f0; height: 10px; border-radius: 999px; overflow: hidden; margin-top: 2px; }
+  table.mini .bar-fill { height: 100%; background: linear-gradient(90deg, #16a34a, #4ade80); border-radius: 999px; }
+  table.mini tr.major td:first-child::after { content: " ⭐"; }
+
+  /* ===== RULES ===== */
+  .rules { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
+  .rule-card { padding: 18px 20px; border-radius: 12px; border: 2px solid; }
+  .rule-card.r1 { background: #fffbeb; border-color: #f59e0b; }
+  .rule-card.r2 { background: #eff6ff; border-color: #2563eb; }
+  .rule-card.r3 { background: #f3e8ff; border-color: #8b5cf6; }
+  .rule-card .rtag { display: inline-block; padding: 3px 10px; border-radius: 999px; font-size: 10px; font-weight: 800; letter-spacing: 0.5px; margin-bottom: 8px; color: #fff; }
+  .rule-card.r1 .rtag { background: #f59e0b; }
+  .rule-card.r2 .rtag { background: #2563eb; }
+  .rule-card.r3 .rtag { background: #8b5cf6; }
+  .rule-card h3 { font-size: 15px; font-weight: 800; margin-bottom: 6px; }
+  .rule-card.r1 h3 { color: #b45309; }
+  .rule-card.r2 h3 { color: #1e40af; }
+  .rule-card.r3 h3 { color: #6b21a8; }
+  .rule-card .rule-desc { font-size: 11px; color: #475569; margin-bottom: 10px; line-height: 1.6; }
+  .rule-card .rule-cond { font-family: 'SF Mono', Consolas, monospace; font-size: 10px; background: #1e293b; color: #e2e8f0; padding: 8px 10px; border-radius: 6px; line-height: 1.5; }
+  .rule-card .rule-cond .hl { color: #fcd34d; }
+  .rule-card .impact { margin-top: 10px; padding: 6px 10px; background: rgba(255,255,255,0.6); border-radius: 4px; font-size: 11px; font-weight: 700; }
+  .rule-card.r1 .impact { color: #b45309; }
+  .rule-card.r2 .impact { color: #1e40af; }
+  .rule-card.r3 .impact { color: #6b21a8; }
+
+  /* ===== PROBLEM ===== */
+  .problem-mini { background: linear-gradient(135deg, #fef2f2 0%, #fecaca 100%); border: 2px solid #dc2626; border-radius: 12px; padding: 18px 22px; margin-bottom: 16px; }
+  .problem-mini h3 { font-size: 16px; font-weight: 800; color: #7f1d1d; margin-bottom: 6px; }
+  .problem-mini p { font-size: 13px; color: #7f1d1d; line-height: 1.7; }
+
+  /* ===== OPTIONS ===== */
+  .opts { display: grid; grid-template-columns: repeat(5, 1fr); gap: 10px; }
+  .opt { background: #fff; border: 2px solid #e2e8f0; border-radius: 10px; padding: 14px 12px; text-align: center; cursor: pointer; transition: all 0.15s; }
+  .opt:hover { transform: translateY(-2px); box-shadow: 0 4px 12px rgba(0,0,0,0.06); }
+  .opt.recommended { border-color: #2563eb; background: #eff6ff; box-shadow: 0 0 0 4px rgba(37,99,235,0.12); }
+  .opt .ol { font-size: 18px; font-weight: 800; margin-bottom: 4px; }
+  .opt .on { font-size: 13px; font-weight: 800; margin-bottom: 6px; letter-spacing: -0.2px; }
+  .opt .od { font-size: 10px; color: #64748b; line-height: 1.5; min-height: 30px; }
+  .opt .meta-row { display: flex; gap: 4px; flex-wrap: wrap; margin-top: 8px; justify-content: center; }
+  .opt-pill { font-size: 8px; padding: 2px 6px; border-radius: 3px; font-weight: 700; letter-spacing: 0.3px; }
+  .opt-pill.danger { background: #fee2e2; color: #991b1b; }
+  .opt-pill.safe { background: #dcfce7; color: #166534; }
+  .opt-pill.warn { background: #fef3c7; color: #92400e; }
+  .opt-pill.info { background: #dbeafe; color: #1e40af; }
+
+  /* ===== DECISION CTA ===== */
+  .cta { background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%); border: 2px solid #f59e0b; border-radius: 14px; padding: 24px 28px; margin-bottom: 16px; }
+  .cta .label { font-size: 10px; font-weight: 800; color: #92400e; letter-spacing: 1.5px; margin-bottom: 8px; }
+  .cta h3 { font-size: 18px; font-weight: 800; color: #78350f; margin-bottom: 8px; letter-spacing: -0.3px; }
+  .cta p { font-size: 13px; color: #78350f; line-height: 1.7; margin-bottom: 14px; }
+  .cta ol { padding-left: 22px; font-size: 12px; color: #78350f; line-height: 1.8; }
+  .cta ol strong { background: #fff; padding: 1px 5px; border-radius: 3px; }
+
+  /* ===== LINKS ===== */
+  .links { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
+  .link-card { background: #fff; border: 1px solid #e2e8f0; border-radius: 10px; padding: 14px 16px; text-decoration: none; color: inherit; transition: all 0.15s; }
+  .link-card:hover { transform: translateY(-2px); box-shadow: 0 4px 12px rgba(0,0,0,0.06); border-color: #2563eb; }
+  .link-card .lico { font-size: 22px; margin-bottom: 8px; }
+  .link-card .lt { font-size: 12px; font-weight: 800; margin-bottom: 4px; color: #0f172a; }
+  .link-card .ld { font-size: 11px; color: #64748b; line-height: 1.5; }
+
+  /* ===== KEY POINT ===== */
+  .keypoint { background: #fff; border-left: 4px solid #2563eb; border-radius: 0 8px 8px 0; padding: 12px 16px; margin: 10px 0; font-size: 12px; color: #1e3a8a; line-height: 1.6; }
+  .keypoint strong { color: #1e40af; }
+</style>
+</head>
+<body>
+
+<!-- ==================== HERO ==================== -->
+<div class="hero">
+  <div class="hero-inner">
+    <div class="tag"><span class="dot"></span> 영업실 브리프 · 결정 요청 자료</div>
+    <h1>"출발확정" 신규 상태값 도입 검토</h1>
+    <p class="sub">신규 예약 원장에 <strong>"출발확정"</strong> 상태값을 추가할지에 대한 데이터 분석 + 토글 정책 결정 요청. 5월·전체 예약 데이터로 자동 매핑 가능성 검증.</p>
+    <div class="meta">
+      <span>📅 2026-06-17</span>
+      <span>👤 PM 김서현</span>
+      <span>🎯 영업실 결정 필요 · 다음 미팅 안건</span>
+    </div>
+  </div>
+</div>
+
+<div class="container">
+
+  <!-- ==================== TL;DR ==================== -->
+  <div class="tldr">
+    <div>
+      <div class="tldr-num">69<span class="pct">%</span></div>
+    </div>
+    <div>
+      <div class="label">✅ ONE-LINE</div>
+      <h2>예약완료 1,946건 중 1,342건(69%)이 자동 출발확정 가능</h2>
+      <p>현재 예약완료 상태로 남아있는 모든 예약을 대상으로 분석한 결과, <strong>메이저 3사 포함 평균 69% 자동 매핑 가능</strong>. 운영자 수동 부담은 31%로 축소. 단 <strong>"왔다갔다 문제" 해결을 위한 Lock 정책</strong> 결정이 필요합니다.</p>
+    </div>
+  </div>
+
+  <!-- ==================== 1. 분석 요약 ==================== -->
+  <div class="section">
+    <div class="section-head">
+      <div class="section-num">1</div>
+      <h2>예약완료 기반 데이터 분석 요약</h2>
+      <div class="lead">BigQuery 직접 조회 · 2026-06-17 기준</div>
+    </div>
+
+    <div class="stat-grid">
+      <div class="stat-card primary">
+        <div class="stat-label">분모 · 예약완료 전체</div>
+        <div class="stat-num">1,946<span style="font-size:13px;color:#94a3b8;">건</span></div>
+        <div class="stat-sub">현재 status=RESERVATION_CONFIRMATION</div>
+      </div>
+      <div class="stat-card success">
+        <div class="stat-label">자동 매핑 가능</div>
+        <div class="stat-num">1,342<span style="font-size:13px;color:#94a3b8;">건</span></div>
+        <div class="stat-sub">69.0% · AIRTEL ∪ B ∪ C</div>
+      </div>
+      <div class="stat-card warn">
+        <div class="stat-label">B · 모객 인원 충족</div>
+        <div class="stat-num">1,299<span style="font-size:13px;color:#94a3b8;">건</span></div>
+        <div class="stat-sub">66.8% · booked ≥ threshold</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">운영자 수동 영역</div>
+        <div class="stat-num">604<span style="font-size:13px;color:#94a3b8;">건</span></div>
+        <div class="stat-sub">31.0% · 모객 미달 + 시그널 없음</div>
+      </div>
+    </div>
+
+    <h3 style="margin-top:18px;font-size:14px;font-weight:800;">여행사별 자동 매핑 비율 (Top 6)</h3>
+    <table class="mini">
+      <thead>
+        <tr><th style="width:140px;">여행사</th><th style="width:80px;">분모</th><th>자동 매핑 비율</th><th style="width:80px;text-align:right;">건수</th><th style="width:60px;text-align:right;">비율</th></tr>
+      </thead>
+      <tbody>
+        <tr class="major">
+          <td>하나투어</td>
+          <td class="num">408</td>
+          <td><div class="bar-bg"><div class="bar-fill" style="width:82.4%;"></div></div></td>
+          <td class="num">336</td>
+          <td class="pct-cell">82.4%</td>
+        </tr>
+        <tr class="major">
+          <td>노랑풍선</td>
+          <td class="num">383</td>
+          <td><div class="bar-bg"><div class="bar-fill" style="width:66.8%;"></div></div></td>
+          <td class="num">256</td>
+          <td class="pct-cell">66.8%</td>
+        </tr>
+        <tr>
+          <td>참좋은여행</td>
+          <td class="num">376</td>
+          <td><div class="bar-bg"><div class="bar-fill" style="width:64.6%;"></div></div></td>
+          <td class="num">243</td>
+          <td class="pct-cell">64.6%</td>
+        </tr>
+        <tr class="major">
+          <td>모두투어</td>
+          <td class="num">322</td>
+          <td><div class="bar-bg"><div class="bar-fill" style="width:68.6%;"></div></div></td>
+          <td class="num">221</td>
+          <td class="pct-cell">68.6%</td>
+        </tr>
+        <tr>
+          <td>온라인투어 (여기어때)</td>
+          <td class="num">253</td>
+          <td><div class="bar-bg"><div class="bar-fill" style="width:58.9%;"></div></div></td>
+          <td class="num">149</td>
+          <td class="pct-cell">58.9%</td>
+        </tr>
+        <tr>
+          <td>교원투어</td>
+          <td class="num">107</td>
+          <td><div class="bar-bg"><div class="bar-fill" style="width:58.9%;"></div></div></td>
+          <td class="num">63</td>
+          <td class="pct-cell">58.9%</td>
+        </tr>
+        <tr style="font-weight:800;background:#f0fdf4;">
+          <td>전체</td>
+          <td class="num">1,946</td>
+          <td><div class="bar-bg"><div class="bar-fill" style="width:69%;"></div></div></td>
+          <td class="num">1,342</td>
+          <td class="pct-cell" style="font-size:13px;">69.0%</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <div class="keypoint">
+      ⭐ <strong>핵심 발견 3가지</strong> · ① <strong>메이저 3사 모두 자동화 가능</strong> (하나 82% / 노랑 67% / 모두 69%) · ② <strong>B(모객 충족)이 압도적 동인</strong> — 단일 변수로 66.8% 커버 · ③ <strong>AIRTEL은 인원 무관 자동</strong> — 11% 추가 커버
+    </div>
+  </div>
+
+  <!-- ==================== 2. 자동 매핑 룰 ==================== -->
+  <div class="section">
+    <div class="section-head">
+      <div class="section-num">2</div>
+      <h2>자동 매핑 룰 3-Track</h2>
+      <div class="lead">상품 유형 + OR 조건 기반</div>
+    </div>
+
+    <div class="rules">
+      <div class="rule-card r1">
+        <span class="rtag">1차</span>
+        <h3>AIRTEL · 결제완료</h3>
+        <p class="rule-desc">에어텔/자유여행은 인원 제약 없음 (2인 이상이면 출발). 결제완료 = 자동 출발확정.</p>
+        <div class="rule-cond">
+<span class="hl">if</span> kind = AIRTEL <span class="hl">and</span> 결제완료:<br>
+&nbsp;&nbsp;status = 출발확정
+        </div>
+        <div class="impact">📊 5월 영향: 59건 (100% 자동)</div>
+      </div>
+      <div class="rule-card r2">
+        <span class="rtag">2차 · 핵심</span>
+        <h3>PACKAGE · 모객 충족</h3>
+        <p class="rule-desc">패키지 = 최소 모객 인원 도달 시 출발확정. 가장 큰 자동화 동인.</p>
+        <div class="rule-cond">
+<span class="hl">if</span> kind = PACKAGE <span class="hl">and</span><br>
+&nbsp;&nbsp;booked ≥ threshold:<br>
+&nbsp;&nbsp;status = 출발확정
+        </div>
+        <div class="impact">📊 전체 영향: 1,299건 (66.8%)</div>
+      </div>
+      <div class="rule-card r3">
+        <span class="rtag">3차 · 보조</span>
+        <h3>여행사 시그널</h3>
+        <p class="rule-desc">여행사가 명시적 출발확정 신호 보내는 경우 즉시 반영. 온라인투어 단독.</p>
+        <div class="rule-cond">
+<span class="hl">if</span> raw_status <span class="hl">in</span><br>
+&nbsp;&nbsp;[E-Ticket 발송완료, 발권완료, ...]:<br>
+&nbsp;&nbsp;status = 출발확정
+        </div>
+        <div class="impact">📊 전체 영향: 27건 (1.4%)</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ==================== 3. 토글 문제 ==================== -->
+  <div class="section">
+    <div class="section-head">
+      <div class="section-num">3</div>
+      <h2>해결해야 할 운영 이슈 — "왔다갔다 문제"</h2>
+      <div class="lead">결정이 필요한 부분</div>
+    </div>
+
+    <div class="problem-mini">
+      <h3>🚨 자동 출발확정 후, 취소 발생하면?</h3>
+      <p>예약 인원이 최소출발인원에 도달해 출발확정이 됐는데, 이후 취소가 발생해 다시 인원 미달이 되는 경우. 그 후 또 새 예약이 들어와 재충족되는 경우. 매번 토글하면 <strong>알림 폭탄 / 운영 혼란 / 고객 신뢰 무너짐</strong>.</p>
+    </div>
+
+    <h3 style="font-size:14px;font-weight:800;margin-bottom:10px;">5가지 해결 옵션</h3>
+    <div class="opts">
+      <div class="opt">
+        <div class="ol">A</div>
+        <div class="on">자동 양방향</div>
+        <div class="od">매번 변동마다 토글</div>
+        <div class="meta-row">
+          <span class="opt-pill danger">위험</span>
+        </div>
+      </div>
+      <div class="opt">
+        <div class="ol">B</div>
+        <div class="on">단방향 Lock</div>
+        <div class="od">첫 충족 시 Lock</div>
+        <div class="meta-row">
+          <span class="opt-pill safe">안전</span>
+          <span class="opt-pill warn">유연성↓</span>
+        </div>
+      </div>
+      <div class="opt">
+        <div class="ol">C</div>
+        <div class="on">운영자 수동</div>
+        <div class="od">버튼 클릭 시만</div>
+        <div class="meta-row">
+          <span class="opt-pill safe">안전</span>
+          <span class="opt-pill warn">자동화 효용X</span>
+        </div>
+      </div>
+      <div class="opt recommended">
+        <div class="ol" style="color:#2563eb;">D ⭐</div>
+        <div class="on" style="color:#1e40af;">시한 기반 Lock</div>
+        <div class="od" style="color:#1e3a8a;">D-N 후 lock</div>
+        <div class="meta-row">
+          <span class="opt-pill info">균형</span>
+          <span class="opt-pill safe">업계 일반</span>
+        </div>
+      </div>
+      <div class="opt">
+        <div class="ol">E</div>
+        <div class="on">마진 조건부</div>
+        <div class="od">±N명까지 유지</div>
+        <div class="meta-row">
+          <span class="opt-pill info">유연</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="keypoint" style="margin-top:14px;border-left-color:#f59e0b;color:#78350f;">
+      💡 <strong>PM 추천 = 옵션 D (시한 기반 Lock)</strong> — 출발일 D-N(예: D-7) 전엔 양방향 자동, D-N 이후 Lock. 업계 일반 룰과 가장 정합.
+    </div>
+  </div>
+
+  <!-- ==================== 4. 영업실 결정 요청 ==================== -->
+  <div class="cta">
+    <div class="label">📌 영업실 결정 요청</div>
+    <h3>다음 미팅에서 결정해주실 사항</h3>
+    <p>아래 3가지에 대한 영업실 의견이 필요합니다. 결정 후 PM이 개발팀과 일정 협의로 마무리합니다.</p>
+    <ol>
+      <li><strong>출발확정 도입</strong> 자체 — 데이터상 69% 자동화 가능. <strong>도입할 것인가?</strong></li>
+      <li><strong>Lock 정책</strong> — 5개 옵션(A~E) 중 어느 방향으로? <strong>(PM 추천: D · 시한 기반)</strong></li>
+      <li><strong>세부 파라미터</strong> — D 선택 시 D-N 기준(D-3 / D-7 / D-14) · E 선택 시 마진(±1 / ±2 / ±3명)</li>
+    </ol>
+  </div>
+
+  <!-- ==================== 5. 세부 자료 ==================== -->
+  <div class="section">
+    <div class="section-head">
+      <div class="section-num">5</div>
+      <h2>세부 자료 (필요 시 깊게 보기)</h2>
+    </div>
+
+    <div class="links">
+      <a href="./departure-confirm-data-analysis.html" class="link-card">
+        <div class="lico">📊</div>
+        <div class="lt">데이터 분석 상세</div>
+        <div class="ld">5월 / 전체 예약완료 기준 / 여행사별 매트릭스 / 쿼리</div>
+      </a>
+      <a href="./departure-confirm-lock-policy.html" class="link-card">
+        <div class="lico">🔒</div>
+        <div class="lt">Lock 정책 5개 옵션 상세</div>
+        <div class="ld">시나리오 / 의사코드 / 장단점 / 비교 매트릭스</div>
+      </a>
+      <a href="./departure-confirm-research.html" class="link-card">
+        <div class="lico">🔍</div>
+        <div class="lt">외부 사례 리서치</div>
+        <div class="ld">업계 출발확정 표시 패턴 / 신뢰 이슈 / 정책 권장</div>
+      </a>
+      <a href="./reservation-status-option-compare.html" class="link-card">
+        <div class="lico">📐</div>
+        <div class="lt">옵션 1 vs 옵션 2 비교</div>
+        <div class="ld">기존 유지 vs 출발대기 추가 (이전 단계 결정)</div>
+      </a>
+      <a href="./reservation-status-decision.html" class="link-card">
+        <div class="lico">📋</div>
+        <div class="lt">예약상태 정의 결정안</div>
+        <div class="ld">옵션 B + 2-Flag AND 채택 (이전 단계)</div>
+      </a>
+      <a href="https://www.notion.so/tripstore/38186ade8e778033805cd8b696b2f592" class="link-card" target="_blank">
+        <div class="lico">📝</div>
+        <div class="lt">노션 정책 페이지</div>
+        <div class="ld">최종 합의 후 정책 이관 예정</div>
+      </a>
+    </div>
+  </div>
+
+  <div style="text-align:center;padding:24px 0;font-size:11px;color:#94a3b8;">
+    트립스토어 PM · 2026-06-17 · 영업실 결정 → 개발 일정 합의 → 노션 정책 페이지로 이관
+  </div>
+
+</div>
+
+</body>
+</html>
