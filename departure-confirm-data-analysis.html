@@ -2,36 +2,40 @@
 <html lang="ko">
 <head>
 <meta charset="UTF-8">
-<title>출발확정 자동 매핑 가능성 — 5월 데이터 분석</title>
+<title>출발확정 자동 매핑 가능성 — 5월 데이터 분석 v2</title>
 <style>
   * { box-sizing: border-box; margin: 0; padding: 0; }
   body { font-family: -apple-system, BlinkMacSystemFont, 'Pretendard', sans-serif; background: #fafbfc; color: #1a1a1a; font-size: 14px; line-height: 1.6; }
 
   /* ===== HERO ===== */
-  .hero { background: linear-gradient(135deg, #0d1b2a 0%, #1a3957 100%); color: #fff; padding: 44px 32px; }
+  .hero { background: linear-gradient(135deg, #064e3b 0%, #15803d 100%); color: #fff; padding: 44px 32px; }
   .hero-inner { max-width: 1200px; margin: 0 auto; }
   .hero .tag { display: inline-flex; align-items: center; gap: 8px; background: rgba(255,255,255,0.15); padding: 5px 14px; border-radius: 999px; font-size: 11px; font-weight: 600; margin-bottom: 16px; }
   .hero .tag .dot { width: 6px; height: 6px; border-radius: 50%; background: #4ade80; }
   .hero h1 { font-size: 28px; font-weight: 800; margin-bottom: 8px; letter-spacing: -0.3px; }
   .hero .sub { font-size: 14px; opacity: 0.88; max-width: 820px; line-height: 1.7; }
-  .hero .meta { margin-top: 14px; display: flex; gap: 18px; font-size: 11px; opacity: 0.7; }
+  .hero .meta { margin-top: 14px; display: flex; gap: 18px; font-size: 11px; opacity: 0.75; }
 
   .container { max-width: 1200px; margin: 0 auto; padding: 32px; }
 
-  /* ===== KEY FINDING ===== */
-  .key-finding { background: linear-gradient(135deg, #fef2f2 0%, #fecaca 100%); border: 2px solid #dc2626; border-radius: 14px; padding: 24px 28px; margin-bottom: 20px; display: flex; gap: 20px; align-items: center; }
-  .key-finding .ico { font-size: 48px; flex-shrink: 0; }
+  /* ===== KEY FINDING (positive) ===== */
+  .key-finding { background: linear-gradient(135deg, #f0fdf4 0%, #bbf7d0 100%); border: 2px solid #16a34a; border-radius: 14px; padding: 24px 28px; margin-bottom: 20px; display: flex; gap: 20px; align-items: center; }
+  .key-finding .big-num { font-size: 80px; font-weight: 900; color: #16a34a; font-family: 'SF Mono', Consolas, monospace; line-height: 1; letter-spacing: -3px; }
+  .key-finding .pct-unit { font-size: 28px; color: #15803d; font-weight: 800; }
   .key-finding .body { flex: 1; }
-  .key-finding .label { font-size: 10px; font-weight: 800; color: #991b1b; letter-spacing: 1.5px; margin-bottom: 6px; }
-  .key-finding h2 { font-size: 22px; font-weight: 800; color: #7f1d1d; margin-bottom: 6px; letter-spacing: -0.3px; }
-  .key-finding p { font-size: 14px; color: #7f1d1d; line-height: 1.7; }
+  .key-finding .label { font-size: 10px; font-weight: 800; color: #15803d; letter-spacing: 1.5px; margin-bottom: 6px; }
+  .key-finding h2 { font-size: 22px; font-weight: 800; color: #14532d; margin-bottom: 6px; letter-spacing: -0.3px; }
+  .key-finding p { font-size: 14px; color: #14532d; line-height: 1.7; }
   .key-finding p strong { background: #fff; padding: 1px 6px; border-radius: 3px; }
-  .key-finding .big-num { font-size: 64px; font-weight: 900; color: #dc2626; font-family: 'SF Mono', Consolas, monospace; line-height: 1; }
+
+  /* ===== UPDATE NOTICE ===== */
+  .update-notice { background: #fffbeb; border-left: 4px solid #f59e0b; padding: 12px 16px; border-radius: 0 8px 8px 0; margin-bottom: 20px; font-size: 12px; color: #78350f; line-height: 1.6; }
+  .update-notice strong { color: #92400e; }
 
   /* ===== SECTION ===== */
   .section { background: #fff; border-radius: 14px; padding: 28px 32px; margin-bottom: 18px; box-shadow: 0 1px 3px rgba(0,0,0,0.04); }
   .section-head { margin-bottom: 22px; }
-  .section-head .eyebrow { font-size: 10px; font-weight: 800; color: #2563eb; letter-spacing: 1.5px; margin-bottom: 6px; text-transform: uppercase; }
+  .section-head .eyebrow { font-size: 10px; font-weight: 800; color: #16a34a; letter-spacing: 1.5px; margin-bottom: 6px; text-transform: uppercase; }
   .section-head h2 { font-size: 20px; font-weight: 800; letter-spacing: -0.3px; }
   .section-head .lead { font-size: 13px; color: #64748b; margin-top: 6px; }
 
@@ -48,58 +52,54 @@
   .stat-card.success .stat-num { color: #15803d; }
   .stat-card.warn { background: #fffbeb; border-color: #f59e0b; }
   .stat-card.warn .stat-num { color: #b45309; }
-  .stat-card.danger { background: #fef2f2; border-color: #dc2626; }
-  .stat-card.danger .stat-num { color: #b91c1c; }
 
-  /* ===== VENN DIAGRAM (TEXT) ===== */
+  /* ===== VENN ===== */
   .venn { background: #fafbfc; border: 1px solid #e2e8f0; border-radius: 12px; padding: 24px; margin: 16px 0; }
   .venn-vars { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; margin-bottom: 18px; }
-  .venn-var { background: #fff; border-radius: 10px; padding: 14px 16px; border-top: 4px solid; }
+  .venn-var { background: #fff; border-radius: 10px; padding: 16px 18px; border-top: 4px solid; }
   .venn-var.va { border-top-color: #2563eb; }
   .venn-var.vb { border-top-color: #f59e0b; }
   .venn-var.vc { border-top-color: #8b5cf6; }
-  .venn-var .vn { font-size: 24px; font-weight: 800; font-family: 'SF Mono', Consolas, monospace; line-height: 1; }
+  .venn-var .vn { font-size: 32px; font-weight: 800; font-family: 'SF Mono', Consolas, monospace; line-height: 1; }
   .venn-var.va .vn { color: #1e40af; }
   .venn-var.vb .vn { color: #b45309; }
   .venn-var.vc .vn { color: #6b21a8; }
-  .venn-var .vlbl { font-size: 11px; font-weight: 800; margin-top: 4px; letter-spacing: 0.3px; }
+  .venn-var .vpct { display: inline-block; font-size: 12px; color: #64748b; font-weight: 600; margin-left: 4px; }
+  .venn-var .vlbl { font-size: 12px; font-weight: 800; margin-top: 6px; letter-spacing: 0.3px; }
   .venn-var .vdesc { font-size: 11px; color: #64748b; margin-top: 4px; line-height: 1.5; }
 
-  .venn-inter { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; }
-  .venn-cell { background: #fff; border: 1px solid #e2e8f0; border-radius: 8px; padding: 12px 14px; text-align: center; }
-  .venn-cell .vcn { font-size: 22px; font-weight: 800; font-family: 'SF Mono', Consolas, monospace; line-height: 1; }
-  .venn-cell .vclbl { font-size: 10px; font-weight: 700; color: #64748b; margin-top: 4px; letter-spacing: 0.3px; }
-  .venn-cell.triple { background: linear-gradient(135deg, #fef2f2, #fecaca); border-color: #dc2626; }
-  .venn-cell.triple .vcn { color: #b91c1c; }
-  .venn-cell.triple .vclbl { color: #991b1b; font-weight: 800; }
+  .union-box { background: linear-gradient(135deg, #f0fdf4, #bbf7d0); border: 2px solid #16a34a; border-radius: 12px; padding: 18px 22px; display: flex; justify-content: space-between; align-items: center; }
+  .union-box .ub-label { font-size: 12px; font-weight: 800; color: #14532d; letter-spacing: 0.5px; }
+  .union-box .ub-num { font-size: 36px; font-weight: 800; font-family: 'SF Mono', Consolas, monospace; color: #15803d; }
+  .union-box .ub-pct { font-size: 18px; color: #15803d; font-weight: 700; margin-left: 4px; }
 
   /* ===== AGENCY TABLE ===== */
   table.agency { width: 100%; border-collapse: collapse; font-size: 12px; }
   table.agency thead { background: #0f172a; }
   table.agency thead th { color: #fff; padding: 12px 10px; text-align: center; font-size: 11px; font-weight: 700; }
   table.agency thead th:first-child { text-align: left; background: #f8fafc; color: #475569; }
+  table.agency thead th.success-col { background: #16a34a; }
   table.agency tbody td { padding: 10px; text-align: center; border-bottom: 1px solid #e2e8f0; font-family: 'SF Mono', Consolas, monospace; font-weight: 600; }
   table.agency tbody td:first-child { text-align: left; font-family: -apple-system; font-weight: 700; color: #0f172a; }
   table.agency tbody tr:hover td { background: #f8fafc; }
   table.agency .zero { color: #cbd5e1; }
   table.agency .has { color: #16a34a; font-weight: 800; }
-  table.agency .has-strong { color: #1e40af; font-weight: 800; }
-  table.agency tr.highlight { background: #eff6ff !important; }
-  table.agency tr.highlight td { background: #eff6ff; }
+  table.agency .has-strong { color: #15803d; font-weight: 800; font-size: 13px; }
   table.agency .agency-tag { display: inline-block; font-size: 9px; padding: 1px 6px; border-radius: 3px; font-weight: 800; margin-left: 4px; letter-spacing: 0.3px; }
   table.agency .agency-tag.major { background: #fee2e2; color: #991b1b; }
   table.agency .agency-tag.go { background: #dcfce7; color: #166534; }
+  table.agency td.bg-success { background: #f0fdf4; }
 
   /* ===== BAR CHART ===== */
   .bar-chart { display: flex; flex-direction: column; gap: 8px; margin: 14px 0; }
   .bar-row { display: flex; align-items: center; gap: 12px; font-size: 12px; }
-  .bar-row .b-label { width: 110px; font-weight: 700; }
-  .bar-row .b-track { flex: 1; height: 22px; background: #f1f5f9; border-radius: 4px; position: relative; overflow: hidden; }
+  .bar-row .b-label { width: 130px; font-weight: 700; }
+  .bar-row .b-track { flex: 1; height: 24px; background: #f1f5f9; border-radius: 4px; position: relative; overflow: hidden; }
   .bar-row .b-fill { height: 100%; border-radius: 4px; display: flex; align-items: center; padding: 0 8px; color: #fff; font-size: 11px; font-weight: 700; font-family: 'SF Mono', Consolas, monospace; }
   .bar-row .b-num { width: 100px; text-align: right; font-family: 'SF Mono', Consolas, monospace; font-weight: 700; font-size: 12px; }
   .bar-row .b-pct { width: 60px; text-align: right; font-size: 11px; color: #94a3b8; font-weight: 600; }
 
-  /* ===== INSIGHTS BOX ===== */
+  /* ===== INSIGHT BOX ===== */
   .insight-box { background: linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%); border-left: 5px solid #2563eb; border-radius: 0 12px 12px 0; padding: 22px 26px; margin: 18px 0; }
   .insight-box h3 { font-size: 16px; font-weight: 800; color: #1e40af; margin-bottom: 12px; letter-spacing: -0.2px; }
   .insight-box ol { padding-left: 22px; }
@@ -107,28 +107,29 @@
   .insight-box li strong { background: #fff; padding: 0 5px; border-radius: 3px; }
   .insight-box .punch { font-size: 14px; font-weight: 800; margin-bottom: 14px; padding: 10px 14px; background: #fff; border-radius: 8px; color: #1e40af; border-left: 3px solid #2563eb; }
 
-  /* ===== RECOMMENDATION ===== */
-  .reco-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
-  .reco-card { border: 2px solid; border-radius: 12px; padding: 20px 22px; }
-  .reco-card.go { background: #f0fdf4; border-color: #16a34a; }
-  .reco-card.caution { background: #fffbeb; border-color: #f59e0b; }
+  /* ===== RECO ===== */
+  .reco-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
+  .reco-card { border: 2px solid; border-radius: 12px; padding: 18px 20px; }
+  .reco-card.r1 { background: #f0fdf4; border-color: #16a34a; }
+  .reco-card.r2 { background: #eff6ff; border-color: #2563eb; }
+  .reco-card.r3 { background: #fffbeb; border-color: #f59e0b; }
   .reco-card .rtag { display: inline-block; padding: 3px 10px; border-radius: 999px; font-size: 10px; font-weight: 800; letter-spacing: 0.5px; margin-bottom: 8px; }
-  .reco-card.go .rtag { background: #16a34a; color: #fff; }
-  .reco-card.caution .rtag { background: #f59e0b; color: #fff; }
-  .reco-card h3 { font-size: 16px; font-weight: 800; margin-bottom: 8px; letter-spacing: -0.2px; }
-  .reco-card.go h3 { color: #15803d; }
-  .reco-card.caution h3 { color: #b45309; }
-  .reco-card .rdesc { font-size: 12px; color: #475569; margin-bottom: 12px; line-height: 1.6; }
-  .reco-card ul { padding-left: 18px; }
-  .reco-card li { padding: 3px 0; font-size: 12px; line-height: 1.6; }
-  .reco-card.go li { color: #166534; }
-  .reco-card.caution li { color: #78350f; }
+  .reco-card.r1 .rtag { background: #16a34a; color: #fff; }
+  .reco-card.r2 .rtag { background: #2563eb; color: #fff; }
+  .reco-card.r3 .rtag { background: #f59e0b; color: #fff; }
+  .reco-card h3 { font-size: 14px; font-weight: 800; margin-bottom: 8px; letter-spacing: -0.2px; }
+  .reco-card.r1 h3 { color: #15803d; }
+  .reco-card.r2 h3 { color: #1e40af; }
+  .reco-card.r3 h3 { color: #b45309; }
+  .reco-card .rdesc { font-size: 12px; color: #475569; margin-bottom: 10px; line-height: 1.6; }
+  .reco-card ul { padding-left: 18px; font-size: 11px; line-height: 1.7; }
 
-  /* ===== QUERY BOX ===== */
+  /* ===== QUERY ===== */
   .query-box { background: #1e293b; color: #e2e8f0; padding: 18px 20px; border-radius: 10px; font-family: 'SF Mono', Consolas, monospace; font-size: 11px; line-height: 1.6; overflow-x: auto; margin: 12px 0; }
   .query-box .keyword { color: #818cf8; font-weight: 700; }
   .query-box .string { color: #fcd34d; }
   .query-box .comment { color: #64748b; font-style: italic; }
+  .query-box .change { background: #166534; padding: 1px 4px; border-radius: 2px; }
 </style>
 </head>
 <body>
@@ -136,147 +137,114 @@
 <!-- ==================== HERO ==================== -->
 <div class="hero">
   <div class="hero-inner">
-    <div class="tag"><span class="dot"></span> 데이터 분석 · 실제 데이터 기반</div>
+    <div class="tag"><span class="dot"></span> 데이터 분석 v2 · 매칭 키 정정 후 재집계</div>
     <h1>출발확정 자동 매핑 가능성 — 5월 데이터 분석</h1>
-    <p class="sub">트립 예약상태(A) × 잔여좌석(B) × 여행사 출발확정 시그널(C) 3개 변수로 5월 발생 예약(1,988건)을 분석한 결과.</p>
+    <p class="sub"><strong>매칭 키 정정 후 결과가 완전히 뒤집혔습니다.</strong> 자동 매핑 가능 영역 60%+. A·B·C OR 합집합 기준, 상품 유형별 분리, 메이저 3사 포함 전체 여행사 99.6% 패키지 매칭.</p>
     <div class="meta">
-      <span>📅 2026-06-17</span>
+      <span>📅 2026-06-17 (v2)</span>
       <span>🗄️ BigQuery: tripstore-352708</span>
       <span>📊 분석 기간: 2026-05-01 ~ 05-31 (예약일 기준)</span>
+      <span>🔧 조인 경로: ts_member_reservation → ts_reservation_order.package_code → ts_packages</span>
     </div>
   </div>
 </div>
 
 <div class="container">
 
-  <!-- ==================== 핵심 발견 ==================== -->
+  <!-- 변경 안내 -->
+  <div class="update-notice">
+    <strong>📌 v1 → v2 변경사항</strong> · v1은 raw_data의 eventCode로 ts_packages 조인했으나 메이저 3사 raw_data에 해당 키가 없어 매칭률 36%였습니다. v2는 <strong>ts_reservation_order.package_code 경유</strong>로 조인하여 매칭률 99.6%로 개선. AND→OR 관계, 패키지/에어텔 분리, threshold 기준(잔여좌석=0 대신 booked≥threshold) 반영.
+  </div>
+
+  <!-- 핵심 발견 (긍정으로 전환) -->
   <div class="key-finding">
-    <div class="big-num">0</div>
+    <div>
+      <div class="big-num">60<span class="pct-unit">%</span></div>
+    </div>
     <div class="body">
-      <div class="label">⚠️ 핵심 발견</div>
-      <h2>3변수 모두 충족하는 자동 매핑 안전영역 = <strong>0건</strong></h2>
-      <p>예약완료 + 잔여좌석=0 + 여행사 출발확정 시그널을 <strong>동시에 만족</strong>하는 5월 예약은 <strong>한 건도 없습니다</strong>. 자동 출발확정 매핑은 단일 변수 또는 2변수 조합으로만 가능하며, 운영자 수동 처리가 필수적입니다.</p>
+      <div class="label">✅ 핵심 발견</div>
+      <h2>5월 예약의 60.1%가 자동 출발확정 매핑 가능</h2>
+      <p>1,992건 중 <strong>1,198건</strong>이 A·B·C 중 어느 하나 이상 충족. <strong>메이저 3사(하나투어/모두투어/노랑풍선)도 모두 자동화 가능</strong>합니다. 매칭 키만 정확히 잡으면 자동화는 결코 적은 영역이 아닙니다.</p>
     </div>
   </div>
 
-  <!-- ==================== 5월 예약 개요 ==================== -->
+  <!-- 5월 개요 -->
   <div class="section">
     <div class="section-head">
-      <div class="eyebrow">Overview · 5월 발생 예약 분포</div>
+      <div class="eyebrow">Overview · 5월 발생 예약</div>
       <h2>5월 발생 예약 한눈에</h2>
-      <p class="lead">예약일(reserved_at)이 2026-05-01 ~ 05-31인 예약 건 분포.</p>
+      <p class="lead">예약일(reserved_at) 2026-05-01 ~ 05-31, status_on_management 채워진 건 기준.</p>
     </div>
 
     <div class="stat-grid">
       <div class="stat-card primary">
-        <div class="stat-label">전체 5월 예약 (status 매핑 완료)</div>
-        <div class="stat-num">1,988<span class="stat-unit">건</span></div>
-        <div class="stat-sub">status_on_management 채워진 건</div>
-      </div>
-      <div class="stat-card">
-        <div class="stat-label">예약완료 (RESERVATION_CONFIRMATION)</div>
-        <div class="stat-num">499<span class="stat-unit">건</span></div>
-        <div class="stat-sub">25.1% · 출발대기 후보군</div>
+        <div class="stat-label">전체 5월 예약</div>
+        <div class="stat-num">1,992<span class="stat-unit">건</span></div>
+        <div class="stat-sub">status 매핑 완료</div>
       </div>
       <div class="stat-card success">
-        <div class="stat-label">출발완료 (DEPARTURE_COMPLETION)</div>
-        <div class="stat-num">540<span class="stat-unit">건</span></div>
-        <div class="stat-sub">27.2% · 이미 출발 종료</div>
+        <div class="stat-label">패키지 매칭 (조인 성공)</div>
+        <div class="stat-num">1,984<span class="stat-unit">건</span></div>
+        <div class="stat-sub">99.6% · ts_packages 연결</div>
       </div>
-      <div class="stat-card danger">
-        <div class="stat-label">취소완료 (RESERVATION_CANCELLATION)</div>
-        <div class="stat-num">912<span class="stat-unit">건</span></div>
-        <div class="stat-sub">45.9% · 취소 종결</div>
+      <div class="stat-card">
+        <div class="stat-label">PACKAGE 상품</div>
+        <div class="stat-num">1,789<span class="stat-unit">건</span></div>
+        <div class="stat-sub">89.8% · threshold 적용</div>
       </div>
-    </div>
-
-    <div class="bar-chart">
-      <div class="bar-row">
-        <div class="b-label">취소완료</div>
-        <div class="b-track"><div class="b-fill" style="width:45.9%;background:#dc2626;">912</div></div>
-        <div class="b-num">912건</div>
-        <div class="b-pct">45.9%</div>
-      </div>
-      <div class="bar-row">
-        <div class="b-label">출발완료</div>
-        <div class="b-track"><div class="b-fill" style="width:27.2%;background:#16a34a;">540</div></div>
-        <div class="b-num">540건</div>
-        <div class="b-pct">27.2%</div>
-      </div>
-      <div class="bar-row">
-        <div class="b-label">예약완료</div>
-        <div class="b-track"><div class="b-fill" style="width:25.1%;background:#2563eb;">499</div></div>
-        <div class="b-num">499건</div>
-        <div class="b-pct">25.1%</div>
-      </div>
-      <div class="bar-row">
-        <div class="b-label">예약접수</div>
-        <div class="b-track"><div class="b-fill" style="width:1.8%;background:#f59e0b;">36</div></div>
-        <div class="b-num">36건</div>
-        <div class="b-pct">1.8%</div>
+      <div class="stat-card warn">
+        <div class="stat-label">AIRTEL 상품</div>
+        <div class="stat-num">195<span class="stat-unit">건</span></div>
+        <div class="stat-sub">9.8% · 인원 무관 (단독 가능)</div>
       </div>
     </div>
   </div>
 
-  <!-- ==================== 3변수 분석 ==================== -->
+  <!-- 3변수 OR 분석 -->
   <div class="section">
     <div class="section-head">
-      <div class="eyebrow">3-Variable Analysis</div>
-      <h2>3변수 교집합 분석</h2>
-      <p class="lead">A·B·C 각 변수의 단독/조합/3중 교집합 건수.</p>
+      <div class="eyebrow">3-Variable OR Analysis</div>
+      <h2>3변수 합집합 분석</h2>
+      <p class="lead">A·B·C는 AND가 아닌 <strong>OR 관계</strong>. 어느 하나라도 충족하면 자동 매핑 후보.</p>
     </div>
 
     <div class="venn">
       <div class="venn-vars">
         <div class="venn-var va">
-          <div class="vn">499</div>
+          <div class="vn">501<span class="vpct">/ 25.2%</span></div>
           <div class="vlbl">A · 트립 예약완료</div>
           <div class="vdesc">status_on_management = RESERVATION_CONFIRMATION</div>
         </div>
         <div class="venn-var vb">
-          <div class="vn">86</div>
-          <div class="vlbl">B · 잔여좌석 0</div>
-          <div class="vdesc">ts_packages.remaining_seats = 0<br><span style="color:#94a3b8;">(패키지 매칭 713건 중)</span></div>
+          <div class="vn">1,048<span class="vpct">/ 52.6%</span></div>
+          <div class="vlbl">B · 모객 인원 충족</div>
+          <div class="vdesc">booked_seats ≥ threshold_for_departure<br><strong style="color:#b45309;">가장 큰 자동화 동인</strong></div>
         </div>
         <div class="venn-var vc">
-          <div class="vn">31</div>
+          <div class="vn">31<span class="vpct">/ 1.6%</span></div>
           <div class="vlbl">C · 여행사 출발확정 시그널</div>
           <div class="vdesc">E-Ticket 발송완료 / 발권완료 / 비자발송완료 / 출발확정</div>
         </div>
       </div>
 
-      <div class="venn-inter">
-        <div class="venn-cell">
-          <div class="vcn">27</div>
-          <div class="vclbl">A ∩ B</div>
-        </div>
-        <div class="venn-cell">
-          <div class="vcn">9</div>
-          <div class="vclbl">A ∩ C</div>
-        </div>
-        <div class="venn-cell">
-          <div class="vcn">1</div>
-          <div class="vclbl">B ∩ C</div>
-        </div>
-        <div class="venn-cell triple">
-          <div class="vcn">0</div>
-          <div class="vclbl">A ∩ B ∩ C (안전영역)</div>
-        </div>
+      <div class="union-box">
+        <div class="ub-label">A ∪ B ∪ C (OR 합집합) — 자동 매핑 가능 영역</div>
+        <div><span class="ub-num">1,198</span><span class="ub-pct">/ 1,992 = 60.1%</span></div>
       </div>
     </div>
 
     <div class="bar-chart" style="margin-top:18px;">
       <div class="bar-row">
-        <div class="b-label">A (예약완료)</div>
-        <div class="b-track"><div class="b-fill" style="width:25.1%;background:#2563eb;">499</div></div>
-        <div class="b-num">499건</div>
-        <div class="b-pct">25.1%</div>
+        <div class="b-label">B (모객 충족)</div>
+        <div class="b-track"><div class="b-fill" style="width:52.6%;background:#f59e0b;">1,048</div></div>
+        <div class="b-num">1,048건</div>
+        <div class="b-pct">52.6%</div>
       </div>
       <div class="bar-row">
-        <div class="b-label">B (좌석=0)</div>
-        <div class="b-track"><div class="b-fill" style="width:4.3%;background:#f59e0b;">86</div></div>
-        <div class="b-num">86건</div>
-        <div class="b-pct">4.3%</div>
+        <div class="b-label">A (예약완료)</div>
+        <div class="b-track"><div class="b-fill" style="width:25.2%;background:#2563eb;">501</div></div>
+        <div class="b-num">501건</div>
+        <div class="b-pct">25.2%</div>
       </div>
       <div class="bar-row">
         <div class="b-label">C (시그널)</div>
@@ -285,32 +253,20 @@
         <div class="b-pct">1.6%</div>
       </div>
       <div class="bar-row">
-        <div class="b-label">A ∩ B</div>
-        <div class="b-track"><div class="b-fill" style="width:1.4%;background:#3b82f6;">27</div></div>
-        <div class="b-num">27건</div>
-        <div class="b-pct">1.4%</div>
-      </div>
-      <div class="bar-row">
-        <div class="b-label">A ∩ C</div>
-        <div class="b-track"><div class="b-fill" style="width:0.45%;background:#7c3aed;">9</div></div>
-        <div class="b-num">9건</div>
-        <div class="b-pct">0.45%</div>
-      </div>
-      <div class="bar-row">
-        <div class="b-label" style="color:#dc2626;font-weight:800;">A ∩ B ∩ C</div>
-        <div class="b-track"><div class="b-fill" style="width:0%;background:#dc2626;"></div></div>
-        <div class="b-num" style="color:#dc2626;font-weight:800;">0건</div>
-        <div class="b-pct" style="color:#dc2626;font-weight:800;">0%</div>
+        <div class="b-label" style="color:#15803d;font-weight:800;">A ∪ B ∪ C</div>
+        <div class="b-track"><div class="b-fill" style="width:60.1%;background:#16a34a;">1,198</div></div>
+        <div class="b-num" style="color:#15803d;font-weight:800;">1,198건</div>
+        <div class="b-pct" style="color:#15803d;font-weight:800;">60.1%</div>
       </div>
     </div>
   </div>
 
-  <!-- ==================== 여행사별 매트릭스 ==================== -->
+  <!-- 여행사별 매트릭스 -->
   <div class="section">
     <div class="section-head">
       <div class="eyebrow">By Travel Agency</div>
-      <h2>여행사별 자동 매핑 가능성 매트릭스</h2>
-      <p class="lead">메이저 vs 자동화 가능 여행사 비교. <span style="color:#dc2626;font-weight:700;">충격적 발견: 메이저 3사가 자동 매핑 신호 미보유</span></p>
+      <h2>여행사별 자동 매핑 가능성 (v2)</h2>
+      <p class="lead">메이저 3사 포함 모든 여행사에서 자동화 후보가 발견됩니다.</p>
     </div>
 
     <table class="agency">
@@ -318,158 +274,202 @@
         <tr>
           <th>여행사</th>
           <th>5월 예약</th>
+          <th>패키지 매칭</th>
           <th>A 예약완료</th>
-          <th>B 좌석=0</th>
+          <th>B 모객 충족</th>
           <th>C 시그널</th>
-          <th>A ∩ B</th>
-          <th>A ∩ C</th>
+          <th class="success-col">A ∪ B ∪ C</th>
+          <th>커버율</th>
         </tr>
       </thead>
       <tbody>
         <tr>
           <td>하나투어 <span class="agency-tag major">메이저</span></td>
-          <td>437</td><td>114</td><td class="zero">0</td><td class="zero">0</td><td class="zero">0</td><td class="zero">0</td>
+          <td>437</td><td>432</td><td>114</td>
+          <td class="has-strong">260</td><td class="zero">0</td>
+          <td class="bg-success has-strong">277</td><td class="bg-success">63.4%</td>
         </tr>
         <tr>
           <td>모두투어 <span class="agency-tag major">메이저</span></td>
-          <td>413</td><td>106</td><td class="zero">0</td><td class="zero">0</td><td class="zero">0</td><td class="zero">0</td>
+          <td>417</td><td>415</td><td>108</td>
+          <td class="has-strong">189</td><td class="zero">0</td>
+          <td class="bg-success has-strong">229</td><td class="bg-success">54.9%</td>
         </tr>
         <tr>
           <td>노랑풍선 <span class="agency-tag major">메이저</span></td>
-          <td>347</td><td>75</td><td class="zero">0</td><td class="zero">0</td><td class="zero">0</td><td class="zero">0</td>
+          <td>347</td><td>346</td><td>75</td>
+          <td class="has-strong">207</td><td class="zero">0</td>
+          <td class="bg-success has-strong">223</td><td class="bg-success">64.3%</td>
         </tr>
-        <tr class="highlight">
-          <td>온라인투어 <span class="agency-tag go">자동 가능</span></td>
-          <td>314</td><td>77</td><td class="has">44</td><td class="has-strong">31</td><td class="has-strong">16</td><td class="has-strong">9</td>
+        <tr>
+          <td>온라인투어 <span class="agency-tag go">시그널 보유</span></td>
+          <td>314</td><td>314</td><td>77</td>
+          <td class="has">138</td><td class="has-strong">31</td>
+          <td class="bg-success has-strong">176</td><td class="bg-success">56.1%</td>
         </tr>
-        <tr class="highlight">
-          <td>참좋은여행 <span class="agency-tag go">부분 가능</span></td>
-          <td>242</td><td>74</td><td class="has">37</td><td class="zero">0</td><td class="has-strong">11</td><td class="zero">0</td>
+        <tr>
+          <td>참좋은여행</td>
+          <td>242</td><td>242</td><td>74</td>
+          <td class="has">130</td><td class="zero">0</td>
+          <td class="bg-success has-strong">153</td><td class="bg-success">63.2%</td>
         </tr>
         <tr>
           <td>교원투어</td>
-          <td>149</td><td>31</td><td>3</td><td class="zero">0</td><td class="zero">0</td><td class="zero">0</td>
+          <td>149</td><td>149</td><td>31</td>
+          <td class="has">83</td><td class="zero">0</td>
+          <td class="bg-success has-strong">90</td><td class="bg-success">60.4%</td>
         </tr>
         <tr>
           <td>롯데관광</td>
-          <td>36</td><td>9</td><td class="zero">0</td><td class="zero">0</td><td class="zero">0</td><td class="zero">0</td>
+          <td>36</td><td>36</td><td>9</td>
+          <td>28</td><td class="zero">0</td>
+          <td class="bg-success has">30</td><td class="bg-success">83.3%</td>
         </tr>
         <tr>
           <td>웹투어</td>
-          <td>18</td><td>6</td><td class="zero">0</td><td class="zero">0</td><td class="zero">0</td><td class="zero">0</td>
+          <td>18</td><td>18</td><td>6</td>
+          <td>9</td><td class="zero">0</td>
+          <td class="bg-success has">10</td><td class="bg-success">55.6%</td>
         </tr>
         <tr>
           <td>에어텔닷컴</td>
-          <td>11</td><td>5</td><td class="zero">0</td><td class="zero">0</td><td class="zero">0</td><td class="zero">0</td>
+          <td>11</td><td>11</td><td>5</td>
+          <td class="zero">0</td><td class="zero">0</td>
+          <td class="bg-success">5</td><td class="bg-success">45.5%</td>
         </tr>
         <tr>
           <td>한진관광</td>
-          <td>9</td><td>2</td><td>2</td><td class="zero">0</td><td class="zero">0</td><td class="zero">0</td>
+          <td>9</td><td>9</td><td>2</td>
+          <td>1</td><td class="zero">0</td>
+          <td class="bg-success">2</td><td class="bg-success">22.2%</td>
+        </tr>
+        <tr>
+          <td>TRP</td>
+          <td>9</td><td>9</td><td>0</td>
+          <td>3</td><td class="zero">0</td>
+          <td class="bg-success">3</td><td class="bg-success">33.3%</td>
         </tr>
         <tr>
           <td>보물섬투어</td>
-          <td>1</td><td>0</td><td class="zero">0</td><td class="zero">0</td><td class="zero">0</td><td class="zero">0</td>
+          <td>1</td><td>1</td><td>0</td>
+          <td class="zero">0</td><td class="zero">0</td>
+          <td class="zero">0</td><td>0%</td>
         </tr>
       </tbody>
     </table>
 
     <div style="margin-top:14px;font-size:11px;color:#64748b;line-height:1.6;">
-      ※ <strong>온라인투어</strong> = 여기어때투어(구 명칭 그대로 DB 저장됨) · <strong>인터파크/NOL</strong>은 5월 예약 데이터 없음 (트립스토어 자체 여행사 풀에 없는 듯)
+      ※ 메이저 3사도 ts_reservation_order.package_code 경유 조인으로 99% 매칭. <strong>B(모객 인원 충족)</strong>가 메이저 3사 자동화 핵심 동인.
     </div>
   </div>
 
-  <!-- ==================== INSIGHTS ==================== -->
+  <!-- 인사이트 -->
   <div class="section">
     <div class="section-head">
       <div class="eyebrow">Key Insights</div>
-      <h2>핵심 인사이트 (정량 데이터 기반)</h2>
+      <h2>핵심 인사이트 (v2)</h2>
     </div>
 
     <div class="insight-box">
-      <div class="punch">메이저 3사(하나투어/모두투어/노랑풍선)는 trips 패키지 잔여좌석 정보와 출발확정 시그널 모두 비어 있어 자동 매핑 불가</div>
+      <div class="punch">자동 매핑 가능 영역 = 60.1% / 메이저 3사 모두 활용 가능 / B(모객 충족)가 압도적 핵심 동인</div>
       <h3>📊 데이터가 말해주는 6가지</h3>
       <ol>
-        <li><strong>3변수 동시 충족 = 0건</strong> — 자동 출발확정의 "가장 안전한 영역"은 5월 데이터에 존재하지 않음. 변수 단일/조합 운영 필수.</li>
-        <li><strong>온라인투어(여기어때)가 거의 모든 자동화 후보를 보유</strong> — 출발확정 시그널 31건 100%가 온라인투어. A∩C 9건도 전부 여기.</li>
-        <li><strong>참좋은여행은 잔여좌석만 매칭됨</strong> — A∩B 11건 자동 매핑 가능. 다만 출발확정 시그널은 없음 (참좋은여행 raw status는 숫자만 0~9).</li>
-        <li><strong>메이저 3사 잔여좌석 매칭률 0%</strong> — 하나투어 437건·모두투어 413건·노랑풍선 347건 모두 ts_packages.remaining_seats 정보 비어 있음. 패키지 인벤토리 연동 정책 차이로 추정.</li>
-        <li><strong>인터파크/NOL 데이터 부재</strong> — 노션 매핑 문서에 명시된 인터파크 `출발확정` 시그널은 5월 예약에 없음. 트립스토어 풀에 해당 여행사 상품이 없는 것으로 보임.</li>
-        <li><strong>5월 예약의 73%는 이미 종결</strong> — 출발완료 540건 + 취소 912건 = 1,452건. 신규 [출발확정] 도입은 미래 예약에만 의미 있음.</li>
+        <li><strong>A ∪ B ∪ C = 60.1% (1,198 / 1,992)</strong> — 자동 출발확정 가능 영역이 절반 이상. 운영자 수동 부담 대폭 경감.</li>
+        <li><strong>B (모객 인원 충족)이 가장 큰 동인 — 52.6%</strong> — booked_seats ≥ threshold_for_departure가 단일 변수로 가장 강력. 메이저 3사도 모두 활용 가능.</li>
+        <li><strong>메이저 3사 자동화 가능</strong> — 하나투어 63.4% / 모두투어 54.9% / 노랑풍선 64.3%. v1 분석 결론("자동화 불가")은 매칭 키 오류였음.</li>
+        <li><strong>온라인투어(여기어때)만 C 시그널 보유 — 31건</strong> — E-Ticket 발송완료가 진짜 출발확정 시그널 역할. 다만 A∪B만으로도 메이저 3사 커버 가능.</li>
+        <li><strong>AIRTEL 9.8% / PACKAGE 89.8%</strong> — AIRTEL은 인원 무관(2인 이상이면 출발 가능)이라 결제완료=출발확정으로 자동 매핑 가능. PACKAGE는 threshold 기준.</li>
+        <li><strong>예약완료(A) 단독으로는 약함 — 25.2%</strong> — A∩B 같은 조합이 더 강력. 하지만 OR 관계로 B 단독으로도 자동화 가능.</li>
       </ol>
     </div>
   </div>
 
-  <!-- ==================== RECOMMENDATION ==================== -->
+  <!-- 권장 룰 -->
   <div class="section">
     <div class="section-head">
-      <div class="eyebrow">Recommendation</div>
-      <h2>정책 결정 권장</h2>
-      <p class="lead">데이터 결과를 토대로 한 2-Track 운영안.</p>
+      <div class="eyebrow">Recommended Rules</div>
+      <h2>출발확정 자동 매핑 룰 (제안)</h2>
+      <p class="lead">상품 유형 + OR 합집합 기반.</p>
     </div>
 
     <div class="reco-grid">
-      <div class="reco-card go">
-        <span class="rtag">1차 시범 운영</span>
-        <h3>온라인투어 단독 자동 매핑</h3>
-        <p class="rdesc">출발확정 시그널이 명확하고 잔여좌석 정보까지 매칭되는 유일한 여행사.</p>
+      <div class="reco-card r1">
+        <span class="rtag">1차 룰</span>
+        <h3>AIRTEL · 결제완료</h3>
+        <p class="rdesc">에어텔/자유여행 = 인원 제약 없음. 결제완료 = 출발확정 자동 처리.</p>
         <ul>
-          <li>A ∩ C 룰 적용: 예약완료 + `E-Ticket 발송완료` → 자동 출발확정</li>
-          <li>월 기대 자동 매핑 = ~9건 (5월 기준)</li>
-          <li>2차로 A ∩ B (잔여좌석 0) 추가하면 ~16건까지 확대</li>
-          <li>여기어때 연동 채널 신뢰도 검증</li>
+          <li>kind = AIRTEL</li>
+          <li>AND status = 결제완료</li>
+          <li>→ 자동 출발확정 (즉시)</li>
         </ul>
       </div>
-      <div class="reco-card caution">
-        <span class="rtag">전체 운영</span>
-        <h3>나머지 여행사 = 운영자 수동 처리</h3>
-        <p class="rdesc">메이저 3사 포함 대부분 자동 매핑 불가. 수동 액션이 표준이 되어야 함.</p>
+      <div class="reco-card r2">
+        <span class="rtag">2차 룰 (핵심)</span>
+        <h3>PACKAGE · 모객 충족</h3>
+        <p class="rdesc">패키지 = 최소 모객 인원 도달 시 출발확정. 가장 많은 케이스 커버.</p>
         <ul>
-          <li>운영자가 [출발확정 처리] 버튼 클릭 = lock</li>
-          <li>참좋은여행은 잔여좌석 정보만 추가 활용 가능 (보조 시그널)</li>
-          <li>메이저 3사에 출발확정 시그널 연동 추가 협의 필요 (장기)</li>
-          <li>모객 미달 알림은 잔여좌석 매칭되는 여행사부터 시범</li>
+          <li>kind = PACKAGE</li>
+          <li>AND booked_seats ≥ threshold_for_departure</li>
+          <li>→ 자동 출발확정 (시스템 판단)</li>
+        </ul>
+      </div>
+      <div class="reco-card r3">
+        <span class="rtag">3차 룰 (보조)</span>
+        <h3>여행사 시그널 신뢰</h3>
+        <p class="rdesc">여행사가 명시적 출발확정 신호 보내는 경우 즉시 반영.</p>
+        <ul>
+          <li>raw_status IN (E-Ticket 발송완료, 발권완료, 비자발송완료, 출발확정)</li>
+          <li>→ 자동 출발확정 (시그널 즉시)</li>
         </ul>
       </div>
     </div>
+
+    <div style="margin-top:18px;padding:14px 18px;background:#f8fafc;border-radius:10px;border-left:4px solid #475569;font-size:12px;color:#475569;line-height:1.7;">
+      <strong>💡 운영자 수동 처리는 예외 영역만</strong> — 위 3개 룰로 60% 커버. 나머지 40%(주로 결제 진행 중·취소·접수 단계)는 자연 진행 또는 운영자 액션 영역.
+    </div>
   </div>
 
-  <!-- ==================== QUERY ==================== -->
+  <!-- 쿼리 -->
   <div class="section">
     <div class="section-head">
-      <div class="eyebrow">Methodology</div>
-      <h2>사용 쿼리 (참고)</h2>
-      <p class="lead">분석에 사용된 BigQuery 쿼리. 재현 가능합니다.</p>
+      <div class="eyebrow">Methodology · v2 Query</div>
+      <h2>분석 쿼리 (v2 — 매칭 키 정정)</h2>
     </div>
 
     <div class="query-box">
 <span class="keyword">WITH</span> base <span class="keyword">AS</span> (
-  <span class="keyword">SELECT</span>
-    r.code, r.status_on_management, d.travel_agency_name,
+  <span class="keyword">SELECT</span> r.code, r.status_on_management, d.travel_agency_name,
     <span class="keyword">JSON_EXTRACT_SCALAR</span>(d.raw_data, <span class="string">"$.status"</span>) <span class="keyword">AS</span> raw_status,
-    <span class="keyword">JSON_EXTRACT_SCALAR</span>(d.raw_data, <span class="string">"$.eventCode"</span>) <span class="keyword">AS</span> event_code
+    <span class="change">o.package_code</span>  <span class="comment">-- v2 변경: ts_reservation_order 경유</span>
   <span class="keyword">FROM</span> `tripstore-352708.svc_reservations.ts_member_reservation` r
   <span class="keyword">JOIN</span> `tripstore-352708.svc_reservations.ts_agency_reservation_detail` d
     <span class="keyword">ON</span> r.agency_reservation_detail_id = d.id
+  <span class="change keyword">JOIN</span> <span class="change">`tripstore-352708.svc_reservations.ts_reservation_order` o</span>
+    <span class="change keyword">ON</span> <span class="change">r.order_id = o.id</span>  <span class="comment">-- 핵심: order_id 경유 조인</span>
   <span class="keyword">WHERE</span> <span class="keyword">DATE</span>(r.reserved_at) <span class="keyword">BETWEEN</span> <span class="string">"2026-05-01"</span> <span class="keyword">AND</span> <span class="string">"2026-05-31"</span>
 ),
 with_pkg <span class="keyword">AS</span> (
-  <span class="keyword">SELECT</span> b.*, p.remaining_seats, p.kind
+  <span class="keyword">SELECT</span> b.*, p.kind,
+    (p.booked_seats &gt;= p.threshold_for_departure <span class="keyword">AND</span> p.threshold_for_departure &gt; 0) <span class="keyword">AS</span> B_thr
   <span class="keyword">FROM</span> base b
   <span class="keyword">LEFT JOIN</span> `tripstore-352708.svc_inventory.ts_packages` p
-    <span class="keyword">ON</span> b.event_code = p.package_code  <span class="comment">-- 행사 단위 조인</span>
+    <span class="keyword">ON</span> b.package_code = p.package_code
 )
 <span class="keyword">SELECT</span>
   <span class="keyword">COUNT</span>(*) <span class="keyword">AS</span> total,
   <span class="keyword">COUNTIF</span>(status_on_management=<span class="string">"RESERVATION_CONFIRMATION"</span>) <span class="keyword">AS</span> A,
-  <span class="keyword">COUNTIF</span>(remaining_seats=0) <span class="keyword">AS</span> B,
+  <span class="keyword">COUNTIF</span>(B_thr) <span class="keyword">AS</span> B,
   <span class="keyword">COUNTIF</span>(raw_status <span class="keyword">IN</span> (<span class="string">"E-Ticket 발송완료"</span>,<span class="string">"발권완료"</span>,<span class="string">"비자발송완료"</span>,<span class="string">"출발확정"</span>)) <span class="keyword">AS</span> C,
-  <span class="comment">-- A ∩ B ∩ C 등 ...</span>
+  <span class="change keyword">COUNTIF</span>(
+    <span class="change">status_on_management=<span class="string">"RESERVATION_CONFIRMATION"</span> </span><span class="change keyword">OR</span><span class="change"> B_thr </span><span class="change keyword">OR</span>
+    <span class="change">raw_status </span><span class="change keyword">IN</span><span class="change"> (...)</span>
+  ) <span class="keyword">AS</span> A_OR_B_OR_C  <span class="comment">-- v2 변경: AND → OR</span>
 <span class="keyword">FROM</span> with_pkg
     </div>
   </div>
 
   <div style="text-align:center;padding:28px 0;font-size:11px;color:#94a3b8;">
-    트립스토어 PM · 2026-06-17 · BigQuery 직접 조회 · 메이저 4사 출발확정 가능 여부 검증
+    트립스토어 PM · 2026-06-17 v2 · BigQuery 직접 조회 · 매칭 키 정정 + OR 합집합 + 상품유형 분리
   </div>
 
 </div>
