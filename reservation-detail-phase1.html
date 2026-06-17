@@ -201,6 +201,7 @@
         <div class="section-body">
           <div class="info-row"><span class="info-label">예약자</span><span class="info-value" id="traveler-name">오기웅</span></div>
           <div class="info-row"><span class="info-label">생년월일</span><span class="info-value" id="traveler-birth">1975-12-17</span></div>
+          <div class="info-row"><span class="info-label">성별</span><span class="info-value" id="traveler-gender">남</span></div>
           <div class="info-row"><span class="info-label">이메일</span><span class="info-value" id="traveler-email">kipoongman@hanmail.net</span></div>
           <div class="info-row"><span class="info-label">연락처</span><span class="info-value" id="traveler-phone">010-2374-8449</span></div>
         </div>
@@ -211,15 +212,18 @@
         <div class="section-header">
           <h2>예약 정보</h2>
           <div class="actions">
+            <button class="btn btn-outline btn-sm" onclick="document.getElementById('modal-edit-reservation').classList.add('show')">수정하기</button>
             <button class="btn btn-outline btn-sm" onclick="copyReservationInfo()">예약복사</button>
           </div>
         </div>
         <div class="section-body">
           <div class="info-row"><span class="info-label">예약채널</span><span class="info-value">트립스토어</span></div>
           <div class="info-row"><span class="info-label">트립 예약번호</span><span class="info-value text-mono">26040708-4300101H</span></div>
-          <div class="info-row"><span class="info-label">여행사 예약번호</span><span class="info-value text-mono">HB2633517226</span></div>
+          <div class="info-row"><span class="info-label">여행사 예약번호</span><span class="info-value text-mono" id="rsv-partner-no">HB2633517226</span></div>
+          <div class="info-row"><span class="info-label">제휴사 ID</span><span class="info-value text-mono" id="rsv-affiliate-id">-</span></div>
+          <div class="info-row"><span class="info-label">제휴코드</span><span class="info-value text-mono" id="rsv-affiliate-code">-</span></div>
           <div class="info-row"><span class="info-label">채널사 주문번호</span><span class="info-value">-</span></div>
-          <div class="info-row"><span class="info-label">수수료율 (VAT포함)</span><span class="info-value">8.8%</span></div>
+          <div class="info-row"><span class="info-label">수수료율 (VAT포함)</span><span class="info-value" id="rsv-commission-rate">8.8%</span></div>
           <div class="info-row"><span class="info-label">예약일시</span><span class="info-value">2026-04-07 08:43</span></div>
           <div class="info-row"><span class="info-label">예약 생성 방식</span><span class="info-value">트립스토어 예약</span></div>
         </div>
@@ -234,16 +238,13 @@
           </div>
         </div>
         <div class="section-body">
-          <div class="info-row"><span class="info-label">트립 예약상태 <span style="font-size:10px;color:#999;">(legacy · status_on_management)</span></span><span class="info-value"><span class="badge green" id="status-on-management">예약완료</span></span></div>
-          <div class="info-row"><span class="info-label">rsv.status <span style="font-size:10px;color:#1565c0;">(신규 시스템)</span></span><span class="info-value"><span class="badge gray" id="status-rsv">출발대기</span></span></div>
+          <div class="info-row"><span class="info-label">트립 예약상태</span><span class="info-value"><span class="badge green" id="status-on-management">예약완료</span></span></div>
           <div class="info-row"><span class="info-label">트립 결제상태</span><span class="info-value"><span class="badge blue" id="status-payment">결제완료</span></span></div>
-          <div class="info-row"><span class="info-label">정산상태</span><span class="info-value"><span class="badge gray" id="status-settlement">정산대기</span></span></div>
-          <div class="info-row"><span class="info-label">지급상태</span><span class="info-value"><span class="badge gray" id="status-payout">지급대기</span></span></div>
+          <div class="info-row"><span class="info-label">여행사 예약상태</span><span class="info-value"><span class="badge gray" id="status-partner-rsv">예약확정</span></span></div>
+          <div class="info-row"><span class="info-label">여행사 결제상태</span><span class="info-value"><span class="badge gray" id="status-partner-pay">입금완료</span></span></div>
         </div>
         <div style="background:#fff8e1;border:1px solid #ffe082;border-radius:6px;padding:8px 12px;margin:0 16px 12px;font-size:11px;color:#5d4037;line-height:1.55;">
-          <strong>🔒 상태 변경 정책</strong><br>
-          · <strong>지급 전</strong>까지는 예약상태를 [예약접수] / [취소완료]로 되돌릴 수 있음<br>
-          · <strong>지급진행 · 지급완료</strong> 시점부터 예약 FIX → 되돌리기 불가, <strong>정산조정</strong>으로만 처리
+          ℹ 1차 컷 기준: <strong>트립 예약상태</strong>만 수정 가능. 여행사 측 상태는 표시 전용.
         </div>
       </div>
 
@@ -1249,6 +1250,41 @@
 
 <!-- ==================== 모달들 ==================== -->
 
+<!-- 예약 정보 수정 모달 -->
+<div class="modal-overlay" id="modal-edit-reservation">
+  <div class="modal" style="width:520px;">
+    <div class="modal-header">
+      <h3>예약 정보 수정</h3>
+      <button class="close" onclick="this.closest('.modal-overlay').classList.remove('show')">&times;</button>
+    </div>
+    <div class="modal-body">
+      <div style="background:#fff8e1;border:1px solid #ffe082;border-radius:6px;padding:8px 12px;font-size:11px;color:#5d4037;margin-bottom:16px;">
+        ⚠ 여행사 예약번호 / 수수료율 / 제휴사 정보를 수정할 수 있습니다. 변경 이력은 자동 기록됩니다.
+      </div>
+      <div class="form-group">
+        <label>여행사 예약번호</label>
+        <input type="text" id="edit-rsv-partner-no" value="HB2633517226">
+      </div>
+      <div class="form-group">
+        <label>수수료율 (VAT포함, %)</label>
+        <input type="number" step="0.1" min="0" id="edit-rsv-commission-rate" value="8.8">
+      </div>
+      <div class="form-group">
+        <label>제휴사 ID</label>
+        <input type="text" id="edit-rsv-affiliate-id" value="" placeholder="예: AFF-1023">
+      </div>
+      <div class="form-group">
+        <label>제휴코드</label>
+        <input type="text" id="edit-rsv-affiliate-code" value="" placeholder="예: PROMO-2026Q2">
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-outline" onclick="this.closest('.modal-overlay').classList.remove('show')">취소</button>
+      <button class="btn btn-primary" onclick="saveReservationInfo()">저장</button>
+    </div>
+  </div>
+</div>
+
 <!-- 예약자 정보 수정 모달 -->
 <div class="modal-overlay" id="modal-edit-traveler">
   <div class="modal" style="width:520px;">
@@ -1267,6 +1303,13 @@
       <div class="form-group">
         <label>생년월일</label>
         <input type="date" id="edit-traveler-birth" value="1975-12-17">
+      </div>
+      <div class="form-group">
+        <label>성별</label>
+        <select id="edit-traveler-gender">
+          <option value="남" selected>남</option>
+          <option value="여">여</option>
+        </select>
       </div>
       <div class="form-group">
         <label>이메일</label>
@@ -1295,21 +1338,16 @@
 
       <!-- 현재 상태 -->
       <div style="background:#f5f5f5;border:1px solid #e0e0e0;border-radius:8px;padding:12px;margin-bottom:14px;">
-        <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px;font-size:11px;">
-          <div><div style="color:#888;margin-bottom:4px;">현재 트립 예약상태 <span style="color:#999;">(legacy)</span></div><span class="badge green" id="cur-status-mng">예약완료</span></div>
-          <div><div style="color:#888;margin-bottom:4px;">현재 rsv.status <span style="color:#1565c0;">(신규 시스템)</span></div><span class="badge gray" id="cur-status-rsv">출발대기</span></div>
-          <div><div style="color:#888;margin-bottom:4px;">현재 결제상태</div><span class="badge blue" id="cur-status-pay">결제완료</span></div>
-        </div>
-        <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:10px;font-size:11px;margin-top:10px;border-top:1px dashed #d0d0d0;padding-top:10px;">
-          <div><div style="color:#888;margin-bottom:4px;">정산상태</div><span class="badge gray" id="cur-status-set">정산대기</span></div>
-          <div><div style="color:#888;margin-bottom:4px;">지급상태</div><span class="badge gray" id="cur-status-pay2">지급대기</span></div>
+        <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:10px;font-size:11px;">
+          <div><div style="color:#888;margin-bottom:4px;">현재 트립 예약상태</div><span class="badge green" id="cur-status-mng">예약완료</span></div>
+          <div><div style="color:#888;margin-bottom:4px;">현재 트립 결제상태</div><span class="badge blue" id="cur-status-pay">결제완료</span></div>
         </div>
       </div>
 
       <!-- 전이 룰 안내 -->
       <div style="background:#e8f4fd;border:1px solid #bbdefb;border-radius:8px;padding:10px 12px;font-size:11px;color:#0d47a1;line-height:1.7;margin-bottom:14px;">
-        <div style="font-weight:700;margin-bottom:4px;">📌 예약상태 전이 룰 (현재 화면 기준)</div>
-        · 예약접수 → 취소완료 / 예약완료<br>
+        <div style="font-weight:700;margin-bottom:4px;">📌 트립 예약상태 전이 룰</div>
+        · 예약접수 → 취소완료 / 예약완료 <span style="color:#d32f2f;">(결제완료 필수)</span><br>
         · 예약완료 → 취소완료 / 출발완료 <span style="color:#d32f2f;">(출발일 경과 필수)</span><br>
         · 취소완료 → 예약접수 <span style="color:#666;">(되돌리기)</span><br>
         · 출발완료 → 예약접수 <span style="color:#666;">(되돌리기)</span>
@@ -1317,24 +1355,14 @@
 
       <!-- 변경할 상태 선택 -->
       <div class="form-group">
-        <label>변경할 트립 예약상태 (legacy)</label>
+        <label>변경할 트립 예약상태</label>
         <select id="new-status-mng" onchange="onStatusChange()">
           <!-- 옵션은 현재 상태에 따라 JS에서 동적 채움 -->
         </select>
-        <div class="help" id="status-rsv-preview" style="margin-top:4px;color:#1565c0;"></div>
       </div>
 
       <!-- 가드 메시지 영역 -->
       <div id="status-guard-msg" style="display:none;background:#ffebee;border:1px solid #ef9a9a;border-radius:6px;padding:10px 12px;font-size:11px;color:#b71c1c;margin-bottom:14px;line-height:1.6;"></div>
-
-      <!-- 정책 안내 -->
-      <div style="background:#fff8e1;border:1px solid #ffe082;border-radius:8px;padding:10px 12px;font-size:11px;color:#5d4037;line-height:1.7;">
-        <strong>📋 처리 규칙</strong><br>
-        ① <strong>접수 시점</strong>: 결제완료여도 자동으로 [출발대기]로 넘어가지 않음 → 무조건 [예약접수=예약성공]으로 생성, <strong>여행사 파트너스 액션</strong>으로 [예약완료=출발대기] 전환<br>
-        ② <strong>정산완료</strong> = 정산데이터 생성(출발완료 기준)<br>
-        ③ <strong>지급 전</strong>까지는 예약상태를 [취소완료] / [예약접수]로 되돌릴 수 있음<br>
-        ④ <strong>지급진행 · 지급완료</strong> 시점부터 예약 FIX → 되돌리기 불가, <strong>정산조정</strong>으로만 처리
-      </div>
 
       <div class="form-group" style="margin-top:14px;">
         <label>변경 메모 (선택)</label>
@@ -4432,15 +4460,32 @@ function showToast(message) {
 function saveTravelerInfo() {
   const name = document.getElementById('edit-traveler-name').value.trim();
   const birth = document.getElementById('edit-traveler-birth').value;
+  const gender = document.getElementById('edit-traveler-gender').value;
   const email = document.getElementById('edit-traveler-email').value.trim();
   const phone = document.getElementById('edit-traveler-phone').value.trim();
-  if (!name || !birth || !email || !phone) { alert('모든 항목을 입력해주세요.'); return; }
+  if (!name || !birth || !gender || !email || !phone) { alert('모든 항목을 입력해주세요.'); return; }
   document.getElementById('traveler-name').textContent = name;
   document.getElementById('traveler-birth').textContent = birth;
+  document.getElementById('traveler-gender').textContent = gender;
   document.getElementById('traveler-email').textContent = email;
   document.getElementById('traveler-phone').textContent = phone;
   document.getElementById('modal-edit-traveler').classList.remove('show');
   showToast('예약자 정보가 수정되었습니다.');
+}
+
+// 예약 정보 저장
+function saveReservationInfo() {
+  const partnerNo = document.getElementById('edit-rsv-partner-no').value.trim();
+  const rate = document.getElementById('edit-rsv-commission-rate').value.trim();
+  const affId = document.getElementById('edit-rsv-affiliate-id').value.trim();
+  const affCode = document.getElementById('edit-rsv-affiliate-code').value.trim();
+  if (!partnerNo || rate === '') { alert('여행사 예약번호와 수수료율은 필수입니다.'); return; }
+  document.getElementById('rsv-partner-no').textContent = partnerNo;
+  document.getElementById('rsv-commission-rate').textContent = `${rate}%`;
+  document.getElementById('rsv-affiliate-id').textContent = affId || '-';
+  document.getElementById('rsv-affiliate-code').textContent = affCode || '-';
+  document.getElementById('modal-edit-reservation').classList.remove('show');
+  showToast('예약 정보가 수정되었습니다.');
 }
 
 // 예약상태 전이 룰 (트립 예약상태 legacy 기준)
@@ -4464,17 +4509,11 @@ const STATUS_TRANSITION_RULES = {
 // 모달 오픈 시 현재 상태 기준으로 옵션 채우기
 function openStatusModal() {
   const curMng = document.getElementById('status-on-management').textContent.trim();
-  const curRsv = document.getElementById('status-rsv').textContent.trim();
   const curPayment = document.getElementById('status-payment').textContent.trim();
-  const curSet = document.getElementById('status-settlement').textContent.trim();
-  const curPay2 = document.getElementById('status-payout').textContent.trim();
 
   // 현재 상태 카드 갱신
   document.getElementById('cur-status-mng').textContent = curMng;
-  document.getElementById('cur-status-rsv').textContent = curRsv;
   document.getElementById('cur-status-pay').textContent = curPayment;
-  document.getElementById('cur-status-set').textContent = curSet;
-  document.getElementById('cur-status-pay2').textContent = curPay2;
 
   // 옵션 채우기
   const sel = document.getElementById('new-status-mng');
@@ -4497,7 +4536,6 @@ function openStatusModal() {
     rules.forEach(r => {
       const o = document.createElement('option');
       o.value = r.to;
-      o.dataset.rsv = r.rsv;
       o.dataset.requirePayment = r.requirePayment ? '1' : '';
       o.dataset.requireDeparturePassed = r.requireDeparturePassed ? '1' : '';
       o.dataset.isRevert = r.isRevert ? '1' : '';
@@ -4507,7 +4545,6 @@ function openStatusModal() {
   }
 
   document.getElementById('status-guard-msg').style.display = 'none';
-  document.getElementById('status-rsv-preview').textContent = '';
   document.getElementById('modal-edit-status').classList.add('show');
   onStatusChange();
 }
@@ -4516,29 +4553,18 @@ function openStatusModal() {
 function onStatusChange() {
   const sel = document.getElementById('new-status-mng');
   if (!sel.value || sel.options[sel.selectedIndex].disabled) {
-    document.getElementById('status-rsv-preview').textContent = '';
     document.getElementById('status-guard-msg').style.display = 'none';
     setSaveDisabled(true);
     return;
   }
   const opt = sel.options[sel.selectedIndex];
-  const newMng = sel.value;
-  const newRsv = opt.dataset.rsv;
   const curPayment = document.getElementById('status-payment').textContent.trim();
-  const curPayout = document.getElementById('status-payout').textContent.trim();
   const guard = document.getElementById('status-guard-msg');
-  const preview = document.getElementById('status-rsv-preview');
   let msgs = [];
 
-  preview.innerHTML = '→ rsv.status: <strong>' + newRsv + '</strong>';
-
-  // 지급진행/지급완료 = 예약 FIX
-  if (curPayout === '지급진행' || curPayout === '지급완료') {
-    msgs.push('🔒 지급 상태가 [' + curPayout + ']이므로 예약상태를 변경할 수 없습니다. <strong>정산조정</strong>으로 처리하세요.');
-  }
   // 예약완료 전환 시 결제완료 필수
   if (opt.dataset.requirePayment === '1' && curPayment !== '결제완료') {
-    msgs.push('⚠ [예약완료=출발대기]는 결제상태가 <strong>결제완료</strong>일 때만 가능합니다. 현재: ' + curPayment);
+    msgs.push('⚠ [예약완료]는 트립 결제상태가 <strong>결제완료</strong>일 때만 가능합니다. 현재: ' + curPayment);
   }
   // 출발완료 전환 시 출발일 경과 필수
   if (opt.dataset.requireDeparturePassed === '1') {
@@ -4571,25 +4597,16 @@ function setSaveDisabled(disabled) {
 function saveStatusChange() {
   const sel = document.getElementById('new-status-mng');
   if (!sel.value) return;
-  const opt = sel.options[sel.selectedIndex];
   const newMng = sel.value;
-  const newRsv = opt.dataset.rsv;
   const mngBadge = document.getElementById('status-on-management');
-  const rsvBadge = document.getElementById('status-rsv');
   const colorMap = {
     '예약접수': 'gray', '예약완료': 'green', '취소요청': 'orange',
     '취소완료': 'red', '출발완료': 'blue', '취소진행': 'orange'
   };
-  const rsvColorMap = {
-    '예약성공': 'gray', '출발대기': 'green', '취소신청': 'orange',
-    '취소완료': 'red', '출발완료': 'blue', '취소진행': 'orange'
-  };
   mngBadge.textContent = newMng;
   mngBadge.className = 'badge ' + (colorMap[newMng] || 'gray');
-  rsvBadge.textContent = newRsv;
-  rsvBadge.className = 'badge ' + (rsvColorMap[newRsv] || 'gray');
   document.getElementById('modal-edit-status').classList.remove('show');
-  showToast('예약상태가 [' + newMng + ' / ' + newRsv + ']로 변경되었습니다.');
+  showToast('트립 예약상태가 [' + newMng + ']로 변경되었습니다.');
 }
 </script>
 </body>
