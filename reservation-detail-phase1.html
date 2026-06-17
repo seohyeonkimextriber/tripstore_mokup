@@ -44,6 +44,10 @@
   .editing .edit-mode { display: inline-flex; align-items: center; }
   .editing .info-label.editable { color: #d32f2f; font-weight: 600; }
   .btn-edit-toggle.is-editing { background: #1565c0; color: #fff; border-color: #1565c0; }
+  /* 하단 수정하기 게이팅: 평소엔 숨김, body.bottom-edit-mode 일 때만 노출 */
+  .edit-gated { display: none !important; }
+  body.bottom-edit-mode .edit-gated { display: inline-flex !important; align-items: center; }
+  .footer-actions .btn-bottom-edit.is-editing { background: #1565c0; color: #fff; border-color: #1565c0; }
   .section-row .section { margin-bottom: 0; height: 100%; display: flex; flex-direction: column; }
   .section-row .section-body { flex: 1; }
   .section-row .info-grid { grid-template-columns: 1fr; }
@@ -383,8 +387,8 @@
       <div class="section-header">
         <h2>예약 금액 관리</h2>
         <div class="actions">
-          <button class="btn btn-minus btn-sm btn-icon" onclick="document.getElementById('modal-sub').classList.add('show')"><span class="feature-tag">파트너스오픈</span> + 금액 추가</button>
-          <button class="btn btn-plus btn-sm btn-icon" onclick="document.getElementById('modal-add').classList.add('show')"><span class="feature-tag">파트너스오픈</span> - 금액 차감</button>
+          <button class="btn btn-minus btn-sm btn-icon edit-gated" onclick="document.getElementById('modal-sub').classList.add('show')"><span class="feature-tag">파트너스오픈</span> + 금액 추가</button>
+          <button class="btn btn-plus btn-sm btn-icon edit-gated" onclick="document.getElementById('modal-add').classList.add('show')"><span class="feature-tag">파트너스오픈</span> - 금액 차감</button>
         </div>
       </div>
       <div class="section-body">
@@ -394,8 +398,8 @@
             <div>
               <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px;">
                 <span style="font-size:11px;color:#1565c0;font-weight:600;">인원 구성</span>
-                <button class="btn btn-plus btn-sm" style="font-size:10px;padding:2px 8px;" onclick="document.getElementById('modal-add-pax').classList.add('show')">+ 인원추가</button>
-                <button class="btn btn-danger btn-sm" style="font-size:10px;padding:2px 8px;" onclick="document.getElementById('modal-remove-pax').classList.add('show')">- 인원삭제</button>
+                <button class="btn btn-plus btn-sm edit-gated" style="font-size:10px;padding:2px 8px;" onclick="document.getElementById('modal-add-pax').classList.add('show')">+ 인원추가</button>
+                <button class="btn btn-danger btn-sm edit-gated" style="font-size:10px;padding:2px 8px;" onclick="document.getElementById('modal-remove-pax').classList.add('show')">- 인원삭제</button>
               </div>
               <div style="display:flex;gap:8px;align-items:center;font-size:13px;font-weight:600;" id="pax-badges">
                 <span class="badge blue" id="pax-adult">성인 3</span>
@@ -450,7 +454,7 @@
           <div style="background:#fff;border:1px solid #e0e0e0;border-radius:8px;padding:14px;">
             <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;padding-bottom:8px;border-bottom:1px solid #f0f0f0;">
               <span style="font-size:12px;font-weight:700;color:#333;">할인금액 관리 <span style="font-size:10px;color:#888;font-weight:400;">(부담주체별)</span></span>
-              <button class="btn btn-outline btn-sm" style="font-size:10px;padding:2px 8px;" onclick="document.getElementById('modal-sub').classList.add('show')">수정하기</button>
+              <button class="btn btn-outline btn-sm edit-gated" style="font-size:10px;padding:2px 8px;" onclick="document.getElementById('modal-sub').classList.add('show')">수정하기</button>
             </div>
             <div style="display:flex;justify-content:space-between;font-size:11px;padding:4px 0;">
               <span style="color:#666;">특가할인 <span style="font-size:9px;color:#888;font-family:monospace;">(2000~2)</span></span>
@@ -479,7 +483,7 @@
           <div style="background:#fff;border:1px solid #e0e0e0;border-radius:8px;padding:14px;">
             <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;padding-bottom:8px;border-bottom:1px solid #f0f0f0;">
               <span style="font-size:12px;font-weight:700;color:#333;">위약금 관리 <span style="font-size:10px;color:#888;font-family:monospace;font-weight:400;">(7010)</span></span>
-              <button class="btn btn-outline btn-sm" style="font-size:10px;padding:2px 8px;" onclick="alert('취소 진행 시 [예약 취소] 모달에서 위약금이 자동 산정됩니다.')">수정하기</button>
+              <button class="btn btn-outline btn-sm edit-gated" style="font-size:10px;padding:2px 8px;" onclick="alert('취소 진행 시 [예약 취소] 모달에서 위약금이 자동 산정됩니다.')">수정하기</button>
             </div>
             <div style="display:flex;justify-content:space-between;font-size:11px;padding:4px 0;">
               <span style="color:#666;">인원별 취소위약금 <span style="font-size:9px;color:#aaa;">(1인 총합)</span></span>
@@ -662,7 +666,7 @@
               <div class="coupon-detail" id="applied-coupon-detail">유효기간: 2026-03-01 ~ 2026-06-30 | 최소 결제금액: 500,000원 | 상태: <strong style="color:#2e7d32;">적용중</strong></div>
             </div>
             <div class="coupon-amount" id="applied-coupon-amount">-20,000</div>
-            <button class="btn btn-danger btn-sm" style="margin-left: 12px;" onclick="cancelCoupon()">쿠폰 취소</button>
+            <button class="btn btn-danger btn-sm edit-gated" style="margin-left: 12px;" onclick="cancelCoupon()">쿠폰 취소</button>
           </div>
         </div>
 
@@ -691,7 +695,10 @@
     <div class="section">
       <div class="section-header">
         <h2>결제 정보</h2>
-        <div class="actions"></div>
+        <div class="actions">
+          <button class="btn btn-outline btn-sm edit-gated" onclick="alert('결제 추가/수정은 1차 컷 미구현. 모달 확정 후 연결 예정.')">결제 추가</button>
+          <button class="btn btn-outline btn-sm edit-gated" onclick="alert('결제 환불 처리는 1차 컷 미구현. 모달 확정 후 연결 예정.')">환불 처리</button>
+        </div>
       </div>
       <div class="section-body">
         <!-- 핵심 비교: 결제 필요 금액 vs 결제된 금액 -->
@@ -1333,7 +1340,7 @@
 <div class="footer-actions">
   <button class="btn btn-danger" onclick="document.getElementById('modal-cancel-rsv').classList.add('show')">예약 취소</button>
   <button class="btn btn-outline">재예약</button>
-  <button class="btn btn-primary">수정하기</button>
+  <button class="btn btn-primary btn-bottom-edit" id="btn-bottom-edit" onclick="toggleBottomEditMode(this)">수정하기</button>
 </div>
 
 <!-- ==================== 모달들 ==================== -->
@@ -4501,6 +4508,15 @@ function resetTripDates() {
   const arr = document.getElementById('info-arr-input');
   dep.value = dep.dataset.original;
   arr.value = arr.dataset.original;
+}
+
+// 하단 수정하기: 상단 4카드와 무관. 금액/할인/인원/결제 영역의 액션 버튼만 노출.
+function toggleBottomEditMode(btn) {
+  const editing = !document.body.classList.contains('bottom-edit-mode');
+  document.body.classList.toggle('bottom-edit-mode', editing);
+  btn.textContent = editing ? '완료' : '수정하기';
+  btn.classList.toggle('is-editing', editing);
+  showToast(editing ? '수정 모드 진입 (금액·할인·인원·결제 영역)' : '수정 모드 종료');
 }
 
 // 카드 단위 edit 모드 토글 (수정하기 ↔ 완료)
