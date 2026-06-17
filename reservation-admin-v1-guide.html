@@ -1,0 +1,1064 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<title>신규 예약시스템 어드민 — 1차 작업 운영 가이드 (v1)</title>
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+  font-family: -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", "Pretendard", sans-serif;
+  line-height: 1.7;
+  color: #1f2937;
+  background: #fafbfc;
+  font-size: 15px;
+}
+.layout { display: grid; grid-template-columns: 260px 1fr; min-height: 100vh; }
+nav.sidebar {
+  background: #064e3b;
+  color: #d1fae5;
+  padding: 32px 24px;
+  position: sticky;
+  top: 0;
+  height: 100vh;
+  overflow-y: auto;
+}
+nav.sidebar .brand {
+  font-size: 14px;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  color: white;
+  padding-bottom: 16px;
+  margin-bottom: 16px;
+  border-bottom: 1px solid #065f46;
+}
+nav.sidebar .brand small { display: block; font-size: 11px; opacity: 0.65; font-weight: 400; margin-top: 4px; }
+nav.sidebar ul { list-style: none; }
+nav.sidebar li { margin: 4px 0; }
+nav.sidebar a {
+  color: #d1fae5; text-decoration: none; display: block;
+  padding: 8px 10px; border-radius: 6px; font-size: 13.5px; transition: all 0.15s;
+}
+nav.sidebar a:hover { background: #065f46; color: white; }
+nav.sidebar .section-label {
+  font-size: 11px; color: #6ee7b7; font-weight: 700; letter-spacing: 1px;
+  margin: 20px 0 8px; text-transform: uppercase;
+}
+nav.sidebar a .ic { display: inline-block; width: 22px; text-align: center; margin-right: 4px; }
+main { padding: 48px 56px; max-width: 1040px; }
+header.page-header { border-bottom: 2px solid #e5e7eb; padding-bottom: 24px; margin-bottom: 32px; }
+h1 { font-size: 30px; letter-spacing: -0.5px; font-weight: 800; margin-bottom: 6px; }
+h1 .badge {
+  display: inline-block; vertical-align: middle; font-size: 12px;
+  background: linear-gradient(135deg, #10b981 0%, #059669 100%); color: white;
+  padding: 4px 12px; border-radius: 999px;
+  margin-left: 8px; font-weight: 700; letter-spacing: 0.5px;
+}
+.page-meta { color: #6b7280; font-size: 14px; }
+.page-meta a { color: #047857; text-decoration: none; border-bottom: 1px dotted #047857; }
+
+section.area {
+  background: white;
+  border: 1px solid #e5e7eb;
+  border-radius: 14px;
+  padding: 32px 36px;
+  margin-bottom: 24px;
+  scroll-margin-top: 24px;
+}
+section.area h2 {
+  font-size: 22px; font-weight: 800; letter-spacing: -0.3px;
+  margin-bottom: 6px; display: flex; align-items: center; gap: 12px;
+}
+section.area h2 .area-num {
+  background: linear-gradient(135deg, #10b981, #059669);
+  color: white; width: 36px; height: 36px; border-radius: 10px;
+  display: inline-flex; align-items: center; justify-content: center;
+  font-size: 16px; font-weight: 800;
+}
+section.area .area-sub {
+  font-size: 14px; color: #6b7280; margin-bottom: 24px; padding-left: 48px;
+}
+h3 {
+  font-size: 12px; margin: 22px 0 10px; color: #047857;
+  letter-spacing: 1px; text-transform: uppercase; font-weight: 700;
+}
+
+/* Mockup preview */
+.mockup-preview {
+  background: #f8fafc;
+  border: 1px solid #e5e7eb;
+  border-radius: 10px;
+  padding: 16px 20px;
+  font-size: 13.5px;
+  margin: 8px 0 16px;
+  font-family: "SF Mono", Consolas, monospace;
+}
+.mockup-preview .mp-row {
+  display: grid;
+  grid-template-columns: 160px 1fr;
+  gap: 12px;
+  padding: 4px 0;
+}
+.mockup-preview .mp-row dt {
+  color: #6b7280;
+  font-weight: 600;
+  font-size: 12px;
+  font-family: -apple-system, sans-serif;
+}
+.mockup-preview .mp-row dd { color: #1f2937; }
+.mockup-preview.amounts .mp-row { border-bottom: 1px dotted #e5e7eb; }
+.mockup-preview.amounts .mp-row.total { font-weight: 700; color: #047857; border-top: 1px solid #047857; padding-top: 8px; }
+
+/* Ledger table styled */
+.ledger-tbl {
+  width: 100%;
+  font-size: 13px;
+  border-collapse: collapse;
+  margin: 8px 0;
+  background: white;
+  border-radius: 8px;
+  overflow: hidden;
+  border: 1px solid #e5e7eb;
+}
+.ledger-tbl th, .ledger-tbl td {
+  padding: 8px 12px;
+  border-bottom: 1px solid #f1f5f9;
+  text-align: left;
+}
+.ledger-tbl th { background: #f8fafc; font-size: 11px; font-weight: 700; color: #6b7280; letter-spacing: 0.5px; }
+.ledger-tbl .code { font-family: "SF Mono", monospace; color: #047857; font-weight: 600; }
+.ledger-tbl .amt-plus { color: #15803d; font-weight: 600; text-align: right; font-family: "SF Mono", monospace; }
+.ledger-tbl .amt-minus { color: #b91c1c; font-weight: 600; text-align: right; font-family: "SF Mono", monospace; }
+.ledger-tbl .date { color: #94a3b8; font-size: 12px; font-family: "SF Mono", monospace; }
+
+/* Balance cards */
+.balance-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin: 8px 0; }
+.balance-card {
+  background: #f8fafc;
+  border-radius: 10px;
+  padding: 12px 14px;
+  border-left: 3px solid #10b981;
+}
+.balance-card .emoji { font-size: 18px; }
+.balance-card .label { font-size: 12px; color: #6b7280; font-weight: 600; margin-top: 2px; }
+.balance-card .v { font-size: 13px; margin-top: 6px; font-family: "SF Mono", monospace; }
+.balance-card .v.plus { color: #15803d; }
+.balance-card .v.minus { color: #b91c1c; }
+
+/* Actions */
+.action-list { display: flex; flex-direction: column; gap: 10px; margin: 6px 0 12px; }
+.action {
+  background: #f8fafc;
+  border-left: 3px solid #10b981;
+  padding: 12px 16px;
+  border-radius: 0 8px 8px 0;
+  font-size: 14px;
+}
+.action .btn-name {
+  display: inline-block;
+  background: #047857;
+  color: white;
+  padding: 2px 10px;
+  border-radius: 5px;
+  font-size: 12.5px;
+  font-weight: 600;
+  margin-right: 8px;
+  font-family: "SF Mono", Consolas, monospace;
+}
+.action .desc { color: #4b5563; }
+
+/* Scenarios */
+.scenario-block {
+  background: #fffbeb;
+  border-radius: 10px;
+  padding: 14px 18px;
+  margin: 6px 0 12px;
+}
+.scenario-block .scen {
+  border-bottom: 1px dashed #fde68a;
+  padding: 8px 0;
+  font-size: 13.5px;
+}
+.scenario-block .scen:last-child { border-bottom: none; }
+.scenario-block .scen .when { font-weight: 700; color: #78350f; margin-bottom: 4px; }
+.scenario-block .scen .flow {
+  color: #1f2937;
+  padding-left: 12px;
+  font-size: 13px;
+}
+.scenario-block .scen .flow .arr { color: #94a3b8; margin: 0 4px; }
+
+.warn {
+  background: #fef2f2;
+  border-left: 4px solid #dc2626;
+  padding: 12px 16px;
+  border-radius: 0 8px 8px 0;
+  font-size: 13.5px;
+  margin: 12px 0;
+  color: #991b1b;
+}
+.tip {
+  background: #eff6ff;
+  border-left: 4px solid #2563eb;
+  padding: 12px 16px;
+  border-radius: 0 8px 8px 0;
+  font-size: 13.5px;
+  margin: 12px 0;
+  color: #1e40af;
+}
+
+.scope-card {
+  background: linear-gradient(135deg, #ecfdf5 0%, #d1fae5 100%);
+  border: 1px solid #6ee7b7;
+  border-radius: 14px;
+  padding: 24px 28px;
+  margin-bottom: 24px;
+}
+.scope-card h3 { color: #047857; margin-top: 0; font-size: 11px; }
+.scope-card .scope-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 12px;
+  margin-top: 12px;
+}
+.scope-card .scope-item {
+  background: white;
+  border-radius: 10px;
+  padding: 14px 16px;
+  border-left: 4px solid #10b981;
+}
+.scope-card .scope-item .num {
+  display: inline-block;
+  background: #d1fae5;
+  color: #065f46;
+  width: 24px; height: 24px;
+  border-radius: 50%;
+  text-align: center;
+  font-size: 12px;
+  font-weight: 700;
+  line-height: 24px;
+  margin-right: 6px;
+}
+.scope-card .scope-item .title { font-weight: 700; color: #1f2937; font-size: 14px; }
+.scope-card .scope-item .sub { font-size: 12px; color: #6b7280; margin-top: 4px; padding-left: 30px; }
+
+footer { text-align: center; padding: 32px; color: #9ca3af; font-size: 12px; border-top: 1px dashed #e5e7eb; margin-top: 40px; }
+
+/* Feature cards */
+.feature-cards { display: grid; gap: 10px; margin-top: 12px; }
+.feature-card {
+  border: 1px solid #e5e7eb;
+  border-left: 4px solid #10b981;
+  border-radius: 10px;
+  background: white;
+  overflow: hidden;
+  transition: all 0.15s;
+}
+.feature-card[open] { box-shadow: 0 2px 8px rgba(0,0,0,0.05); }
+.feature-card summary {
+  padding: 12px 16px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 14px;
+  font-weight: 600;
+  background: #f0fdf4;
+  color: #065f46;
+  list-style: none;
+  user-select: none;
+}
+.feature-card summary::-webkit-details-marker { display: none; }
+.feature-card summary::before {
+  content: "▸";
+  font-size: 11px;
+  color: #94a3b8;
+  transition: transform 0.15s;
+}
+.feature-card[open] summary::before { transform: rotate(90deg); }
+.feature-card summary .priority {
+  font-size: 11px;
+  font-weight: 700;
+  padding: 3px 9px;
+  border-radius: 999px;
+  margin-left: auto;
+  letter-spacing: 0.3px;
+  background: #d1fae5;
+  color: #065f46;
+}
+.feature-card .fc-body { padding: 16px 20px; font-size: 13.5px; line-height: 1.85; color: #334155; }
+.feature-card .fc-body strong { color: #1e293b; }
+.feature-card .fc-body h4 {
+  font-size: 12px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: #6b7280;
+  margin-top: 12px;
+  margin-bottom: 4px;
+}
+.feature-card .fc-body h4:first-child { margin-top: 0; }
+.feature-card .fc-body ul { padding-left: 20px; margin: 4px 0; }
+.feature-card .fc-body li { margin: 3px 0; }
+
+/* Mockup toggle */
+.mockup-toggle-btn {
+  position: fixed;
+  bottom: 24px;
+  right: 24px;
+  background: linear-gradient(135deg, #10b981, #059669);
+  color: white;
+  padding: 14px 22px;
+  border-radius: 999px;
+  font-weight: 700;
+  font-size: 14px;
+  letter-spacing: 0.3px;
+  cursor: pointer;
+  box-shadow: 0 6px 20px rgba(16, 185, 129, 0.4);
+  z-index: 1001;
+  border: none;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  transition: transform 0.15s, box-shadow 0.15s;
+}
+.mockup-toggle-btn:hover { transform: translateY(-2px); box-shadow: 0 8px 24px rgba(16, 185, 129, 0.5); }
+.mockup-toggle-btn.open {
+  right: calc(40vw + 16px);
+  background: #064e3b;
+}
+
+.mockup-panel {
+  position: fixed;
+  top: 0;
+  right: 0;
+  width: clamp(560px, 40vw, 900px);
+  height: 100vh;
+  background: white;
+  box-shadow: -6px 0 32px rgba(0,0,0,0.18);
+  transform: translateX(100%);
+  transition: transform 0.3s ease;
+  z-index: 1000;
+  display: flex;
+  flex-direction: column;
+}
+.mockup-panel.open { transform: translateX(0); }
+.mockup-panel .mp-header {
+  background: #064e3b;
+  color: white;
+  padding: 14px 20px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 14px;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+}
+.mockup-panel .mp-header .mp-url {
+  font-family: "SF Mono", Consolas, monospace;
+  font-size: 11px;
+  opacity: 0.65;
+  font-weight: 400;
+}
+.mockup-panel .mp-header button {
+  background: rgba(255,255,255,0.1);
+  color: white;
+  border: none;
+  width: 28px;
+  height: 28px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 14px;
+}
+.mockup-panel iframe { flex: 1; border: 0; width: 100%; }
+.mockup-panel .mp-actions {
+  background: #f8fafc;
+  padding: 8px 16px;
+  border-top: 1px solid #e5e7eb;
+  display: flex;
+  gap: 8px;
+  font-size: 12px;
+}
+.mockup-panel .mp-actions button {
+  background: white;
+  border: 1px solid #cbd5e1;
+  padding: 6px 12px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 12px;
+  color: #475569;
+  font-family: inherit;
+}
+.mockup-panel .mp-actions button:hover { background: #ecfdf5; border-color: #10b981; color: #047857; }
+
+body.mockup-open main {
+  padding-right: calc(clamp(560px, 40vw, 900px) + 24px);
+  max-width: none;
+  transition: padding-right 0.3s ease, max-width 0.3s ease;
+}
+body.mockup-open nav.sidebar {
+  width: 0;
+  padding: 0;
+  overflow: hidden;
+  transition: width 0.3s ease, padding 0.3s ease;
+}
+body.mockup-open .layout { grid-template-columns: 0 1fr; transition: grid-template-columns 0.3s ease; }
+.layout { transition: grid-template-columns 0.3s ease; }
+nav.sidebar { transition: width 0.3s ease, padding 0.3s ease; }
+body main { transition: padding-right 0.3s ease, max-width 0.3s ease; }
+
+@media (max-width: 900px) {
+  .layout { grid-template-columns: 1fr; }
+  nav.sidebar { position: static; height: auto; }
+  main { padding: 32px 24px; }
+  .balance-grid { grid-template-columns: 1fr 1fr; }
+  .mockup-panel { width: 100vw; }
+  .mockup-toggle-btn.open { right: 16px; bottom: 16px; }
+  body.mockup-open main { padding-right: 24px; }
+}
+</style>
+</head>
+<body>
+
+<div class="layout">
+
+<nav class="sidebar">
+  <div class="brand">예약시스템 운영 가이드 — v1<small>1차 작업 (9월 추석 오픈) 범위</small></div>
+
+  <div class="section-label">시작하기</div>
+  <ul>
+    <li><a href="#overview"><span class="ic">🎯</span> 신규 예약관리의 목적</a></li>
+    <li><a href="#scope"><span class="ic">📋</span> 1차 작업 범위 (7개)</a></li>
+    <li><a href="#decisions"><span class="ic">📝</span> 의사결정 Summary</a></li>
+  </ul>
+
+  <div class="section-label">🟢 1차 작업 (9월 추석 오픈)</div>
+  <ul>
+    <li><a href="#area-4"><span class="ic">①</span> 인원 관리</a></li>
+    <li><a href="#area-5"><span class="ic">②</span> 예약 금액 관리</a></li>
+    <li><a href="#area-immediate-discount"><span class="ic">③</span> 즉시결제할인</a></li>
+    <li><a href="#area-cancel-fee"><span class="ic">④</span> 취소위약금 원장 이전</a></li>
+    <li><a href="#area-settlement"><span class="ic">⑤</span> 정산 시스템 연계</a></li>
+    <li><a href="#area-8"><span class="ic">⑥</span> 원장탭 (가계부)</a></li>
+    <li><a href="#area-9"><span class="ic">⑦</span> 타임라인 · 이력</a></li>
+  </ul>
+
+  <div class="section-label">참고</div>
+  <ul>
+    <li><a href="#policy-matrix"><span class="ic">⑩</span> 정책 매트릭스</a></li>
+    <li><a href="#action-items"><span class="ic">🚨</span> 1차 미해결 액션</a></li>
+  </ul>
+
+</nav>
+
+<main>
+
+<header class="page-header">
+  <h1>신규 예약시스템 어드민 운영 가이드 <span class="badge">v1 · 1차 작업</span></h1>
+  <p class="page-meta">
+    9월 추석 오픈 범위만 정리한 1차 작업 가이드 · 목업 샘플 예약 기준 · PM 김서현 · 2026-06-17<br>
+    참고 목업: <a href="https://seohyeonkimextriber.github.io/tripstore_mokup/reservation-detail.html" target="_blank">reservation-detail.html</a> · 풀버전: <a href="https://seohyeonkimextriber.github.io/tripstore_mokup/reservation-admin-operations-guide.html" target="_blank">v1.3 (1차+2차+별도)</a>
+  </p>
+</header>
+
+<!-- Overview -->
+<section class="area" id="overview">
+  <div class="tip">
+    🎯 <b>신규 예약관리의 목적:</b> "왜 이 금액이 이렇게 됐어요?"라는 모든 질문이 <b>원장 한 곳에서 답이 나오게</b> — 신규 예약시스템이 지키려는 가장 큰 약속이에요.
+  </div>
+  <div style="background:#f0fdf4; border-left:4px solid #10b981; padding:14px 18px; border-radius:0 10px 10px 0; font-size:13.5px; color:#064e3b; margin-top:12px;">
+    📌 <b>이 가이드는 1차(v1) 작업 범위만 다룹니다.</b><br>
+    2차 작업(행사 이동·쿠폰 자동 비율 차감·수동예약·수동 결제 등록)과 별도 트랙(결제수단 변경·다중 결제 URL·경품·공급사 정산·예약자/기본 정보)은 <a href="https://seohyeonkimextriber.github.io/tripstore_mokup/reservation-admin-operations-guide.html" target="_blank" style="color:#047857; font-weight:700;">풀버전 가이드</a>를 참고하세요.
+  </div>
+</section>
+
+<!-- 1차 작업 범위 -->
+<section class="area" id="scope">
+  <h2><span class="area-num">📋</span>1차 작업 범위 (7개)</h2>
+  <div class="area-sub">9월 추석 오픈 — 신규 원장 시스템 핵심 기능 집중</div>
+
+  <div class="scope-card">
+    <h3 style="font-size: 12px; letter-spacing: 1px; margin-bottom: 4px;">🟢 1차 오픈 (9월 추석)</h3>
+    <div class="scope-grid">
+      <div class="scope-item"><span class="num">1</span><span class="title">인원 추가 / 삭제</span><div class="sub">기본가 자동, 특가/할인 수동</div></div>
+      <div class="scope-item"><span class="num">2</span><span class="title">금액 추가 / 차감</span><div class="sub">파트너스=사유만, 어드민=분담주체 노출</div></div>
+      <div class="scope-item"><span class="num">3</span><span class="title">즉시결제할인</span><div class="sub">별도 트랙(재원), 오픈 1차와 동시</div></div>
+      <div class="scope-item"><span class="num">4</span><span class="title">취소위약금 원장 이전</span><div class="sub">결제 시스템 → 예약 원장 7010</div></div>
+      <div class="scope-item"><span class="num">5</span><span class="title">정산 시스템 연계</span><div class="sub">신규 API 설계 (기존 재활용 X)</div></div>
+      <div class="scope-item"><span class="num">6</span><span class="title">원장탭 (가계부)</span><div class="sub">주체별 잔액 + 4개 서브탭</div></div>
+      <div class="scope-item"><span class="num">7</span><span class="title">타임라인 · 이력</span><div class="sub">예약 이벤트 시계열 추적</div></div>
+    </div>
+  </div>
+</section>
+
+<!-- 의사결정 Summary -->
+<section class="area" id="decisions">
+  <h2><span class="area-num">📝</span>의사결정 Summary</h2>
+  <div class="area-sub">2026-06-11 미팅 확정 — 1차 작업 항목별 결정 사유 <a href="https://www.notion.so/tripstore/2026-06-11-37d86ade8e7780dfba43df7319ae18f5" target="_blank" style="font-size:12px; font-weight:500; color:#047857; margin-left:4px;">📋 노션 회의록</a></div>
+
+  <table style="width:100%; font-size:13px; border-collapse:collapse; background:white; border:1px solid #e5e7eb; border-radius:8px; overflow:hidden; margin-top:8px;">
+    <thead>
+      <tr style="background:#f0fdf4;">
+        <th style="padding:10px 12px; text-align:left; font-size:11px; font-weight:700; color:#065f46; text-transform:uppercase; width:24%;">기능</th>
+        <th style="padding:10px 12px; text-align:left; font-size:11px; font-weight:700; color:#065f46; text-transform:uppercase; width:18%;">구분</th>
+        <th style="padding:10px 12px; text-align:left; font-size:11px; font-weight:700; color:#065f46; text-transform:uppercase;">결정 사유</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr><td style="padding:9px 12px; border-bottom:1px solid #f1f5f9; font-weight:600;">인원 추가/삭제</td><td style="padding:9px 12px; border-bottom:1px solid #f1f5f9; color:#065f46; font-weight:700;">🟢 1차</td><td style="padding:9px 12px; border-bottom:1px solid #f1f5f9; color:#475569;">신규 원장 핵심 기능. 신규 인원 타입(아동/유아) 특가 분담 정보 재현 가능 여부 추가 확인 필요</td></tr>
+      <tr><td style="padding:9px 12px; border-bottom:1px solid #f1f5f9; font-weight:600;">금액 추가/차감</td><td style="padding:9px 12px; border-bottom:1px solid #f1f5f9; color:#065f46; font-weight:700;">🟢 1차</td><td style="padding:9px 12px; border-bottom:1px solid #f1f5f9; color:#475569;">신규 원장 핵심 기능. 어드민에서 할인의 경우 분담 주체 선택 노출 필요</td></tr>
+      <tr><td style="padding:9px 12px; border-bottom:1px solid #f1f5f9; font-weight:600;">정산 시스템 연계</td><td style="padding:9px 12px; border-bottom:1px solid #f1f5f9; color:#065f46; font-weight:700;">🟢 1차</td><td style="padding:9px 12px; border-bottom:1px solid #f1f5f9; color:#475569;">기존 API 재활용 X. 신규 원장 항목 분류 기반. 정산 결과 원장 역반영해 최종 0원 결산 지향</td></tr>
+      <tr><td style="padding:9px 12px; border-bottom:1px solid #f1f5f9; font-weight:600;">취소 위약금 원장 이전</td><td style="padding:9px 12px; border-bottom:1px solid #f1f5f9; color:#065f46; font-weight:700;">🟢 1차</td><td style="padding:9px 12px; border-bottom:1px solid #f1f5f9; color:#475569;">결제 시스템 → 예약 원장(7010)으로 이전. 인원 삭제 모달 + 금액 추가 흐름 안에 자연스럽게 통합</td></tr>
+      <tr><td style="padding:9px 12px; font-weight:600;">즉시결제할인</td><td style="padding:9px 12px; color:#065f46; font-weight:700;">🟢 1차 (별도 트랙)</td><td style="padding:9px 12px; color:#475569;">쿠폰시스템 → 할인시스템으로 변경. 재원님 별도 트랙. <b>오픈 시점은 1차와 동시</b></td></tr>
+    </tbody>
+  </table>
+
+  <div style="margin-top:14px; background:#f0fdf4; border-left:4px solid #10b981; padding:14px 18px; border-radius:0 10px 10px 0; font-size:13px; color:#064e3b;">
+    📌 <b>9월 추석 오픈 일정 유지:</b> 1차 작업(인원·금액·정산 시스템 연계)만 9월에 집중. 일부 후속 작업이 분리되면서 1차 작업 부담이 오히려 줄어듦. 속도가 빠르면 더 당겨질 가능성도.
+  </div>
+</section>
+
+<!-- ① 인원 관리 -->
+<section class="area" id="area-4">
+  <h2><span class="area-num">①</span>인원 관리</h2>
+  <div class="area-sub">② 예약 금액 관리 영역 안에 있음. 인원 추가·삭제·인원별 보기</div>
+
+  <h3>이 영역에 보이는 데이터</h3>
+  <div class="mockup-preview">
+    <div class="mp-row"><dt>인원 구성</dt><dd>성인 3명 / 아동 0명 / 유아 0명 = <b>총 3명</b></dd></div>
+    <div class="mp-row"><dt>P-5501 (예약자)</dt><dd>ADULT · ACTIVE</dd></div>
+    <div class="mp-row"><dt>P-5502</dt><dd>ADULT · ACTIVE</dd></div>
+    <div class="mp-row"><dt>P-5503</dt><dd>ADULT · ACTIVE</dd></div>
+  </div>
+
+  <h3>가능한 액션 <span style="font-size:12px; color:#0c4a6e; background:#e0f2fe; padding:3px 10px; border-radius:6px; font-weight:700; margin-left:6px;">2026-06-11 미팅: 기본가만 자동</span></h3>
+  <div class="action-list">
+    <div class="action">
+      <span class="btn-name">인원 추가</span>
+      <span class="desc">연령구분 + 인원수를 <b>여러 행</b> 한 번에 등록. 원장에 인원별 1000(상품정가) 자동 생성. <b>특가/할인은 기본가만 적용</b> (할인 분담 정보가 모호한 경우 담당자가 별도 항목 수동 입력).<br><small style="color:#475569;">📌 미팅 결정: 기존 예약자 = 특가가 적용된 상태인데, 추가 인원에 대해 같은 특가 분담 정보(채널/플랫폼/여행사)를 자동 결정하기 어려움. 운영자가 명시적으로 입력하는 게 안전.</small></span>
+    </div>
+    <div class="action">
+      <span class="btn-name">인원 삭제</span>
+      <span class="desc">체크박스로 선택 후 삭제. 역분개 자동 + <b>[+금액 추가] 모달 자동 표시</b><br><small style="color:#475569;">안내: "인원 취소에 따라서 발생하는 취소위약금이 있는 경우 금액을 입력해주세요" → 위약금 없으면 모달 닫기</small></span>
+    </div>
+    <div class="action">
+      <span class="btn-name">인원별 보기 토글</span>
+      <span class="desc">예약자·동행별 원장 항목 분리 표시</span>
+    </div>
+  </div>
+
+  <h3>운영 시나리오</h3>
+  <div class="scenario-block">
+    <div class="scen">
+      <div class="when">1. "성인 1명 추가" — 친구 함께 가요</div>
+      <div class="flow">[인원 추가] <span class="arr">→</span> 성인 1행 등록 <span class="arr">→</span> 1인 상품가 699,000 자동 입력 <span class="arr">→</span> 특가 −13,000 분담 정보는 담당자 수동 입력 <span class="arr">→</span> 결제필요금액 +686,000 추가</div>
+    </div>
+    <div class="scen">
+      <div class="when">2. "동행자 1명 못 가요" — 위약금 청구 (3명 → 2명)</div>
+      <div class="flow">동행자 체크박스 선택 <span class="arr">→</span> [인원 삭제] <span class="arr">→</span> 해당 인원 100·202 자동 역분개 <span class="arr">→</span> 자동 [+금액 추가] 모달 <span class="arr">→</span> 취소위약금(7010) 입력</div>
+    </div>
+    <div class="scen">
+      <div class="when">3. "3명 다 못 가요" — 전원 삭제</div>
+      <div class="flow">전 인원 체크 + [인원 삭제] <span class="arr">→</span> <b>예약 전체 취소 흐름으로 자연 전환</b> (별도 차단 없음)</div>
+    </div>
+  </div>
+
+  <div class="tip">
+    💡 <b>여행자와 예약자는 따로 관리.</b> 예약자(booker)는 회원·연락처 정보, 여행자(travelers)는 실제 탑승 인원으로 별도 테이블.<br>
+    인원(여행자) 삭제는 예약자 지정과 무관하며, <b>전원 삭제 시 예약 전체 취소 흐름으로 자연 전환</b> (별도 차단 없음).
+  </div>
+
+  <div style="background:#fef3c7; border-left:4px solid #f59e0b; padding:10px 14px; border-radius:0 8px 8px 0; font-size:13px; color:#78350f; margin-top:10px;">
+    📌 <b>향후 개선 사항:</b> 전원 삭제 시 자동으로 결제 취소 + 예약 전체 취소 처리 프로세스 자동화 (현재는 수동 흐름)
+  </div>
+
+  <div style="background:#fef2f2; border-left:4px solid #dc2626; padding:12px 16px; border-radius:0 8px 8px 0; font-size:13px; color:#7f1d1d; margin-top:10px;">
+    🔍 <b>신규 인원 타입 추가 검토 중 (2026-06-11 미팅):</b><br>
+    예: 성인 2명 + 유아 1명 예약 → 큰 아이가 아동으로 추가되는 케이스. <b>아동 가격 정보 / 특가 분담 정보를 시스템이 알 수 없는 상황</b>.<br>
+    • Option A: 그냥 성인으로 추가하고 금액 차감으로 처리 (분담 정보 = 여행사로 자동)<br>
+    • Option B: 신규 타입 추가 자체를 차단, 운영팀이 별도 CS 채널로 처리<br>
+    → <b>상문님이 특가 정보 저장 구조 분석 후 정책 결정 예정.</b> 1차 오픈 시점에는 신규 타입 추가 비활성화 가능성.
+  </div>
+</section>
+
+<!-- ② 예약 금액 관리 -->
+<section class="area" id="area-5">
+  <h2><span class="area-num">②</span>예약 금액 관리</h2>
+  <div class="area-sub">예약 금액을 +/− 행 추가로만 관리. <b>금액 직접 수정 불가</b></div>
+
+  <h3>이 영역에 보이는 금액 카드</h3>
+  <div class="mockup-preview amounts">
+    <div class="mp-row"><dt>1인 판매가(성인)</dt><dd>686,000원</dd></div>
+    <div class="mp-row"><dt>상품정가(1인)</dt><dd>699,000원</dd></div>
+    <div class="mp-row"><dt>특가 할인(1인)</dt><dd>−13,000원</dd></div>
+    <div class="mp-row"><dt>상품금액 합계</dt><dd>2,097,000원 (×3명)</dd></div>
+    <div class="mp-row"><dt>할인</dt><dd>−39,000원</dd></div>
+    <div class="mp-row"><dt>쿠폰</dt><dd>−20,000원</dd></div>
+    <div class="mp-row total"><dt>판매금액 (결제필요)</dt><dd>2,038,000원</dd></div>
+  </div>
+
+  <h3>예약금액 원장 항목 테이블 (100·101·200·701만 표시)</h3>
+  <table class="ledger-tbl">
+    <thead><tr><th>코드</th><th>항목명</th><th style="text-align:right;">금액</th><th>날짜</th></tr></thead>
+    <tbody>
+      <tr><td class="code">100</td><td>상품정가</td><td class="amt-minus">−2,097,000</td><td class="date">04-07 08:43</td></tr>
+      <tr><td class="code">202</td><td>여행사특가할인</td><td class="amt-plus">+39,000</td><td class="date">04-07 08:43</td></tr>
+    </tbody>
+  </table>
+
+  <h3>가능한 액션</h3>
+  <div class="action-list">
+    <div class="action">
+      <span class="btn-name">+금액 추가</span>
+      <span class="desc">관리자가 <b>더 받아야 할 금액</b>. 결제필요금액 ↑<br>• <b>추가 비용 [101]</b> · <b>취소위약금 [701]</b> (인원 취소 시 발생)<br><b style="color:#92400e;">📌 모달 안내 문구:</b> "인원 취소에 따라서 발생하는 취소위약금이 있는 경우 금액을 입력해주세요"</span>
+    </div>
+    <div class="action">
+      <span class="btn-name">−금액 차감</span>
+      <span class="desc">관리자가 <b>할인 처리</b>. 결제필요금액 ↓<br>• <b>200번대 할인</b>: 특가할인 채널[200]/플랫폼[201]/여행사[202], 커스텀할인 채널[210]/플랫폼[211]/여행사[212]<br>• <b>300번대 쿠폰</b>: 쿠폰할인 채널[300]/플랫폼[301]/여행사[302]</span>
+    </div>
+  </div>
+
+  <h3>운영 시나리오</h3>
+  <div class="scenario-block">
+    <div class="scen">
+      <div class="when">"유류세 인상으로 1인 5,000원 추가"</div>
+      <div class="flow">[+금액 추가] <span class="arr">→</span> 금액 조정(증액) <span class="arr">→</span> 15,000원 (3명) <span class="arr">→</span> 결제필요금액 2,038,000 → 2,053,000</div>
+    </div>
+    <div class="scen">
+      <div class="when">"CS 보상 5만원 할인"</div>
+      <div class="flow">[−금액 차감] <span class="arr">→</span> 보상 할인 <span class="arr">→</span> 50,000원 <span class="arr">→</span> 결제필요금액 2,038,000 → 1,988,000</div>
+    </div>
+    <div class="scen">
+      <div class="when">"동행자 1명 취소 후 위약금 청구"</div>
+      <div class="flow">① [인원 삭제] 후 자동 표시되는 [+금액 추가] 모달 <span class="arr">→</span> 취소위약금(7010) <span class="arr">→</span> 금액 입력</div>
+    </div>
+  </div>
+
+  <div class="warn">
+    ⚠️ <b>절대 금액 직접 수정 X.</b> 모든 변동은 +/− 행으로만. 그래야 원장에 이력이 남음.
+  </div>
+  <div class="tip">
+    💡 <b>결제필요금액 계산식:</b> 상품(1000) + 추가비용(1010) − 할인(2000번대) − 쿠폰(3000번대) + 취소위약금(7010)<br>※ 화면에 보이는 2,038,000 = 2,097,000 − 39,000(202) − 20,000(301)
+  </div>
+
+  <h3 style="margin-top:24px;">📊 어드민 vs 파트너스 — 분담 가능 항목 매트릭스 <span style="font-size:12px; color:#7c2d12; background:#fef3c7; padding:3px 10px; border-radius:6px; font-weight:700; margin-left:6px;">2026-06-11 미팅</span></h3>
+  <table style="width:100%; font-size:13px; border-collapse:collapse; background:white; border:1px solid #e5e7eb; border-radius:8px; overflow:hidden; margin-top:8px;">
+    <thead>
+      <tr style="background:#f1f5f9;">
+        <th style="padding:9px 12px; text-align:left; font-size:11px; font-weight:700; color:#334155; text-transform:uppercase;">분담 주체</th>
+        <th style="padding:9px 12px; text-align:center; font-size:11px; font-weight:700; color:#334155; text-transform:uppercase;">트립어드민</th>
+        <th style="padding:9px 12px; text-align:center; font-size:11px; font-weight:700; color:#334155; text-transform:uppercase;">파트너스</th>
+        <th style="padding:9px 12px; text-align:left; font-size:11px; font-weight:700; color:#334155; text-transform:uppercase;">비고</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr><td style="padding:9px 12px; border-bottom:1px solid #f1f5f9;"><b>여행사 분담</b> (202·212·302)</td><td style="padding:9px 12px; border-bottom:1px solid #f1f5f9; text-align:center; color:#15803d; font-weight:700;">✅ 가능</td><td style="padding:9px 12px; border-bottom:1px solid #f1f5f9; text-align:center; color:#15803d; font-weight:700;">✅ 가능</td><td style="padding:9px 12px; border-bottom:1px solid #f1f5f9; color:#475569; font-size:12px;">파트너스는 본인 분담만 입력 가능 (대부분 케이스)</td></tr>
+      <tr><td style="padding:9px 12px; border-bottom:1px solid #f1f5f9;"><b>플랫폼 분담</b> (201·211·301)</td><td style="padding:9px 12px; border-bottom:1px solid #f1f5f9; text-align:center; color:#15803d; font-weight:700;">✅ 가능</td><td style="padding:9px 12px; border-bottom:1px solid #f1f5f9; text-align:center; color:#b91c1c; font-weight:700;">❌ 불가</td><td style="padding:9px 12px; border-bottom:1px solid #f1f5f9; color:#475569; font-size:12px;">트립 귀책 사유 (CS 보상 등) 어드민만</td></tr>
+      <tr><td style="padding:9px 12px; border-bottom:1px solid #f1f5f9;"><b>채널 분담</b> (200·210·300)</td><td style="padding:9px 12px; border-bottom:1px solid #f1f5f9; text-align:center; color:#15803d; font-weight:700;">✅ 가능</td><td style="padding:9px 12px; border-bottom:1px solid #f1f5f9; text-align:center; color:#b91c1c; font-weight:700;">❌ 불가</td><td style="padding:9px 12px; border-bottom:1px solid #f1f5f9; color:#475569; font-size:12px;">채널사 협의 사항, 어드민만</td></tr>
+      <tr><td style="padding:9px 12px;"><b>추가/차감 명목</b></td><td style="padding:9px 12px; text-align:center; color:#15803d; font-weight:700;">✅ 모든 명목</td><td style="padding:9px 12px; text-align:center; color:#92400e; font-weight:700;">⚠️ 제한적</td><td style="padding:9px 12px; color:#475569; font-size:12px;">파트너스는 보상/추가 등 4종 + "기타(사유 입력)"</td></tr>
+    </tbody>
+  </table>
+
+  <div style="background:#eff6ff; border-left:4px solid #3b82f6; padding:12px 16px; border-radius:0 8px 8px 0; font-size:13px; color:#1e3a8a; margin-top:10px;">
+    💡 <b>명목 + 부담주체 명시 필수 (상문님 강조):</b><br>
+    • <b>"+ 금액 추가" / "− 금액 차감" 만으로는 부족.</b> 어떤 명목인지, 누가 부담하는지 명확하게 표기.<br>
+    • 어드민 화면에서는 손익에 미치는 영향까지 같이 보이도록 (예: 채널수수료/플랫폼이용료 영향).<br>
+    • 파트너스 화면에서는 "본인이 부담하는 항목" 위주로 리스트업 (어차피 회계 시스템 외 연동이라 단순화).
+  </div>
+
+  <div style="background:#fef3c7; border-left:4px solid #f59e0b; padding:12px 16px; border-radius:0 8px 8px 0; font-size:13px; color:#78350f; margin-top:10px;">
+    📌 <b>향후 확장 — 동적 원장 항목 분류:</b> 파트너스가 자기네만 쓰는 명목으로 항목 분류 추가 요청 시, <b>원장 항목 분류에 "사용 가능 주체" 속성 추가</b> 검토. 1차 오픈 시점에는 4-5개 표준 명목 + "기타" 사유 입력으로 시작.<br>
+    <b style="color:#7c2d12;">담당:</b> 현정님 — 원장 항목 카인드 재그룹핑 정의 + 분담 주체 매핑표 작성
+  </div>
+</section>
+
+<!-- ③ 즉시결제할인 -->
+<section class="area" id="area-immediate-discount">
+  <h2><span class="area-num">③</span>즉시결제할인 <span style="font-size:12px; color:#065f46; background:#d1fae5; padding:3px 10px; border-radius:6px; font-weight:700; margin-left:6px;">별도 트랙 · 오픈 1차와 동시</span></h2>
+  <div class="area-sub">결제 시점에 즉시 적용되는 할인. 신규 원장 핵심 기능 사용 — 작업 트랙은 분리하되 오픈은 1차와 동시</div>
+
+  <div style="background:linear-gradient(135deg, #faf5ff 0%, #f3e8ff 100%); border:1px solid #c084fc; border-radius:12px; padding:18px 22px; margin-top:14px;">
+    <div style="font-size:13px; font-weight:700; color:#6b21a8; margin-bottom:8px; letter-spacing:0.3px;">🎯 궁극적 목표 — 중복할인 적용</div>
+    <div style="font-size:13.5px; color:#581c87; line-height:1.85;">
+      이 작업의 진짜 목적은 <b>한 예약에 여러 할인을 동시에 적용할 수 있게 하는 것</b>입니다.<br>
+      • Legacy 예약시스템은 구조상 중복할인을 받아들일 수 없음<br>
+      • <b>신규 원장 시스템</b>은 +/− 항목 누적 구조이므로 중복할인을 자연스럽게 흡수 가능<br>
+      • 그래서 즉시결제할인은 <b>원장 오픈과 반드시 같이 오픈</b>되어야 함 (단순 일정 동기가 아니라 구조적 의존)
+    </div>
+  </div>
+
+  <h3>배경 / 방향성</h3>
+  <div class="mockup-preview">
+    <div class="mp-row"><dt>현재 상태</dt><dd>쿠폰 시스템과 즉시할인이 분리 운영 → 운영 복잡도 ↑</dd></div>
+    <div class="mp-row"><dt>목표</dt><dd>쿠폰 시스템을 <b>"할인 시스템"</b>으로 확장 → 즉시할인 + 쿠폰을 동일 컨셉으로 통합</dd></div>
+    <div class="mp-row"><dt>설계 포인트</dt><dd>다중 쿠폰 사용 설계도 함께 검토 (신규 원장이 설계상 유리)</dd></div>
+  </div>
+
+  <div style="background:#eff6ff; border-left:4px solid #3b82f6; padding:14px 18px; border-radius:0 10px 10px 0; font-size:13px; color:#1e3a8a; margin-top:14px;">
+    💡 <b>핵심 결정 (2026-06-11 미팅):</b><br>
+    • <b>신규 원장 핵심 기능을 그대로 사용</b> → 즉시할인도 +/− 항목으로 원장에 자동 기록<br>
+    • 작업은 별도 트랙으로 진행, <b>오픈 시점은 1차와 동시</b>로 맞춤<br>
+    • 담당: <b>재원님</b> (국내 숙소 오픈 후 착수, 6월 말 일정 합의)
+  </div>
+
+  <div style="background:#fef3c7; border-left:4px solid #f59e0b; padding:12px 16px; border-radius:0 8px 8px 0; font-size:13px; color:#78350f; margin-top:10px;">
+    📌 <b>미해결:</b> 작업 진행 중에도 오픈 시점 한 번 더 리체크 필요 (1차 오픈과 동기화).
+  </div>
+
+  <div style="background:#fef2f2; border-left:4px solid #dc2626; padding:12px 16px; border-radius:0 8px 8px 0; font-size:13px; color:#7f1d1d; margin-top:10px;">
+    ⚠️ <b>카드사 분담(페이백)과의 관계:</b> 결제즉시할인 도입 시 카드사 분담이 원장에 어떻게 담길지 확인 필요 (현재는 원장 범위 외, 마케팅 영역).
+  </div>
+</section>
+
+<!-- ④ 취소위약금 원장 이전 -->
+<section class="area" id="area-cancel-fee">
+  <h2><span class="area-num">④</span>취소위약금 원장 이전</h2>
+  <div class="area-sub">결제 시스템 → 예약 원장(7010)으로 위약금 관리 이전. 인원 삭제·금액 관리 흐름 안에 자연스럽게 통합</div>
+
+  <h3>배경 / 결정</h3>
+  <div class="mockup-preview">
+    <div class="mp-row"><dt>현재 상태</dt><dd>결제 시스템에서 취소 위약금을 관리 → 결제·환불 트랜잭션과 위약금 정보가 섞여 회계 정합성 저하</dd></div>
+    <div class="mp-row"><dt>결정</dt><dd>1차 오픈 포함 ("취소위약금 예약원장 우선 오픈" 단락 1:29~1:34)</dd></div>
+    <div class="mp-row"><dt>이전 후</dt><dd>결제 서비스는 "결제·환불" 트랜잭션만 관리, 위약금은 <b>예약 원장의 책임</b></dd></div>
+  </div>
+
+  <h3>정책</h3>
+  <div class="action-list">
+    <div class="action">
+      <span class="btn-name">7010 위약금 항목</span>
+      <span class="desc">결제 시스템에서 보유하던 위약금 정보 → 예약 원장 <b>7010 항목</b>으로 이전<br>• 위약금 발생 시 결제 자체는 깨지지 않고 원장에서 처리<br>• 회계 정합성 개선</span>
+    </div>
+  </div>
+
+  <h3>운영 흐름</h3>
+  <div class="scenario-block">
+    <div class="scen">
+      <div class="when">동행자 1명 취소 (위약금 30,000원 발생)</div>
+      <div class="flow">① [인원 삭제] <span class="arr">→</span> [+금액 추가] 모달 자동 표시 <span class="arr">→</span> 위약금(7010) 입력 30,000 <span class="arr">→</span> 결제필요금액에 +30,000 반영</div>
+    </div>
+    <div class="scen">
+      <div class="when">인원 취소했지만 위약금 면제 케이스</div>
+      <div class="flow">① [인원 삭제] <span class="arr">→</span> [+금액 추가] 모달 자동 표시 <span class="arr">→</span> 모달 닫기 (위약금 없음)</div>
+    </div>
+  </div>
+
+  <div style="background:#dcfce7; border-left:4px solid #10b981; padding:14px 18px; border-radius:0 10px 10px 0; font-size:13px; color:#065f46; margin-top:12px;">
+    💡 <b>핵심 변화:</b><br>
+    • <b>취소위약금 관리 주체 이전</b>: 기존 결제 시스템 → <b>예약 원장(7010)으로 완전 이전</b><br>
+    • 결제 서비스는 "결제·환불" 트랜잭션만 관리, 위약금은 예약 원장의 책임<br>
+    • 결제 후 위약금 발생 시 결제 자체는 깨지지 않고 원장에서 처리 → 회계 정합성 개선<br>
+    <small style="color:#047857; font-weight:600;">📌 미팅 결정 (1:29~1:34 "취소위약금 예약원장 우선 오픈" 단락): <b>1차 오픈에 포함</b>. 인원 삭제 시 [+금액 추가] 모달 자동 표시 → 위약금(7010) 입력 흐름으로 ① 인원 관리·② 예약 금액 관리 안에 이미 반영됨.</small>
+  </div>
+</section>
+
+<!-- ⑤ 정산 시스템 연계 -->
+<section class="area" id="area-settlement">
+  <h2><span class="area-num">⑤</span>정산 시스템 연계</h2>
+  <div class="area-sub">변경된 예약 원장 기준으로 정산 데이터 인터페이스 개선. 신규 API 설계 (기존 API 재활용 X)</div>
+
+  <h3>정산 데이터 개선 흐름 (1차 오픈 함께)</h3>
+  <div class="mockup-preview">
+    <div class="mp-row"><dt>1단계 (9월 1차 오픈)</dt><dd>변경된 예약 원장 데이터 구조 기준으로 <b>정산 시스템이 받아갈 신규 API 스펙 정의</b> (기존 API 재활용 X)</dd></div>
+    <div class="mp-row"><dt>2단계 (9월 1차 오픈)</dt><dd>현정님이 회계 인식 기준으로 원장 항목 그룹핑 가이드 작성 → 정근님이 가이드 기반 API 스펙 작성</dd></div>
+    <div class="mp-row"><dt>3단계 (9월 1차 오픈)</dt><dd>정산 시스템이 신규 예약 원장에서 받은 데이터로 정상 계산 → 기존 정산 로직과 호환</dd></div>
+    <div class="mp-row"><dt>4단계 (후속)</dt><dd>정산 결과 (지급/PG 수수료/채널사 수수료) → 예약 원장으로 역반영 → <b>최종 0원 결산 모델</b> 지향</dd></div>
+  </div>
+
+  <div style="background:#eff6ff; border-left:4px solid #3b82f6; padding:12px 16px; border-radius:0 8px 8px 0; font-size:13px; color:#1e3a8a; margin-top:12px;">
+    💡 <b>정산 API 신규 스펙 (현정님 + 정근님 협의 필요):</b><br>
+    • 기존 정산 API를 그대로 신규 원장에서 내려주는 식은 NO<br>
+    • <b>신규 원장 항목 분류를 그대로/집계해서 정산이 받아가는 신규 스펙</b>이 정답<br>
+    • 현정님이 "원장 각 항목을 회계학적으로 어떻게 인식할지" 정리 → 정근님이 가이드 기반 API 사이즈 산정<br>
+    • 6월 중 정리, 7월 리뷰 목표
+  </div>
+
+  <div style="background:#fef3c7; border-left:4px solid #f59e0b; padding:12px 16px; border-radius:0 8px 8px 0; font-size:13px; color:#78350f; margin-top:10px;">
+    📌 <b>노션 트래커 항목명 정정:</b> 기존 "신규 정산 시스템" → "<b>포트원 PG 정산 시스템 연동 개선</b>" 으로 정정. 정산 시스템은 이미 운영 중이며, 신규 원장 기반으로 데이터 인터페이스만 개선하는 작업.
+  </div>
+</section>
+
+<!-- ⑥ 원장탭 (가계부) -->
+<section class="area" id="area-8">
+  <h2><span class="area-num">⑥</span>원장탭 (가계부 펼쳐보기)</h2>
+  <div class="area-sub">예약 1건의 모든 돈 흐름을 시계열로 펼쳐보는 영역</div>
+
+  <h3>주체별 잔액 현황 (오기웅님 예약의 실제 값)</h3>
+  <div class="balance-grid">
+    <div class="balance-card">
+      <div><span class="emoji">🙋</span></div>
+      <div class="label">고객</div>
+      <div class="v minus">손익 −2,038,000</div>
+      <div class="v minus">자금 −2,038,000</div>
+    </div>
+    <div class="balance-card">
+      <div><span class="emoji">🔗</span></div>
+      <div class="label">채널사</div>
+      <div class="v">손익 0</div>
+      <div class="v">자금 0</div>
+    </div>
+    <div class="balance-card">
+      <div><span class="emoji">🏢</span></div>
+      <div class="label">플랫폼</div>
+      <div class="v plus">손익 +159,344</div>
+      <div class="v plus">자금 +2,038,000</div>
+    </div>
+    <div class="balance-card">
+      <div><span class="emoji">🚩</span></div>
+      <div class="label">여행사</div>
+      <div class="v plus">손익 +1,878,656</div>
+      <div class="v">자금 0</div>
+    </div>
+  </div>
+  <div class="tip">💡 <b>결제 완료 시점:</b> 고객 합계(손익+자금) = 0이 되어야 정상 / <b>결산 완료 시점:</b> 4주체 모두 합계 = 0</div>
+
+  <h3>전체 원장 시계열 (오기웅님 예약 7행)</h3>
+  <table class="ledger-tbl">
+    <thead><tr><th>코드</th><th>항목명</th><th style="text-align:right;">금액</th><th>날짜</th></tr></thead>
+    <tbody>
+      <tr><td class="code">100</td><td>상품정가</td><td class="amt-minus">−2,097,000</td><td class="date">04-07 08:43</td></tr>
+      <tr><td class="code">202</td><td>여행사특가할인</td><td class="amt-plus">+39,000</td><td class="date">04-07 08:43</td></tr>
+      <tr><td class="code">301</td><td>쿠폰할인(플랫폼)</td><td class="amt-plus">+20,000</td><td class="date">04-07 08:43</td></tr>
+      <tr><td class="code">401</td><td>고객결제(플랫폼)</td><td class="amt-plus">+2,038,000</td><td class="date">04-07 08:43</td></tr>
+      <tr><td class="code">601</td><td>PG수수료</td><td class="amt-minus">−59,100</td><td class="date">04-07 08:43</td></tr>
+      <tr><td class="code">602</td><td>플랫폼이용료</td><td class="amt-plus">+179,344</td><td class="date">04-07 08:43</td></tr>
+      <tr><td class="code">501</td><td>플랫폼대금이전</td><td class="amt-plus">+1,878,656</td><td class="date">06-19(예정)</td></tr>
+    </tbody>
+  </table>
+  <div class="tip">💡 합계: 총 유입 <b style="color:#15803d;">+4,155,000</b> / 총 유출 <b style="color:#b91c1c;">−2,156,100</b> / 순합계 <b>+1,998,900</b></div>
+
+  <h3>4개 서브탭 활용</h3>
+  <div class="mockup-preview">
+    <div class="mp-row"><dt>예약금액 관리</dt><dd>100·101·200번대·300번대·701만 표시 (상품가/추가비용/할인/쿠폰/위약금)</dd></div>
+    <div class="mp-row"><dt>결제금액 관리</dt><dd>400·700만 표시 (결제/환불)</dd></div>
+    <div class="mp-row"><dt>정산 관리</dt><dd>500·600·900만 표시 (수수료/대금이전/결산)</dd></div>
+    <div class="mp-row"><dt>전체 원장</dt><dd>모든 항목 시계열 + 주체·범주·기간 필터 + CSV 다운</dd></div>
+  </div>
+
+  <h3>운영 시나리오</h3>
+  <div class="scenario-block">
+    <div class="scen">
+      <div class="when">"이 예약 정산이 어떻게 됐어요?" <b>경영지원실 → 여행사 CS</b> 문의응대</div>
+      <div class="flow">원장탭 ▷ 정산 관리 서브탭 ▷ 6/19 예정인 501 행 확인 → 여행사에 "1,878,656원 6/19 이전 예정" 응대</div>
+    </div>
+    <div class="scen">
+      <div class="when">"결제가 어떻게 됐어요?"</div>
+      <div class="flow">원장탭 ▷ 결제금액 관리 ▷ 401 행 +2,038,000 (4/7 08:43)</div>
+    </div>
+    <div class="scen">
+      <div class="when">월말 결산 검증</div>
+      <div class="flow">주체별 잔액 카드 ▷ 4주체 합계 = 0 확인</div>
+    </div>
+    <div class="scen">
+      <div class="when">회계팀 데이터 요청</div>
+      <div class="flow">전체 원장 ▷ 기간 필터 (4월) ▷ CSV 다운로드</div>
+    </div>
+  </div>
+</section>
+
+<!-- ⑦ 타임라인·이력 -->
+<section class="area" id="area-9">
+  <h2><span class="area-num">⑦</span>타임라인 · 이력</h2>
+  <div class="area-sub">예약에서 일어난 모든 이벤트를 시계열로 추적</div>
+
+  <h3>타임라인 이벤트 종류</h3>
+  <ul style="padding-left: 22px; font-size: 14px;">
+    <li>예약 접수 (예약완료)</li>
+    <li>여행사 특가 할인 (자동)</li>
+    <li>쿠폰 할인 적용</li>
+    <li>고객 결제 완료</li>
+    <li>PG 수수료/플랫폼 이용료 산정</li>
+    <li>대금 정산 예정</li>
+    <li>인원 변경 / 금액 조정 / 취소위약금 입력 이벤트</li>
+  </ul>
+
+  <h3>운영 시나리오</h3>
+  <div class="scenario-block">
+    <div class="scen">
+      <div class="when">"오기웅님 예약 금액 누가 바꿨어요?" 추적</div>
+      <div class="flow">타임라인 필터 ▷ 금액조정 카테고리 ▷ 처리자·일시 확인</div>
+    </div>
+    <div class="scen">
+      <div class="when">"인원이 언제 어떻게 변경됐는지" 추적</div>
+      <div class="flow">타임라인 필터 ▷ 인원변경 카테고리 ▷ 추가/삭제 이력 확인</div>
+    </div>
+  </div>
+</section>
+
+<!-- ⑩ 정책 매트릭스 -->
+<section class="area" id="policy-matrix">
+  <h2><span class="area-num">⑩</span>정책 매트릭스</h2>
+  <div class="area-sub">취소완료 예약의 인원/금액 표시 + 데이터 수정 권한 일람</div>
+
+  <h3>인원 표시 정책 (5개 영역 통일)</h3>
+  <table style="width:100%; font-size:13px; border-collapse:collapse; background:white; border:1px solid #e5e7eb; border-radius:8px; overflow:hidden;">
+    <thead>
+      <tr style="background:#f1f5f9;">
+        <th style="padding:9px 12px; text-align:left; font-size:11px; font-weight:700; color:#334155; text-transform:uppercase; letter-spacing:0.5px;">반영 위치</th>
+        <th style="padding:9px 12px; text-align:left; font-size:11px; font-weight:700; color:#334155; text-transform:uppercase; letter-spacing:0.5px;">예약상태 ≠ 취소완료</th>
+        <th style="padding:9px 12px; text-align:left; font-size:11px; font-weight:700; color:#334155; text-transform:uppercase; letter-spacing:0.5px;">예약상태 = 취소완료</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr><td style="padding:9px 12px; border-bottom:1px solid #f1f5f9;">트립어드민 - 예약관리 목록</td><td style="padding:9px 12px; border-bottom:1px solid #f1f5f9;">travelers에서 취소된 인원 제외</td><td style="padding:9px 12px; border-bottom:1px solid #f1f5f9; color:#b91c1c; font-weight:600;">인원 0명</td></tr>
+      <tr><td style="padding:9px 12px; border-bottom:1px solid #f1f5f9;">트립어드민 - 예약관리 엑셀</td><td style="padding:9px 12px; border-bottom:1px solid #f1f5f9;">travelers에서 취소된 인원 제외</td><td style="padding:9px 12px; border-bottom:1px solid #f1f5f9; color:#15803d; font-weight:600;">travelers 기존 인원 값 모두 표시</td></tr>
+      <tr><td style="padding:9px 12px; border-bottom:1px solid #f1f5f9;">파트너스 - 예약관리 목록</td><td style="padding:9px 12px; border-bottom:1px solid #f1f5f9;">travelers에서 취소된 인원 제외</td><td style="padding:9px 12px; border-bottom:1px solid #f1f5f9; color:#b91c1c; font-weight:600;">인원 0명</td></tr>
+      <tr><td style="padding:9px 12px; border-bottom:1px solid #f1f5f9;">파트너스 - 예약관리 엑셀</td><td style="padding:9px 12px; border-bottom:1px solid #f1f5f9;">travelers에서 취소된 인원 제외</td><td style="padding:9px 12px; border-bottom:1px solid #f1f5f9; color:#15803d; font-weight:600;">travelers 기존 인원 값 모두 표시</td></tr>
+      <tr><td style="padding:9px 12px;">트립어드민 - 정산관리 엑셀</td><td style="padding:9px 12px;">travelers에서 취소된 인원 제외</td><td style="padding:9px 12px; color:#15803d; font-weight:600;">travelers 기존 인원 값 모두 표시</td></tr>
+    </tbody>
+  </table>
+
+  <div class="warn">
+    ⚠️ <b>제한사항:</b> 취소완료 시점에 최초 예약 인원에서 <b>추가된 인원</b>은 추적 가능 / <b>제외된 인원</b>은 추적 불가<br>
+    • 예: 최초 8명 → 2명 추가 → 10명 → 취소완료 → <b>10명 표시</b><br>
+    • 예: 최초 8명 → 2명 취소 → 6명 → 취소완료 → <b>8명 표시</b>
+  </div>
+
+  <div style="background:#fef3c7; border-left:4px solid #f59e0b; padding:12px 16px; border-radius:0 8px 8px 0; font-size:13px; color:#78350f; margin:10px 0;">
+    📌 <b>확인 필요:</b> 관리자가 수정한 <b>취소하기 이전의 최종 이력</b>을 별도로 남길지 정책 확인 필요<br>
+    <small>예: 8명 → 2명 취소 → 6명 → 취소완료. "6명" 이라는 취소 직전 상태를 별도 이력으로 보관해야 하는지 검토</small>
+  </div>
+
+  <h3 style="margin-top:28px;">📚 별도 정리·기억해둘 사항</h3>
+
+  <div style="background:white; border:1px solid #e5e7eb; border-radius:10px; padding:18px 22px; margin:12px 0;">
+    <div style="font-size:13px; font-weight:700; color:#047857; margin-bottom:8px;">📒 예약원장 개념 (2026-02-13 회의)</div>
+    <div style="font-size:13px; color:#475569; line-height:1.7;">
+      • <b>주체 8종:</b> 결제 · 고객 · 채널사 · 채널사 결제 · PG사 · 플랫폼 · 여행사 · 여행사 결제<br>
+      • 분류항목 = 관리자 추가 가능, 주체 정의는 개발 시점에 마무리<br>
+      • <b>최종 마감 목표:</b> 모든 주체 잔액 = 0 (경지실 목표)<br>
+      • 잔액 계산 중심 구조 + 실행/확정 레코드 구분 필요<br>
+      • <b>원장 범위 외:</b> 카드사 페이백·즉시할인 (PG 응답 = 결제금액만)<br>
+      • <b>경지실 정책 결정 필요:</b> 채널 갭 귀속, 광고비 항목, 종결 status, 마감 0 처리
+    </div>
+  </div>
+
+  <div style="background:white; border:1px solid #e5e7eb; border-radius:10px; padding:18px 22px; margin:12px 0;">
+    <div style="font-size:13px; font-weight:700; color:#047857; margin-bottom:8px;">🎯 1차 작업에 포함된 운영 케이스</div>
+    <table style="width:100%; font-size:12.5px; border-collapse:collapse;">
+      <tbody>
+        <tr><td style="padding:6px 10px; border-bottom:1px solid #f1f5f9; width:40%;"><b>1. PG vs 채널 정산 시점 불일치</b></td><td style="padding:6px 10px; border-bottom:1px solid #f1f5f9; color:#475569;">계산용 vs 실행 레코드 구분</td></tr>
+        <tr><td style="padding:6px 10px; border-bottom:1px solid #f1f5f9;"><b>2. 결제수단 변경 초과 결제</b></td><td style="padding:6px 10px; border-bottom:1px solid #f1f5f9; color:#475569;">+/− 누적, 추적 가능하게 허용</td></tr>
+        <tr><td style="padding:6px 10px; border-bottom:1px solid #f1f5f9;"><b>3. 예약 종결 status</b></td><td style="padding:6px 10px; border-bottom:1px solid #f1f5f9; color:#475569;">확정·마감 + 잔액 0 체크로 이상 탐지</td></tr>
+        <tr><td style="padding:6px 10px; border-bottom:1px solid #f1f5f9;"><b>4. 카드사 분담 (페이백)</b></td><td style="padding:6px 10px; border-bottom:1px solid #f1f5f9; color:#b91c1c;">원장 범위 외 (마케팅 영역) <br><span style="color:#92400e; font-size:11px; font-weight:600;">📌 결제즉시할인 도입 시 카드사 분담 어떻게 담길지 확인 필요</span></td></tr>
+        <tr><td style="padding:6px 10px; border-bottom:1px solid #f1f5f9;"><b>5. 마감 시 모든 주체 잔액 = 0</b></td><td style="padding:6px 10px; border-bottom:1px solid #f1f5f9; color:#475569;">"잔액 0 만드는 레코드" 생성 + ERP 연계</td></tr>
+        <tr><td style="padding:6px 10px;"><b>6. 자동화 불가 영역</b></td><td style="padding:6px 10px; color:#475569;">관리자 입력 + 엑셀 업로드 (밀어넣기)</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <h3>데이터 수정 권한 매트릭스 (요약)</h3>
+  <div class="mockup-preview">
+    <div class="mp-row"><dt>인원/금액 (제한)</dt><dd>1인 판매가·특가금액·할인금액·상품금액·판매금액 → 데이터 수정 가능하나 <b>관리자 직접 수정 X</b> (+/− 행 추가만)</dd></div>
+    <div class="mp-row"><dt>인원/금액 (허용)</dt><dd>쿠폰금액·여행사/트립/채널 추가할인·예약 취소위약금 → <b>관리자 수정 가능</b></dd></div>
+    <div class="mp-row"><dt>결제/취소 메타</dt><dd>결제주체·PG·결제수단·결제번호·결제금액·취소금액·결제상태 → <b>전부 수정 불가</b> (조회만)</dd></div>
+    <div class="mp-row"><dt>이력/메모</dt><dd>예약관리이력·메모 → <b>전부 수정 불가</b> (조회만, 메모 추가는 가능)</dd></div>
+  </div>
+  <div class="tip">
+    💡 전체 60+ 필드 상세 매트릭스는 별도 Reference 문서 참고 → <a href="/reservation-system-reference.html" style="color:#047857;">reservation-system-reference.html</a>
+  </div>
+</section>
+
+<!-- 액션 아이템 -->
+<section class="area" id="action-items">
+  <h2><span class="area-num">🚨</span>1차 미해결 액션 아이템</h2>
+  <div class="area-sub">2026-06-11 미팅 결정 사항 — 1차 오픈 전 처리 필요</div>
+
+  <table style="width:100%; font-size:13px; border-collapse:collapse; background:white; border:1px solid #e5e7eb; border-radius:8px; overflow:hidden;">
+    <thead>
+      <tr style="background:#f1f5f9;">
+        <th style="padding:10px 12px; text-align:left; font-size:11px; font-weight:700; color:#334155; text-transform:uppercase; width:18%;">담당자</th>
+        <th style="padding:10px 12px; text-align:left; font-size:11px; font-weight:700; color:#334155; text-transform:uppercase; width:30%;">과제</th>
+        <th style="padding:10px 12px; text-align:left; font-size:11px; font-weight:700; color:#334155; text-transform:uppercase;">연관 섹션</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr><td style="padding:9px 12px; border-bottom:1px solid #f1f5f9; color:#7c2d12; font-weight:700;">상문</td><td style="padding:9px 12px; border-bottom:1px solid #f1f5f9;">신규 인원 타입(아동/유아) 추가 시 특가 분담 정보 재현 가능 여부 확인</td><td style="padding:9px 12px; border-bottom:1px solid #f1f5f9; color:#475569;">① 인원 관리</td></tr>
+      <tr><td style="padding:9px 12px; border-bottom:1px solid #f1f5f9; color:#7c2d12; font-weight:700;">현정</td><td style="padding:9px 12px; border-bottom:1px solid #f1f5f9;">원장 항목 카인드 재그룹핑 정의 + 분담 주체 매핑표 작성</td><td style="padding:9px 12px; border-bottom:1px solid #f1f5f9; color:#475569;">② 예약 금액 관리</td></tr>
+      <tr><td style="padding:9px 12px; border-bottom:1px solid #f1f5f9; color:#7c2d12; font-weight:700;">현정</td><td style="padding:9px 12px; border-bottom:1px solid #f1f5f9;">정산 회계 인식 기준 정리 → 정근님 신규 API 스펙 작성 인풋</td><td style="padding:9px 12px; border-bottom:1px solid #f1f5f9; color:#475569;">⑤ 정산 시스템 연계</td></tr>
+      <tr><td style="padding:9px 12px; border-bottom:1px solid #f1f5f9; color:#7c2d12; font-weight:700;">정근</td><td style="padding:9px 12px; border-bottom:1px solid #f1f5f9;">정산 API 사이즈/스펙 산정 (6월 정리, 7월 리뷰)</td><td style="padding:9px 12px; border-bottom:1px solid #f1f5f9; color:#475569;">⑤ 정산 시스템 연계</td></tr>
+      <tr><td style="padding:9px 12px; color:#7c2d12; font-weight:700;">재원</td><td style="padding:9px 12px;">즉시결제할인 → 할인시스템으로 변경 작업, 1차 오픈 시점 동기화</td><td style="padding:9px 12px; color:#475569;">③ 즉시결제할인</td></tr>
+    </tbody>
+  </table>
+
+  <div style="margin-top:18px; background:#faf5ff; border-left:4px solid #a855f7; padding:12px 16px; border-radius:0 8px 8px 0; font-size:13px; color:#581c87;">
+    📅 <b>주요 일정:</b><br>
+    • 6월 중 — 정산 API 가이드 정리, 즉시결제할인 일정 합의<br>
+    • 7월 — 정산 API 스펙 리뷰<br>
+    • 9월 추석 — <b>1차 오픈</b>
+  </div>
+</section>
+
+<footer>
+  ⓒ 2026 트립스토어 · PM 김서현 · 본 가이드는 신규 예약시스템 <b>1차 작업(v1)</b> 운영 매뉴얼 (목업 샘플 예약 기준)
+</footer>
+
+</main>
+
+</div>
+
+<!-- Floating mockup toggle -->
+<button class="mockup-toggle-btn" id="mockupToggleBtn" onclick="toggleMockup()">
+  <span id="mockupToggleLabel">🎭 목업 열기</span>
+</button>
+
+<aside class="mockup-panel" id="mockupPanel">
+  <div class="mp-header">
+    <div>
+      🎭 인터랙티브 목업
+      <div class="mp-url">reservation-detail.html · 오기웅님 예약</div>
+    </div>
+    <button onclick="toggleMockup()" title="닫기">✕</button>
+  </div>
+  <iframe id="mockupIframe" src="" loading="lazy"></iframe>
+  <div class="mp-actions">
+    <button onclick="reloadMockup()">🔄 새로고침</button>
+    <button onclick="openMockupNewTab()">↗️ 새 탭으로 열기</button>
+  </div>
+</aside>
+
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+  document.querySelectorAll('nav.sidebar a[href^="#"]').forEach(link => {
+    link.addEventListener('click', (e) => {
+      const href = link.getAttribute('href');
+      if (!href || href === '#') return;
+      const target = document.querySelector(href);
+      if (target) {
+        e.preventDefault();
+        target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }
+    });
+  });
+});
+
+const MOCKUP_URL = 'https://seohyeonkimextriber.github.io/tripstore_mokup/reservation-detail.html';
+
+function toggleMockup() {
+  const panel = document.getElementById('mockupPanel');
+  const btn = document.getElementById('mockupToggleBtn');
+  const label = document.getElementById('mockupToggleLabel');
+  const iframe = document.getElementById('mockupIframe');
+
+  const isOpen = panel.classList.toggle('open');
+  btn.classList.toggle('open', isOpen);
+  document.body.classList.toggle('mockup-open', isOpen);
+
+  if (isOpen) {
+    label.textContent = '✕ 목업 닫기';
+    if (!iframe.src) iframe.src = MOCKUP_URL;
+  } else {
+    label.textContent = '🎭 목업 열기';
+  }
+}
+
+function reloadMockup() {
+  const iframe = document.getElementById('mockupIframe');
+  iframe.src = MOCKUP_URL + '?t=' + Date.now();
+}
+
+function openMockupNewTab() {
+  window.open(MOCKUP_URL, '_blank');
+}
+</script>
+
+</body>
+</html>
