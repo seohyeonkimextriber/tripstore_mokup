@@ -27,8 +27,7 @@
   .tab.active { color: #1a1a1a; font-weight: 700; border-bottom-color: #1a1a1a; }
   .section { background: #fff; border-radius: 12px; border: 1px solid #e8e8e8; margin-bottom: 16px; overflow: hidden; }
   .section-row { display: grid; grid-template-columns: 1fr 1fr 1.4fr; gap: 12px; margin-bottom: 16px; }
-  /* 인라인 편집 */
-  .info-label.editable { color: #d32f2f; font-weight: 600; }
+  /* 인라인 편집 토글 */
   .inline-input { padding: 6px 10px; border: 1px solid #d0d0d0; border-radius: 6px; font-size: 12px; box-sizing: border-box; }
   .inline-input:focus { outline: none; border-color: #1565c0; }
   .inline-input.w-full { width: 200px; }
@@ -38,6 +37,13 @@
   .btn-reset { margin-left: 6px; padding: 5px 10px; border: 1px solid #ef9a9a; background: #fff; color: #d32f2f; border-radius: 6px; font-size: 11px; font-weight: 600; cursor: pointer; }
   .btn-reset:hover { background: #ffebee; }
   .field-wrap { display: inline-flex; align-items: center; gap: 4px; }
+  /* view ↔ edit 토글: 카드에 .editing 클래스가 있을 때만 edit 노출 */
+  .view-mode { display: inline; }
+  .edit-mode { display: none; }
+  .editing .view-mode { display: none; }
+  .editing .edit-mode { display: inline-flex; align-items: center; }
+  .editing .info-label.editable { color: #d32f2f; font-weight: 600; }
+  .btn-edit-toggle.is-editing { background: #1565c0; color: #fff; border-color: #1565c0; }
   .section-row .section { margin-bottom: 0; height: 100%; display: flex; flex-direction: column; }
   .section-row .section-body { flex: 1; }
   .section-row .info-grid { grid-template-columns: 1fr; }
@@ -202,15 +208,19 @@
     <div class="section-row">
 
       <!-- 카드 1: 예약 상태 관리 -->
-      <div class="section">
+      <div class="section" id="card-status">
         <div class="section-header">
           <h2>예약 상태 관리</h2>
+          <div class="actions">
+            <button class="btn btn-outline btn-sm btn-edit-toggle" id="btn-toggle-status" onclick="toggleEditMode('card-status', this)">수정하기</button>
+          </div>
         </div>
         <div class="section-body">
           <div class="info-row">
             <span class="info-label editable">트립 예약상태</span>
             <span class="info-value">
-              <span class="field-wrap">
+              <span class="view-mode"><span class="badge green" id="status-on-management">예약완료</span></span>
+              <span class="edit-mode field-wrap">
                 <select id="status-on-management-select" class="inline-select" data-original="예약완료" onchange="onTripStatusSelect()">
                   <option value="예약접수">예약접수</option>
                   <option value="예약완료" selected>예약완료</option>
@@ -229,8 +239,6 @@
         <div style="background:#fff8e1;border:1px solid #ffe082;border-radius:6px;padding:8px 12px;margin:0 16px 12px;font-size:11px;color:#5d4037;line-height:1.55;">
           ℹ 1차 컷 기준: <strong>트립 예약상태</strong>만 수정 가능. 여행사 측 상태는 표시 전용.
         </div>
-        <!-- 호환용 hidden badge (취소 플로우 동기화) -->
-        <span id="status-on-management" class="badge green" style="display:none;">예약완료</span>
       </div>
 
       <!-- 카드 2: 예약자 정보 -->
@@ -251,10 +259,11 @@
       </div>
 
       <!-- 카드 3: 예약정보 (인라인 편집) -->
-      <div class="section">
+      <div class="section" id="card-reservation">
         <div class="section-header">
           <h2>예약정보</h2>
           <div class="actions">
+            <button class="btn btn-outline btn-sm btn-edit-toggle" id="btn-toggle-reservation" onclick="toggleEditMode('card-reservation', this)">수정하기</button>
             <button class="btn btn-outline btn-sm" onclick="copyReservationInfo()">예약복사</button>
           </div>
         </div>
@@ -264,7 +273,8 @@
           <div class="info-row">
             <span class="info-label editable">여행사 예약번호</span>
             <span class="info-value">
-              <span class="field-wrap">
+              <span class="view-mode text-mono" id="rsv-partner-no-view">HB2633517226</span>
+              <span class="edit-mode field-wrap">
                 <input type="text" id="rsv-partner-no" class="inline-input w-full text-mono" value="HB2633517226" data-original="HB2633517226">
                 <button type="button" class="btn-reset" onclick="resetField('rsv-partner-no')">초기화</button>
               </span>
@@ -274,7 +284,8 @@
           <div class="info-row">
             <span class="info-label editable">수수료율 (VAT포함)</span>
             <span class="info-value">
-              <span class="field-wrap">
+              <span class="view-mode" id="rsv-commission-rate-view">8.8%</span>
+              <span class="edit-mode field-wrap">
                 <input type="number" step="0.1" min="0" id="rsv-commission-rate" class="inline-input w-rate" value="8.8" data-original="8.8">
                 <span style="font-size:11px;color:#666;">%</span>
                 <button type="button" class="btn-reset" onclick="resetField('rsv-commission-rate')">초기화</button>
@@ -4454,7 +4465,7 @@ const STATUS_COLOR_MAP = {
   '예약접수': 'gray', '예약완료': 'green', '취소완료': 'red', '출발완료': 'blue'
 };
 
-// 트립 예약상태 인라인 select 핸들러
+// 트립 예약상태 인라인 select 핸들러 (가드만 검증, 적용은 완료 시)
 function onTripStatusSelect() {
   const sel = document.getElementById('status-on-management-select');
   const guard = document.getElementById('status-guard-msg-inline');
@@ -4466,13 +4477,11 @@ function onTripStatusSelect() {
   const rules = STATUS_TRANSITION_RULES[original] || [];
   const rule = rules.find(r => r.to === newVal);
   if (!rule) {
-    guard.innerHTML = `⚠ [${original}] → [${newVal}] 전이는 허용되지 않습니다. 초기 상태로 되돌립니다.`;
+    guard.innerHTML = `⚠ [${original}] → [${newVal}] 전이는 허용되지 않습니다.`;
     guard.style.display = 'block';
     sel.value = original;
     return;
   }
-
-  // 결제완료 필수
   if (rule.requirePayment) {
     const curPayment = (document.getElementById('status-payment').textContent || '').trim();
     if (curPayment !== '결제완료') {
@@ -4482,7 +4491,6 @@ function onTripStatusSelect() {
       return;
     }
   }
-  // 출발일 경과 필수
   if (rule.requireDeparturePassed) {
     const depStr = (document.getElementById('info-dep-arr').textContent || '').split('→')[0].trim();
     const depDate = new Date(depStr);
@@ -4494,36 +4502,59 @@ function onTripStatusSelect() {
       return;
     }
   }
-
-  // 적용
   guard.style.display = 'none';
-  sel.dataset.original = newVal;
-  // 호환용 hidden badge 동기화
-  const badge = document.getElementById('status-on-management');
-  if (badge) {
-    badge.textContent = newVal;
-    badge.className = 'badge ' + (STATUS_COLOR_MAP[newVal] || 'gray');
-  }
-  showToast(`트립 예약상태가 [${newVal}]로 변경되었습니다.`);
 }
 
 function resetTripStatus() {
   const sel = document.getElementById('status-on-management-select');
-  const initial = '예약완료';
-  sel.value = initial;
-  sel.dataset.original = initial;
+  sel.value = sel.dataset.original;
   document.getElementById('status-guard-msg-inline').style.display = 'none';
-  const badge = document.getElementById('status-on-management');
-  if (badge) { badge.textContent = initial; badge.className = 'badge ' + STATUS_COLOR_MAP[initial]; }
-  showToast('트립 예약상태가 초기값으로 되돌려졌습니다.');
 }
 
-// 인라인 input 초기화
 function resetField(id) {
   const el = document.getElementById(id);
   if (!el) return;
   el.value = el.dataset.original || '';
-  showToast('초기값으로 되돌려졌습니다.');
+}
+
+// 카드 단위 edit 모드 토글 (수정하기 ↔ 완료)
+function toggleEditMode(cardId, btn) {
+  const card = document.getElementById(cardId);
+  const entering = !card.classList.contains('editing');
+  if (entering) {
+    card.classList.add('editing');
+    btn.textContent = '완료';
+    btn.classList.add('is-editing');
+    return;
+  }
+
+  // 완료: edit 값 → view 반영
+  if (cardId === 'card-status') {
+    const sel = document.getElementById('status-on-management-select');
+    const newVal = sel.value;
+    sel.dataset.original = newVal;
+    const badge = document.getElementById('status-on-management');
+    if (badge) {
+      badge.textContent = newVal;
+      badge.className = 'badge ' + (STATUS_COLOR_MAP[newVal] || 'gray');
+    }
+    document.getElementById('status-guard-msg-inline').style.display = 'none';
+  }
+  if (cardId === 'card-reservation') {
+    const partnerEl = document.getElementById('rsv-partner-no');
+    const rateEl = document.getElementById('rsv-commission-rate');
+    const partnerNo = partnerEl.value.trim();
+    const rate = rateEl.value.trim();
+    if (!partnerNo || rate === '') { alert('여행사 예약번호와 수수료율은 필수입니다.'); return; }
+    partnerEl.dataset.original = partnerNo;
+    rateEl.dataset.original = rate;
+    document.getElementById('rsv-partner-no-view').textContent = partnerNo;
+    document.getElementById('rsv-commission-rate-view').textContent = `${rate}%`;
+  }
+  card.classList.remove('editing');
+  btn.textContent = '수정하기';
+  btn.classList.remove('is-editing');
+  showToast('수정되었습니다.');
 }
 </script>
 </body>
