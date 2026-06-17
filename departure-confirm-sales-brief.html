@@ -240,7 +240,7 @@
     </table>
 
     <div class="keypoint">
-      ⭐ <strong>핵심 발견 3가지</strong> · ① <strong>메이저 3사 모두 자동화 가능</strong> (하나 82% / 노랑 67% / 모두 69%) · ② <strong>B(모객 충족)이 압도적 동인</strong> — 단일 변수로 66.8% 커버 · ③ <strong>AIRTEL은 인원 무관 자동</strong> — 11% 추가 커버
+      ⭐ <strong>핵심 발견 4가지</strong> · ① <strong>메이저 3사 모두 자동화 가능</strong> (하나 82% / 노랑 67% / 모두 69%) · ② <strong>B(모객 충족)이 압도적 동인</strong> — 단일 변수로 66.8% 커버 · ③ <strong>AIRTEL은 인원 무관 자동</strong> — 11% 추가 커버 · ④ <strong>C(시그널)은 3사 보유</strong> (온라인투어/내일투어/보물섬투어) — 다만 시그널 발생 window가 짧아 현재 영향은 1.4%, 미래 정책 룰에는 포함
     </div>
   </div>
 
@@ -277,13 +277,15 @@
       <div class="rule-card r3">
         <span class="rtag">3차 · 보조</span>
         <h3>여행사 시그널</h3>
-        <p class="rule-desc">여행사가 명시적 출발확정 신호 보내는 경우 즉시 반영. 온라인투어 단독.</p>
+        <p class="rule-desc">여행사가 명시적 출발확정 신호 보내는 경우 즉시 반영. <strong>3사 활용 가능</strong> (온라인투어 + 내일투어 + 보물섬투어).</p>
         <div class="rule-cond">
-<span class="hl">if</span> raw_status <span class="hl">in</span><br>
-&nbsp;&nbsp;[E-Ticket 발송완료, 발권완료, ...]:<br>
-&nbsp;&nbsp;status = 출발확정
+<span class="hl">if</span> agency=온라인투어 <span class="hl">and</span> raw_status<br>
+&nbsp;&nbsp;<span class="hl">in</span> [E-Ticket 발송완료, 발권완료, 비자발송완료]<br>
+<span class="hl">or</span> agency=내일투어 <span class="hl">and</span> raw_status=예약확정<br>
+<span class="hl">or</span> agency=보물섬투어 <span class="hl">and</span> raw_status=확정<br>
+&nbsp;&nbsp;→ status = 출발확정
         </div>
-        <div class="impact">📊 전체 영향: 27건 (1.4%)</div>
+        <div class="impact">📊 전체 영향: 27건 (1.4%)<br>※ 시그널은 짧은 window에만 잡힘 — 미래 예약 정책에 활용</div>
       </div>
     </div>
   </div>

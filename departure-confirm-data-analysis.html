@@ -223,7 +223,7 @@
         <div class="venn-var vc">
           <div class="vn">9<span class="vpct">/ 1.8%</span></div>
           <div class="vlbl">A ∩ C · 여행사 시그널</div>
-          <div class="vdesc">E-Ticket 발송완료 / 발권완료 등<br>온라인투어 단독</div>
+          <div class="vdesc">E-Ticket 발송완료 / 발권완료 / 예약확정 / 확정<br>온라인투어 + 내일투어 + 보물섬투어 (3사)</div>
         </div>
       </div>
 
@@ -535,7 +535,7 @@
         <li><strong>A 중 자동 매핑 가능 = 73.7% (369 / 501)</strong> — 출발대기 진입 후보(A)의 4분의 3이 시스템 자동 처리 가능. 운영자 수동 부담 26%로 축소.</li>
         <li><strong>B(모객 인원 충족)이 압도적 핵심 동인 — A 대비 71.3%</strong> — booked_seats ≥ threshold_for_departure가 단일 변수로 가장 강력. PACKAGE 상품의 자동화 동력.</li>
         <li><strong>메이저 3사 자동화 가능</strong> — 하나투어 86.8% / 노랑풍선 78.7% / 모두투어 63.0%. ts_reservation_order.package_code 경유 매칭 후 99% 조인 성공.</li>
-        <li><strong>C(시그널)은 온라인투어 단독 9건</strong> — A∩C가 적지만 보조 시그널로 가치 있음. E-Ticket 발송완료가 진짜 출발확정 신호.</li>
+        <li><strong>C(시그널) 활용 가능 여행사 = 3사</strong> — 온라인투어(E-Ticket 발송완료 등) + 내일투어(예약확정/RSVCF) + 보물섬투어(확정). 단 대부분 시그널은 짧은 window에만 잡혀서 현재 분석 영향은 작음(9~27건). <strong>미래 예약 정책 룰에는 3사 모두 포함</strong>.</li>
         <li><strong>AIRTEL은 100% 자동 매핑</strong> — 인원 무관(2인 이상이면 출발) 룰이라 A∩AIRTEL=59건은 별도 조건 없이 자동 처리 가능. 에어텔닷컴 케이스 자동화율 100%.</li>
         <li><strong>나머지 26.3%(132건)는 운영자 수동 영역</strong> — 주로 PACKAGE 중 모객 미달 + 시그널 없는 케이스. D-7 알림 + 운영자 [출발확정 처리] 액션 룰 필요.</li>
       </ol>
@@ -576,7 +576,9 @@
         <h3>여행사 시그널 신뢰</h3>
         <p class="rdesc">여행사가 명시적 출발확정 신호 보내는 경우 즉시 반영.</p>
         <ul>
-          <li>raw_status IN (E-Ticket 발송완료, 발권완료, 비자발송완료, 출발확정)</li>
+          <li>온라인투어: raw_status IN (E-Ticket 발송완료, 발권완료, 비자발송완료)</li>
+          <li>내일투어: raw_status = "예약확정" (RSVCF)</li>
+          <li>보물섬투어: raw_status = "확정"</li>
           <li>→ 자동 출발확정 (시그널 즉시)</li>
         </ul>
       </div>
