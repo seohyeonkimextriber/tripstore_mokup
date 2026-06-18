@@ -2,9 +2,10 @@
 <html lang="ko">
 <head>
 <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
 <title>🍜 냄비모임 가입 라면 시험</title>
 <style>
-  * { box-sizing: border-box; margin: 0; padding: 0; }
+  * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
   body {
     font-family: 'Apple SD Gothic Neo', -apple-system, sans-serif;
     background: linear-gradient(180deg, #ffd9a8 0%, #ff9466 100%);
@@ -13,7 +14,13 @@
     flex-direction: column;
     align-items: center;
     padding: 16px;
+    -webkit-user-select: none;
     user-select: none;
+    touch-action: manipulation;
+  }
+  button, .ramen-card, .extra-btn, .fire-btn, .bag, .kettle, .star, .pot {
+    touch-action: manipulation;
+    cursor: pointer;
   }
   h1 { color: #4a1f00; font-size: 24px; margin-bottom: 4px; }
   .sub { color: #6b3410; font-size: 13px; margin-bottom: 16px; }
@@ -190,12 +197,15 @@
   }
   .bag {
     display: inline-block;
-    font-size: 80px;
+    font-size: 100px;
     cursor: pointer;
-    transition: transform 0.1s;
+    transition: transform 0.05s;
     position: relative;
+    padding: 20px 40px;
+    user-select: none;
+    -webkit-user-select: none;
   }
-  .bag:active { transform: scale(0.95); }
+  .bag:active { transform: scale(0.92); }
   .tear-bar {
     width: 80%;
     height: 10px;
@@ -517,7 +527,7 @@
     <div id="bagStage" class="hidden bag-area">
       <div class="bag" id="bag">📦</div>
       <div class="tear-bar"><div class="tear-fill" id="tearFill"></div></div>
-      <div style="font-size: 12px; color: #888;">봉지를 빠르게 클릭해서 뜯으세요 (10번)</div>
+      <div style="font-size: 12px; color: #888;">봉지를 빠르게 탭해서 뜯으세요 (6번)</div>
     </div>
 
     <!-- Stage 4: Extras -->
@@ -628,10 +638,11 @@ function updateTemp() {
 
 // Stage 1: Pour water
 let pourTimer = null;
+$('kettle').addEventListener('touchstart', e => { e.preventDefault(); startPour(); }, { passive: false });
 $('kettle').addEventListener('mousedown', startPour);
-$('kettle').addEventListener('touchstart', e => { e.preventDefault(); startPour(); });
-document.addEventListener('mouseup', stopPour);
 document.addEventListener('touchend', stopPour);
+document.addEventListener('touchcancel', stopPour);
+document.addEventListener('mouseup', stopPour);
 
 function startPour() {
   if (state.stage !== 1 || state.water >= 100) return;
@@ -653,9 +664,23 @@ function stopPour() {
   clearInterval(pourTimer);
 }
 
+function tapHandler(el, fn) {
+  let touched = false;
+  el.addEventListener('touchstart', e => {
+    touched = true;
+    e.preventDefault();
+    fn();
+  }, { passive: false });
+  el.addEventListener('click', e => {
+    if (touched) { touched = false; return; }
+    fn();
+  });
+}
+
 // Stage 2: Ramen selection
 document.querySelectorAll('.ramen-card').forEach(card => {
-  card.addEventListener('click', () => {
+  tapHandler(card, () => {
+    if (state.stage !== 2) return;
     document.querySelectorAll('.ramen-card').forEach(c => c.classList.remove('selected'));
     card.classList.add('selected');
     state.ramen = card.dataset.ramen;
@@ -664,20 +689,21 @@ document.querySelectorAll('.ramen-card').forEach(card => {
 });
 
 // Stage 3: Tear bag, then put noodle & soup
-$('bag').addEventListener('click', () => {
+const TEAR_TARGET = 6;
+tapHandler($('bag'), () => {
   if (state.stage !== 3) return;
-  if (state.tearCount < 10) {
+  if (state.tearCount < TEAR_TARGET) {
     state.tearCount++;
-    $('tearFill').style.width = (state.tearCount * 10) + '%';
-    if (state.tearCount >= 10) {
+    $('tearFill').style.width = (state.tearCount / TEAR_TARGET * 100) + '%';
+    if (state.tearCount >= TEAR_TARGET) {
       $('bag').textContent = '💥';
-      $('instruction').textContent = '봉지가 뜯어졌어요! 봉지를 한 번 더 클릭하면 면 투입';
+      $('instruction').textContent = '봉지가 뜯어졌어요! 한 번 더 탭 → 면 투입';
     }
   } else if (!state.noodleIn) {
     state.noodleIn = true;
     $('potIngredients').innerHTML += '🍜';
     $('bag').textContent = '📜';
-    $('instruction').textContent = '면 투입 완료! 스프 봉지 클릭';
+    $('instruction').textContent = '면 투입 완료! 스프 봉지 한 번 더 탭';
   } else if (!state.soupIn) {
     state.soupIn = true;
     $('potIngredients').innerHTML += '🌶️';
@@ -689,14 +715,13 @@ $('bag').addEventListener('click', () => {
 
 // Stage 4: Extras
 document.querySelectorAll('.extra-btn').forEach(btn => {
-  btn.addEventListener('click', () => {
+  tapHandler(btn, () => {
     if (state.stage !== 4) return;
     const name = btn.dataset.extra;
     const emojiMap = {청양고추:'🌶️',콩나물:'🌱',계란:'🥚',대파:'🧅',치즈:'🧀',떡:'🍡'};
     if (state.extras.includes(name)) {
       state.extras = state.extras.filter(e => e !== name);
       btn.classList.remove('added');
-      // remove one matching emoji
       $('potIngredients').innerHTML = $('potIngredients').innerHTML.replace(emojiMap[name], '');
     } else {
       state.extras.push(name);
@@ -708,7 +733,7 @@ document.querySelectorAll('.extra-btn').forEach(btn => {
 
 // Stage 5: Fire
 document.querySelectorAll('.fire-btn').forEach(btn => {
-  btn.addEventListener('click', () => {
+  tapHandler(btn, () => {
     if (state.stage !== 5) return;
     document.querySelectorAll('.fire-btn').forEach(b => b.classList.remove('active'));
     btn.classList.add('active');
