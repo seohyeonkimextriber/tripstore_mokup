@@ -386,6 +386,7 @@
             <div>
               <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px;">
                 <span style="font-size:11px;color:#1565c0;font-weight:600;">인원 구성</span>
+                <button class="btn btn-outline btn-sm" style="font-size:10px;padding:2px 8px;" onclick="togglePaxMatrix(this)" id="btn-pax-matrix">인원관리</button>
                 <button class="btn btn-plus btn-sm" style="font-size:10px;padding:2px 8px;" onclick="document.getElementById('modal-add-pax').classList.add('show')">+ 인원추가</button>
                 <button class="btn btn-danger btn-sm" style="font-size:10px;padding:2px 8px;" onclick="document.getElementById('modal-remove-pax').classList.add('show')">- 인원삭제</button>
               </div>
@@ -405,6 +406,69 @@
               <div style="font-size:10px;color:#888;">총 판매금액</div>
               <div style="font-family:monospace;font-weight:700;font-size:16px;color:#e65100;" id="pax-sale-total">2,038,000</div>
               <div style="font-size:9px;color:#aaa;" id="pax-sale-formula">(686,000 x 3) - 쿠폰 20,000</div>
+            </div>
+          </div>
+
+          <!-- 인원관리 매트릭스 (토글) -->
+          <div id="pax-matrix" style="display:none;margin-top:14px;background:#fff;border:1px solid #e0e0e0;border-radius:8px;padding:16px;">
+            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;">
+              <div style="font-size:13px;font-weight:700;color:#333;">예약자 인원 별 금액 정보 관리</div>
+              <div style="font-size:11px;color:#666;">총 <strong style="color:#1565c0;" id="pax-matrix-total">3</strong>명 (성인 <span id="pax-matrix-adult">3</span>, 아동 <span id="pax-matrix-child">0</span>, 유아 <span id="pax-matrix-infant">0</span>)</div>
+            </div>
+            <div style="overflow-x:auto;">
+              <table style="width:100%;font-size:12px;border-collapse:collapse;min-width:920px;">
+                <thead>
+                  <tr style="background:#fafafa;border-bottom:1px solid #e8e8e8;">
+                    <th style="padding:10px 12px;text-align:center;font-weight:600;color:#666;font-size:11px;">구분</th>
+                    <th style="padding:10px 12px;text-align:right;font-weight:600;color:#666;font-size:11px;">1인 상품가</th>
+                    <th style="padding:10px 12px;text-align:right;font-weight:600;color:#666;font-size:11px;">1인 판매가</th>
+                    <th style="padding:10px 12px;text-align:right;font-weight:600;color:#666;font-size:11px;">특가금액</th>
+                    <th style="padding:10px 12px;text-align:right;font-weight:600;color:#666;font-size:11px;">1인 트립 특가</th>
+                    <th style="padding:10px 12px;text-align:right;font-weight:600;color:#666;font-size:11px;">1인 여행사 특가</th>
+                    <th style="padding:10px 12px;text-align:right;font-weight:600;color:#666;font-size:11px;">1인 채널사 특가</th>
+                    <th style="padding:10px 12px;text-align:right;font-weight:600;color:#666;font-size:11px;">1인 취소위약금</th>
+                    <th style="padding:10px 12px;text-align:center;font-weight:600;color:#666;font-size:11px;">상태</th>
+                  </tr>
+                </thead>
+                <tbody id="pax-matrix-tbody">
+                  <tr style="border-bottom:1px solid #f5f5f5;">
+                    <td style="padding:12px;text-align:center;">성인</td>
+                    <td style="padding:12px;text-align:right;font-family:monospace;">699,000원</td>
+                    <td style="padding:12px;text-align:right;font-family:monospace;font-weight:700;color:#1565c0;">686,000원</td>
+                    <td style="padding:12px;text-align:right;font-family:monospace;color:#d32f2f;">13,000원</td>
+                    <td style="padding:12px;text-align:right;font-family:monospace;color:#bbb;">0원</td>
+                    <td style="padding:12px;text-align:right;font-family:monospace;color:#d32f2f;">13,000원</td>
+                    <td style="padding:12px;text-align:right;font-family:monospace;color:#bbb;">0원</td>
+                    <td style="padding:12px;text-align:right;font-family:monospace;color:#bbb;">0원</td>
+                    <td style="padding:12px;text-align:center;"><span style="background:#e8f5e9;color:#2e7d32;font-size:10px;padding:2px 8px;border-radius:3px;font-weight:600;">승인</span></td>
+                  </tr>
+                  <tr style="border-bottom:1px solid #f5f5f5;">
+                    <td style="padding:12px;text-align:center;">성인</td>
+                    <td style="padding:12px;text-align:right;font-family:monospace;">699,000원</td>
+                    <td style="padding:12px;text-align:right;font-family:monospace;font-weight:700;color:#1565c0;">686,000원</td>
+                    <td style="padding:12px;text-align:right;font-family:monospace;color:#d32f2f;">13,000원</td>
+                    <td style="padding:12px;text-align:right;font-family:monospace;color:#bbb;">0원</td>
+                    <td style="padding:12px;text-align:right;font-family:monospace;color:#d32f2f;">13,000원</td>
+                    <td style="padding:12px;text-align:right;font-family:monospace;color:#bbb;">0원</td>
+                    <td style="padding:12px;text-align:right;font-family:monospace;color:#bbb;">0원</td>
+                    <td style="padding:12px;text-align:center;"><span style="background:#e8f5e9;color:#2e7d32;font-size:10px;padding:2px 8px;border-radius:3px;font-weight:600;">승인</span></td>
+                  </tr>
+                  <tr>
+                    <td style="padding:12px;text-align:center;">성인</td>
+                    <td style="padding:12px;text-align:right;font-family:monospace;">699,000원</td>
+                    <td style="padding:12px;text-align:right;font-family:monospace;font-weight:700;color:#1565c0;">686,000원</td>
+                    <td style="padding:12px;text-align:right;font-family:monospace;color:#d32f2f;">13,000원</td>
+                    <td style="padding:12px;text-align:right;font-family:monospace;color:#bbb;">0원</td>
+                    <td style="padding:12px;text-align:right;font-family:monospace;color:#d32f2f;">13,000원</td>
+                    <td style="padding:12px;text-align:right;font-family:monospace;color:#bbb;">0원</td>
+                    <td style="padding:12px;text-align:right;font-family:monospace;color:#bbb;">0원</td>
+                    <td style="padding:12px;text-align:center;"><span style="background:#e8f5e9;color:#2e7d32;font-size:10px;padding:2px 8px;border-radius:3px;font-weight:600;">승인</span></td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+            <div style="font-size:11px;color:#888;margin-top:10px;line-height:1.5;">
+              ※ 인원별 1인 판매가 = 1인 상품가 − 특가금액(트립+여행사+채널). 취소위약금은 인원 삭제 시 자동 반영.
             </div>
           </div>
         </div>
@@ -5077,6 +5141,15 @@ function showToast(message) {
   document.body.appendChild(toast);
   setTimeout(() => { toast.style.opacity = '0'; toast.style.transition = 'opacity 0.3s'; }, 2000);
   setTimeout(() => toast.remove(), 2500);
+}
+
+// ============== 인원관리 매트릭스 토글 ==============
+function togglePaxMatrix(btn) {
+  const panel = document.getElementById('pax-matrix');
+  const isHidden = panel.style.display === 'none' || !panel.style.display;
+  panel.style.display = isHidden ? 'block' : 'none';
+  btn.textContent = isHidden ? '인원관리 닫기' : '인원관리';
+  btn.classList.toggle('is-editing', isHidden);
 }
 
 // ============== 상단 4카드 인라인 편집 (phase1 패턴) ==============
