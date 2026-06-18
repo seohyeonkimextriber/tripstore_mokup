@@ -1,0 +1,312 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
+<meta name="apple-mobile-web-app-capable" content="yes" />
+<meta name="mobile-web-app-capable" content="yes" />
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+<meta name="theme-color" content="#0f172a" />
+<title>이동형 잡기 🎯</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+  html, body { height: 100%; overflow: hidden; font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, sans-serif; touch-action: manipulation; }
+  body {
+    background: linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #334155 100%);
+    color: white;
+    user-select: none;
+    -webkit-user-select: none;
+    overscroll-behavior: none;
+    position: fixed;
+    width: 100%;
+  }
+  #hud {
+    position: fixed; top: 0; left: 0; right: 0;
+    display: flex; justify-content: space-between; align-items: center;
+    padding: max(16px, env(safe-area-inset-top)) 16px 12px;
+    background: linear-gradient(180deg, rgba(0,0,0,0.6), transparent);
+    z-index: 10;
+    font-weight: 700;
+  }
+  .stat { display: flex; gap: 6px; align-items: center; font-size: 13px; }
+  .stat-value { font-size: 22px; color: #fbbf24; min-width: 40px; }
+  #timer .stat-value { color: #f87171; }
+  #combo .stat-value { color: #34d399; }
+
+  #stage {
+    position: relative; width: 100vw; height: 100vh;
+    overflow: hidden; cursor: crosshair;
+    touch-action: none;
+  }
+  .target {
+    position: absolute;
+    width: 90px; height: 90px;
+    border-radius: 50%;
+    background-size: cover;
+    background-position: center top;
+    box-shadow: 0 8px 24px rgba(0,0,0,0.5), inset 0 0 0 4px white;
+    cursor: pointer;
+    transition: transform 0.08s ease-out;
+    will-change: transform, left, top;
+    touch-action: none;
+  }
+  .target:active { transform: scale(1.15); }
+  .target.bomb {
+    box-shadow: 0 8px 24px rgba(220,38,38,0.7), inset 0 0 0 4px #dc2626;
+    filter: hue-rotate(180deg) brightness(0.8);
+  }
+  .target.golden {
+    box-shadow: 0 8px 32px rgba(251,191,36,0.9), inset 0 0 0 4px #fbbf24;
+    animation: glow 0.6s ease-in-out infinite alternate;
+  }
+  @keyframes glow {
+    from { box-shadow: 0 0 20px rgba(251,191,36,0.6), inset 0 0 0 4px #fbbf24; }
+    to { box-shadow: 0 0 40px rgba(251,191,36,1), inset 0 0 0 4px #fde68a; }
+  }
+
+  .popup {
+    position: absolute;
+    font-size: 32px; font-weight: 900;
+    pointer-events: none;
+    animation: floatUp 0.8s ease-out forwards;
+    text-shadow: 0 2px 8px rgba(0,0,0,0.8);
+  }
+  @keyframes floatUp {
+    0% { opacity: 1; transform: translateY(0) scale(0.6); }
+    100% { opacity: 0; transform: translateY(-80px) scale(1.4); }
+  }
+
+  #overlay {
+    position: fixed; inset: 0;
+    background: rgba(15,23,42,0.92);
+    display: flex; flex-direction: column;
+    justify-content: center; align-items: center;
+    z-index: 100; gap: 24px;
+    backdrop-filter: blur(8px);
+  }
+  #overlay.hidden { display: none; }
+  #overlay h1 {
+    font-size: 40px;
+    background: linear-gradient(135deg, #fbbf24, #f87171);
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+    text-align: center;
+  }
+  #overlay p { font-size: 15px; opacity: 0.85; max-width: 90vw; text-align: center; line-height: 1.6; padding: 0 16px; }
+  .rules { display: flex; flex-direction: column; gap: 10px; padding: 0 24px; width: 100%; max-width: 360px; }
+  .rule {
+    background: rgba(255,255,255,0.08);
+    padding: 12px 16px; border-radius: 14px;
+    display: flex; align-items: center; gap: 12px;
+    font-size: 14px;
+  }
+  .rule .icon { width: 36px; height: 36px; border-radius: 50%; background-size: cover; background-position: center top; flex-shrink: 0; }
+  .rule .icon.bomb { filter: hue-rotate(180deg) brightness(0.8); box-shadow: inset 0 0 0 3px #dc2626; }
+  .rule .icon.golden { box-shadow: inset 0 0 0 3px #fbbf24; }
+
+  button {
+    font: inherit; font-weight: 700; font-size: 20px;
+    padding: 16px 40px; border-radius: 999px; border: none;
+    background: linear-gradient(135deg, #fbbf24, #f59e0b);
+    color: #1e293b; cursor: pointer;
+    box-shadow: 0 8px 24px rgba(251,191,36,0.4);
+    transition: transform 0.1s;
+  }
+  button:hover { transform: translateY(-2px); }
+  button:active { transform: translateY(0); }
+
+  #final-score { font-size: 64px; color: #fbbf24; font-weight: 900; }
+  #final-grade { font-size: 20px; opacity: 0.9; text-align: center; padding: 0 16px; }
+</style>
+</head>
+<body>
+
+<div id="hud">
+  <div class="stat" id="score">SCORE <span class="stat-value">0</span></div>
+  <div class="stat" id="combo">COMBO <span class="stat-value">x1</span></div>
+  <div class="stat" id="timer">TIME <span class="stat-value">30</span></div>
+</div>
+
+<div id="stage"></div>
+
+<div id="overlay">
+  <h1>이동형 잡기 🎯</h1>
+  <p>30초 안에 빠르게 도망다니는 <b>이동형</b>을 클릭해서 잡아라!</p>
+  <div class="rules">
+    <div class="rule"><div class="icon" style="background-image:url('dh2.png')"></div>+10점</div>
+    <div class="rule"><div class="icon golden" style="background-image:url('dh3.png')"></div>황금이동형 +50점</div>
+    <div class="rule"><div class="icon bomb" style="background-image:url('dh1.png')"></div>가짜! -20점 / 콤보 리셋</div>
+  </div>
+  <button id="startBtn">START</button>
+</div>
+
+<script>
+const stage = document.getElementById('stage');
+const scoreEl = document.querySelector('#score .stat-value');
+const comboEl = document.querySelector('#combo .stat-value');
+const timerEl = document.querySelector('#timer .stat-value');
+const overlay = document.getElementById('overlay');
+const startBtn = document.getElementById('startBtn');
+
+const FACES = ['dh1.png', 'dh2.png', 'dh3.png'];
+
+let score = 0, combo = 1, timeLeft = 30;
+let running = false;
+let spawnTimer, gameTimer;
+let activeTargets = new Set();
+
+function rand(min, max) { return Math.random() * (max - min) + min; }
+
+function showPopup(x, y, text, color) {
+  const el = document.createElement('div');
+  el.className = 'popup';
+  el.textContent = text;
+  el.style.color = color;
+  el.style.left = x + 'px';
+  el.style.top = y + 'px';
+  stage.appendChild(el);
+  setTimeout(() => el.remove(), 800);
+}
+
+function spawnTarget() {
+  if (!running) return;
+  const el = document.createElement('div');
+  el.className = 'target';
+
+  const roll = Math.random();
+  let type = 'normal', face = FACES[1];
+  if (roll < 0.12) { type = 'golden'; el.classList.add('golden'); face = FACES[2]; }
+  else if (roll < 0.30) { type = 'bomb'; el.classList.add('bomb'); face = FACES[0]; }
+  else { face = FACES[Math.floor(Math.random()*2)+1]; }
+
+  el.style.backgroundImage = `url('${face}')`;
+
+  const isMobile = window.innerWidth < 600;
+  const base = isMobile ? 80 : 110;
+  const size = type === 'golden' ? base - 15 : (type === 'bomb' ? base + 15 : base);
+  el.style.width = size + 'px';
+  el.style.height = size + 'px';
+
+  const maxX = window.innerWidth - size - 20;
+  const maxY = window.innerHeight - size - 100;
+  let x = rand(20, maxX);
+  let y = rand(80, maxY);
+  el.style.left = x + 'px';
+  el.style.top = y + 'px';
+
+  // movement
+  let vx = rand(-1, 1) * (type === 'golden' ? 4 : 2.2);
+  let vy = rand(-1, 1) * (type === 'golden' ? 4 : 2.2);
+
+  let alive = true;
+  const lifespan = type === 'golden' ? 1800 : 2600;
+
+  function tick() {
+    if (!alive) return;
+    x += vx; y += vy;
+    if (x < 10 || x > maxX) vx *= -1;
+    if (y < 70 || y > maxY) vy *= -1;
+    el.style.left = x + 'px';
+    el.style.top = y + 'px';
+    requestAnimationFrame(tick);
+  }
+  tick();
+
+  const handleHit = (e) => {
+    if (!alive) return;
+    e.preventDefault();
+    alive = false;
+    const rect = el.getBoundingClientRect();
+    const cx = rect.left + rect.width/2;
+    const cy = rect.top + rect.height/2;
+
+    if (type === 'bomb') {
+      score = Math.max(0, score - 20);
+      combo = 1;
+      showPopup(cx, cy, '-20 💥', '#f87171');
+    } else if (type === 'golden') {
+      const gain = 50 * combo;
+      score += gain;
+      combo = Math.min(combo + 1, 9);
+      showPopup(cx, cy, `+${gain} ⭐`, '#fde68a');
+    } else {
+      const gain = 10 * combo;
+      score += gain;
+      combo = Math.min(combo + 1, 9);
+      showPopup(cx, cy, `+${gain}`, '#34d399');
+    }
+    updateHUD();
+    el.remove();
+    activeTargets.delete(el);
+  };
+  el.addEventListener('pointerdown', handleHit);
+
+  stage.appendChild(el);
+  activeTargets.add(el);
+
+  setTimeout(() => {
+    if (alive) {
+      alive = false;
+      el.remove();
+      activeTargets.delete(el);
+      if (type !== 'bomb') {
+        combo = 1;
+        updateHUD();
+      }
+    }
+  }, lifespan);
+}
+
+function updateHUD() {
+  scoreEl.textContent = score;
+  comboEl.textContent = 'x' + combo;
+  timerEl.textContent = timeLeft;
+}
+
+function loop() {
+  spawnTarget();
+  const interval = Math.max(350, 900 - (30 - timeLeft) * 18);
+  spawnTimer = setTimeout(loop, interval);
+}
+
+function startGame() {
+  score = 0; combo = 1; timeLeft = 30;
+  running = true;
+  updateHUD();
+  overlay.classList.add('hidden');
+  activeTargets.forEach(t => t.remove());
+  activeTargets.clear();
+
+  loop();
+  gameTimer = setInterval(() => {
+    timeLeft--;
+    updateHUD();
+    if (timeLeft <= 0) endGame();
+  }, 1000);
+}
+
+function endGame() {
+  running = false;
+  clearTimeout(spawnTimer);
+  clearInterval(gameTimer);
+  activeTargets.forEach(t => t.remove());
+  activeTargets.clear();
+
+  let grade = '🌱 새싹 이동형 사냥꾼';
+  if (score >= 800) grade = '👑 이동형 마스터';
+  else if (score >= 500) grade = '🔥 이동형 전문가';
+  else if (score >= 250) grade = '⚡ 이동형 추적자';
+
+  overlay.innerHTML = `
+    <h1>게임 종료!</h1>
+    <div id="final-score">${score}</div>
+    <div id="final-grade">${grade}</div>
+    <button id="startBtn">다시하기</button>
+  `;
+  overlay.classList.remove('hidden');
+  document.getElementById('startBtn').addEventListener('click', startGame);
+}
+
+startBtn.addEventListener('click', startGame);
+</script>
+</body>
+</html>
