@@ -36,11 +36,28 @@
   .info-label { width: 140px; color: #888; font-size: 12px; flex-shrink: 0; }
   .info-value { font-size: 13px; font-weight: 500; }
   .top-grid { display: grid; grid-template-columns: 1fr 1.1fr 1.3fr; gap: 16px; margin-bottom: 16px; }
-  .top-grid .section { margin-bottom: 0; height: 100%; }
+  .top-grid .section { margin-bottom: 0; height: 100%; display: flex; flex-direction: column; }
+  .top-grid .section-body { flex: 1; }
   .top-grid .info-label { width: 110px; }
   .btn-inline { display: inline-flex; align-items: center; gap: 4px; padding: 3px 8px; font-size: 11px; font-weight: 500; background: #fff; color: #555; border: 1px solid #d0d0d0; border-radius: 6px; cursor: pointer; }
   .btn-inline:hover { background: #fafafa; border-color: #bbb; }
   @media (max-width: 1100px) { .top-grid { grid-template-columns: 1fr; } }
+  /* 인라인 편집 (phase1 패턴) */
+  .inline-input { padding: 6px 10px; border: 1px solid #d0d0d0; border-radius: 6px; font-size: 12px; box-sizing: border-box; }
+  .inline-input:focus { outline: none; border-color: #1565c0; }
+  .inline-input.w-full { width: 180px; }
+  .inline-input.w-rate { width: 70px; text-align: right; }
+  .inline-select { padding: 6px 28px 6px 10px; border: 1px solid #d0d0d0; border-radius: 6px; font-size: 12px; background: #fff; cursor: pointer; }
+  .inline-select:focus { outline: none; border-color: #1565c0; }
+  .btn-reset { margin-left: 6px; padding: 5px 10px; border: 1px solid #ef9a9a; background: #fff; color: #d32f2f; border-radius: 6px; font-size: 11px; font-weight: 600; cursor: pointer; }
+  .btn-reset:hover { background: #ffebee; }
+  .field-wrap { display: inline-flex; align-items: center; gap: 4px; flex-wrap: wrap; }
+  .view-mode { display: inline; }
+  .edit-mode { display: none; }
+  .editing .view-mode { display: none; }
+  .editing .edit-mode { display: inline-flex; align-items: center; }
+  .editing .info-label.editable { color: #d32f2f; font-weight: 600; }
+  .btn-edit-toggle.is-editing { background: #1a1a1a; color: #fff; border-color: #1a1a1a; }
   .btn { padding: 6px 14px; border-radius: 6px; font-size: 12px; font-weight: 600; cursor: pointer; border: none; }
   .btn-primary { background: #1a1a1a; color: #fff; }
   .btn-outline { background: #fff; color: #333; border: 1px solid #d0d0d0; }
@@ -182,80 +199,125 @@
     <!-- 상단 3카드: 예약 상태 관리 / 예약자 정보 / 예약정보 -->
     <div class="top-grid">
 
-      <!-- 예약 상태 관리 -->
-      <div class="section">
+      <!-- 카드 1: 예약 상태 관리 -->
+      <div class="section" id="card-status">
         <div class="section-header">
           <h2>예약 상태 관리</h2>
           <div class="actions">
-            <button class="btn-inline" onclick="alert('상태 수정 기능은 별도 모달 예정')">수정하기</button>
+            <button class="btn btn-outline btn-sm btn-edit-toggle" id="btn-toggle-status" onclick="toggleEditMode('card-status', this)">수정하기</button>
           </div>
         </div>
         <div class="section-body">
-          <div class="info-grid single">
-            <div>
-              <div class="info-row"><span class="info-label">트립 예약상태</span><span class="info-value">예약완료</span></div>
-              <div class="info-row"><span class="info-label">트립 결제상태</span><span class="info-value">결제완료</span></div>
-              <div class="info-row"><span class="info-label">여행사 예약상태</span><span class="info-value">-(상태 값 업데이트 진행 중)</span></div>
-              <div class="info-row" style="border-bottom:none;"><span class="info-label">여행사 결제상태</span><span class="info-value">-</span></div>
-            </div>
+          <div class="info-row">
+            <span class="info-label editable">트립 예약상태</span>
+            <span class="info-value">
+              <span class="view-mode"><span class="badge green" id="status-on-management">예약완료</span></span>
+              <span class="edit-mode field-wrap">
+                <select id="status-on-management-select" class="inline-select" data-original="예약완료" onchange="onTripStatusSelect()">
+                  <option value="예약접수">예약접수</option>
+                  <option value="예약완료" selected>예약완료</option>
+                  <option value="취소완료">취소완료</option>
+                  <option value="출발완료">출발완료</option>
+                </select>
+                <button type="button" class="btn-reset" onclick="resetTripStatus()">초기화</button>
+              </span>
+            </span>
+          </div>
+          <div class="info-row"><span class="info-label">트립 결제상태</span><span class="info-value" id="status-payment">결제완료</span></div>
+          <div class="info-row"><span class="info-label">여행사 예약상태</span><span class="info-value" id="status-partner-rsv" style="color:#999;">(상태 값 업데이트 진행 중)</span></div>
+          <div class="info-row" style="border-bottom:none;"><span class="info-label">여행사 결제상태</span><span class="info-value" id="status-partner-pay" style="color:#999;">(상태 값 업데이트 진행 중)</span></div>
+          <div id="status-guard-msg-inline" style="display:none;margin-top:10px;background:#ffebee;border:1px solid #ef9a9a;border-radius:6px;padding:8px 12px;font-size:11px;color:#b71c1c;line-height:1.6;"></div>
+          <div style="background:#fff8e1;border:1px solid #ffe082;border-radius:6px;padding:8px 12px;margin-top:12px;font-size:11px;color:#5d4037;line-height:1.55;">
+            ℹ 1차 컷 기준: <strong>트립 예약상태</strong>만 수정 가능. 여행사 측 상태는 표시 전용.
           </div>
         </div>
       </div>
 
-      <!-- 예약자 정보 -->
-      <div class="section" id="section-traveler">
+      <!-- 카드 2: 예약자 정보 -->
+      <div class="section" id="card-traveler">
         <div class="section-header">
           <h2>예약자 정보</h2>
           <div class="actions">
-            <button class="btn-inline" onclick="alert('예약자 정보 수정 모달 예정')">수정하기</button>
+            <button class="btn btn-outline btn-sm btn-edit-toggle" id="btn-toggle-traveler" onclick="toggleEditMode('card-traveler', this)">수정하기</button>
           </div>
         </div>
         <div class="section-body">
-          <div class="info-grid single">
-            <div>
-              <div class="info-row"><span class="info-label">예약자</span><span class="info-value">오기웅</span></div>
-              <div class="info-row"><span class="info-label">생년월일</span><span class="info-value">1975-12-17</span></div>
-              <div class="info-row"><span class="info-label">성별</span><span class="info-value">남성</span></div>
-              <div class="info-row"><span class="info-label">이메일</span><span class="info-value">kipoongman@hanmail.net</span></div>
-              <div class="info-row" style="border-bottom:none;"><span class="info-label">연락처</span><span class="info-value" style="display:flex;align-items:center;gap:8px;">010-2374-8449 <button class="btn-inline" onclick="alert('문자발송 모달 예정')">문자발송</button></span></div>
-            </div>
+          <div class="info-row">
+            <span class="info-label editable">예약자</span>
+            <span class="info-value">
+              <span class="view-mode" id="traveler-name-view">오기웅</span>
+              <span class="edit-mode field-wrap">
+                <input type="text" id="traveler-name" class="inline-input w-full" value="오기웅" data-original="오기웅">
+                <button type="button" class="btn-reset" onclick="resetField('traveler-name')">초기화</button>
+              </span>
+            </span>
+          </div>
+          <div class="info-row"><span class="info-label">생년월일</span><span class="info-value" id="traveler-birth">1975-12-17</span></div>
+          <div class="info-row"><span class="info-label">성별</span><span class="info-value" id="traveler-gender">남성</span></div>
+          <div class="info-row"><span class="info-label">이메일</span><span class="info-value" id="traveler-email">kipoongman@hanmail.net</span></div>
+          <div class="info-row" style="border-bottom:none;">
+            <span class="info-label editable">연락처</span>
+            <span class="info-value">
+              <span class="view-mode" id="traveler-phone-view" style="display:inline-flex;align-items:center;gap:8px;">010-2374-8449 <button class="btn-inline" onclick="event.stopPropagation();alert('문자발송 모달 예정')">문자발송</button></span>
+              <span class="edit-mode field-wrap">
+                <input type="tel" id="traveler-phone" class="inline-input w-full" value="010-2374-8449" data-original="010-2374-8449">
+                <button type="button" class="btn-reset" onclick="resetField('traveler-phone')">초기화</button>
+              </span>
+            </span>
           </div>
         </div>
       </div>
 
-      <!-- 예약정보 -->
-      <div class="section">
+      <!-- 카드 3: 예약정보 -->
+      <div class="section" id="card-reservation">
         <div class="section-header">
           <h2>예약정보</h2>
           <div class="actions">
-            <button class="btn-inline" onclick="copyReservationInfo()">예약복사</button>
-            <button class="btn-inline" onclick="alert('예약정보 수정 모달 예정')">수정하기</button>
+            <button class="btn btn-outline btn-sm" onclick="copyReservationInfo()">예약복사</button>
+            <button class="btn btn-outline btn-sm btn-edit-toggle" id="btn-toggle-reservation" onclick="toggleEditMode('card-reservation', this)">수정하기</button>
           </div>
         </div>
         <div class="section-body">
-          <div class="info-grid single">
-            <div>
-              <div class="info-row"><span class="info-label">예약채널</span><span class="info-value">트립스토어</span></div>
-              <div class="info-row"><span class="info-label">예약 생성 방식</span><span class="info-value">트립스토어 예약</span></div>
-              <div class="info-row"><span class="info-label">채널사 주문번호</span><span class="info-value">-</span></div>
-              <div class="info-row"><span class="info-label">여행사 예약번호</span><span class="info-value text-mono">HB2633517226</span></div>
-              <div class="info-row"><span class="info-label">트립 예약번호</span><span class="info-value text-mono">26040708-4300101H</span></div>
-              <div class="info-row"><span class="info-label">수수료율 (VAT포함)</span><span class="info-value">8.8%</span></div>
-              <div class="info-row"><span class="info-label">예약일시</span><span class="info-value">2026-04-07 08:43</span></div>
-              <div class="info-row" style="border-bottom:none;"><span class="info-label">제휴사 ID/제휴코드</span><span class="info-value">-</span></div>
-            </div>
+          <div class="info-row"><span class="info-label">예약채널</span><span class="info-value">트립스토어</span></div>
+          <div class="info-row"><span class="info-label">예약 생성 방식</span><span class="info-value">트립스토어 예약</span></div>
+          <div class="info-row"><span class="info-label">채널사 주문번호</span><span class="info-value">-</span></div>
+          <div class="info-row">
+            <span class="info-label editable">여행사 예약번호</span>
+            <span class="info-value">
+              <span class="view-mode text-mono" id="rsv-partner-no-view">HB2633517226</span>
+              <span class="edit-mode field-wrap">
+                <input type="text" id="rsv-partner-no" class="inline-input w-full text-mono" value="HB2633517226" data-original="HB2633517226">
+                <button type="button" class="btn-reset" onclick="resetField('rsv-partner-no')">초기화</button>
+              </span>
+            </span>
           </div>
+          <div class="info-row"><span class="info-label">트립 예약번호</span><span class="info-value text-mono">26040708-4300101H</span></div>
+          <div class="info-row">
+            <span class="info-label editable">수수료율 (VAT포함)</span>
+            <span class="info-value">
+              <span class="view-mode" id="rsv-commission-rate-view">8.8%</span>
+              <span class="edit-mode field-wrap">
+                <input type="number" step="0.1" min="0" id="rsv-commission-rate" class="inline-input w-rate" value="8.8" data-original="8.8">
+                <span style="font-size:11px;color:#666;">%</span>
+                <button type="button" class="btn-reset" onclick="resetField('rsv-commission-rate')">초기화</button>
+              </span>
+            </span>
+          </div>
+          <div class="info-row"><span class="info-label">예약일시</span><span class="info-value">2026-04-07 08:43</span></div>
+          <div class="info-row" style="border-bottom:none;"><span class="info-label">제휴사 ID/제휴코드</span><span class="info-value">-</span></div>
         </div>
       </div>
 
     </div>
 
     <!-- 여행 상품 정보 -->
-    <div class="section">
+    <div class="section" id="card-trip-product">
       <div class="section-header">
         <h2>여행 상품 정보</h2>
         <div class="actions">
-          <button class="btn-inline" onclick="alert('정보 수정 모달 예정')">수정하기</button>
+          <button class="btn btn-outline btn-sm btn-icon btn-edit-toggle" id="btn-toggle-trip-product" onclick="toggleEditMode('card-trip-product', this)">
+            <span class="feature-tag">관리자전용</span> 수정하기
+          </button>
         </div>
       </div>
       <div class="section-body">
@@ -264,12 +326,32 @@
             <div class="info-row"><span class="info-label">여행사</span><span class="info-value">하나투어</span></div>
             <div class="info-row"><span class="info-label">여행지</span><span class="info-value">상하이(상해)</span></div>
             <div class="info-row"><span class="info-label">상품코드</span><span class="info-value text-mono">CCB1017B71284A0</span></div>
-            <div class="info-row"><span class="info-label">행사코드</span><span class="info-value text-mono" id="info-event-code">CCB101260606CZ2</span></div>
+            <div class="info-row">
+              <span class="info-label editable">행사코드</span>
+              <span class="info-value">
+                <span class="view-mode text-mono" id="info-event-code">CCB101260606CZ2</span>
+                <span class="edit-mode field-wrap">
+                  <input type="text" id="info-event-code-input" class="inline-input w-full text-mono" value="CCB101260606CZ2" data-original="CCB101260606CZ2">
+                  <button type="button" class="btn-reset" onclick="resetField('info-event-code-input')">초기화</button>
+                </span>
+              </span>
+            </div>
             <div class="info-row"><span class="info-label">상품유형</span><span class="info-value">AIRTEL</span></div>
           </div>
           <div>
             <div class="info-row"><span class="info-label">여행기간</span><span class="info-value" id="info-travel-days">3박4일</span></div>
-            <div class="info-row"><span class="info-label">출도착일</span><span class="info-value" id="info-dep-arr">2026-06-06 → 2026-06-09</span></div>
+            <div class="info-row">
+              <span class="info-label editable">출도착일</span>
+              <span class="info-value">
+                <span class="view-mode" id="info-dep-arr">2026-06-06 → 2026-06-09</span>
+                <span class="edit-mode field-wrap">
+                  <input type="date" id="info-dep-input" class="inline-input" value="2026-06-06" data-original="2026-06-06" style="width:135px;">
+                  <span style="font-size:11px;color:#666;">→</span>
+                  <input type="date" id="info-arr-input" class="inline-input" value="2026-06-09" data-original="2026-06-09" style="width:135px;">
+                  <button type="button" class="btn-reset" onclick="resetTripDates()">초기화</button>
+                </span>
+              </span>
+            </div>
             <div class="info-row"><span class="info-label">항공사</span><span class="info-value">중국남방항공</span></div>
             <div class="info-row"><span class="info-label">출발지</span><span class="info-value">인천</span></div>
             <div class="info-row"><span class="info-label">행사명</span><span class="info-value" style="font-size:11px;" id="info-event-name">상하이 자유여행 4일 #하버플라자...</span></div>
@@ -4995,6 +5077,155 @@ function showToast(message) {
   document.body.appendChild(toast);
   setTimeout(() => { toast.style.opacity = '0'; toast.style.transition = 'opacity 0.3s'; }, 2000);
   setTimeout(() => toast.remove(), 2500);
+}
+
+// ============== 상단 4카드 인라인 편집 (phase1 패턴) ==============
+
+// 트립 예약상태 전이 룰
+const STATUS_TRANSITION_RULES = {
+  '예약접수': [
+    { to: '취소완료' },
+    { to: '예약완료', requirePayment: true }
+  ],
+  '예약완료': [
+    { to: '취소완료' },
+    { to: '출발완료', requireDeparturePassed: true }
+  ],
+  '취소완료': [ { to: '예약접수' } ],
+  '출발완료': [ { to: '예약접수' } ]
+};
+
+const STATUS_COLOR_MAP = {
+  '예약접수': 'gray', '예약완료': 'green', '취소완료': 'red', '출발완료': 'blue'
+};
+
+// 트립 예약상태 인라인 select 핸들러 (가드만 검증, 적용은 완료 시)
+function onTripStatusSelect() {
+  const sel = document.getElementById('status-on-management-select');
+  const guard = document.getElementById('status-guard-msg-inline');
+  const original = sel.dataset.original;
+  const newVal = sel.value;
+
+  if (newVal === original) { guard.style.display = 'none'; return; }
+
+  const rules = STATUS_TRANSITION_RULES[original] || [];
+  const rule = rules.find(r => r.to === newVal);
+  if (!rule) {
+    guard.innerHTML = `⚠ [${original}] → [${newVal}] 전이는 허용되지 않습니다.`;
+    guard.style.display = 'block';
+    sel.value = original;
+    return;
+  }
+  if (rule.requirePayment) {
+    const curPayment = (document.getElementById('status-payment').textContent || '').trim();
+    if (curPayment !== '결제완료') {
+      guard.innerHTML = `⚠ [예약완료]는 트립 결제상태가 <strong>결제완료</strong>일 때만 가능합니다. 현재: ${curPayment}`;
+      guard.style.display = 'block';
+      sel.value = original;
+      return;
+    }
+  }
+  if (rule.requireDeparturePassed) {
+    const depStr = (document.getElementById('info-dep-arr').textContent || '').split('→')[0].trim();
+    const depDate = new Date(depStr);
+    const today = new Date(); today.setHours(0,0,0,0);
+    if (isNaN(depDate.getTime()) || depDate > today) {
+      guard.innerHTML = `⚠ [출발완료]는 <strong>출발일이 경과한 이후</strong>에만 변경 가능합니다. 출발일: ${depStr}`;
+      guard.style.display = 'block';
+      sel.value = original;
+      return;
+    }
+  }
+  guard.style.display = 'none';
+}
+
+function resetTripStatus() {
+  const sel = document.getElementById('status-on-management-select');
+  sel.value = sel.dataset.original;
+  document.getElementById('status-guard-msg-inline').style.display = 'none';
+}
+
+function resetField(id) {
+  const el = document.getElementById(id);
+  if (!el) return;
+  el.value = el.dataset.original || '';
+}
+
+function resetTripDates() {
+  const dep = document.getElementById('info-dep-input');
+  const arr = document.getElementById('info-arr-input');
+  dep.value = dep.dataset.original;
+  arr.value = arr.dataset.original;
+}
+
+// 카드 단위 edit 모드 토글 (수정하기 ↔ 완료)
+function toggleEditMode(cardId, btn) {
+  const card = document.getElementById(cardId);
+  const entering = !card.classList.contains('editing');
+  if (entering) {
+    card.classList.add('editing');
+    btn.textContent = '완료';
+    btn.classList.add('is-editing');
+    return;
+  }
+
+  // 완료: edit 값 → view 반영
+  if (cardId === 'card-status') {
+    const sel = document.getElementById('status-on-management-select');
+    const newVal = sel.value;
+    sel.dataset.original = newVal;
+    const badge = document.getElementById('status-on-management');
+    if (badge) {
+      badge.textContent = newVal;
+      badge.className = 'badge ' + (STATUS_COLOR_MAP[newVal] || 'gray');
+    }
+    document.getElementById('status-guard-msg-inline').style.display = 'none';
+  }
+  if (cardId === 'card-reservation') {
+    const partnerEl = document.getElementById('rsv-partner-no');
+    const rateEl = document.getElementById('rsv-commission-rate');
+    const partnerNo = partnerEl.value.trim();
+    const rate = rateEl.value.trim();
+    if (!partnerNo || rate === '') { alert('여행사 예약번호와 수수료율은 필수입니다.'); return; }
+    partnerEl.dataset.original = partnerNo;
+    rateEl.dataset.original = rate;
+    document.getElementById('rsv-partner-no-view').textContent = partnerNo;
+    document.getElementById('rsv-commission-rate-view').textContent = `${rate}%`;
+  }
+  if (cardId === 'card-traveler') {
+    const nameEl = document.getElementById('traveler-name');
+    const phoneEl = document.getElementById('traveler-phone');
+    const name = nameEl.value.trim();
+    const phone = phoneEl.value.trim();
+    if (!name || !phone) { alert('예약자명과 연락처는 필수입니다.'); return; }
+    nameEl.dataset.original = name;
+    phoneEl.dataset.original = phone;
+    document.getElementById('traveler-name-view').textContent = name;
+    // 연락처 view에는 [문자발송] 버튼이 같이 있으므로 재구성
+    const phoneView = document.getElementById('traveler-phone-view');
+    phoneView.innerHTML = `${phone} <button class="btn-inline" onclick="event.stopPropagation();alert('문자발송 모달 예정')">문자발송</button>`;
+  }
+  if (cardId === 'card-trip-product') {
+    const codeEl = document.getElementById('info-event-code-input');
+    const depEl = document.getElementById('info-dep-input');
+    const arrEl = document.getElementById('info-arr-input');
+    const newCode = codeEl.value.trim();
+    const newDep = depEl.value;
+    const newArr = arrEl.value;
+    if (!newCode || !newDep || !newArr) { alert('행사코드와 출도착일은 필수입니다.'); return; }
+    if (new Date(newDep) > new Date(newArr)) { alert('도착일은 출발일 이후여야 합니다.'); return; }
+    codeEl.dataset.original = newCode;
+    depEl.dataset.original = newDep;
+    arrEl.dataset.original = newArr;
+    document.getElementById('info-event-code').textContent = newCode;
+    document.getElementById('info-dep-arr').textContent = `${newDep} → ${newArr}`;
+    const nights = Math.round((new Date(newArr) - new Date(newDep)) / 86400000);
+    document.getElementById('info-travel-days').textContent = `${nights}박${nights+1}일`;
+  }
+  card.classList.remove('editing');
+  btn.innerHTML = (cardId === 'card-trip-product') ? '<span class="feature-tag">관리자전용</span> 수정하기' : '수정하기';
+  btn.classList.remove('is-editing');
+  showToast('수정되었습니다.');
 }
 </script>
 </body>
