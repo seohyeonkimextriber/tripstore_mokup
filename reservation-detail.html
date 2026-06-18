@@ -31,9 +31,16 @@
   .section-header .actions { display: flex; gap: 8px; }
   .section-body { padding: 20px 24px; }
   .info-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 0; }
+  .info-grid.single { grid-template-columns: 1fr; }
   .info-row { display: flex; padding: 10px 0; border-bottom: 1px solid #f5f5f5; }
   .info-label { width: 140px; color: #888; font-size: 12px; flex-shrink: 0; }
   .info-value { font-size: 13px; font-weight: 500; }
+  .top-grid { display: grid; grid-template-columns: 1fr 1.1fr 1.3fr; gap: 16px; margin-bottom: 16px; }
+  .top-grid .section { margin-bottom: 0; height: 100%; }
+  .top-grid .info-label { width: 110px; }
+  .btn-inline { display: inline-flex; align-items: center; gap: 4px; padding: 3px 8px; font-size: 11px; font-weight: 500; background: #fff; color: #555; border: 1px solid #d0d0d0; border-radius: 6px; cursor: pointer; }
+  .btn-inline:hover { background: #fafafa; border-color: #bbb; }
+  @media (max-width: 1100px) { .top-grid { grid-template-columns: 1fr; } }
   .btn { padding: 6px 14px; border-radius: 6px; font-size: 12px; font-weight: 600; cursor: pointer; border: none; }
   .btn-primary { background: #1a1a1a; color: #fff; }
   .btn-outline { background: #fff; color: #333; border: 1px solid #d0d0d0; }
@@ -172,33 +179,75 @@
   <!-- ==================== 기본 탭 ==================== -->
   <div id="tab-basic" class="tab-content active">
 
-    <!-- 1. 예약 기본 정보 -->
-    <div class="section">
-      <div class="section-header">
-        <h2>예약 기본 정보</h2>
-        <div class="actions">
-          <button class="btn btn-plus btn-sm btn-icon" onclick="document.getElementById('modal-customer-view').classList.add('show')">👤 고객 화면 조회</button>
-          <button class="btn btn-outline btn-sm" onclick="copyReservationInfo()">예약복사</button>
-        </div>
-      </div>
-      <div class="section-body">
-        <div class="info-grid">
-          <div>
-            <div class="info-row"><span class="info-label">예약채널</span><span class="info-value">트립스토어</span></div>
-            <div class="info-row"><span class="info-label">트립 예약상태</span><span class="info-value"><span class="badge green">예약완료</span></span></div>
-            <div class="info-row"><span class="info-label">여행사 예약상태</span><span class="info-value">예약완료</span></div>
-            <div class="info-row"><span class="info-label">트립 결제상태</span><span class="info-value"><span class="badge blue">결제완료</span></span></div>
-            <div class="info-row"><span class="info-label">예약 생성 방식</span><span class="info-value">트립스토어 예약</span></div>
+    <!-- 상단 3카드: 예약 상태 관리 / 예약자 정보 / 예약정보 -->
+    <div class="top-grid">
+
+      <!-- 예약 상태 관리 -->
+      <div class="section">
+        <div class="section-header">
+          <h2>예약 상태 관리</h2>
+          <div class="actions">
+            <button class="btn-inline" onclick="alert('상태 수정 기능은 별도 모달 예정')">수정하기</button>
           </div>
-          <div>
-            <div class="info-row"><span class="info-label">트립 예약번호</span><span class="info-value text-mono">26040708-4300101H</span></div>
-            <div class="info-row"><span class="info-label">여행사 예약번호</span><span class="info-value text-mono">HB2633517226</span></div>
-            <div class="info-row"><span class="info-label">채널사 주문번호</span><span class="info-value">-</span></div>
-            <div class="info-row"><span class="info-label">수수료율 (VAT포함)</span><span class="info-value">8.8%</span></div>
-            <div class="info-row"><span class="info-label">예약일시</span><span class="info-value">2026-04-07 08:43</span></div>
+        </div>
+        <div class="section-body">
+          <div class="info-grid single">
+            <div>
+              <div class="info-row"><span class="info-label">트립 예약상태</span><span class="info-value">예약완료</span></div>
+              <div class="info-row"><span class="info-label">트립 결제상태</span><span class="info-value">결제완료</span></div>
+              <div class="info-row"><span class="info-label">여행사 예약상태</span><span class="info-value">-(상태 값 업데이트 진행 중)</span></div>
+              <div class="info-row" style="border-bottom:none;"><span class="info-label">여행사 결제상태</span><span class="info-value">-</span></div>
+            </div>
           </div>
         </div>
       </div>
+
+      <!-- 예약자 정보 -->
+      <div class="section" id="section-traveler">
+        <div class="section-header">
+          <h2>예약자 정보</h2>
+          <div class="actions">
+            <button class="btn-inline" onclick="alert('예약자 정보 수정 모달 예정')">수정하기</button>
+          </div>
+        </div>
+        <div class="section-body">
+          <div class="info-grid single">
+            <div>
+              <div class="info-row"><span class="info-label">예약자</span><span class="info-value">오기웅</span></div>
+              <div class="info-row"><span class="info-label">생년월일</span><span class="info-value">1975-12-17</span></div>
+              <div class="info-row"><span class="info-label">성별</span><span class="info-value">남성</span></div>
+              <div class="info-row"><span class="info-label">이메일</span><span class="info-value">kipoongman@hanmail.net</span></div>
+              <div class="info-row" style="border-bottom:none;"><span class="info-label">연락처</span><span class="info-value" style="display:flex;align-items:center;gap:8px;">010-2374-8449 <button class="btn-inline" onclick="alert('문자발송 모달 예정')">문자발송</button></span></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 예약정보 -->
+      <div class="section">
+        <div class="section-header">
+          <h2>예약정보</h2>
+          <div class="actions">
+            <button class="btn-inline" onclick="copyReservationInfo()">예약복사</button>
+            <button class="btn-inline" onclick="alert('예약정보 수정 모달 예정')">수정하기</button>
+          </div>
+        </div>
+        <div class="section-body">
+          <div class="info-grid single">
+            <div>
+              <div class="info-row"><span class="info-label">예약채널</span><span class="info-value">트립스토어</span></div>
+              <div class="info-row"><span class="info-label">예약 생성 방식</span><span class="info-value">트립스토어 예약</span></div>
+              <div class="info-row"><span class="info-label">채널사 주문번호</span><span class="info-value">-</span></div>
+              <div class="info-row"><span class="info-label">여행사 예약번호</span><span class="info-value text-mono">HB2633517226</span></div>
+              <div class="info-row"><span class="info-label">트립 예약번호</span><span class="info-value text-mono">26040708-4300101H</span></div>
+              <div class="info-row"><span class="info-label">수수료율 (VAT포함)</span><span class="info-value">8.8%</span></div>
+              <div class="info-row"><span class="info-label">예약일시</span><span class="info-value">2026-04-07 08:43</span></div>
+              <div class="info-row" style="border-bottom:none;"><span class="info-label">제휴사 ID/제휴코드</span><span class="info-value">-</span></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
     </div>
 
     <!-- 2. 여행 상품 정보 + 행사 이동 -->
@@ -244,29 +293,7 @@
       </div>
     </div>
 
-    <!-- 3. 예약자 정보 (개인정보만) -->
-    <div class="section" id="section-traveler">
-      <div class="section-header">
-        <h2>예약자 정보</h2>
-      </div>
-      <div class="section-body">
-        <div class="info-grid">
-          <div>
-            <div class="info-row"><span class="info-label">예약자</span><span class="info-value">오기웅</span></div>
-            <div class="info-row"><span class="info-label">생년월일</span><span class="info-value">1975-12-17</span></div>
-          </div>
-          <div>
-            <div class="info-row"><span class="info-label">이메일</span><span class="info-value">kipoongman@hanmail.net</span></div>
-            <div class="info-row"><span class="info-label">연락처</span><span class="info-value">010-2374-8449</span></div>
-          </div>
-        </div>
-        <div style="font-size:11px;color:#888;margin-top:8px;">
-          ※ 트립스토어는 <b>예약자 정보만</b> 보관합니다. 동행 여행자 명단은 여행사(하나투어)가 별도 관리.
-        </div>
-      </div>
-    </div>
-
-    <!-- 4. 예약 금액 관리 (원장 기반) -->
+    <!-- 예약 금액 관리 (원장 기반) -->
     <div class="section">
       <div class="section-header">
         <h2>예약 금액 관리</h2>
@@ -1772,11 +1799,6 @@
           </div>
         </div>
 
-        <!-- 고객 뷰 안내 -->
-        <div style="margin-top:12px;background:#e3f2fd;border-radius:6px;padding:8px 12px;font-size:11px;color:#1565c0;display:flex;align-items:center;gap:8px;">
-          <span>👤</span>
-          <span>행사 이동 후 고객에게 어떻게 보이는지 확인하려면 상단 <strong>"고객 화면 조회"</strong> 버튼을 사용하세요.</span>
-        </div>
       </div>
 
       <!-- 여행사 예약번호 -->
