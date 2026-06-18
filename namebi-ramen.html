@@ -828,17 +828,19 @@ function finishCooking() {
 }
 
 function renderResult(score, grade, msg, pass, reasons) {
-  // 모임원 평가
+  // NPC 평가 (재미용 캐릭터 코멘트, 점수에 미반영)
   const evaluations = evaluateByMembers();
-  const yesVotes = evaluations.filter(e => e.vote).length;
-  const externalYes = state.externalEvals.filter(e => e.stars >= 3).length;
-  const totalYes = yesVotes + externalYes;
-  const totalCount = 5 + state.externalEvals.length;
-  const finalPass = totalYes >= Math.ceil(totalCount / 2) + (totalCount === 5 ? 0 : 0) && totalYes >= 3;
+
+  // 실제 언니들 평가 (별점으로 합격 판정)
+  const realCount = state.externalEvals.length;
+  const realAvg = realCount > 0
+    ? state.externalEvals.reduce((s, e) => s + e.stars, 0) / realCount
+    : 0;
+  const finalPass = realCount > 0 && realAvg >= 3;
 
   const membersHtml = `
     <div class="members-panel">
-      <div class="members-panel-title">👥 냄비모임 5인 평가단</div>
+      <div class="members-panel-title">👥 NPC 5인의 한마디 (재미용)</div>
       ${evaluations.map(e => `
         <div class="member-row">
           <div class="member-avatar">${e.avatar}</div>
@@ -849,36 +851,46 @@ function renderResult(score, grade, msg, pass, reasons) {
             </div>
             <div class="member-comment">"${e.comment}"</div>
           </div>
-          <div class="member-vote ${e.vote ? 'vote-yes' : 'vote-no'}">
-            ${e.vote ? '찬성' : '반대'}
-          </div>
         </div>
       `).join('')}
     </div>
   `;
 
-  const externalEvalsHtml = state.externalEvals.length > 0 ? `
-    <div class="members-panel">
-      <div class="members-panel-title">💬 추가 평가 (${state.externalEvals.length}명)</div>
+  const externalEvalsHtml = realCount > 0 ? `
+    <div class="members-panel" style="border:2px solid #ff8c42;">
+      <div class="members-panel-title">⭐ 냄비모임 언니들 별점 (${realCount}명, 평균 ${realAvg.toFixed(1)}★)</div>
       ${state.externalEvals.map(e => `
         <div class="external-eval">
           <div class="external-eval-head">
             <span class="external-eval-name">${escapeHtml(e.name)}</span>
             <span class="external-eval-stars">${'★'.repeat(e.stars)}${'☆'.repeat(5 - e.stars)}</span>
           </div>
-          <div class="external-eval-comment">"${escapeHtml(e.comment) || '평가 코멘트 없음'}"</div>
+          <div class="external-eval-comment">"${escapeHtml(e.comment) || '코멘트 없음'}"</div>
         </div>
       `).join('')}
     </div>
-  ` : '';
-
-  const verdictHtml = `
-    <div class="final-verdict ${finalPass ? 'verdict-pass' : 'verdict-fail'}">
-      ${finalPass
-        ? `🎊 ${totalYes}/${totalCount} 찬성 — 정식 입회 통과!`
-        : `💔 ${totalYes}/${totalCount} 찬성 — 더 많은 찬성표 필요`}
+  ` : `
+    <div class="members-panel" style="border:2px dashed #ff8c42; text-align:center;">
+      <div class="members-panel-title">⭐ 냄비모임 언니들 별점 대기중</div>
+      <div style="font-size:13px; color:#5a2d0c; line-height:1.5;">
+        아직 평가한 언니가 없어요.<br>
+        아래 링크를 공유해서 ⭐ 별점을 받아주세요!
+      </div>
     </div>
   `;
+
+  let verdictText, verdictClass;
+  if (realCount === 0) {
+    verdictText = '⏳ 언니들 평가 대기중 — 링크를 공유해서 별점을 받으세요';
+    verdictClass = 'verdict-fail';
+  } else if (finalPass) {
+    verdictText = `🎊 평균 ${realAvg.toFixed(1)}★ — 냄비모임 정식 입회 통과!`;
+    verdictClass = 'verdict-pass';
+  } else {
+    verdictText = `💔 평균 ${realAvg.toFixed(1)}★ — 다음 기수 도전 (★3 평균 이상 필요)`;
+    verdictClass = 'verdict-fail';
+  }
+  const verdictHtml = `<div class="final-verdict ${verdictClass}">${verdictText}</div>`;
 
   const banner = state.readOnly
     ? `<div class="read-only-banner">📨 ${escapeHtml(state.nickname || '누군가')}의 라면 결과를 보고 있어요. 아래에서 평가해주세요!</div>`
@@ -886,14 +898,15 @@ function renderResult(score, grade, msg, pass, reasons) {
 
   const shareHtml = !state.readOnly ? `
     <div class="share-panel">
-      <div class="share-title">📤 결과 공유하기 (팀원이 평가할 수 있어요)</div>
+      <div class="share-title">📤 언니들한테 공유해서 별점 받기 (★3 평균 넘으면 합격!)</div>
       <input type="text" id="nicknameInput" class="nickname-input" placeholder="내 닉네임 (예: 서현)" value="${escapeHtml(state.nickname)}">
       <div class="share-buttons">
         <button class="share-btn" id="shareUrlBtn">🔗 결과 링크 복사</button>
-        <button class="share-btn text" id="shareTextBtn">💬 슬랙/카톡용 텍스트 복사</button>
+        <button class="share-btn text" id="shareTextBtn">💬 카톡/슬랙 텍스트 복사</button>
       </div>
       <div style="font-size:11px; color:#868e96; text-align:center; line-height:1.5;">
-        링크를 받은 팀원이 별점을 추가하면 새 링크가 생성돼요
+        언니들이 링크 열어서 별점 매기면 새 링크가 자동 생성돼요.<br>
+        그 새 링크를 다음 언니한테 전달 → 평가 누적!
       </div>
     </div>
   ` : '';
@@ -1032,12 +1045,13 @@ function buildShareText(score, evaluations) {
     `🌡️ 최종 온도: ${Math.round(state.temp)}°C`,
     `🥗 재료: ${state.extras.length ? state.extras.join(', ') : '기본'}`,
     '',
-    `📊 총점: ${score}점`,
+    `📊 알고리즘 점수: ${score}점`,
     '━━━━━━━━━━━━━━',
-    '👥 5인 평가단',
+    '👥 NPC 5인 한마디 (재미용)',
     ...evaluations.map(e => `${e.avatar} ${e.name} ${'★'.repeat(e.stars)}${'☆'.repeat(5-e.stars)} "${e.comment}"`),
     '',
-    `너도 평가해줘 👉 ${buildShareUrl()}`,
+    '⭐ 언니들, 별점 매겨줘! 평균 ★3 넘으면 정식 입회',
+    `👉 ${buildShareUrl()}`,
   ];
   return lines.join('\n');
 }
