@@ -415,8 +415,7 @@
                 <div style="font-size:11px;color:#666;">총 <strong style="color:#1565c0;" id="pax-matrix-total">3</strong>명 (성인 <span id="pax-matrix-adult">3</span>, 아동 <span id="pax-matrix-child">0</span>, 유아 <span id="pax-matrix-infant">0</span>)</div>
               </div>
               <div style="display:flex;gap:6px;">
-                <button class="btn btn-plus btn-sm" style="font-size:11px;padding:4px 10px;" onclick="document.getElementById('modal-add-pax').classList.add('show')">+ 인원추가</button>
-                <button class="btn btn-danger btn-sm" style="font-size:11px;padding:4px 10px;" onclick="document.getElementById('modal-remove-pax').classList.add('show')">- 인원삭제</button>
+                <button class="btn btn-plus btn-sm" style="font-size:11px;padding:4px 10px;" onclick="addPaxRow()">+ 인원추가</button>
               </div>
             </div>
             <div style="overflow-x:auto;">
@@ -432,41 +431,45 @@
                     <th style="padding:10px 12px;text-align:right;font-weight:600;color:#666;font-size:11px;">1인 채널사 특가</th>
                     <th style="padding:10px 12px;text-align:right;font-weight:600;color:#666;font-size:11px;">1인 취소위약금</th>
                     <th style="padding:10px 12px;text-align:center;font-weight:600;color:#666;font-size:11px;">상태</th>
+                    <th style="padding:10px 12px;text-align:center;font-weight:600;color:#666;font-size:11px;width:50px;"></th>
                   </tr>
                 </thead>
                 <tbody id="pax-matrix-tbody">
-                  <tr style="border-bottom:1px solid #f5f5f5;">
+                  <tr style="border-bottom:1px solid #f5f5f5;" data-pax-type="성인" data-price="699000" data-trip="0" data-agency="13000" data-channel="0" data-penalty="0">
                     <td style="padding:12px;text-align:center;">성인</td>
-                    <td style="padding:12px;text-align:right;font-family:monospace;">699,000원</td>
-                    <td style="padding:12px;text-align:right;font-family:monospace;font-weight:700;color:#1565c0;">686,000원</td>
-                    <td style="padding:12px;text-align:right;font-family:monospace;color:#d32f2f;">13,000원</td>
-                    <td style="padding:12px;text-align:right;font-family:monospace;color:#bbb;">0원</td>
-                    <td style="padding:12px;text-align:right;font-family:monospace;color:#d32f2f;">13,000원</td>
-                    <td style="padding:12px;text-align:right;font-family:monospace;color:#bbb;">0원</td>
-                    <td style="padding:12px;text-align:right;font-family:monospace;color:#bbb;">0원</td>
+                    <td class="pax-cell-price" style="padding:12px;text-align:right;font-family:monospace;">699,000원</td>
+                    <td class="pax-cell-sale" style="padding:12px;text-align:right;font-family:monospace;font-weight:700;color:#1565c0;">686,000원</td>
+                    <td class="pax-cell-disc" style="padding:12px;text-align:right;font-family:monospace;color:#d32f2f;">13,000원</td>
+                    <td class="pax-cell-trip" style="padding:12px;text-align:right;font-family:monospace;color:#bbb;">0원</td>
+                    <td class="pax-cell-agency" style="padding:12px;text-align:right;font-family:monospace;color:#d32f2f;">13,000원</td>
+                    <td class="pax-cell-channel" style="padding:12px;text-align:right;font-family:monospace;color:#bbb;">0원</td>
+                    <td class="pax-cell-penalty" style="padding:12px;text-align:right;font-family:monospace;color:#bbb;">0원</td>
                     <td style="padding:12px;text-align:center;"><span style="background:#e8f5e9;color:#2e7d32;font-size:10px;padding:2px 8px;border-radius:3px;font-weight:600;">승인</span></td>
+                    <td style="padding:12px;text-align:center;"><button type="button" class="pax-row-del" onclick="removePaxRow(this)" title="인원 삭제" style="background:#fff;color:#d32f2f;border:1px solid #ffcdd2;border-radius:6px;width:26px;height:26px;font-size:14px;cursor:pointer;line-height:1;padding:0;">×</button></td>
                   </tr>
-                  <tr style="border-bottom:1px solid #f5f5f5;">
+                  <tr style="border-bottom:1px solid #f5f5f5;" data-pax-type="성인" data-price="699000" data-trip="0" data-agency="13000" data-channel="0" data-penalty="0">
                     <td style="padding:12px;text-align:center;">성인</td>
-                    <td style="padding:12px;text-align:right;font-family:monospace;">699,000원</td>
-                    <td style="padding:12px;text-align:right;font-family:monospace;font-weight:700;color:#1565c0;">686,000원</td>
-                    <td style="padding:12px;text-align:right;font-family:monospace;color:#d32f2f;">13,000원</td>
-                    <td style="padding:12px;text-align:right;font-family:monospace;color:#bbb;">0원</td>
-                    <td style="padding:12px;text-align:right;font-family:monospace;color:#d32f2f;">13,000원</td>
-                    <td style="padding:12px;text-align:right;font-family:monospace;color:#bbb;">0원</td>
-                    <td style="padding:12px;text-align:right;font-family:monospace;color:#bbb;">0원</td>
+                    <td class="pax-cell-price" style="padding:12px;text-align:right;font-family:monospace;">699,000원</td>
+                    <td class="pax-cell-sale" style="padding:12px;text-align:right;font-family:monospace;font-weight:700;color:#1565c0;">686,000원</td>
+                    <td class="pax-cell-disc" style="padding:12px;text-align:right;font-family:monospace;color:#d32f2f;">13,000원</td>
+                    <td class="pax-cell-trip" style="padding:12px;text-align:right;font-family:monospace;color:#bbb;">0원</td>
+                    <td class="pax-cell-agency" style="padding:12px;text-align:right;font-family:monospace;color:#d32f2f;">13,000원</td>
+                    <td class="pax-cell-channel" style="padding:12px;text-align:right;font-family:monospace;color:#bbb;">0원</td>
+                    <td class="pax-cell-penalty" style="padding:12px;text-align:right;font-family:monospace;color:#bbb;">0원</td>
                     <td style="padding:12px;text-align:center;"><span style="background:#e8f5e9;color:#2e7d32;font-size:10px;padding:2px 8px;border-radius:3px;font-weight:600;">승인</span></td>
+                    <td style="padding:12px;text-align:center;"><button type="button" class="pax-row-del" onclick="removePaxRow(this)" title="인원 삭제" style="background:#fff;color:#d32f2f;border:1px solid #ffcdd2;border-radius:6px;width:26px;height:26px;font-size:14px;cursor:pointer;line-height:1;padding:0;">×</button></td>
                   </tr>
-                  <tr>
+                  <tr data-pax-type="성인" data-price="699000" data-trip="0" data-agency="13000" data-channel="0" data-penalty="0">
                     <td style="padding:12px;text-align:center;">성인</td>
-                    <td style="padding:12px;text-align:right;font-family:monospace;">699,000원</td>
-                    <td style="padding:12px;text-align:right;font-family:monospace;font-weight:700;color:#1565c0;">686,000원</td>
-                    <td style="padding:12px;text-align:right;font-family:monospace;color:#d32f2f;">13,000원</td>
-                    <td style="padding:12px;text-align:right;font-family:monospace;color:#bbb;">0원</td>
-                    <td style="padding:12px;text-align:right;font-family:monospace;color:#d32f2f;">13,000원</td>
-                    <td style="padding:12px;text-align:right;font-family:monospace;color:#bbb;">0원</td>
-                    <td style="padding:12px;text-align:right;font-family:monospace;color:#bbb;">0원</td>
+                    <td class="pax-cell-price" style="padding:12px;text-align:right;font-family:monospace;">699,000원</td>
+                    <td class="pax-cell-sale" style="padding:12px;text-align:right;font-family:monospace;font-weight:700;color:#1565c0;">686,000원</td>
+                    <td class="pax-cell-disc" style="padding:12px;text-align:right;font-family:monospace;color:#d32f2f;">13,000원</td>
+                    <td class="pax-cell-trip" style="padding:12px;text-align:right;font-family:monospace;color:#bbb;">0원</td>
+                    <td class="pax-cell-agency" style="padding:12px;text-align:right;font-family:monospace;color:#d32f2f;">13,000원</td>
+                    <td class="pax-cell-channel" style="padding:12px;text-align:right;font-family:monospace;color:#bbb;">0원</td>
+                    <td class="pax-cell-penalty" style="padding:12px;text-align:right;font-family:monospace;color:#bbb;">0원</td>
                     <td style="padding:12px;text-align:center;"><span style="background:#e8f5e9;color:#2e7d32;font-size:10px;padding:2px 8px;border-radius:3px;font-weight:600;">승인</span></td>
+                    <td style="padding:12px;text-align:center;"><button type="button" class="pax-row-del" onclick="removePaxRow(this)" title="인원 삭제" style="background:#fff;color:#d32f2f;border:1px solid #ffcdd2;border-radius:6px;width:26px;height:26px;font-size:14px;cursor:pointer;line-height:1;padding:0;">×</button></td>
                   </tr>
                 </tbody>
               </table>
@@ -5154,6 +5157,157 @@ function togglePaxMatrix(btn) {
   panel.style.display = isHidden ? 'block' : 'none';
   btn.textContent = isHidden ? '인원관리 닫기' : '인원관리';
   btn.classList.toggle('is-editing', isHidden);
+}
+
+// ============== 인원관리 매트릭스 — 인라인 추가/삭제 ==============
+const PAX_DEFAULT_PRICE = { '성인': 699000, '아동': 525000, '유아': 70000 };
+
+function fmtWon(n) {
+  return (Number(n) || 0).toLocaleString() + '원';
+}
+
+function recalcPaxRow(tr) {
+  const trip    = Number(tr.dataset.trip || 0);
+  const agency  = Number(tr.dataset.agency || 0);
+  const channel = Number(tr.dataset.channel || 0);
+  const price   = Number(tr.dataset.price || 0);
+  const penalty = Number(tr.dataset.penalty || 0);
+  const disc    = trip + agency + channel;
+  const sale    = price - disc;
+  tr.querySelector('.pax-cell-price').textContent   = fmtWon(price);
+  tr.querySelector('.pax-cell-sale').textContent    = fmtWon(sale);
+  tr.querySelector('.pax-cell-disc').textContent    = fmtWon(disc);
+  tr.querySelector('.pax-cell-trip').textContent    = fmtWon(trip);
+  tr.querySelector('.pax-cell-agency').textContent  = fmtWon(agency);
+  tr.querySelector('.pax-cell-channel').textContent = fmtWon(channel);
+  tr.querySelector('.pax-cell-penalty').textContent = fmtWon(penalty);
+  // 0원 회색 처리
+  ['trip','agency','channel','penalty'].forEach(k => {
+    const cell = tr.querySelector(`.pax-cell-${k}`);
+    const v = Number(tr.dataset[k] || 0);
+    cell.style.color = v === 0 ? '#bbb' : '#d32f2f';
+  });
+}
+
+function updatePaxSummary() {
+  const rows = document.querySelectorAll('#pax-matrix-tbody tr');
+  let adult = 0, child = 0, infant = 0;
+  rows.forEach(tr => {
+    const t = tr.dataset.paxType;
+    if (t === '성인') adult++;
+    else if (t === '아동') child++;
+    else if (t === '유아') infant++;
+  });
+  const total = adult + child + infant;
+  // 매트릭스 헤더 카운트
+  const adv  = document.getElementById('pax-matrix-adult');
+  const chv  = document.getElementById('pax-matrix-child');
+  const inv  = document.getElementById('pax-matrix-infant');
+  const tov  = document.getElementById('pax-matrix-total');
+  if (adv) adv.textContent = adult;
+  if (chv) chv.textContent = child;
+  if (inv) inv.textContent = infant;
+  if (tov) tov.textContent = total;
+  // 인원 구성 박스 배지
+  const adb = document.getElementById('pax-adult');
+  const cdb = document.getElementById('pax-child');
+  const ifb = document.getElementById('pax-infant');
+  const tot = document.getElementById('pax-total');
+  if (adb) adb.textContent = `성인 ${adult}`;
+  if (cdb) cdb.textContent = `아동 ${child}`;
+  if (ifb) ifb.textContent = `유아 ${infant}`;
+  if (tot) tot.textContent = `총 ${total}명`;
+}
+
+function addPaxRow() {
+  const tbody = document.getElementById('pax-matrix-tbody');
+  const tr = document.createElement('tr');
+  tr.style.borderBottom = '1px solid #f5f5f5';
+  tr.style.background = '#fffdf5';
+  tr.dataset.paxType = '성인';
+  tr.dataset.price = PAX_DEFAULT_PRICE['성인'];
+  tr.dataset.trip = 0;
+  tr.dataset.agency = 0;
+  tr.dataset.channel = 0;
+  tr.dataset.penalty = 0;
+
+  const inlineInputStyle = 'width:90px;padding:4px 6px;border:1px solid #d0d0d0;border-radius:4px;font-size:11px;text-align:right;font-family:monospace;';
+  const selStyle = 'padding:4px 6px;border:1px solid #d0d0d0;border-radius:4px;font-size:11px;background:#fff;';
+
+  tr.innerHTML = `
+    <td style="padding:8px;text-align:center;">
+      <select style="${selStyle}" onchange="onPaxTypeChange(this)">
+        <option value="성인" selected>성인</option>
+        <option value="아동">아동</option>
+        <option value="유아">유아</option>
+      </select>
+    </td>
+    <td style="padding:8px;text-align:right;">
+      <input type="number" style="${inlineInputStyle}" value="${PAX_DEFAULT_PRICE['성인']}" oninput="onPaxFieldChange(this,'price')" />
+    </td>
+    <td class="pax-cell-sale" style="padding:12px;text-align:right;font-family:monospace;font-weight:700;color:#1565c0;">${fmtWon(PAX_DEFAULT_PRICE['성인'])}</td>
+    <td class="pax-cell-disc" style="padding:12px;text-align:right;font-family:monospace;color:#bbb;">0원</td>
+    <td style="padding:8px;text-align:right;">
+      <input type="number" style="${inlineInputStyle}" value="0" oninput="onPaxFieldChange(this,'trip')" />
+    </td>
+    <td style="padding:8px;text-align:right;">
+      <input type="number" style="${inlineInputStyle}" value="0" oninput="onPaxFieldChange(this,'agency')" />
+    </td>
+    <td style="padding:8px;text-align:right;">
+      <input type="number" style="${inlineInputStyle}" value="0" oninput="onPaxFieldChange(this,'channel')" />
+    </td>
+    <td class="pax-cell-penalty" style="padding:12px;text-align:right;font-family:monospace;color:#bbb;">0원</td>
+    <td style="padding:12px;text-align:center;"><span style="background:#fff3e0;color:#e65100;font-size:10px;padding:2px 8px;border-radius:3px;font-weight:600;">신규</span></td>
+    <td style="padding:12px;text-align:center;"><button type="button" class="pax-row-del" onclick="removePaxRow(this)" title="인원 삭제" style="background:#fff;color:#d32f2f;border:1px solid #ffcdd2;border-radius:6px;width:26px;height:26px;font-size:14px;cursor:pointer;line-height:1;padding:0;">×</button></td>
+  `;
+  // 신규 행은 동적이라 .pax-cell-price 셀 위치가 input이므로 별도 클래스 추가
+  // recalc는 동적 input이라 별도 처리 (sale/disc만 갱신)
+  tbody.appendChild(tr);
+  recalcDynamicPaxRow(tr);
+  updatePaxSummary();
+  showToast('인원 1명이 추가되었습니다. 금액을 입력하세요.');
+}
+
+function recalcDynamicPaxRow(tr) {
+  const trip    = Number(tr.dataset.trip || 0);
+  const agency  = Number(tr.dataset.agency || 0);
+  const channel = Number(tr.dataset.channel || 0);
+  const price   = Number(tr.dataset.price || 0);
+  const disc    = trip + agency + channel;
+  const sale    = price - disc;
+  const discCell = tr.querySelector('.pax-cell-disc');
+  const saleCell = tr.querySelector('.pax-cell-sale');
+  if (discCell) {
+    discCell.textContent = fmtWon(disc);
+    discCell.style.color = disc === 0 ? '#bbb' : '#d32f2f';
+  }
+  if (saleCell) saleCell.textContent = fmtWon(sale);
+}
+
+function onPaxTypeChange(sel) {
+  const tr = sel.closest('tr');
+  tr.dataset.paxType = sel.value;
+  // 연령별 기본 단가 자동 적용
+  const newPrice = PAX_DEFAULT_PRICE[sel.value] || 0;
+  tr.dataset.price = newPrice;
+  const priceInput = tr.querySelector('input[oninput*="price"]');
+  if (priceInput) priceInput.value = newPrice;
+  recalcDynamicPaxRow(tr);
+  updatePaxSummary();
+}
+
+function onPaxFieldChange(input, key) {
+  const tr = input.closest('tr');
+  tr.dataset[key] = Number(input.value) || 0;
+  recalcDynamicPaxRow(tr);
+}
+
+function removePaxRow(btn) {
+  const tr = btn.closest('tr');
+  if (!confirm('이 인원을 삭제하시겠습니까? 위약금이 발생하면 별도로 추가하세요.')) return;
+  tr.remove();
+  updatePaxSummary();
+  showToast('인원이 삭제되었습니다.');
 }
 
 // ============== 상단 4카드 인라인 편집 (phase1 패턴) ==============
