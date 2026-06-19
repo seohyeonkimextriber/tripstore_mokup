@@ -156,16 +156,16 @@ $('best').textContent=best;
 // 설희 얼굴 사진 (있으면 머리에 사용, 없으면 기본 그림으로 폴백)
 const faceImg=new Image(); let faceReady=false;
 faceImg.onload=()=>{ faceReady=true; if(typeof state!=='undefined'&&state!=='play'&&state!=='boss') draw(); };
-faceImg.src='hyokyung.jpg';
+faceImg.src='hyokyung.png';
 // 이토(최종보스) 얼굴 사진
 const bossImg=new Image(); let bossReady=false;
 bossImg.onload=()=>{ bossReady=true; };
-bossImg.src='boss.jpg';
+bossImg.src='boss.png';
 
 const grid=$('heroGrid');
 HEROES.forEach(h=>{
   const d=document.createElement('div'); d.className='hero';
-  const faceTag = h.face ? `<img src="hyokyung.jpg" alt="" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover" onerror="this.remove()">` : '';
+  const faceTag = h.face ? `<img src="hyokyung.png" alt="" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover" onerror="this.remove()">` : '';
   d.innerHTML=`<div class="wp" style="background:${h.color}">${faceTag}${h.icon||h.wp}</div>
     <div class="nm">${h.name}</div><div class="wn">${h.weapon}</div><div class="ds">${h.ds}</div>`;
   d.onclick=()=>{ hero=h; start(); };
@@ -369,7 +369,6 @@ function drawHero(){
     ctx.save(); ctx.beginPath(); ctx.arc(0,hy,r,0,7); ctx.clip();
     ctx.drawImage(faceImg, sx,sy,s,s, -r,hy-r, r*2,r*2);
     ctx.restore();
-    ctx.strokeStyle='#fff'; ctx.lineWidth=1.5; ctx.beginPath(); ctx.arc(0,hy,r,0,7); ctx.stroke();
     // 비녀 (머리 위)
     ctx.strokeStyle='#e9c46a'; ctx.lineWidth=2.2; ctx.lineCap='round';
     ctx.beginPath(); ctx.moveTo(-8,hy-r+2); ctx.lineTo(7,hy-r-3); ctx.stroke();
@@ -435,7 +434,6 @@ function draw(){
       ctx.save(); ctx.beginPath(); ctx.arc(bcx,bcy,r,0,7); ctx.clip();
       ctx.drawImage(bossImg, sx,sy,s,s, bcx-r,bcy-r, r*2,r*2);
       ctx.restore();
-      ctx.strokeStyle='#ff4d5e'; ctx.lineWidth=2.6; ctx.beginPath(); ctx.arc(bcx,bcy,r,0,7); ctx.stroke();
       ctx.font='30px serif'; ctx.textAlign='center'; ctx.fillText('🎩', bcx, bcy-r+8);   // 모자
     } else {
       ctx.font='56px serif'; ctx.textAlign='center'; ctx.fillText('🎩', bcx, boss.y-2+Math.sin(boss.bob)*4);
