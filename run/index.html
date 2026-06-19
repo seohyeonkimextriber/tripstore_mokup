@@ -52,7 +52,8 @@
     cursor:pointer; transition:transform .08s, border-color .15s;}
   .hero:active{transform:scale(.96);} .hero:hover{border-color:var(--gold);}
   .hero .wp{width:50px; height:50px; border-radius:50%; margin:0 auto; font-size:27px;
-    display:flex; align-items:center; justify-content:center; box-shadow:inset 0 0 0 2px rgba(255,255,255,.18);}
+    display:flex; align-items:center; justify-content:center; box-shadow:inset 0 0 0 2px rgba(255,255,255,.18);
+    position:relative; overflow:hidden;}
   .hero .nm{font-weight:800; font-size:14px; margin-top:5px;}
   .hero .wn{color:var(--gold); font-size:12px; font-weight:700;}
   .hero .ds{color:var(--muted); font-size:10.5px; margin-top:2px; line-height:1.3;}
@@ -142,6 +143,7 @@ const HEROES=[
   {id:'choi',name:'최재형', weapon:'서류가방',wp:'💼',type:'shot', speed:8,  cd:34, range:0, ds:'묵직한 한 방',      color:'#5b5f70', hair:'#2a2a30', glasses:true},
   {id:'wang',name:'왕웨이', weapon:'만두',  wp:'🥟', type:'lob',  speed:11, cd:22, range:0, ds:'포물선 투척',      color:'#b83b3b', hair:'#1a1a1a', cap:true},
   {id:'seol',name:'설희',   weapon:'비녀',  wp:'🌸', type:'shot', speed:14, cd:13, range:0, ds:'재빠른 비녀 투척',  color:'#d96f9a', hair:'#1a1620', bun:true, binyeo:true,
+    face:true,
     icon:'<svg width="30" height="30" viewBox="0 0 30 30"><line x1="15" y1="9" x2="15" y2="27" stroke="#e9c46a" stroke-width="2.6" stroke-linecap="round"/><circle cx="15" cy="7.5" r="4.6" fill="#e76f9e"/><circle cx="15" cy="7.5" r="2" fill="#fff" fill-opacity=".7"/></svg>'},
 ];
 
@@ -151,10 +153,20 @@ let boss, bossShots, bossStarted, dist, speed, spawnT, coinT, atkCd, kills, live
 best=+(localStorage.getItem('dokrip_run_best')||0);
 $('best').textContent=best;
 
+// 설희 얼굴 사진 (있으면 머리에 사용, 없으면 기본 그림으로 폴백)
+const faceImg=new Image(); let faceReady=false;
+faceImg.onload=()=>{ faceReady=true; if(typeof state!=='undefined'&&state!=='play'&&state!=='boss') draw(); };
+faceImg.src='hyokyung.jpg';
+// 이토(최종보스) 얼굴 사진
+const bossImg=new Image(); let bossReady=false;
+bossImg.onload=()=>{ bossReady=true; };
+bossImg.src='boss.jpg';
+
 const grid=$('heroGrid');
 HEROES.forEach(h=>{
   const d=document.createElement('div'); d.className='hero';
-  d.innerHTML=`<div class="wp" style="background:${h.color}">${h.icon||h.wp}</div>
+  const faceTag = h.face ? `<img src="hyokyung.jpg" alt="" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover" onerror="this.remove()">` : '';
+  d.innerHTML=`<div class="wp" style="background:${h.color}">${faceTag}${h.icon||h.wp}</div>
     <div class="nm">${h.name}</div><div class="wn">${h.weapon}</div><div class="ds">${h.ds}</div>`;
   d.onclick=()=>{ hero=h; start(); };
   grid.appendChild(d);
@@ -350,6 +362,21 @@ function drawHero(){
   ctx.beginPath(); ctx.moveTo(9,-28); ctx.lineTo(18,-22+Math.sin(t*0.55)*2); ctx.stroke();
   // 머리
   const hy=-45;
+  if(hero.face && faceReady){
+    // 실제 얼굴 사진을 원형으로 잘라 머리로
+    const r=14, iw=faceImg.naturalWidth, ih=faceImg.naturalHeight, s=Math.min(iw,ih);
+    const sx=(iw-s)/2, sy=Math.max(0,(ih-s)/2 - s*0.08);
+    ctx.save(); ctx.beginPath(); ctx.arc(0,hy,r,0,7); ctx.clip();
+    ctx.drawImage(faceImg, sx,sy,s,s, -r,hy-r, r*2,r*2);
+    ctx.restore();
+    ctx.strokeStyle='#fff'; ctx.lineWidth=1.5; ctx.beginPath(); ctx.arc(0,hy,r,0,7); ctx.stroke();
+    // 비녀 (머리 위)
+    ctx.strokeStyle='#e9c46a'; ctx.lineWidth=2.2; ctx.lineCap='round';
+    ctx.beginPath(); ctx.moveTo(-8,hy-r+2); ctx.lineTo(7,hy-r-3); ctx.stroke();
+    ctx.fillStyle='#e76f9e'; ctx.beginPath(); ctx.arc(8,hy-r-3,2.6,0,7); ctx.fill();
+    drawBinyeo(20,-20);            // 손에 든 비녀
+    ctx.restore(); return;
+  }
   ctx.beginPath(); ctx.arc(0,hy,10,0,7); ctx.fillStyle='#f4d6ad'; ctx.fill();
   // 머리카락 (윗부분)
   ctx.fillStyle=hero.hair||'#22232b';
@@ -401,8 +428,19 @@ function draw(){
   if(boss){
     ctx.font='28px serif'; ctx.textAlign='center';
     for(const s of bossShots) ctx.fillText(s.emoji, s.x+13, s.y-10);
-    ctx.font='56px serif'; ctx.fillText('🎩', boss.x+boss.w/2, boss.y-2+Math.sin(boss.bob)*4);
-    ctx.font='bold 12px sans-serif'; ctx.fillStyle='#ff6b81'; ctx.fillText('이토 히로부미', boss.x+boss.w/2, boss.y-boss.h-22);
+    const bcx=boss.x+boss.w/2, bcy=boss.y-boss.h/2+Math.sin(boss.bob)*4;
+    if(bossReady){
+      const r=32, iw=bossImg.naturalWidth, ih=bossImg.naturalHeight, s=Math.min(iw,ih);
+      const sx=(iw-s)/2, sy=Math.max(0,(ih-s)/2 - s*0.05);
+      ctx.save(); ctx.beginPath(); ctx.arc(bcx,bcy,r,0,7); ctx.clip();
+      ctx.drawImage(bossImg, sx,sy,s,s, bcx-r,bcy-r, r*2,r*2);
+      ctx.restore();
+      ctx.strokeStyle='#ff4d5e'; ctx.lineWidth=2.6; ctx.beginPath(); ctx.arc(bcx,bcy,r,0,7); ctx.stroke();
+      ctx.font='30px serif'; ctx.textAlign='center'; ctx.fillText('🎩', bcx, bcy-r+8);   // 모자
+    } else {
+      ctx.font='56px serif'; ctx.textAlign='center'; ctx.fillText('🎩', bcx, boss.y-2+Math.sin(boss.bob)*4);
+    }
+    ctx.font='bold 12px sans-serif'; ctx.fillStyle='#ff6b81'; ctx.textAlign='center'; ctx.fillText('이토 히로부미', boss.x+boss.w/2, boss.y-boss.h-22);
     const bw=W-32, bx=16, by=46;
     ctx.fillStyle='rgba(255,255,255,.15)'; ctx.fillRect(bx,by,bw,9);
     ctx.fillStyle='#ff4d5e'; ctx.fillRect(bx,by,bw*Math.max(0,boss.hp/boss.maxhp),9);
