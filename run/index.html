@@ -1,0 +1,465 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="영웅 RUN">
+<meta name="theme-color" content="#0b1020">
+<title>영웅 RUN 🏃 — 이토를 처단하라!</title>
+<style>
+  :root{--ink:#fff; --muted:#aab0d0; --accent:#ff4d5e; --gold:#ffd24a; --sky1:#1a2150; --sky2:#3a2f6e;}
+  *{box-sizing:border-box; -webkit-tap-highlight-color:transparent; touch-action:manipulation; user-select:none; -webkit-user-select:none;}
+  html,body{margin:0; height:100%; overscroll-behavior:none;}
+  body{
+    font-family:-apple-system,BlinkMacSystemFont,"Apple SD Gothic Neo","Malgun Gothic",sans-serif;
+    background:#0b1020; color:var(--ink); display:flex; flex-direction:column;
+    align-items:center; justify-content:center; min-height:100%;
+    padding:env(safe-area-inset-top) 10px env(safe-area-inset-bottom);
+  }
+  .frame{width:100%; max-width:780px;}
+  .top{display:flex; justify-content:space-between; align-items:baseline; padding:6px 4px;}
+  .top h1{font-size:18px; margin:0; letter-spacing:-.5px;}
+  .top h1 .em{color:var(--gold);}
+  .top .best{font-size:13px; color:var(--muted);}
+  .stage{position:relative; width:100%; border-radius:16px; overflow:hidden;
+    box-shadow:0 14px 40px rgba(0,0,0,.5); border:1px solid #2a3160;}
+  canvas{display:block; width:100%; height:auto; background:linear-gradient(180deg,var(--sky1),var(--sky2));}
+
+  .overlay{position:absolute; inset:0; display:grid; place-items:center; text-align:center;
+    background:rgba(8,10,28,.82); backdrop-filter:blur(2px); padding:16px; overflow:auto;}
+  .overlay.hide{display:none;}
+  .panel{max-width:560px; width:100%;}
+  .panel h2{font-size:24px; margin:0 0 4px;}
+  .panel h2 .em{color:var(--gold);}
+  .panel p{color:var(--muted); font-size:13px; line-height:1.5; margin:4px 0;}
+  .panel .big{font-size:32px; font-weight:800; color:var(--gold); margin:6px 0;}
+
+  .heroes{display:grid; grid-template-columns:repeat(4,1fr); gap:8px; margin:12px 0 4px;}
+  @media(max-width:520px){ .heroes{grid-template-columns:repeat(3,1fr);} }
+  .hero{background:#161c3a; border:1px solid #2a3160; border-radius:13px; padding:9px 6px;
+    cursor:pointer; transition:transform .08s, border-color .15s;}
+  .hero:active{transform:scale(.96);} .hero:hover{border-color:var(--gold);}
+  .hero .wp{width:50px; height:50px; border-radius:50%; margin:0 auto; font-size:27px;
+    display:flex; align-items:center; justify-content:center; box-shadow:inset 0 0 0 2px rgba(255,255,255,.18);}
+  .hero .nm{font-weight:800; font-size:14px; margin-top:5px;}
+  .hero .wn{color:var(--gold); font-size:12px; font-weight:700;}
+  .hero .ds{color:var(--muted); font-size:10.5px; margin-top:2px; line-height:1.3;}
+
+  .btn{margin-top:14px; padding:13px 26px; border:none; border-radius:14px; cursor:pointer;
+    background:var(--accent); color:#fff; font-weight:800; font-size:16px; box-shadow:0 6px 0 #b3303d;}
+  .btn:active{transform:translateY(4px); box-shadow:0 2px 0 #b3303d;}
+  .hint{margin-top:10px; font-size:12px; color:var(--muted);}
+  .key{display:inline-block; background:#222a52; border:1px solid #3a4179; border-radius:6px; padding:1px 8px; font-weight:700; color:#fff;}
+
+  .footer{display:flex; gap:8px; margin-top:10px;}
+  .footer button{flex:1; padding:9px; border-radius:11px; border:1px solid #2a3160;
+    background:#161c3a; color:var(--muted); font-weight:700; font-size:13px; cursor:pointer;}
+  .legend{display:flex; flex-wrap:wrap; gap:4px 12px; justify-content:center; margin-top:6px; font-size:11.5px; color:var(--muted);}
+</style>
+</head>
+<body>
+<div class="frame">
+  <div class="top">
+    <h1>영웅 <span class="em">RUN</span> 🏃</h1>
+    <div class="best">최고기록 <b id="best">0</b> m</div>
+  </div>
+
+  <div class="stage">
+    <canvas id="cv" width="780" height="380"></canvas>
+
+    <div class="overlay" id="selectScr">
+      <div class="panel">
+        <h2>영웅을 <span class="em">선택</span>하라</h2>
+        <p>❤❤❤ 목숨 3개로 와다 부대를 뚫고 1945m로! 마지막엔 🎩<b>이토 최종전</b>.</p>
+        <div class="heroes" id="heroGrid"></div>
+        <p style="margin-top:8px">📱 <b>왼쪽 탭=점프</b> · <b>오른쪽 탭=무기 발사</b></p>
+      </div>
+    </div>
+
+    <div class="overlay hide" id="overScr">
+      <div class="panel">
+        <h2 id="overTitle">쓰러졌다! 😵</h2>
+        <div class="big"><span id="overDist">0</span> m</div>
+        <p id="overMsg"></p>
+        <div style="display:flex; gap:8px; justify-content:center; flex-wrap:wrap;">
+          <button class="btn" id="retryBtn">↻ 다시</button>
+          <button class="btn" id="changeBtn" style="background:#3a4179; box-shadow:0 6px 0 #232a52;">🔄 캐릭터 변경</button>
+        </div>
+        <div class="hint" id="overHint"></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="footer">
+    <button id="bragBtn">🏆 기록 자랑</button>
+    <button id="resetBtn">🗑️ 기록 초기화</button>
+  </div>
+  <div class="legend">
+    <span>❤❤❤ 목숨 3개</span><span>🕴️ 와다</span><span>🎩 이토(최종보스)</span><span>💰 독립자금</span>
+  </div>
+</div>
+
+<script>
+const cv=document.getElementById('cv'), ctx=cv.getContext('2d');
+const W=cv.width, H=cv.height, GROUND=H-56, GOAL=1945;
+const $=id=>document.getElementById(id);
+
+function fitDPR(){
+  const dpr=Math.min(window.devicePixelRatio||1,2.5);
+  cv.width=W*dpr; cv.height=H*dpr; cv.style.width='100%';
+  ctx.setTransform(dpr,0,0,dpr,0,0);
+}
+fitDPR();
+
+// 영웅 + 무기 + 외형(색/머리/소품)
+const HEROES=[
+  {id:'ahn', name:'안중근', weapon:'태극기', wp:'🇰🇷', type:'shot', speed:11, cd:24, range:0, ds:'균형잡힌 명사수',  color:'#34508f', hair:'#1c1c24'},
+  {id:'woo', name:'우덕순', weapon:'방망이', wp:'🏏', type:'melee',speed:13, cd:18, range:78,ds:'근접 강타·빠른 쿨', color:'#7a4a2b', hair:'#201712'},
+  {id:'cho', name:'조도선', weapon:'총',    wp:'🔫', type:'shot', speed:16, cd:30, range:0, ds:'초고속·긴 사거리',  color:'#3f6b3a', hair:'#1c1c24'},
+  {id:'yoo', name:'유동하', weapon:'하트',  wp:'💗', type:'shot', speed:10, cd:15, range:0, ds:'연사 매우 빠름',    color:'#3aa0d8', hair:'#23232c', cap:true},
+  {id:'choi',name:'최재형', weapon:'서류가방',wp:'💼',type:'shot', speed:8,  cd:34, range:0, ds:'묵직한 한 방',      color:'#5b5f70', hair:'#2a2a30', glasses:true},
+  {id:'wang',name:'왕웨이', weapon:'만두',  wp:'🥟', type:'lob',  speed:11, cd:22, range:0, ds:'포물선 투척',      color:'#b83b3b', hair:'#1a1a1a', cap:true},
+  {id:'seol',name:'설희',   weapon:'비녀',  wp:'🌸', type:'shot', speed:14, cd:13, range:0, ds:'재빠른 암기 연사',  color:'#d96f9a', hair:'#1a1620', bun:true},
+];
+
+let state, hero, player, obstacles, coins, projectiles, particles, floats, melee;
+let boss, bossShots, bossStarted, dist, speed, spawnT, coinT, atkCd, kills, lives, invuln, hintLife, raf, best, hitBy;
+
+best=+(localStorage.getItem('dokrip_run_best')||0);
+$('best').textContent=best;
+
+const grid=$('heroGrid');
+HEROES.forEach(h=>{
+  const d=document.createElement('div'); d.className='hero';
+  d.innerHTML=`<div class="wp" style="background:${h.color}">${h.wp}</div>
+    <div class="nm">${h.name}</div><div class="wn">${h.weapon}</div><div class="ds">${h.ds}</div>`;
+  d.onclick=()=>{ hero=h; start(); };
+  grid.appendChild(d);
+});
+
+function reset(){
+  state='play';
+  player={x:90,y:GROUND,vy:0,w:34,h:46,onGround:true,jumps:0,run:0};
+  obstacles=[]; coins=[]; projectiles=[]; particles=[]; floats=[]; melee=null;
+  boss=null; bossShots=[]; bossStarted=false;
+  dist=0; speed=4.2; spawnT=70; coinT=90; atkCd=0; kills=0; lives=3; invuln=0; hintLife=210; hitBy=null;
+}
+
+function jump(){
+  if(state!=='play'&&state!=='boss') return;
+  if(player.jumps<2){ player.vy=player.jumps===0?-13.2:-11.2; player.onGround=false; player.jumps++; }
+}
+function attack(){
+  if((state!=='play'&&state!=='boss')||atkCd>0) return;
+  atkCd=hero.cd;
+  const px=player.x+player.w, py=player.y-player.h*0.55;
+  if(hero.type==='melee' && state==='play'){ melee={t:12}; }
+  else{
+    const p={x:px,y:py,wp:hero.wp,vx:(hero.type==='melee'?15:hero.speed),vy:0,grav:0};
+    if(hero.type==='lob'){ p.vy=-7.5; p.grav=0.32; }
+    projectiles.push(p);
+  }
+  burst(px,py,'#ffd24a',4);
+}
+
+cv.addEventListener('pointerdown', e=>{
+  if(state!=='play'&&state!=='boss') return;
+  e.preventDefault();
+  const r=cv.getBoundingClientRect();
+  if((e.clientX-r.left) < r.width*0.5) jump(); else attack();
+});
+window.addEventListener('keydown', e=>{
+  if(e.code==='Space'||e.code==='ArrowUp'){ e.preventDefault(); jump(); }
+  if(e.code==='KeyF'||e.code==='KeyJ'||e.code==='ArrowRight'){ e.preventDefault(); attack(); }
+});
+
+function spawnFoe(){
+  const big=Math.random()<0.22;
+  obstacles.push({emoji:'🕴️', name: big?'거대 와다':'와다', x:W+20, y:GROUND,
+    w: big?54:42, h: big?64:50, hp: big?2:1, big, defeated:false});
+}
+function spawnCoin(){ coins.push({x:W+20, y:(Math.random()<0.5?GROUND-90:GROUND-30), bob:Math.random()*6, got:false}); }
+function burst(x,y,c,n){ for(let i=0;i<n;i++) particles.push({x,y,vx:(Math.random()-0.5)*6,vy:(Math.random()-0.8)*6,life:1,color:c}); }
+function floatTxt(x,y,t,c){ floats.push({x,y,txt:t,color:c||'#ffd24a',life:1}); }
+function aabb(a,b){ return a.x<b.x+b.w && a.x+a.w>b.x && a.y-a.h<b.y && a.y>b.y-b.h; }
+
+function hitFoe(o){
+  o.hp--;
+  if(o.hp<=0){
+    o.defeated=true; kills++;
+    burst(o.x+o.w/2,o.y-o.h/2,'#ffd24a',o.big?20:14);
+    const r=o.big?40:20; dist+=r; floatTxt(o.x+o.w/2,o.y-o.h-8,`${o.name} 격퇴! +${r}`,'#ffd24a');
+  }else burst(o.x+o.w/2,o.y-o.h/2,'#fff',6);
+}
+function loseLife(name,emoji){
+  lives--; invuln=100; hitBy={name,emoji};
+  burst(player.x+16,player.y-22,'#ff4d5e',16);
+  floatTxt(player.x+player.w/2, player.y-54, '-1 ❤','#ff6b81');
+}
+
+function physics(){
+  player.vy+=0.62; player.y+=player.vy;
+  if(player.y>=GROUND){ player.y=GROUND; player.vy=0; player.onGround=true; player.jumps=0; }
+  player.run+=speed*0.06;
+  if(atkCd>0) atkCd--;
+  if(invuln>0) invuln--;
+  if(hintLife>0) hintLife--;
+}
+function stepFx(){
+  for(const p of particles){ p.x+=p.vx; p.y+=p.vy; p.vy+=0.25; p.life-=0.03; }
+  particles=particles.filter(p=>p.life>0);
+  for(const f of floats){ f.y-=1.1; f.life-=0.02; }
+  floats=floats.filter(f=>f.life>0);
+}
+function stepProjectiles(){
+  for(const pr of projectiles){
+    pr.x+=pr.vx; pr.vy+=pr.grav; pr.y+=pr.vy;
+    for(const o of obstacles){
+      if(!o.defeated && pr.x>o.x && pr.x<o.x+o.w && pr.y>o.y-o.h && pr.y<o.y+6){ pr.dead=true; hitFoe(o); break; }
+    }
+  }
+  projectiles=projectiles.filter(p=>!p.dead && p.x<W+40 && p.y<H+20);
+}
+
+// ── 달리기 구간 ──
+function update(){
+  dist+=speed/12; speed+=0.0016; physics();
+  if(--spawnT<=0){ spawnFoe(); spawnT=Math.max(44,96-dist*0.018)+Math.random()*44; }
+  if(--coinT<=0){ spawnCoin(); coinT=70+Math.random()*90; }
+
+  stepProjectiles();
+  if(melee){
+    melee.t--; const mx=player.x+player.w;
+    for(const o of obstacles){
+      if(!o.defeated && o.x<mx+hero.range && o.x+o.w>mx && o.y>player.y-player.h && o.y-o.h<player.y) hitFoe(o);
+    }
+    if(melee.t<=0) melee=null;
+  }
+
+  const pBox={x:player.x,y:player.y,w:player.w,h:player.h};
+  for(const o of obstacles){
+    o.x-=speed;
+    if(!o.defeated && invuln<=0 && aabb(pBox,{x:o.x,y:o.y,w:o.w,h:o.h})){
+      o.defeated=true; loseLife(o.name,o.emoji); if(lives<=0) return gameOver();
+    }
+  }
+  obstacles=obstacles.filter(o=>o.x>-60 && !o.defeated);
+
+  for(const c of coins){
+    c.x-=speed;
+    if(!c.got){ const dx=(player.x+player.w/2)-c.x, dy=(player.y-player.h/2)-c.y;
+      if(Math.hypot(dx,dy)<30){ c.got=true; dist+=8; burst(c.x,c.y,'#ffd24a',10); floatTxt(c.x,c.y-10,'+8','#ffd24a'); } }
+  }
+  coins=coins.filter(c=>c.x>-30 && !c.got);
+  stepFx();
+
+  if(dist>=GOAL && !bossStarted) startBoss();
+}
+
+// ── 이토 최종 보스전 ──
+function startBoss(){
+  bossStarted=true; state='boss';
+  obstacles=[]; coins=[]; projectiles=[];
+  boss={x:W-120, y:GROUND, w:58, h:72, hp:18, maxhp:18, atkT:50, bob:0};
+  floatTxt(W/2, H/2-30, '🎩 이토 등장! 처단하라!', '#ff6b81');
+}
+function updateBoss(){
+  physics();
+  boss.bob+=0.08;
+  if(--boss.atkT<=0){
+    const fast=1 - boss.hp/boss.maxhp;
+    bossShots.push({x:boss.x, y:GROUND, vx:-(5+Math.random()*2.5+fast*2), emoji:'📜'});
+    if(boss.hp < boss.maxhp*0.4 && Math.random()<0.5) bossShots.push({x:boss.x+30, y:GROUND, vx:-(6+fast*2), emoji:'📜'});
+    boss.atkT = Math.max(28, 70 - fast*40);
+  }
+  boss.x -= 0.18;
+
+  for(const pr of projectiles){
+    pr.x+=pr.vx; pr.vy+=pr.grav; pr.y+=pr.vy;
+    if(pr.x>boss.x-8 && pr.x<boss.x+boss.w && pr.y>boss.y-boss.h && pr.y<boss.y+6){
+      pr.dead=true; boss.hp--; boss.x+=6; burst(boss.x+boss.w/2,boss.y-boss.h/2,'#ffd24a',8);
+    }
+  }
+  projectiles=projectiles.filter(p=>!p.dead && p.x<W+40 && p.y<H+20);
+
+  const pBox={x:player.x,y:player.y,w:player.w,h:player.h};
+  for(const s of bossShots){
+    s.x+=s.vx;
+    if(!s.gone && invuln<=0 && aabb(pBox,{x:s.x,y:s.y,w:26,h:24})){
+      s.gone=true; loseLife('이토의 불평등 조약','📜'); if(lives<=0) return gameOver();
+    }
+  }
+  bossShots=bossShots.filter(s=>s.x>-30 && !s.gone);
+
+  stepFx();
+  if(boss.hp<=0) return win();
+  if(boss.x < player.x+player.w+6){
+    if(invuln<=0){ loseLife('이토','🎩'); boss.x+=110; if(lives<=0) return gameOver(); }
+  }
+}
+
+// ── 캐릭터 그리기 ──
+function rrect(x,y,w,h,r){ ctx.beginPath(); ctx.moveTo(x+r,y); ctx.arcTo(x+w,y,x+w,y+h,r); ctx.arcTo(x+w,y+h,x,y+h,r); ctx.arcTo(x,y+h,x,y,r); ctx.arcTo(x,y,x+w,y,r); ctx.closePath(); }
+function drawHero(){
+  const cx=player.x+player.w/2;
+  // 무적 깜빡임
+  if(invuln>0 && Math.floor(invuln/6)%2===0) return;
+  // 그림자
+  ctx.fillStyle='rgba(0,0,0,.25)'; ctx.beginPath(); ctx.ellipse(cx,GROUND+4,16,5,0,0,7); ctx.fill();
+
+  const t=player.run, air=!player.onGround;
+  const swing=air?5:Math.sin(t*0.55)*8;
+  ctx.save(); ctx.translate(cx, player.y);
+  if(air) ctx.rotate(player.vy*0.01);
+  // 다리
+  ctx.strokeStyle='#2a2a33'; ctx.lineWidth=5; ctx.lineCap='round';
+  ctx.beginPath();
+  ctx.moveTo(-4,-12); ctx.lineTo(-4 - swing*0.6, 0);
+  ctx.moveTo(4,-12);  ctx.lineTo(4 + swing*0.6, 0);
+  ctx.stroke();
+  // 몸통(저고리/자켓)
+  ctx.fillStyle=hero.color; rrect(-11,-35,22,25,7); ctx.fill();
+  // 띠
+  ctx.fillStyle='rgba(255,255,255,.25)'; ctx.fillRect(-11,-20,22,3);
+  // 팔 + 무기
+  ctx.strokeStyle=hero.color; ctx.lineWidth=5;
+  ctx.beginPath(); ctx.moveTo(9,-28); ctx.lineTo(18,-22+Math.sin(t*0.55)*2); ctx.stroke();
+  // 머리
+  const hy=-45;
+  ctx.beginPath(); ctx.arc(0,hy,10,0,7); ctx.fillStyle='#f4d6ad'; ctx.fill();
+  // 머리카락 (윗부분)
+  ctx.fillStyle=hero.hair||'#22232b';
+  ctx.beginPath(); ctx.arc(0,hy,10,Math.PI*1.05,Math.PI*-0.05); ctx.fill();
+  // 소품
+  if(hero.bun){ ctx.beginPath(); ctx.arc(0,hy-11,5,0,7); ctx.fill();
+    ctx.strokeStyle='#ffd24a'; ctx.lineWidth=2; ctx.beginPath(); ctx.moveTo(-5,hy-11); ctx.lineTo(6,hy-11); ctx.stroke(); }
+  if(hero.cap){ ctx.fillStyle=hero.color; ctx.beginPath(); ctx.arc(0,hy-3,11,Math.PI,0); ctx.fill();
+    ctx.fillRect(-13,hy-3,26,3); }
+  if(hero.glasses){ ctx.strokeStyle='#1a1a1a'; ctx.lineWidth=1.6;
+    ctx.beginPath(); ctx.arc(-4,hy+1,2.6,0,7); ctx.moveTo(7.6,hy+1); ctx.arc(5,hy+1,2.6,0,7); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(-1.4,hy+1); ctx.lineTo(2.4,hy+1); ctx.stroke(); }
+  // 무기 이모지
+  ctx.font='18px serif'; ctx.textAlign='center'; ctx.textBaseline='middle';
+  ctx.fillText(hero.wp, 21, -21);
+  ctx.restore();
+}
+
+function draw(){
+  ctx.clearRect(0,0,W,H);
+  const run=player?player.run:0;
+  ctx.fillStyle='rgba(255,255,255,0.06)';
+  for(let i=0;i<5;i++){ const mx=((i*220-run*0.2)%(W+220)+W+220)%(W+220)-110;
+    ctx.beginPath(); ctx.moveTo(mx-110,GROUND); ctx.lineTo(mx,GROUND-120); ctx.lineTo(mx+110,GROUND); ctx.fill(); }
+  ctx.fillStyle='rgba(255,255,255,0.10)';
+  for(let i=0;i<4;i++){ const cx=((i*260-run*0.28)%(W+260)+W+260)%(W+260)-130, cy=58+i*16;
+    ctx.beginPath(); ctx.arc(cx,cy,18,0,7); ctx.arc(cx+22,cy+4,22,0,7); ctx.arc(cx+48,cy,16,0,7); ctx.fill(); }
+  ctx.fillStyle='#10152e'; ctx.fillRect(0,GROUND,W,H-GROUND);
+  ctx.strokeStyle='rgba(255,255,255,.12)'; ctx.lineWidth=2; ctx.beginPath(); ctx.moveTo(0,GROUND+1); ctx.lineTo(W,GROUND+1); ctx.stroke();
+  ctx.fillStyle='rgba(255,255,255,.05)';
+  for(let i=0;i<14;i++){ const sx=((i*70-run)%(W+70)+W+70)%(W+70)-35; ctx.fillRect(sx,GROUND+14,34,5); }
+
+  ctx.textAlign='center'; ctx.textBaseline='middle';
+  for(const c of coins){ ctx.font='26px serif'; ctx.fillText('💰', c.x, c.y+Math.sin(run*0.1+c.bob)*4); }
+  for(const pr of projectiles){ ctx.font='24px serif'; ctx.fillText(pr.wp, pr.x, pr.y); }
+
+  ctx.textBaseline='alphabetic';
+  for(const o of obstacles){
+    ctx.font=(o.big?'52px':'40px')+' serif'; ctx.textAlign='center'; ctx.fillText(o.emoji,o.x+o.w/2,o.y-2);
+    ctx.font='bold 11px sans-serif'; ctx.fillStyle='rgba(255,255,255,.85)'; ctx.fillText(o.name,o.x+o.w/2,o.y-o.h-6);
+    if(o.hp>1){ ctx.fillStyle='#ff8aa0'; ctx.font='10px sans-serif'; ctx.fillText('❤'.repeat(o.hp),o.x+o.w/2,o.y-o.h-18); }
+    ctx.fillStyle='#fff';
+  }
+
+  if(boss){
+    ctx.font='28px serif'; ctx.textAlign='center';
+    for(const s of bossShots) ctx.fillText(s.emoji, s.x+13, s.y-10);
+    ctx.font='56px serif'; ctx.fillText('🎩', boss.x+boss.w/2, boss.y-2+Math.sin(boss.bob)*4);
+    ctx.font='bold 12px sans-serif'; ctx.fillStyle='#ff6b81'; ctx.fillText('이토 히로부미', boss.x+boss.w/2, boss.y-boss.h-22);
+    const bw=W-32, bx=16, by=46;
+    ctx.fillStyle='rgba(255,255,255,.15)'; ctx.fillRect(bx,by,bw,9);
+    ctx.fillStyle='#ff4d5e'; ctx.fillRect(bx,by,bw*Math.max(0,boss.hp/boss.maxhp),9);
+    ctx.fillStyle='#fff'; ctx.font='bold 13px sans-serif'; ctx.textAlign='left'; ctx.fillText('🎩 이토 최종전',16,34);
+  }
+
+  if(melee && hero){ ctx.font='34px serif'; ctx.textAlign='center';
+    ctx.fillText(hero.wp, player.x+player.w+hero.range*0.5, player.y-player.h*0.4); }
+
+  if(player){ if(hero) drawHero(); else { ctx.font='38px serif'; ctx.textAlign='center'; ctx.fillText('🏃', player.x+player.w/2, player.y-6); } }
+
+  for(const p of particles){ ctx.globalAlpha=Math.max(0,p.life); ctx.fillStyle=p.color; ctx.fillRect(p.x,p.y,4,4); }
+  ctx.globalAlpha=1;
+  for(const f of floats){ ctx.globalAlpha=Math.max(0,f.life); ctx.fillStyle=f.color; ctx.font='bold 15px sans-serif'; ctx.textAlign='center'; ctx.fillText(f.txt,f.x,f.y); }
+  ctx.globalAlpha=1;
+
+  if(!boss){
+    ctx.fillStyle='#fff'; ctx.font='bold 22px sans-serif'; ctx.textAlign='left'; ctx.fillText(Math.floor(dist)+' m',16,34);
+    const bw=W-32,bx=16,by=46;
+    ctx.fillStyle='rgba(255,255,255,.15)'; ctx.fillRect(bx,by,bw,6);
+    ctx.fillStyle='#ffd24a'; ctx.fillRect(bx,by,bw*Math.min(1,dist/GOAL),6);
+    ctx.font='15px serif'; ctx.textAlign='right'; ctx.fillText('🏁 1945',bx+bw,by-4);
+  }
+  // 목숨 + 무기 + 처단수
+  if(state==='play'||state==='boss'){
+    let hearts=''; for(let i=0;i<3;i++) hearts += i<lives?'❤':'🤍';
+    ctx.font='17px serif'; ctx.textAlign='right'; ctx.fillText(hearts, W-12, boss?80:30);
+  }
+  if(hero){ ctx.textAlign='left'; ctx.font='20px serif'; ctx.globalAlpha=atkCd>0?0.4:1; ctx.fillText(hero.wp,16,80); ctx.globalAlpha=1;
+    ctx.fillStyle=atkCd>0?'rgba(255,255,255,.4)':'#fff'; ctx.font='bold 12px sans-serif'; ctx.fillText(`${hero.name} · ⚔️${kills}`,44,78); }
+
+  if((state==='play'||state==='boss') && hintLife>0){
+    ctx.globalAlpha=Math.min(0.5,hintLife/210*0.5);
+    ctx.fillStyle='#fff'; ctx.strokeStyle='rgba(255,255,255,.3)'; ctx.lineWidth=1;
+    ctx.beginPath(); ctx.moveTo(W/2,GROUND-90); ctx.lineTo(W/2,GROUND); ctx.stroke();
+    ctx.font='bold 16px sans-serif'; ctx.textAlign='center';
+    ctx.fillText('👆 점프', W*0.25, GROUND-40);
+    ctx.fillText('👆 무기', W*0.75, GROUND-40);
+    ctx.globalAlpha=1;
+  }
+}
+
+function loop(){
+  if(state==='play'){ update(); draw(); raf=requestAnimationFrame(loop); }
+  else if(state==='boss'){ updateBoss(); draw(); raf=requestAnimationFrame(loop); }
+}
+function start(){ $('selectScr').classList.add('hide'); $('overScr').classList.add('hide'); reset(); cancelAnimationFrame(raf); loop(); }
+
+function endCommon(){
+  cancelAnimationFrame(raf);
+  if(Math.floor(dist)>best){ best=Math.floor(dist); localStorage.setItem('dokrip_run_best',best); }
+  $('best').textContent=best; $('overDist').textContent=Math.floor(dist);
+}
+function gameOver(){
+  state='over'; burst(player.x+16,player.y-20,'#ff4d5e',20); draw(); endCommon();
+  $('overTitle').textContent = hitBy ? `${hitBy.emoji} ${hitBy.name}에게 쓰러졌다!` : '쓰러졌다! 😵';
+  const msgs=['여기서 멈출 순 없다... 다시!','독립의 길은 멀고도 험하다 💪','한 번 더!','아직 광복은 멀었다!'];
+  $('overMsg').innerHTML=`처단한 적 <b>${kills}</b> · ${msgs[Math.floor(dist)%msgs.length]}`;
+  $('overHint').innerHTML='❤❤❤ 목숨 3개! 👆왼쪽=점프 / 오른쪽=무기. 이토는 무기로만 잡힌다!';
+  $('overScr').classList.remove('hide');
+}
+function win(){
+  state='over'; burst(boss.x,boss.y-30,'#ffd24a',50); draw(); endCommon();
+  $('overTitle').innerHTML='🎉 이토 처단! <span class="em">광복</span>!';
+  $('overMsg').innerHTML=`${hero.name}, 마침내 이토를 쓰러뜨렸다!<br>처단한 적 <b>${kills}</b> · 남은 목숨 <b>${lives}</b>❤ · 대한 독립 만세! 🙌🇰🇷`;
+  $('overHint').innerHTML='다른 영웅으로도 도전해봐!';
+  $('overScr').classList.remove('hide');
+}
+
+$('retryBtn').onclick=start;
+$('changeBtn').onclick=()=>{ $('overScr').classList.add('hide'); $('selectScr').classList.remove('hide'); state='select'; };
+$('bragBtn').onclick=()=>{
+  const txt=`🏃 [영웅 RUN] 최고기록 ${best}m\n${best>=GOAL?'🎉 이토 처단·광복 달성!':'이토까지 '+(GOAL-best)+'m 남음'}\n너도 영웅 골라서 달려봐!`;
+  if(navigator.clipboard) navigator.clipboard.writeText(txt).then(()=>alert('📋 기록 복사 완료! 팀 채팅에 붙여넣기 🔥'));
+  else prompt('복사해서 자랑하세요!', txt);
+};
+$('resetBtn').onclick=()=>{ if(confirm('최고기록을 지울까요?')){ best=0; localStorage.removeItem('dokrip_run_best'); $('best').textContent=0; } };
+
+window.addEventListener('resize', ()=>{ fitDPR(); if(state!=='play'&&state!=='boss') draw(); });
+
+state='select';
+player={x:90,y:GROUND,run:0,onGround:true,h:46,w:34,vy:0};
+draw();
+</script>
+</body>
+</html>
