@@ -15,8 +15,8 @@
   body{
     font-family:-apple-system,BlinkMacSystemFont,"Apple SD Gothic Neo","Malgun Gothic",sans-serif;
     background:#0b1020; color:var(--ink); display:flex; flex-direction:column;
-    align-items:center; justify-content:center; min-height:100%;
-    padding:env(safe-area-inset-top) 10px env(safe-area-inset-bottom);
+    align-items:center; justify-content:flex-start; min-height:100%;
+    padding:calc(env(safe-area-inset-top) + 8px) 10px calc(env(safe-area-inset-bottom) + 8px);
   }
   .frame{width:100%; max-width:780px;}
   .top{display:flex; justify-content:space-between; align-items:baseline; padding:6px 4px;}
@@ -25,7 +25,7 @@
   .top .best{font-size:13px; color:var(--muted);}
   .stage{position:relative; width:100%; border-radius:16px; overflow:hidden;
     box-shadow:0 14px 40px rgba(0,0,0,.5); border:1px solid #2a3160;}
-  canvas{display:block; width:100%; height:auto; background:linear-gradient(180deg,var(--sky1),var(--sky2));}
+  canvas{display:block; margin:0 auto; max-width:100%; background:linear-gradient(180deg,var(--sky1),var(--sky2));}
 
   .overlay{position:absolute; inset:0; display:grid; place-items:center; text-align:center;
     background:rgba(8,10,28,.82); backdrop-filter:blur(2px); padding:16px; overflow:auto;}
@@ -37,7 +37,17 @@
   .panel .big{font-size:32px; font-weight:800; color:var(--gold); margin:6px 0;}
 
   .heroes{display:grid; grid-template-columns:repeat(4,1fr); gap:8px; margin:12px 0 4px;}
-  @media(max-width:520px){ .heroes{grid-template-columns:repeat(3,1fr);} }
+  @media(max-width:520px){
+    .heroes{grid-template-columns:repeat(3,1fr); gap:6px; margin:8px 0 2px;}
+    .overlay{padding:12px 12px;}
+    .panel h2{font-size:21px;}
+    .panel p{font-size:11.5px; margin:3px 0;}
+    .hero{padding:6px 4px; border-radius:11px;}
+    .hero .wp{width:40px; height:40px; font-size:22px;}
+    .hero .nm{font-size:12.5px; margin-top:3px;}
+    .hero .wn{font-size:11px;}
+    .hero .ds{font-size:9.5px; margin-top:1px;}
+  }
   .hero{background:#161c3a; border:1px solid #2a3160; border-radius:13px; padding:9px 6px;
     cursor:pointer; transition:transform .08s, border-color .15s;}
   .hero:active{transform:scale(.96);} .hero:hover{border-color:var(--gold);}
@@ -103,15 +113,25 @@
 
 <script>
 const cv=document.getElementById('cv'), ctx=cv.getContext('2d');
-const W=cv.width, H=cv.height, GROUND=H-56, GOAL=1945;
+let W=cv.width, H=cv.height, GROUND=H-56; const GOAL=1945;
 const $=id=>document.getElementById(id);
 
-function fitDPR(){
+// 화면 크기에 맞춰 캔버스 크기/지면 재계산 (모바일 세로화면은 더 높게)
+function layout(){
+  const host=cv.parentElement;
+  const cssW=Math.max(280, host.clientWidth||360);
+  const mobile=window.innerWidth<700;
+  const cssH = mobile
+    ? Math.min(Math.max(window.innerHeight-210, 330), cssW*1.25)
+    : Math.round(cssW*0.5);
+  W=Math.round(cssW); H=Math.round(cssH); GROUND=H-56;
   const dpr=Math.min(window.devicePixelRatio||1,2.5);
-  cv.width=W*dpr; cv.height=H*dpr; cv.style.width='100%';
+  cv.width=W*dpr; cv.height=H*dpr;
+  cv.style.width=cssW+'px'; cv.style.height=cssH+'px';
   ctx.setTransform(dpr,0,0,dpr,0,0);
 }
-fitDPR();
+layout();
+const startX=()=>Math.max(50,Math.round(W*0.12));
 
 // 영웅 + 무기 + 외형(색/머리/소품)
 const HEROES=[
@@ -121,7 +141,8 @@ const HEROES=[
   {id:'yoo', name:'유동하', weapon:'하트',  wp:'💗', type:'shot', speed:10, cd:15, range:0, ds:'연사 매우 빠름',    color:'#3aa0d8', hair:'#23232c', cap:true},
   {id:'choi',name:'최재형', weapon:'서류가방',wp:'💼',type:'shot', speed:8,  cd:34, range:0, ds:'묵직한 한 방',      color:'#5b5f70', hair:'#2a2a30', glasses:true},
   {id:'wang',name:'왕웨이', weapon:'만두',  wp:'🥟', type:'lob',  speed:11, cd:22, range:0, ds:'포물선 투척',      color:'#b83b3b', hair:'#1a1a1a', cap:true},
-  {id:'seol',name:'설희',   weapon:'비녀',  wp:'🌸', type:'shot', speed:14, cd:13, range:0, ds:'재빠른 암기 연사',  color:'#d96f9a', hair:'#1a1620', bun:true},
+  {id:'seol',name:'설희',   weapon:'비녀',  wp:'🌸', type:'shot', speed:14, cd:13, range:0, ds:'재빠른 비녀 투척',  color:'#d96f9a', hair:'#1a1620', bun:true, binyeo:true,
+    icon:'<svg width="30" height="30" viewBox="0 0 30 30"><line x1="15" y1="9" x2="15" y2="27" stroke="#e9c46a" stroke-width="2.6" stroke-linecap="round"/><circle cx="15" cy="7.5" r="4.6" fill="#e76f9e"/><circle cx="15" cy="7.5" r="2" fill="#fff" fill-opacity=".7"/></svg>'},
 ];
 
 let state, hero, player, obstacles, coins, projectiles, particles, floats, melee;
@@ -133,7 +154,7 @@ $('best').textContent=best;
 const grid=$('heroGrid');
 HEROES.forEach(h=>{
   const d=document.createElement('div'); d.className='hero';
-  d.innerHTML=`<div class="wp" style="background:${h.color}">${h.wp}</div>
+  d.innerHTML=`<div class="wp" style="background:${h.color}">${h.icon||h.wp}</div>
     <div class="nm">${h.name}</div><div class="wn">${h.weapon}</div><div class="ds">${h.ds}</div>`;
   d.onclick=()=>{ hero=h; start(); };
   grid.appendChild(d);
@@ -141,7 +162,7 @@ HEROES.forEach(h=>{
 
 function reset(){
   state='play';
-  player={x:90,y:GROUND,vy:0,w:34,h:46,onGround:true,jumps:0,run:0};
+  player={x:startX(),y:GROUND,vy:0,w:34,h:46,onGround:true,jumps:0,run:0};
   obstacles=[]; coins=[]; projectiles=[]; particles=[]; floats=[]; melee=null;
   boss=null; bossShots=[]; bossStarted=false;
   dist=0; speed=4.2; spawnT=70; coinT=90; atkCd=0; kills=0; lives=3; invuln=0; hintLife=210; hitBy=null;
@@ -157,7 +178,7 @@ function attack(){
   const px=player.x+player.w, py=player.y-player.h*0.55;
   if(hero.type==='melee' && state==='play'){ melee={t:12}; }
   else{
-    const p={x:px,y:py,wp:hero.wp,vx:(hero.type==='melee'?15:hero.speed),vy:0,grav:0};
+    const p={x:px,y:py,wp:hero.wp,vx:(hero.type==='melee'?15:hero.speed),vy:0,grav:0,binyeo:!!hero.binyeo};
     if(hero.type==='lob'){ p.vy=-7.5; p.grav=0.32; }
     projectiles.push(p);
   }
@@ -302,6 +323,7 @@ function updateBoss(){
 
 // ── 캐릭터 그리기 ──
 function rrect(x,y,w,h,r){ ctx.beginPath(); ctx.moveTo(x+r,y); ctx.arcTo(x+w,y,x+w,y+h,r); ctx.arcTo(x+w,y+h,x,y+h,r); ctx.arcTo(x,y+h,x,y,r); ctx.arcTo(x,y,x+w,y,r); ctx.closePath(); }
+function drawBinyeo(x,y){ ctx.save(); ctx.translate(x,y); ctx.strokeStyle='#e9c46a'; ctx.lineWidth=2.6; ctx.lineCap='round'; ctx.beginPath(); ctx.moveTo(-13,0); ctx.lineTo(7,0); ctx.stroke(); ctx.fillStyle='#e76f9e'; ctx.beginPath(); ctx.arc(10,0,4,0,7); ctx.fill(); ctx.fillStyle='rgba(255,255,255,.7)'; ctx.beginPath(); ctx.arc(10,0,1.6,0,7); ctx.fill(); ctx.restore(); }
 function drawHero(){
   const cx=player.x+player.w/2;
   // 무적 깜빡임
@@ -333,16 +355,20 @@ function drawHero(){
   ctx.fillStyle=hero.hair||'#22232b';
   ctx.beginPath(); ctx.arc(0,hy,10,Math.PI*1.05,Math.PI*-0.05); ctx.fill();
   // 소품
-  if(hero.bun){ ctx.beginPath(); ctx.arc(0,hy-11,5,0,7); ctx.fill();
-    ctx.strokeStyle='#ffd24a'; ctx.lineWidth=2; ctx.beginPath(); ctx.moveTo(-5,hy-11); ctx.lineTo(6,hy-11); ctx.stroke(); }
+  if(hero.bun){
+    ctx.beginPath(); ctx.arc(0,hy-11,5.5,0,7); ctx.fill();                 // 쪽진 머리
+    ctx.strokeStyle='#e9c46a'; ctx.lineWidth=2.2; ctx.lineCap='round';     // 비녀
+    ctx.beginPath(); ctx.moveTo(-7,hy-13); ctx.lineTo(8,hy-9); ctx.stroke();
+    ctx.fillStyle='#e76f9e'; ctx.beginPath(); ctx.arc(9,hy-8.5,2.6,0,7); ctx.fill();
+  }
   if(hero.cap){ ctx.fillStyle=hero.color; ctx.beginPath(); ctx.arc(0,hy-3,11,Math.PI,0); ctx.fill();
     ctx.fillRect(-13,hy-3,26,3); }
   if(hero.glasses){ ctx.strokeStyle='#1a1a1a'; ctx.lineWidth=1.6;
     ctx.beginPath(); ctx.arc(-4,hy+1,2.6,0,7); ctx.moveTo(7.6,hy+1); ctx.arc(5,hy+1,2.6,0,7); ctx.stroke();
     ctx.beginPath(); ctx.moveTo(-1.4,hy+1); ctx.lineTo(2.4,hy+1); ctx.stroke(); }
-  // 무기 이모지
-  ctx.font='18px serif'; ctx.textAlign='center'; ctx.textBaseline='middle';
-  ctx.fillText(hero.wp, 21, -21);
+  // 손에 든 무기
+  if(hero.binyeo){ drawBinyeo(20,-20); }
+  else { ctx.font='18px serif'; ctx.textAlign='center'; ctx.textBaseline='middle'; ctx.fillText(hero.wp, 21, -21); }
   ctx.restore();
 }
 
@@ -362,7 +388,7 @@ function draw(){
 
   ctx.textAlign='center'; ctx.textBaseline='middle';
   for(const c of coins){ ctx.font='26px serif'; ctx.fillText('💰', c.x, c.y+Math.sin(run*0.1+c.bob)*4); }
-  for(const pr of projectiles){ ctx.font='24px serif'; ctx.fillText(pr.wp, pr.x, pr.y); }
+  for(const pr of projectiles){ if(pr.binyeo){ drawBinyeo(pr.x,pr.y); } else { ctx.font='24px serif'; ctx.fillText(pr.wp, pr.x, pr.y); } }
 
   ctx.textBaseline='alphabetic';
   for(const o of obstacles){
@@ -405,7 +431,7 @@ function draw(){
     let hearts=''; for(let i=0;i<3;i++) hearts += i<lives?'❤':'🤍';
     ctx.font='17px serif'; ctx.textAlign='right'; ctx.fillText(hearts, W-12, boss?80:30);
   }
-  if(hero){ ctx.textAlign='left'; ctx.font='20px serif'; ctx.globalAlpha=atkCd>0?0.4:1; ctx.fillText(hero.wp,16,80); ctx.globalAlpha=1;
+  if(hero){ ctx.textAlign='left'; ctx.font='20px serif'; ctx.globalAlpha=atkCd>0?0.4:1; if(hero.binyeo) drawBinyeo(26,74); else ctx.fillText(hero.wp,16,80); ctx.globalAlpha=1;
     ctx.fillStyle=atkCd>0?'rgba(255,255,255,.4)':'#fff'; ctx.font='bold 12px sans-serif'; ctx.fillText(`${hero.name} · ⚔️${kills}`,44,78); }
 
   if((state==='play'||state==='boss') && hintLife>0){
@@ -455,10 +481,14 @@ $('bragBtn').onclick=()=>{
 };
 $('resetBtn').onclick=()=>{ if(confirm('최고기록을 지울까요?')){ best=0; localStorage.removeItem('dokrip_run_best'); $('best').textContent=0; } };
 
-window.addEventListener('resize', ()=>{ fitDPR(); if(state!=='play'&&state!=='boss') draw(); });
+window.addEventListener('resize', ()=>{
+  layout();
+  if(player){ player.x=startX(); if(player.onGround) player.y=GROUND; }
+  if(state!=='play'&&state!=='boss') draw();
+});
 
 state='select';
-player={x:90,y:GROUND,run:0,onGround:true,h:46,w:34,vy:0};
+player={x:startX(),y:GROUND,run:0,onGround:true,h:46,w:34,vy:0};
 draw();
 </script>
 </body>
