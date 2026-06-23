@@ -80,6 +80,16 @@ input, select, textarea { font-family: inherit; }
 
 /* Footer action bar */
 .action-bar { display: flex; justify-content: flex-end; gap: 10px; padding: 18px 0 4px; }
+
+/* Modal */
+.modal-backdrop { position: fixed; inset: 0; background: rgba(0,0,0,0.45); display: none; align-items: center; justify-content: center; z-index: 1000; }
+.modal-backdrop.open { display: flex; }
+.modal { width: 460px; max-width: calc(100vw - 32px); background: #fff; border-radius: 12px; box-shadow: 0 12px 40px rgba(0,0,0,0.18); overflow: hidden; }
+.modal-head { padding: 18px 20px 8px; }
+.modal-title { font-size: 16px; font-weight: 700; color: rgba(0,0,0,0.88); }
+.modal-body { padding: 8px 20px 20px; font-size: 13.5px; color: rgba(0,0,0,0.7); line-height: 1.6; }
+.modal-body strong { color: rgba(0,0,0,0.88); font-weight: 700; }
+.modal-foot { display: flex; justify-content: flex-end; gap: 8px; padding: 12px 16px; border-top: 1px solid #f0f0f0; background: #fafbfc; }
 </style>
 </head>
 <body>
@@ -160,7 +170,7 @@ input, select, textarea { font-family: inherit; }
 
     <div class="editor-toolbar">
       <div style="font-size:13px; font-weight:600; color:rgba(0,0,0,0.7);">기본 정보 콘텐츠</div>
-      <button class="btn-ghost">📥 기본정보 가져오기</button>
+      <button class="btn-ghost" id="btn-import-base">📥 기본정보 가져오기</button>
     </div>
 
     <!-- 콘텐츠 카드: 스페셜혜택 -->
@@ -202,6 +212,22 @@ input, select, textarea { font-family: inherit; }
 
 </div>
 
+<!-- Modal: 기본정보 가져오기 -->
+<div class="modal-backdrop" id="modal-import">
+  <div class="modal">
+    <div class="modal-head">
+      <div class="modal-title">기본정보 가져오기</div>
+    </div>
+    <div class="modal-body">
+      선택하신 타겟의 숙소 기본 콘텐츠 <strong>(숙소, 객실, 식사)</strong> 정보를 가지고 오시겠습니까?
+    </div>
+    <div class="modal-foot">
+      <button class="btn-ghost" id="modal-cancel">취소</button>
+      <button class="btn-primary" id="modal-confirm">가져오기</button>
+    </div>
+  </div>
+</div>
+
 <script>
 document.querySelectorAll('.cat-chip').forEach(chip => {
   chip.addEventListener('click', () => {
@@ -209,6 +235,14 @@ document.querySelectorAll('.cat-chip').forEach(chip => {
     chip.classList.add('active');
   });
 });
+
+const modal = document.getElementById('modal-import');
+const openModal = () => modal.classList.add('open');
+const closeModal = () => modal.classList.remove('open');
+document.getElementById('btn-import-base').addEventListener('click', openModal);
+document.getElementById('modal-cancel').addEventListener('click', closeModal);
+document.getElementById('modal-confirm').addEventListener('click', closeModal);
+modal.addEventListener('click', (e) => { if (e.target === modal) closeModal(); });
 </script>
 
 </body>
