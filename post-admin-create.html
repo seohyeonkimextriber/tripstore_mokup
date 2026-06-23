@@ -119,7 +119,7 @@ input, select, textarea { font-family: inherit; }
     <div class="card-title">기본정보</div>
     <div class="form-row">
       <div class="form-label">타겟유형</div>
-      <select class="form-control select" style="max-width: 420px;">
+      <select class="form-control select" id="target-type" style="max-width: 420px;">
         <option>숙박권</option>
         <option>항공권</option>
         <option>투어/티켓</option>
@@ -218,8 +218,8 @@ input, select, textarea { font-family: inherit; }
     <div class="modal-head">
       <div class="modal-title">기본정보 가져오기</div>
     </div>
-    <div class="modal-body">
-      선택하신 타겟의 숙소 기본 콘텐츠 <strong>(숙소, 객실, 식사)</strong> 정보를 가지고 오시겠습니까?
+    <div class="modal-body" id="modal-body-text">
+      선택하신 타겟의 기본 콘텐츠 <strong id="modal-categories">(숙소, 객실, 식사)</strong> 정보를 가지고 오시겠습니까?
     </div>
     <div class="modal-foot">
       <button class="btn-ghost" id="modal-cancel">취소</button>
@@ -237,7 +237,20 @@ document.querySelectorAll('.cat-chip').forEach(chip => {
 });
 
 const modal = document.getElementById('modal-import');
-const openModal = () => modal.classList.add('open');
+const modalCategories = document.getElementById('modal-categories');
+const targetSelect = document.getElementById('target-type');
+
+const BASE_MAP = {
+  '숙박권': '(숙소, 객실, 식사)',
+  '항공권': '(항공사, 국가, 여행지)',
+  '투어/티켓': '(스팟·체험)'
+};
+
+const openModal = () => {
+  const t = targetSelect.value;
+  modalCategories.textContent = BASE_MAP[t] || '(연결된 기본 콘텐츠 없음)';
+  modal.classList.add('open');
+};
 const closeModal = () => modal.classList.remove('open');
 document.getElementById('btn-import-base').addEventListener('click', openModal);
 document.getElementById('modal-cancel').addEventListener('click', closeModal);
