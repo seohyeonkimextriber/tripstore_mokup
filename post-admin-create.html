@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PB 콘텐츠 등록 — 어드민 (리디자인)</title>
+<link href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.6/dist/web/static/pretendard.css" rel="stylesheet">
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: 'Pretendard', 'Apple SD Gothic Neo', -apple-system, sans-serif; font-size: 14px; color: rgba(0,0,0,0.88); background: #f5f5f5; }
+button { font-family: inherit; cursor: pointer; }
+input, select, textarea { font-family: inherit; }
+
+/* Breadcrumb */
+.breadcrumb { padding: 16px 28px 0; font-size: 12px; color: rgba(0,0,0,0.45); display: flex; align-items: center; gap: 6px; }
+.breadcrumb .sep { color: rgba(0,0,0,0.2); }
+.breadcrumb .bc-current { color: rgba(0,0,0,0.88); font-weight: 600; }
+
+.layout { padding: 14px 28px 48px; max-width: 1480px; margin: 0 auto; }
+
+/* Header */
+.page-header { display: flex; align-items: center; justify-content: space-between; gap: 14px; flex-wrap: wrap; margin: 8px 0 18px; }
+.page-title { font-size: 24px; font-weight: 800; color: rgba(0,0,0,0.88); letter-spacing: -0.4px; }
+.page-title .subtle { font-size: 14px; font-weight: 500; color: rgba(0,0,0,0.45); margin-left: 6px; }
+.page-actions { display: flex; gap: 8px; align-items: center; }
+
+/* AI button */
+.btn-ai { height: 36px; padding: 0 16px; border-radius: 8px; font-size: 13px; font-weight: 700; cursor: pointer; border: 1px solid #7e3ff2; background: linear-gradient(135deg, #7e3ff2 0%, #4f6cf7 100%); color: #fff; display: inline-flex; align-items: center; gap: 6px; box-shadow: 0 1px 4px rgba(126,63,242,0.25); transition: all 0.15s; }
+.btn-ai:hover { transform: translateY(-1px); box-shadow: 0 3px 10px rgba(126,63,242,0.35); }
+.btn-ai .ico { font-size: 14px; }
+
+/* Buttons */
+.btn-primary { height: 34px; padding: 0 16px; border-radius: 6px; font-size: 13px; font-weight: 600; cursor: pointer; border: 1px solid #1677ff; background: #1677ff; color: #fff; display: inline-flex; align-items: center; gap: 6px; transition: background 0.15s; }
+.btn-primary:hover { background: #4096ff; }
+.btn-ghost { height: 34px; padding: 0 14px; border-radius: 6px; font-size: 13px; font-weight: 500; cursor: pointer; border: 1px solid #d9d9d9; background: #fff; color: rgba(0,0,0,0.75); display: inline-flex; align-items: center; gap: 6px; transition: all 0.15s; }
+.btn-ghost:hover { color: #1677ff; border-color: #1677ff; }
+.btn-danger-ghost { height: 30px; padding: 0 12px; border-radius: 6px; font-size: 12.5px; font-weight: 600; cursor: pointer; border: 1px solid #ffa39e; background: #fff; color: #cf1322; display: inline-flex; align-items: center; gap: 4px; transition: all 0.15s; }
+.btn-danger-ghost:hover { background: #fff1f0; }
+
+/* Card sections */
+.card { background: #fff; border: 1px solid #ececec; border-radius: 12px; padding: 18px 20px; margin-bottom: 16px; }
+.card-title { font-size: 15px; font-weight: 700; color: rgba(0,0,0,0.88); margin-bottom: 14px; display: flex; align-items: center; justify-content: space-between; gap: 10px; }
+.card-title .right { display: flex; gap: 8px; }
+.card-section-label { font-size: 13px; font-weight: 700; color: rgba(0,0,0,0.7); background: #fafbfc; padding: 8px 14px; border-radius: 6px 6px 0 0; border: 1px solid #ececec; border-bottom: none; }
+.card-section-body { border: 1px solid #ececec; border-radius: 0 0 6px 6px; padding: 16px; background: #fff; }
+
+/* Form rows */
+.form-row { display: grid; grid-template-columns: 110px 1fr; align-items: center; gap: 16px; padding: 10px 0; }
+.form-row + .form-row { border-top: 1px solid #f5f5f5; }
+.form-label { font-size: 13px; font-weight: 500; color: rgba(0,0,0,0.65); }
+.form-control { width: 100%; height: 36px; padding: 0 12px; border: 1px solid #d9d9d9; border-radius: 6px; font-size: 13px; color: rgba(0,0,0,0.88); background: #fff; outline: none; transition: border 0.15s; }
+.form-control:focus { border-color: #1677ff; box-shadow: 0 0 0 2px rgba(22,119,255,0.1); }
+.form-control.select { padding-right: 32px; appearance: none; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='%23bbb'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 12px center; cursor: pointer; }
+.form-control.with-id { padding-left: 56px; }
+.form-control-wrap { position: relative; }
+.id-chip { position: absolute; left: 8px; top: 50%; transform: translateY(-50%); background: #f0f0f0; color: rgba(0,0,0,0.65); font-size: 11.5px; font-weight: 700; padding: 3px 8px; border-radius: 4px; font-family: 'SF Mono', monospace; pointer-events: none; }
+
+/* Category chips (스페셜혜택 등) */
+.cat-chips { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 12px; }
+.cat-chip { padding: 6px 12px; border-radius: 999px; font-size: 12.5px; font-weight: 500; color: rgba(0,0,0,0.55); background: #fafafa; border: 1px solid #ececec; cursor: pointer; transition: all 0.15s; }
+.cat-chip:hover { color: #1677ff; border-color: #91caff; background: #f0f7ff; }
+.cat-chip.active { color: #0958d9; background: #e6f4ff; border-color: #1677ff; font-weight: 700; }
+
+/* Content card (개별 카테고리 작성 카드) */
+.content-card { border: 1px solid #ececec; border-radius: 10px; padding: 18px; margin-bottom: 12px; background: #fff; }
+.content-card-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 14px; }
+.content-card-title { font-size: 15px; font-weight: 700; color: rgba(0,0,0,0.88); }
+.content-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px 18px; margin-bottom: 14px; }
+.field-block { display: flex; flex-direction: column; gap: 6px; }
+.field-label { font-size: 12.5px; font-weight: 600; color: rgba(0,0,0,0.65); }
+
+/* Template item area */
+.tpl-block { border: 1px solid #ececec; border-radius: 8px; padding: 14px; background: #fafbfc; }
+.tpl-label { font-size: 12.5px; font-weight: 600; color: rgba(0,0,0,0.65); margin-bottom: 10px; }
+.tpl-add { width: 100%; padding: 10px; border: 1px dashed #d9d9d9; background: #fff; border-radius: 6px; font-size: 13px; color: rgba(0,0,0,0.55); cursor: pointer; transition: all 0.15s; font-family: inherit; }
+.tpl-add:hover { color: #1677ff; border-color: #1677ff; background: #f0f7ff; }
+
+/* Inline content row toolbar */
+.editor-toolbar { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 12px; flex-wrap: wrap; }
+
+/* Footer action bar */
+.action-bar { display: flex; justify-content: flex-end; gap: 10px; padding: 18px 0 4px; }
+</style>
+</head>
+<body>
+
+<div class="breadcrumb">
+  <span>운영 관리</span>
+  <span class="sep">›</span>
+  <span>콘텐츠</span>
+  <span class="sep">›</span>
+  <span>PB 콘텐츠 관리</span>
+  <span class="sep">›</span>
+  <span class="bc-current">등록</span>
+</div>
+
+<div class="layout">
+
+  <!-- Header -->
+  <div class="page-header">
+    <div class="page-title">PB 콘텐츠 등록 <span class="subtle">(기존 API 전용)</span></div>
+    <div class="page-actions">
+      <button class="btn-ai"><span class="ico">✨</span>AI 자동 생성</button>
+    </div>
+  </div>
+
+  <!-- 기본정보 (타겟 선택) -->
+  <div class="card">
+    <div class="card-title">기본정보</div>
+    <div class="form-row">
+      <div class="form-label">타겟유형</div>
+      <select class="form-control select" style="max-width: 420px;">
+        <option>숙박권</option>
+        <option>항공권</option>
+        <option>투어/티켓</option>
+        <option>보험</option>
+        <option>숙소</option>
+        <option>객실</option>
+        <option>항공사</option>
+        <option>공항</option>
+        <option>스팟·체험</option>
+        <option>국가</option>
+        <option>여행지</option>
+        <option>식사</option>
+        <option>공통</option>
+      </select>
+    </div>
+    <div class="form-row">
+      <div class="form-label">숙박권</div>
+      <div class="form-control-wrap" style="max-width: 720px;">
+        <span class="id-chip">40</span>
+        <select class="form-control select with-id">
+          <option>제이파크 / 빅토리아 호이안 비치 리조트 앤 스파</option>
+        </select>
+      </div>
+    </div>
+  </div>
+
+  <!-- PDP 미러 에디터 -->
+  <div class="card">
+    <div class="card-title">
+      <span>PDP 미러 에디터</span>
+      <div class="right">
+        <button class="btn-ghost">＋ 콘텐츠 추가</button>
+      </div>
+    </div>
+
+    <div class="cat-chips">
+      <button class="cat-chip active">스페셜혜택</button>
+      <button class="cat-chip">소개</button>
+      <button class="cat-chip">핵심포인트</button>
+      <button class="cat-chip">포함</button>
+      <button class="cat-chip">불포함</button>
+      <button class="cat-chip">유의</button>
+      <button class="cat-chip">안내</button>
+      <button class="cat-chip">수하물</button>
+      <button class="cat-chip">FAQ</button>
+      <button class="cat-chip">취소환불</button>
+    </div>
+
+    <div class="editor-toolbar">
+      <div style="font-size:13px; font-weight:600; color:rgba(0,0,0,0.7);">기본 정보 콘텐츠</div>
+      <button class="btn-ghost">📥 기본정보 가져오기</button>
+    </div>
+
+    <!-- 콘텐츠 카드: 스페셜혜택 -->
+    <div class="content-card">
+      <div class="content-card-head">
+        <div class="content-card-title">스페셜혜택</div>
+        <button class="btn-danger-ghost">삭제</button>
+      </div>
+      <div class="content-grid">
+        <div class="field-block">
+          <div class="field-label">카테고리</div>
+          <select class="form-control select"><option>스페셜혜택</option></select>
+        </div>
+        <div class="field-block">
+          <div class="field-label">적용 조건</div>
+          <select class="form-control select"><option>전체</option></select>
+        </div>
+        <div class="field-block">
+          <div class="field-label">관리명</div>
+          <input class="form-control" placeholder="관리명을 입력해주세요">
+        </div>
+        <div class="field-block">
+          <div class="field-label">템플릿</div>
+          <select class="form-control select"><option>체크 리스트</option></select>
+        </div>
+      </div>
+      <div class="tpl-block">
+        <div class="tpl-label">체크 리스트</div>
+        <button class="tpl-add">＋ 항목 추가</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Footer -->
+  <div class="action-bar">
+    <button class="btn-ghost">취소</button>
+    <button class="btn-primary">등록</button>
+  </div>
+
+</div>
+
+<script>
+document.querySelectorAll('.cat-chip').forEach(chip => {
+  chip.addEventListener('click', () => {
+    document.querySelectorAll('.cat-chip').forEach(c => c.classList.remove('active'));
+    chip.classList.add('active');
+  });
+});
+</script>
+
+</body>
+</html>
