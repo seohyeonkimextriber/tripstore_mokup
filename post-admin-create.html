@@ -570,6 +570,56 @@ function addPointItem() {
   </div>`;
   document.getElementById('point-items').insertAdjacentHTML('beforeend', html);
 }
+// === Embed mode (iframe from entity-post-extra-info.html) ===
+window.addEventListener('DOMContentLoaded', () => {
+  const hash = window.location.hash.replace(/^#/, '');
+  if (!hash) return;
+  const params = {};
+  hash.split('&').forEach(p => {
+    const [k, v] = p.split('=');
+    params[k] = decodeURIComponent(v || '');
+  });
+  if (!params.embed) return;
+
+  ['.gnb', '.demo-banner', '.breadcrumb', '.page-header'].forEach(sel => {
+    const el = document.querySelector(sel);
+    if (el) el.style.display = 'none';
+  });
+  document.body.style.background = '#fff';
+  const layout = document.querySelector('.layout');
+  layout.style.padding = '16px 18px 28px';
+  layout.style.maxWidth = 'none';
+
+  if (params.targetType) {
+    const tt = document.getElementById('target-type');
+    tt.value = params.targetType;
+    onTargetTypeChange();
+    tt.disabled = true;
+  }
+  if (params.targetId) {
+    const ti = document.getElementById('target-id');
+    const exists = [...ti.options].some(o => o.value === params.targetId || o.textContent === params.targetId);
+    if (!exists) {
+      const opt = document.createElement('option');
+      opt.textContent = params.targetId;
+      ti.appendChild(opt);
+    }
+    ti.value = params.targetId;
+    ti.disabled = true;
+  }
+  if (params.org) {
+    const org = document.getElementById('org-id');
+    org.value = params.org;
+    org.disabled = true;
+  }
+  if (params.category) {
+    const c = document.getElementById('category-select');
+    c.value = params.category;
+    c.disabled = true;
+  }
+  updateManagementName();
+});
+
 function addFaqItem() {
   faqN++;
   const html = `<div class="faq-row">
