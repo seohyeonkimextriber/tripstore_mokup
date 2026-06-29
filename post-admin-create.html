@@ -69,6 +69,13 @@ input, select, textarea { font-family: inherit; }
 .item-textarea { width: 100%; min-height: 70px; padding: 8px 10px; border: 1px solid #d9d9d9; border-radius: 6px; font-size: 13px; line-height: 1.55; resize: vertical; }
 
 .btn-add-item { width: 100%; height: 42px; padding: 0 14px; border: 1px dashed #1677ff; background: #f0f7ff; color: #1677ff; border-radius: 6px; font-size: 13px; font-weight: 600; margin-top: 6px; }
+
+/* Checklist row */
+.checklist-row { display: grid; grid-template-columns: 32px 1fr 36px; gap: 16px; align-items: flex-start; }
+.checklist-check { width: 32px; height: 32px; border-radius: 50%; background: #389e0d; color: #fff; display: inline-flex; align-items: center; justify-content: center; font-size: 16px; font-weight: 700; margin-top: 4px; }
+.checklist-body { display: flex; flex-direction: column; gap: 10px; }
+.checklist-field { display: flex; flex-direction: column; gap: 6px; }
+.checklist-delete { margin-top: 4px; }
 .btn-add-item:hover { background: #e6f4ff; }
 
 /* Image upload placeholder */
@@ -228,12 +235,19 @@ input, select, textarea { font-family: inherit; }
       <!-- 1. 체크리스트 -->
       <div class="template-panel" id="tpl-checklist">
         <div id="checklist-items">
-          <div class="item-set">
-            <div class="item-set-head">
-              <div class="item-set-num">항목 1</div>
-              <div class="item-set-actions"><button class="btn-icon danger" title="삭제">🗑</button></div>
+          <div class="item-set checklist-row">
+            <div class="checklist-check">✓</div>
+            <div class="checklist-body">
+              <div class="checklist-field">
+                <div class="item-label">항목 1 소제목</div>
+                <input class="item-input" placeholder="소제목을 입력해주세요" value="공항 무료 픽업/샌딩">
+              </div>
+              <div class="checklist-field">
+                <div class="item-label">항목 1 설명</div>
+                <textarea class="item-textarea" placeholder="설명을 입력해주세요">3박 이상 예약 시 호텔 도착 시 무료 픽업/샌딩 제공</textarea>
+              </div>
             </div>
-            <input class="item-input" placeholder="항목을 입력해주세요" value="공항 무료 픽업/샌딩">
+            <button class="btn-icon danger checklist-delete" title="삭제">🗑</button>
           </div>
         </div>
         <button class="btn-add-item" onclick="addChecklistItem()">＋ 항목 추가</button>
@@ -491,9 +505,19 @@ function setDisplay(el) {
 let checklistN = 1, imgTopN = 1, imgBottomN = 1, pointN = 1, faqN = 2;
 function addChecklistItem() {
   checklistN++;
-  const html = `<div class="item-set">
-    <div class="item-set-head"><div class="item-set-num">항목 ${checklistN}</div><div class="item-set-actions"><button class="btn-icon danger" title="삭제" onclick="this.closest('.item-set').remove()">🗑</button></div></div>
-    <input class="item-input" placeholder="항목을 입력해주세요">
+  const html = `<div class="item-set checklist-row">
+    <div class="checklist-check">✓</div>
+    <div class="checklist-body">
+      <div class="checklist-field">
+        <div class="item-label">항목 ${checklistN} 소제목</div>
+        <input class="item-input" placeholder="소제목을 입력해주세요">
+      </div>
+      <div class="checklist-field">
+        <div class="item-label">항목 ${checklistN} 설명</div>
+        <textarea class="item-textarea" placeholder="설명을 입력해주세요"></textarea>
+      </div>
+    </div>
+    <button class="btn-icon danger checklist-delete" title="삭제" onclick="this.closest('.checklist-row').remove()">🗑</button>
   </div>`;
   document.getElementById('checklist-items').insertAdjacentHTML('beforeend', html);
 }
