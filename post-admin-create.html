@@ -194,11 +194,15 @@ input, select, textarea { font-family: inherit; }
           <option>자주묻는질문</option>
         </select>
       </div>
-      <div class="form-row">
-        <div class="form-label">적용 조건</div>
-        <select class="form-control form-select" id="scope-select" disabled onchange="updateManagementName()">
-          <option>전체</option>
-          <option>객실요금표 단위</option>
+      <div class="form-row" id="rate-type-row" style="display:none;">
+        <div class="form-label">가격유형</div>
+        <select class="form-control form-select" id="rate-type-select" onchange="updateManagementName()">
+          <option value="">전체 (가격유형 무관)</option>
+          <option value="RO">RO · 객실만</option>
+          <option value="BB">BB · 조식 포함</option>
+          <option value="HB">HB · 조·석식</option>
+          <option value="FB">FB · 3식</option>
+          <option value="AI">AI · 올인클루시브</option>
         </select>
       </div>
       <div class="form-row">
@@ -433,10 +437,14 @@ input, select, textarea { font-family: inherit; }
 
 <script>
 const SAMPLES = {
-  '숙박권': ['40 — 제이파크 / 빅토리아 호이안 비치 리조트 앤 스파', '90 — 솔바이멜리아 푸꾸옥', '41 — 인터컨티넨탈 다낭'],
+  '숙박권': [
+    '40 — 빅토리아 호이안 / 디럭스 가든뷰 / BB',
+    '41 — 인터컨티넨탈 다낭 / 클래식 / RO',
+    '90 — 솔바이멜리아 푸꾸옥 / 스탠다드 오션뷰 / BB',
+  ],
   '항공권': ['97360978 — 베트남항공 ICN-DAD', '6700 — 아시아나항공 ICN-SGN'],
   '투어/티켓': ['33 — 다낭 바나힐 1일 투어', '67 — 호이안 야경 투어'],
-  '숙소': ['빅토리아 호이안', '솔바이멜리아 푸꾸옥'],
+  '숙소': ['1831 — 리젠트 푸꾸옥 리조트', '1442 — 빅토리아 호이안', '1620 — 솔바이멜리아 푸꾸옥'],
   '항공사': ['베트남항공', '아시아나항공', '대한항공'],
   '국가': ['베트남', '태국', '일본'],
   '여행지': ['다낭', '호이안', '푸꾸옥'],
@@ -450,9 +458,14 @@ function onTargetTypeChange() {
   // 수하물규정 옵션 toggle
   const luggage = document.getElementById('opt-luggage');
   luggage.disabled = (t !== '항공권' && t !== '');
-  // 적용 조건은 숙박권일 때만 활성
-  const scope = document.getElementById('scope-select');
-  scope.disabled = (t !== '숙박권');
+  // 가격유형은 숙소일 때만
+  const rateRow = document.getElementById('rate-type-row');
+  if (t === '숙소') {
+    rateRow.style.display = 'grid';
+  } else {
+    rateRow.style.display = 'none';
+    document.getElementById('rate-type-select').value = '';
+  }
   // 공통 타겟유형은 org 설정
   if (t === '공통') {
     row.style.display = 'none';
@@ -470,8 +483,8 @@ function onTargetTypeChange() {
 function updateManagementName() {
   const target = document.getElementById('target-type').value;
   const category = document.getElementById('category-select').value;
-  const scopeSel = document.getElementById('scope-select');
-  const scope = scopeSel.disabled ? '' : scopeSel.value;
+  const rateSel = document.getElementById('rate-type-select');
+  const rate = (target === '숙소' && rateSel && rateSel.value) ? rateSel.value : '';
   let targetInfo = '';
   if (target === '공통') {
     const orgSel = document.getElementById('org-id');
@@ -481,7 +494,7 @@ function updateManagementName() {
     const tgt = document.getElementById('target-id');
     if (tgt && tgt.value) targetInfo = tgt.value;
   }
-  const parts = [category, target, targetInfo, scope].filter(p => p && p !== '전체');
+  const parts = [category, target, targetInfo, rate].filter(Boolean);
   document.getElementById('management-name').value = parts.join('_');
 }
 
