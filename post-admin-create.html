@@ -163,6 +163,20 @@ input, select, textarea { font-family: inherit; }
           <button class="btn" style="height:38px;padding:0 14px;font-size:12.5px;">📥 기본정보 가져오기</button>
         </div>
       </div>
+      <div class="form-row" id="org-row" style="display:none;">
+        <div class="form-label">org <span class="required">*</span></div>
+        <select class="form-control form-select" id="org-id">
+          <option value="">org를 선택해주세요</option>
+          <option>전체 (모든 조직)</option>
+          <option>트립스토어 본사</option>
+          <option>엑스트라이버</option>
+          <option>온필</option>
+          <option>NUUA</option>
+          <option>제이파크</option>
+          <option>에이앤드티</option>
+          <option>TMG_TEMP</option>
+        </select>
+      </div>
       <div class="form-row">
         <div class="form-label">카테고리 <span class="required">*</span></div>
         <select class="form-control form-select" id="category-select">
@@ -429,12 +443,12 @@ const SAMPLES = {
   '항공사': ['베트남항공', '아시아나항공', '대한항공'],
   '국가': ['베트남', '태국', '일본'],
   '여행지': ['다낭', '호이안', '푸꾸옥'],
-  '공통': ['(전체 공통 — 별도 타겟 선택 없음)']
 };
 
 function onTargetTypeChange() {
   const t = document.getElementById('target-type').value;
   const row = document.getElementById('target-row');
+  const orgRow = document.getElementById('org-row');
   const sel = document.getElementById('target-id');
   // 수하물규정 옵션 toggle
   const luggage = document.getElementById('opt-luggage');
@@ -442,6 +456,13 @@ function onTargetTypeChange() {
   // 적용 조건은 숙박권일 때만 활성
   const scope = document.getElementById('scope-select');
   scope.disabled = (t !== '숙박권');
+  // 공통 타겟유형은 org 설정
+  if (t === '공통') {
+    row.style.display = 'none';
+    orgRow.style.display = 'grid';
+    return;
+  }
+  orgRow.style.display = 'none';
   if (!t) { row.style.display = 'none'; return; }
   row.style.display = 'grid';
   const opts = SAMPLES[t] || ['(타겟 데이터 로드)'];
