@@ -180,7 +180,7 @@ input, select, textarea { font-family: inherit; }
       </div>
       <div class="form-row">
         <div class="form-label">카테고리 <span class="required">*</span></div>
-        <select class="form-control form-select" id="category-select" onchange="updateManagementName()">
+        <select class="form-control form-select" id="category-select" onchange="onCategoryChange()">
           <option value="">카테고리를 선택해주세요</option>
           <option>소개</option>
           <option>핵심포인트</option>
@@ -528,6 +528,32 @@ function onTargetTypeChange() {
   updateManagementName();
 }
 
+function onCategoryChange() {
+  const category = document.getElementById('category-select').value;
+  const tpl = document.getElementById('template-select');
+  const allowed = CATEGORY_TEMPLATES[category];
+  // 옵션 초기화
+  [...tpl.options].forEach(opt => { opt.hidden = false; opt.disabled = false; });
+  tpl.disabled = false;
+  if (allowed) {
+    [...tpl.options].forEach(opt => {
+      if (opt.value === '') return;
+      const ok = allowed.includes(opt.value);
+      opt.hidden = !ok;
+      opt.disabled = !ok;
+    });
+    if (allowed.length === 1) {
+      tpl.value = allowed[0];
+      tpl.disabled = true;
+      onTemplateChange();
+    } else if (tpl.value && !allowed.includes(tpl.value)) {
+      tpl.value = '';
+      onTemplateChange();
+    }
+  }
+  updateManagementName();
+}
+
 function onTargetIdChange() {
   const target = document.getElementById('target-type').value;
   if (target === '숙박권') {
@@ -693,21 +719,7 @@ window.addEventListener('DOMContentLoaded', () => {
     const c = document.getElementById('category-select');
     c.value = params.category;
     c.disabled = true;
-    // 카테고리별 허용 템플릿 필터링
-    const allowed = CATEGORY_TEMPLATES[params.category];
-    if (allowed) {
-      const tpl = document.getElementById('template-select');
-      [...tpl.options].forEach(opt => {
-        if (opt.value === '') return;
-        opt.hidden = !allowed.includes(opt.value);
-        opt.disabled = !allowed.includes(opt.value);
-      });
-      if (allowed.length === 1) {
-        tpl.value = allowed[0];
-        tpl.disabled = true;
-        if (typeof onTemplateChange === 'function') onTemplateChange();
-      }
-    }
+    onCategoryChange();
   }
   // 객실요금표 단위 사전 선택 (embed)
   if (params.rateTable) {
