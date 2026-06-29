@@ -165,13 +165,13 @@ input, select, textarea { font-family: inherit; }
       <div class="form-row" id="target-row" style="display:none;">
         <div class="form-label">타겟 <span class="required">*</span></div>
         <div style="display:flex; gap:8px;">
-          <select class="form-control form-select" id="target-id" style="flex:1;"></select>
+          <select class="form-control form-select" id="target-id" style="flex:1;" onchange="updateManagementName()"></select>
           <button class="btn" style="height:38px;padding:0 14px;font-size:12.5px;">📥 기본정보 가져오기</button>
         </div>
       </div>
       <div class="form-row" id="org-row" style="display:none;">
         <div class="form-label">org <span class="required">*</span></div>
-        <select class="form-control form-select" id="org-id">
+        <select class="form-control form-select" id="org-id" onchange="updateManagementName()">
           <option value="">org를 선택해주세요</option>
           <option value="tripstore">트립스토어</option>
           <option value="null">전체 (null · 모든 org)</option>
@@ -180,7 +180,7 @@ input, select, textarea { font-family: inherit; }
       </div>
       <div class="form-row">
         <div class="form-label">카테고리 <span class="required">*</span></div>
-        <select class="form-control form-select" id="category-select">
+        <select class="form-control form-select" id="category-select" onchange="updateManagementName()">
           <option value="">카테고리를 선택해주세요</option>
           <option>소개</option>
           <option>핵심포인트</option>
@@ -196,17 +196,14 @@ input, select, textarea { font-family: inherit; }
       </div>
       <div class="form-row">
         <div class="form-label">적용 조건</div>
-        <select class="form-control form-select" id="scope-select" disabled>
+        <select class="form-control form-select" id="scope-select" disabled onchange="updateManagementName()">
           <option>전체</option>
           <option>객실요금표 단위</option>
         </select>
       </div>
       <div class="form-row">
         <div class="form-label">관리명 <span class="required">*</span></div>
-        <div class="input-with-btn">
-          <input type="text" class="form-control" placeholder="관리명을 입력해주세요">
-          <button class="btn-auto">자동생성</button>
-        </div>
+        <input type="text" class="form-control" id="management-name" placeholder="카테고리·타겟유형·타겟·적용조건을 선택하면 자동으로 채워집니다" readonly style="background:rgba(0,0,0,0.03);cursor:not-allowed;">
       </div>
       <div class="form-row">
         <div class="form-label">템플릿 <span class="required">*</span></div>
@@ -475,6 +472,25 @@ function onTargetTypeChange() {
   row.style.display = 'grid';
   const opts = SAMPLES[t] || ['(타겟 데이터 로드)'];
   sel.innerHTML = '<option value="">선택해주세요</option>' + opts.map(o => `<option>${o}</option>`).join('');
+  updateManagementName();
+}
+
+function updateManagementName() {
+  const target = document.getElementById('target-type').value;
+  const category = document.getElementById('category-select').value;
+  const scopeSel = document.getElementById('scope-select');
+  const scope = scopeSel.disabled ? '' : scopeSel.value;
+  let targetInfo = '';
+  if (target === '공통') {
+    const orgSel = document.getElementById('org-id');
+    const orgText = orgSel.options[orgSel.selectedIndex]?.text || '';
+    targetInfo = orgSel.value ? orgText.replace(/\s*\(.*\)\s*/, '') : '';
+  } else {
+    const tgt = document.getElementById('target-id');
+    if (tgt && tgt.value) targetInfo = tgt.value;
+  }
+  const parts = [category, target, targetInfo, scope].filter(p => p && p !== '전체');
+  document.getElementById('management-name').value = parts.join('_');
 }
 
 function onTemplateChange() {
