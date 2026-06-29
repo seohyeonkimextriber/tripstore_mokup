@@ -260,7 +260,7 @@ input, select, textarea { font-family: inherit; }
           <button class="unit-subtab" data-unit="스위트 / BB" onclick="switchUnit('accom', this)">스위트 / BB</button>
           <button class="unit-subtab" data-unit="풀빌라 / RO" onclick="switchUnit('accom', this)">풀빌라 / RO</button>
         </div>
-        <div class="unit-scope-note" id="accom-unit-note">현재 적용 범위: <strong>숙박권 전체</strong> · 각 객실요금표 단위 탭에서 단위별 POST를 따로 등록할 수 있습니다</div>
+        <div class="unit-scope-note" id="accom-unit-note">현재 적용 범위: <strong>숙박권 전체</strong> · 숙소·항공사 등 숙박권 전체 매핑 콘텐츠 + 숙박권에 직접 등록한 POST를 노출합니다. 객실·식사 카탈로그 콘텐츠는 각 객실요금표 단위 탭에서 확인하세요.</div>
 
         <!-- 1. 스페셜 혜택 -->
         <div class="pdp-section">
@@ -707,8 +707,9 @@ function openModal(cat) {
 // 관련 콘텐츠 가져오기 모달 — 6개 게시판 자동입력 룰 기준
 const IMPORT_SOURCES = {
   accom: [
-    { type: '숙소',   icon: '🏠', name: '리젠트 푸꾸옥 리조트', id: '1442', count: 12, desc: '같은 숙소 카탈로그 쓰는 모든 숙박권에 자동 입력' },
-    { type: '객실',   icon: '🛌', name: '디럭스 가든뷰',       id: '152',  count: 4,  desc: '같은 객실 카탈로그 쓰는 모든 숙박권에 자동 입력' },
+    { type: '숙소', icon: '🏠', name: '리젠트 푸꾸옥 리조트', id: '1442', count: 12, scope: '숙박권 전체',     desc: '같은 숙소 카탈로그 쓰는 모든 숙박권에 자동 입력 (전체 단위)' },
+    { type: '객실', icon: '🛌', name: '디럭스 가든뷰',       id: '152',  count: 4,  scope: '객실요금표 단위', desc: '같은 객실 카탈로그 쓰는 모든 객실요금표 단위에 자동 입력' },
+    { type: '식사', icon: '🍽', name: 'BB · 조식 포함',      id: 'BB',   count: 3,  scope: '객실요금표 단위', desc: '같은 식사 카탈로그 쓰는 모든 객실요금표 단위에 자동 입력' },
   ],
   flight: [
     { type: '항공사', icon: '🛫', name: '베트남항공',          id: 'VN',   count: 8,  desc: '같은 항공사 카탈로그 쓰는 모든 항공권에 자동 입력' },
@@ -732,6 +733,7 @@ function openImportModal() {
           <span class="source-name">${s.name} <span style="color:rgba(0,0,0,0.4);font-weight:500;">#${s.id}</span></span>
           <span class="source-count">${s.count}건 등록됨</span>
         </div>
+        ${s.scope ? `<div style="font-size:11px;font-weight:700;color:#874d00;background:#fffbe6;border:1px solid #ffe58f;display:inline-block;padding:2px 8px;border-radius:4px;margin-bottom:6px;">매핑 범위: ${s.scope}</div>` : ''}
         <div class="source-desc">${s.desc}</div>
       </div>
     </label>
@@ -758,8 +760,8 @@ function switchUnit(entity, btn) {
   const note = document.getElementById(entity + '-unit-note');
   if (note) {
     note.innerHTML = unit
-      ? `현재 적용 범위: <strong>${unit}</strong> · 이 객실요금표 단위에만 적용되는 POST를 등록합니다`
-      : '현재 적용 범위: <strong>숙박권 전체</strong> · 각 객실요금표 단위 탭에서 단위별 POST를 따로 등록할 수 있습니다';
+      ? `현재 적용 범위: <strong>${unit}</strong> · 이 단위에 매핑된 POST + 객실·식사 카탈로그 콘텐츠가 자동 매핑됩니다`
+      : '현재 적용 범위: <strong>숙박권 전체</strong> · 숙소·항공사 등 숙박권 전체 매핑 콘텐츠 + 숙박권에 직접 등록한 POST를 노출합니다. 객실·식사 카탈로그 콘텐츠는 각 객실요금표 단위 탭에서 확인하세요.';
   }
 }
 function closeModal() {
