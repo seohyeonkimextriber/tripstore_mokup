@@ -90,6 +90,20 @@ button { font-family: inherit; cursor: pointer; }
 .btn-icon-sm.danger:hover { border-color: #cf1322; color: #cf1322; }
 .btn-icon-sm:disabled { opacity: 0.4; cursor: not-allowed; }
 
+/* 단일 적용 룰 banner */
+.single-apply-banner { background: #fffbe6; border: 1px solid #ffe58f; border-radius: 8px; padding: 12px 14px; margin-bottom: 12px; font-size: 12.5px; color: #874d00; line-height: 1.6; }
+.single-apply-banner strong { color: #ad6800; }
+.priority-chain { display: inline-flex; gap: 4px; align-items: center; margin-left: 4px; font-weight: 700; }
+.priority-chain .step { background: #fff; border: 1px solid #ffe58f; padding: 1px 7px; border-radius: 4px; font-size: 11px; }
+.priority-chain .arrow { color: #d48806; }
+
+/* 적용 중 / 가려짐 상태 */
+.post-item.active { border-left: 3px solid #389e0d; background: #f6ffed; }
+.post-item.hidden { opacity: 0.55; background: #fafafa; }
+.status-badge { display: inline-flex; align-items: center; gap: 4px; font-size: 11px; font-weight: 700; padding: 3px 9px; border-radius: 10px; margin-bottom: 8px; }
+.status-badge.active { background: #389e0d; color: #fff; }
+.status-badge.hidden { background: #f0f0f0; color: rgba(0,0,0,0.55); border: 1px solid #e8e8e8; }
+
 /* 출처 표시 — 어디서 끌려온 콘텐츠인지 */
 .source-tag { display: inline-flex; align-items: center; gap: 6px; font-size: 11.5px; font-weight: 600; color: #0958d9; background: #e6f4ff; padding: 4px 10px; border-radius: 6px; border: 1px solid #d6e4ff; margin-bottom: 10px; }
 .source-tag .source-icon { font-size: 13px; }
@@ -487,25 +501,81 @@ button { font-family: inherit; cursor: pointer; }
         </div>
       </div>
 
-      <!-- 취소 환불 규정 -->
+      <!-- 취소 환불 규정 — 단일 적용 룰 -->
       <div class="pdp-section">
         <div class="pdp-section-head">
           <div class="pdp-section-title">취소환불규정 (선택) <span class="tpl-badge text">텍스트</span></div>
           <div class="pdp-section-actions"><button class="btn-section-add">+ 추가하기</button></div>
         </div>
-        <div class="post-item">
+        <div class="single-apply-banner">
+          ⚡ <strong>단일 적용 룰</strong> — 여러 그룹에 등록되어도 PDP에는 1개만 노출됩니다.<br>
+          우선순위: <span class="priority-chain"><span class="step">✈️ 항공권</span><span class="arrow">›</span><span class="step">🏨 숙박권</span><span class="arrow">›</span><span class="step">🌟 필수공통 (기본값)</span></span> · 기본정보 게시판(숙소·객실·식사·항공사·국가·여행지·스팟·체험)은 등록 불가
+        </div>
+
+        <!-- ✓ 적용 중 — 항공권 (최우선) -->
+        <div class="post-item active">
           <div class="post-item-head">
-            <div class="post-item-meta"><span class="post-id">[2]</span> <span class="post-name">공통_취소환불규정_특별약관</span> &gt; 취소환불규정</div>
+            <div class="post-item-meta"><span class="post-id">[1340]</span> <span class="post-name">비엣젯항공_취소환불_LCC</span> &gt; 취소환불규정</div>
             <div class="post-item-controls">
               <button class="btn-icon-sm" disabled>↑</button>
               <button class="btn-icon-sm" disabled>↓</button>
               <button class="btn-icon-sm danger">✕</button>
             </div>
           </div>
-          <div class="source-tag"><span class="source-icon">📥</span> 여행사 공통 자동 매핑 <span class="source-chain">· 취소환불규정 특별약관</span></div>
+          <div class="status-badge active">✓ 적용 중 · 항공권 (최우선)</div>
+          <div class="source-tag"><span class="source-icon">🛫</span> 항공사 #VN 자동 매핑 <span class="source-chain">· 비엣젯항공 → 항공권 #52</span></div>
           <div class="text-content">
-            <p><strong>📌 에어텔 취소·환불 규정</strong></p>
-            <ul><li>출발 30일 전: 위약금 없음</li><li>출발 15~29일 전: 위약금 30%</li><li>출발 7~14일 전: 위약금 50%</li><li>출발 1~6일 전·당일·NO-SHOW: 환불 불가</li></ul>
+            <p><strong>📌 비엣젯항공 (LCC) 취소·환불 규정</strong></p>
+            <ul>
+              <li>출발 72시간 이전: 위약금 USD 80 + 운임의 30%</li>
+              <li>출발 72시간 이내·NO-SHOW: 환불 불가</li>
+              <li>위탁수하물·사전좌석 등 부가서비스 환불 불가</li>
+            </ul>
+          </div>
+        </div>
+
+        <!-- ⊘ 가려짐 — 숙박권 -->
+        <div class="post-item hidden">
+          <div class="post-item-head">
+            <div class="post-item-meta"><span class="post-id">[871]</span> <span class="post-name">솔바이멜리아_취소환불</span> &gt; 취소환불규정</div>
+            <div class="post-item-controls">
+              <button class="btn-icon-sm" disabled>↑</button>
+              <button class="btn-icon-sm" disabled>↓</button>
+              <button class="btn-icon-sm danger">✕</button>
+            </div>
+          </div>
+          <div class="status-badge hidden">⊘ 가려짐 · 항공권 우선 적용으로 노출 안 됨</div>
+          <div class="source-tag"><span class="source-icon">📥</span> 숙박권 #258 직접 등록 <span class="source-chain">· 객실요금표 단위</span></div>
+          <div class="text-content">
+            <p><strong>📌 솔바이멜리아 푸꾸옥 취소·환불 규정</strong></p>
+            <ul>
+              <li>체크인 7일 전: 100% 환불</li>
+              <li>체크인 3~6일 전: 1박 위약금</li>
+              <li>체크인 0~2일 전·NO-SHOW: 전체 위약금</li>
+            </ul>
+          </div>
+        </div>
+
+        <!-- ⊘ 가려짐 — 필수공통 (기본값) -->
+        <div class="post-item hidden">
+          <div class="post-item-head">
+            <div class="post-item-meta"><span class="post-id">[2]</span> <span class="post-name">공통_취소환불규정_특별약관</span> &gt; 취소환불규정</div>
+            <div class="post-item-controls">
+              <button class="btn-icon-sm" disabled>↑</button>
+              <button class="btn-icon-sm" disabled>↓</button>
+              <button class="btn-icon-sm danger" disabled>✕</button>
+            </div>
+          </div>
+          <div class="status-badge hidden">⊘ 가려짐 · 항공권 우선 적용으로 노출 안 됨 (기본값으로 항상 보관)</div>
+          <div class="source-tag"><span class="source-icon">🌟</span> 필수공통 매핑 <span class="source-chain">· 표준 약관 — 항공권/숙박권 미등록 시 적용</span></div>
+          <div class="text-content">
+            <p><strong>📌 에어텔 표준 취소·환불 규정 (기본값)</strong></p>
+            <ul>
+              <li>출발 30일 전: 위약금 없음</li>
+              <li>출발 15~29일 전: 위약금 30%</li>
+              <li>출발 7~14일 전: 위약금 50%</li>
+              <li>출발 1~6일 전·당일·NO-SHOW: 환불 불가</li>
+            </ul>
           </div>
         </div>
       </div>
