@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>엔티티 등록폼 — 부가정보 카테고리 통일 mockup</title>
+<title>엔티티 등록폼 — 기본정보·부가정보 탭 분리 mockup</title>
 <link href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.6/dist/web/static/pretendard.css" rel="stylesheet">
 <style>
 * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -25,38 +25,103 @@ input, select, textarea { font-family: inherit; }
 
 .layout { padding: 18px 28px 60px; max-width: 1280px; margin: 0 auto; }
 .breadcrumb { font-size: 12px; color: rgba(0,0,0,0.45); margin-bottom: 8px; }
-.page-title { font-size: 24px; font-weight: 800; letter-spacing: -0.4px; margin-bottom: 20px; }
+.page-title { font-size: 24px; font-weight: 800; letter-spacing: -0.4px; margin-bottom: 18px; }
 
-/* Section card */
-.section-card { background: #fff; border: 1px solid #ececec; border-radius: 8px; padding: 22px 24px; margin-bottom: 16px; }
-.section-title { font-size: 15px; font-weight: 700; color: rgba(0,0,0,0.88); margin-bottom: 16px; display: flex; align-items: center; gap: 8px; }
-.section-title .badge-new { background: #fff1f0; color: #cf1322; font-size: 10.5px; font-weight: 700; padding: 2px 7px; border-radius: 4px; }
-.section-desc { font-size: 12.5px; color: rgba(0,0,0,0.5); font-weight: 500; margin-left: auto; }
+/* Page-level tabs */
+.form-tabs { background: #fff; border: 1px solid #f0f0f0; border-radius: 10px; padding: 4px; margin-bottom: 16px; display: inline-flex; }
+.form-tab { padding: 10px 22px; font-size: 13.5px; font-weight: 600; cursor: pointer; color: rgba(0,0,0,0.55); border-radius: 7px; border: none; background: transparent; display: inline-flex; align-items: center; gap: 8px; }
+.form-tab:hover { color: rgba(0,0,0,0.88); }
+.form-tab.active { color: #1677ff; background: #e6f4ff; font-weight: 700; }
+.form-tab .badge-new { background: #fff1f0; color: #cf1322; font-size: 10px; font-weight: 700; padding: 2px 7px; border-radius: 4px; }
 
-/* Existing fields placeholder */
-.placeholder-fields { background: #fafbfc; border: 1px dashed #e8e8e8; border-radius: 8px; padding: 28px; text-align: center; color: rgba(0,0,0,0.4); font-size: 12.5px; }
+.form-panel { display: none; }
+.form-panel.active { display: block; }
 
-/* 부가정보 grid */
-.extra-info-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px 14px; }
-.extra-item { background: #fff; border: 1px solid #ececec; border-radius: 8px; padding: 14px 16px; display: flex; align-items: center; justify-content: space-between; gap: 10px; transition: all 0.15s; }
-.extra-item:hover { border-color: #91caff; background: #fafdff; }
-.extra-item.filled { border-color: #1677ff; background: #f0f7ff; }
-.extra-item-label { font-size: 13.5px; font-weight: 600; color: rgba(0,0,0,0.88); display: flex; align-items: center; gap: 8px; }
-.extra-item-label .check { color: #389e0d; font-weight: 700; font-size: 13px; }
-.extra-item-status { font-size: 11.5px; color: rgba(0,0,0,0.45); }
-.extra-item-status.filled { color: #0958d9; font-weight: 600; }
-.btn-add { height: 30px; padding: 0 13px; border-radius: 6px; font-size: 12px; font-weight: 600; border: 1px solid #d9d9d9; background: #fff; color: rgba(0,0,0,0.75); display: inline-flex; align-items: center; gap: 4px; }
-.btn-add:hover { border-color: #1677ff; color: #1677ff; }
-.btn-edit { height: 30px; padding: 0 13px; border-radius: 6px; font-size: 12px; font-weight: 600; border: 1px solid #1677ff; background: #1677ff; color: #fff; display: inline-flex; align-items: center; gap: 4px; }
-.btn-edit:hover { background: #4096ff; }
+/* Section card (existing) */
+.section-card { background: #fff; border: 1px solid #ececec; border-radius: 8px; padding: 22px 24px; margin-bottom: 14px; }
+.section-title { font-size: 15px; font-weight: 700; color: rgba(0,0,0,0.88); margin-bottom: 14px; display: flex; align-items: center; gap: 8px; }
+.placeholder-fields { background: #fafbfc; border: 1px dashed #e8e8e8; border-radius: 6px; padding: 26px; text-align: center; color: rgba(0,0,0,0.4); font-size: 12.5px; }
 
+/* === 부가정보 탭 === PDP 스타일 === */
+.pdp-wrap { background: #fff; border: 1px solid #ececec; border-radius: 12px; padding: 30px 36px; }
+.pdp-header { display: flex; align-items: center; justify-content: space-between; padding-bottom: 18px; margin-bottom: 24px; border-bottom: 1px solid #f0f0f0; }
+.pdp-header-title { font-size: 16px; font-weight: 700; }
+.pdp-header-desc { font-size: 12.5px; color: rgba(0,0,0,0.5); margin-top: 4px; }
+
+.pdp-section { padding: 28px 0; border-bottom: 1px solid #f5f5f5; position: relative; }
+.pdp-section:last-child { border-bottom: none; }
+.pdp-section-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px; }
+.pdp-section-title { font-size: 18px; font-weight: 800; color: rgba(0,0,0,0.88); letter-spacing: -0.3px; }
+.pdp-section-actions { display: flex; gap: 6px; }
+.btn-edit-sm { height: 28px; padding: 0 12px; border-radius: 6px; font-size: 11.5px; font-weight: 600; border: 1px solid #1677ff; background: #fff; color: #1677ff; }
+.btn-edit-sm:hover { background: #e6f4ff; }
+.btn-add-sm { height: 28px; padding: 0 12px; border-radius: 6px; font-size: 11.5px; font-weight: 600; border: 1px solid #d9d9d9; background: #fff; color: rgba(0,0,0,0.65); }
+.btn-add-sm:hover { border-color: #1677ff; color: #1677ff; }
+
+/* Empty state — 미등록 */
+.pdp-empty { background: #fafbfc; border: 1px dashed #d9d9d9; border-radius: 8px; padding: 22px; text-align: center; color: rgba(0,0,0,0.4); font-size: 12.5px; }
+.pdp-empty-btn { margin-top: 10px; height: 32px; padding: 0 16px; border-radius: 6px; font-size: 12.5px; font-weight: 600; border: 1px solid #1677ff; background: #1677ff; color: #fff; display: inline-flex; align-items: center; gap: 5px; }
+
+/* 소개 — paragraph */
+.intro-text { font-size: 14.5px; line-height: 1.75; color: rgba(0,0,0,0.78); }
+
+/* 핵심포인트 — bullet grid */
+.point-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px 18px; }
+.point-item { display: flex; gap: 10px; padding: 12px 14px; background: #fafbfc; border-radius: 8px; }
+.point-icon { font-size: 18px; }
+.point-text { font-size: 13.5px; line-height: 1.55; color: rgba(0,0,0,0.78); }
+
+/* 안내사항 — bullet list */
+.notice-list { display: flex; flex-direction: column; gap: 8px; }
+.notice-list li { font-size: 13.5px; line-height: 1.6; color: rgba(0,0,0,0.78); padding-left: 16px; position: relative; list-style: none; }
+.notice-list li::before { content: '•'; position: absolute; left: 4px; color: #1677ff; font-weight: 700; }
+
+/* 포함/불포함 — check/x list */
+.check-list { display: grid; grid-template-columns: 1fr 1fr; gap: 6px 14px; }
+.check-list .item { display: flex; gap: 8px; align-items: flex-start; font-size: 13.5px; line-height: 1.55; padding: 6px 0; }
+.check-list .item.included::before { content: '✓'; color: #389e0d; font-weight: 700; }
+.check-list .item.excluded::before { content: '✗'; color: #cf1322; font-weight: 700; }
+
+/* 유의사항 — number list */
+.caution-list { background: #fff7e6; border: 1px solid #ffe58f; border-radius: 8px; padding: 16px 20px; }
+.caution-list-title { font-size: 13px; font-weight: 700; color: #ad6800; margin-bottom: 10px; display: flex; align-items: center; gap: 6px; }
+.caution-list ol { padding-left: 20px; display: flex; flex-direction: column; gap: 6px; }
+.caution-list ol li { font-size: 13px; color: #874d00; line-height: 1.6; }
+
+/* 스페셜 혜택 */
+.benefit-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px; }
+.benefit-card { padding: 16px; border-radius: 10px; background: linear-gradient(135deg, #fff2e8 0%, #fff7e6 100%); border: 1px solid #ffd591; }
+.benefit-icon { font-size: 22px; margin-bottom: 8px; }
+.benefit-title { font-size: 13.5px; font-weight: 700; color: #d46b08; margin-bottom: 4px; }
+.benefit-desc { font-size: 12px; color: #ad6800; line-height: 1.5; }
+
+/* 자주묻는질문 — accordion */
+.faq-list { display: flex; flex-direction: column; gap: 8px; }
+.faq-item { border: 1px solid #ececec; border-radius: 8px; overflow: hidden; }
+.faq-q { padding: 12px 16px; background: #fafbfc; font-weight: 700; font-size: 13.5px; display: flex; justify-content: space-between; cursor: pointer; }
+.faq-q .toggle { color: rgba(0,0,0,0.4); font-weight: 400; }
+.faq-a { padding: 12px 16px; font-size: 13px; color: rgba(0,0,0,0.65); line-height: 1.6; border-top: 1px solid #f0f0f0; }
+
+/* 취소환불규정 / 출발전안내 — notice card */
+.notice-card { background: #fff1f0; border: 1px solid #ffa39e; border-radius: 8px; padding: 16px 20px; }
+.notice-card .notice-card-title { font-size: 13px; font-weight: 700; color: #cf1322; margin-bottom: 8px; display: flex; align-items: center; gap: 6px; }
+.notice-card.info { background: #e6f4ff; border-color: #91caff; }
+.notice-card.info .notice-card-title { color: #0958d9; }
+.notice-card-text { font-size: 13px; color: rgba(0,0,0,0.7); line-height: 1.65; }
+
+/* 수하물규정 */
+.luggage-table { width: 100%; border-collapse: collapse; }
+.luggage-table th, .luggage-table td { padding: 10px 14px; text-align: left; font-size: 13px; border: 1px solid #ececec; }
+.luggage-table th { background: #fafbfc; font-weight: 700; color: rgba(0,0,0,0.65); font-size: 12px; }
+
+/* entity panel */
 .entity-panel { display: none; }
 .entity-panel.active { display: block; }
 
 /* Modal */
 .modal-backdrop { position: fixed; inset: 0; background: rgba(0,0,0,0.5); display: none; align-items: center; justify-content: center; z-index: 200; padding: 20px; }
 .modal-backdrop.show { display: flex; }
-.modal { background: #fff; border-radius: 12px; max-width: 720px; width: 100%; max-height: calc(100vh - 40px); overflow: auto; }
+.modal { background: #fff; border-radius: 12px; max-width: 680px; width: 100%; max-height: calc(100vh - 40px); overflow: auto; }
 .modal-head { padding: 18px 22px; border-bottom: 1px solid #f0f0f0; display: flex; align-items: center; justify-content: space-between; }
 .modal-title { font-size: 16px; font-weight: 700; }
 .modal-close { background: transparent; border: none; font-size: 18px; color: rgba(0,0,0,0.45); }
@@ -66,11 +131,14 @@ input, select, textarea { font-family: inherit; }
 .form-row { padding: 8px 0; }
 .form-label { font-size: 12.5px; font-weight: 600; color: rgba(0,0,0,0.65); margin-bottom: 6px; display: block; }
 .form-control { width: 100%; height: 36px; padding: 0 12px; border: 1px solid #d9d9d9; border-radius: 6px; font-size: 13px; }
-.form-control:focus { border-color: #1677ff; outline: none; box-shadow: 0 0 0 2px rgba(22,119,255,0.1); }
 .form-textarea { width: 100%; min-height: 120px; padding: 10px 12px; border: 1px solid #d9d9d9; border-radius: 6px; font-size: 13px; line-height: 1.6; resize: vertical; }
 .btn { height: 34px; padding: 0 16px; border-radius: 6px; font-size: 13px; font-weight: 600; border: 1px solid #d9d9d9; background: #fff; color: rgba(0,0,0,0.75); }
 .btn-primary { background: #1677ff; border-color: #1677ff; color: #fff; }
 .btn-primary:hover { background: #4096ff; }
+
+/* Action bar */
+.action-bar { display: flex; justify-content: flex-end; gap: 8px; padding: 16px 0; margin-top: 12px; }
+.btn-lg { height: 40px; padding: 0 22px; font-size: 14px; font-weight: 700; border-radius: 8px; }
 </style>
 </head>
 <body>
@@ -80,7 +148,7 @@ input, select, textarea { font-family: inherit; }
 </div>
 
 <div class="demo-banner">
-  📝 <strong>엔티티 등록폼 — 부가정보 카테고리 통일 mockup</strong>. 기존 부가정보 섹션에 <strong>POST 10개 카테고리 전체</strong>를 노출. 각 카테고리는 "+ 추가하기"로 인라인 등록, 등록된 항목은 [편집] 버튼으로 즉시 수정.
+  📝 <strong>엔티티 등록폼 — 기본정보·부가정보 탭 분리 mockup</strong>. 부가정보 탭은 <strong>실제 PDP/www에서 보이는 모양</strong>으로 렌더링하여 운영자가 등록된 상태를 그대로 미리보기 가능.
 </div>
 
 <div class="entity-switcher">
@@ -91,288 +159,424 @@ input, select, textarea { font-family: inherit; }
 
 <div class="layout">
 
-  <!-- ============ 숙박권 ============ -->
+  <!-- ============================== 숙박권 ============================== -->
   <div id="entity-accom" class="entity-panel active">
     <div class="breadcrumb">PB 관리 › 숙박권 관리</div>
-    <div class="page-title">숙박권 등록하기</div>
+    <div class="page-title">숙박권 등록하기 — 제이파크 / 빅토리아 호이안</div>
 
-    <div class="section-card">
-      <div class="section-title">기본 정보</div>
-      <div class="placeholder-fields">공급사 · 숙소 · 입력통화 · 요금사용 기한 · 상태 · 사용 가능 조직 정보 · 운영명 (기존 필드 유지)</div>
+    <div class="form-tabs">
+      <button class="form-tab active" onclick="switchForm('accom', 'basic', this)">📋 기본 정보</button>
+      <button class="form-tab" onclick="switchForm('accom', 'extra', this)">📝 부가 정보 <span class="badge-new">PDP 미리보기</span></button>
     </div>
 
-    <div class="section-card">
-      <div class="section-title">수익률</div>
-      <div class="placeholder-fields">수익률 설정 · 마진율 · 할인율 · 확정 수익률 · 수수료 (기존 필드 유지)</div>
+    <!-- 기본정보 탭 -->
+    <div id="accom-basic" class="form-panel active">
+      <div class="section-card"><div class="section-title">기본 정보</div><div class="placeholder-fields">공급사 · 숙소 · 입력통화 · 요금사용 기한 · 상태 · 사용 가능 조직 정보 · 운영명 (기존 필드 유지)</div></div>
+      <div class="section-card"><div class="section-title">수익률</div><div class="placeholder-fields">수익률 설정 · 마진율 · 할인율 · 확정 수익률 · 수수료 (기존 필드 유지)</div></div>
+      <div class="section-card"><div class="section-title">객실/인원 별 판매가</div><div class="placeholder-fields">기본정보 &gt; 숙소를 먼저 선택하세요 (기존 영역 유지)</div></div>
+      <div class="section-card"><div class="section-title">추가옵션</div><div class="placeholder-fields">얼리체크인 · 레이트체크아웃 · 공항 픽업/샌딩 (기존 토글 유지)</div></div>
     </div>
 
-    <div class="section-card">
-      <div class="section-title">객실/인원 별 판매가</div>
-      <div class="placeholder-fields">기본정보 &gt; 숙소를 먼저 선택하세요 (기존 영역 유지)</div>
-    </div>
+    <!-- 부가정보 탭 -->
+    <div id="accom-extra" class="form-panel">
+      <div class="pdp-wrap">
+        <div class="pdp-header">
+          <div>
+            <div class="pdp-header-title">PDP 미리보기 — 부가 정보</div>
+            <div class="pdp-header-desc">www에서 노출되는 모양 그대로. 각 섹션 우측 버튼으로 등록·편집.</div>
+          </div>
+        </div>
 
-    <div class="section-card">
-      <div class="section-title">추가옵션</div>
-      <div class="placeholder-fields">얼리체크인 · 레이트체크아웃 · 공항 픽업/샌딩 (기존 토글 유지)</div>
-    </div>
+        <!-- 소개 -->
+        <div class="pdp-section">
+          <div class="pdp-section-head">
+            <div class="pdp-section-title">소개</div>
+            <div class="pdp-section-actions"><button class="btn-edit-sm" onclick="openModal('소개')">✏ 편집</button></div>
+          </div>
+          <div class="intro-text">
+            푸꾸옥 청정 자연 속 5성급 리조트. 1.5km 프라이빗 비치를 끼고 있으며 6개 다이닝, 풀빌라와 비치프론트 객실을 제공합니다. 가족·커플 모두에게 인기 있는 럭셔리 리조트로 특별한 휴식을 약속드립니다.
+          </div>
+        </div>
 
-    <div class="section-card">
-      <div class="section-title">
-        부가 정보
-        <span class="badge-new">UPDATE</span>
-        <span class="section-desc">POST 카테고리 10종 전체 노출 · 등록 시 즉시 이 숙박권에 매핑</span>
+        <!-- 핵심포인트 -->
+        <div class="pdp-section">
+          <div class="pdp-section-head">
+            <div class="pdp-section-title">핵심포인트</div>
+            <div class="pdp-section-actions"><button class="btn-add-sm" onclick="openModal('핵심포인트')">+ 추가하기</button></div>
+          </div>
+          <div class="pdp-empty">
+            아직 등록된 핵심포인트가 없습니다.
+            <div><button class="pdp-empty-btn" onclick="openModal('핵심포인트')">+ 핵심포인트 추가</button></div>
+          </div>
+        </div>
+
+        <!-- 안내사항 -->
+        <div class="pdp-section">
+          <div class="pdp-section-head">
+            <div class="pdp-section-title">안내사항</div>
+            <div class="pdp-section-actions"><button class="btn-edit-sm" onclick="openModal('안내사항')">✏ 편집</button></div>
+          </div>
+          <ul class="notice-list">
+            <li>체크인 16:00 / 체크아웃 12:00. 얼리체크인은 현지 사정에 따라 유료입니다.</li>
+            <li>신용카드 사전 인증 (USD 100/박 보증금 필요)</li>
+            <li>리조트 내 모든 시설은 투숙객 전용입니다.</li>
+          </ul>
+        </div>
+
+        <!-- 포함사항 -->
+        <div class="pdp-section">
+          <div class="pdp-section-head">
+            <div class="pdp-section-title">포함사항</div>
+            <div class="pdp-section-actions"><button class="btn-add-sm" onclick="openModal('포함사항')">+ 추가하기</button></div>
+          </div>
+          <div class="pdp-empty">아직 등록된 포함사항이 없습니다. <button class="btn-add-sm" onclick="openModal('포함사항')" style="margin-left:8px;">+ 추가</button></div>
+        </div>
+
+        <!-- 불포함사항 -->
+        <div class="pdp-section">
+          <div class="pdp-section-head">
+            <div class="pdp-section-title">불포함사항</div>
+            <div class="pdp-section-actions"><button class="btn-add-sm" onclick="openModal('불포함사항')">+ 추가하기</button></div>
+          </div>
+          <div class="pdp-empty">아직 등록된 불포함사항이 없습니다. <button class="btn-add-sm" onclick="openModal('불포함사항')" style="margin-left:8px;">+ 추가</button></div>
+        </div>
+
+        <!-- 유의사항 -->
+        <div class="pdp-section">
+          <div class="pdp-section-head">
+            <div class="pdp-section-title">유의사항</div>
+            <div class="pdp-section-actions"><button class="btn-edit-sm" onclick="openModal('유의사항')">✏ 편집</button></div>
+          </div>
+          <div class="caution-list">
+            <div class="caution-list-title">⚠️ 예약 전 반드시 확인해주세요</div>
+            <ol>
+              <li>리조트 내 외부 음식 반입은 제한됩니다.</li>
+              <li>객실 내 흡연 시 청소비 USD 200 청구됩니다.</li>
+            </ol>
+          </div>
+        </div>
+
+        <!-- 취소 환불 규정 -->
+        <div class="pdp-section">
+          <div class="pdp-section-head">
+            <div class="pdp-section-title">취소 환불 규정</div>
+            <div class="pdp-section-actions"><button class="btn-add-sm" onclick="openModal('취소 환불 규정')">+ 추가하기</button></div>
+          </div>
+          <div class="pdp-empty">아직 등록된 취소 환불 규정이 없습니다. <button class="btn-add-sm" onclick="openModal('취소 환불 규정')" style="margin-left:8px;">+ 추가</button></div>
+        </div>
+
+        <!-- 스페셜 혜택 -->
+        <div class="pdp-section">
+          <div class="pdp-section-head">
+            <div class="pdp-section-title">스페셜 혜택</div>
+            <div class="pdp-section-actions"><button class="btn-edit-sm" onclick="openModal('스페셜 혜택')">✏ 편집</button></div>
+          </div>
+          <div class="benefit-grid">
+            <div class="benefit-card">
+              <div class="benefit-icon">🚐</div>
+              <div class="benefit-title">왕복 공항 픽업 무료</div>
+              <div class="benefit-desc">3박 이상 예약 시 호텔 도착 시 무료 픽업/샌딩 제공</div>
+            </div>
+            <div class="benefit-card">
+              <div class="benefit-icon">🎢</div>
+              <div class="benefit-title">빈원더스 1회권 제공</div>
+              <div class="benefit-desc">투숙 기간 중 1회 이용. 2026-07~08월 미제공</div>
+            </div>
+            <div class="benefit-card">
+              <div class="benefit-icon">🍽</div>
+              <div class="benefit-title">조식 2회 + 미니바 무료</div>
+              <div class="benefit-desc">투숙 기간 중 조식 2회 + 객실 미니바 일부 무료</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 자주묻는질문 -->
+        <div class="pdp-section">
+          <div class="pdp-section-head">
+            <div class="pdp-section-title">자주묻는질문</div>
+            <div class="pdp-section-actions"><button class="btn-add-sm" onclick="openModal('자주묻는질문')">+ 추가하기</button></div>
+          </div>
+          <div class="pdp-empty">아직 등록된 자주묻는질문이 없습니다. <button class="btn-add-sm" onclick="openModal('자주묻는질문')" style="margin-left:8px;">+ 추가</button></div>
+        </div>
+
+        <!-- 출발 전 안내 -->
+        <div class="pdp-section">
+          <div class="pdp-section-head">
+            <div class="pdp-section-title">출발 전 안내</div>
+            <div class="pdp-section-actions"><button class="btn-add-sm" onclick="openModal('출발 전 안내')">+ 추가하기</button></div>
+          </div>
+          <div class="pdp-empty">아직 등록된 출발 전 안내가 없습니다. <button class="btn-add-sm" onclick="openModal('출발 전 안내')" style="margin-left:8px;">+ 추가</button></div>
+        </div>
+
       </div>
-      <div class="extra-info-grid">
+    </div>
 
-        <div class="extra-item filled">
-          <div>
-            <div class="extra-item-label"><span class="check">✓</span> 소개</div>
-            <div class="extra-item-status filled">1건 등록됨</div>
-          </div>
-          <button class="btn-edit" onclick="openModal('소개', '숙박권', '40')">편집</button>
-        </div>
-
-        <div class="extra-item">
-          <div>
-            <div class="extra-item-label">핵심포인트</div>
-            <div class="extra-item-status">미등록</div>
-          </div>
-          <button class="btn-add" onclick="openModal('핵심포인트', '숙박권', '40')">+ 추가하기</button>
-        </div>
-
-        <div class="extra-item filled">
-          <div>
-            <div class="extra-item-label"><span class="check">✓</span> 안내사항</div>
-            <div class="extra-item-status filled">3건 등록됨</div>
-          </div>
-          <button class="btn-edit" onclick="openModal('안내사항', '숙박권', '40')">편집</button>
-        </div>
-
-        <div class="extra-item">
-          <div>
-            <div class="extra-item-label">포함사항</div>
-            <div class="extra-item-status">미등록</div>
-          </div>
-          <button class="btn-add" onclick="openModal('포함사항', '숙박권', '40')">+ 추가하기</button>
-        </div>
-
-        <div class="extra-item">
-          <div>
-            <div class="extra-item-label">불포함사항</div>
-            <div class="extra-item-status">미등록</div>
-          </div>
-          <button class="btn-add" onclick="openModal('불포함사항', '숙박권', '40')">+ 추가하기</button>
-        </div>
-
-        <div class="extra-item filled">
-          <div>
-            <div class="extra-item-label"><span class="check">✓</span> 유의사항</div>
-            <div class="extra-item-status filled">2건 등록됨</div>
-          </div>
-          <button class="btn-edit" onclick="openModal('유의사항', '숙박권', '40')">편집</button>
-        </div>
-
-        <div class="extra-item">
-          <div>
-            <div class="extra-item-label">취소 환불 규정</div>
-            <div class="extra-item-status">미등록</div>
-          </div>
-          <button class="btn-add" onclick="openModal('취소 환불 규정', '숙박권', '40')">+ 추가하기</button>
-        </div>
-
-        <div class="extra-item filled">
-          <div>
-            <div class="extra-item-label"><span class="check">✓</span> 스페셜 혜택</div>
-            <div class="extra-item-status filled">3건 등록됨</div>
-          </div>
-          <button class="btn-edit" onclick="openModal('스페셜 혜택', '숙박권', '40')">편집</button>
-        </div>
-
-        <div class="extra-item">
-          <div>
-            <div class="extra-item-label">자주묻는질문</div>
-            <div class="extra-item-status">미등록</div>
-          </div>
-          <button class="btn-add" onclick="openModal('자주묻는질문', '숙박권', '40')">+ 추가하기</button>
-        </div>
-
-        <div class="extra-item">
-          <div>
-            <div class="extra-item-label">출발 전 안내</div>
-            <div class="extra-item-status">미등록</div>
-          </div>
-          <button class="btn-add" onclick="openModal('출발 전 안내', '숙박권', '40')">+ 추가하기</button>
-        </div>
-
-      </div>
+    <div class="action-bar">
+      <button class="btn btn-lg">취소</button>
+      <button class="btn btn-primary btn-lg">등록</button>
     </div>
   </div>
 
-  <!-- ============ 항공권 ============ -->
+  <!-- ============================== 항공권 ============================== -->
   <div id="entity-flight" class="entity-panel">
     <div class="breadcrumb">PB 관리 › 항공권 관리</div>
-    <div class="page-title">항공권 등록하기</div>
+    <div class="page-title">항공권 등록하기 — 베트남항공 ICN-DAD</div>
 
-    <div class="section-card">
-      <div class="section-title">기본 정보</div>
-      <div class="placeholder-fields">공급사 · 등급 · 블록 · 여행기간 · 요금사용 기한 · AUTH 번호 · 상태 · 운영명 (기존 필드 유지)</div>
+    <div class="form-tabs">
+      <button class="form-tab active" onclick="switchForm('flight', 'basic', this)">📋 기본 정보</button>
+      <button class="form-tab" onclick="switchForm('flight', 'extra', this)">📝 부가 정보 <span class="badge-new">PDP 미리보기</span></button>
     </div>
 
-    <div class="section-card">
-      <div class="section-title">수익률 · 항공편 · 공항 이용료 · 유류할증료 · 항공운임</div>
-      <div class="placeholder-fields">기존 섹션 일체 유지 (출국편/귀국편, 성인/아동 항공운임 등)</div>
+    <div id="flight-basic" class="form-panel active">
+      <div class="section-card"><div class="section-title">기본 정보 · 수익률 · 항공편 · 공항이용료 · 유류할증료 · 항공운임 · 유아 항공운임</div><div class="placeholder-fields">기존 섹션 일체 유지</div></div>
     </div>
 
-    <div class="section-card">
-      <div class="section-title">
-        부가 정보
-        <span class="badge-new">UPDATE</span>
-        <span class="section-desc">POST 카테고리 10종 전체 노출</span>
-      </div>
-      <div class="extra-info-grid">
-
-        <div class="extra-item">
-          <div><div class="extra-item-label">소개</div><div class="extra-item-status">미등록</div></div>
-          <button class="btn-add" onclick="openModal('소개', '항공권', '97360978')">+ 추가하기</button>
-        </div>
-        <div class="extra-item">
-          <div><div class="extra-item-label">핵심포인트</div><div class="extra-item-status">미등록</div></div>
-          <button class="btn-add" onclick="openModal('핵심포인트', '항공권', '97360978')">+ 추가하기</button>
-        </div>
-        <div class="extra-item filled">
-          <div><div class="extra-item-label"><span class="check">✓</span> 안내사항</div><div class="extra-item-status filled">1건 등록됨</div></div>
-          <button class="btn-edit" onclick="openModal('안내사항', '항공권', '97360978')">편집</button>
-        </div>
-        <div class="extra-item filled">
-          <div><div class="extra-item-label"><span class="check">✓</span> 포함사항</div><div class="extra-item-status filled">1건 등록됨</div></div>
-          <button class="btn-edit" onclick="openModal('포함사항', '항공권', '97360978')">편집</button>
-        </div>
-        <div class="extra-item">
-          <div><div class="extra-item-label">불포함사항</div><div class="extra-item-status">미등록</div></div>
-          <button class="btn-add" onclick="openModal('불포함사항', '항공권', '97360978')">+ 추가하기</button>
-        </div>
-        <div class="extra-item filled">
-          <div><div class="extra-item-label"><span class="check">✓</span> 유의사항</div><div class="extra-item-status filled">2건 등록됨</div></div>
-          <button class="btn-edit" onclick="openModal('유의사항', '항공권', '97360978')">편집</button>
-        </div>
-        <div class="extra-item filled">
-          <div><div class="extra-item-label"><span class="check">✓</span> 수하물규정</div><div class="extra-item-status filled">1건 등록됨</div></div>
-          <button class="btn-edit" onclick="openModal('수하물규정', '항공권', '97360978')">편집</button>
-        </div>
-        <div class="extra-item filled">
-          <div><div class="extra-item-label"><span class="check">✓</span> 취소 환불 규정</div><div class="extra-item-status filled">1건 등록됨</div></div>
-          <button class="btn-edit" onclick="openModal('취소 환불 규정', '항공권', '97360978')">편집</button>
-        </div>
-        <div class="extra-item filled">
-          <div><div class="extra-item-label"><span class="check">✓</span> 스페셜 혜택</div><div class="extra-item-status filled">1건 등록됨</div></div>
-          <button class="btn-edit" onclick="openModal('스페셜 혜택', '항공권', '97360978')">편집</button>
-        </div>
-        <div class="extra-item filled">
-          <div><div class="extra-item-label"><span class="check">✓</span> 자주묻는질문</div><div class="extra-item-status filled">3건 등록됨</div></div>
-          <button class="btn-edit" onclick="openModal('자주묻는질문', '항공권', '97360978')">편집</button>
-        </div>
-        <div class="extra-item filled">
-          <div><div class="extra-item-label"><span class="check">✓</span> 출발 전 안내</div><div class="extra-item-status filled">1건 등록됨</div></div>
-          <button class="btn-edit" onclick="openModal('출발 전 안내', '항공권', '97360978')">편집</button>
+    <div id="flight-extra" class="form-panel">
+      <div class="pdp-wrap">
+        <div class="pdp-header">
+          <div>
+            <div class="pdp-header-title">PDP 미리보기 — 부가 정보</div>
+            <div class="pdp-header-desc">www에서 노출되는 모양 그대로</div>
+          </div>
         </div>
 
+        <div class="pdp-section">
+          <div class="pdp-section-head"><div class="pdp-section-title">안내사항</div><div class="pdp-section-actions"><button class="btn-edit-sm" onclick="openModal('안내사항')">✏ 편집</button></div></div>
+          <ul class="notice-list">
+            <li>출발 2시간 전까지 공항 도착 권장</li>
+            <li>좌석 지정은 항공사 정책에 따라 변동 가능</li>
+          </ul>
+        </div>
+
+        <div class="pdp-section">
+          <div class="pdp-section-head"><div class="pdp-section-title">수하물규정</div><div class="pdp-section-actions"><button class="btn-edit-sm" onclick="openModal('수하물규정')">✏ 편집</button></div></div>
+          <table class="luggage-table">
+            <thead><tr><th>구분</th><th>위탁수하물</th><th>기내수하물</th></tr></thead>
+            <tbody>
+              <tr><td>이코노미</td><td>23kg × 1개</td><td>10kg × 1개</td></tr>
+              <tr><td>비즈니스</td><td>32kg × 2개</td><td>14kg × 1개</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div class="pdp-section">
+          <div class="pdp-section-head"><div class="pdp-section-title">포함사항</div><div class="pdp-section-actions"><button class="btn-edit-sm" onclick="openModal('포함사항')">✏ 편집</button></div></div>
+          <div class="check-list">
+            <div class="item included">기내식 1회</div>
+            <div class="item included">기내 엔터테인먼트</div>
+            <div class="item included">위탁수하물 23kg</div>
+            <div class="item included">기내수하물 10kg</div>
+          </div>
+        </div>
+
+        <div class="pdp-section">
+          <div class="pdp-section-head"><div class="pdp-section-title">취소 환불 규정</div><div class="pdp-section-actions"><button class="btn-edit-sm" onclick="openModal('취소 환불 규정')">✏ 편집</button></div></div>
+          <div class="notice-card">
+            <div class="notice-card-title">📌 항공권 취소·환불 규정</div>
+            <div class="notice-card-text">출발 72시간 이전: 위약금 USD 50<br>출발 72시간 이내: 환불 불가<br>NO-SHOW: 환불 불가</div>
+          </div>
+        </div>
+
+        <div class="pdp-section">
+          <div class="pdp-section-head"><div class="pdp-section-title">자주묻는질문</div><div class="pdp-section-actions"><button class="btn-edit-sm" onclick="openModal('자주묻는질문')">✏ 편집</button></div></div>
+          <div class="faq-list">
+            <div class="faq-item">
+              <div class="faq-q">공항 미팅은 어떻게 진행되나요? <span class="toggle">∧</span></div>
+              <div class="faq-a">공항→리조트: 짐 찾고 입국장 나오면 호텔 로고 피켓 든 직원 만나 대표자 명 확인 후 미팅 차량 탑승</div>
+            </div>
+            <div class="faq-item">
+              <div class="faq-q">예약은 언제 확정되나요? <span class="toggle">∧</span></div>
+              <div class="faq-a">결제 후 평일 기준 48시간 이내 진행되는 전문상담사의 해피콜을 통해 예약이 확정됩니다.</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="pdp-section">
+          <div class="pdp-section-head"><div class="pdp-section-title">출발 전 안내</div><div class="pdp-section-actions"><button class="btn-edit-sm" onclick="openModal('출발 전 안내')">✏ 편집</button></div></div>
+          <div class="notice-card info">
+            <div class="notice-card-title">✈ 출발 D-3 알림</div>
+            <div class="notice-card-text">출발 3일 전 e-티켓이 메일로 발송됩니다. 여권 만료일이 출발일 기준 6개월 이상 남았는지 확인해주세요.</div>
+          </div>
+        </div>
+
+        <!-- 미등록 카테고리는 간략 placeholder -->
+        <div class="pdp-section">
+          <div class="pdp-section-head"><div class="pdp-section-title">소개</div><div class="pdp-section-actions"><button class="btn-add-sm" onclick="openModal('소개')">+ 추가</button></div></div>
+          <div class="pdp-empty">미등록</div>
+        </div>
+        <div class="pdp-section">
+          <div class="pdp-section-head"><div class="pdp-section-title">핵심포인트</div><div class="pdp-section-actions"><button class="btn-add-sm" onclick="openModal('핵심포인트')">+ 추가</button></div></div>
+          <div class="pdp-empty">미등록</div>
+        </div>
+        <div class="pdp-section">
+          <div class="pdp-section-head"><div class="pdp-section-title">불포함사항</div><div class="pdp-section-actions"><button class="btn-add-sm" onclick="openModal('불포함사항')">+ 추가</button></div></div>
+          <div class="pdp-empty">미등록</div>
+        </div>
+        <div class="pdp-section">
+          <div class="pdp-section-head"><div class="pdp-section-title">유의사항</div><div class="pdp-section-actions"><button class="btn-add-sm" onclick="openModal('유의사항')">+ 추가</button></div></div>
+          <div class="pdp-empty">미등록</div>
+        </div>
+        <div class="pdp-section">
+          <div class="pdp-section-head"><div class="pdp-section-title">스페셜 혜택</div><div class="pdp-section-actions"><button class="btn-add-sm" onclick="openModal('스페셜 혜택')">+ 추가</button></div></div>
+          <div class="pdp-empty">미등록</div>
+        </div>
       </div>
+    </div>
+
+    <div class="action-bar">
+      <button class="btn btn-lg">취소</button>
+      <button class="btn btn-primary btn-lg">등록</button>
     </div>
   </div>
 
-  <!-- ============ 투어/티켓 ============ -->
+  <!-- ============================== 투어/티켓 ============================== -->
   <div id="entity-tour" class="entity-panel">
     <div class="breadcrumb">PB 관리 › 투어/티켓 관리</div>
-    <div class="page-title">투어/티켓 등록하기</div>
+    <div class="page-title">투어/티켓 등록하기 — 다낭 바나힐 1일 투어</div>
 
-    <div class="section-card">
-      <div class="section-title">기본 정보</div>
-      <div class="placeholder-fields">공급사 · 스팟/체험 · 공급사 측 통화 · 상태 · 사용 가능 조직 정보 · 운영명 (기존 필드 유지)</div>
+    <div class="form-tabs">
+      <button class="form-tab active" onclick="switchForm('tour', 'basic', this)">📋 기본 정보</button>
+      <button class="form-tab" onclick="switchForm('tour', 'extra', this)">📝 부가 정보 <span class="badge-new">PDP 미리보기</span></button>
     </div>
 
-    <div class="section-card">
-      <div class="section-title">연령대 별 가격</div>
-      <div class="placeholder-fields">성인/아동/유아 공급가·판매가 (기존 필드 유지)</div>
+    <div id="tour-basic" class="form-panel active">
+      <div class="section-card"><div class="section-title">기본 정보 · 연령대 별 가격</div><div class="placeholder-fields">기존 섹션 유지</div></div>
     </div>
 
-    <div class="section-card">
-      <div class="section-title">
-        서비스 노출 정보 (부가 정보)
-        <span class="badge-new">UPDATE</span>
-        <span class="section-desc">POST 카테고리 10종 전체 노출 · 명칭 통일</span>
-      </div>
-      <div class="extra-info-grid">
-
-        <div class="extra-item filled">
-          <div><div class="extra-item-label"><span class="check">✓</span> 소개</div><div class="extra-item-status filled">1건 등록됨</div></div>
-          <button class="btn-edit" onclick="openModal('소개', '투어/티켓', '33')">편집</button>
-        </div>
-        <div class="extra-item filled">
-          <div><div class="extra-item-label"><span class="check">✓</span> 핵심포인트</div><div class="extra-item-status filled">5건 등록됨</div></div>
-          <button class="btn-edit" onclick="openModal('핵심포인트', '투어/티켓', '33')">편집</button>
-        </div>
-        <div class="extra-item filled">
-          <div><div class="extra-item-label"><span class="check">✓</span> 안내사항</div><div class="extra-item-status filled">2건 등록됨</div></div>
-          <button class="btn-edit" onclick="openModal('안내사항', '투어/티켓', '33')">편집</button>
-        </div>
-        <div class="extra-item filled">
-          <div><div class="extra-item-label"><span class="check">✓</span> 포함사항</div><div class="extra-item-status filled">4건 등록됨</div></div>
-          <button class="btn-edit" onclick="openModal('포함사항', '투어/티켓', '33')">편집</button>
-        </div>
-        <div class="extra-item filled">
-          <div><div class="extra-item-label"><span class="check">✓</span> 불포함사항</div><div class="extra-item-status filled">3건 등록됨</div></div>
-          <button class="btn-edit" onclick="openModal('불포함사항', '투어/티켓', '33')">편집</button>
-        </div>
-        <div class="extra-item filled">
-          <div><div class="extra-item-label"><span class="check">✓</span> 유의사항</div><div class="extra-item-status filled">2건 등록됨</div></div>
-          <button class="btn-edit" onclick="openModal('유의사항', '투어/티켓', '33')">편집</button>
-        </div>
-        <div class="extra-item">
-          <div><div class="extra-item-label">수하물규정</div><div class="extra-item-status">미등록 (필요 시)</div></div>
-          <button class="btn-add" onclick="openModal('수하물규정', '투어/티켓', '33')">+ 추가하기</button>
-        </div>
-        <div class="extra-item filled">
-          <div><div class="extra-item-label"><span class="check">✓</span> 취소 환불 규정</div><div class="extra-item-status filled">1건 등록됨</div></div>
-          <button class="btn-edit" onclick="openModal('취소 환불 규정', '투어/티켓', '33')">편집</button>
-        </div>
-        <div class="extra-item filled">
-          <div><div class="extra-item-label"><span class="check">✓</span> 스페셜 혜택</div><div class="extra-item-status filled">2건 등록됨</div></div>
-          <button class="btn-edit" onclick="openModal('스페셜 혜택', '투어/티켓', '33')">편집</button>
-        </div>
-        <div class="extra-item filled">
-          <div><div class="extra-item-label"><span class="check">✓</span> 자주묻는질문</div><div class="extra-item-status filled">5건 등록됨</div></div>
-          <button class="btn-edit" onclick="openModal('자주묻는질문', '투어/티켓', '33')">편집</button>
-        </div>
-        <div class="extra-item filled">
-          <div><div class="extra-item-label"><span class="check">✓</span> 출발 전 안내</div><div class="extra-item-status filled">1건 등록됨</div></div>
-          <button class="btn-edit" onclick="openModal('출발 전 안내', '투어/티켓', '33')">편집</button>
+    <div id="tour-extra" class="form-panel">
+      <div class="pdp-wrap">
+        <div class="pdp-header">
+          <div>
+            <div class="pdp-header-title">PDP 미리보기 — 부가 정보</div>
+            <div class="pdp-header-desc">www에서 노출되는 모양 그대로</div>
+          </div>
         </div>
 
+        <div class="pdp-section">
+          <div class="pdp-section-head"><div class="pdp-section-title">소개</div><div class="pdp-section-actions"><button class="btn-edit-sm" onclick="openModal('소개')">✏ 편집</button></div></div>
+          <div class="intro-text">다낭의 상징인 바나힐을 하루 만에 즐기는 투어. 골든 브릿지부터 프랑스 마을, 환상의 정원까지 케이블카로 이동하며 다채로운 풍경을 만끽할 수 있습니다.</div>
+        </div>
+
+        <div class="pdp-section">
+          <div class="pdp-section-head"><div class="pdp-section-title">핵심포인트</div><div class="pdp-section-actions"><button class="btn-edit-sm" onclick="openModal('핵심포인트')">✏ 편집</button></div></div>
+          <div class="point-grid">
+            <div class="point-item"><span class="point-icon">🌉</span><div class="point-text"><strong>골든 브릿지</strong><br>거대한 손이 받치는 다리에서 인생샷</div></div>
+            <div class="point-item"><span class="point-icon">🚡</span><div class="point-text"><strong>세계 최장 케이블카</strong><br>약 5,801m 케이블카 탑승 체험</div></div>
+            <div class="point-item"><span class="point-icon">🏰</span><div class="point-text"><strong>프랑스 마을</strong><br>유럽 감성의 컬러풀한 건축물</div></div>
+            <div class="point-item"><span class="point-icon">🌷</span><div class="point-text"><strong>환상의 정원</strong><br>9개 테마 정원 산책</div></div>
+          </div>
+        </div>
+
+        <div class="pdp-section">
+          <div class="pdp-section-head"><div class="pdp-section-title">포함사항</div><div class="pdp-section-actions"><button class="btn-edit-sm" onclick="openModal('포함사항')">✏ 편집</button></div></div>
+          <div class="check-list">
+            <div class="item included">왕복 차량</div>
+            <div class="item included">한국어 가이드</div>
+            <div class="item included">바나힐 입장권</div>
+            <div class="item included">중식 (한식 뷔페)</div>
+            <div class="item included">여행자 보험</div>
+          </div>
+        </div>
+
+        <div class="pdp-section">
+          <div class="pdp-section-head"><div class="pdp-section-title">불포함사항</div><div class="pdp-section-actions"><button class="btn-edit-sm" onclick="openModal('불포함사항')">✏ 편집</button></div></div>
+          <div class="check-list">
+            <div class="item excluded">개인 경비</div>
+            <div class="item excluded">가이드/기사 팁 (USD 5)</div>
+            <div class="item excluded">호텔 픽업·샌딩</div>
+          </div>
+        </div>
+
+        <div class="pdp-section">
+          <div class="pdp-section-head"><div class="pdp-section-title">유의사항</div><div class="pdp-section-actions"><button class="btn-edit-sm" onclick="openModal('유의사항')">✏ 편집</button></div></div>
+          <div class="caution-list">
+            <div class="caution-list-title">⚠️ 출발 전 확인</div>
+            <ol>
+              <li>케이블카 운행 중단 시 일정 변경될 수 있음</li>
+              <li>임산부·고혈압 환자는 사전 상의 요망</li>
+            </ol>
+          </div>
+        </div>
+
+        <div class="pdp-section">
+          <div class="pdp-section-head"><div class="pdp-section-title">자주묻는질문</div><div class="pdp-section-actions"><button class="btn-edit-sm" onclick="openModal('자주묻는질문')">✏ 편집</button></div></div>
+          <div class="faq-list">
+            <div class="faq-item">
+              <div class="faq-q">우천 시 진행되나요? <span class="toggle">∧</span></div>
+              <div class="faq-a">소규모 우천은 정상 진행되나 폭우/태풍 시 일정 변경 또는 환불됩니다.</div>
+            </div>
+            <div class="faq-item">
+              <div class="faq-q">아이도 참여 가능한가요? <span class="toggle">∧</span></div>
+              <div class="faq-a">만 3세 이상 참여 가능합니다. 유아석/카시트는 사전 요청 시 가능.</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="pdp-section">
+          <div class="pdp-section-head"><div class="pdp-section-title">출발 전 안내</div><div class="pdp-section-actions"><button class="btn-edit-sm" onclick="openModal('출발 전 안내')">✏ 편집</button></div></div>
+          <div class="notice-card info">
+            <div class="notice-card-title">🎫 출발 D-1 카톡 알림</div>
+            <div class="notice-card-text">출발 1일 전 가이드가 카톡으로 미팅 시간·장소 안내드립니다.</div>
+          </div>
+        </div>
+
+        <div class="pdp-section">
+          <div class="pdp-section-head"><div class="pdp-section-title">안내사항</div><div class="pdp-section-actions"><button class="btn-edit-sm" onclick="openModal('안내사항')">✏ 편집</button></div></div>
+          <ul class="notice-list">
+            <li>편안한 운동화 착용 권장</li>
+            <li>케이블카 내 음식 반입 불가</li>
+          </ul>
+        </div>
+
+        <div class="pdp-section">
+          <div class="pdp-section-head"><div class="pdp-section-title">취소 환불 규정</div><div class="pdp-section-actions"><button class="btn-edit-sm" onclick="openModal('취소 환불 규정')">✏ 편집</button></div></div>
+          <div class="notice-card">
+            <div class="notice-card-title">📌 투어 취소·환불 규정</div>
+            <div class="notice-card-text">출발 3일 전: 100% 환불 / 출발 1일 전: 50% 환불 / 당일 취소·NO-SHOW: 환불 불가</div>
+          </div>
+        </div>
+
+        <div class="pdp-section">
+          <div class="pdp-section-head"><div class="pdp-section-title">스페셜 혜택</div><div class="pdp-section-actions"><button class="btn-edit-sm" onclick="openModal('스페셜 혜택')">✏ 편집</button></div></div>
+          <div class="benefit-grid">
+            <div class="benefit-card">
+              <div class="benefit-icon">📸</div>
+              <div class="benefit-title">기념 사진 1매 무료</div>
+              <div class="benefit-desc">바나힐 골든 브릿지에서 가이드가 단체 사진 1매 촬영·전송</div>
+            </div>
+            <div class="benefit-card">
+              <div class="benefit-icon">🍹</div>
+              <div class="benefit-title">웰컴 드링크</div>
+              <div class="benefit-desc">투어 시작 시 현지 음료 1잔 제공</div>
+            </div>
+          </div>
+        </div>
       </div>
+    </div>
+
+    <div class="action-bar">
+      <button class="btn btn-lg">취소</button>
+      <button class="btn btn-primary btn-lg">등록</button>
     </div>
   </div>
 
 </div>
 
-<!-- POST 등록/편집 모달 -->
+<!-- 편집/등록 모달 -->
 <div class="modal-backdrop" id="post-modal">
   <div class="modal">
     <div class="modal-head">
-      <div class="modal-title" id="modal-title">콘텐츠 등록</div>
+      <div class="modal-title" id="modal-title">콘텐츠 편집</div>
       <button class="modal-close" onclick="closeModal()">✕</button>
     </div>
     <div class="modal-body">
-      <div class="modal-info">
-        🔒 타겟유형 <strong id="m-type">숙박권</strong> · 타겟ID <strong id="m-id">40</strong> · 카테고리 <strong id="m-cat">소개</strong> 자동 잠금
-      </div>
+      <div class="modal-info">🔒 카테고리 <strong id="m-cat">소개</strong> · 타겟유형·타겟ID 자동 잠금</div>
       <div class="form-row">
         <label class="form-label">템플릿</label>
         <select class="form-control">
-          <option>선택해주세요</option>
           <option>체크리스트</option>
           <option>이미지 설명</option>
           <option>이미지 슬라이드</option>
-          <option>이미지 하단 설명</option>
           <option>핵심포인트</option>
           <option>텍스트</option>
           <option>자주묻는질문</option>
@@ -380,7 +584,7 @@ input, select, textarea { font-family: inherit; }
       </div>
       <div class="form-row">
         <label class="form-label">콘텐츠 본문</label>
-        <textarea class="form-textarea" placeholder="선택한 템플릿에 맞게 입력 영역이 노출됩니다."></textarea>
+        <textarea class="form-textarea" placeholder="템플릿에 맞게 입력 영역이 노출됩니다."></textarea>
       </div>
     </div>
     <div class="modal-foot">
@@ -398,10 +602,14 @@ function switchEntity(name, el) {
   el.classList.add('active');
   document.getElementById('entity-' + name).classList.add('active');
 }
-function openModal(cat, type, id) {
-  document.getElementById('modal-title').textContent = cat + ' 등록';
-  document.getElementById('m-type').textContent = type;
-  document.getElementById('m-id').textContent = id;
+function switchForm(entity, panel, el) {
+  el.parentElement.querySelectorAll('.form-tab').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('#entity-' + entity + ' .form-panel').forEach(p => p.classList.remove('active'));
+  el.classList.add('active');
+  document.getElementById(entity + '-' + panel).classList.add('active');
+}
+function openModal(cat) {
+  document.getElementById('modal-title').textContent = cat + ' 편집';
   document.getElementById('m-cat').textContent = cat;
   document.getElementById('post-modal').classList.add('show');
 }
