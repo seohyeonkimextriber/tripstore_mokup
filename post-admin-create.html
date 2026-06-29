@@ -159,13 +159,13 @@ input, select, textarea { font-family: inherit; }
           <option value="국가">국가</option>
           <option value="여행지">여행지</option>
           <option value="식사">식사</option>
-          <option value="공통">공통</option>
+          <option value="여행사 공통">여행사 공통</option>
         </select>
       </div>
       <div class="form-row" id="target-row" style="display:none;">
         <div class="form-label">타겟 <span class="required">*</span></div>
         <div style="display:flex; gap:8px;">
-          <select class="form-control form-select" id="target-id" style="flex:1;" onchange="updateManagementName()"></select>
+          <select class="form-control form-select" id="target-id" style="flex:1;" onchange="onTargetIdChange()"></select>
           <button class="btn" style="height:38px;padding:0 14px;font-size:12.5px;">📥 기본정보 가져오기</button>
         </div>
       </div>
@@ -192,6 +192,12 @@ input, select, textarea { font-family: inherit; }
           <option>취소 환불 규정</option>
           <option>스페셜 혜택</option>
           <option>자주묻는질문</option>
+        </select>
+      </div>
+      <div class="form-row" id="rate-table-row" style="display:none;">
+        <div class="form-label">객실요금표 단위</div>
+        <select class="form-control form-select" id="rate-table-select" onchange="updateManagementName()">
+          <option value="">전체 (숙박권 전체에 적용)</option>
         </select>
       </div>
       <div class="form-row" id="rate-type-row" style="display:none;">
@@ -438,9 +444,9 @@ input, select, textarea { font-family: inherit; }
 <script>
 const SAMPLES = {
   '숙박권': [
-    '40 — 빅토리아 호이안 / 디럭스 가든뷰 / BB',
-    '41 — 인터컨티넨탈 다낭 / 클래식 / RO',
-    '90 — 솔바이멜리아 푸꾸옥 / 스탠다드 오션뷰 / BB',
+    '40 — 빅토리아 호이안',
+    '41 — 인터컨티넨탈 다낭',
+    '90 — 솔바이멜리아 푸꾸옥',
   ],
   '항공권': ['97360978 — 베트남항공 ICN-DAD', '6700 — 아시아나항공 ICN-SGN'],
   '투어/티켓': ['33 — 다낭 바나힐 1일 투어', '67 — 호이안 야경 투어'],
@@ -448,6 +454,26 @@ const SAMPLES = {
   '항공사': ['베트남항공', '아시아나항공', '대한항공'],
   '국가': ['베트남', '태국', '일본'],
   '여행지': ['다낭', '호이안', '푸꾸옥'],
+};
+
+// 숙박권 하위 객실요금표 단위 (숙박권 ID 별)
+const RATE_TABLES = {
+  '40 — 빅토리아 호이안': [
+    '디럭스 가든뷰 / BB',
+    '디럭스 가든뷰 / RO',
+    '스위트 / BB',
+    '풀빌라 / RO',
+  ],
+  '41 — 인터컨티넨탈 다낭': [
+    '클래식 / RO',
+    '클래식 오션뷰 / BB',
+    '펜트하우스 / BB',
+  ],
+  '90 — 솔바이멜리아 푸꾸옥': [
+    '스탠다드 오션뷰 / BB',
+    '디럭스 오션뷰 / BB',
+    '비치프론트 빌라 / AI',
+  ],
 };
 
 function onTargetTypeChange() {
@@ -466,8 +492,16 @@ function onTargetTypeChange() {
     rateRow.style.display = 'none';
     document.getElementById('rate-type-select').value = '';
   }
-  // 공통 타겟유형은 org 설정
-  if (t === '공통') {
+  // 객실요금표 단위는 숙박권일 때만
+  const rateTableRow = document.getElementById('rate-table-row');
+  if (t === '숙박권') {
+    rateTableRow.style.display = 'grid';
+  } else {
+    rateTableRow.style.display = 'none';
+    document.getElementById('rate-table-select').innerHTML = '<option value="">전체 (숙박권 전체에 적용)</option>';
+  }
+  // 여행사 공통 타겟유형은 org 설정
+  if (t === '여행사 공통') {
     row.style.display = 'none';
     orgRow.style.display = 'grid';
     return;
@@ -480,13 +514,27 @@ function onTargetTypeChange() {
   updateManagementName();
 }
 
+function onTargetIdChange() {
+  const target = document.getElementById('target-type').value;
+  if (target === '숙박권') {
+    const tgt = document.getElementById('target-id').value;
+    const opts = RATE_TABLES[tgt] || [];
+    const sel = document.getElementById('rate-table-select');
+    sel.innerHTML = '<option value="">전체 (숙박권 전체에 적용)</option>'
+      + opts.map(o => `<option>${o}</option>`).join('');
+  }
+  updateManagementName();
+}
+
 function updateManagementName() {
   const target = document.getElementById('target-type').value;
   const category = document.getElementById('category-select').value;
   const rateSel = document.getElementById('rate-type-select');
   const rate = (target === '숙소' && rateSel && rateSel.value) ? rateSel.value : '';
+  const rateTableSel = document.getElementById('rate-table-select');
+  const rateTable = (target === '숙박권' && rateTableSel && rateTableSel.value) ? rateTableSel.value : '';
   let targetInfo = '';
-  if (target === '공통') {
+  if (target === '여행사 공통') {
     const orgSel = document.getElementById('org-id');
     const orgText = orgSel.options[orgSel.selectedIndex]?.text || '';
     targetInfo = orgSel.value ? orgText.replace(/\s*\(.*\)\s*/, '') : '';
@@ -494,7 +542,7 @@ function updateManagementName() {
     const tgt = document.getElementById('target-id');
     if (tgt && tgt.value) targetInfo = tgt.value;
   }
-  const parts = [category, target, targetInfo, rate].filter(Boolean);
+  const parts = [category, target, targetInfo, rate, rateTable].filter(Boolean);
   document.getElementById('management-name').value = parts.join('_');
 }
 
@@ -619,6 +667,8 @@ window.addEventListener('DOMContentLoaded', () => {
     }
     ti.value = params.targetId;
     ti.disabled = true;
+    // 숙박권이면 객실요금표 단위 옵션 채움 (행은 활성 상태로 둠 → 수정 가능)
+    if (typeof onTargetIdChange === 'function') onTargetIdChange();
   }
   if (params.org) {
     const org = document.getElementById('org-id');
