@@ -1,0 +1,376 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PB상품 수정하기 — 콘텐츠 정보 탭 분리 mockup</title>
+<link href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.6/dist/web/static/pretendard.css" rel="stylesheet">
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: 'Pretendard', 'Apple SD Gothic Neo', -apple-system, sans-serif; font-size: 14px; color: rgba(0,0,0,0.88); background: #f5f5f5; }
+button { font-family: inherit; cursor: pointer; }
+
+.gnb { background: #fff; height: 48px; display: flex; align-items: center; padding: 0 20px; border-bottom: 1px solid #f0f0f0; position: sticky; top: 0; z-index: 50; }
+.gnb-logo { color: #222427; font-weight: 800; font-size: 15px; }
+.gnb-logo span { color: #1677ff; }
+
+.demo-banner { background: linear-gradient(135deg, #fff7e6 0%, #fffbe6 100%); border-bottom: 1px solid #ffe58f; padding: 10px 20px; font-size: 12.5px; color: #ad6800; }
+.demo-banner strong { color: #874d00; }
+
+.layout { padding: 18px 28px 60px; max-width: 1280px; margin: 0 auto; }
+.breadcrumb { font-size: 12px; color: rgba(0,0,0,0.45); margin-bottom: 8px; }
+.page-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 18px; }
+.page-title { font-size: 24px; font-weight: 800; letter-spacing: -0.4px; }
+.page-header-actions { display: flex; gap: 8px; }
+.btn { height: 36px; padding: 0 14px; border-radius: 6px; font-size: 12.5px; font-weight: 600; border: 1px solid #d9d9d9; background: #fff; color: rgba(0,0,0,0.75); display: inline-flex; align-items: center; gap: 4px; }
+.btn:hover { border-color: #1677ff; color: #1677ff; }
+.btn-primary { background: #1677ff; border-color: #1677ff; color: #fff; }
+.btn-primary:hover { background: #4096ff; color: #fff; }
+
+.section-card { background: #fff; border: 1px solid #ececec; border-radius: 8px; padding: 22px 24px; margin-bottom: 14px; }
+.section-title { font-size: 15px; font-weight: 700; color: rgba(0,0,0,0.88); margin-bottom: 14px; }
+.placeholder-fields { background: #fafbfc; border: 1px dashed #e8e8e8; border-radius: 6px; padding: 22px; text-align: center; color: rgba(0,0,0,0.4); font-size: 12.5px; line-height: 1.7; }
+.placeholder-fields strong { color: rgba(0,0,0,0.65); }
+
+/* 연결된 엔티티 요약 */
+.linked-entities { background: #fafbfc; border-radius: 8px; padding: 14px 18px; }
+.linked-row { display: flex; align-items: center; gap: 10px; padding: 8px 0; font-size: 13px; }
+.linked-row + .linked-row { border-top: 1px solid #f0f0f0; }
+.linked-type { font-size: 11.5px; font-weight: 700; color: #0958d9; background: #e6f4ff; padding: 3px 9px; border-radius: 4px; min-width: 50px; text-align: center; }
+.linked-id { font-size: 11.5px; color: rgba(0,0,0,0.45); font-weight: 600; }
+.linked-name { font-weight: 600; color: rgba(0,0,0,0.85); flex: 1; }
+
+/* === 콘텐츠 정보 탭 영역 === */
+.content-tabs-card { background: #fff; border: 1px solid #ececec; border-radius: 10px; padding: 8px; margin-bottom: 14px; display: inline-flex; gap: 4px; }
+.content-tab { padding: 10px 22px; font-size: 13.5px; font-weight: 600; cursor: pointer; color: rgba(0,0,0,0.55); border-radius: 7px; border: none; background: transparent; display: inline-flex; align-items: center; gap: 8px; }
+.content-tab:hover { color: rgba(0,0,0,0.88); }
+.content-tab.active { color: #1677ff; background: #e6f4ff; font-weight: 700; }
+.content-tab .count { background: #d6e4ff; color: #0958d9; font-size: 11px; padding: 2px 7px; border-radius: 4px; font-weight: 700; }
+.content-tab.active .count { background: #1677ff; color: #fff; }
+.content-panel { display: none; }
+.content-panel.active { display: block; }
+
+/* PDP 미리보기 컨테이너 */
+.pdp-wrap { background: #fff; border: 1px solid #ececec; border-radius: 12px; padding: 28px 32px; }
+.pdp-section { padding: 24px 0; border-bottom: 1px solid #f5f5f5; }
+.pdp-section:first-child { padding-top: 0; }
+.pdp-section:last-child { border-bottom: none; padding-bottom: 0; }
+.pdp-section-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; }
+.pdp-section-title { font-size: 17px; font-weight: 800; color: rgba(0,0,0,0.88); letter-spacing: -0.3px; }
+.tpl-badge { font-size: 10.5px; font-weight: 700; padding: 3px 9px; border-radius: 10px; background: #f5f5f5; color: rgba(0,0,0,0.55); margin-left: 8px; border: 1px solid #e8e8e8; vertical-align: middle; }
+.tpl-badge.checklist { background: #f6ffed; color: #389e0d; border-color: #b7eb8f; }
+.tpl-badge.point { background: #fff7e6; color: #d46b08; border-color: #ffd591; }
+.tpl-badge.image-top { background: #f9f0ff; color: #722ed1; border-color: #d3adf7; }
+.tpl-badge.faq { background: #fff0f6; color: #c41d7f; border-color: #ffadd2; }
+.tpl-badge.text { background: #f5f5f5; color: rgba(0,0,0,0.55); border-color: #e8e8e8; }
+
+/* 출처 표시 — 어디서 끌려온 콘텐츠인지 */
+.source-tag { display: inline-flex; align-items: center; gap: 6px; font-size: 11.5px; font-weight: 600; color: #0958d9; background: #e6f4ff; padding: 4px 10px; border-radius: 6px; border: 1px solid #d6e4ff; margin-bottom: 10px; }
+.source-tag .source-icon { font-size: 13px; }
+.source-tag .source-chain { color: rgba(9,88,217,0.6); font-weight: 500; }
+
+/* 미등록 */
+.pdp-empty { background: #fafbfc; border: 1px dashed #d9d9d9; border-radius: 8px; padding: 22px; text-align: center; color: rgba(0,0,0,0.4); font-size: 12.5px; }
+
+/* 체크리스트 */
+.check-list-detail { display: flex; flex-direction: column; gap: 4px; }
+.check-list-detail .item { display: flex; gap: 12px; padding: 10px 4px; }
+.check-list-detail .item + .item { border-top: 1px solid #f5f5f5; }
+.check-list-detail .item-check { width: 26px; height: 26px; border-radius: 50%; background: #389e0d; color: #fff; flex-shrink: 0; display: inline-flex; align-items: center; justify-content: center; font-weight: 700; font-size: 13px; margin-top: 2px; }
+.check-list-detail .item-body { flex: 1; }
+.check-list-detail .item-title { font-size: 13.5px; font-weight: 700; color: rgba(0,0,0,0.85); margin-bottom: 4px; }
+.check-list-detail .item-desc { font-size: 13px; color: rgba(0,0,0,0.6); line-height: 1.55; }
+
+/* 이미지 (상단 설명) */
+.image-content { display: flex; flex-direction: column; gap: 14px; }
+.image-content-image { width: 100%; aspect-ratio: 16/9; background: linear-gradient(135deg, #e6f4ff, #f0f7ff); border-radius: 8px; display: flex; align-items: center; justify-content: center; color: #0958d9; font-size: 13px; gap: 6px; border: 1px solid #d6e4ff; }
+.image-content-text { display: flex; flex-direction: column; gap: 4px; }
+.image-content-title { font-size: 15.5px; font-weight: 700; color: rgba(0,0,0,0.88); }
+.image-content-summary { font-size: 13px; color: rgba(0,0,0,0.55); }
+.image-content-desc { font-size: 14px; line-height: 1.7; color: rgba(0,0,0,0.78); margin-top: 4px; }
+
+/* 핵심포인트 */
+.point-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px 18px; }
+.point-item { display: flex; gap: 10px; padding: 12px 14px; background: #fafbfc; border-radius: 8px; }
+.point-icon { font-size: 20px; }
+.point-text { font-size: 13.5px; line-height: 1.55; color: rgba(0,0,0,0.78); }
+
+/* 텍스트 */
+.text-content { font-size: 14px; line-height: 1.75; color: rgba(0,0,0,0.78); }
+.text-content p { margin-bottom: 8px; }
+.text-content ul, .text-content ol { padding-left: 22px; margin: 4px 0 10px; }
+.text-content li { margin-bottom: 4px; line-height: 1.7; }
+.text-content strong { font-weight: 700; color: rgba(0,0,0,0.88); }
+.text-content table { width: 100%; border-collapse: collapse; margin: 8px 0; }
+.text-content table th, .text-content table td { padding: 8px 12px; border: 1px solid #ececec; font-size: 13px; text-align: left; }
+.text-content table th { background: #fafbfc; font-weight: 700; }
+
+/* FAQ */
+.faq-list { display: flex; flex-direction: column; gap: 8px; }
+.faq-item { border: 1px solid #ececec; border-radius: 8px; overflow: hidden; }
+.faq-q { padding: 12px 16px; background: #fafbfc; font-weight: 700; font-size: 13.5px; }
+.faq-a { padding: 12px 16px; font-size: 13px; color: rgba(0,0,0,0.65); line-height: 1.6; border-top: 1px solid #f0f0f0; }
+
+/* 액션 바 */
+.action-bar { display: flex; justify-content: flex-end; gap: 8px; padding-top: 16px; margin-top: 12px; }
+.btn-lg { height: 42px; padding: 0 24px; font-size: 14px; font-weight: 700; border-radius: 8px; }
+</style>
+</head>
+<body>
+
+<div class="gnb">
+  <div class="gnb-logo">Trip<span>store</span> 파트너스</div>
+</div>
+
+<div class="demo-banner">
+  📝 <strong>PB상품 수정 — 콘텐츠 정보 탭 분리 mockup</strong>. 상품소개·안내사항 두 탭으로 분리. 등록된 숙박권/항공권/투어·티켓의 콘텐츠를 자동 매핑하여 PDP 미리보기 스타일로 렌더링. 출처(어디서 끌려왔는지) 표시 포함.
+</div>
+
+<div class="layout">
+
+  <div class="breadcrumb">PB 관리 › PB상품목록 › 수정</div>
+  <div class="page-header">
+    <div class="page-title">PB상품 수정하기</div>
+    <div class="page-header-actions">
+      <button class="btn">수정이력 확인하기</button>
+      <button class="btn">메모 확인 및 작성</button>
+      <button class="btn">📋 상품 복사</button>
+    </div>
+  </div>
+
+  <!-- 기본 정보 (기존 영역 유지 — placeholder) -->
+  <div class="section-card">
+    <div class="section-title">기본 정보</div>
+    <div class="placeholder-fields">
+      상품유형(에어텔) · 상태(승인됨) · 출발공항 · 도착지(여행지)<br>
+      <strong>항공권 #52</strong> 비엣젯항공 / 3박5일 / 이코노미 — &nbsp;
+      <strong>숙박권 #258</strong> TMG / 솔바이멜리아 푸꾸옥 / 스탠다드 / BB &nbsp;
+      <em>(투어/티켓 미연결)</em><br>
+      상품코드 TPBAPQC13671 · 행사수 27개 · 등록 2026.05.08 · 수정 2026.06.22
+    </div>
+  </div>
+
+  <!-- 상품명 / 상품 이미지 / 금액 설정 / 추가옵션 (placeholder) -->
+  <div class="section-card"><div class="section-title">상품명</div><div class="placeholder-fields">직접입력 / 추천 상품명 (기존 영역 유지)</div></div>
+  <div class="section-card"><div class="section-title">상품 이미지 9/20</div><div class="placeholder-fields">기존 이미지 영역 유지</div></div>
+  <div class="section-card"><div class="section-title">상품 금액 설정</div><div class="placeholder-fields">고정 마진율 · 추가 마진율 · 정가 설정 (기존 영역 유지)</div></div>
+  <div class="section-card"><div class="section-title">추가옵션</div><div class="placeholder-fields">여행자 보험 등 (기존 토글 유지)</div></div>
+
+  <!-- ============================================ -->
+  <!-- 콘텐츠 정보 — 2탭 (상품소개 / 안내사항)         -->
+  <!-- ============================================ -->
+
+  <div class="content-tabs-card">
+    <button class="content-tab active" onclick="switchContentTab('intro', this)">🏷 상품소개 <span class="count" id="cnt-intro">5</span></button>
+    <button class="content-tab" onclick="switchContentTab('info', this)">📋 안내사항 <span class="count" id="cnt-info">7</span></button>
+  </div>
+
+  <!-- ============ 탭1: 상품소개 ============ -->
+  <div id="tab-intro" class="content-panel active">
+    <div class="pdp-wrap">
+
+      <!-- 스페셜 혜택 (체크리스트) -->
+      <div class="pdp-section">
+        <div class="pdp-section-head">
+          <div class="pdp-section-title">스페셜 혜택 <span class="tpl-badge checklist">체크리스트</span></div>
+        </div>
+        <div class="source-tag"><span class="source-icon">📥</span> 숙박권 #258 자동 매핑 <span class="source-chain">· 솔바이멜리아 푸꾸옥 / 스탠다드 / BB</span></div>
+        <div class="check-list-detail">
+          <div class="item"><div class="item-check">✓</div><div class="item-body"><div class="item-title">전 일정 조식 포함 (BB)</div><div class="item-desc">투숙 기간 중 매일 조식 1회 제공</div></div></div>
+          <div class="item"><div class="item-check">✓</div><div class="item-body"><div class="item-title">공항 픽업·샌딩 무료</div><div class="item-desc">3박 이상 예약 시 호텔 도착·출발 시 무료 차량 제공</div></div></div>
+        </div>
+      </div>
+
+      <!-- 소개 (이미지 상단) -->
+      <div class="pdp-section">
+        <div class="pdp-section-head">
+          <div class="pdp-section-title">숙소 소개 <span class="tpl-badge image-top">이미지(상단 설명)</span></div>
+        </div>
+        <div class="source-tag"><span class="source-icon">📥</span> 숙소 #1620 자동 매핑 <span class="source-chain">· 솔바이멜리아 푸꾸옥 → 숙박권 #258</span></div>
+        <div class="image-content">
+          <div class="image-content-image">📷 솔바이멜리아 푸꾸옥 메인.jpg</div>
+          <div class="image-content-text">
+            <div class="image-content-title">솔 바이 멜리아 푸꾸옥</div>
+            <div class="image-content-summary">푸꾸옥 청정 자연 속 5성급 리조트 · 프라이빗 비치 보유</div>
+            <div class="image-content-desc">멜리아 호텔 인터내셔널이 운영하는 5성급 리조트. 가족·커플 모두에게 인기 있는 럭셔리 리조트로 특별한 휴식을 약속드립니다.</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 객실 소개 (이미지 상단) -->
+      <div class="pdp-section">
+        <div class="pdp-section-head">
+          <div class="pdp-section-title">객실 소개 <span class="tpl-badge image-top">이미지(상단 설명)</span></div>
+        </div>
+        <div class="source-tag"><span class="source-icon">📥</span> 객실 #152 자동 매핑 <span class="source-chain">· 스탠다드 → 숙박권 #258</span></div>
+        <div class="image-content">
+          <div class="image-content-image">📷 스탠다드 객실.jpg</div>
+          <div class="image-content-text">
+            <div class="image-content-title">스탠다드</div>
+            <div class="image-content-summary">킹 또는 트윈베드 / 약 38㎡ / 시티뷰</div>
+            <div class="image-content-desc">아늑하고 모던한 객실 디자인. 가족·커플 모두에게 적합한 컴팩트한 5성급 객실 옵션.</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 핵심포인트 -->
+      <div class="pdp-section">
+        <div class="pdp-section-head">
+          <div class="pdp-section-title">핵심포인트 <span class="tpl-badge point">핵심포인트</span></div>
+        </div>
+        <div class="source-tag"><span class="source-icon">📥</span> 숙소 #1620 자동 매핑 <span class="source-chain">· 솔바이멜리아 푸꾸옥</span></div>
+        <div class="point-grid">
+          <div class="point-item"><span class="point-icon">🍽</span><div class="point-text"><strong>로맨틱한 레스토랑</strong><br>오션뷰 다이닝 6종 운영</div></div>
+          <div class="point-item"><span class="point-icon">🏖</span><div class="point-text"><strong>여유롭게 즐길 수 있는 프라이빗 해변</strong><br>투숙객 전용 1.5km 비치프론트</div></div>
+          <div class="point-item"><span class="point-icon">🏊</span><div class="point-text"><strong>아름다운 전망을 만끽할 수 있는 수영장</strong><br>인피니티 풀 + 키즈 풀</div></div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ============ 탭2: 안내사항 ============ -->
+  <div id="tab-info" class="content-panel">
+    <div class="pdp-wrap">
+
+      <!-- 포함사항 -->
+      <div class="pdp-section">
+        <div class="pdp-section-head">
+          <div class="pdp-section-title">포함사항 <span class="tpl-badge text">텍스트</span></div>
+        </div>
+        <div class="source-tag"><span class="source-icon">📥</span> 여행사 공통 자동 매핑 <span class="source-chain">· 항공/보험 + 식사 BB</span></div>
+        <div class="text-content">
+          <ul>
+            <li>왕복 항공권 (비엣젯항공 ICN-VPQ)</li>
+            <li>여행자 보험</li>
+            <li>전 일정 조식 (BB)</li>
+            <li>리조트 숙박 (스탠다드 3박)</li>
+          </ul>
+        </div>
+      </div>
+
+      <!-- 불포함사항 -->
+      <div class="pdp-section">
+        <div class="pdp-section-head">
+          <div class="pdp-section-title">불포함사항 <span class="tpl-badge text">텍스트</span></div>
+        </div>
+        <div class="source-tag"><span class="source-icon">📥</span> 여행사 공통 자동 매핑 <span class="source-chain">· 에어텔 상품 공통</span></div>
+        <div class="text-content">
+          <ul>
+            <li>개인 경비 · 가이드/기사 팁</li>
+            <li>중식·석식 (BB 제외분)</li>
+            <li>선택관광 · 옵션 투어</li>
+          </ul>
+        </div>
+      </div>
+
+      <!-- 유의사항 -->
+      <div class="pdp-section">
+        <div class="pdp-section-head">
+          <div class="pdp-section-title">유의사항 <span class="tpl-badge text">텍스트</span></div>
+        </div>
+        <div class="source-tag"><span class="source-icon">📥</span> 항공사 자동 매핑 <span class="source-chain">· 비엣젯항공 → 항공권 #52</span></div>
+        <div class="text-content">
+          <p><strong>⚠️ 출발 전 반드시 확인</strong></p>
+          <ol>
+            <li>비엣젯항공은 LCC로 위탁수하물·기내식이 별도 유료입니다.</li>
+            <li>여권 잔여 유효기간 6개월 이상 필수.</li>
+          </ol>
+        </div>
+      </div>
+
+      <!-- 안내사항 -->
+      <div class="pdp-section">
+        <div class="pdp-section-head">
+          <div class="pdp-section-title">안내사항 <span class="tpl-badge text">텍스트</span></div>
+        </div>
+        <div class="source-tag"><span class="source-icon">📥</span> 여행사 공통 자동 매핑 <span class="source-chain">· 예약진행안내 + 여권정보 + 보험안내</span></div>
+        <div class="text-content">
+          <ul>
+            <li>예약은 결제 후 평일 기준 48시간 이내 해피콜을 통해 확정됩니다.</li>
+            <li>여권 정보(영문명·여권번호·유효기간)는 결제 후 즉시 입력 필요.</li>
+            <li>여행자 보험은 어시스트카드로 가입됩니다 (성인 8,000원).</li>
+          </ul>
+        </div>
+      </div>
+
+      <!-- 수하물규정 -->
+      <div class="pdp-section">
+        <div class="pdp-section-head">
+          <div class="pdp-section-title">수하물규정 <span class="tpl-badge text">텍스트</span></div>
+        </div>
+        <div class="source-tag"><span class="source-icon">📥</span> 항공사 자동 매핑 <span class="source-chain">· 비엣젯항공 → 항공권 #52</span></div>
+        <div class="text-content">
+          <table>
+            <thead><tr><th>구분</th><th>위탁수하물</th><th>기내수하물</th></tr></thead>
+            <tbody>
+              <tr><td>이코노미</td><td>유료 (사전 구매 권장)</td><td>7kg × 1개</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- 취소 환불 규정 -->
+      <div class="pdp-section">
+        <div class="pdp-section-head">
+          <div class="pdp-section-title">취소 환불 규정 <span class="tpl-badge text">텍스트</span></div>
+        </div>
+        <div class="source-tag"><span class="source-icon">📥</span> 여행사 공통 자동 매핑 <span class="source-chain">· 취소환불규정 특별약관</span></div>
+        <div class="text-content">
+          <p><strong>📌 에어텔 취소·환불 규정</strong></p>
+          <ul>
+            <li>출발 30일 전: 위약금 없음</li>
+            <li>출발 15~29일 전: 위약금 30%</li>
+            <li>출발 7~14일 전: 위약금 50%</li>
+            <li>출발 1~6일 전·당일·NO-SHOW: 환불 불가</li>
+          </ul>
+        </div>
+      </div>
+
+      <!-- 자주묻는질문 -->
+      <div class="pdp-section">
+        <div class="pdp-section-head">
+          <div class="pdp-section-title">자주묻는질문 <span class="tpl-badge faq">자주묻는질문</span></div>
+        </div>
+        <div class="source-tag"><span class="source-icon">📥</span> 여행사 공통 + 항공사 + 숙소 자동 매핑 <span class="source-chain">· 예약/픽업/항공 + 체크아웃케어</span></div>
+        <div class="faq-list">
+          <div class="faq-item">
+            <div class="faq-q">예약은 언제 확정되나요?</div>
+            <div class="faq-a">결제 후 평일 기준 48시간 이내 진행되는 전문상담사의 해피콜을 통해 예약이 확정됩니다.</div>
+          </div>
+          <div class="faq-item">
+            <div class="faq-q">공항 미팅은 어떻게 진행되나요?</div>
+            <div class="faq-a">공항 도착 후 입국장 나오면 호텔 로고 피켓 든 직원을 만나 대표자 명 확인 후 미팅 차량 탑승.</div>
+          </div>
+          <div class="faq-item">
+            <div class="faq-q">체크아웃케어는 어떤 건가요?</div>
+            <div class="faq-a">체크아웃 후 비행기 탑승 전까지 짐 보관·라운지 이용을 도와드리는 서비스입니다.</div>
+          </div>
+          <div class="faq-item">
+            <div class="faq-q">사전 좌석 지정이 가능한가요?</div>
+            <div class="faq-a">비엣젯항공은 유료로 사전 좌석 지정이 가능합니다. (편당 5,000원~)</div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <div class="action-bar">
+    <button class="btn btn-lg">취소</button>
+    <button class="btn btn-primary btn-lg">저장</button>
+  </div>
+
+</div>
+
+<script>
+function switchContentTab(name, el) {
+  document.querySelectorAll('.content-tab').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('.content-panel').forEach(p => p.classList.remove('active'));
+  el.classList.add('active');
+  document.getElementById('tab-' + name).classList.add('active');
+}
+</script>
+
+</body>
+</html>
