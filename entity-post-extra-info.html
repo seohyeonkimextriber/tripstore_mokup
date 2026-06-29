@@ -1,0 +1,414 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>엔티티 등록폼 — 부가정보 카테고리 통일 mockup</title>
+<link href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.6/dist/web/static/pretendard.css" rel="stylesheet">
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: 'Pretendard', 'Apple SD Gothic Neo', -apple-system, sans-serif; font-size: 14px; color: rgba(0,0,0,0.88); background: #f5f5f5; }
+button { font-family: inherit; cursor: pointer; }
+input, select, textarea { font-family: inherit; }
+
+.gnb { background: #fff; height: 48px; display: flex; align-items: center; padding: 0 20px; border-bottom: 1px solid #f0f0f0; position: sticky; top: 0; z-index: 50; }
+.gnb-logo { color: #222427; font-weight: 800; font-size: 15px; }
+.gnb-logo span { color: #1677ff; }
+
+.demo-banner { background: linear-gradient(135deg, #fff7e6 0%, #fffbe6 100%); border-bottom: 1px solid #ffe58f; padding: 10px 20px; font-size: 12.5px; color: #ad6800; }
+.demo-banner strong { color: #874d00; }
+
+.entity-switcher { background: #fff; border-bottom: 1px solid #f0f0f0; padding: 14px 28px 0; display: flex; gap: 4px; }
+.entity-tab { padding: 10px 20px; font-size: 13px; font-weight: 600; cursor: pointer; color: rgba(0,0,0,0.55); border: none; background: transparent; border-radius: 8px 8px 0 0; border-bottom: 2px solid transparent; }
+.entity-tab:hover { color: rgba(0,0,0,0.88); }
+.entity-tab.active { color: #1677ff; background: #f0f7ff; border-bottom-color: #1677ff; font-weight: 700; }
+
+.layout { padding: 18px 28px 60px; max-width: 1280px; margin: 0 auto; }
+.breadcrumb { font-size: 12px; color: rgba(0,0,0,0.45); margin-bottom: 8px; }
+.page-title { font-size: 24px; font-weight: 800; letter-spacing: -0.4px; margin-bottom: 20px; }
+
+/* Section card */
+.section-card { background: #fff; border: 1px solid #ececec; border-radius: 8px; padding: 22px 24px; margin-bottom: 16px; }
+.section-title { font-size: 15px; font-weight: 700; color: rgba(0,0,0,0.88); margin-bottom: 16px; display: flex; align-items: center; gap: 8px; }
+.section-title .badge-new { background: #fff1f0; color: #cf1322; font-size: 10.5px; font-weight: 700; padding: 2px 7px; border-radius: 4px; }
+.section-desc { font-size: 12.5px; color: rgba(0,0,0,0.5); font-weight: 500; margin-left: auto; }
+
+/* Existing fields placeholder */
+.placeholder-fields { background: #fafbfc; border: 1px dashed #e8e8e8; border-radius: 8px; padding: 28px; text-align: center; color: rgba(0,0,0,0.4); font-size: 12.5px; }
+
+/* 부가정보 grid */
+.extra-info-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px 14px; }
+.extra-item { background: #fff; border: 1px solid #ececec; border-radius: 8px; padding: 14px 16px; display: flex; align-items: center; justify-content: space-between; gap: 10px; transition: all 0.15s; }
+.extra-item:hover { border-color: #91caff; background: #fafdff; }
+.extra-item.filled { border-color: #1677ff; background: #f0f7ff; }
+.extra-item-label { font-size: 13.5px; font-weight: 600; color: rgba(0,0,0,0.88); display: flex; align-items: center; gap: 8px; }
+.extra-item-label .check { color: #389e0d; font-weight: 700; font-size: 13px; }
+.extra-item-status { font-size: 11.5px; color: rgba(0,0,0,0.45); }
+.extra-item-status.filled { color: #0958d9; font-weight: 600; }
+.btn-add { height: 30px; padding: 0 13px; border-radius: 6px; font-size: 12px; font-weight: 600; border: 1px solid #d9d9d9; background: #fff; color: rgba(0,0,0,0.75); display: inline-flex; align-items: center; gap: 4px; }
+.btn-add:hover { border-color: #1677ff; color: #1677ff; }
+.btn-edit { height: 30px; padding: 0 13px; border-radius: 6px; font-size: 12px; font-weight: 600; border: 1px solid #1677ff; background: #1677ff; color: #fff; display: inline-flex; align-items: center; gap: 4px; }
+.btn-edit:hover { background: #4096ff; }
+
+.entity-panel { display: none; }
+.entity-panel.active { display: block; }
+
+/* Modal */
+.modal-backdrop { position: fixed; inset: 0; background: rgba(0,0,0,0.5); display: none; align-items: center; justify-content: center; z-index: 200; padding: 20px; }
+.modal-backdrop.show { display: flex; }
+.modal { background: #fff; border-radius: 12px; max-width: 720px; width: 100%; max-height: calc(100vh - 40px); overflow: auto; }
+.modal-head { padding: 18px 22px; border-bottom: 1px solid #f0f0f0; display: flex; align-items: center; justify-content: space-between; }
+.modal-title { font-size: 16px; font-weight: 700; }
+.modal-close { background: transparent; border: none; font-size: 18px; color: rgba(0,0,0,0.45); }
+.modal-body { padding: 22px; }
+.modal-foot { padding: 14px 22px; border-top: 1px solid #f0f0f0; display: flex; justify-content: flex-end; gap: 8px; }
+.modal-info { background: #f0f7ff; border: 1px solid #91caff; border-radius: 6px; padding: 10px 14px; font-size: 12.5px; color: #0958d9; margin-bottom: 16px; }
+.form-row { padding: 8px 0; }
+.form-label { font-size: 12.5px; font-weight: 600; color: rgba(0,0,0,0.65); margin-bottom: 6px; display: block; }
+.form-control { width: 100%; height: 36px; padding: 0 12px; border: 1px solid #d9d9d9; border-radius: 6px; font-size: 13px; }
+.form-control:focus { border-color: #1677ff; outline: none; box-shadow: 0 0 0 2px rgba(22,119,255,0.1); }
+.form-textarea { width: 100%; min-height: 120px; padding: 10px 12px; border: 1px solid #d9d9d9; border-radius: 6px; font-size: 13px; line-height: 1.6; resize: vertical; }
+.btn { height: 34px; padding: 0 16px; border-radius: 6px; font-size: 13px; font-weight: 600; border: 1px solid #d9d9d9; background: #fff; color: rgba(0,0,0,0.75); }
+.btn-primary { background: #1677ff; border-color: #1677ff; color: #fff; }
+.btn-primary:hover { background: #4096ff; }
+</style>
+</head>
+<body>
+
+<div class="gnb">
+  <div class="gnb-logo">Trip<span>store</span> 관리자</div>
+</div>
+
+<div class="demo-banner">
+  📝 <strong>엔티티 등록폼 — 부가정보 카테고리 통일 mockup</strong>. 기존 부가정보 섹션에 <strong>POST 10개 카테고리 전체</strong>를 노출. 각 카테고리는 "+ 추가하기"로 인라인 등록, 등록된 항목은 [편집] 버튼으로 즉시 수정.
+</div>
+
+<div class="entity-switcher">
+  <button class="entity-tab active" onclick="switchEntity('accom', this)">🏨 숙박권 등록하기</button>
+  <button class="entity-tab" onclick="switchEntity('flight', this)">✈ 항공권 등록하기</button>
+  <button class="entity-tab" onclick="switchEntity('tour', this)">🎫 투어/티켓 등록하기</button>
+</div>
+
+<div class="layout">
+
+  <!-- ============ 숙박권 ============ -->
+  <div id="entity-accom" class="entity-panel active">
+    <div class="breadcrumb">PB 관리 › 숙박권 관리</div>
+    <div class="page-title">숙박권 등록하기</div>
+
+    <div class="section-card">
+      <div class="section-title">기본 정보</div>
+      <div class="placeholder-fields">공급사 · 숙소 · 입력통화 · 요금사용 기한 · 상태 · 사용 가능 조직 정보 · 운영명 (기존 필드 유지)</div>
+    </div>
+
+    <div class="section-card">
+      <div class="section-title">수익률</div>
+      <div class="placeholder-fields">수익률 설정 · 마진율 · 할인율 · 확정 수익률 · 수수료 (기존 필드 유지)</div>
+    </div>
+
+    <div class="section-card">
+      <div class="section-title">객실/인원 별 판매가</div>
+      <div class="placeholder-fields">기본정보 &gt; 숙소를 먼저 선택하세요 (기존 영역 유지)</div>
+    </div>
+
+    <div class="section-card">
+      <div class="section-title">추가옵션</div>
+      <div class="placeholder-fields">얼리체크인 · 레이트체크아웃 · 공항 픽업/샌딩 (기존 토글 유지)</div>
+    </div>
+
+    <div class="section-card">
+      <div class="section-title">
+        부가 정보
+        <span class="badge-new">UPDATE</span>
+        <span class="section-desc">POST 카테고리 10종 전체 노출 · 등록 시 즉시 이 숙박권에 매핑</span>
+      </div>
+      <div class="extra-info-grid">
+
+        <div class="extra-item filled">
+          <div>
+            <div class="extra-item-label"><span class="check">✓</span> 소개</div>
+            <div class="extra-item-status filled">1건 등록됨</div>
+          </div>
+          <button class="btn-edit" onclick="openModal('소개', '숙박권', '40')">편집</button>
+        </div>
+
+        <div class="extra-item">
+          <div>
+            <div class="extra-item-label">핵심포인트</div>
+            <div class="extra-item-status">미등록</div>
+          </div>
+          <button class="btn-add" onclick="openModal('핵심포인트', '숙박권', '40')">+ 추가하기</button>
+        </div>
+
+        <div class="extra-item filled">
+          <div>
+            <div class="extra-item-label"><span class="check">✓</span> 안내사항</div>
+            <div class="extra-item-status filled">3건 등록됨</div>
+          </div>
+          <button class="btn-edit" onclick="openModal('안내사항', '숙박권', '40')">편집</button>
+        </div>
+
+        <div class="extra-item">
+          <div>
+            <div class="extra-item-label">포함사항</div>
+            <div class="extra-item-status">미등록</div>
+          </div>
+          <button class="btn-add" onclick="openModal('포함사항', '숙박권', '40')">+ 추가하기</button>
+        </div>
+
+        <div class="extra-item">
+          <div>
+            <div class="extra-item-label">불포함사항</div>
+            <div class="extra-item-status">미등록</div>
+          </div>
+          <button class="btn-add" onclick="openModal('불포함사항', '숙박권', '40')">+ 추가하기</button>
+        </div>
+
+        <div class="extra-item filled">
+          <div>
+            <div class="extra-item-label"><span class="check">✓</span> 유의사항</div>
+            <div class="extra-item-status filled">2건 등록됨</div>
+          </div>
+          <button class="btn-edit" onclick="openModal('유의사항', '숙박권', '40')">편집</button>
+        </div>
+
+        <div class="extra-item">
+          <div>
+            <div class="extra-item-label">취소 환불 규정</div>
+            <div class="extra-item-status">미등록</div>
+          </div>
+          <button class="btn-add" onclick="openModal('취소 환불 규정', '숙박권', '40')">+ 추가하기</button>
+        </div>
+
+        <div class="extra-item filled">
+          <div>
+            <div class="extra-item-label"><span class="check">✓</span> 스페셜 혜택</div>
+            <div class="extra-item-status filled">3건 등록됨</div>
+          </div>
+          <button class="btn-edit" onclick="openModal('스페셜 혜택', '숙박권', '40')">편집</button>
+        </div>
+
+        <div class="extra-item">
+          <div>
+            <div class="extra-item-label">자주묻는질문</div>
+            <div class="extra-item-status">미등록</div>
+          </div>
+          <button class="btn-add" onclick="openModal('자주묻는질문', '숙박권', '40')">+ 추가하기</button>
+        </div>
+
+        <div class="extra-item">
+          <div>
+            <div class="extra-item-label">출발 전 안내</div>
+            <div class="extra-item-status">미등록</div>
+          </div>
+          <button class="btn-add" onclick="openModal('출발 전 안내', '숙박권', '40')">+ 추가하기</button>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <!-- ============ 항공권 ============ -->
+  <div id="entity-flight" class="entity-panel">
+    <div class="breadcrumb">PB 관리 › 항공권 관리</div>
+    <div class="page-title">항공권 등록하기</div>
+
+    <div class="section-card">
+      <div class="section-title">기본 정보</div>
+      <div class="placeholder-fields">공급사 · 등급 · 블록 · 여행기간 · 요금사용 기한 · AUTH 번호 · 상태 · 운영명 (기존 필드 유지)</div>
+    </div>
+
+    <div class="section-card">
+      <div class="section-title">수익률 · 항공편 · 공항 이용료 · 유류할증료 · 항공운임</div>
+      <div class="placeholder-fields">기존 섹션 일체 유지 (출국편/귀국편, 성인/아동 항공운임 등)</div>
+    </div>
+
+    <div class="section-card">
+      <div class="section-title">
+        부가 정보
+        <span class="badge-new">UPDATE</span>
+        <span class="section-desc">POST 카테고리 10종 전체 노출</span>
+      </div>
+      <div class="extra-info-grid">
+
+        <div class="extra-item">
+          <div><div class="extra-item-label">소개</div><div class="extra-item-status">미등록</div></div>
+          <button class="btn-add" onclick="openModal('소개', '항공권', '97360978')">+ 추가하기</button>
+        </div>
+        <div class="extra-item">
+          <div><div class="extra-item-label">핵심포인트</div><div class="extra-item-status">미등록</div></div>
+          <button class="btn-add" onclick="openModal('핵심포인트', '항공권', '97360978')">+ 추가하기</button>
+        </div>
+        <div class="extra-item filled">
+          <div><div class="extra-item-label"><span class="check">✓</span> 안내사항</div><div class="extra-item-status filled">1건 등록됨</div></div>
+          <button class="btn-edit" onclick="openModal('안내사항', '항공권', '97360978')">편집</button>
+        </div>
+        <div class="extra-item filled">
+          <div><div class="extra-item-label"><span class="check">✓</span> 포함사항</div><div class="extra-item-status filled">1건 등록됨</div></div>
+          <button class="btn-edit" onclick="openModal('포함사항', '항공권', '97360978')">편집</button>
+        </div>
+        <div class="extra-item">
+          <div><div class="extra-item-label">불포함사항</div><div class="extra-item-status">미등록</div></div>
+          <button class="btn-add" onclick="openModal('불포함사항', '항공권', '97360978')">+ 추가하기</button>
+        </div>
+        <div class="extra-item filled">
+          <div><div class="extra-item-label"><span class="check">✓</span> 유의사항</div><div class="extra-item-status filled">2건 등록됨</div></div>
+          <button class="btn-edit" onclick="openModal('유의사항', '항공권', '97360978')">편집</button>
+        </div>
+        <div class="extra-item filled">
+          <div><div class="extra-item-label"><span class="check">✓</span> 수하물규정</div><div class="extra-item-status filled">1건 등록됨</div></div>
+          <button class="btn-edit" onclick="openModal('수하물규정', '항공권', '97360978')">편집</button>
+        </div>
+        <div class="extra-item filled">
+          <div><div class="extra-item-label"><span class="check">✓</span> 취소 환불 규정</div><div class="extra-item-status filled">1건 등록됨</div></div>
+          <button class="btn-edit" onclick="openModal('취소 환불 규정', '항공권', '97360978')">편집</button>
+        </div>
+        <div class="extra-item filled">
+          <div><div class="extra-item-label"><span class="check">✓</span> 스페셜 혜택</div><div class="extra-item-status filled">1건 등록됨</div></div>
+          <button class="btn-edit" onclick="openModal('스페셜 혜택', '항공권', '97360978')">편집</button>
+        </div>
+        <div class="extra-item filled">
+          <div><div class="extra-item-label"><span class="check">✓</span> 자주묻는질문</div><div class="extra-item-status filled">3건 등록됨</div></div>
+          <button class="btn-edit" onclick="openModal('자주묻는질문', '항공권', '97360978')">편집</button>
+        </div>
+        <div class="extra-item filled">
+          <div><div class="extra-item-label"><span class="check">✓</span> 출발 전 안내</div><div class="extra-item-status filled">1건 등록됨</div></div>
+          <button class="btn-edit" onclick="openModal('출발 전 안내', '항공권', '97360978')">편집</button>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <!-- ============ 투어/티켓 ============ -->
+  <div id="entity-tour" class="entity-panel">
+    <div class="breadcrumb">PB 관리 › 투어/티켓 관리</div>
+    <div class="page-title">투어/티켓 등록하기</div>
+
+    <div class="section-card">
+      <div class="section-title">기본 정보</div>
+      <div class="placeholder-fields">공급사 · 스팟/체험 · 공급사 측 통화 · 상태 · 사용 가능 조직 정보 · 운영명 (기존 필드 유지)</div>
+    </div>
+
+    <div class="section-card">
+      <div class="section-title">연령대 별 가격</div>
+      <div class="placeholder-fields">성인/아동/유아 공급가·판매가 (기존 필드 유지)</div>
+    </div>
+
+    <div class="section-card">
+      <div class="section-title">
+        서비스 노출 정보 (부가 정보)
+        <span class="badge-new">UPDATE</span>
+        <span class="section-desc">POST 카테고리 10종 전체 노출 · 명칭 통일</span>
+      </div>
+      <div class="extra-info-grid">
+
+        <div class="extra-item filled">
+          <div><div class="extra-item-label"><span class="check">✓</span> 소개</div><div class="extra-item-status filled">1건 등록됨</div></div>
+          <button class="btn-edit" onclick="openModal('소개', '투어/티켓', '33')">편집</button>
+        </div>
+        <div class="extra-item filled">
+          <div><div class="extra-item-label"><span class="check">✓</span> 핵심포인트</div><div class="extra-item-status filled">5건 등록됨</div></div>
+          <button class="btn-edit" onclick="openModal('핵심포인트', '투어/티켓', '33')">편집</button>
+        </div>
+        <div class="extra-item filled">
+          <div><div class="extra-item-label"><span class="check">✓</span> 안내사항</div><div class="extra-item-status filled">2건 등록됨</div></div>
+          <button class="btn-edit" onclick="openModal('안내사항', '투어/티켓', '33')">편집</button>
+        </div>
+        <div class="extra-item filled">
+          <div><div class="extra-item-label"><span class="check">✓</span> 포함사항</div><div class="extra-item-status filled">4건 등록됨</div></div>
+          <button class="btn-edit" onclick="openModal('포함사항', '투어/티켓', '33')">편집</button>
+        </div>
+        <div class="extra-item filled">
+          <div><div class="extra-item-label"><span class="check">✓</span> 불포함사항</div><div class="extra-item-status filled">3건 등록됨</div></div>
+          <button class="btn-edit" onclick="openModal('불포함사항', '투어/티켓', '33')">편집</button>
+        </div>
+        <div class="extra-item filled">
+          <div><div class="extra-item-label"><span class="check">✓</span> 유의사항</div><div class="extra-item-status filled">2건 등록됨</div></div>
+          <button class="btn-edit" onclick="openModal('유의사항', '투어/티켓', '33')">편집</button>
+        </div>
+        <div class="extra-item">
+          <div><div class="extra-item-label">수하물규정</div><div class="extra-item-status">미등록 (필요 시)</div></div>
+          <button class="btn-add" onclick="openModal('수하물규정', '투어/티켓', '33')">+ 추가하기</button>
+        </div>
+        <div class="extra-item filled">
+          <div><div class="extra-item-label"><span class="check">✓</span> 취소 환불 규정</div><div class="extra-item-status filled">1건 등록됨</div></div>
+          <button class="btn-edit" onclick="openModal('취소 환불 규정', '투어/티켓', '33')">편집</button>
+        </div>
+        <div class="extra-item filled">
+          <div><div class="extra-item-label"><span class="check">✓</span> 스페셜 혜택</div><div class="extra-item-status filled">2건 등록됨</div></div>
+          <button class="btn-edit" onclick="openModal('스페셜 혜택', '투어/티켓', '33')">편집</button>
+        </div>
+        <div class="extra-item filled">
+          <div><div class="extra-item-label"><span class="check">✓</span> 자주묻는질문</div><div class="extra-item-status filled">5건 등록됨</div></div>
+          <button class="btn-edit" onclick="openModal('자주묻는질문', '투어/티켓', '33')">편집</button>
+        </div>
+        <div class="extra-item filled">
+          <div><div class="extra-item-label"><span class="check">✓</span> 출발 전 안내</div><div class="extra-item-status filled">1건 등록됨</div></div>
+          <button class="btn-edit" onclick="openModal('출발 전 안내', '투어/티켓', '33')">편집</button>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<!-- POST 등록/편집 모달 -->
+<div class="modal-backdrop" id="post-modal">
+  <div class="modal">
+    <div class="modal-head">
+      <div class="modal-title" id="modal-title">콘텐츠 등록</div>
+      <button class="modal-close" onclick="closeModal()">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="modal-info">
+        🔒 타겟유형 <strong id="m-type">숙박권</strong> · 타겟ID <strong id="m-id">40</strong> · 카테고리 <strong id="m-cat">소개</strong> 자동 잠금
+      </div>
+      <div class="form-row">
+        <label class="form-label">템플릿</label>
+        <select class="form-control">
+          <option>선택해주세요</option>
+          <option>체크리스트</option>
+          <option>이미지 설명</option>
+          <option>이미지 슬라이드</option>
+          <option>이미지 하단 설명</option>
+          <option>핵심포인트</option>
+          <option>텍스트</option>
+          <option>자주묻는질문</option>
+        </select>
+      </div>
+      <div class="form-row">
+        <label class="form-label">콘텐츠 본문</label>
+        <textarea class="form-textarea" placeholder="선택한 템플릿에 맞게 입력 영역이 노출됩니다."></textarea>
+      </div>
+    </div>
+    <div class="modal-foot">
+      <button class="btn" onclick="closeModal()">취소</button>
+      <button class="btn">Draft 저장</button>
+      <button class="btn btn-primary">운영중으로 저장</button>
+    </div>
+  </div>
+</div>
+
+<script>
+function switchEntity(name, el) {
+  document.querySelectorAll('.entity-tab').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('.entity-panel').forEach(p => p.classList.remove('active'));
+  el.classList.add('active');
+  document.getElementById('entity-' + name).classList.add('active');
+}
+function openModal(cat, type, id) {
+  document.getElementById('modal-title').textContent = cat + ' 등록';
+  document.getElementById('m-type').textContent = type;
+  document.getElementById('m-id').textContent = id;
+  document.getElementById('m-cat').textContent = cat;
+  document.getElementById('post-modal').classList.add('show');
+}
+function closeModal() {
+  document.getElementById('post-modal').classList.remove('show');
+}
+</script>
+
+</body>
+</html>
