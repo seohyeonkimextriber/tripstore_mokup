@@ -40,7 +40,15 @@ button { font-family: inherit; cursor: pointer; }
 .linked-id { font-size: 11.5px; color: rgba(0,0,0,0.45); font-weight: 600; }
 .linked-name { font-weight: 600; color: rgba(0,0,0,0.85); flex: 1; }
 
-/* === 콘텐츠 정보 탭 영역 === */
+/* === 페이지 레벨 탭 (기본 상품 정보 / 콘텐츠 정보) === */
+.page-tabs { background: #fff; border: 1px solid #f0f0f0; border-radius: 10px; padding: 4px; margin-bottom: 16px; display: inline-flex; gap: 4px; }
+.page-tab { padding: 10px 22px; font-size: 13.5px; font-weight: 600; cursor: pointer; color: rgba(0,0,0,0.55); border-radius: 7px; border: none; background: transparent; display: inline-flex; align-items: center; gap: 8px; }
+.page-tab:hover { color: rgba(0,0,0,0.88); }
+.page-tab.active { color: #1677ff; background: #e6f4ff; font-weight: 700; }
+.page-panel { display: none; }
+.page-panel.active { display: block; }
+
+/* === 콘텐츠 정보 내부 sub-tab (상품소개 / 안내사항) === */
 .content-tabs-card { background: #fff; border: 1px solid #ececec; border-radius: 10px; padding: 8px; margin-bottom: 14px; display: inline-flex; gap: 4px; }
 .content-tab { padding: 10px 22px; font-size: 13.5px; font-weight: 600; cursor: pointer; color: rgba(0,0,0,0.55); border-radius: 7px; border: none; background: transparent; display: inline-flex; align-items: center; gap: 8px; }
 .content-tab:hover { color: rgba(0,0,0,0.88); }
@@ -138,6 +146,15 @@ button { font-family: inherit; cursor: pointer; }
     </div>
   </div>
 
+  <!-- 페이지 레벨 탭: 기본 상품 정보 / 콘텐츠 정보 -->
+  <div class="page-tabs">
+    <button class="page-tab active" onclick="switchPageTab('basic', this)">📋 기본 상품 정보</button>
+    <button class="page-tab" onclick="switchPageTab('content', this)">📝 콘텐츠 정보</button>
+  </div>
+
+  <!-- ============ 탭1: 기본 상품 정보 ============ -->
+  <div id="page-basic" class="page-panel active">
+
   <!-- 기본 정보 (기존 영역 유지 — placeholder) -->
   <div class="section-card">
     <div class="section-title">기본 정보</div>
@@ -157,10 +174,14 @@ button { font-family: inherit; cursor: pointer; }
   <div class="section-card"><div class="section-title">상품 금액 설정</div><div class="placeholder-fields">고정 마진율 · 추가 마진율 · 정가 설정 (기존 영역 유지)</div></div>
   <div class="section-card"><div class="section-title">추가옵션</div><div class="placeholder-fields">여행자 보험 등 (기존 토글 유지)</div></div>
 
-  <!-- ============================================ -->
-  <!-- 콘텐츠 정보 — 2탭 (상품소개 / 안내사항)         -->
-  <!-- ============================================ -->
+  </div>
+  <!-- ============ /탭1 끝 ============ -->
 
+
+  <!-- ============ 탭2: 콘텐츠 정보 ============ -->
+  <div id="page-content" class="page-panel">
+
+  <!-- 내부 sub-tab: 상품소개 / 안내사항 -->
   <div class="content-tabs-card">
     <button class="content-tab active" onclick="switchContentTab('intro', this)">🏷 상품소개 <span class="count" id="cnt-intro">5</span></button>
     <button class="content-tab" onclick="switchContentTab('info', this)">📋 안내사항 <span class="count" id="cnt-info">7</span></button>
@@ -357,6 +378,9 @@ button { font-family: inherit; cursor: pointer; }
     </div>
   </div>
 
+  </div>
+  <!-- ============ /탭2 끝 ============ -->
+
   <div class="action-bar">
     <button class="btn btn-lg">취소</button>
     <button class="btn btn-primary btn-lg">저장</button>
@@ -365,6 +389,13 @@ button { font-family: inherit; cursor: pointer; }
 </div>
 
 <script>
+function switchPageTab(name, el) {
+  document.querySelectorAll('.page-tab').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('.page-panel').forEach(p => p.classList.remove('active'));
+  el.classList.add('active');
+  document.getElementById('page-' + name).classList.add('active');
+}
+
 function switchContentTab(name, el) {
   document.querySelectorAll('.content-tab').forEach(t => t.classList.remove('active'));
   document.querySelectorAll('.content-panel').forEach(p => p.classList.remove('active'));
