@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>PB 콘텐츠 등록 — 어드민 (리디자인)</title>
+<title>콘텐츠 등록 — 단건 등록</title>
 <link href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.6/dist/web/static/pretendard.css" rel="stylesheet">
 <style>
 * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -11,252 +11,269 @@ body { font-family: 'Pretendard', 'Apple SD Gothic Neo', -apple-system, sans-ser
 button { font-family: inherit; cursor: pointer; }
 input, select, textarea { font-family: inherit; }
 
-/* Breadcrumb */
-.breadcrumb { padding: 16px 28px 0; font-size: 12px; color: rgba(0,0,0,0.45); display: flex; align-items: center; gap: 6px; }
+.gnb { background: #fff; height: 48px; display: flex; align-items: center; padding: 0 20px; border-bottom: 1px solid #f0f0f0; position: sticky; top: 0; z-index: 50; }
+.gnb-logo { color: #222427; font-weight: 800; font-size: 15px; }
+.gnb-logo span { color: #1677ff; }
+
+.demo-banner { background: linear-gradient(135deg, #fff7e6 0%, #fffbe6 100%); border-bottom: 1px solid #ffe58f; padding: 10px 20px; font-size: 12.5px; color: #ad6800; }
+.demo-banner strong { color: #874d00; }
+
+.layout { padding: 18px 28px 60px; max-width: 1080px; margin: 0 auto; }
+.breadcrumb { font-size: 12px; color: rgba(0,0,0,0.45); margin-bottom: 8px; display: flex; gap: 6px; }
 .breadcrumb .sep { color: rgba(0,0,0,0.2); }
-.breadcrumb .bc-current { color: rgba(0,0,0,0.88); font-weight: 600; }
+.breadcrumb .current { color: rgba(0,0,0,0.88); font-weight: 600; }
 
-.layout { padding: 14px 28px 48px; max-width: 1480px; margin: 0 auto; }
-
-/* Header */
-.page-header { display: flex; align-items: center; justify-content: space-between; gap: 14px; flex-wrap: wrap; margin: 8px 0 18px; }
-.page-title { font-size: 24px; font-weight: 800; color: rgba(0,0,0,0.88); letter-spacing: -0.4px; }
-.page-title .subtle { font-size: 14px; font-weight: 500; color: rgba(0,0,0,0.45); margin-left: 6px; }
-.page-actions { display: flex; gap: 8px; align-items: center; }
-
-/* AI button */
-.btn-ai { height: 36px; padding: 0 16px; border-radius: 8px; font-size: 13px; font-weight: 700; cursor: pointer; border: 1px solid #7e3ff2; background: linear-gradient(135deg, #7e3ff2 0%, #4f6cf7 100%); color: #fff; display: inline-flex; align-items: center; gap: 6px; box-shadow: 0 1px 4px rgba(126,63,242,0.25); transition: all 0.15s; }
+.page-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 18px; }
+.page-title { font-size: 22px; font-weight: 800; letter-spacing: -0.3px; }
+.btn-ai { height: 36px; padding: 0 16px; border-radius: 8px; font-size: 13px; font-weight: 700; border: 1px solid #7e3ff2; background: linear-gradient(135deg, #7e3ff2 0%, #4f6cf7 100%); color: #fff; display: inline-flex; align-items: center; gap: 6px; box-shadow: 0 1px 4px rgba(126,63,242,0.25); }
 .btn-ai:hover { transform: translateY(-1px); box-shadow: 0 3px 10px rgba(126,63,242,0.35); }
-.btn-ai .ico { font-size: 14px; }
 
-/* Buttons */
-.btn-primary { height: 34px; padding: 0 16px; border-radius: 6px; font-size: 13px; font-weight: 600; cursor: pointer; border: 1px solid #1677ff; background: #1677ff; color: #fff; display: inline-flex; align-items: center; gap: 6px; transition: background 0.15s; }
-.btn-primary:hover { background: #4096ff; }
-.btn-ghost { height: 34px; padding: 0 14px; border-radius: 6px; font-size: 13px; font-weight: 500; cursor: pointer; border: 1px solid #d9d9d9; background: #fff; color: rgba(0,0,0,0.75); display: inline-flex; align-items: center; gap: 6px; transition: all 0.15s; }
-.btn-ghost:hover { color: #1677ff; border-color: #1677ff; }
-.btn-danger-ghost { height: 30px; padding: 0 12px; border-radius: 6px; font-size: 12.5px; font-weight: 600; cursor: pointer; border: 1px solid #ffa39e; background: #fff; color: #cf1322; display: inline-flex; align-items: center; gap: 4px; transition: all 0.15s; }
-.btn-danger-ghost:hover { background: #fff1f0; }
+/* Section */
+.section { background: #fff; border: 1px solid #ececec; border-radius: 8px; margin-bottom: 16px; overflow: hidden; }
+.section-header { background: #fafbfc; padding: 12px 22px; font-size: 13px; font-weight: 700; color: rgba(0,0,0,0.78); border-bottom: 1px solid #f0f0f0; }
+.section-body { padding: 18px 22px; }
 
-/* Card sections */
-.card { background: #fff; border: 1px solid #ececec; border-radius: 12px; padding: 18px 20px; margin-bottom: 16px; }
-.card-title { font-size: 15px; font-weight: 700; color: rgba(0,0,0,0.88); margin-bottom: 14px; display: flex; align-items: center; justify-content: space-between; gap: 10px; }
-.card-title .right { display: flex; gap: 8px; }
-.card-section-label { font-size: 13px; font-weight: 700; color: rgba(0,0,0,0.7); background: #fafbfc; padding: 8px 14px; border-radius: 6px 6px 0 0; border: 1px solid #ececec; border-bottom: none; }
-.card-section-body { border: 1px solid #ececec; border-radius: 0 0 6px 6px; padding: 16px; background: #fff; }
-
-/* Form rows */
-.form-row { display: grid; grid-template-columns: 110px 1fr; align-items: center; gap: 16px; padding: 10px 0; }
+.form-row { display: grid; grid-template-columns: 110px 1fr; align-items: center; gap: 14px; padding: 10px 0; }
+.form-row.aligned-top { align-items: flex-start; padding-top: 12px; }
 .form-row + .form-row { border-top: 1px solid #f5f5f5; }
 .form-label { font-size: 13px; font-weight: 500; color: rgba(0,0,0,0.65); }
-.form-control { width: 100%; height: 36px; padding: 0 12px; border: 1px solid #d9d9d9; border-radius: 6px; font-size: 13px; color: rgba(0,0,0,0.88); background: #fff; outline: none; transition: border 0.15s; }
-.form-control:focus { border-color: #1677ff; box-shadow: 0 0 0 2px rgba(22,119,255,0.1); }
-.form-control.select { padding-right: 32px; appearance: none; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='%23bbb'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 12px center; cursor: pointer; }
-.form-control.with-id { padding-left: 56px; }
-.form-control-wrap { position: relative; }
-.id-chip { position: absolute; left: 8px; top: 50%; transform: translateY(-50%); background: #f0f0f0; color: rgba(0,0,0,0.65); font-size: 11.5px; font-weight: 700; padding: 3px 8px; border-radius: 4px; font-family: 'SF Mono', monospace; pointer-events: none; }
+.form-label .required { color: #cf1322; margin-left: 2px; }
+.form-control { width: 100%; height: 38px; padding: 0 12px; border: 1px solid #d9d9d9; border-radius: 6px; font-size: 13px; background: #fff; }
+.form-control:focus { border-color: #1677ff; outline: none; box-shadow: 0 0 0 2px rgba(22,119,255,0.1); }
+.form-select { appearance: none; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='%23bbb'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 12px center; padding-right: 34px; cursor: pointer; }
+.input-with-btn { display: flex; gap: 8px; }
+.input-with-btn .form-control { flex: 1; }
+.btn-auto { height: 38px; padding: 0 14px; border-radius: 6px; font-size: 12.5px; font-weight: 600; border: 1px solid #1f1f1f; background: #1f1f1f; color: #fff; white-space: nowrap; }
+.btn-auto:hover { background: #000; }
 
-/* Category chips (스페셜혜택 등) */
-.cat-chips { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 12px; }
-.cat-chip { padding: 6px 12px; border-radius: 999px; font-size: 12.5px; font-weight: 500; color: rgba(0,0,0,0.55); background: #fafafa; border: 1px solid #ececec; cursor: pointer; transition: all 0.15s; }
-.cat-chip:hover { color: #1677ff; border-color: #91caff; background: #f0f7ff; }
-.cat-chip.active { color: #0958d9; background: #e6f4ff; border-color: #1677ff; font-weight: 700; }
+/* Rich text editor placeholder */
+.rte-wrap { border: 1px solid #d9d9d9; border-radius: 6px; overflow: hidden; }
+.rte-toolbar { background: #fafbfc; padding: 8px 12px; border-bottom: 1px solid #ececec; display: flex; gap: 4px; }
+.rte-btn { width: 28px; height: 28px; display: inline-flex; align-items: center; justify-content: center; border: none; background: transparent; border-radius: 4px; font-size: 12.5px; font-weight: 700; color: rgba(0,0,0,0.65); }
+.rte-btn:hover { background: #f0f0f0; color: rgba(0,0,0,0.88); }
+.rte-sep { width: 1px; height: 16px; background: #ececec; margin: 6px 2px; align-self: center; }
+.rte-body { min-height: 220px; padding: 14px; font-size: 13.5px; line-height: 1.7; color: rgba(0,0,0,0.85); }
+.rte-body[contenteditable]:empty:before { content: attr(data-placeholder); color: rgba(0,0,0,0.3); }
 
-/* Content card (개별 카테고리 작성 카드) */
-.content-card { border: 1px solid #ececec; border-radius: 10px; padding: 18px; margin-bottom: 12px; background: #fff; }
-.content-card-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 14px; }
-.content-card-title { font-size: 15px; font-weight: 700; color: rgba(0,0,0,0.88); }
-.content-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px 18px; margin-bottom: 14px; }
-.field-block { display: flex; flex-direction: column; gap: 6px; }
-.field-label { font-size: 12.5px; font-weight: 600; color: rgba(0,0,0,0.65); }
+textarea.form-control { height: auto; padding: 10px 12px; line-height: 1.5; resize: vertical; }
 
-/* Template item area */
-.tpl-block { border: 1px solid #ececec; border-radius: 8px; padding: 14px; background: #fafbfc; }
-.tpl-label { font-size: 12.5px; font-weight: 600; color: rgba(0,0,0,0.65); margin-bottom: 10px; }
-.tpl-add { width: 100%; padding: 10px; border: 1px dashed #d9d9d9; background: #fff; border-radius: 6px; font-size: 13px; color: rgba(0,0,0,0.55); cursor: pointer; transition: all 0.15s; font-family: inherit; }
-.tpl-add:hover { color: #1677ff; border-color: #1677ff; background: #f0f7ff; }
+/* FAQ Q&A list (자주묻는질문 카테고리 선택 시) */
+.faq-builder { border: 1px solid #d9d9d9; border-radius: 6px; padding: 16px; background: #fafbfc; }
+.faq-row { background: #fff; border: 1px solid #ececec; border-radius: 8px; padding: 14px 16px; margin-bottom: 10px; }
+.faq-row-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; }
+.faq-row-num { font-size: 12.5px; font-weight: 700; color: rgba(0,0,0,0.65); }
+.faq-row-actions { display: flex; gap: 6px; }
+.btn-icon { width: 28px; height: 28px; border-radius: 6px; border: 1px solid #d9d9d9; background: #fff; color: rgba(0,0,0,0.55); display: inline-flex; align-items: center; justify-content: center; font-size: 12px; }
+.btn-icon:hover { border-color: #1677ff; color: #1677ff; }
+.faq-q-input { width: 100%; height: 36px; padding: 0 10px; border: 1px solid #d9d9d9; border-radius: 6px; font-size: 13px; font-weight: 600; margin-bottom: 8px; }
+.faq-a-input { width: 100%; min-height: 80px; padding: 8px 10px; border: 1px solid #d9d9d9; border-radius: 6px; font-size: 13px; line-height: 1.6; resize: vertical; }
+.faq-add { width: 100%; height: 40px; padding: 0 14px; border: 1px dashed #1677ff; background: #f0f7ff; color: #1677ff; border-radius: 6px; font-size: 13px; font-weight: 600; margin-top: 4px; }
+.faq-add:hover { background: #e6f4ff; }
 
-/* Inline content row toolbar */
-.editor-toolbar { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 12px; flex-wrap: wrap; }
+/* Action bar */
+.action-bar { display: flex; justify-content: flex-end; gap: 8px; padding-top: 8px; }
+.btn { height: 40px; padding: 0 22px; border-radius: 8px; font-size: 14px; font-weight: 700; border: 1px solid #d9d9d9; background: #fff; color: rgba(0,0,0,0.78); }
+.btn-primary { background: #1677ff; border-color: #1677ff; color: #fff; }
+.btn-primary:hover { background: #4096ff; }
 
-/* Footer action bar */
-.action-bar { display: flex; justify-content: flex-end; gap: 10px; padding: 18px 0 4px; }
-
-/* Modal */
-.modal-backdrop { position: fixed; inset: 0; background: rgba(0,0,0,0.45); display: none; align-items: center; justify-content: center; z-index: 1000; }
-.modal-backdrop.open { display: flex; }
-.modal { width: 460px; max-width: calc(100vw - 32px); background: #fff; border-radius: 12px; box-shadow: 0 12px 40px rgba(0,0,0,0.18); overflow: hidden; }
-.modal.wide { width: 560px; }
-.modal-head { padding: 18px 20px 8px; }
-.modal-title { font-size: 16px; font-weight: 700; color: rgba(0,0,0,0.88); }
-.modal-subtitle { font-size: 12.5px; color: rgba(0,0,0,0.5); margin-top: 4px; }
-.modal-body { padding: 8px 20px 20px; font-size: 13.5px; color: rgba(0,0,0,0.7); line-height: 1.6; }
-.modal-body strong { color: rgba(0,0,0,0.88); font-weight: 700; }
-.modal-foot { display: flex; justify-content: flex-end; gap: 8px; padding: 12px 16px; border-top: 1px solid #f0f0f0; background: #fafbfc; }
-
-/* Content picker grid */
-.content-picker { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; padding: 6px 20px 20px; }
-.content-option { padding: 12px 14px; border: 1px solid #ececec; border-radius: 8px; background: #fff; font-size: 13.5px; font-weight: 600; color: rgba(0,0,0,0.78); text-align: left; cursor: pointer; transition: all 0.15s; display: flex; align-items: center; gap: 8px; }
-.content-option:hover { border-color: #1677ff; color: #1677ff; background: #f0f7ff; }
-.content-option .ico { font-size: 16px; line-height: 1; }
+/* Helper note */
+.helper-note { background: #f0f7ff; border: 1px solid #91caff; border-radius: 6px; padding: 8px 12px; font-size: 12px; color: #0958d9; margin-top: 6px; }
 </style>
 </head>
 <body>
 
-<div class="breadcrumb">
-  <span>운영 관리</span>
-  <span class="sep">›</span>
-  <span>콘텐츠</span>
-  <span class="sep">›</span>
-  <span>PB 콘텐츠 관리</span>
-  <span class="sep">›</span>
-  <span class="bc-current">등록</span>
+<div class="gnb">
+  <div class="gnb-logo">Trip<span>store</span> 관리자</div>
+</div>
+
+<div class="demo-banner">
+  📝 <strong>콘텐츠 등록 — 단건 등록 페이지 (현행 유지)</strong>. 공급사 필드 제거 · 카테고리/템플릿 통일안 적용 · 자주묻는질문 카테고리는 제목·요약 비노출
 </div>
 
 <div class="layout">
 
-  <!-- Header -->
-  <div class="page-header">
-    <div class="page-title">PB 콘텐츠 등록 <span class="subtle">(기존 API 전용)</span></div>
-    <div class="page-actions">
-      <button class="btn-ai"><span class="ico">✨</span>AI 자동 생성</button>
-    </div>
+  <div class="breadcrumb">
+    <span>운영 관리</span><span class="sep">›</span>
+    <span>콘텐츠</span><span class="sep">›</span>
+    <span>PB 콘텐츠 관리</span><span class="sep">›</span>
+    <span class="current">등록</span>
   </div>
 
-  <!-- 기본정보 (타겟 선택) -->
-  <div class="card">
-    <div class="card-title">기본정보</div>
-    <div class="form-row">
-      <div class="form-label">타겟유형</div>
-      <select class="form-control select" id="target-type" style="max-width: 420px;">
-        <option>숙박권</option>
-        <option>항공권</option>
-        <option>투어/티켓</option>
-        <option>보험</option>
-        <option>숙소</option>
-        <option>객실</option>
-        <option>항공사</option>
-        <option>공항</option>
-        <option>스팟·체험</option>
-        <option>국가</option>
-        <option>여행지</option>
-        <option>식사</option>
-        <option>공통</option>
-      </select>
-    </div>
-    <div class="form-row">
-      <div class="form-label">숙박권</div>
-      <div class="form-control-wrap" style="max-width: 720px;">
-        <span class="id-chip">40</span>
-        <select class="form-control select with-id">
-          <option>제이파크 / 빅토리아 호이안 비치 리조트 앤 스파</option>
+  <div class="page-header">
+    <div class="page-title">콘텐츠 등록</div>
+    <button class="btn-ai"><span>✨</span> AI 자동 생성</button>
+  </div>
+
+  <!-- 기본정보 -->
+  <div class="section">
+    <div class="section-header">기본정보</div>
+    <div class="section-body">
+      <div class="form-row">
+        <div class="form-label">카테고리 <span class="required">*</span></div>
+        <select class="form-control form-select" id="category-select" onchange="onCategoryChange()">
+          <option value="">카테고리를 선택해주세요</option>
+          <option value="소개">소개</option>
+          <option value="핵심포인트">핵심포인트</option>
+          <option value="안내사항">안내사항</option>
+          <option value="포함사항">포함사항</option>
+          <option value="불포함사항">불포함사항</option>
+          <option value="유의사항">유의사항</option>
+          <option value="수하물규정" id="opt-luggage">수하물규정 (항공권 전용)</option>
+          <option value="취소 환불 규정">취소 환불 규정</option>
+          <option value="스페셜 혜택">스페셜 혜택</option>
+          <option value="자주묻는질문">자주묻는질문</option>
+        </select>
+      </div>
+      <div class="form-row">
+        <div class="form-label">관리명 <span class="required">*</span></div>
+        <div class="input-with-btn">
+          <input type="text" class="form-control" placeholder="관리명을 입력해주세요">
+          <button class="btn-auto">자동생성</button>
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-label">타겟유형 <span class="required">*</span></div>
+        <select class="form-control form-select" id="target-type" onchange="onTargetChange()">
+          <option value="">타겟유형을 선택해주세요</option>
+          <option value="숙박권">숙박권</option>
+          <option value="항공권">항공권</option>
+          <option value="투어/티켓">투어/티켓</option>
+          <option value="보험">보험</option>
+          <option value="숙소">숙소</option>
+          <option value="객실">객실</option>
+          <option value="항공사">항공사</option>
+          <option value="공항">공항</option>
+          <option value="스팟·체험">스팟·체험</option>
+          <option value="국가">국가</option>
+          <option value="여행지">여행지</option>
+          <option value="식사">식사</option>
+          <option value="공통">공통</option>
+        </select>
+      </div>
+      <div class="form-row" id="target-row" style="display:none;">
+        <div class="form-label">타겟 <span class="required">*</span></div>
+        <select class="form-control form-select" id="target-id">
+          <option value="">타겟을 먼저 선택해주세요</option>
+        </select>
+      </div>
+      <div class="form-row">
+        <div class="form-label">템플릿 <span class="required">*</span></div>
+        <select class="form-control form-select">
+          <option value="">템플릿을 선택해주세요</option>
+          <option>체크리스트</option>
+          <option>이미지 설명</option>
+          <option>이미지 슬라이드</option>
+          <option>이미지 하단 설명</option>
+          <option>핵심포인트</option>
+          <option>텍스트</option>
+          <option>자주묻는질문</option>
         </select>
       </div>
     </div>
   </div>
 
-  <!-- PDP 미러 에디터 -->
-  <div class="card">
-    <div class="card-title">
-      <span>PDP 미러 에디터</span>
-      <div class="right">
-        <button class="btn-ghost" id="btn-add-content">＋ 콘텐츠 추가</button>
+  <!-- 상세정보 (일반 카테고리) -->
+  <div class="section" id="detail-standard">
+    <div class="section-header">상세정보</div>
+    <div class="section-body">
+      <div class="form-row aligned-top">
+        <div class="form-label">제목</div>
+        <input type="text" class="form-control" placeholder="제목을 입력해주세요">
+      </div>
+      <div class="form-row aligned-top">
+        <div class="form-label">요약</div>
+        <textarea class="form-control" rows="2" placeholder="요약을 입력해주세요"></textarea>
+      </div>
+      <div class="form-row aligned-top">
+        <div class="form-label">내용 <span class="required">*</span></div>
+        <div class="rte-wrap">
+          <div class="rte-toolbar">
+            <button class="rte-btn" title="굵게">B</button>
+            <button class="rte-btn" title="기울임"><i>I</i></button>
+            <button class="rte-btn" title="밑줄"><u>U</u></button>
+            <div class="rte-sep"></div>
+            <button class="rte-btn" title="목록">≡</button>
+            <button class="rte-btn" title="번호목록">1.</button>
+            <div class="rte-sep"></div>
+            <button class="rte-btn" title="링크">🔗</button>
+            <button class="rte-btn" title="이미지">🖼</button>
+          </div>
+          <div class="rte-body" contenteditable="true" data-placeholder="내용을 입력해주세요"></div>
+        </div>
       </div>
     </div>
+  </div>
 
-    <div class="editor-toolbar">
-      <div style="font-size:13px; font-weight:600; color:rgba(0,0,0,0.7);">기본 정보 콘텐츠</div>
-      <button class="btn-ghost" id="btn-import-base">📥 기본정보 가져오기</button>
+  <!-- 상세정보 (자주묻는질문 카테고리) -->
+  <div class="section" id="detail-faq" style="display:none;">
+    <div class="section-header">상세정보 — 자주묻는질문 (제목·요약 비노출, Q&A 다중 입력)</div>
+    <div class="section-body">
+      <div class="form-row aligned-top">
+        <div class="form-label">Q & A <span class="required">*</span></div>
+        <div class="faq-builder">
+          <div class="faq-row">
+            <div class="faq-row-head">
+              <div class="faq-row-num">질문 1</div>
+              <div class="faq-row-actions">
+                <button class="btn-icon" title="삭제">🗑</button>
+              </div>
+            </div>
+            <input class="faq-q-input" placeholder="질문을 입력해주세요" value="공항 미팅은 어떻게 진행되나요?">
+            <textarea class="faq-a-input" placeholder="답변을 입력해주세요">공항→리조트: 짐 찾고 입국장 나오면 호텔 로고 피켓 든 직원 만나 대표자 명 확인 후 미팅 차량 탑승</textarea>
+          </div>
+          <div class="faq-row">
+            <div class="faq-row-head">
+              <div class="faq-row-num">질문 2</div>
+              <div class="faq-row-actions">
+                <button class="btn-icon" title="삭제">🗑</button>
+              </div>
+            </div>
+            <input class="faq-q-input" placeholder="질문을 입력해주세요" value="예약은 언제 확정되나요?">
+            <textarea class="faq-a-input" placeholder="답변을 입력해주세요">결제 후 평일 기준 48시간 이내 진행되는 전문상담사의 해피콜을 통해 예약이 확정됩니다.</textarea>
+          </div>
+          <button class="faq-add">＋ 질문 추가</button>
+          <div class="helper-note">등록·수정 모드 모두 디폴트로 답변까지 모두 펼침</div>
+        </div>
+      </div>
     </div>
   </div>
 
-  <!-- Footer -->
   <div class="action-bar">
-    <button class="btn-ghost">취소</button>
-    <button class="btn-primary">등록</button>
+    <button class="btn">취소</button>
+    <button class="btn btn-primary">저장</button>
   </div>
 
-</div>
-
-<!-- Modal: 콘텐츠 추가 -->
-<div class="modal-backdrop" id="modal-add-content">
-  <div class="modal wide">
-    <div class="modal-head">
-      <div class="modal-title">콘텐츠 추가</div>
-      <div class="modal-subtitle">추가할 콘텐츠 유형을 선택해 주세요.</div>
-    </div>
-    <div class="content-picker">
-      <button class="content-option" data-type="스페셜혜택"><span class="ico">🎁</span>스페셜혜택</button>
-      <button class="content-option" data-type="소개"><span class="ico">📝</span>소개</button>
-      <button class="content-option" data-type="핵심포인트"><span class="ico">⭐</span>핵심포인트</button>
-      <button class="content-option" data-type="포함사항"><span class="ico">✅</span>포함사항</button>
-      <button class="content-option" data-type="불포함사항"><span class="ico">🚫</span>불포함사항</button>
-      <button class="content-option" data-type="유의사항"><span class="ico">⚠️</span>유의사항</button>
-      <button class="content-option" data-type="안내사항"><span class="ico">ℹ️</span>안내사항</button>
-      <button class="content-option" data-type="수하물규정"><span class="ico">🧳</span>수하물규정</button>
-      <button class="content-option" data-type="자주묻는 질문"><span class="ico">❓</span>자주묻는 질문</button>
-      <button class="content-option" data-type="취소환불규정"><span class="ico">↩️</span>취소환불규정</button>
-    </div>
-    <div class="modal-foot">
-      <button class="btn-ghost" id="add-content-cancel">취소</button>
-    </div>
-  </div>
-</div>
-
-<!-- Modal: 기본정보 가져오기 -->
-<div class="modal-backdrop" id="modal-import">
-  <div class="modal">
-    <div class="modal-head">
-      <div class="modal-title">기본정보 가져오기</div>
-    </div>
-    <div class="modal-body" id="modal-body-text">
-      선택하신 타겟의 기본 콘텐츠 <strong id="modal-categories">(숙소, 객실, 식사)</strong> 정보를 가지고 오시겠습니까?
-    </div>
-    <div class="modal-foot">
-      <button class="btn-ghost" id="modal-cancel">취소</button>
-      <button class="btn-primary" id="modal-confirm">가져오기</button>
-    </div>
-  </div>
 </div>
 
 <script>
-document.querySelectorAll('.cat-chip').forEach(chip => {
-  chip.addEventListener('click', () => {
-    document.querySelectorAll('.cat-chip').forEach(c => c.classList.remove('active'));
-    chip.classList.add('active');
-  });
-});
-
-const modal = document.getElementById('modal-import');
-const modalCategories = document.getElementById('modal-categories');
-const targetSelect = document.getElementById('target-type');
-
-const BASE_MAP = {
-  '숙박권': '(숙소, 객실, 식사)',
-  '항공권': '(항공사, 국가, 여행지)',
-  '투어/티켓': '(스팟·체험)'
-};
-
-const openModal = () => {
-  const t = targetSelect.value;
-  modalCategories.textContent = BASE_MAP[t] || '(연결된 기본 콘텐츠 없음)';
-  modal.classList.add('open');
-};
-const closeModal = () => modal.classList.remove('open');
-document.getElementById('btn-import-base').addEventListener('click', openModal);
-document.getElementById('modal-cancel').addEventListener('click', closeModal);
-document.getElementById('modal-confirm').addEventListener('click', closeModal);
-modal.addEventListener('click', (e) => { if (e.target === modal) closeModal(); });
-
-// 콘텐츠 추가 모달
-const addModal = document.getElementById('modal-add-content');
-const openAddModal = () => addModal.classList.add('open');
-const closeAddModal = () => addModal.classList.remove('open');
-document.getElementById('btn-add-content').addEventListener('click', openAddModal);
-document.getElementById('add-content-cancel').addEventListener('click', closeAddModal);
-addModal.addEventListener('click', (e) => { if (e.target === addModal) closeAddModal(); });
-document.querySelectorAll('.content-option').forEach(opt => {
-  opt.addEventListener('click', () => closeAddModal());
-});
+function onCategoryChange() {
+  const cat = document.getElementById('category-select').value;
+  const isFaq = cat === '자주묻는질문';
+  document.getElementById('detail-standard').style.display = isFaq ? 'none' : 'block';
+  document.getElementById('detail-faq').style.display = isFaq ? 'block' : 'none';
+}
+function onTargetChange() {
+  const t = document.getElementById('target-type').value;
+  const row = document.getElementById('target-row');
+  const sel = document.getElementById('target-id');
+  // 항공권 외 카테고리 수하물규정 disable 시뮬
+  const luggage = document.getElementById('opt-luggage');
+  luggage.disabled = (t !== '항공권' && t !== '');
+  if (!t) { row.style.display = 'none'; return; }
+  row.style.display = 'grid';
+  const SAMPLES = {
+    '숙박권': ['제이파크 / 빅토리아 호이안 비치 리조트 앤 스파', '솔바이멜리아 푸꾸옥', '인터컨티넨탈 다낭 선 페닌슐라'],
+    '항공권': ['베트남항공 ICN-DAD 직항', '아시아나항공 ICN-SGN', '제주항공 ICN-DAD'],
+    '투어/티켓': ['다낭 바나힐 1일 투어', '호이안 야경 투어', '푸꾸옥 빈원더스 입장권'],
+    '숙소': ['빅토리아 호이안', '솔바이멜리아 푸꾸옥', '인터컨티넨탈 다낭'],
+    '항공사': ['베트남항공', '아시아나항공', '대한항공'],
+    '국가': ['베트남', '태국', '일본'],
+    '여행지': ['다낭', '호이안', '푸꾸옥'],
+    '공통': ['(전체 공통 — 별도 타겟 선택 없음)']
+  };
+  const opts = SAMPLES[t] || ['(타겟 데이터 로드)'];
+  sel.innerHTML = '<option value="">선택해주세요</option>' + opts.map(o => `<option>${o}</option>`).join('');
+}
 </script>
 
 </body>
