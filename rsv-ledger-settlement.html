@@ -112,7 +112,7 @@ table.ledger{width:100%;border-collapse:collapse;font-size:12px;}
 </div>
 
 <div class="changelog">
-  <strong>2026-06-30 수정사항</strong> · ① 예약 카테고리에서 트립할인·채널할인 4종(2000/2001/3000/3001) 제거 (여행사 할인 2002/3002만 유지) · ② 정산 카테고리의 <s>플랫폼이용료(6020)</s> → <strong>공제금액(6030)</strong>으로 교체 (출처: 엑스트라이버 정산상세 공제금액 컬럼) · ③ PG수수료(6010) → <strong>6010 공급가 + 6011 VAT</strong> 두 줄로 분리
+  <strong>2026-06-30 수정사항</strong> · ① 예약 카테고리에서 트립할인·채널할인 4종(2000/2001/3000/3001) 제거 (여행사 할인 2002/3002만 유지) · ② 정산 카테고리의 <s>플랫폼이용료(6020)</s> → <strong>공제금액(6030)</strong>으로 교체 (출처: 엑스트라이버 정산상세 공제금액 컬럼) · ③ PG수수료(6010) → <strong>6010 공급가 + 6011 부가세</strong> 두 줄로 분리
 </div>
 
 <div class="info-banner">
@@ -275,7 +275,7 @@ table.ledger{width:100%;border-collapse:collapse;font-size:12px;}
           <td><span class="src src-pg">PG-NICE</span><br><span style="font-size:10px;color:rgba(0,0,0,.4);">pg_fee_supply</span></td>
           <td>2025-07-08</td><td><span class="status-chip st-paid">계산완료</span></td>
         </tr>
-        <tr data-src="pg-nice-settle" class="new-row"><td class="clsfy">PG수수료(VAT) <span style="font-size:10px;color:#c41d7f;">(분리)</span></td><td class="code">6011</td>
+        <tr data-src="pg-nice-settle" class="new-row"><td class="clsfy">PG 수수료 부가세 <span style="font-size:10px;color:#c41d7f;">(분리)</span></td><td class="code">6011</td>
           
           <td>0</td><td>0</td>
           <td>0</td><td>0</td>
@@ -327,7 +327,7 @@ table.ledger{width:100%;border-collapse:collapse;font-size:12px;}
           <td>0</td><td class="sign-neg">-1</td>
           <td>0</td><td class="sign-pos">+1</td>
           <td class="amount">1,120</td>
-          <td><span class="src src-pg">PG-NICE</span><br><span style="font-size:10px;color:rgba(0,0,0,.4);">공급가1,018 + VAT102</span></td>
+          <td><span class="src src-pg">PG-NICE</span><br><span style="font-size:10px;color:rgba(0,0,0,.4);">공급가1,018 + 부가세102</span></td>
           <td>2025-07-08</td><td><span class="status-chip st-paid">실행완료</span></td>
         </tr>
 
@@ -460,7 +460,7 @@ table.ledger{width:100%;border-collapse:collapse;font-size:12px;}
           <dt>pg_fee_total</dt><dd>1,120</dd>
           <dt>pg_settlement_date</dt><dd>2025-07-08</dd>
         </dl>
-        <div class="src-row-meta" style="margin-top:6px;color:#c41d7f;">→ <strong>6010 공급가 + 6011 VAT</strong> + 5010 + 5020 + 5021 (5-item)</div>
+        <div class="src-row-meta" style="margin-top:6px;color:#c41d7f;">→ <strong>6010 공급가 + 6011 부가세</strong> + 5010 + 5020 + 5021 (5-item)</div>
       </div>
 
       <div class="src-row" data-target="ch-street11-settle">
@@ -542,7 +542,7 @@ table.ledger{width:100%;border-collapse:collapse;font-size:12px;}
       <div class="card-head">매핑 규칙 요약 (수정됨)</div>
       <div style="padding:12px 14px;font-size:11px;line-height:1.65;color:rgba(0,0,0,.75);">
         <p><strong>1) PG 결제 row</strong> → 4001 결제 1건. 취소면 7021 환불실행.</p>
-        <p style="margin-top:6px;"><strong>2) PG 정산 row</strong> → <span style="color:#c41d7f;font-weight:600;">6010(공급가) + 6011(VAT)</span> + 5010 + 5020 + 5021. <code>pg_fee_supply</code>/<code>pg_fee_vat</code>를 분리해서 적재.</p>
+        <p style="margin-top:6px;"><strong>2) PG 정산 row</strong> → <span style="color:#c41d7f;font-weight:600;">6010(공급가) + 6011(부가세)</span> + 5010 + 5020 + 5021. <code>pg_fee_supply</code>/<code>pg_fee_vat</code>를 분리해서 적재.</p>
         <p style="margin-top:6px;"><strong>3) 채널 정산 row</strong> → 6000 + 5000. 채널결제 타입(11번가/SSG/THT/카카오쇼핑)이면 4001도 함께.</p>
         <p style="margin-top:6px;"><strong>4) 엑스트라이버 정산상세</strong> → 여행사할인(2002) + 여행사쿠폰(3002) + <span style="color:#c41d7f;font-weight:600;">공제금액(6030)</span>. <s>플랫폼이용료(6020)</s>는 폐기, 회사부담 할인 보정인 <strong>공제금액 컬럼</strong>이 직접 여행사 정산에 반영.</p>
         <p style="margin-top:6px;"><strong>5) 트립할인·채널할인</strong>은 예약 시점 ledger row로 분리하지 않고, 정산 시 <strong>공제금액(6030)</strong>으로 합쳐서 처리.</p>
