@@ -38,7 +38,6 @@ body { font-family: 'Pretendard','Apple SD Gothic Neo',sans-serif; font-size: 13
 .card-head .sub{font-size:11px;color:rgba(0,0,0,.45);font-weight:400;margin-left:6px;}
 .card-body{padding:0;}
 
-/* LEDGER TABLE */
 .ledger-wrap{overflow-x:auto;}
 table.ledger{width:100%;border-collapse:collapse;font-size:12px;}
 .ledger thead th{padding:8px 6px;text-align:center;background:#fafafa;border-bottom:1px solid #e8e8e8;font-weight:600;color:rgba(0,0,0,.65);white-space:nowrap;}
@@ -56,11 +55,11 @@ table.ledger{width:100%;border-collapse:collapse;font-size:12px;}
 .ledger .sign-neg{color:#cf1322;}
 .ledger .sign-zero{color:rgba(0,0,0,.25);}
 .ledger .check-row td{background:#f6ffed !important;font-weight:700;color:#389e0d;}
+.ledger tbody tr.new-row td{background:#fff0f6;}
+.ledger tbody tr.new-row:hover td{background:#ffadd2 !important;}
 
-/* highlight when external source clicked */
 .ledger tbody tr.hl td{background:#fff1b8 !important;}
 
-/* source chip */
 .src{display:inline-flex;align-items:center;gap:4px;padding:2px 6px;border-radius:4px;font-size:10px;font-weight:600;line-height:1;cursor:default;}
 .src-pg{background:#fff0f6;color:#c41d7f;border:1px solid #ffadd2;}
 .src-ch{background:#f6ffed;color:#389e0d;border:1px solid #b7eb8f;}
@@ -74,7 +73,6 @@ table.ledger{width:100%;border-collapse:collapse;font-size:12px;}
 .st-calc{background:#e6f4ff;color:#0958d9;border:1px solid #91caff;}
 .st-paid{background:#f6ffed;color:#389e0d;border:1px solid #b7eb8f;}
 
-/* SIDE PANEL — external settlement rows */
 .src-row{padding:10px 14px;border-bottom:1px solid #f0f0f0;cursor:pointer;transition:background .15s;}
 .src-row:hover{background:#fffbe6;}
 .src-row.active{background:#fff7e6;border-left:3px solid #d48806;}
@@ -94,6 +92,9 @@ table.ledger{width:100%;border-collapse:collapse;font-size:12px;}
 
 .foot-note{padding:10px 16px;font-size:11px;color:rgba(0,0,0,.45);border-top:1px solid #f0f0f0;}
 .foot-note code{background:#f5f5f5;padding:1px 4px;border-radius:3px;font-size:10px;}
+
+.changelog{margin:12px 24px 0;background:#fff7e6;border:1px solid #ffd666;border-radius:8px;padding:10px 14px;font-size:12px;color:#874d00;}
+.changelog strong{color:#874d00;}
 </style>
 </head>
 <body>
@@ -110,8 +111,12 @@ table.ledger{width:100%;border-collapse:collapse;font-size:12px;}
   <span class="tag tag-status">출발대기</span>
 </div>
 
+<div class="changelog">
+  <strong>2026-06-30 수정사항</strong> · ① 예약 카테고리에서 트립할인·채널할인 4종(2000/2001/3000/3001) 제거 (여행사 할인 2002/3002만 유지) · ② 정산 카테고리의 <s>플랫폼이용료(6020)</s> → <strong>공제금액(6030)</strong>으로 교체 (출처: 엑스트라이버 정산상세 공제금액 컬럼) · ③ PG수수료(6010) → <strong>6010 공급가 + 6011 VAT</strong> 두 줄로 분리
+</div>
+
 <div class="info-banner">
-  <strong>읽는 방법</strong> · 좌측 표는 시뮬레이터 `예약원장-상문`과 동일한 5주체×(손익/자금) 매트릭스입니다. 각 row 우측 <b>출처</b> 칩이 어떤 외부 정산데이터에서 자동 변환되었는지 보여줍니다. 우측 패널의 정산 row를 클릭하면 어떤 ledger item으로 들어왔는지 표시됩니다.
+  <strong>읽는 방법</strong> · 좌측은 5주체×(손익/자금) 매트릭스, 각 row의 <b>출처</b>는 어떤 외부 정산데이터에서 변환됐는지. 우측 정산 row를 클릭하면 매핑된 ledger item이 하이라이트됩니다. <b>핑크 배경</b> = 이번 수정으로 추가/변경된 라인.
 </div>
 
 <div class="summary">
@@ -129,7 +134,6 @@ table.ledger{width:100%;border-collapse:collapse;font-size:12px;}
 </div>
 
 <div class="layout">
-  <!-- ============ MAIN: LEDGER MATRIX ============ -->
   <div class="main-card">
     <div class="card-head">
       예약원장 매트릭스
@@ -162,8 +166,9 @@ table.ledger{width:100%;border-collapse:collapse;font-size:12px;}
           </tr>
         </thead>
         <tbody id="ledgerBody">
+
         <!-- ===== 예약 ===== -->
-        <tr data-src="auto"><td class="cat" rowspan="7">예약</td><td class="clsfy">상품정가</td><td class="code">1000</td>
+        <tr data-src="auto"><td class="cat" rowspan="3">예약</td><td class="clsfy">상품정가</td><td class="code">1000</td>
           <td class="sign-neg">-1</td><td class="sign-zero">0</td>
           <td class="sign-zero">0</td><td class="sign-zero">0</td>
           <td class="sign-zero">0</td><td class="sign-zero">0</td>
@@ -173,39 +178,11 @@ table.ledger{width:100%;border-collapse:collapse;font-size:12px;}
           <td><span class="src src-auto">예약 생성</span></td>
           <td>2025-06-30</td><td><span class="status-chip st-paid">계산완료</span></td>
         </tr>
-        <tr data-src="ch-street11"><td class="clsfy">특가할인(채널사)</td><td class="code">2000</td>
-          <td class="sign-pos">+1</td><td>0</td><td class="sign-neg">-1</td><td>0</td>
-          <td>0</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td>
-          <td class="amount">10,000</td>
-          <td><span class="src src-ch">채널-11번가</span><br><span style="font-size:10px;color:rgba(0,0,0,.4);">판매자추가할인</span></td>
-          <td>2025-06-30</td><td><span class="status-chip st-paid">계산완료</span></td>
-        </tr>
-        <tr data-src="auto"><td class="clsfy">특가할인(플랫폼)</td><td class="code">2001</td>
-          <td class="sign-pos">+1</td><td>0</td><td>0</td><td>0</td>
-          <td class="sign-neg">-1</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td>
-          <td class="amount">10,000</td>
-          <td><span class="src src-auto">트립특가</span></td>
-          <td>2025-06-30</td><td><span class="status-chip st-paid">계산완료</span></td>
-        </tr>
         <tr data-src="xtr"><td class="clsfy">특가할인(여행사)</td><td class="code">2002</td>
           <td class="sign-pos">+1</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td>
           <td class="sign-neg">-1</td><td>0</td><td>0</td><td>0</td>
           <td class="amount">10,000</td>
           <td><span class="src src-xtr">엑스트라이버</span><br><span style="font-size:10px;color:rgba(0,0,0,.4);">여행사할인금액</span></td>
-          <td>2025-06-30</td><td><span class="status-chip st-paid">계산완료</span></td>
-        </tr>
-        <tr data-src="ch-street11"><td class="clsfy">쿠폰할인(채널사)</td><td class="code">3000</td>
-          <td class="sign-pos">+1</td><td>0</td><td class="sign-neg">-1</td><td>0</td>
-          <td>0</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td>
-          <td class="amount">5,000</td>
-          <td><span class="src src-ch">채널-11번가</span><br><span style="font-size:10px;color:rgba(0,0,0,.4);">판매자기본할인</span></td>
-          <td>2025-06-30</td><td><span class="status-chip st-paid">계산완료</span></td>
-        </tr>
-        <tr data-src="auto"><td class="clsfy">쿠폰할인(플랫폼)</td><td class="code">3001</td>
-          <td class="sign-pos">+1</td><td>0</td><td>0</td><td>0</td>
-          <td class="sign-neg">-1</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td>
-          <td class="amount">5,000</td>
-          <td><span class="src src-auto">트립쿠폰</span></td>
           <td>2025-06-30</td><td><span class="status-chip st-paid">계산완료</span></td>
         </tr>
         <tr data-src="xtr"><td class="clsfy">쿠폰할인(여행사)</td><td class="code">3002</td>
@@ -244,34 +221,42 @@ table.ledger{width:100%;border-collapse:collapse;font-size:12px;}
         <tr class="cat-sep"><td colspan="18"></td></tr>
 
         <!-- ===== 정산 ===== -->
-        <tr data-src="xtr"><td class="cat" rowspan="7">정산</td><td class="clsfy">플랫폼이용료</td><td class="code">6020</td>
+        <tr data-src="xtr" class="new-row"><td class="cat" rowspan="8">정산</td><td class="clsfy">공제금액 <span style="font-size:10px;color:#c41d7f;">(NEW)</span></td><td class="code">6030</td>
           <td>0</td><td>0</td><td>0</td><td>0</td>
           <td class="sign-pos">+1</td><td>0</td>
           <td class="sign-neg">-1</td><td>0</td><td>0</td><td>0</td>
           <td class="amount">60,000</td>
-          <td><span class="src src-xtr">엑스트라이버</span><br><span style="font-size:10px;color:rgba(0,0,0,.4);">서비스이용료</span></td>
+          <td><span class="src src-xtr">엑스트라이버</span><br><span style="font-size:10px;color:rgba(0,0,0,.4);">정산상세 공제금액 컬럼</span></td>
           <td>2025-07-08</td><td><span class="status-chip st-paid">계산완료</span></td>
         </tr>
         <tr data-src="ch-street11-settle"><td class="clsfy">채널사수수료</td><td class="code">6000</td>
           <td>0</td><td>0</td><td class="sign-pos">+1</td><td>0</td>
           <td class="sign-neg">-1</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td>
           <td class="amount">22,400</td>
-          <td><span class="src src-ch">채널-11번가</span><br><span style="font-size:10px;color:rgba(0,0,0,.4);">채널수수료-확정</span></td>
+          <td><span class="src src-ch">채널-11번가</span><br><span style="font-size:10px;color:rgba(0,0,0,.4);">channel_commission_total_confirmed</span></td>
           <td>2025-07-15</td><td><span class="status-chip st-paid">계산완료</span></td>
         </tr>
-        <tr data-src="pg-nice-settle"><td class="clsfy">PG수수료</td><td class="code">6010</td>
+        <tr data-src="pg-nice-settle" class="new-row"><td class="clsfy">PG수수료(공급가) <span style="font-size:10px;color:#c41d7f;">(분리)</span></td><td class="code">6010</td>
           <td>0</td><td>0</td><td>0</td><td>0</td>
           <td class="sign-neg">-1</td><td>0</td><td>0</td><td>0</td>
           <td class="sign-pos">+1</td><td>0</td>
-          <td class="amount">1,120</td>
-          <td><span class="src src-pg">PG-NICE</span><br><span style="font-size:10px;color:rgba(0,0,0,.4);">pg_fee_total</span></td>
+          <td class="amount">1,018</td>
+          <td><span class="src src-pg">PG-NICE</span><br><span style="font-size:10px;color:rgba(0,0,0,.4);">pg_fee_supply</span></td>
+          <td>2025-07-08</td><td><span class="status-chip st-paid">계산완료</span></td>
+        </tr>
+        <tr data-src="pg-nice-settle" class="new-row"><td class="clsfy">PG수수료(VAT) <span style="font-size:10px;color:#c41d7f;">(분리)</span></td><td class="code">6011</td>
+          <td>0</td><td>0</td><td>0</td><td>0</td>
+          <td class="sign-neg">-1</td><td>0</td><td>0</td><td>0</td>
+          <td class="sign-pos">+1</td><td>0</td>
+          <td class="amount">102</td>
+          <td><span class="src src-pg">PG-NICE</span><br><span style="font-size:10px;color:rgba(0,0,0,.4);">pg_fee_vat</span></td>
           <td>2025-07-08</td><td><span class="status-chip st-paid">계산완료</span></td>
         </tr>
         <tr data-src="pg-nice-settle"><td class="clsfy">PGto여행사</td><td class="code">5010</td>
           <td>0</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td>
           <td>0</td><td class="sign-pos">+1</td><td>0</td><td class="sign-neg">-1</td>
           <td class="amount">1,080,000</td>
-          <td><span class="src src-pg">PG-NICE</span><br><span style="font-size:10px;color:rgba(0,0,0,.4);">pg_settlement_amount</span></td>
+          <td><span class="src src-pg">PG-NICE</span><br><span style="font-size:10px;color:rgba(0,0,0,.4);">pg_settlement_amount(여행사몫)</span></td>
           <td>2025-07-08</td><td><span class="status-chip st-paid">실행완료</span></td>
         </tr>
         <tr data-src="pg-nice-settle"><td class="clsfy">PGto플랫폼</td><td class="code">5020</td>
@@ -279,7 +264,7 @@ table.ledger{width:100%;border-collapse:collapse;font-size:12px;}
           <td>0</td><td class="sign-pos">+1</td>
           <td>0</td><td>0</td><td>0</td><td class="sign-neg">-1</td>
           <td class="amount">40,000</td>
-          <td><span class="src src-pg">PG-NICE</span><br><span style="font-size:10px;color:rgba(0,0,0,.4);">정산 분담</span></td>
+          <td><span class="src src-pg">PG-NICE</span><br><span style="font-size:10px;color:rgba(0,0,0,.4);">pg_settlement_amount(플랫폼몫)</span></td>
           <td>2025-07-08</td><td><span class="status-chip st-paid">실행완료</span></td>
         </tr>
         <tr data-src="ch-street11-settle"><td class="clsfy">플랫폼to채널</td><td class="code">5000</td>
@@ -287,7 +272,7 @@ table.ledger{width:100%;border-collapse:collapse;font-size:12px;}
           <td>0</td><td class="sign-neg">-1</td>
           <td>0</td><td>0</td><td>0</td><td>0</td>
           <td class="amount">22,400</td>
-          <td><span class="src src-ch">채널-11번가</span><br><span style="font-size:10px;color:rgba(0,0,0,.4);">channel_settlement_amount</span></td>
+          <td><span class="src src-ch">채널-11번가</span><br><span style="font-size:10px;color:rgba(0,0,0,.4);">channel_settlement_amount 차감</span></td>
           <td>2025-07-15</td><td><span class="status-chip st-paid">실행완료</span></td>
         </tr>
         <tr data-src="pg-nice-settle"><td class="clsfy">플랫폼toPG수수료</td><td class="code">5021</td>
@@ -295,7 +280,7 @@ table.ledger{width:100%;border-collapse:collapse;font-size:12px;}
           <td>0</td><td class="sign-neg">-1</td>
           <td>0</td><td>0</td><td>0</td><td class="sign-pos">+1</td>
           <td class="amount">1,120</td>
-          <td><span class="src src-pg">PG-NICE</span></td>
+          <td><span class="src src-pg">PG-NICE</span><br><span style="font-size:10px;color:rgba(0,0,0,.4);">공급가1,018 + VAT102</span></td>
           <td>2025-07-08</td><td><span class="status-chip st-paid">실행완료</span></td>
         </tr>
 
@@ -313,7 +298,7 @@ table.ledger{width:100%;border-collapse:collapse;font-size:12px;}
           <td>0</td><td>0</td><td>0</td><td class="sign-neg">-1</td>
           <td>0</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td>
           <td class="amount">22,400</td>
-          <td><span class="src src-ch">채널-11번가</span><br><span style="font-size:10px;color:rgba(0,0,0,.4);">정산입금 확인</span></td>
+          <td><span class="src src-ch">채널-11번가</span><br><span style="font-size:10px;color:rgba(0,0,0,.4);">입금 매칭</span></td>
           <td>2025-07-20</td><td><span class="status-chip st-paid">실행완료</span></td>
         </tr>
         <tr data-src="auto"><td class="clsfy">플랫폼잔액결산</td><td class="code">9002</td>
@@ -343,7 +328,7 @@ table.ledger{width:100%;border-collapse:collapse;font-size:12px;}
           <td>0</td><td>0</td>
           <td>0</td><td>0</td>
           <td class="amount">∑=0 ✓</td>
-          <td colspan="3" style="text-align:left;">고객 손익(-1,120,000) + 사업주체 손익(+1,120,000) = 0 · 채널/플랫폼/여행사/PG 자금잔액 = 0</td>
+          <td colspan="3" style="text-align:left;">고객 손익(-1,120,000) + 사업주체 손익(+1,120,000) = 0 · 모든 자금 잔액 = 0</td>
         </tr>
         </tbody>
       </table>
@@ -360,11 +345,10 @@ table.ledger{width:100%;border-collapse:collapse;font-size:12px;}
     </div>
 
     <div class="foot-note">
-      v3_settlements 테이블의 row 1개는 ledger items 1~N개를 생성합니다. 각 ledger item에는 <code>source_settlement_id</code>가 박혀 있어 역추적이 가능합니다.
+      v3_settlements 테이블의 row 1개는 ledger items 1~N개를 생성. 각 ledger item에는 <code>source_settlement_id</code>가 박혀 역추적 가능.
     </div>
   </div>
 
-  <!-- ============ SIDE: EXTERNAL SETTLEMENT ROWS ============ -->
   <div class="side">
 
     <div class="main-card">
@@ -384,6 +368,7 @@ table.ledger{width:100%;border-collapse:collapse;font-size:12px;}
           <dt>pg_transaction_date</dt><dd>2025-06-30</dd>
           <dt>trip_reservation_code</dt><dd>RB2025063012345</dd>
         </dl>
+        <div class="src-row-meta" style="margin-top:6px;color:#c41d7f;">→ 4001 고객결제(PG)</div>
       </div>
 
       <div class="src-row" data-target="pg-nice-pay2">
@@ -395,8 +380,8 @@ table.ledger{width:100%;border-collapse:collapse;font-size:12px;}
         <dl class="src-kv">
           <dt>pg_transaction_amount</dt><dd>150,000</dd>
           <dt>pg_transaction_date</dt><dd>2025-07-02</dd>
-          <dt>trip_reservation_code</dt><dd>RB2025063012345</dd>
         </dl>
+        <div class="src-row-meta" style="margin-top:6px;color:#c41d7f;">→ 4001 추가비용결제(PG)</div>
       </div>
 
       <div class="src-row" data-target="pg-nice-settle">
@@ -407,26 +392,12 @@ table.ledger{width:100%;border-collapse:collapse;font-size:12px;}
         <div class="src-row-meta">아임포트_정산데이터_20250708.csv · row 9201</div>
         <dl class="src-kv">
           <dt>pg_settlement_amount</dt><dd>1,118,880</dd>
+          <dt><strong style="color:#c41d7f;">pg_fee_supply</strong></dt><dd><strong>1,018</strong></dd>
+          <dt><strong style="color:#c41d7f;">pg_fee_vat</strong></dt><dd><strong>102</strong></dd>
           <dt>pg_fee_total</dt><dd>1,120</dd>
-          <dt>pg_fee_supply</dt><dd>1,018</dd>
-          <dt>pg_fee_vat</dt><dd>102</dd>
           <dt>pg_settlement_date</dt><dd>2025-07-08</dd>
         </dl>
-        <div class="src-row-meta" style="margin-top:6px;color:#c41d7f;">→ 6010 + 5010 + 5020 + 5021 (4-item 생성)</div>
-      </div>
-
-      <div class="src-row" data-target="ch-street11">
-        <div class="src-row-head">
-          <span class="src src-ch">채널-11번가</span>
-          <span class="src-row-title">예약 시점 할인 분담</span>
-        </div>
-        <div class="src-row-meta">11번가_정산데이터_20250715.csv · row 2034</div>
-        <dl class="src-kv">
-          <dt>판매자기본할인</dt><dd>5,000</dd>
-          <dt>판매자추가할인</dt><dd>10,000</dd>
-          <dt>channel_order_code</dt><dd>20250630-7700101</dd>
-        </dl>
-        <div class="src-row-meta" style="margin-top:6px;color:#389e0d;">→ 2000 + 3000 (할인 분담)</div>
+        <div class="src-row-meta" style="margin-top:6px;color:#c41d7f;">→ <strong>6010 공급가 + 6011 VAT</strong> + 5010 + 5020 + 5021 (5-item)</div>
       </div>
 
       <div class="src-row" data-target="ch-street11-settle">
@@ -441,7 +412,7 @@ table.ledger{width:100%;border-collapse:collapse;font-size:12px;}
           <dt>channel_commission_total_confirmed</dt><dd>22,400</dd>
           <dt>channel_settlement_date</dt><dd>2025-07-15</dd>
         </dl>
-        <div class="src-row-meta" style="margin-top:6px;color:#389e0d;">→ 6000 + 5000 (수수료 + 정산이전)</div>
+        <div class="src-row-meta" style="margin-top:6px;color:#389e0d;">→ 6000 채널사수수료 + 5000 플랫폼to채널</div>
       </div>
 
       <div class="src-row" data-target="ch-street11-paid">
@@ -460,7 +431,7 @@ table.ledger{width:100%;border-collapse:collapse;font-size:12px;}
       <div class="src-row" data-target="xtr">
         <div class="src-row-head">
           <span class="src src-xtr">엑스트라이버</span>
-          <span class="src-row-title">예약 정산상세 (집계)</span>
+          <span class="src-row-title">예약 정산상세</span>
         </div>
         <div class="src-row-meta">ADMIN_정산상세조회-정산기준일_20250708</div>
         <dl class="src-kv">
@@ -468,10 +439,11 @@ table.ledger{width:100%;border-collapse:collapse;font-size:12px;}
           <dt>여행사할인금액</dt><dd>10,000</dd>
           <dt>트립할인금액</dt><dd>5,000</dd>
           <dt>서비스이용료</dt><dd>60,000</dd>
+          <dt><strong style="color:#c41d7f;">공제금액</strong></dt><dd><strong>60,000</strong></dd>
           <dt>정산금액</dt><dd>1,080,000</dd>
           <dt>지급예정일</dt><dd>2025-07-15</dd>
         </dl>
-        <div class="src-row-meta" style="margin-top:6px;color:#08979c;">→ 2002 + 3002 + 6020 (분담·이용료)</div>
+        <div class="src-row-meta" style="margin-top:6px;color:#08979c;">→ 2002 + 3002 + <strong>6030 공제금액</strong></div>
       </div>
 
       <div class="src-row" data-target="xtr-payout">
@@ -504,13 +476,13 @@ table.ledger{width:100%;border-collapse:collapse;font-size:12px;}
     </div>
 
     <div class="main-card">
-      <div class="card-head">매핑 규칙 요약</div>
+      <div class="card-head">매핑 규칙 요약 (수정됨)</div>
       <div style="padding:12px 14px;font-size:11px;line-height:1.65;color:rgba(0,0,0,.75);">
-        <p><strong>1) PG 결제 row 적재</strong> → 4001 결제 1건 생성. transaction_type=취소면 7021 환불실행.</p>
-        <p style="margin-top:6px;"><strong>2) PG 정산 row 적재</strong> → 6010 + 5010 + 5020 (+ 5021) 4-item 동시 생성. 분담 금액은 manifest에 정의된 룰로 계산.</p>
-        <p style="margin-top:6px;"><strong>3) 채널 정산 row 적재</strong> → 6000 + 5000 생성. channel_payment_type=채널결제면 4001도 함께(11번가/SSG/THT/카카오쇼핑).</p>
-        <p style="margin-top:6px;"><strong>4) 엑스트라이버 정산상세</strong> → 2002/3002/6020 분담 항목 보정 + 9000 지급예정.</p>
-        <p style="margin-top:6px;"><strong>5) 매핑 실패</strong> (trip_reservation_code 미매칭) → ledger 미생성, <code>mapping_status='ambiguous'</code>로 어드민 워크큐로 빠짐.</p>
+        <p><strong>1) PG 결제 row</strong> → 4001 결제 1건. 취소면 7021 환불실행.</p>
+        <p style="margin-top:6px;"><strong>2) PG 정산 row</strong> → <span style="color:#c41d7f;font-weight:600;">6010(공급가) + 6011(VAT)</span> + 5010 + 5020 + 5021. <code>pg_fee_supply</code>/<code>pg_fee_vat</code>를 분리해서 적재.</p>
+        <p style="margin-top:6px;"><strong>3) 채널 정산 row</strong> → 6000 + 5000. 채널결제 타입(11번가/SSG/THT/카카오쇼핑)이면 4001도 함께.</p>
+        <p style="margin-top:6px;"><strong>4) 엑스트라이버 정산상세</strong> → 여행사할인(2002) + 여행사쿠폰(3002) + <span style="color:#c41d7f;font-weight:600;">공제금액(6030)</span>. <s>플랫폼이용료(6020)</s>는 폐기, 회사부담 할인 보정인 <strong>공제금액 컬럼</strong>이 직접 여행사 정산에 반영.</p>
+        <p style="margin-top:6px;"><strong>5) 트립할인·채널할인</strong>은 예약 시점 ledger row로 분리하지 않고, 정산 시 <strong>공제금액(6030)</strong>으로 합쳐서 처리.</p>
       </div>
     </div>
 
@@ -519,13 +491,12 @@ table.ledger{width:100%;border-collapse:collapse;font-size:12px;}
 
 <div class="checksum-card">
   <div class="lab">검산식 (시뮬레이터 이미지 그대로)</div>
-  <div class="eq">고객 손익 합계 + 사업주체 손익 합계 = -1,120,000 + 1,120,000 = <strong>0</strong></div>
-  <div class="eq">채널/플랫폼/여행사/PG 자금 잔액 = <strong>0</strong></div>
+  <div class="eq">고객 손익 합계 + 사업주체 손익 합계 = 0</div>
+  <div class="eq">채널/플랫폼/여행사/PG 자금 잔액 = 0</div>
   <div class="ok">✓ 결산 통과</div>
 </div>
 
 <script>
-// click external source row -> highlight matching ledger items
 document.querySelectorAll('.src-row').forEach(row => {
   row.addEventListener('click', () => {
     document.querySelectorAll('.src-row').forEach(r => r.classList.remove('active'));
@@ -533,7 +504,6 @@ document.querySelectorAll('.src-row').forEach(row => {
     row.classList.add('active');
     const target = row.dataset.target;
     document.querySelectorAll(`.ledger tbody tr[data-src="${target}"]`).forEach(r => r.classList.add('hl'));
-    // scroll first highlighted into view
     const first = document.querySelector(`.ledger tbody tr[data-src="${target}"]`);
     if (first) first.scrollIntoView({behavior:'smooth', block:'center'});
   });
