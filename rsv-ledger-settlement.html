@@ -112,7 +112,7 @@ table.ledger{width:100%;border-collapse:collapse;font-size:12px;}
 </div>
 
 <div class="changelog">
-  <strong>2026-06-30 수정사항</strong> · ① 예약 카테고리에서 트립할인·채널할인 4종(2000/2001/3000/3001) 제거 (여행사 할인 2002/3002만 유지) · ② 정산 카테고리의 <s>플랫폼이용료(6020)</s> → <strong>공제금액(6030)</strong>으로 교체 (출처: 엑스트라이버 정산상세 공제금액 컬럼) · ③ PG수수료(6010) → <strong>6010 공급가 + 6011 부가세</strong> 두 줄로 분리
+  <strong>2026-06-30 갱신</strong> · 실제 BE 코드체계(<a href="https://github.com/extriber/platform-svc-reservations/blob/master/tripstore-reservations-application/src/main/kotlin/kr/tripstore/reservations/domain/ledger/SystemLedgerItemType.kt" target="_blank" style="color:#874d00;text-decoration:underline;">SystemLedgerItemType.kt</a>) 기준으로 재정렬 · ① 쿠폰할인 코드 3xxx → <strong>2200/2201/2202</strong>로 이동 (할인은 2xxx) · ② 트립·채널 할인 라인 복원 · ③ 공제금액(6030) 폐기 → <strong>6020 플랫폼이용료</strong> 복원, 공제금액은 BE summary API의 도출값 · ④ PG수수료 공급가/부가세 분리 폐기 → <strong>6010 단일</strong> (lineage는 settlement 도메인 책임) · ⑤ 정산 자금이전 5xxx → <strong>7xxx</strong>로 이동 (5xxx는 예약취소용)
 </div>
 
 <div class="info-banner">
@@ -168,37 +168,46 @@ table.ledger{width:100%;border-collapse:collapse;font-size:12px;}
         <tbody id="ledgerBody">
 
         <!-- ===== 예약 ===== -->
-        <tr data-src="auto"><td class="cat" rowspan="3">예약</td><td class="clsfy">상품정가</td><td class="code">1000</td>
-          
-          <td class="sign-neg">-1</td><td class="sign-zero">0</td>
-          <td class="sign-pos">+1</td><td class="sign-zero">0</td>
-          <td class="sign-zero">0</td><td class="sign-zero">0</td>
-          <td class="sign-zero">0</td><td class="sign-zero">0</td>
-          <td class="sign-zero">0</td><td class="sign-zero">0</td>
+        <tr data-src="auto"><td class="cat" rowspan="7">예약</td><td class="clsfy">상품정가</td><td class="code">1000</td>
+          <td class="sign-neg">-1</td><td class="sign-zero">0</td><td class="sign-pos">+1</td><td class="sign-zero">0</td><td class="sign-zero">0</td><td class="sign-zero">0</td><td class="sign-zero">0</td><td class="sign-zero">0</td><td class="sign-zero">0</td><td class="sign-zero">0</td>
           <td class="amount">1,000,000</td>
-          <td><span class="src src-auto">예약 생성</span></td>
+          <td><span class="src src-auto">예약 생성</span><br><span style="font-size:10px;color:rgba(0,0,0,.4);">LIST_PRICE</span></td>
           <td>2025-06-30</td><td><span class="status-chip st-paid">계산완료</span></td>
         </tr>
-        <tr data-src="xtr"><td class="clsfy">특가할인(여행사)</td><td class="code">2002</td>
-          
-          <td class="sign-pos">+1</td><td>0</td>
-          <td class="sign-neg">-1</td><td>0</td>
-          <td>0</td><td>0</td>
-          <td>0</td><td>0</td>
-          <td>0</td><td>0</td>
+        <tr data-src="ch-street11-discount"><td class="clsfy">특가할인(채널)</td><td class="code">2000</td>
+          <td class="sign-pos">+1</td><td class="sign-zero">0</td><td class="sign-zero">0</td><td class="sign-zero">0</td><td class="sign-neg">-1</td><td class="sign-zero">0</td><td class="sign-zero">0</td><td class="sign-zero">0</td><td class="sign-zero">0</td><td class="sign-zero">0</td>
           <td class="amount">10,000</td>
-          <td><span class="src src-xtr">엑스트라이버</span><br><span style="font-size:10px;color:rgba(0,0,0,.4);">여행사할인금액</span></td>
+          <td><span class="src src-ch">채널-11번가</span><br><span style="font-size:10px;color:rgba(0,0,0,.4);">DISCOUNT_CHANNEL</span></td>
           <td>2025-06-30</td><td><span class="status-chip st-paid">계산완료</span></td>
         </tr>
-        <tr data-src="xtr"><td class="clsfy">쿠폰할인(여행사)</td><td class="code">3002</td>
-          
-          <td class="sign-pos">+1</td><td>0</td>
-          <td class="sign-neg">-1</td><td>0</td>
-          <td>0</td><td>0</td>
-          <td>0</td><td>0</td>
-          <td>0</td><td>0</td>
+        <tr data-src="auto-platform-discount"><td class="clsfy">특가할인(플랫폼)</td><td class="code">2001</td>
+          <td class="sign-pos">+1</td><td class="sign-zero">0</td><td class="sign-zero">0</td><td class="sign-zero">0</td><td class="sign-zero">0</td><td class="sign-zero">0</td><td class="sign-neg">-1</td><td class="sign-zero">0</td><td class="sign-zero">0</td><td class="sign-zero">0</td>
+          <td class="amount">10,000</td>
+          <td><span class="src src-auto">트립특가</span><br><span style="font-size:10px;color:rgba(0,0,0,.4);">DISCOUNT_PLATFORM</span></td>
+          <td>2025-06-30</td><td><span class="status-chip st-paid">계산완료</span></td>
+        </tr>
+        <tr data-src="xtr-supplier-discount"><td class="clsfy">특가할인(여행사)</td><td class="code">2002</td>
+          <td class="sign-pos">+1</td><td class="sign-zero">0</td><td class="sign-neg">-1</td><td class="sign-zero">0</td><td class="sign-zero">0</td><td class="sign-zero">0</td><td class="sign-zero">0</td><td class="sign-zero">0</td><td class="sign-zero">0</td><td class="sign-zero">0</td>
+          <td class="amount">10,000</td>
+          <td><span class="src src-xtr">엑스트라이버</span><br><span style="font-size:10px;color:rgba(0,0,0,.4);">DISCOUNT_SUPPLIER</span></td>
+          <td>2025-06-30</td><td><span class="status-chip st-paid">계산완료</span></td>
+        </tr>
+        <tr data-src="ch-street11-coupon"><td class="clsfy">쿠폰할인(채널)</td><td class="code">2200</td>
+          <td class="sign-pos">+1</td><td class="sign-zero">0</td><td class="sign-zero">0</td><td class="sign-zero">0</td><td class="sign-neg">-1</td><td class="sign-zero">0</td><td class="sign-zero">0</td><td class="sign-zero">0</td><td class="sign-zero">0</td><td class="sign-zero">0</td>
           <td class="amount">5,000</td>
-          <td><span class="src src-xtr">엑스트라이버</span></td>
+          <td><span class="src src-ch">채널-11번가</span><br><span style="font-size:10px;color:rgba(0,0,0,.4);">COUPON_CHANNEL</span></td>
+          <td>2025-06-30</td><td><span class="status-chip st-paid">계산완료</span></td>
+        </tr>
+        <tr data-src="auto-platform-coupon"><td class="clsfy">쿠폰할인(플랫폼)</td><td class="code">2201</td>
+          <td class="sign-pos">+1</td><td class="sign-zero">0</td><td class="sign-zero">0</td><td class="sign-zero">0</td><td class="sign-zero">0</td><td class="sign-zero">0</td><td class="sign-neg">-1</td><td class="sign-zero">0</td><td class="sign-zero">0</td><td class="sign-zero">0</td>
+          <td class="amount">5,000</td>
+          <td><span class="src src-auto">트립쿠폰</span><br><span style="font-size:10px;color:rgba(0,0,0,.4);">COUPON_PLATFORM</span></td>
+          <td>2025-06-30</td><td><span class="status-chip st-paid">계산완료</span></td>
+        </tr>
+        <tr data-src="xtr-supplier-coupon"><td class="clsfy">쿠폰할인(여행사)</td><td class="code">2202</td>
+          <td class="sign-pos">+1</td><td class="sign-zero">0</td><td class="sign-neg">-1</td><td class="sign-zero">0</td><td class="sign-zero">0</td><td class="sign-zero">0</td><td class="sign-zero">0</td><td class="sign-zero">0</td><td class="sign-zero">0</td><td class="sign-zero">0</td>
+          <td class="amount">5,000</td>
+          <td><span class="src src-xtr">엑스트라이버</span><br><span style="font-size:10px;color:rgba(0,0,0,.4);">COUPON_SUPPLIER</span></td>
           <td>2025-06-30</td><td><span class="status-chip st-paid">계산완료</span></td>
         </tr>
 
@@ -206,176 +215,95 @@ table.ledger{width:100%;border-collapse:collapse;font-size:12px;}
 
         <!-- ===== 결제 ===== -->
         <tr data-src="pg-nice-pay"><td class="cat" rowspan="3">결제</td><td class="clsfy">고객결제(PG)</td><td class="code">4001</td>
-          
-          <td>0</td><td class="sign-pos">+1</td>
-          <td>0</td><td class="sign-pos">+1</td>
-          <td>0</td><td>0</td>
-          <td>0</td><td>0</td>
-          <td>0</td><td class="sign-neg">-1</td>
+          <td class="sign-zero">0</td><td class="sign-pos">+1</td><td class="sign-zero">0</td><td class="sign-zero">0</td><td class="sign-zero">0</td><td class="sign-zero">0</td><td class="sign-zero">0</td><td class="sign-zero">0</td><td class="sign-zero">0</td><td class="sign-pos">+1</td>
           <td class="amount">970,000</td>
-          <td><span class="src src-pg">PG-NICE</span><br><span style="font-size:10px;color:rgba(0,0,0,.4);">결제 승인</span></td>
+          <td><span class="src src-pg">PG-NICE</span><br><span style="font-size:10px;color:rgba(0,0,0,.4);">PAYMENT_PG · 결제 승인</span></td>
           <td>2025-06-30 14:22</td><td><span class="status-chip st-paid">실행완료</span></td>
         </tr>
         <tr data-src="auto"><td class="clsfy">추가비용</td><td class="code">1010</td>
-          
-          <td class="sign-neg">-1</td><td>0</td>
-          <td class="sign-pos">+1</td><td>0</td>
-          <td>0</td><td>0</td>
-          <td>0</td><td>0</td>
-          <td>0</td><td>0</td>
+          <td class="sign-neg">-1</td><td class="sign-zero">0</td><td class="sign-pos">+1</td><td class="sign-zero">0</td><td class="sign-zero">0</td><td class="sign-zero">0</td><td class="sign-zero">0</td><td class="sign-zero">0</td><td class="sign-zero">0</td><td class="sign-zero">0</td>
           <td class="amount">150,000</td>
-          <td><span class="src src-auto">운영자 추가</span></td>
+          <td><span class="src src-auto">운영자 추가</span><br><span style="font-size:10px;color:rgba(0,0,0,.4);">ADDITIONAL_COST</span></td>
           <td>2025-07-02</td><td><span class="status-chip st-paid">계산완료</span></td>
         </tr>
         <tr data-src="pg-nice-pay2"><td class="clsfy">추가비용결제(PG)</td><td class="code">4001</td>
-          
-          <td>0</td><td class="sign-pos">+1</td>
-          <td>0</td><td class="sign-pos">+1</td>
-          <td>0</td><td>0</td>
-          <td>0</td><td>0</td>
-          <td>0</td><td class="sign-neg">-1</td>
+          <td class="sign-zero">0</td><td class="sign-pos">+1</td><td class="sign-zero">0</td><td class="sign-zero">0</td><td class="sign-zero">0</td><td class="sign-zero">0</td><td class="sign-zero">0</td><td class="sign-zero">0</td><td class="sign-zero">0</td><td class="sign-pos">+1</td>
           <td class="amount">150,000</td>
-          <td><span class="src src-pg">PG-NICE</span><br><span style="font-size:10px;color:rgba(0,0,0,.4);">결제 승인 (2차)</span></td>
+          <td><span class="src src-pg">PG-NICE</span><br><span style="font-size:10px;color:rgba(0,0,0,.4);">PAYMENT_PG · 2차 결제</span></td>
           <td>2025-07-02 11:08</td><td><span class="status-chip st-paid">실행완료</span></td>
         </tr>
 
         <tr class="cat-sep"><td colspan="18"></td></tr>
 
         <!-- ===== 정산 ===== -->
-        <tr data-src="xtr" class="new-row"><td class="cat" rowspan="8">정산</td><td class="clsfy">공제금액 <span style="font-size:10px;color:#c41d7f;">(NEW)</span></td><td class="code">6030</td>
-          
-          <td>0</td><td>0</td>
-          <td class="sign-neg">-1</td><td>0</td>
-          <td>0</td><td>0</td>
-          <td class="sign-pos">+1</td><td>0</td>
-          <td>0</td><td>0</td>
+        <tr data-src="xtr"><td class="cat" rowspan="7">정산</td><td class="clsfy">플랫폼이용료</td><td class="code">6020</td>
+          <td class="sign-zero">0</td><td class="sign-zero">0</td><td class="sign-neg">-1</td><td class="sign-zero">0</td><td class="sign-zero">0</td><td class="sign-zero">0</td><td class="sign-pos">+1</td><td class="sign-zero">0</td><td class="sign-zero">0</td><td class="sign-zero">0</td>
           <td class="amount">60,000</td>
-          <td><span class="src src-xtr">엑스트라이버</span><br><span style="font-size:10px;color:rgba(0,0,0,.4);">정산상세 공제금액 컬럼</span></td>
+          <td><span class="src src-xtr">엑스트라이버</span><br><span style="font-size:10px;color:rgba(0,0,0,.4);">FEE_PLATFORM · 서비스이용료</span></td>
           <td>2025-07-08</td><td><span class="status-chip st-paid">계산완료</span></td>
         </tr>
         <tr data-src="ch-street11-settle"><td class="clsfy">채널사수수료</td><td class="code">6000</td>
-          
-          <td>0</td><td>0</td>
-          <td>0</td><td>0</td>
-          <td class="sign-pos">+1</td><td>0</td>
-          <td class="sign-neg">-1</td><td>0</td>
-          <td>0</td><td>0</td>
+          <td class="sign-zero">0</td><td class="sign-zero">0</td><td class="sign-zero">0</td><td class="sign-zero">0</td><td class="sign-pos">+1</td><td class="sign-zero">0</td><td class="sign-neg">-1</td><td class="sign-zero">0</td><td class="sign-zero">0</td><td class="sign-zero">0</td>
           <td class="amount">22,400</td>
-          <td><span class="src src-ch">채널-11번가</span><br><span style="font-size:10px;color:rgba(0,0,0,.4);">channel_commission_total_confirmed</span></td>
+          <td><span class="src src-ch">채널-11번가</span><br><span style="font-size:10px;color:rgba(0,0,0,.4);">FEE_CHANNEL · channel_commission_total_confirmed</span></td>
           <td>2025-07-15</td><td><span class="status-chip st-paid">계산완료</span></td>
         </tr>
-        <tr data-src="pg-nice-settle" class="new-row"><td class="clsfy">PG수수료(공급가) <span style="font-size:10px;color:#c41d7f;">(분리)</span></td><td class="code">6010</td>
-          
-          <td>0</td><td>0</td>
-          <td>0</td><td>0</td>
-          <td>0</td><td>0</td>
-          <td class="sign-neg">-1</td><td>0</td>
-          <td class="sign-pos">+1</td><td>0</td>
-          <td class="amount">1,018</td>
-          <td><span class="src src-pg">PG-NICE</span><br><span style="font-size:10px;color:rgba(0,0,0,.4);">pg_fee_supply</span></td>
+        <tr data-src="pg-nice-settle"><td class="clsfy">PG수수료</td><td class="code">6010</td>
+          <td class="sign-zero">0</td><td class="sign-zero">0</td><td class="sign-zero">0</td><td class="sign-zero">0</td><td class="sign-zero">0</td><td class="sign-zero">0</td><td class="sign-neg">-1</td><td class="sign-zero">0</td><td class="sign-pos">+1</td><td class="sign-zero">0</td>
+          <td class="amount">1,120</td>
+          <td><span class="src src-pg">PG-NICE</span><br><span style="font-size:10px;color:rgba(0,0,0,.4);">FEE_PG · 공급가/부가세 lineage는 settlement</span></td>
           <td>2025-07-08</td><td><span class="status-chip st-paid">계산완료</span></td>
         </tr>
-        <tr data-src="pg-nice-settle" class="new-row"><td class="clsfy">PG 수수료 부가세 <span style="font-size:10px;color:#c41d7f;">(분리)</span></td><td class="code">6011</td>
-          
-          <td>0</td><td>0</td>
-          <td>0</td><td>0</td>
-          <td>0</td><td>0</td>
-          <td class="sign-neg">-1</td><td>0</td>
-          <td class="sign-pos">+1</td><td>0</td>
-          <td class="amount">102</td>
-          <td><span class="src src-pg">PG-NICE</span><br><span style="font-size:10px;color:rgba(0,0,0,.4);">pg_fee_vat</span></td>
-          <td>2025-07-08</td><td><span class="status-chip st-paid">계산완료</span></td>
-        </tr>
-        <tr data-src="pg-nice-settle"><td class="clsfy">PGto여행사</td><td class="code">5010</td>
-          
-          <td>0</td><td>0</td>
-          <td>0</td><td class="sign-pos">+1</td>
-          <td>0</td><td>0</td>
-          <td>0</td><td>0</td>
-          <td>0</td><td class="sign-neg">-1</td>
+        <tr data-src="pg-nice-settle"><td class="clsfy">PG→여행사</td><td class="code">7010</td>
+          <td class="sign-zero">0</td><td class="sign-zero">0</td><td class="sign-zero">0</td><td class="sign-pos">+1</td><td class="sign-zero">0</td><td class="sign-zero">0</td><td class="sign-zero">0</td><td class="sign-zero">0</td><td class="sign-zero">0</td><td class="sign-neg">-1</td>
           <td class="amount">1,080,000</td>
-          <td><span class="src src-pg">PG-NICE</span><br><span style="font-size:10px;color:rgba(0,0,0,.4);">pg_settlement_amount(여행사몫)</span></td>
+          <td><span class="src src-pg">PG-NICE</span><br><span style="font-size:10px;color:rgba(0,0,0,.4);">TRANSFER_PG_TO_SUPPLIER</span></td>
           <td>2025-07-08</td><td><span class="status-chip st-paid">실행완료</span></td>
         </tr>
-        <tr data-src="pg-nice-settle"><td class="clsfy">PGto플랫폼</td><td class="code">5020</td>
-          
-          <td>0</td><td>0</td>
-          <td>0</td><td>0</td>
-          <td>0</td><td>0</td>
-          <td>0</td><td class="sign-pos">+1</td>
-          <td>0</td><td class="sign-neg">-1</td>
+        <tr data-src="pg-nice-settle"><td class="clsfy">PG→플랫폼</td><td class="code">7020</td>
+          <td class="sign-zero">0</td><td class="sign-zero">0</td><td class="sign-zero">0</td><td class="sign-zero">0</td><td class="sign-zero">0</td><td class="sign-zero">0</td><td class="sign-zero">0</td><td class="sign-pos">+1</td><td class="sign-zero">0</td><td class="sign-neg">-1</td>
           <td class="amount">40,000</td>
-          <td><span class="src src-pg">PG-NICE</span><br><span style="font-size:10px;color:rgba(0,0,0,.4);">pg_settlement_amount(플랫폼몫)</span></td>
+          <td><span class="src src-pg">PG-NICE</span><br><span style="font-size:10px;color:rgba(0,0,0,.4);">TRANSFER_PG_TO_PLATFORM</span></td>
           <td>2025-07-08</td><td><span class="status-chip st-paid">실행완료</span></td>
         </tr>
-        <tr data-src="ch-street11-settle"><td class="clsfy">플랫폼to채널</td><td class="code">5000</td>
-          
-          <td>0</td><td>0</td>
-          <td>0</td><td>0</td>
-          <td>0</td><td class="sign-pos">+1</td>
-          <td>0</td><td class="sign-neg">-1</td>
-          <td>0</td><td>0</td>
+        <tr data-src="ch-street11-settle"><td class="clsfy">플랫폼→채널</td><td class="code">7000</td>
+          <td class="sign-zero">0</td><td class="sign-zero">0</td><td class="sign-zero">0</td><td class="sign-zero">0</td><td class="sign-zero">0</td><td class="sign-pos">+1</td><td class="sign-zero">0</td><td class="sign-neg">-1</td><td class="sign-zero">0</td><td class="sign-zero">0</td>
           <td class="amount">22,400</td>
-          <td><span class="src src-ch">채널-11번가</span><br><span style="font-size:10px;color:rgba(0,0,0,.4);">channel_settlement_amount 차감</span></td>
+          <td><span class="src src-ch">채널-11번가</span><br><span style="font-size:10px;color:rgba(0,0,0,.4);">TRANSFER_PLATFORM_TO_CHANNEL</span></td>
           <td>2025-07-15</td><td><span class="status-chip st-paid">실행완료</span></td>
         </tr>
-        <tr data-src="pg-nice-settle"><td class="clsfy">플랫폼toPG수수료</td><td class="code">5021</td>
-          
-          <td>0</td><td>0</td>
-          <td>0</td><td>0</td>
-          <td>0</td><td>0</td>
-          <td>0</td><td class="sign-neg">-1</td>
-          <td>0</td><td class="sign-pos">+1</td>
+        <tr data-src="pg-nice-settle"><td class="clsfy">플랫폼→PG수수료</td><td class="code">7021</td>
+          <td class="sign-zero">0</td><td class="sign-zero">0</td><td class="sign-zero">0</td><td class="sign-zero">0</td><td class="sign-zero">0</td><td class="sign-zero">0</td><td class="sign-zero">0</td><td class="sign-neg">-1</td><td class="sign-zero">0</td><td class="sign-pos">+1</td>
           <td class="amount">1,120</td>
-          <td><span class="src src-pg">PG-NICE</span><br><span style="font-size:10px;color:rgba(0,0,0,.4);">공급가1,018 + 부가세102</span></td>
+          <td><span class="src src-pg">PG-NICE</span><br><span style="font-size:10px;color:rgba(0,0,0,.4);">TRANSFER_PLATFORM_TO_PG_FEE</span></td>
           <td>2025-07-08</td><td><span class="status-chip st-paid">실행완료</span></td>
         </tr>
 
         <tr class="cat-sep"><td colspan="18"></td></tr>
 
         <!-- ===== 결산 ===== -->
-        <tr data-src="xtr-payout"><td class="cat" rowspan="4">결산</td><td class="clsfy">여행사지급완료</td><td class="code">9000</td>
-          
-          <td>0</td><td>0</td>
-          <td>0</td><td class="sign-neg">-1</td>
-          <td>0</td><td>0</td>
-          <td>0</td><td>0</td>
-          <td>0</td><td>0</td>
+        <tr data-src="xtr-payout"><td class="cat" rowspan="4">결산</td><td class="clsfy">여행사 결산출금</td><td class="code">9000</td>
+          <td class="sign-zero">0</td><td class="sign-zero">0</td><td class="sign-zero">0</td><td class="sign-neg">-1</td><td class="sign-zero">0</td><td class="sign-zero">0</td><td class="sign-zero">0</td><td class="sign-zero">0</td><td class="sign-zero">0</td><td class="sign-zero">0</td>
           <td class="amount">1,080,000</td>
-          <td><span class="src src-xtr">엑스트라이버</span><br><span style="font-size:10px;color:rgba(0,0,0,.4);">지급완료일</span></td>
+          <td><span class="src src-xtr">엑스트라이버</span><br><span style="font-size:10px;color:rgba(0,0,0,.4);">CLOSING_SUPPLIER</span></td>
           <td>2025-07-15</td><td><span class="status-chip st-paid">실행완료</span></td>
         </tr>
-        <tr data-src="ch-street11-paid"><td class="clsfy">채널사지급완료</td><td class="code">9001</td>
-          
-          <td>0</td><td>0</td>
-          <td>0</td><td>0</td>
-          <td>0</td><td class="sign-neg">-1</td>
-          <td>0</td><td>0</td>
-          <td>0</td><td>0</td>
+        <tr data-src="ch-street11-paid"><td class="clsfy">채널 결산출금</td><td class="code">9001</td>
+          <td class="sign-zero">0</td><td class="sign-zero">0</td><td class="sign-zero">0</td><td class="sign-zero">0</td><td class="sign-zero">0</td><td class="sign-neg">-1</td><td class="sign-zero">0</td><td class="sign-zero">0</td><td class="sign-zero">0</td><td class="sign-zero">0</td>
           <td class="amount">22,400</td>
-          <td><span class="src src-ch">채널-11번가</span><br><span style="font-size:10px;color:rgba(0,0,0,.4);">입금 매칭</span></td>
+          <td><span class="src src-ch">채널-11번가</span><br><span style="font-size:10px;color:rgba(0,0,0,.4);">CLOSING_CHANNEL</span></td>
           <td>2025-07-20</td><td><span class="status-chip st-paid">실행완료</span></td>
         </tr>
-        <tr data-src="auto"><td class="clsfy">플랫폼잔액결산</td><td class="code">9002</td>
-          
-          <td>0</td><td>0</td>
-          <td>0</td><td>0</td>
-          <td>0</td><td>0</td>
-          <td>0</td><td class="sign-neg">-1</td>
-          <td>0</td><td>0</td>
+        <tr data-src="auto"><td class="clsfy">플랫폼 결산출금</td><td class="code">9002</td>
+          <td class="sign-zero">0</td><td class="sign-zero">0</td><td class="sign-zero">0</td><td class="sign-zero">0</td><td class="sign-zero">0</td><td class="sign-zero">0</td><td class="sign-zero">0</td><td class="sign-neg">-1</td><td class="sign-zero">0</td><td class="sign-zero">0</td>
           <td class="amount">16,480</td>
-          <td><span class="src src-derived">검산 자동</span></td>
+          <td><span class="src src-derived">결산 자동</span><br><span style="font-size:10px;color:rgba(0,0,0,.4);">CLOSING_PLATFORM</span></td>
           <td>2025-07-20</td><td><span class="status-chip st-paid">실행완료</span></td>
         </tr>
-        <tr data-src="manual-pg"><td class="clsfy">PG수수료출금</td><td class="code">9003</td>
-          
-          <td>0</td><td>0</td>
-          <td>0</td><td>0</td>
-          <td>0</td><td>0</td>
-          <td>0</td><td>0</td>
-          <td>0</td><td class="sign-neg">-1</td>
+        <tr data-src="manual-pg"><td class="clsfy">PG 결산출금</td><td class="code">9003</td>
+          <td class="sign-zero">0</td><td class="sign-zero">0</td><td class="sign-zero">0</td><td class="sign-zero">0</td><td class="sign-zero">0</td><td class="sign-zero">0</td><td class="sign-zero">0</td><td class="sign-zero">0</td><td class="sign-zero">0</td><td class="sign-neg">-1</td>
           <td class="amount">1,120</td>
-          <td><span class="src src-manual">수동 (월마감)</span></td>
+          <td><span class="src src-manual">수동 (월마감)</span><br><span style="font-size:10px;color:rgba(0,0,0,.4);">CLOSING_PG</span></td>
           <td>2025-07-31</td><td><span class="status-chip st-paid">실행완료</span></td>
         </tr>
 
@@ -384,14 +312,13 @@ table.ledger{width:100%;border-collapse:collapse;font-size:12px;}
         <!-- ===== 검산 ===== -->
         <tr class="check-row">
           <td class="cat">검산</td><td class="clsfy">최종잔액</td><td class="code">—</td>
-          
-          <td>-1,120,000</td><td>0</td>
-          <td>0</td><td>0</td>
-          <td>0</td><td>0</td>
-          <td>0</td><td>0</td>
-          <td>0</td><td>0</td>
-          <td class="amount">∑=0 ✓</td>
-          <td colspan="3" style="text-align:left;">고객 손익(-1,120,000) + 사업주체 손익(+1,120,000) = 0 · 모든 자금 잔액 = 0</td>
+          <td>-1,105,000</td><td>+1,120,000</td>
+          <td>+1,075,000</td><td>0</td>
+          <td>+7,400</td><td>0</td>
+          <td>+21,480</td><td>0</td>
+          <td>+1,120</td><td>0</td>
+          <td class="amount">∑ = 0</td>
+          <td colspan="3" style="text-align:left;font-size:11px;">고객(손익-1,105,000 + 자금+1,120,000 = +15,000 ※쿠폰분담 잔액) · 사업주체 손익합 +1,105,000. 부호규약은 시뮬레이터 기준이며 실제 BE convention 확인 필요.</td>
         </tr>
         </tbody>
       </table>
@@ -460,7 +387,7 @@ table.ledger{width:100%;border-collapse:collapse;font-size:12px;}
           <dt>pg_fee_total</dt><dd>1,120</dd>
           <dt>pg_settlement_date</dt><dd>2025-07-08</dd>
         </dl>
-        <div class="src-row-meta" style="margin-top:6px;color:#c41d7f;">→ <strong>6010 공급가 + 6011 부가세</strong> + 5010 + 5020 + 5021 (5-item)</div>
+        <div class="src-row-meta" style="margin-top:6px;color:#c41d7f;">→ <strong>6010 + 7010 + 7020 + 7021</strong> (4-item, 공급가/부가세 분해는 settlement 도메인 책임)</div>
       </div>
 
       <div class="src-row" data-target="ch-street11-settle">
@@ -475,7 +402,7 @@ table.ledger{width:100%;border-collapse:collapse;font-size:12px;}
           <dt>channel_commission_total_confirmed</dt><dd>22,400</dd>
           <dt>channel_settlement_date</dt><dd>2025-07-15</dd>
         </dl>
-        <div class="src-row-meta" style="margin-top:6px;color:#389e0d;">→ 6000 채널사수수료 + 5000 플랫폼to채널</div>
+        <div class="src-row-meta" style="margin-top:6px;color:#389e0d;">→ 6000 채널사수수료 + 7000 플랫폼→채널</div>
       </div>
 
       <div class="src-row" data-target="ch-street11-paid">
@@ -488,7 +415,7 @@ table.ledger{width:100%;border-collapse:collapse;font-size:12px;}
           <dt>입금일</dt><dd>2025-07-20</dd>
           <dt>입금액</dt><dd>22,400</dd>
         </dl>
-        <div class="src-row-meta" style="margin-top:6px;color:#389e0d;">→ 9001 채널사지급완료</div>
+        <div class="src-row-meta" style="margin-top:6px;color:#389e0d;">→ 9001 CLOSING_CHANNEL</div>
       </div>
 
       <div class="src-row" data-target="xtr">
@@ -506,7 +433,7 @@ table.ledger{width:100%;border-collapse:collapse;font-size:12px;}
           <dt>정산금액</dt><dd>1,080,000</dd>
           <dt>지급예정일</dt><dd>2025-07-15</dd>
         </dl>
-        <div class="src-row-meta" style="margin-top:6px;color:#08979c;">→ 2002 + 3002 + <strong>6030 공제금액</strong></div>
+        <div class="src-row-meta" style="margin-top:6px;color:#08979c;">→ 2002/2202 (여행사 할인) + 6020 FEE_PLATFORM. <em>공제금액</em>은 별도 코드 아님 — BE summary API의 도출값</div>
       </div>
 
       <div class="src-row" data-target="xtr-payout">
@@ -520,7 +447,7 @@ table.ledger{width:100%;border-collapse:collapse;font-size:12px;}
           <dt>지급완료일</dt><dd>2025-07-15</dd>
           <dt>여행사</dt><dd>TMG (V3)</dd>
         </dl>
-        <div class="src-row-meta" style="margin-top:6px;color:#08979c;">→ 9000 여행사지급완료</div>
+        <div class="src-row-meta" style="margin-top:6px;color:#08979c;">→ 9000 CLOSING_SUPPLIER</div>
       </div>
 
       <div class="src-row" data-target="manual-pg">
@@ -533,19 +460,21 @@ table.ledger{width:100%;border-collapse:collapse;font-size:12px;}
           <dt>출금액</dt><dd>1,120</dd>
           <dt>출금일</dt><dd>2025-07-31</dd>
         </dl>
-        <div class="src-row-meta" style="margin-top:6px;color:#d48806;">→ 9003 PG수수료출금</div>
+        <div class="src-row-meta" style="margin-top:6px;color:#d48806;">→ 9003 CLOSING_PG</div>
       </div>
 
     </div>
 
     <div class="main-card">
-      <div class="card-head">매핑 규칙 요약 (수정됨)</div>
+      <div class="card-head">매핑 규칙 (SystemLedgerItemType.kt 기준)</div>
       <div style="padding:12px 14px;font-size:11px;line-height:1.65;color:rgba(0,0,0,.75);">
-        <p><strong>1) PG 결제 row</strong> → 4001 결제 1건. 취소면 7021 환불실행.</p>
-        <p style="margin-top:6px;"><strong>2) PG 정산 row</strong> → <span style="color:#c41d7f;font-weight:600;">6010(공급가) + 6011(부가세)</span> + 5010 + 5020 + 5021. <code>pg_fee_supply</code>/<code>pg_fee_vat</code>를 분리해서 적재.</p>
-        <p style="margin-top:6px;"><strong>3) 채널 정산 row</strong> → 6000 + 5000. 채널결제 타입(11번가/SSG/THT/카카오쇼핑)이면 4001도 함께.</p>
-        <p style="margin-top:6px;"><strong>4) 엑스트라이버 정산상세</strong> → 여행사할인(2002) + 여행사쿠폰(3002) + <span style="color:#c41d7f;font-weight:600;">공제금액(6030)</span>. <s>플랫폼이용료(6020)</s>는 폐기, 회사부담 할인 보정인 <strong>공제금액 컬럼</strong>이 직접 여행사 정산에 반영.</p>
-        <p style="margin-top:6px;"><strong>5) 트립할인·채널할인</strong>은 예약 시점 ledger row로 분리하지 않고, 정산 시 <strong>공제금액(6030)</strong>으로 합쳐서 처리.</p>
+        <p><strong>1) PG 결제 row 적재</strong> → <code>4001 PAYMENT_PG</code> 1건. 취소·환불은 <code>4101 REFUND_PG</code> (4xxx 자금 입출금).</p>
+        <p style="margin-top:6px;"><strong>2) PG 정산 row 적재</strong> → <strong>6010 + 7010 + 7020 + 7021</strong> 4-item을 settlement event 받아서 append. 공급가/부가세 분해는 reservations 원장이 아니라 <strong>settlement 도메인</strong>의 lineage 책임 (02-ledger-items.md SourceType과 SourceKey).</p>
+        <p style="margin-top:6px;"><strong>3) 채널 정산 row 적재</strong> → <strong>6000 + 7000</strong>. 채널결제 타입(11번가/SSG/THT/카카오쇼핑)이면 <code>4001 PAYMENT_PG</code>도 함께 (PaymentOwner.PLATFORM 경로지만 원장 자금주체는 PG).</p>
+        <p style="margin-top:6px;"><strong>4) 엑스트라이버 정산상세</strong> → 예약 시점에 이미 적재된 <code>2002/2202</code> (여행사 할인) + 정산 시점 <code>6020 FEE_PLATFORM</code>. "공제금액" 컬럼은 별도 ledger 코드 없음 → <strong>BE summary API의 도출값</strong>으로 노출.</p>
+        <p style="margin-top:6px;"><strong>5) 취소 시</strong> 기존 item 삭제 X. <code>5xxx CANCELLATION</code> + 대응 reversal item 추가 (ADR-0006).</p>
+        <p style="margin-top:6px;"><strong>6) executedAt</strong> 으로 대기/실행 분리. 정산/결산/현금 잔액 리포트는 실행 item만 본다 (ADR-0009).</p>
+        <p style="margin-top:8px;padding-top:8px;border-top:1px dashed #d9d9d9;color:rgba(0,0,0,.5);">SSOT: <a href="https://github.com/extriber/platform-svc-reservations/blob/master/tripstore-reservations-application/src/main/kotlin/kr/tripstore/reservations/domain/ledger/SystemLedgerItemType.kt" target="_blank" style="color:#1677ff;">SystemLedgerItemType.kt</a></p>
       </div>
     </div>
 
