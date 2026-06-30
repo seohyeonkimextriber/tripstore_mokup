@@ -336,14 +336,22 @@ table.ledger{width:100%;border-collapse:collapse;font-size:12px;}
 
         <!-- ===== 검산 ===== -->
         <tr class="check-row">
-          <td class="cat">검산</td><td class="clsfy">최종잔액</td><td class="code">—</td>
-          <td>-1,105,000</td><td>+1,120,000</td>
-          <td>+1,075,000</td><td>0</td>
-          <td>+7,400</td><td>0</td>
-          <td>+21,480</td><td>0</td>
-          <td>+1,120</td><td>0</td>
-          <td class="amount">∑ = 0</td>
-          <td colspan="4" style="text-align:left;font-size:11px;">고객(손익-1,105,000 + 자금+1,120,000 = +15,000 ※쿠폰분담 잔액) · 사업주체 손익합 +1,105,000. 부호규약은 시뮬레이터 기준이며 실제 BE convention 확인 필요.</td>
+          <td class="cat" rowspan="3">검산</td><td class="clsfy" style="font-weight:700;">정산 전 (PG 자금 보유 중)</td><td class="code">—</td>
+          <td colspan="10" style="text-align:left;font-size:11px;">고객 손익+자금 = 0 (미수 0) · PG 자금잔액 = <strong>+1,120,000</strong> 보유 정상 · 여행사/채널/플랫폼 자금잔액 = 0 (아직 분배 전)</td>
+          <td class="amount">중간</td>
+          <td colspan="4" style="text-align:left;font-size:11px;">07-verification §최종 결산 검산: "정산 전에는 PG 자금 잔액이 남는 것이 정상"</td>
+        </tr>
+        <tr class="check-row">
+          <td class="clsfy" style="font-weight:700;">정산 후·결산 전</td><td class="code">—</td>
+          <td colspan="10" style="text-align:left;font-size:11px;">PG 자금잔액 → +1,120 (PG수수료만 남음) · 여행사 자금 +1,080,000 · 플랫폼 +16,480 · 채널 +22,400 (각자 보유 정상, 결산 대기)</td>
+          <td class="amount">중간</td>
+          <td colspan="4" style="text-align:left;font-size:11px;">플랫폼이 채널수수료 미지급이면 플랫폼 자금 잔액이 남는 게 정상</td>
+        </tr>
+        <tr class="check-row">
+          <td class="clsfy" style="font-weight:700;">결산 후 (9xxx 완료)</td><td class="code">—</td>
+          <td colspan="10" style="text-align:left;font-size:11px;">✅ <strong>모든 사업주체 자금잔액 = 0</strong> (실제 출금됨) · 고객 손익+자금 = 0 · 손익 총합 = 0 (경제적 사건 모두 기록)</td>
+          <td class="amount">∑ = 0 ✓</td>
+          <td colspan="4" style="text-align:left;font-size:11px;color:#389e0d;font-weight:600;">결산 통과</td>
         </tr>
         </tbody>
       </table>
@@ -500,6 +508,50 @@ table.ledger{width:100%;border-collapse:collapse;font-size:12px;}
         <p style="margin-top:6px;"><strong>5) 취소 시</strong> 기존 item 삭제 X. <code>5xxx CANCELLATION</code> + 대응 reversal item 추가 (ADR-0006).</p>
         <p style="margin-top:6px;"><strong>6) executedAt</strong> 으로 대기/실행 분리. 정산/결산/현금 잔액 리포트는 실행 item만 본다 (ADR-0009).</p>
         <p style="margin-top:8px;padding-top:8px;border-top:1px dashed #d9d9d9;color:rgba(0,0,0,.5);">SSOT: <a href="https://github.com/extriber/platform-svc-reservations/blob/master/tripstore-reservations-application/src/main/kotlin/kr/tripstore/reservations/domain/ledger/SystemLedgerItemType.kt" target="_blank" style="color:#1677ff;">SystemLedgerItemType.kt</a></p>
+      </div>
+    </div>
+
+    <div class="main-card">
+      <div class="card-head">정산 event payload (settlement → reservations)</div>
+      <div style="padding:12px 14px;font-size:11px;line-height:1.6;color:rgba(0,0,0,.75);">
+        <p style="color:rgba(0,0,0,.55);margin-bottom:6px;">settlement 도메인이 reservations로 보내는 정산 event에 들어가야 하는 데이터. reservations는 이 payload를 받아 ledger에 append만 한다 (재계산 X).</p>
+        <p style="margin-top:8px;"><strong style="color:#c41d7f;">① 식별·멱등성</strong></p>
+        <div style="font-family:'SF Mono',ui-monospace,monospace;font-size:10px;background:#fafafa;padding:6px 8px;border-radius:4px;line-height:1.5;color:rgba(0,0,0,.7);">
+          settlement_event_id · settlement_id · trip_reservation_code
+        </div>
+        <p style="margin-top:8px;"><strong style="color:#c41d7f;">② 자금 이전 (PG 보유 → 분배)</strong></p>
+        <div style="font-family:'SF Mono',ui-monospace,monospace;font-size:10px;background:#fafafa;padding:6px 8px;border-radius:4px;line-height:1.5;color:rgba(0,0,0,.7);">
+          transfer_pg_to_supplier (→ 7010)<br>
+          transfer_pg_to_platform (→ 7020)<br>
+          transfer_platform_to_channel (→ 7000)<br>
+          transfer_platform_to_pg_fee (→ 7021)
+        </div>
+        <p style="margin-top:8px;"><strong style="color:#c41d7f;">③ 수수료 손익</strong></p>
+        <div style="font-family:'SF Mono',ui-monospace,monospace;font-size:10px;background:#fafafa;padding:6px 8px;border-radius:4px;line-height:1.5;color:rgba(0,0,0,.7);">
+          channel_fee_amount (→ 6000)<br>
+          pg_fee_amount (→ 6010)<br>
+          platform_service_fee_amount (→ 6020)
+        </div>
+        <p style="margin-top:8px;"><strong style="color:#c41d7f;">④ 시점·상태</strong></p>
+        <div style="font-family:'SF Mono',ui-monospace,monospace;font-size:10px;background:#fafafa;padding:6px 8px;border-radius:4px;line-height:1.5;color:rgba(0,0,0,.7);">
+          executed_at · settlement_basis_date · payout_scheduled_date · payout_completed_date · settlement_status
+        </div>
+        <p style="margin-top:8px;"><strong style="color:#c41d7f;">⑤ lineage (settlement만 보관)</strong></p>
+        <div style="font-family:'SF Mono',ui-monospace,monospace;font-size:10px;background:#fafafa;padding:6px 8px;border-radius:4px;line-height:1.5;color:rgba(0,0,0,.7);">
+          pg_fee_supply / pg_fee_vat (BE 분해 안 함)<br>
+          mid / tid / approval_no<br>
+          source_file / source_row_number
+        </div>
+        <p style="margin-top:8px;"><strong style="color:#c41d7f;">⑥ 취소·환불·조정</strong></p>
+        <div style="font-family:'SF Mono',ui-monospace,monospace;font-size:10px;background:#fafafa;padding:6px 8px;border-radius:4px;line-height:1.5;color:rgba(0,0,0,.7);">
+          refund_amount (→ 4101)<br>
+          fee_reversal (→ 6500/6510/6520)<br>
+          transfer_reversal (→ 7500~7521)<br>
+          adjustment (→ 8000/8010)
+        </div>
+        <p style="margin-top:10px;padding-top:8px;border-top:1px dashed #d9d9d9;font-size:10px;color:rgba(0,0,0,.5);">
+          💡 결산(9xxx)은 별도 이벤트 — 사업주체별 실제 계좌 출금 시점에 발생
+        </p>
       </div>
     </div>
 
@@ -733,11 +785,30 @@ table.ledger{width:100%;border-collapse:collapse;font-size:12px;}
   </div>
 </div>
 
-<div class="checksum-card">
-  <div class="lab">검산식 (시뮬레이터 이미지 그대로)</div>
-  <div class="eq">고객 손익 합계 + 사업주체 손익 합계 = 0</div>
-  <div class="eq">채널/플랫폼/여행사/PG 자금 잔액 = 0</div>
-  <div class="ok">✓ 결산 통과</div>
+<div class="checksum-card" style="display:block;">
+  <div class="lab" style="margin-bottom:8px;">검산식 (07-verification-and-operations.md §최종 결산 검산 기준)</div>
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;font-size:12px;">
+    <div>
+      <div style="font-weight:700;color:#237804;margin-bottom:4px;">고객 (단일식)</div>
+      <div class="eq">고객 손익 합계 + 고객 자금 합계 = 0</div>
+      <div style="font-size:11px;color:rgba(0,0,0,.55);margin-top:2px;">미수·초과수납 0 검증. 중간 상태에서도 성립</div>
+    </div>
+    <div>
+      <div style="font-weight:700;color:#237804;margin-bottom:4px;">사업주체 (결산 후)</div>
+      <div class="eq">채널 / 플랫폼 / 여행사 / PG 자금 잔액 = 0</div>
+      <div style="font-size:11px;color:rgba(0,0,0,.55);margin-top:2px;">9xxx 결산 출금 완료 후에만 성립. 손익은 0으로 닫지 않음</div>
+    </div>
+    <div>
+      <div style="font-weight:700;color:#237804;margin-bottom:4px;">전체 손익 (완전 closure)</div>
+      <div class="eq">고객 손익 + 사업주체 손익 = 0</div>
+      <div style="font-size:11px;color:rgba(0,0,0,.55);margin-top:2px;">경제적 사건이 모두 원장에 기록된 예약에서만 성립</div>
+    </div>
+    <div>
+      <div style="font-weight:700;color:#cf1322;margin-bottom:4px;">중간 상태 (정상)</div>
+      <div style="font-size:11px;color:rgba(0,0,0,.65);">정산 전: PG 자금잔액 보유 정상<br>플랫폼이 채널/PG수수료 미지급: 플랫폼 자금 잔액 보유 정상<br>세금·외부비용·반올림: 별도 시스템 분리 시 손익 총합 차이 정상 (운영 리포트 설명)</div>
+    </div>
+  </div>
+  <div class="ok" style="margin-top:10px;">✓ 본 예시 예약은 결산 완료 단계 = 모든 자금 0</div>
 </div>
 
 <script>
