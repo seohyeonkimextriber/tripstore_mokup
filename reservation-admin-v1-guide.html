@@ -471,6 +471,10 @@ body main { transition: padding-right 0.3s ease, max-width 0.3s ease; }
   </div>
 </section>
 
+<div style="margin:16px 24px 0;background:#fff7e6;border:1px solid #ffd666;border-radius:8px;padding:10px 14px;font-size:12px;color:#874d00;">
+  <strong>2026-06-30 갱신</strong> · 원장 항목 코드 3자리(100/200/300/...) → <strong>4자리 BE SSOT</strong>로 일괄 교체. 매핑은 <a href="https://github.com/extriber/platform-svc-reservations/blob/master/tripstore-reservations-application/src/main/kotlin/kr/tripstore/reservations/domain/ledger/SystemLedgerItemType.kt" target="_blank" style="color:#874d00;text-decoration:underline;font-weight:600;">SystemLedgerItemType.kt</a> 기준. 주요: 쿠폰 3xx→<strong>22xx</strong>, 위약금 701/7010→<strong>5010</strong>, 자금이전 501→<strong>7010</strong>, 결제(PG) 401→<strong>4001</strong>, 수수료 601/602→<strong>6010/6020</strong>.
+</div>
+
 <!-- 1차 작업 범위 -->
 <section class="area" id="scope">
   <h2><span class="area-num">📋</span>1차 작업 범위 (7개)</h2>
@@ -482,7 +486,7 @@ body main { transition: padding-right 0.3s ease, max-width 0.3s ease; }
       <div class="scope-item"><span class="num">1</span><span class="title">인원 추가 / 삭제</span><div class="sub">기본가 자동, 특가/할인 수동</div></div>
       <div class="scope-item"><span class="num">2</span><span class="title">금액 추가 / 차감</span><div class="sub">파트너스=사유만, 어드민=분담주체 노출</div></div>
       <div class="scope-item"><span class="num">3</span><span class="title">즉시결제할인</span><div class="sub">별도 트랙(재원), 오픈 1차와 동시</div></div>
-      <div class="scope-item"><span class="num">4</span><span class="title">취소위약금 원장 이전</span><div class="sub">결제 시스템 → 예약 원장 7010</div></div>
+      <div class="scope-item"><span class="num">4</span><span class="title">취소위약금 원장 이전</span><div class="sub">결제 시스템 → 예약 원장 5010</div></div>
       <div class="scope-item"><span class="num">5</span><span class="title">정산 시스템 연계</span><div class="sub">신규 API 설계 (기존 재활용 X)</div></div>
       <div class="scope-item"><span class="num">6</span><span class="title">원장탭 (가계부)</span><div class="sub">주체별 잔액 + 4개 서브탭</div></div>
       <div class="scope-item"><span class="num">7</span><span class="title">타임라인 · 이력</span><div class="sub">예약 이벤트 시계열 추적</div></div>
@@ -507,7 +511,7 @@ body main { transition: padding-right 0.3s ease, max-width 0.3s ease; }
       <tr><td style="padding:9px 12px; border-bottom:1px solid #f1f5f9; font-weight:600;">인원 추가/삭제</td><td style="padding:9px 12px; border-bottom:1px solid #f1f5f9; color:#065f46; font-weight:700;">🟢 1차</td><td style="padding:9px 12px; border-bottom:1px solid #f1f5f9; color:#475569;">신규 원장 핵심 기능. 신규 인원 타입(아동/유아) 특가 분담 정보 재현 가능 여부 추가 확인 필요</td></tr>
       <tr><td style="padding:9px 12px; border-bottom:1px solid #f1f5f9; font-weight:600;">금액 추가/차감</td><td style="padding:9px 12px; border-bottom:1px solid #f1f5f9; color:#065f46; font-weight:700;">🟢 1차</td><td style="padding:9px 12px; border-bottom:1px solid #f1f5f9; color:#475569;">신규 원장 핵심 기능. 어드민에서 할인의 경우 분담 주체 선택 노출 필요</td></tr>
       <tr><td style="padding:9px 12px; border-bottom:1px solid #f1f5f9; font-weight:600;">정산 시스템 연계</td><td style="padding:9px 12px; border-bottom:1px solid #f1f5f9; color:#065f46; font-weight:700;">🟢 1차</td><td style="padding:9px 12px; border-bottom:1px solid #f1f5f9; color:#475569;">기존 API 재활용 X. 신규 원장 항목 분류 기반. 정산 결과 원장 역반영해 최종 0원 결산 지향</td></tr>
-      <tr><td style="padding:9px 12px; border-bottom:1px solid #f1f5f9; font-weight:600;">취소 위약금 원장 이전</td><td style="padding:9px 12px; border-bottom:1px solid #f1f5f9; color:#065f46; font-weight:700;">🟢 1차</td><td style="padding:9px 12px; border-bottom:1px solid #f1f5f9; color:#475569;">결제 시스템 → 예약 원장(7010)으로 이전. 인원 삭제 모달 + 금액 추가 흐름 안에 자연스럽게 통합</td></tr>
+      <tr><td style="padding:9px 12px; border-bottom:1px solid #f1f5f9; font-weight:600;">취소 위약금 원장 이전</td><td style="padding:9px 12px; border-bottom:1px solid #f1f5f9; color:#065f46; font-weight:700;">🟢 1차</td><td style="padding:9px 12px; border-bottom:1px solid #f1f5f9; color:#475569;">결제 시스템 → 예약 원장(5010)으로 이전. 인원 삭제 모달 + 금액 추가 흐름 안에 자연스럽게 통합</td></tr>
       <tr><td style="padding:9px 12px; font-weight:600;">즉시결제할인</td><td style="padding:9px 12px; color:#065f46; font-weight:700;">🟢 1차 (별도 트랙)</td><td style="padding:9px 12px; color:#475569;">쿠폰시스템 → 할인시스템으로 변경. 재원님 별도 트랙. <b>오픈 시점은 1차와 동시</b></td></tr>
     </tbody>
   </table>
@@ -554,7 +558,7 @@ body main { transition: padding-right 0.3s ease, max-width 0.3s ease; }
     </div>
     <div class="scen">
       <div class="when">2. "동행자 1명 못 가요" — 위약금 청구 (3명 → 2명)</div>
-      <div class="flow">동행자 체크박스 선택 <span class="arr">→</span> [인원 삭제] <span class="arr">→</span> 해당 인원 100·202 자동 역분개 <span class="arr">→</span> 자동 [+금액 추가] 모달 <span class="arr">→</span> 취소위약금(7010) 입력</div>
+      <div class="flow">동행자 체크박스 선택 <span class="arr">→</span> [인원 삭제] <span class="arr">→</span> 해당 인원 1000·2002 자동 역분개 <span class="arr">→</span> 자동 [+금액 추가] 모달 <span class="arr">→</span> 취소위약금(5010) 입력</div>
     </div>
     <div class="scen">
       <div class="when">3. "3명 다 못 가요" — 전원 삭제</div>
@@ -596,12 +600,12 @@ body main { transition: padding-right 0.3s ease, max-width 0.3s ease; }
     <div class="mp-row total"><dt>판매금액 (결제필요)</dt><dd>2,038,000원</dd></div>
   </div>
 
-  <h3>예약금액 원장 항목 테이블 (100·101·200·701만 표시)</h3>
+  <h3>예약금액 원장 항목 테이블 (1000·1010·2000·5010만 표시)</h3>
   <table class="ledger-tbl">
     <thead><tr><th>코드</th><th>항목명</th><th style="text-align:right;">금액</th><th>날짜</th></tr></thead>
     <tbody>
-      <tr><td class="code">100</td><td>상품정가</td><td class="amt-minus">−2,097,000</td><td class="date">04-07 08:43</td></tr>
-      <tr><td class="code">202</td><td>여행사특가할인</td><td class="amt-plus">+39,000</td><td class="date">04-07 08:43</td></tr>
+      <tr><td class="code">1000</td><td>상품정가</td><td class="amt-minus">−2,097,000</td><td class="date">04-07 08:43</td></tr>
+      <tr><td class="code">2002</td><td>여행사특가할인</td><td class="amt-plus">+39,000</td><td class="date">04-07 08:43</td></tr>
     </tbody>
   </table>
 
@@ -609,11 +613,11 @@ body main { transition: padding-right 0.3s ease, max-width 0.3s ease; }
   <div class="action-list">
     <div class="action">
       <span class="btn-name">+금액 추가</span>
-      <span class="desc">관리자가 <b>더 받아야 할 금액</b>. 결제필요금액 ↑<br>• <b>추가 비용 [101]</b> · <b>취소위약금 [701]</b> (인원 취소 시 발생)<br><b style="color:#92400e;">📌 모달 안내 문구:</b> "인원 취소에 따라서 발생하는 취소위약금이 있는 경우 금액을 입력해주세요"</span>
+      <span class="desc">관리자가 <b>더 받아야 할 금액</b>. 결제필요금액 ↑<br>• <b>추가 비용 [1010]</b> · <b>취소위약금 [5010]</b> (인원 취소 시 발생)<br><b style="color:#92400e;">📌 모달 안내 문구:</b> "인원 취소에 따라서 발생하는 취소위약금이 있는 경우 금액을 입력해주세요"</span>
     </div>
     <div class="action">
       <span class="btn-name">−금액 차감</span>
-      <span class="desc">관리자가 <b>할인 처리</b>. 결제필요금액 ↓<br>• <b>200번대 할인</b>: 특가할인 채널[200]/플랫폼[201]/여행사[202], 커스텀할인 채널[210]/플랫폼[211]/여행사[212]<br>• <b>300번대 쿠폰</b>: 쿠폰할인 채널[300]/플랫폼[301]/여행사[302]</span>
+      <span class="desc">관리자가 <b>할인 처리</b>. 결제필요금액 ↓<br>• <b>2000번대 특가할인</b>: 특가할인 채널[2000]/플랫폼[2001]/여행사[2002], 커스텀할인 채널[2100]/플랫폼[2101]/여행사[2102]<br>• <b>22000번대 쿠폰</b>: 쿠폰할인 채널[2200]/플랫폼[2201]/여행사[2202]</span>
     </div>
   </div>
 
@@ -629,7 +633,7 @@ body main { transition: padding-right 0.3s ease, max-width 0.3s ease; }
     </div>
     <div class="scen">
       <div class="when">"동행자 1명 취소 후 위약금 청구"</div>
-      <div class="flow">① [인원 삭제] 후 자동 표시되는 [+금액 추가] 모달 <span class="arr">→</span> 취소위약금(7010) <span class="arr">→</span> 금액 입력</div>
+      <div class="flow">① [인원 삭제] 후 자동 표시되는 [+금액 추가] 모달 <span class="arr">→</span> 취소위약금(5010) <span class="arr">→</span> 금액 입력</div>
     </div>
   </div>
 
@@ -637,7 +641,7 @@ body main { transition: padding-right 0.3s ease, max-width 0.3s ease; }
     ⚠️ <b>절대 금액 직접 수정 X.</b> 모든 변동은 +/− 행으로만. 그래야 원장에 이력이 남음.
   </div>
   <div class="tip">
-    💡 <b>결제필요금액 계산식:</b> 상품(1000) + 추가비용(1010) − 할인(2000번대) − 쿠폰(3000번대) + 취소위약금(7010)<br>※ 화면에 보이는 2,038,000 = 2,097,000 − 39,000(202) − 20,000(301)
+    💡 <b>결제필요금액 계산식:</b> 상품(1000) + 추가비용(1010) − 할인(2000번대) − 쿠폰(2200번대) + 취소위약금(5010)<br>※ 화면에 보이는 2,038,000 = 2,097,000 − 39,000(2002) − 20,000(2201)
   </div>
 
   <h3 style="margin-top:24px;">📊 어드민 vs 파트너스 — 분담 가능 항목 매트릭스 <span style="font-size:12px; color:#7c2d12; background:#fef3c7; padding:3px 10px; border-radius:6px; font-weight:700; margin-left:6px;">2026-06-11 미팅</span></h3>
@@ -712,7 +716,7 @@ body main { transition: padding-right 0.3s ease, max-width 0.3s ease; }
 <!-- ④ 취소위약금 원장 이전 -->
 <section class="area" id="area-cancel-fee">
   <h2><span class="area-num">④</span>취소위약금 원장 이전</h2>
-  <div class="area-sub">결제 시스템 → 예약 원장(7010)으로 위약금 관리 이전. 인원 삭제·금액 관리 흐름 안에 자연스럽게 통합</div>
+  <div class="area-sub">결제 시스템 → 예약 원장(5010)으로 위약금 관리 이전. 인원 삭제·금액 관리 흐름 안에 자연스럽게 통합</div>
 
   <h3>배경 / 결정</h3>
   <div class="mockup-preview">
@@ -724,8 +728,8 @@ body main { transition: padding-right 0.3s ease, max-width 0.3s ease; }
   <h3>정책</h3>
   <div class="action-list">
     <div class="action">
-      <span class="btn-name">7010 위약금 항목</span>
-      <span class="desc">결제 시스템에서 보유하던 위약금 정보 → 예약 원장 <b>7010 항목</b>으로 이전<br>• 위약금 발생 시 결제 자체는 깨지지 않고 원장에서 처리<br>• 회계 정합성 개선</span>
+      <span class="btn-name">5010 위약금 항목</span>
+      <span class="desc">결제 시스템에서 보유하던 위약금 정보 → 예약 원장 <b>5010 항목</b>으로 이전<br>• 위약금 발생 시 결제 자체는 깨지지 않고 원장에서 처리<br>• 회계 정합성 개선</span>
     </div>
   </div>
 
@@ -733,7 +737,7 @@ body main { transition: padding-right 0.3s ease, max-width 0.3s ease; }
   <div class="scenario-block">
     <div class="scen">
       <div class="when">동행자 1명 취소 (위약금 30,000원 발생)</div>
-      <div class="flow">① [인원 삭제] <span class="arr">→</span> [+금액 추가] 모달 자동 표시 <span class="arr">→</span> 위약금(7010) 입력 30,000 <span class="arr">→</span> 결제필요금액에 +30,000 반영</div>
+      <div class="flow">① [인원 삭제] <span class="arr">→</span> [+금액 추가] 모달 자동 표시 <span class="arr">→</span> 위약금(5010) 입력 30,000 <span class="arr">→</span> 결제필요금액에 +30,000 반영</div>
     </div>
     <div class="scen">
       <div class="when">인원 취소했지만 위약금 면제 케이스</div>
@@ -743,10 +747,10 @@ body main { transition: padding-right 0.3s ease, max-width 0.3s ease; }
 
   <div style="background:#dcfce7; border-left:4px solid #10b981; padding:14px 18px; border-radius:0 10px 10px 0; font-size:13px; color:#065f46; margin-top:12px;">
     💡 <b>핵심 변화:</b><br>
-    • <b>취소위약금 관리 주체 이전</b>: 기존 결제 시스템 → <b>예약 원장(7010)으로 완전 이전</b><br>
+    • <b>취소위약금 관리 주체 이전</b>: 기존 결제 시스템 → <b>예약 원장(5010)으로 완전 이전</b><br>
     • 결제 서비스는 "결제·환불" 트랜잭션만 관리, 위약금은 예약 원장의 책임<br>
     • 결제 후 위약금 발생 시 결제 자체는 깨지지 않고 원장에서 처리 → 회계 정합성 개선<br>
-    <small style="color:#047857; font-weight:600;">📌 미팅 결정 (1:29~1:34 "취소위약금 예약원장 우선 오픈" 단락): <b>1차 오픈에 포함</b>. 인원 삭제 시 [+금액 추가] 모달 자동 표시 → 위약금(7010) 입력 흐름으로 ① 인원 관리·② 예약 금액 관리 안에 이미 반영됨.</small>
+    <small style="color:#047857; font-weight:600;">📌 미팅 결정 (1:29~1:34 "취소위약금 예약원장 우선 오픈" 단락): <b>1차 오픈에 포함</b>. 인원 삭제 시 [+금액 추가] 모달 자동 표시 → 위약금(5010) 입력 흐름으로 ① 인원 관리·② 예약 금액 관리 안에 이미 반영됨.</small>
   </div>
 </section>
 
@@ -814,20 +818,20 @@ body main { transition: padding-right 0.3s ease, max-width 0.3s ease; }
   <table class="ledger-tbl">
     <thead><tr><th>코드</th><th>항목명</th><th style="text-align:right;">금액</th><th>날짜</th></tr></thead>
     <tbody>
-      <tr><td class="code">100</td><td>상품정가</td><td class="amt-minus">−2,097,000</td><td class="date">04-07 08:43</td></tr>
-      <tr><td class="code">202</td><td>여행사특가할인</td><td class="amt-plus">+39,000</td><td class="date">04-07 08:43</td></tr>
-      <tr><td class="code">301</td><td>쿠폰할인(플랫폼)</td><td class="amt-plus">+20,000</td><td class="date">04-07 08:43</td></tr>
-      <tr><td class="code">401</td><td>고객결제(플랫폼)</td><td class="amt-plus">+2,038,000</td><td class="date">04-07 08:43</td></tr>
-      <tr><td class="code">601</td><td>PG수수료</td><td class="amt-minus">−59,100</td><td class="date">04-07 08:43</td></tr>
-      <tr><td class="code">602</td><td>플랫폼이용료</td><td class="amt-plus">+179,344</td><td class="date">04-07 08:43</td></tr>
-      <tr><td class="code">501</td><td>플랫폼대금이전</td><td class="amt-plus">+1,878,656</td><td class="date">06-19(예정)</td></tr>
+      <tr><td class="code">1000</td><td>상품정가</td><td class="amt-minus">−2,097,000</td><td class="date">04-07 08:43</td></tr>
+      <tr><td class="code">2002</td><td>여행사특가할인</td><td class="amt-plus">+39,000</td><td class="date">04-07 08:43</td></tr>
+      <tr><td class="code">2201</td><td>쿠폰할인(플랫폼)</td><td class="amt-plus">+20,000</td><td class="date">04-07 08:43</td></tr>
+      <tr><td class="code">4001</td><td>고객결제(PG)</td><td class="amt-plus">+2,038,000</td><td class="date">04-07 08:43</td></tr>
+      <tr><td class="code">6010</td><td>PG수수료</td><td class="amt-minus">−59,100</td><td class="date">04-07 08:43</td></tr>
+      <tr><td class="code">6020</td><td>플랫폼이용료</td><td class="amt-plus">+179,344</td><td class="date">04-07 08:43</td></tr>
+      <tr><td class="code">7010</td><td>PG→여행사 이전</td><td class="amt-plus">+1,878,656</td><td class="date">06-19(예정)</td></tr>
     </tbody>
   </table>
   <div class="tip">💡 합계: 총 유입 <b style="color:#15803d;">+4,155,000</b> / 총 유출 <b style="color:#b91c1c;">−2,156,100</b> / 순합계 <b>+1,998,900</b></div>
 
   <h3>4개 서브탭 활용</h3>
   <div class="mockup-preview">
-    <div class="mp-row"><dt>예약금액 관리</dt><dd>100·101·200번대·300번대·701만 표시 (상품가/추가비용/할인/쿠폰/위약금)</dd></div>
+    <div class="mp-row"><dt>예약금액 관리</dt><dd>1000·1010·2000번대·2200번대·5010만 표시 (상품가/추가비용/할인/쿠폰/위약금)</dd></div>
     <div class="mp-row"><dt>결제금액 관리</dt><dd>400·700만 표시 (결제/환불)</dd></div>
     <div class="mp-row"><dt>정산 관리</dt><dd>500·600·900만 표시 (수수료/대금이전/결산)</dd></div>
     <div class="mp-row"><dt>전체 원장</dt><dd>모든 항목 시계열 + 주체·범주·기간 필터 + CSV 다운</dd></div>
