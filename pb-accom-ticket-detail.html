@@ -51,6 +51,20 @@ button { font-family: inherit; cursor: pointer; }
 .st-badge { display: inline-flex; align-items: center; gap: 5px; padding: 5px 12px; border-radius: 14px; font-size: 12.5px; font-weight: 700; white-space: nowrap; }
 .st-badge.st-preparing { background: #fff7e6; color: #d46b08; border: 1px solid #ffbb96; }
 
+/* Entry-info header card (진입 조건: TMG + 매핑) */
+.entry-card { background: linear-gradient(135deg, #f6ffed 0%, #f0f5ff 100%); border: 1px solid #b7eb8f; border-radius: 12px; padding: 14px 18px; display: flex; align-items: center; gap: 16px; flex-wrap: wrap; }
+.entry-card .ec-block { display: flex; align-items: center; gap: 8px; font-size: 13px; color: rgba(0,0,0,0.85); }
+.entry-card .ec-block .ec-ico { font-size: 15px; }
+.entry-card .ec-block strong { font-weight: 700; color: rgba(0,0,0,0.88); }
+.entry-card .ec-mono { font-family: 'SF Mono', monospace; background: #fff; padding: 2px 8px; border-radius: 4px; font-size: 11.5px; color: #0958d9; border: 1px solid #91caff; font-weight: 700; }
+.entry-card .ec-divider { width: 1px; height: 20px; background: rgba(0,0,0,0.1); }
+.entry-card .ec-actions { margin-left: auto; display: flex; gap: 8px; }
+.entry-card .ec-btn { height: 30px; padding: 0 12px; border-radius: 6px; font-size: 12px; font-weight: 600; cursor: pointer; border: 1px solid #d9d9d9; background: #fff; color: rgba(0,0,0,0.75); font-family: inherit; display: inline-flex; align-items: center; gap: 5px; transition: all 0.15s; }
+.entry-card .ec-btn:hover { color: #1677ff; border-color: #1677ff; }
+.entry-card .ec-btn.warn { color: #d46b08; border-color: #ffbb96; background: #fff7e6; }
+.entry-card .ec-btn.warn:hover { background: #ffd591; }
+.entry-card .ec-note { font-size: 11px; color: rgba(0,0,0,0.5); margin-top: 4px; font-weight: 500; }
+
 /* Top row 2 — progress + activate btn */
 .top-row2 { margin-top: 14px; display: flex; align-items: center; gap: 16px; flex-wrap: wrap; }
 .progress-wrap { flex: 1; min-width: 320px; display: flex; align-items: center; gap: 12px; }
@@ -285,28 +299,27 @@ button { font-family: inherit; cursor: pointer; }
           <span>rateType <strong style="color:#1677ff;">ALM-DYNAMIC</strong></span>
         </div>
       </div>
-      <span class="st-badge st-preparing">⏳ 대기 (준비 중)</span>
+      <span class="st-badge st-preparing">⏳ 대기</span>
     </div>
 
     <div class="top-row2">
       <div class="progress-wrap">
-        <div class="progress-label-lg">진행 <strong>3</strong> / 4</div>
-        <div class="progress-bar-lg"><div class="progress-bar-lg-fill" style="width:75%"></div></div>
+        <div class="progress-label-lg">진행 <strong>2</strong> / 3</div>
+        <div class="progress-bar-lg"><div class="progress-bar-lg-fill" style="width:67%"></div></div>
       </div>
       <div class="section-pills">
-        <span class="sp-pill done">✓ 카탈로그 매핑</span>
         <span class="sp-pill undone">✗ 콘텐츠 등록</span>
         <span class="sp-pill done">✓ 요금·재고</span>
         <span class="sp-pill done">✓ 판매기간·정책</span>
       </div>
       <div class="activate-wrap">
         <button class="btn-activate" disabled onclick="tryActivate()">▶ 운영중 전환</button>
-        <div class="tooltip-hint">모든 섹션 완료 후 활성화됩니다</div>
+        <div class="tooltip-hint">3개 섹션 모두 완료 후 활성화됩니다</div>
       </div>
     </div>
 
     <div class="top-note">
-      각 섹션 저장은 언제든 가능합니다. <strong>4개 섹션 모두 완료되면 [운영중 전환] 버튼이 활성화</strong>됩니다.
+      각 섹션 저장은 언제든 가능합니다. <strong>3개 섹션 모두 완료되면 [운영중 전환] 버튼이 활성화</strong>됩니다.
     </div>
   </div>
 </div>
@@ -316,27 +329,27 @@ button { font-family: inherit; cursor: pointer; }
 
   <!-- Left mini nav -->
   <aside class="side-nav">
-    <div class="side-nav-title">섹션</div>
-    <button class="side-nav-item done" onclick="scrollToSection('sec-1')">
-      <span class="sn-num">1</span> 카탈로그 매핑
-      <span class="sn-status" style="color:#389e0d;">✓</span>
+    <button class="side-nav-item" onclick="scrollToSection('entry-info')" style="color:rgba(0,0,0,0.6);">
+      <span class="sn-num" style="background:#f0f5ff; color:#0958d9;">i</span>
+      진입 정보 (TMG + 매핑)
     </button>
-    <button class="side-nav-item undone current" onclick="scrollToSection('sec-2')">
-      <span class="sn-num">2</span> 콘텐츠 등록
+    <div style="border-top:1px dashed #e8e8e8; margin: 6px 4px;"></div>
+    <div class="side-nav-title">섹션 (진행률 2 / 3)</div>
+    <button class="side-nav-item undone current" onclick="scrollToSection('sec-1')">
+      <span class="sn-num">1</span> 콘텐츠 등록
       <span class="sn-status" style="color:#cf1322;">✗</span>
     </button>
+    <button class="side-nav-item done" onclick="scrollToSection('sec-2')">
+      <span class="sn-num">2</span> 요금·재고
+      <span class="sn-status" style="color:#389e0d;">✓</span>
+    </button>
     <button class="side-nav-item done" onclick="scrollToSection('sec-3')">
-      <span class="sn-num">3</span> 요금·재고
+      <span class="sn-num">3</span> 판매기간·정책
       <span class="sn-status" style="color:#389e0d;">✓</span>
     </button>
-    <button class="side-nav-item done" onclick="scrollToSection('sec-4')">
-      <span class="sn-num">4</span> 판매기간·정책
-      <span class="sn-status" style="color:#389e0d;">✓</span>
-    </button>
-    <div style="border-top:1px dashed #e8e8e8; margin-top:6px; padding-top:6px;">
-      <button class="side-nav-item" onclick="scrollToSection('sec-tmg')" style="color:rgba(0,0,0,0.5);">
-        <span class="sn-num" style="background:#f0f5ff; color:#0958d9;">i</span>
-        TMG 원본 데이터
+    <div style="border-top:1px dashed #e8e8e8; margin-top:6px; padding-top:8px;">
+      <button class="side-nav-item" style="background:#52c41a; color:#fff; font-weight:700; justify-content:center;" disabled title="3개 섹션 모두 완료 후 활성화">
+        ▶ 운영중 전환
       </button>
     </div>
   </aside>
@@ -344,137 +357,37 @@ button { font-family: inherit; cursor: pointer; }
   <!-- Content column -->
   <div class="content-col">
 
-    <!-- ==================== 섹션 0. TMG 원본 데이터 (info, 진행률 대상 아님) ==================== -->
-    <div class="section-card collapsed" id="sec-tmg">
-      <div class="sec-head" onclick="toggleSection(this)">
-        <div class="sec-num" style="background:#f0f5ff; color:#0958d9;">i</div>
-        <div class="sec-title-wrap">
-          <div class="sec-title">TMG 원본 데이터 <span style="font-size:11px; background:#f5f5f5; color:rgba(0,0,0,0.55); padding:2px 8px; border-radius:10px; font-weight:600;">읽기 전용</span></div>
-          <div class="sec-sub">webhook / getDetailRates로 수신된 요금표 메타 · 편집 불가</div>
-        </div>
-        <span class="sec-status info">참고</span>
-        <span class="sec-chev">▾</span>
+    <!-- ==================== 진입 정보 카드 (TMG + 매핑) — 진행률 카운트 X ==================== -->
+    <div id="entry-info" class="entry-card">
+      <div class="ec-block">
+        <span class="ec-ico">📡</span>
+        <span>TMG 요금표</span>
+        <span class="ec-mono">46882</span>
+        <strong>Ưu Đãi Đặt Trước 60 Ngày</strong>
+        <span class="rate-type-tag alm">ALM-DYNAMIC</span>
       </div>
-      <div class="sec-body">
-        <div class="tmg-info-card">
-          <div>
-            <div class="lbl">rateType</div>
-            <div class="val"><span class="rate-type-tag alm">ALM-DYNAMIC</span></div>
-          </div>
-          <div>
-            <div class="lbl">요금 ID / 요금 명</div>
-            <div class="val mono">48555</div>
-            <div class="val" style="font-style:italic; font-size:12px; color:rgba(0,0,0,0.65);">Ưu Đãi Đặt Trước 60 Ngày</div>
-          </div>
-          <div>
-            <div class="lbl">숙소 ID</div>
-            <div class="val mono">46820</div>
-          </div>
-          <div>
-            <div class="lbl">숙소 명 (VN)</div>
-            <div class="val" style="font-size:12.5px;">Sol by Meliá Phú Quốc</div>
-          </div>
-        </div>
-        <span class="link-open-modal" onclick="openTmgDetail()">
-          🔍 원본 데이터 상세 보기 (ratesBreakdown · cancellationPolicies · JSON)
-        </span>
+      <div class="ec-divider"></div>
+      <div class="ec-block">
+        <span class="ec-ico">🔗</span>
+        <span>카탈로그 매핑 완료</span>
+        <span class="ec-mono" style="color:#722ed1; border-color:#d3adf7; background:#f9f0ff;">1256</span>
+        <strong>솔 바이 멜리아 푸꾸옥</strong>
+        <span style="font-size:11.5px; color:rgba(0,0,0,0.55);">· 객실 3개 매핑됨</span>
+      </div>
+      <div class="ec-actions">
+        <button class="ec-btn" onclick="openTmgDetail()">🔍 원본 데이터 상세 보기</button>
+        <button class="ec-btn warn" onclick="openMappingEdit()">✏ 매핑 수정</button>
+      </div>
+      <div style="flex-basis:100%; height:0;"></div>
+      <div class="ec-note">
+        ℹ️ 이 카드는 진입 시점에 이미 완료된 진입 조건입니다 — 진행률에 포함되지 않습니다.
       </div>
     </div>
 
-    <!-- ==================== 섹션 1. 카탈로그 매핑 (✓ 완료) ==================== -->
-    <div class="section-card done" id="sec-1">
+    <!-- ==================== 섹션 1. 콘텐츠 등록 (✗ 진행 중) ==================== -->
+    <div class="section-card warn" id="sec-1">
       <div class="sec-head" onclick="toggleSection(this)">
         <div class="sec-num">1</div>
-        <div class="sec-title-wrap">
-          <div class="sec-title">카탈로그 매핑</div>
-          <div class="sec-sub">TMG 숙소·객실을 트립스토어 카탈로그에 매핑합니다.</div>
-        </div>
-        <span class="sec-status done">✓ 완료</span>
-        <span class="sec-chev">▾</span>
-      </div>
-      <div class="sec-body">
-
-        <!-- 숙소 매핑 -->
-        <div class="mapping-row">
-          <div class="mapping-side tmg">
-            <div class="lbl">TMG 숙소정보</div>
-            <div class="val"><span class="mono-id">46820</span>Sol by Meliá Phú Quốc</div>
-          </div>
-          <div class="arrow-cell">→</div>
-          <div class="mapping-side catalog">
-            <div class="lbl">카탈로그 숙소</div>
-            <select class="form-select" style="background-color:#fff;">
-              <option>1256 · 푸꾸옥 솔바이멜리아 리조트</option>
-              <option>+ 새 카탈로그 숙소 등록</option>
-            </select>
-            <a class="link-catalog">→ 카탈로그 숙소 상세보기</a>
-          </div>
-        </div>
-
-        <!-- 객실 매핑 -->
-        <div class="sub-section">
-          <div class="sub-section-title">
-            객실 매핑 <span class="count-pill">3개 객실</span>
-            <span style="margin-left:auto; font-size:11.5px; color:rgba(0,0,0,0.45); font-weight:500;">TMG roomPriceCategories 기반 · 각 객실에 대응되는 카탈로그 객실을 지정합니다.</span>
-          </div>
-
-          <div class="mapping-row">
-            <div class="mapping-side tmg">
-              <div class="lbl">TMG 객실</div>
-              <div class="val" style="font-size:12.5px;">Deluxe Pool View King</div>
-            </div>
-            <div class="arrow-cell">→</div>
-            <div style="display:flex; gap:8px;">
-              <select class="form-select" style="flex:1;">
-                <option>881 · Deluxe Pool View King</option>
-                <option>선택 안 함 (스킵)</option>
-              </select>
-              <button class="btn-add-room">+ 새 객실 생성</button>
-            </div>
-          </div>
-
-          <div class="mapping-row">
-            <div class="mapping-side tmg">
-              <div class="lbl">TMG 객실</div>
-              <div class="val" style="font-size:12.5px;">Premium Deluxe Ocean View</div>
-            </div>
-            <div class="arrow-cell">→</div>
-            <div style="display:flex; gap:8px;">
-              <select class="form-select" style="flex:1;">
-                <option>882 · Premium Deluxe Ocean View</option>
-                <option>선택 안 함 (스킵)</option>
-              </select>
-              <button class="btn-add-room">+ 새 객실 생성</button>
-            </div>
-          </div>
-
-          <div class="mapping-row">
-            <div class="mapping-side tmg">
-              <div class="lbl">TMG 객실</div>
-              <div class="val" style="font-size:12.5px;">Deluxe Garden View Twin</div>
-            </div>
-            <div class="arrow-cell">→</div>
-            <div style="display:flex; gap:8px;">
-              <select class="form-select" style="flex:1;">
-                <option>883 · Deluxe Garden View Twin</option>
-                <option>선택 안 함 (스킵)</option>
-              </select>
-              <button class="btn-add-room">+ 새 객실 생성</button>
-            </div>
-          </div>
-        </div>
-
-        <div class="sec-save-row">
-          <button class="btn btn-default">취소</button>
-          <button class="btn btn-primary" onclick="saveSection(1)">매핑 저장</button>
-        </div>
-      </div>
-    </div>
-
-    <!-- ==================== 섹션 2. 콘텐츠 등록 (✗ 진행 중) ==================== -->
-    <div class="section-card warn" id="sec-2">
-      <div class="sec-head" onclick="toggleSection(this)">
-        <div class="sec-num">2</div>
         <div class="sec-title-wrap">
           <div class="sec-title">콘텐츠 등록 <span style="font-size:11px; background:#fff7e6; color:#d46b08; padding:2px 8px; border-radius:10px; font-weight:600; border:1px solid #ffbb96;">진행 중</span></div>
           <div class="sec-sub">사용자에게 노출되는 운영명·서브카피·상세 설명·이미지를 작성합니다.</div>
@@ -523,15 +436,15 @@ button { font-family: inherit; cursor: pointer; }
 
         <div class="sec-save-row">
           <button class="btn btn-default">취소</button>
-          <button class="btn btn-primary" onclick="saveSection(2)">콘텐츠 저장</button>
+          <button class="btn btn-primary" onclick="saveSection(1)">콘텐츠 저장</button>
         </div>
       </div>
     </div>
 
-    <!-- ==================== 섹션 3. 요금·재고 (✓ 완료) ==================== -->
-    <div class="section-card done" id="sec-3">
+    <!-- ==================== 섹션 2. 요금·재고 (✓ 완료) ==================== -->
+    <div class="section-card done" id="sec-2">
       <div class="sec-head" onclick="toggleSection(this)">
-        <div class="sec-num">3</div>
+        <div class="sec-num">2</div>
         <div class="sec-title-wrap">
           <div class="sec-title">요금·재고 (자동 채움값 확인)</div>
           <div class="sec-sub">TMG 요금표 기반 자동 채움값을 확인하고, 마크업 정책만 지정하면 됩니다.</div>
@@ -578,15 +491,15 @@ button { font-family: inherit; cursor: pointer; }
 
         <div class="sec-save-row">
           <button class="btn btn-default">취소</button>
-          <button class="btn btn-primary" onclick="saveSection(3)">요금·재고 확인 완료</button>
+          <button class="btn btn-primary" onclick="saveSection(2)">요금·재고 확인 완료</button>
         </div>
       </div>
     </div>
 
-    <!-- ==================== 섹션 4. 판매기간·정책 (✓ 완료) ==================== -->
-    <div class="section-card done" id="sec-4">
+    <!-- ==================== 섹션 3. 판매기간·정책 (✓ 완료) ==================== -->
+    <div class="section-card done" id="sec-3">
       <div class="sec-head" onclick="toggleSection(this)">
-        <div class="sec-num">4</div>
+        <div class="sec-num">3</div>
         <div class="sec-title-wrap">
           <div class="sec-title">판매기간·정책</div>
           <div class="sec-sub">TMG validity(읽기 전용)와 트립스토어 판매 오픈일/마감일·판매 정책을 지정합니다.</div>
@@ -642,7 +555,7 @@ button { font-family: inherit; cursor: pointer; }
 
         <div class="sec-save-row">
           <button class="btn btn-default">취소</button>
-          <button class="btn btn-primary" onclick="saveSection(4)">판매기간 확인 완료</button>
+          <button class="btn btn-primary" onclick="saveSection(3)">판매기간 확인 완료</button>
         </div>
       </div>
     </div>
@@ -731,7 +644,7 @@ function scrollToSection(id) {
   el.scrollIntoView({ behavior: 'smooth', block: 'start' });
   // update side-nav current
   document.querySelectorAll('.side-nav-item').forEach(b => b.classList.remove('current'));
-  const idx = { 'sec-1': 0, 'sec-2': 1, 'sec-3': 2, 'sec-4': 3, 'sec-tmg': 4 }[id];
+  const idx = { 'entry-info': 0, 'sec-1': 1, 'sec-2': 2, 'sec-3': 3 }[id];
   const items = document.querySelectorAll('.side-nav-item');
   if (items[idx]) items[idx].classList.add('current');
 }
@@ -742,6 +655,10 @@ function saveSection(n) {
 
 function tryActivate() {
   alert('아직 완료되지 않은 섹션이 있습니다. (콘텐츠 등록)');
+}
+
+function openMappingEdit() {
+  alert('매핑 수정 모달을 엽니다.\n\n숙박권 관리 > 매핑 대기 탭에서 사용하는 것과 동일한 매핑 UI로 재편집할 수 있습니다.\n\n(이 목업에서는 pb-accom-tickets.html의 매핑 모달을 참조하세요.)');
 }
 
 function showToast(msg) {

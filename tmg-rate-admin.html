@@ -83,6 +83,11 @@ tbody tr:hover td { background: #fafafa; }
 .tag-red { background: #fff1f0; color: #cf1322; border: 1px solid #ffa39e; }
 .tag-purple { background: #f9f0ff; color: #722ed1; border: 1px solid #d3adf7; }
 
+/* MAPPING STATUS */
+.map-tag { display: inline-flex; align-items: center; gap: 4px; padding: 2px 8px; border-radius: 10px; font-size: 11.5px; font-weight: 600; }
+.map-tag.mapped { background: #f6ffed; color: #389e0d; border: 1px solid #b7eb8f; }
+.map-tag.unmapped { background: #fff7e6; color: #d46b08; border: 1px solid #ffbb96; }
+
 /* SOURCE PILL */
 .src-pill { display: inline-flex; align-items: center; padding: 1px 7px; border-radius: 3px; font-size: 10.5px; font-weight: 600; margin-left: 4px; }
 .src-webhook { background: #f6ffed; color: #389e0d; border: 1px solid #b7eb8f; }
@@ -180,8 +185,8 @@ tbody tr:hover td { background: #fafafa; }
   <div class="notice-banner notice-blue">
     <span class="notice-icon">📡</span>
     <div>
-      TMG는 <code style="background:rgba(22,119,255,0.1); padding:1px 5px; border-radius:3px; font-size:12px;">webhook</code> 실시간 push + <code style="background:rgba(22,119,255,0.1); padding:1px 5px; border-radius:3px; font-size:12px;">getDetailRates</code> polling 두 채널로 요금표를 전달합니다.
-      새 요금표가 수신되면 <strong>[숙박권 관리]에 ⏳ 대기 상태 행이 자동 생성</strong>되며, 이 화면에서는 원본 데이터만 조회할 수 있습니다.
+      TMG는 <code style="background:rgba(22,119,255,0.1); padding:1px 5px; border-radius:3px; font-size:12px;">webhook</code> 실시간 push + <code style="background:rgba(22,119,255,0.1); padding:1px 5px; border-radius:3px; font-size:12px;">getDetailRates</code> polling 두 채널로 요금표를 수신합니다.
+      <strong>매핑·숙박권 생성은 <a href="pb-accom-tickets.html">[숙박권 관리]</a>에서 진행</strong>합니다. 미매핑 요금표는 자동으로 [숙박권 관리] 상단에 알림으로 표시됩니다.
     </div>
   </div>
 
@@ -228,6 +233,7 @@ tbody tr:hover td { background: #fafafa; }
             <th>숙소 ID</th>
             <th>숙소명</th>
             <th>판매 기간</th>
+            <th>매핑 상태</th>
             <th>최근 수신</th>
             <th style="width:80px;"></th>
           </tr>
@@ -240,6 +246,7 @@ tbody tr:hover td { background: #fafafa; }
             <td class="td-id">46820</td>
             <td><div class="hotel-name" title="Sol by Meliá Phú Quốc">Sol by Meliá Phú Quốc</div></td>
             <td style="font-size:12px; color:rgba(0,0,0,0.65);">2026-07-01 ~ 09-30</td>
+            <td><span class="map-tag unmapped">— 미매핑</span></td>
             <td><span class="sync-time">2026-07-02 13:22</span><span class="src-pill src-webhook">webhook</span></td>
             <td><button class="btn btn-ghost btn-sm" onclick="openDetail('46882')">상세</button></td>
           </tr>
@@ -250,6 +257,7 @@ tbody tr:hover td { background: #fafafa; }
             <td class="td-id">46820</td>
             <td><div class="hotel-name" title="Sol by Meliá Phú Quốc">Sol by Meliá Phú Quốc</div></td>
             <td style="font-size:12px; color:rgba(0,0,0,0.65);">2026-06-15 ~ 08-31</td>
+            <td><span class="map-tag mapped">✓ 매핑됨</span></td>
             <td><span class="sync-time">2026-07-02 11:08</span><span class="src-pill src-webhook">webhook</span></td>
             <td><button class="btn btn-ghost btn-sm" onclick="openDetail('46880')">상세</button></td>
           </tr>
@@ -260,6 +268,7 @@ tbody tr:hover td { background: #fafafa; }
             <td class="td-id">47010</td>
             <td><div class="hotel-name" title="Grand Ocean Bay Phú Quốc">Grand Ocean Bay Phú Quốc</div></td>
             <td style="font-size:12px; color:rgba(0,0,0,0.65);">2026-07-01 ~ 12-31</td>
+            <td><span class="map-tag unmapped">— 미매핑</span></td>
             <td><span class="sync-time">2026-07-02 12:44</span><span class="src-pill src-poll">getDetailRates</span></td>
             <td><button class="btn btn-ghost btn-sm" onclick="openDetail('47102')">상세</button></td>
           </tr>
@@ -270,6 +279,7 @@ tbody tr:hover td { background: #fafafa; }
             <td class="td-id">47010</td>
             <td><div class="hotel-name" title="Grand Ocean Bay Phú Quốc">Grand Ocean Bay Phú Quốc</div></td>
             <td style="font-size:12px; color:rgba(0,0,0,0.65);">2026-06-01 ~ 11-30</td>
+            <td><span class="map-tag mapped">✓ 매핑됨</span></td>
             <td><span class="sync-time">2026-07-02 09:32</span><span class="src-pill src-webhook">webhook</span></td>
             <td><button class="btn btn-ghost btn-sm" onclick="openDetail('47098')">상세</button></td>
           </tr>
@@ -280,6 +290,7 @@ tbody tr:hover td { background: #fafafa; }
             <td class="td-id">46818</td>
             <td><div class="hotel-name" title="Khu Nghỉ Dưỡng Dusit Princess Moonrise Beach Phú Quốc">Khu Nghỉ Dưỡng Dusit Princess Moonrise Beach Phú Quốc</div></td>
             <td style="font-size:12px; color:rgba(0,0,0,0.65);">2026-07-15 ~ 10-31</td>
+            <td><span class="map-tag unmapped">— 미매핑</span></td>
             <td><span class="sync-time">2026-07-02 08:15</span><span class="src-pill src-webhook">webhook</span></td>
             <td><button class="btn btn-ghost btn-sm" onclick="openDetail('48555')">상세</button></td>
           </tr>
@@ -290,6 +301,7 @@ tbody tr:hover td { background: #fafafa; }
             <td class="td-id">46818</td>
             <td><div class="hotel-name" title="Khu Nghỉ Dưỡng Dusit Princess Moonrise Beach Phú Quốc">Khu Nghỉ Dưỡng Dusit Princess Moonrise Beach Phú Quốc</div></td>
             <td style="font-size:12px; color:rgba(0,0,0,0.65);">2026-04-29 ~ 2031-04-29 <span class="tag tag-gray" style="margin-left:2px;">자동</span></td>
+            <td><span class="map-tag mapped">✓ 매핑됨</span></td>
             <td><span class="sync-time">2026-07-02 07:00</span><span class="src-pill src-poll">getDetailRates</span></td>
             <td><button class="btn btn-ghost btn-sm" onclick="openDetail('48198')">상세</button></td>
           </tr>
@@ -300,6 +312,7 @@ tbody tr:hover td { background: #fafafa; }
             <td class="td-id">46820</td>
             <td><div class="hotel-name" title="Sol by Meliá Phú Quốc">Sol by Meliá Phú Quốc</div></td>
             <td style="font-size:12px; color:rgba(0,0,0,0.65);">2026-04-29 ~ 2031-04-29 <span class="tag tag-gray" style="margin-left:2px;">자동</span></td>
+            <td><span class="map-tag unmapped">— 미매핑</span></td>
             <td><span class="sync-time">2026-07-02 06:40</span><span class="src-pill src-poll">getDetailRates</span></td>
             <td><button class="btn btn-ghost btn-sm" onclick="openDetail('48205')">상세</button></td>
           </tr>
@@ -310,6 +323,7 @@ tbody tr:hover td { background: #fafafa; }
             <td class="td-id">47010</td>
             <td><div class="hotel-name" title="Grand Ocean Bay Phú Quốc">Grand Ocean Bay Phú Quốc</div></td>
             <td style="font-size:12px; color:rgba(0,0,0,0.65);">2026-04-29 ~ 2031-04-29 <span class="tag tag-gray" style="margin-left:2px;">자동</span></td>
+            <td><span class="map-tag unmapped">— 미매핑</span></td>
             <td><span class="sync-time">2026-07-01 22:15</span><span class="src-pill src-poll">getDetailRates</span></td>
             <td><button class="btn btn-ghost btn-sm" onclick="openDetail('48190')">상세</button></td>
           </tr>
@@ -320,6 +334,7 @@ tbody tr:hover td { background: #fafafa; }
             <td class="td-id">46820</td>
             <td><div class="hotel-name" title="Sol by Meliá Phú Quốc">Sol by Meliá Phú Quốc</div></td>
             <td style="font-size:12px; color:rgba(0,0,0,0.65);">2026-07-01 ~ 12-31</td>
+            <td><span class="map-tag mapped">✓ 매핑됨</span></td>
             <td><span class="sync-time sync-fail" title="webhook 파싱 오류 — 재동기화 필요">실패 · 07-02 05:30</span><span class="src-pill src-webhook">webhook</span></td>
             <td><button class="btn btn-ghost btn-sm" onclick="openDetail('48180')">상세</button></td>
           </tr>
@@ -330,6 +345,7 @@ tbody tr:hover td { background: #fafafa; }
             <td class="td-id">46818</td>
             <td><div class="hotel-name" title="Khu Nghỉ Dưỡng Dusit Princess Moonrise Beach Phú Quốc">Khu Nghỉ Dưỡng Dusit Princess Moonrise Beach Phú Quốc</div></td>
             <td style="font-size:12px; color:rgba(0,0,0,0.65);">2026-08-01 ~ 11-30</td>
+            <td><span class="map-tag mapped">✓ 매핑됨</span></td>
             <td><span class="sync-time">2026-07-01 18:22</span><span class="src-pill src-webhook">webhook</span></td>
             <td><button class="btn btn-ghost btn-sm" onclick="openDetail('48155')">상세</button></td>
           </tr>
