@@ -2,7 +2,7 @@
 <html lang="ko">
 <head>
 <meta charset="UTF-8">
-<title>예약원장 v2 + 정산데이터 매핑 — TripStore Admin</title>
+<title>예약원장 + 지급원장 (상문님 v2 시뮬레이터) — TripStore Admin</title>
 <link href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.6/dist/web/static/pretendard.css" rel="stylesheet">
 <style>
 * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -20,554 +20,148 @@ body { font-family: 'Pretendard','Apple SD Gothic Neo',sans-serif; font-size: 13
 .page-title{font-size:20px;font-weight:700;}
 .tag{display:inline-flex;align-items:center;padding:2px 8px;border-radius:4px;font-size:11px;font-weight:600;}
 .tag-v2{background:#e6f7ff;color:#0958d9;border:1px solid #91caff;}
-.tag-status{background:#fff7e6;color:#d48806;border:1px solid #ffd666;}
+.tag-sim{background:#f9f0ff;color:#531dab;border:1px solid #d3adf7;}
 
-.info-banner{margin:12px 24px 0;background:#e6f7ff;border:1px solid #91caff;border-radius:8px;padding:10px 14px;font-size:12px;color:#0958d9;display:flex;gap:8px;}
+.changelog{margin:12px 24px 0;background:#fff7e6;border:1px solid #ffd666;border-radius:8px;padding:10px 14px;font-size:12px;color:#874d00;line-height:1.6;}
+.info-banner{margin:12px 24px 0;background:#e6f7ff;border:1px solid #91caff;border-radius:8px;padding:10px 14px;font-size:12px;color:#0958d9;}
 
-.summary{margin:16px 24px 0;background:#fff;border:1px solid #f0f0f0;border-radius:8px;padding:14px 18px;display:flex;align-items:center;gap:24px;flex-wrap:wrap;}
+.summary{margin:16px 24px 0;background:#fff;border:1px solid #f0f0f0;border-radius:8px;padding:14px 18px;display:flex;align-items:center;gap:20px;flex-wrap:wrap;}
 .sum-item{display:flex;flex-direction:column;gap:2px;}
 .sum-label{font-size:11px;color:rgba(0,0,0,.45);}
 .sum-value{font-size:14px;font-weight:600;}
 .sum-divider{width:1px;height:28px;background:#f0f0f0;}
 
-.layout{padding:14px 24px 48px;display:grid;grid-template-columns: 1fr 360px;gap:14px;align-items:start;}
-.main-card{background:#fff;border:1px solid #f0f0f0;border-radius:8px;overflow:hidden;}
+.layout{padding:14px 24px 0;display:grid;grid-template-columns: 1fr 320px;gap:14px;align-items:start;}
+.main-card{background:#fff;border:1px solid #f0f0f0;border-radius:8px;overflow:hidden;margin:14px 24px 0;}
+.card-in-layout{margin:0;}
 .side{display:flex;flex-direction:column;gap:14px;}
 
 .card-head{padding:12px 16px;border-bottom:1px solid #f0f0f0;font-weight:600;font-size:13px;display:flex;align-items:center;gap:8px;}
 .card-head .sub{font-size:11px;color:rgba(0,0,0,.45);font-weight:400;margin-left:6px;}
-.card-body{padding:0;}
 
 .ledger-wrap{overflow-x:auto;}
 table.ledger{width:100%;border-collapse:collapse;font-size:12px;}
-.ledger thead th{padding:8px 6px;text-align:center;background:#fafafa;border-bottom:1px solid #e8e8e8;font-weight:600;color:rgba(0,0,0,.65);white-space:nowrap;}
+.ledger thead th{padding:8px 5px;text-align:center;background:#fafafa;border-bottom:1px solid #e8e8e8;font-weight:600;color:rgba(0,0,0,.65);white-space:nowrap;font-size:11px;}
 .ledger thead th.party{background:#f0f5ff;color:#1d39c4;}
-.ledger thead tr.sub th{font-size:11px;background:#fafafa;color:rgba(0,0,0,.55);padding:4px 6px;}
+.ledger thead th.tally{background:#fff2e8;color:#d4380d;}
+.ledger thead tr.sub th{font-size:10px;background:#fafafa;color:rgba(0,0,0,.55);padding:3px 5px;}
 .ledger thead th.party.sub{background:#f0f5ff;}
-.ledger tbody td{padding:6px 6px;border-bottom:1px solid #f5f5f5;text-align:center;white-space:nowrap;vertical-align:middle;}
+.ledger thead th.tally.sub{background:#fff2e8;}
+.ledger tbody td{padding:5px 5px;border-bottom:1px solid #f5f5f5;text-align:center;white-space:nowrap;vertical-align:middle;font-size:11.5px;}
+.ledger tbody td.tally-col{background:#fffbf5;color:#874d00;font-variant-numeric:tabular-nums;}
 .ledger tbody tr:hover td{background:#fffbe6;}
-.ledger tbody tr.cat-sep td{background:#fafafa;height:6px;padding:0;border-bottom:1px solid #e8e8e8;}
+.ledger tbody tr.cat-sep td{background:#fafafa;height:5px;padding:0;border-bottom:1px solid #e8e8e8;}
 .ledger .cat{font-weight:600;color:#1677ff;text-align:center;background:#f0f5ff;}
+.ledger .cat-cancel{background:#fff1f0;color:#cf1322;}
 .ledger .clsfy{text-align:left;padding-left:10px;font-weight:500;}
 .ledger .code{font-family:'SF Mono',monospace;font-size:11px;color:rgba(0,0,0,.55);}
-.ledger .amount{text-align:right;font-variant-numeric:tabular-nums;padding-right:10px;font-weight:500;}
-.ledger .sign-pos{color:#1677ff;}
-.ledger .sign-neg{color:#cf1322;}
+.ledger .amount{text-align:right;font-variant-numeric:tabular-nums;padding-right:8px;font-weight:500;}
+.ledger .sign-pos{color:#1677ff;font-weight:600;}
+.ledger .sign-neg{color:#cf1322;font-weight:600;}
 .ledger .sign-zero{color:rgba(0,0,0,.25);}
 .ledger .check-row td{background:#f6ffed !important;font-weight:700;color:#389e0d;}
-.ledger tbody tr.new-row td{background:#fff0f6;}
-.ledger tbody tr.new-row:hover td{background:#ffadd2 !important;}
+.ledger tr.cancel-row td{background:#fff8f6;}
+.ledger tr.cancel-row:hover td{background:#ffe7e0 !important;}
 
-.ledger tbody tr.hl td{background:#fff1b8 !important;}
+/* payout ledger */
+.payout-tbl{width:100%;border-collapse:collapse;font-size:11.5px;}
+.payout-tbl thead th{padding:8px 6px;background:#fafafa;border-bottom:1px solid #e8e8e8;font-weight:600;color:rgba(0,0,0,.65);white-space:nowrap;font-size:11px;text-align:center;}
+.payout-tbl thead th.calc{background:#e6fffb;color:#08979c;}
+.payout-tbl thead th.tax{background:#fff2e8;color:#d4380d;}
+.payout-tbl tbody td{padding:6px 6px;border-bottom:1px solid #f5f5f5;font-size:11.5px;text-align:right;font-variant-numeric:tabular-nums;}
+.payout-tbl tbody td.label{text-align:left;font-weight:600;padding-left:10px;}
+.payout-tbl tbody td.calc-col{background:#f0fdf9;}
+.payout-tbl tbody td.tax-col{background:#fff8f2;}
+.payout-tbl .rsv-tag{display:inline-block;padding:2px 6px;border-radius:4px;background:#e6f4ff;color:#0958d9;font-weight:600;font-size:10px;margin-right:6px;}
+.payout-tbl .zero-note{font-size:9px;color:#cf1322;font-weight:600;}
 
-.src{display:inline-flex;align-items:center;gap:4px;padding:2px 6px;border-radius:4px;font-size:10px;font-weight:600;line-height:1;cursor:default;}
+/* status chips 지급 5단계 */
+.payout-status{display:inline-flex;align-items:center;padding:2px 7px;border-radius:10px;font-size:10px;font-weight:600;white-space:nowrap;}
+.ps-pending{background:#e6f4ff;color:#0958d9;border:1px solid #91caff;}       /* 지급대기 */
+.ps-request{background:#fff7e6;color:#d48806;border:1px solid #ffd666;}       /* 지급요청 */
+.ps-complete{background:#f6ffed;color:#389e0d;border:1px solid #b7eb8f;}      /* 지급완료 */
+.ps-defer{background:#f9f0ff;color:#531dab;border:1px solid #d3adf7;}         /* 지급이월 */
+.ps-fail{background:#fff1f0;color:#cf1322;border:1px solid #ffa39e;}          /* 지급실패 */
+
+/* rsv status chips (예약 상태) */
+.rsv-status{display:inline-flex;align-items:center;padding:2px 7px;border-radius:10px;font-size:10px;font-weight:600;white-space:nowrap;}
+.rs-ok{background:#e6f7ff;color:#0958d9;border:1px solid #91caff;}
+.rs-confirm{background:#f6ffed;color:#389e0d;border:1px solid #b7eb8f;}
+.rs-wait{background:#fff7e6;color:#d48806;border:1px solid #ffd666;}
+.rs-done{background:#f9f0ff;color:#531dab;border:1px solid #d3adf7;}
+.rs-cancel-done{background:#fafafa;color:rgba(0,0,0,.45);border:1px solid #d9d9d9;}
+
+.src{display:inline-flex;align-items:center;gap:4px;padding:2px 6px;border-radius:4px;font-size:10px;font-weight:600;line-height:1;}
 .src-pg{background:#fff0f6;color:#c41d7f;border:1px solid #ffadd2;}
 .src-ch{background:#f6ffed;color:#389e0d;border:1px solid #b7eb8f;}
 .src-xtr{background:#e6fffb;color:#08979c;border:1px solid #87e8de;}
 .src-auto{background:#f5f5f5;color:rgba(0,0,0,.45);border:1px solid #d9d9d9;}
-.src-manual{background:#fff7e6;color:#d48806;border:1px solid #ffd666;}
-.src-derived{background:#f9f0ff;color:#531dab;border:1px solid #d3adf7;}
 
+.foot-note{padding:10px 16px;font-size:11px;color:rgba(0,0,0,.45);border-top:1px solid #f0f0f0;background:#fafafa;}
+.foot-note code{background:#fff;padding:1px 4px;border-radius:3px;font-size:10px;border:1px solid #e8e8e8;}
+.foot-note strong{color:rgba(0,0,0,.7);}
 
-.rsv-status{display:inline-flex;align-items:center;padding:2px 7px;border-radius:10px;font-size:10px;font-weight:600;white-space:nowrap;}
-.rs-ok{background:#e6f7ff;color:#0958d9;border:1px solid #91caff;}      /* 예약성공 */
-.rs-confirm{background:#f6ffed;color:#389e0d;border:1px solid #b7eb8f;}  /* 예약완료 */
-.rs-wait{background:#fff7e6;color:#d48806;border:1px solid #ffd666;}     /* 출발대기 */
-.rs-done{background:#f9f0ff;color:#531dab;border:1px solid #d3adf7;}     /* 출발완료 */
-.rs-cancel-req{background:#fff1f0;color:#cf1322;border:1px solid #ffa39e;} /* 취소요청 */
-.rs-cancel-done{background:#fafafa;color:rgba(0,0,0,.45);border:1px solid #d9d9d9;} /* 취소완료 */
+.policy-card{margin:14px 24px 0;background:#fff;border:1px solid #f0f0f0;border-radius:8px;overflow:hidden;}
+.policy-list{padding:14px 18px;font-size:12px;line-height:1.75;color:rgba(0,0,0,.75);}
+.policy-list li{margin-bottom:6px;}
+.policy-list code{background:#f5f5f5;padding:1px 5px;border-radius:3px;font-size:11px;font-family:'SF Mono',monospace;}
+.policy-list strong{color:#0958d9;}
 
-.status-chip{display:inline-flex;align-items:center;gap:3px;padding:2px 6px;border-radius:10px;font-size:10px;font-weight:600;}
-.st-pending{background:#fafafa;color:rgba(0,0,0,.45);border:1px solid #d9d9d9;}
-.st-calc{background:#e6f4ff;color:#0958d9;border:1px solid #91caff;}
-.st-paid{background:#f6ffed;color:#389e0d;border:1px solid #b7eb8f;}
-
-.src-row{padding:10px 14px;border-bottom:1px solid #f0f0f0;cursor:pointer;transition:background .15s;}
-.src-row:hover{background:#fffbe6;}
-.src-row.active{background:#fff7e6;border-left:3px solid #d48806;}
-.src-row-head{display:flex;align-items:center;gap:6px;margin-bottom:4px;}
-.src-row-title{font-weight:600;font-size:12px;}
-.src-row-meta{font-size:11px;color:rgba(0,0,0,.45);}
-.src-kv{display:grid;grid-template-columns: minmax(0,auto) minmax(0,1fr);column-gap:14px;row-gap:4px;font-size:11px;margin-top:6px;align-items:baseline;}
-.src-kv dt{color:rgba(0,0,0,.5);font-family:'SF Mono',ui-monospace,monospace;font-size:10px;line-height:1.4;word-break:break-all;min-width:0;}
-.src-kv dd{color:rgba(0,0,0,.85);font-weight:600;font-variant-numeric:tabular-nums;text-align:right;min-width:0;line-height:1.4;}
-
-.legend{padding:10px 14px;font-size:11px;color:rgba(0,0,0,.55);background:#fafafa;border-top:1px solid #f0f0f0;display:flex;flex-wrap:wrap;gap:8px;align-items:center;}
-
-.checksum-card{background:#f6ffed;border:1px solid #b7eb8f;border-radius:8px;padding:14px 18px;margin:14px 24px 0;display:flex;align-items:center;gap:24px;flex-wrap:wrap;}
-.checksum-card .lab{font-size:11px;color:#389e0d;}
+.checksum-card{background:#f6ffed;border:1px solid #b7eb8f;border-radius:8px;padding:14px 18px;margin:14px 24px 48px;}
+.checksum-card .lab{font-size:11px;color:#389e0d;margin-bottom:8px;}
 .checksum-card .eq{font-family:'SF Mono',monospace;font-size:13px;font-weight:600;color:#237804;}
-.checksum-card .ok{font-size:14px;font-weight:700;color:#389e0d;}
-
-.foot-note{padding:10px 16px;font-size:11px;color:rgba(0,0,0,.45);border-top:1px solid #f0f0f0;}
-.foot-note code{background:#f5f5f5;padding:1px 4px;border-radius:3px;font-size:10px;}
-
-.changelog{margin:12px 24px 0;background:#fff7e6;border:1px solid #ffd666;border-radius:8px;padding:10px 14px;font-size:12px;color:#874d00;}
-.changelog strong{color:#874d00;}
+.checksum-card .ok{font-size:14px;font-weight:700;color:#389e0d;margin-top:10px;}
+.check-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;font-size:12px;}
 </style>
 </head>
 <body>
+
 <div class="gnb">
   <div class="gnb-logo">Trip<span>Store</span> Admin</div>
   <div class="gnb-right">예약/원장 · soyhoney@tripstore.kr</div>
 </div>
 
-<div class="bc">예약관리<span class="sep">/</span>예약 상세<span class="sep">/</span><strong>예약원장</strong></div>
+<div class="bc">예약관리<span class="sep">/</span>예약 상세<span class="sep">/</span><strong>예약원장 + 지급원장</strong></div>
 
 <div class="page-head">
-  <div class="page-title">예약원장 — RB2025063012345</div>
+  <div class="page-title">예약원장 + 지급원장 (상문님 v2)</div>
   <span class="tag tag-v2">RsvLedgerItem v2</span>
-  <span class="tag tag-status">출발대기</span>
+  <span class="tag tag-sim">시뮬레이터 재현</span>
 </div>
 
 <div class="changelog">
-  <strong>2026-06-30 갱신</strong> · 실제 BE 코드체계(<a href="https://github.com/extriber/platform-svc-reservations/blob/master/tripstore-reservations-application/src/main/kotlin/kr/tripstore/reservations/domain/ledger/SystemLedgerItemType.kt" target="_blank" style="color:#874d00;text-decoration:underline;">SystemLedgerItemType.kt</a>) 기준 + 수정요청 7건 반영 ·
-  ① <strong>RsvStatus 컬럼 추가</strong> — 각 row 생성 당시 상태(예약성공/예약완료/출발완료/취소요청/취소완료) 표시 ·
-  ② <strong>PG수수료 부가세 행 추가</strong> (BE 코드 미정, 시각화용 — 정책 결정 시 코드 부여) ·
-  ③ <strong>취소 시나리오 섹션 신설</strong> — 4번 QA 반영(7000 인원·추가비용별 분리 row), 6번 QA 반영(가상계좌 PG수수료 차감), 3xxx 할인 reversal, 4101 환불실행 ·
-  ④ 기존: 쿠폰할인 3xxx → <strong>2200/2201/2202</strong>로 이동, 정산 자금이전 5xxx → <strong>7xxx</strong>, 공제금액(6030) 폐기 → <strong>6020 플랫폼이용료</strong> 복원 (도출값은 BE summary API)
+  <strong>2026-07-06 갱신</strong> · 상문님 <strong>rsv-ledger-item-simulator (2).ods</strong> 기준으로 재구성 ·
+  ① 예약원장-상문 매트릭스에 <strong>5주체 손익 증감/잔액 running tally</strong> 열 추가 ·
+  ② <strong>지급원장 카드 신설</strong> — 정산기준금액 / 서비스이용료 / 공제금액 / 정산금액 / <strong>세금계산서금액</strong> ·
+  ③ <strong>조정내역 관리 카드</strong> — 수동등록·지급-연결정보·상계연결 ·
+  ④ <strong>지급 5단계 상태</strong> (지급대기·지급요청·지급완료·지급이월·지급실패) ·
+  ⑤ 위약금 <strong>3.30%</strong> 별도 수수료율 반영 ·
+  ⑥ <strong>공제금액 = 서비스이용료 + 회사부담할인</strong> 공식 명시
 </div>
 
 <div class="info-banner">
-  <strong>읽는 방법</strong> · 좌측은 5주체×(손익/자금) 매트릭스, 각 row의 <b>출처</b>는 어떤 외부 정산데이터에서 변환됐는지. 우측 정산 row를 클릭하면 매핑된 ledger item이 하이라이트됩니다. <b>핑크 배경</b> = 이번 수정으로 추가/변경된 라인.
+  <strong>주의</strong> — 시뮬레이터의 코드체계(5xxx=자금이전, 7xxx=취소)는 <strong>실제 BE 코드(SystemLedgerItemType.kt)와 다름</strong>. 학습·설명 목적 시뮬레이터 재현이며, 실제 마이그·구현은 BE SSOT를 따름. 매핑표는 <a href="https://github.com/extriber/platform-svc-reservations/blob/master/tripstore-reservations-application/src/main/kotlin/kr/tripstore/reservations/domain/ledger/SystemLedgerItemType.kt" target="_blank" style="color:#0958d9;font-weight:600;">SystemLedgerItemType.kt</a> 참고.
 </div>
 
 <div class="summary">
-  <div class="sum-item"><div class="sum-label">상품정가</div><div class="sum-value">1,000,000원</div></div>
+  <div class="sum-item"><div class="sum-label">시나리오</div><div class="sum-value">시뮬레이터 상품 1,000,000 케이스</div></div>
   <div class="sum-divider"></div>
-  <div class="sum-item"><div class="sum-label">추가비용</div><div class="sum-value">150,000원</div></div>
+  <div class="sum-item"><div class="sum-label">상품정가</div><div class="sum-value">1,000,000</div></div>
   <div class="sum-divider"></div>
-  <div class="sum-item"><div class="sum-label">고객 실결제</div><div class="sum-value">1,120,000원</div></div>
+  <div class="sum-item"><div class="sum-label">추가비용</div><div class="sum-value">150,000</div></div>
   <div class="sum-divider"></div>
-  <div class="sum-item"><div class="sum-label">예약채널</div><div class="sum-value">11번가</div></div>
+  <div class="sum-item"><div class="sum-label">고객 결제 총액</div><div class="sum-value">1,120,000</div></div>
   <div class="sum-divider"></div>
-  <div class="sum-item"><div class="sum-label">PG</div><div class="sum-value">NICE</div></div>
-  <div class="sum-divider"></div>
-  <div class="sum-item"><div class="sum-label">여행사</div><div class="sum-value">TMG (V3)</div></div>
+  <div class="sum-item"><div class="sum-label">RsvStatus</div><div class="sum-value"><span class="rsv-status rs-done">출발완료</span></div></div>
 </div>
 
-<div class="layout">
-  <div class="main-card">
-    <div class="card-head">
-      예약원장 매트릭스
-      <span class="sub">5주체 × (손익 · 자금) — 정책문서 38a86ade…</span>
-    </div>
-
-    <div class="ledger-wrap">
-      <table class="ledger">
-        <thead>
-          <tr>
-            <th rowspan="2">분류</th>
-            <th rowspan="2">항목</th>
-            <th rowspan="2">코드</th>
-            <th class="party" colspan="2">고객</th>
-            <th class="party" colspan="2">여행사</th>
-            <th class="party" colspan="2">채널사</th>
-            <th class="party" colspan="2">플랫폼</th>
-            <th class="party" colspan="2">PG</th>
-            <th rowspan="2">금액</th>
-            <th rowspan="2">출처</th>
-            <th rowspan="2">RsvStatus<br><span style="font-size:9px;color:rgba(0,0,0,.4);font-weight:400;">생성 당시</span></th>
-            <th rowspan="2">executed_at</th>
-            <th rowspan="2">처리</th>
-          </tr>
-          <tr class="sub">
-            <th class="party sub">손익</th><th class="party sub">자금</th>
-            <th class="party sub">손익</th><th class="party sub">자금</th>
-            <th class="party sub">손익</th><th class="party sub">자금</th>
-            <th class="party sub">손익</th><th class="party sub">자금</th>
-            <th class="party sub">손익</th><th class="party sub">자금</th>
-          </tr>
-        </thead>
-        <tbody id="ledgerBody">
-
-        <!-- ===== 예약 ===== -->
-        <tr data-src="auto"><td class="cat" rowspan="7">예약</td><td class="clsfy">상품정가</td><td class="code">1000</td>
-          <td class="sign-neg">-1</td><td class="sign-zero">0</td><td class="sign-pos">+1</td><td class="sign-zero">0</td><td class="sign-zero">0</td><td class="sign-zero">0</td><td class="sign-zero">0</td><td class="sign-zero">0</td><td class="sign-zero">0</td><td class="sign-zero">0</td>
-          <td class="amount">1,000,000</td>
-          <td><span class="src src-auto">예약 생성</span><br><span style="font-size:10px;color:rgba(0,0,0,.4);">LIST_PRICE</span></td>
-          <td><span class="rsv-status rs-ok">예약성공</span></td><td>2025-06-30</td><td><span class="status-chip st-paid">계산완료</span></td>
-        </tr>
-        <tr data-src="ch-street11-discount"><td class="clsfy">특가할인(채널)</td><td class="code">2000</td>
-          <td class="sign-pos">+1</td><td class="sign-zero">0</td><td class="sign-zero">0</td><td class="sign-zero">0</td><td class="sign-neg">-1</td><td class="sign-zero">0</td><td class="sign-zero">0</td><td class="sign-zero">0</td><td class="sign-zero">0</td><td class="sign-zero">0</td>
-          <td class="amount">10,000</td>
-          <td><span class="src src-ch">채널-11번가</span><br><span style="font-size:10px;color:rgba(0,0,0,.4);">DISCOUNT_CHANNEL</span></td>
-          <td><span class="rsv-status rs-ok">예약성공</span></td><td>2025-06-30</td><td><span class="status-chip st-paid">계산완료</span></td>
-        </tr>
-        <tr data-src="auto-platform-discount"><td class="clsfy">특가할인(플랫폼)</td><td class="code">2001</td>
-          <td class="sign-pos">+1</td><td class="sign-zero">0</td><td class="sign-zero">0</td><td class="sign-zero">0</td><td class="sign-zero">0</td><td class="sign-zero">0</td><td class="sign-neg">-1</td><td class="sign-zero">0</td><td class="sign-zero">0</td><td class="sign-zero">0</td>
-          <td class="amount">10,000</td>
-          <td><span class="src src-auto">트립특가</span><br><span style="font-size:10px;color:rgba(0,0,0,.4);">DISCOUNT_PLATFORM</span></td>
-          <td><span class="rsv-status rs-ok">예약성공</span></td><td>2025-06-30</td><td><span class="status-chip st-paid">계산완료</span></td>
-        </tr>
-        <tr data-src="xtr-supplier-discount"><td class="clsfy">특가할인(여행사)</td><td class="code">2002</td>
-          <td class="sign-pos">+1</td><td class="sign-zero">0</td><td class="sign-neg">-1</td><td class="sign-zero">0</td><td class="sign-zero">0</td><td class="sign-zero">0</td><td class="sign-zero">0</td><td class="sign-zero">0</td><td class="sign-zero">0</td><td class="sign-zero">0</td>
-          <td class="amount">10,000</td>
-          <td><span class="src src-xtr">엑스트라이버</span><br><span style="font-size:10px;color:rgba(0,0,0,.4);">DISCOUNT_SUPPLIER</span></td>
-          <td><span class="rsv-status rs-ok">예약성공</span></td><td>2025-06-30</td><td><span class="status-chip st-paid">계산완료</span></td>
-        </tr>
-        <tr data-src="ch-street11-coupon"><td class="clsfy">쿠폰할인(채널)</td><td class="code">2200</td>
-          <td class="sign-pos">+1</td><td class="sign-zero">0</td><td class="sign-zero">0</td><td class="sign-zero">0</td><td class="sign-neg">-1</td><td class="sign-zero">0</td><td class="sign-zero">0</td><td class="sign-zero">0</td><td class="sign-zero">0</td><td class="sign-zero">0</td>
-          <td class="amount">5,000</td>
-          <td><span class="src src-ch">채널-11번가</span><br><span style="font-size:10px;color:rgba(0,0,0,.4);">COUPON_CHANNEL</span></td>
-          <td><span class="rsv-status rs-ok">예약성공</span></td><td>2025-06-30</td><td><span class="status-chip st-paid">계산완료</span></td>
-        </tr>
-        <tr data-src="auto-platform-coupon"><td class="clsfy">쿠폰할인(플랫폼)</td><td class="code">2201</td>
-          <td class="sign-pos">+1</td><td class="sign-zero">0</td><td class="sign-zero">0</td><td class="sign-zero">0</td><td class="sign-zero">0</td><td class="sign-zero">0</td><td class="sign-neg">-1</td><td class="sign-zero">0</td><td class="sign-zero">0</td><td class="sign-zero">0</td>
-          <td class="amount">5,000</td>
-          <td><span class="src src-auto">트립쿠폰</span><br><span style="font-size:10px;color:rgba(0,0,0,.4);">COUPON_PLATFORM</span></td>
-          <td><span class="rsv-status rs-ok">예약성공</span></td><td>2025-06-30</td><td><span class="status-chip st-paid">계산완료</span></td>
-        </tr>
-        <tr data-src="xtr-supplier-coupon"><td class="clsfy">쿠폰할인(여행사)</td><td class="code">2202</td>
-          <td class="sign-pos">+1</td><td class="sign-zero">0</td><td class="sign-neg">-1</td><td class="sign-zero">0</td><td class="sign-zero">0</td><td class="sign-zero">0</td><td class="sign-zero">0</td><td class="sign-zero">0</td><td class="sign-zero">0</td><td class="sign-zero">0</td>
-          <td class="amount">5,000</td>
-          <td><span class="src src-xtr">엑스트라이버</span><br><span style="font-size:10px;color:rgba(0,0,0,.4);">COUPON_SUPPLIER</span></td>
-          <td><span class="rsv-status rs-ok">예약성공</span></td><td>2025-06-30</td><td><span class="status-chip st-paid">계산완료</span></td>
-        </tr>
-
-        <tr class="cat-sep"><td colspan="19"></td></tr>
-
-        <!-- ===== 결제 ===== -->
-        <tr data-src="pg-nice-pay"><td class="cat" rowspan="3">결제</td><td class="clsfy">고객결제(PG)</td><td class="code">4001</td>
-          <td class="sign-zero">0</td><td class="sign-pos">+1</td><td class="sign-zero">0</td><td class="sign-zero">0</td><td class="sign-zero">0</td><td class="sign-zero">0</td><td class="sign-zero">0</td><td class="sign-zero">0</td><td class="sign-zero">0</td><td class="sign-pos">+1</td>
-          <td class="amount">970,000</td>
-          <td><span class="src src-pg">PG-NICE</span><br><span style="font-size:10px;color:rgba(0,0,0,.4);">PAYMENT_PG · 결제 승인</span></td>
-          <td><span class="rsv-status rs-ok">예약성공</span></td><td>2025-06-30 14:22</td><td><span class="status-chip st-paid">실행완료</span></td>
-        </tr>
-        <tr data-src="auto"><td class="clsfy">추가비용</td><td class="code">1010</td>
-          <td class="sign-neg">-1</td><td class="sign-zero">0</td><td class="sign-pos">+1</td><td class="sign-zero">0</td><td class="sign-zero">0</td><td class="sign-zero">0</td><td class="sign-zero">0</td><td class="sign-zero">0</td><td class="sign-zero">0</td><td class="sign-zero">0</td>
-          <td class="amount">150,000</td>
-          <td><span class="src src-auto">운영자 추가</span><br><span style="font-size:10px;color:rgba(0,0,0,.4);">ADDITIONAL_COST</span></td>
-          <td><span class="rsv-status rs-confirm">예약완료</span></td><td>2025-07-02</td><td><span class="status-chip st-paid">계산완료</span></td>
-        </tr>
-        <tr data-src="pg-nice-pay2"><td class="clsfy">추가비용결제(PG)</td><td class="code">4001</td>
-          <td class="sign-zero">0</td><td class="sign-pos">+1</td><td class="sign-zero">0</td><td class="sign-zero">0</td><td class="sign-zero">0</td><td class="sign-zero">0</td><td class="sign-zero">0</td><td class="sign-zero">0</td><td class="sign-zero">0</td><td class="sign-pos">+1</td>
-          <td class="amount">150,000</td>
-          <td><span class="src src-pg">PG-NICE</span><br><span style="font-size:10px;color:rgba(0,0,0,.4);">PAYMENT_PG · 2차 결제</span></td>
-          <td><span class="rsv-status rs-confirm">예약완료</span></td><td>2025-07-02 11:08</td><td><span class="status-chip st-paid">실행완료</span></td>
-        </tr>
-
-        <tr class="cat-sep"><td colspan="19"></td></tr>
-
-        <!-- ===== 정산 ===== -->
-        <tr data-src="xtr"><td class="cat" rowspan="8">정산</td><td class="clsfy">플랫폼이용료</td><td class="code">6020</td>
-          <td class="sign-zero">0</td><td class="sign-zero">0</td><td class="sign-neg">-1</td><td class="sign-zero">0</td><td class="sign-zero">0</td><td class="sign-zero">0</td><td class="sign-pos">+1</td><td class="sign-zero">0</td><td class="sign-zero">0</td><td class="sign-zero">0</td>
-          <td class="amount">60,000</td>
-          <td><span class="src src-xtr">엑스트라이버</span><br><span style="font-size:10px;color:rgba(0,0,0,.4);">FEE_PLATFORM · 서비스이용료</span></td>
-          <td><span class="rsv-status rs-done">출발완료</span></td><td>2025-07-08</td><td><span class="status-chip st-paid">계산완료</span></td>
-        </tr>
-        <tr data-src="ch-street11-settle"><td class="clsfy">채널사수수료</td><td class="code">6000</td>
-          <td class="sign-zero">0</td><td class="sign-zero">0</td><td class="sign-zero">0</td><td class="sign-zero">0</td><td class="sign-pos">+1</td><td class="sign-zero">0</td><td class="sign-neg">-1</td><td class="sign-zero">0</td><td class="sign-zero">0</td><td class="sign-zero">0</td>
-          <td class="amount">22,400</td>
-          <td><span class="src src-ch">채널-11번가</span><br><span style="font-size:10px;color:rgba(0,0,0,.4);">FEE_CHANNEL · channel_commission_total_confirmed</span></td>
-          <td><span class="rsv-status rs-done">출발완료</span></td><td>2025-07-15</td><td><span class="status-chip st-paid">계산완료</span></td>
-        </tr>
-        <tr data-src="pg-nice-settle"><td class="clsfy">PG수수료</td><td class="code">6010</td>
-          <td class="sign-zero">0</td><td class="sign-zero">0</td><td class="sign-zero">0</td><td class="sign-zero">0</td><td class="sign-zero">0</td><td class="sign-zero">0</td><td class="sign-neg">-1</td><td class="sign-zero">0</td><td class="sign-pos">+1</td><td class="sign-zero">0</td>
-          <td class="amount">1,120</td>
-          <td><span class="src src-pg">PG-NICE</span><br><span style="font-size:10px;color:rgba(0,0,0,.4);">FEE_PG · 공급가/부가세 lineage는 settlement</span></td>
-          <td><span class="rsv-status rs-done">출발완료</span></td><td>2025-07-08</td><td><span class="status-chip st-paid">계산완료</span></td>
-        </tr>
-        <tr data-src="pg-nice-settle" class="new-row"><td class="clsfy">PG수수료 부가세 <span style="font-size:10px;color:#c41d7f;">(시각화)</span></td><td class="code">—</td>
-          <td class="sign-zero">0</td><td class="sign-zero">0</td>
-          <td class="sign-zero">0</td><td class="sign-zero">0</td>
-          <td class="sign-zero">0</td><td class="sign-zero">0</td>
-          <td class="sign-neg">-1</td><td class="sign-zero">0</td>
-          <td class="sign-pos">+1</td><td class="sign-zero">0</td>
-          <td class="amount">112</td>
-          <td><span class="src src-pg">PG-NICE</span><br><span style="font-size:10px;color:rgba(0,0,0,.4);">pg_fee_vat · BE 코드 미정</span></td>
-          <td><span class="rsv-status rs-done">출발완료</span></td>
-          <td>2025-07-08</td><td><span class="status-chip st-paid">계산완료</span></td>
-        </tr>
-        <tr data-src="pg-nice-settle"><td class="clsfy">PG→여행사</td><td class="code">7010</td>
-          <td class="sign-zero">0</td><td class="sign-zero">0</td><td class="sign-zero">0</td><td class="sign-pos">+1</td><td class="sign-zero">0</td><td class="sign-zero">0</td><td class="sign-zero">0</td><td class="sign-zero">0</td><td class="sign-zero">0</td><td class="sign-neg">-1</td>
-          <td class="amount">1,080,000</td>
-          <td><span class="src src-pg">PG-NICE</span><br><span style="font-size:10px;color:rgba(0,0,0,.4);">TRANSFER_PG_TO_SUPPLIER</span></td>
-          <td><span class="rsv-status rs-done">출발완료</span></td><td>2025-07-08</td><td><span class="status-chip st-paid">실행완료</span></td>
-        </tr>
-        <tr data-src="pg-nice-settle"><td class="clsfy">PG→플랫폼</td><td class="code">7020</td>
-          <td class="sign-zero">0</td><td class="sign-zero">0</td><td class="sign-zero">0</td><td class="sign-zero">0</td><td class="sign-zero">0</td><td class="sign-zero">0</td><td class="sign-zero">0</td><td class="sign-pos">+1</td><td class="sign-zero">0</td><td class="sign-neg">-1</td>
-          <td class="amount">40,000</td>
-          <td><span class="src src-pg">PG-NICE</span><br><span style="font-size:10px;color:rgba(0,0,0,.4);">TRANSFER_PG_TO_PLATFORM</span></td>
-          <td><span class="rsv-status rs-done">출발완료</span></td><td>2025-07-08</td><td><span class="status-chip st-paid">실행완료</span></td>
-        </tr>
-        <tr data-src="ch-street11-settle"><td class="clsfy">플랫폼→채널</td><td class="code">7000</td>
-          <td class="sign-zero">0</td><td class="sign-zero">0</td><td class="sign-zero">0</td><td class="sign-zero">0</td><td class="sign-zero">0</td><td class="sign-pos">+1</td><td class="sign-zero">0</td><td class="sign-neg">-1</td><td class="sign-zero">0</td><td class="sign-zero">0</td>
-          <td class="amount">22,400</td>
-          <td><span class="src src-ch">채널-11번가</span><br><span style="font-size:10px;color:rgba(0,0,0,.4);">TRANSFER_PLATFORM_TO_CHANNEL</span></td>
-          <td><span class="rsv-status rs-done">출발완료</span></td><td>2025-07-15</td><td><span class="status-chip st-paid">실행완료</span></td>
-        </tr>
-        <tr data-src="pg-nice-settle"><td class="clsfy">플랫폼→PG수수료</td><td class="code">7021</td>
-          <td class="sign-zero">0</td><td class="sign-zero">0</td><td class="sign-zero">0</td><td class="sign-zero">0</td><td class="sign-zero">0</td><td class="sign-zero">0</td><td class="sign-zero">0</td><td class="sign-neg">-1</td><td class="sign-zero">0</td><td class="sign-pos">+1</td>
-          <td class="amount">1,120</td>
-          <td><span class="src src-pg">PG-NICE</span><br><span style="font-size:10px;color:rgba(0,0,0,.4);">TRANSFER_PLATFORM_TO_PG_FEE</span></td>
-          <td><span class="rsv-status rs-done">출발완료</span></td><td>2025-07-08</td><td><span class="status-chip st-paid">실행완료</span></td>
-        </tr>
-
-        <tr class="cat-sep"><td colspan="19"></td></tr>
-
-        <!-- ===== 결산 ===== -->
-        <tr data-src="xtr-payout"><td class="cat" rowspan="4">결산</td><td class="clsfy">여행사 결산출금</td><td class="code">9000</td>
-          <td class="sign-zero">0</td><td class="sign-zero">0</td><td class="sign-zero">0</td><td class="sign-neg">-1</td><td class="sign-zero">0</td><td class="sign-zero">0</td><td class="sign-zero">0</td><td class="sign-zero">0</td><td class="sign-zero">0</td><td class="sign-zero">0</td>
-          <td class="amount">1,080,000</td>
-          <td><span class="src src-xtr">엑스트라이버</span><br><span style="font-size:10px;color:rgba(0,0,0,.4);">CLOSING_SUPPLIER</span></td>
-          <td><span class="rsv-status rs-done">출발완료</span></td><td>2025-07-15</td><td><span class="status-chip st-paid">실행완료</span></td>
-        </tr>
-        <tr data-src="ch-street11-paid"><td class="clsfy">채널 결산출금</td><td class="code">9001</td>
-          <td class="sign-zero">0</td><td class="sign-zero">0</td><td class="sign-zero">0</td><td class="sign-zero">0</td><td class="sign-zero">0</td><td class="sign-neg">-1</td><td class="sign-zero">0</td><td class="sign-zero">0</td><td class="sign-zero">0</td><td class="sign-zero">0</td>
-          <td class="amount">22,400</td>
-          <td><span class="src src-ch">채널-11번가</span><br><span style="font-size:10px;color:rgba(0,0,0,.4);">CLOSING_CHANNEL</span></td>
-          <td><span class="rsv-status rs-done">출발완료</span></td><td>2025-07-20</td><td><span class="status-chip st-paid">실행완료</span></td>
-        </tr>
-        <tr data-src="auto"><td class="clsfy">플랫폼 결산출금</td><td class="code">9002</td>
-          <td class="sign-zero">0</td><td class="sign-zero">0</td><td class="sign-zero">0</td><td class="sign-zero">0</td><td class="sign-zero">0</td><td class="sign-zero">0</td><td class="sign-zero">0</td><td class="sign-neg">-1</td><td class="sign-zero">0</td><td class="sign-zero">0</td>
-          <td class="amount">16,480</td>
-          <td><span class="src src-derived">결산 자동</span><br><span style="font-size:10px;color:rgba(0,0,0,.4);">CLOSING_PLATFORM</span></td>
-          <td><span class="rsv-status rs-done">출발완료</span></td><td>2025-07-20</td><td><span class="status-chip st-paid">실행완료</span></td>
-        </tr>
-        <tr data-src="manual-pg"><td class="clsfy">PG 결산출금</td><td class="code">9003</td>
-          <td class="sign-zero">0</td><td class="sign-zero">0</td><td class="sign-zero">0</td><td class="sign-zero">0</td><td class="sign-zero">0</td><td class="sign-zero">0</td><td class="sign-zero">0</td><td class="sign-zero">0</td><td class="sign-zero">0</td><td class="sign-neg">-1</td>
-          <td class="amount">1,120</td>
-          <td><span class="src src-manual">수동 (월마감)</span><br><span style="font-size:10px;color:rgba(0,0,0,.4);">CLOSING_PG</span></td>
-          <td><span class="rsv-status rs-done">출발완료</span></td><td>2025-07-31</td><td><span class="status-chip st-paid">실행완료</span></td>
-        </tr>
-
-        <tr class="cat-sep"><td colspan="19"></td></tr>
-
-        <!-- ===== 검산 ===== -->
-        <tr class="check-row">
-          <td class="cat" rowspan="3">검산</td><td class="clsfy" style="font-weight:700;">정산 전 (PG 자금 보유 중)</td><td class="code">—</td>
-          <td colspan="10" style="text-align:left;font-size:11px;">고객 손익+자금 = 0 (미수 0) · PG 자금잔액 = <strong>+1,120,000</strong> 보유 정상 · 여행사/채널/플랫폼 자금잔액 = 0 (아직 분배 전)</td>
-          <td class="amount">중간</td>
-          <td colspan="4" style="text-align:left;font-size:11px;">07-verification §최종 결산 검산: "정산 전에는 PG 자금 잔액이 남는 것이 정상"</td>
-        </tr>
-        <tr class="check-row">
-          <td class="clsfy" style="font-weight:700;">정산 후·결산 전</td><td class="code">—</td>
-          <td colspan="10" style="text-align:left;font-size:11px;">PG 자금잔액 → +1,120 (PG수수료만 남음) · 여행사 자금 +1,080,000 · 플랫폼 +16,480 · 채널 +22,400 (각자 보유 정상, 결산 대기)</td>
-          <td class="amount">중간</td>
-          <td colspan="4" style="text-align:left;font-size:11px;">플랫폼이 채널수수료 미지급이면 플랫폼 자금 잔액이 남는 게 정상</td>
-        </tr>
-        <tr class="check-row">
-          <td class="clsfy" style="font-weight:700;">결산 후 (9xxx 완료)</td><td class="code">—</td>
-          <td colspan="10" style="text-align:left;font-size:11px;">✅ <strong>모든 사업주체 자금잔액 = 0</strong> (실제 출금됨) · 고객 손익+자금 = 0 · 손익 총합 = 0 (경제적 사건 모두 기록)</td>
-          <td class="amount">∑ = 0 ✓</td>
-          <td colspan="4" style="text-align:left;font-size:11px;color:#389e0d;font-weight:600;">결산 통과</td>
-        </tr>
-        </tbody>
-      </table>
-    </div>
-
-    <div class="legend">
-      <strong style="color:rgba(0,0,0,.85);">출처 범례:</strong>
-      <span class="src src-pg">PG-NICE</span> PG 결제/정산 CSV
-      <span class="src src-ch">채널-11번가</span> 채널 정산 CSV
-      <span class="src src-xtr">엑스트라이버</span> 어드민 정산조회
-      <span class="src src-auto">예약/내부</span> 예약 생성 시 자동
-      <span class="src src-derived">검산 자동</span> 결산 시 자동 산출
-      <span class="src src-manual">수동</span> 운영자 입력
-    </div>
-
-    <div class="foot-note">
-      v3_settlements 테이블의 row 1개는 ledger items 1~N개를 생성. 각 ledger item에는 <code>source_settlement_id</code>가 박혀 역추적 가능.
-    </div>
+<!-- ================ 예약원장-상문 매트릭스 ================ -->
+<div class="main-card">
+  <div class="card-head">
+    ① 예약원장-상문 매트릭스
+    <span class="sub">5주체 × (손익 · 자금) + 러닝 tally · 시뮬레이터 시트 그대로 재현</span>
   </div>
-
-  <div class="side">
-
-    <div class="main-card">
-      <div class="card-head">
-        외부 정산데이터
-        <span class="sub">v3_settlements 적재 row · 클릭해서 매핑 확인</span>
-      </div>
-
-      <div class="src-row" data-target="pg-nice-pay">
-        <div class="src-row-head">
-          <span class="src src-pg">PG-NICE</span>
-          <span class="src-row-title">결제 승인</span>
-        </div>
-        <div class="src-row-meta">나이스페이_결제데이터_20250630.csv · row 1421</div>
-        <dl class="src-kv">
-          <dt>pg_transaction_amount</dt><dd>970,000</dd>
-          <dt>pg_transaction_date</dt><dd>2025-06-30</dd>
-          <dt>trip_reservation_code</dt><dd>RB2025063012345</dd>
-        </dl>
-        <div class="src-row-meta" style="margin-top:6px;color:#c41d7f;">→ 4001 고객결제(PG)</div>
-      </div>
-
-      <div class="src-row" data-target="pg-nice-pay2">
-        <div class="src-row-head">
-          <span class="src src-pg">PG-NICE</span>
-          <span class="src-row-title">결제 승인 (추가비용)</span>
-        </div>
-        <div class="src-row-meta">나이스페이_결제데이터_20250702.csv · row 388</div>
-        <dl class="src-kv">
-          <dt>pg_transaction_amount</dt><dd>150,000</dd>
-          <dt>pg_transaction_date</dt><dd>2025-07-02</dd>
-        </dl>
-        <div class="src-row-meta" style="margin-top:6px;color:#c41d7f;">→ 4001 추가비용결제(PG)</div>
-      </div>
-
-      <div class="src-row" data-target="pg-nice-settle">
-        <div class="src-row-head">
-          <span class="src src-pg">PG-NICE</span>
-          <span class="src-row-title">정산 (수수료·입금)</span>
-        </div>
-        <div class="src-row-meta">아임포트_정산데이터_20250708.csv · row 9201</div>
-        <dl class="src-kv">
-          <dt>pg_settlement_amount</dt><dd>1,118,880</dd>
-          <dt><strong style="color:#c41d7f;">pg_fee_supply</strong></dt><dd><strong>1,018</strong></dd>
-          <dt><strong style="color:#c41d7f;">pg_fee_vat</strong></dt><dd><strong>102</strong></dd>
-          <dt>pg_fee_total</dt><dd>1,120</dd>
-          <dt>pg_settlement_date</dt><dd>2025-07-08</dd>
-        </dl>
-        <div class="src-row-meta" style="margin-top:6px;color:#c41d7f;">→ <strong>6010 + 7010 + 7020 + 7021</strong> (4-item, 공급가/부가세 분해는 settlement 도메인 책임)</div>
-      </div>
-
-      <div class="src-row" data-target="ch-street11-settle">
-        <div class="src-row-head">
-          <span class="src src-ch">채널-11번가</span>
-          <span class="src-row-title">정산 (수수료·입금예정)</span>
-        </div>
-        <div class="src-row-meta">11번가_정산데이터_20250715.csv · row 2034</div>
-        <dl class="src-kv">
-          <dt>channel_selling_amount</dt><dd>1,120,000</dd>
-          <dt>channel_settlement_amount</dt><dd>1,097,600</dd>
-          <dt>channel_commission_total_confirmed</dt><dd>22,400</dd>
-          <dt>channel_settlement_date</dt><dd>2025-07-15</dd>
-        </dl>
-        <div class="src-row-meta" style="margin-top:6px;color:#389e0d;">→ 6000 채널사수수료 + 7000 플랫폼→채널</div>
-      </div>
-
-      <div class="src-row" data-target="ch-street11-paid">
-        <div class="src-row-head">
-          <span class="src src-ch">채널-11번가</span>
-          <span class="src-row-title">입금 확정</span>
-        </div>
-        <div class="src-row-meta">은행 입금 매칭 (수동/자동)</div>
-        <dl class="src-kv">
-          <dt>입금일</dt><dd>2025-07-20</dd>
-          <dt>입금액</dt><dd>22,400</dd>
-        </dl>
-        <div class="src-row-meta" style="margin-top:6px;color:#389e0d;">→ 9001 CLOSING_CHANNEL</div>
-      </div>
-
-      <div class="src-row" data-target="xtr">
-        <div class="src-row-head">
-          <span class="src src-xtr">엑스트라이버</span>
-          <span class="src-row-title">예약 정산상세</span>
-        </div>
-        <div class="src-row-meta">ADMIN_정산상세조회-정산기준일_20250708</div>
-        <dl class="src-kv">
-          <dt>상품금액</dt><dd>1,000,000</dd>
-          <dt>여행사할인금액</dt><dd>10,000</dd>
-          <dt>트립할인금액</dt><dd>5,000</dd>
-          <dt>서비스이용료</dt><dd>60,000</dd>
-          <dt><strong style="color:#c41d7f;">공제금액</strong></dt><dd><strong>60,000</strong></dd>
-          <dt>정산금액</dt><dd>1,080,000</dd>
-          <dt>지급예정일</dt><dd>2025-07-15</dd>
-        </dl>
-        <div class="src-row-meta" style="margin-top:6px;color:#08979c;">→ 2002/2202 (여행사 할인) + 6020 FEE_PLATFORM. <em>공제금액</em>은 별도 코드 아님 — BE summary API의 도출값</div>
-      </div>
-
-      <div class="src-row" data-target="xtr-payout">
-        <div class="src-row-head">
-          <span class="src src-xtr">엑스트라이버</span>
-          <span class="src-row-title">지급 완료</span>
-        </div>
-        <div class="src-row-meta">수동정산_20250715.csv</div>
-        <dl class="src-kv">
-          <dt>지급금액</dt><dd>1,080,000</dd>
-          <dt>지급완료일</dt><dd>2025-07-15</dd>
-          <dt>여행사</dt><dd>TMG (V3)</dd>
-        </dl>
-        <div class="src-row-meta" style="margin-top:6px;color:#08979c;">→ 9000 CLOSING_SUPPLIER</div>
-      </div>
-
-      <div class="src-row" data-target="manual-pg">
-        <div class="src-row-head">
-          <span class="src src-manual">수동</span>
-          <span class="src-row-title">PG 월마감 출금</span>
-        </div>
-        <div class="src-row-meta">월결산 후 운영자 등록</div>
-        <dl class="src-kv">
-          <dt>출금액</dt><dd>1,120</dd>
-          <dt>출금일</dt><dd>2025-07-31</dd>
-        </dl>
-        <div class="src-row-meta" style="margin-top:6px;color:#d48806;">→ 9003 CLOSING_PG</div>
-      </div>
-
-    </div>
-
-    <div class="main-card">
-      <div class="card-head">매핑 규칙 (SystemLedgerItemType.kt 기준)</div>
-      <div style="padding:12px 14px;font-size:11px;line-height:1.65;color:rgba(0,0,0,.75);">
-        <p><strong>1) PG 결제 row 적재</strong> → <code>4001 PAYMENT_PG</code> 1건. 취소·환불은 <code>4101 REFUND_PG</code> (4xxx 자금 입출금).</p>
-        <p style="margin-top:6px;"><strong>2) PG 정산 row 적재</strong> → <strong>6010 + 7010 + 7020 + 7021</strong> 4-item을 settlement event 받아서 append. 공급가/부가세 분해는 reservations 원장이 아니라 <strong>settlement 도메인</strong>의 lineage 책임 (02-ledger-items.md SourceType과 SourceKey).</p>
-        <p style="margin-top:6px;"><strong>3) 채널 정산 row 적재</strong> → <strong>6000 + 7000</strong>. 채널결제 타입(11번가/SSG/THT/카카오쇼핑)이면 <code>4001 PAYMENT_PG</code>도 함께 (PaymentOwner.PLATFORM 경로지만 원장 자금주체는 PG).</p>
-        <p style="margin-top:6px;"><strong>4) 엑스트라이버 정산상세</strong> → 예약 시점에 이미 적재된 <code>2002/2202</code> (여행사 할인) + 정산 시점 <code>6020 FEE_PLATFORM</code>. "공제금액" 컬럼은 별도 ledger 코드 없음 → <strong>BE summary API의 도출값</strong>으로 노출.</p>
-        <p style="margin-top:6px;"><strong>5) 취소 시</strong> 기존 item 삭제 X. <code>5xxx CANCELLATION</code> + 대응 reversal item 추가 (ADR-0006).</p>
-        <p style="margin-top:6px;"><strong>6) executedAt</strong> 으로 대기/실행 분리. 정산/결산/현금 잔액 리포트는 실행 item만 본다 (ADR-0009).</p>
-        <p style="margin-top:8px;padding-top:8px;border-top:1px dashed #d9d9d9;color:rgba(0,0,0,.5);">SSOT: <a href="https://github.com/extriber/platform-svc-reservations/blob/master/tripstore-reservations-application/src/main/kotlin/kr/tripstore/reservations/domain/ledger/SystemLedgerItemType.kt" target="_blank" style="color:#1677ff;">SystemLedgerItemType.kt</a></p>
-      </div>
-    </div>
-
-    <div class="main-card">
-      <div class="card-head">정산 event payload (settlement → reservations)</div>
-      <div style="padding:12px 14px;font-size:11px;line-height:1.6;color:rgba(0,0,0,.75);">
-        <p style="color:rgba(0,0,0,.55);margin-bottom:6px;">settlement 도메인이 reservations로 보내는 정산 event에 들어가야 하는 데이터. reservations는 이 payload를 받아 ledger에 append만 한다 (재계산 X).</p>
-        <p style="margin-top:8px;"><strong style="color:#c41d7f;">① 식별·멱등성</strong></p>
-        <div style="font-family:'SF Mono',ui-monospace,monospace;font-size:10px;background:#fafafa;padding:6px 8px;border-radius:4px;line-height:1.5;color:rgba(0,0,0,.7);">
-          settlement_event_id · settlement_id · trip_reservation_code
-        </div>
-        <p style="margin-top:8px;"><strong style="color:#c41d7f;">② 자금 이전 (PG 보유 → 분배)</strong></p>
-        <div style="font-family:'SF Mono',ui-monospace,monospace;font-size:10px;background:#fafafa;padding:6px 8px;border-radius:4px;line-height:1.5;color:rgba(0,0,0,.7);">
-          transfer_pg_to_supplier (→ 7010)<br>
-          transfer_pg_to_platform (→ 7020)<br>
-          transfer_platform_to_channel (→ 7000)<br>
-          transfer_platform_to_pg_fee (→ 7021)
-        </div>
-        <p style="margin-top:8px;"><strong style="color:#c41d7f;">③ 수수료 손익</strong></p>
-        <div style="font-family:'SF Mono',ui-monospace,monospace;font-size:10px;background:#fafafa;padding:6px 8px;border-radius:4px;line-height:1.5;color:rgba(0,0,0,.7);">
-          channel_fee_amount (→ 6000)<br>
-          pg_fee_amount (→ 6010)<br>
-          platform_service_fee_amount (→ 6020)
-        </div>
-        <p style="margin-top:8px;"><strong style="color:#c41d7f;">④ 시점·상태</strong></p>
-        <div style="font-family:'SF Mono',ui-monospace,monospace;font-size:10px;background:#fafafa;padding:6px 8px;border-radius:4px;line-height:1.5;color:rgba(0,0,0,.7);">
-          executed_at · settlement_basis_date · payout_scheduled_date · payout_completed_date · settlement_status
-        </div>
-        <p style="margin-top:8px;"><strong style="color:#c41d7f;">⑤ lineage (settlement만 보관)</strong></p>
-        <div style="font-family:'SF Mono',ui-monospace,monospace;font-size:10px;background:#fafafa;padding:6px 8px;border-radius:4px;line-height:1.5;color:rgba(0,0,0,.7);">
-          pg_fee_supply / pg_fee_vat (BE 분해 안 함)<br>
-          mid / tid / approval_no<br>
-          source_file / source_row_number
-        </div>
-        <p style="margin-top:8px;"><strong style="color:#c41d7f;">⑥ 취소·환불·조정</strong></p>
-        <div style="font-family:'SF Mono',ui-monospace,monospace;font-size:10px;background:#fafafa;padding:6px 8px;border-radius:4px;line-height:1.5;color:rgba(0,0,0,.7);">
-          refund_amount (→ 4101)<br>
-          fee_reversal (→ 6500/6510/6520)<br>
-          transfer_reversal (→ 7500~7521)<br>
-          adjustment (→ 8000/8010)
-        </div>
-        <p style="margin-top:10px;padding-top:8px;border-top:1px dashed #d9d9d9;font-size:10px;color:rgba(0,0,0,.5);">
-          💡 결산(9xxx)은 별도 이벤트 — 사업주체별 실제 계좌 출금 시점에 발생
-        </p>
-      </div>
-    </div>
-
-  </div>
-</div>
-
-<!-- ============ 취소 시나리오 ============ -->
-<div style="margin:18px 24px 0;background:#fff;border:1px solid #f0f0f0;border-radius:8px;overflow:hidden;">
-  <div style="padding:12px 16px;border-bottom:1px solid #f0f0f0;font-weight:600;font-size:13px;display:flex;align-items:center;gap:8px;">
-    🚫 취소 시나리오 (참고용)
-    <span style="font-size:11px;color:rgba(0,0,0,.45);font-weight:400;margin-left:6px;">만약 출발 전, 잔금 결제 후, 정산 진행 전에 취소가 발생하면 — 다음 ledger items가 추가로 append됨</span>
-  </div>
-  <div style="padding:10px 16px;font-size:11px;color:#874d00;background:#fff7e6;border-bottom:1px solid #ffd666;">
-    <strong>핵심 원칙</strong>: 취소는 기존 item 삭제 X. 반대 부호의 reversal item을 append (ADR-0006). · 위약금이 있으면 <code>5010 CANCELLATION_PENALTY</code>로 별도 row. · 4번 QA 정책 결정 사항: <code>7000 예약취소</code>를 인원·추가비용별로 분리 적재 (전체 합계 1건 추가는 금지).
-  </div>
-  <div style="overflow-x:auto;">
+  <div class="ledger-wrap">
     <table class="ledger">
       <thead>
         <tr>
@@ -575,13 +169,17 @@ table.ledger{width:100%;border-collapse:collapse;font-size:12px;}
           <th rowspan="2">항목</th>
           <th rowspan="2">코드</th>
           <th class="party" colspan="2">고객</th>
-          <th class="party" colspan="2">여행사</th>
           <th class="party" colspan="2">채널사</th>
           <th class="party" colspan="2">플랫폼</th>
+          <th class="party" colspan="2">여행사</th>
           <th class="party" colspan="2">PG</th>
           <th rowspan="2">금액</th>
-          <th rowspan="2">설명</th>
-          <th rowspan="2">RsvStatus</th>
+          <th rowspan="2">제어</th>
+          <th class="tally" colspan="2">고객 손익</th>
+          <th class="tally" colspan="2">채널사 손익</th>
+          <th class="tally" colspan="2">플랫폼 손익</th>
+          <th class="tally" colspan="2">여행사 손익</th>
+          <th class="tally" colspan="2">PG 손익</th>
         </tr>
         <tr class="sub">
           <th class="party sub">손익</th><th class="party sub">자금</th>
@@ -589,241 +187,839 @@ table.ledger{width:100%;border-collapse:collapse;font-size:12px;}
           <th class="party sub">손익</th><th class="party sub">자금</th>
           <th class="party sub">손익</th><th class="party sub">자금</th>
           <th class="party sub">손익</th><th class="party sub">자금</th>
+          <th class="tally sub">증감</th><th class="tally sub">잔액</th>
+          <th class="tally sub">증감</th><th class="tally sub">잔액</th>
+          <th class="tally sub">증감</th><th class="tally sub">잔액</th>
+          <th class="tally sub">증감</th><th class="tally sub">잔액</th>
+          <th class="tally sub">증감</th><th class="tally sub">잔액</th>
         </tr>
       </thead>
       <tbody>
-        <!-- 취소요청 트랜지션 -->
+        <!-- 예약 (7 rows) -->
         <tr>
-          <td class="cat" rowspan="2">취소요청</td>
-          <td class="clsfy">상태 전이 → 취소요청</td>
-          <td class="code">—</td>
+          <td class="cat" rowspan="7">예약</td>
+          <td class="clsfy">상품정가</td><td class="code">1000</td>
+          <td class="sign-neg">-1</td><td class="sign-zero">0</td>
           <td class="sign-zero">0</td><td class="sign-zero">0</td>
           <td class="sign-zero">0</td><td class="sign-zero">0</td>
+          <td class="sign-pos">+1</td><td class="sign-zero">0</td>
           <td class="sign-zero">0</td><td class="sign-zero">0</td>
-          <td class="sign-zero">0</td><td class="sign-zero">0</td>
-          <td class="sign-zero">0</td><td class="sign-zero">0</td>
-          <td class="amount">—</td>
-          <td style="text-align:left;font-size:11px;">rsv_status_transitions에 CANCELLATION_REQUESTED row 1개 append. ledger item은 아직 생성 X</td>
-          <td><span class="rsv-status rs-cancel-req">취소요청</span></td>
+          <td class="amount">1,000,000</td><td>1</td>
+          <td class="tally-col">-1,000,000</td><td class="tally-col">-1,000,000</td>
+          <td class="tally-col">0</td><td class="tally-col">0</td>
+          <td class="tally-col">0</td><td class="tally-col">0</td>
+          <td class="tally-col sign-pos">+1,000,000</td><td class="tally-col">+1,000,000</td>
+          <td class="tally-col">0</td><td class="tally-col">0</td>
         </tr>
         <tr>
-          <td class="clsfy">위약금 정책 확정 대기</td>
-          <td class="code">—</td>
+          <td class="clsfy">특가할인(채널사)</td><td class="code">2000</td>
+          <td class="sign-pos">+1</td><td class="sign-zero">0</td>
+          <td class="sign-neg">-1</td><td class="sign-zero">0</td>
           <td class="sign-zero">0</td><td class="sign-zero">0</td>
           <td class="sign-zero">0</td><td class="sign-zero">0</td>
           <td class="sign-zero">0</td><td class="sign-zero">0</td>
+          <td class="amount">10,000</td><td>1</td>
+          <td class="tally-col">+10,000</td><td class="tally-col">-990,000</td>
+          <td class="tally-col">-10,000</td><td class="tally-col">-10,000</td>
+          <td class="tally-col">0</td><td class="tally-col">0</td>
+          <td class="tally-col">0</td><td class="tally-col">+1,000,000</td>
+          <td class="tally-col">0</td><td class="tally-col">0</td>
+        </tr>
+        <tr>
+          <td class="clsfy">특가할인(플랫폼)</td><td class="code">2001</td>
+          <td class="sign-pos">+1</td><td class="sign-zero">0</td>
+          <td class="sign-zero">0</td><td class="sign-zero">0</td>
+          <td class="sign-neg">-1</td><td class="sign-zero">0</td>
           <td class="sign-zero">0</td><td class="sign-zero">0</td>
           <td class="sign-zero">0</td><td class="sign-zero">0</td>
-          <td class="amount">—</td>
-          <td style="text-align:left;font-size:11px;">대기 item으로만 등록 (executedAt = null). 확정 후 실행 item으로 전환</td>
-          <td><span class="rsv-status rs-cancel-req">취소요청</span></td>
+          <td class="amount">10,000</td><td>1</td>
+          <td class="tally-col">+10,000</td><td class="tally-col">-980,000</td>
+          <td class="tally-col">0</td><td class="tally-col">-10,000</td>
+          <td class="tally-col">-10,000</td><td class="tally-col">-10,000</td>
+          <td class="tally-col">0</td><td class="tally-col">+1,000,000</td>
+          <td class="tally-col">0</td><td class="tally-col">0</td>
+        </tr>
+        <tr>
+          <td class="clsfy">특가할인(여행사)</td><td class="code">2002</td>
+          <td class="sign-pos">+1</td><td class="sign-zero">0</td>
+          <td class="sign-zero">0</td><td class="sign-zero">0</td>
+          <td class="sign-zero">0</td><td class="sign-zero">0</td>
+          <td class="sign-neg">-1</td><td class="sign-zero">0</td>
+          <td class="sign-zero">0</td><td class="sign-zero">0</td>
+          <td class="amount">10,000</td><td>1</td>
+          <td class="tally-col">+10,000</td><td class="tally-col">-970,000</td>
+          <td class="tally-col">0</td><td class="tally-col">-10,000</td>
+          <td class="tally-col">0</td><td class="tally-col">-10,000</td>
+          <td class="tally-col">-10,000</td><td class="tally-col">+990,000</td>
+          <td class="tally-col">0</td><td class="tally-col">0</td>
+        </tr>
+        <tr>
+          <td class="clsfy">쿠폰할인(채널사)</td><td class="code">3000</td>
+          <td class="sign-pos">+1</td><td class="sign-zero">0</td>
+          <td class="sign-neg">-1</td><td class="sign-zero">0</td>
+          <td class="sign-zero">0</td><td class="sign-zero">0</td>
+          <td class="sign-zero">0</td><td class="sign-zero">0</td>
+          <td class="sign-zero">0</td><td class="sign-zero">0</td>
+          <td class="amount">5,000</td><td>0</td>
+          <td class="tally-col">0</td><td class="tally-col">-970,000</td>
+          <td class="tally-col">0</td><td class="tally-col">-10,000</td>
+          <td class="tally-col">0</td><td class="tally-col">-10,000</td>
+          <td class="tally-col">0</td><td class="tally-col">+990,000</td>
+          <td class="tally-col">0</td><td class="tally-col">0</td>
+        </tr>
+        <tr>
+          <td class="clsfy">쿠폰할인(플랫폼)</td><td class="code">3001</td>
+          <td class="sign-pos">+1</td><td class="sign-zero">0</td>
+          <td class="sign-zero">0</td><td class="sign-zero">0</td>
+          <td class="sign-neg">-1</td><td class="sign-zero">0</td>
+          <td class="sign-zero">0</td><td class="sign-zero">0</td>
+          <td class="sign-zero">0</td><td class="sign-zero">0</td>
+          <td class="amount">5,000</td><td>0</td>
+          <td class="tally-col">0</td><td class="tally-col">-970,000</td>
+          <td class="tally-col">0</td><td class="tally-col">-10,000</td>
+          <td class="tally-col">0</td><td class="tally-col">-10,000</td>
+          <td class="tally-col">0</td><td class="tally-col">+990,000</td>
+          <td class="tally-col">0</td><td class="tally-col">0</td>
+        </tr>
+        <tr>
+          <td class="clsfy">쿠폰할인(여행사)</td><td class="code">3002</td>
+          <td class="sign-pos">+1</td><td class="sign-zero">0</td>
+          <td class="sign-zero">0</td><td class="sign-zero">0</td>
+          <td class="sign-zero">0</td><td class="sign-zero">0</td>
+          <td class="sign-neg">-1</td><td class="sign-zero">0</td>
+          <td class="sign-zero">0</td><td class="sign-zero">0</td>
+          <td class="amount">5,000</td><td>0</td>
+          <td class="tally-col">0</td><td class="tally-col">-970,000</td>
+          <td class="tally-col">0</td><td class="tally-col">-10,000</td>
+          <td class="tally-col">0</td><td class="tally-col">-10,000</td>
+          <td class="tally-col">0</td><td class="tally-col">+990,000</td>
+          <td class="tally-col">0</td><td class="tally-col">0</td>
         </tr>
 
-        <tr class="cat-sep"><td colspan="16"></td></tr>
+        <tr class="cat-sep"><td colspan="23"></td></tr>
 
-        <!-- 5xxx 취소·위약금 -->
+        <!-- 결제 (4 rows) -->
         <tr>
-          <td class="cat" rowspan="4">5xxx 취소·위약금</td>
-          <td class="clsfy">예약취소 (성인 #1)</td>
-          <td class="code">5000</td>
-          <td class="sign-pos">+1</td><td class="sign-zero">0</td>
-          <td class="sign-neg">-1</td><td class="sign-zero">0</td>
-          <td class="sign-zero">0</td><td class="sign-zero">0</td>
-          <td class="sign-zero">0</td><td class="sign-zero">0</td>
-          <td class="sign-zero">0</td><td class="sign-zero">0</td>
-          <td class="amount">500,000</td>
-          <td style="text-align:left;font-size:11px;color:#c41d7f;"><strong>4번 QA 반영</strong>: 인원별로 별도 row. traveler_id 매칭</td>
-          <td><span class="rsv-status rs-cancel-done">취소완료</span></td>
-        </tr>
-        <tr>
-          <td class="clsfy">예약취소 (성인 #2)</td>
-          <td class="code">5000</td>
-          <td class="sign-pos">+1</td><td class="sign-zero">0</td>
-          <td class="sign-neg">-1</td><td class="sign-zero">0</td>
-          <td class="sign-zero">0</td><td class="sign-zero">0</td>
-          <td class="sign-zero">0</td><td class="sign-zero">0</td>
-          <td class="sign-zero">0</td><td class="sign-zero">0</td>
-          <td class="amount">500,000</td>
-          <td style="text-align:left;font-size:11px;">상품정가 1000 × 2 행에 대응</td>
-          <td><span class="rsv-status rs-cancel-done">취소완료</span></td>
-        </tr>
-        <tr>
-          <td class="clsfy">예약취소 (추가비용)</td>
-          <td class="code">5000</td>
-          <td class="sign-pos">+1</td><td class="sign-zero">0</td>
-          <td class="sign-neg">-1</td><td class="sign-zero">0</td>
-          <td class="sign-zero">0</td><td class="sign-zero">0</td>
-          <td class="sign-zero">0</td><td class="sign-zero">0</td>
-          <td class="sign-zero">0</td><td class="sign-zero">0</td>
-          <td class="amount">150,000</td>
-          <td style="text-align:left;font-size:11px;">추가비용 1010 행에 대응</td>
-          <td><span class="rsv-status rs-cancel-done">취소완료</span></td>
-        </tr>
-        <tr>
-          <td class="clsfy">취소위약금</td>
-          <td class="code">5010</td>
-          <td class="sign-neg">-1</td><td class="sign-zero">0</td>
-          <td class="sign-pos">+1</td><td class="sign-zero">0</td>
-          <td class="sign-zero">0</td><td class="sign-zero">0</td>
-          <td class="sign-zero">0</td><td class="sign-zero">0</td>
-          <td class="sign-zero">0</td><td class="sign-zero">0</td>
-          <td class="amount">112,000</td>
-          <td style="text-align:left;font-size:11px;">위약금 10% 가정 (정책별)</td>
-          <td><span class="rsv-status rs-cancel-done">취소완료</span></td>
-        </tr>
-
-        <tr class="cat-sep"><td colspan="16"></td></tr>
-
-        <!-- 3xxx 할인 reversal -->
-        <tr>
-          <td class="cat" rowspan="6">3xxx 할인 원복</td>
-          <td class="clsfy">특가취소(채널)</td>
-          <td class="code">3000</td>
-          <td class="sign-neg">-1</td><td class="sign-zero">0</td>
-          <td class="sign-zero">0</td><td class="sign-zero">0</td>
-          <td class="sign-pos">+1</td><td class="sign-zero">0</td>
-          <td class="sign-zero">0</td><td class="sign-zero">0</td>
-          <td class="sign-zero">0</td><td class="sign-zero">0</td>
-          <td class="amount">10,000</td>
-          <td style="text-align:left;font-size:11px;">2000 reversal — 채널 부담 할인 원복</td>
-          <td><span class="rsv-status rs-cancel-done">취소완료</span></td>
-        </tr>
-        <tr>
-          <td class="clsfy">특가취소(플랫폼)</td>
-          <td class="code">3001</td>
-          <td class="sign-neg">-1</td><td class="sign-zero">0</td>
-          <td class="sign-zero">0</td><td class="sign-zero">0</td>
-          <td class="sign-zero">0</td><td class="sign-zero">0</td>
-          <td class="sign-pos">+1</td><td class="sign-zero">0</td>
-          <td class="sign-zero">0</td><td class="sign-zero">0</td>
-          <td class="amount">10,000</td>
-          <td style="text-align:left;font-size:11px;">2001 reversal</td>
-          <td><span class="rsv-status rs-cancel-done">취소완료</span></td>
-        </tr>
-        <tr>
-          <td class="clsfy">특가취소(여행사)</td>
-          <td class="code">3002</td>
-          <td class="sign-neg">-1</td><td class="sign-zero">0</td>
-          <td class="sign-pos">+1</td><td class="sign-zero">0</td>
-          <td class="sign-zero">0</td><td class="sign-zero">0</td>
-          <td class="sign-zero">0</td><td class="sign-zero">0</td>
-          <td class="sign-zero">0</td><td class="sign-zero">0</td>
-          <td class="amount">10,000</td>
-          <td style="text-align:left;font-size:11px;">2002 reversal</td>
-          <td><span class="rsv-status rs-cancel-done">취소완료</span></td>
-        </tr>
-        <tr>
-          <td class="clsfy">쿠폰취소(채널)</td>
-          <td class="code">3200</td>
-          <td class="sign-neg">-1</td><td class="sign-zero">0</td>
-          <td class="sign-zero">0</td><td class="sign-zero">0</td>
-          <td class="sign-pos">+1</td><td class="sign-zero">0</td>
-          <td class="sign-zero">0</td><td class="sign-zero">0</td>
-          <td class="sign-zero">0</td><td class="sign-zero">0</td>
-          <td class="amount">5,000</td>
-          <td style="text-align:left;font-size:11px;">2200 reversal</td>
-          <td><span class="rsv-status rs-cancel-done">취소완료</span></td>
-        </tr>
-        <tr>
-          <td class="clsfy">쿠폰취소(플랫폼)</td>
-          <td class="code">3201</td>
-          <td class="sign-neg">-1</td><td class="sign-zero">0</td>
-          <td class="sign-zero">0</td><td class="sign-zero">0</td>
-          <td class="sign-zero">0</td><td class="sign-zero">0</td>
-          <td class="sign-pos">+1</td><td class="sign-zero">0</td>
-          <td class="sign-zero">0</td><td class="sign-zero">0</td>
-          <td class="amount">5,000</td>
-          <td style="text-align:left;font-size:11px;">2201 reversal</td>
-          <td><span class="rsv-status rs-cancel-done">취소완료</span></td>
-        </tr>
-        <tr>
-          <td class="clsfy">쿠폰취소(여행사)</td>
-          <td class="code">3202</td>
-          <td class="sign-neg">-1</td><td class="sign-zero">0</td>
-          <td class="sign-pos">+1</td><td class="sign-zero">0</td>
-          <td class="sign-zero">0</td><td class="sign-zero">0</td>
-          <td class="sign-zero">0</td><td class="sign-zero">0</td>
-          <td class="sign-zero">0</td><td class="sign-zero">0</td>
-          <td class="amount">5,000</td>
-          <td style="text-align:left;font-size:11px;">2202 reversal</td>
-          <td><span class="rsv-status rs-cancel-done">취소완료</span></td>
-        </tr>
-
-        <tr class="cat-sep"><td colspan="16"></td></tr>
-
-        <!-- 4xxx 환불실행 -->
-        <tr>
-          <td class="cat" rowspan="2">4xxx 환불</td>
-          <td class="clsfy">환불실행(PG) — 1차결제</td>
-          <td class="code">4101</td>
+          <td class="cat" rowspan="4">결제</td>
+          <td class="clsfy">예약금결제(PG)</td><td class="code">4001</td>
           <td class="sign-zero">0</td><td class="sign-pos">+1</td>
           <td class="sign-zero">0</td><td class="sign-zero">0</td>
           <td class="sign-zero">0</td><td class="sign-zero">0</td>
           <td class="sign-zero">0</td><td class="sign-zero">0</td>
-          <td class="sign-zero">0</td><td class="sign-neg">-1</td>
-          <td class="amount">858,000</td>
-          <td style="text-align:left;font-size:11px;">970,000 - 위약금 분담 - 가상계좌 PG수수료 차감 (6번 QA: 가상계좌도 PG수수료 차감)</td>
-          <td><span class="rsv-status rs-cancel-done">취소완료</span></td>
+          <td class="sign-zero">0</td><td class="sign-pos">+1</td>
+          <td class="amount">100,000</td><td>0</td>
+          <td class="tally-col">0</td><td class="tally-col">-970,000</td>
+          <td class="tally-col">0</td><td class="tally-col">-10,000</td>
+          <td class="tally-col">0</td><td class="tally-col">-10,000</td>
+          <td class="tally-col">0</td><td class="tally-col">+990,000</td>
+          <td class="tally-col">0</td><td class="tally-col">0</td>
         </tr>
         <tr>
-          <td class="clsfy">환불실행(PG) — 추가비용결제</td>
-          <td class="code">4101</td>
+          <td class="clsfy">고객결제(PG)</td><td class="code">4001</td>
           <td class="sign-zero">0</td><td class="sign-pos">+1</td>
           <td class="sign-zero">0</td><td class="sign-zero">0</td>
           <td class="sign-zero">0</td><td class="sign-zero">0</td>
           <td class="sign-zero">0</td><td class="sign-zero">0</td>
+          <td class="sign-zero">0</td><td class="sign-pos">+1</td>
+          <td class="amount">970,000</td><td>1</td>
+          <td class="tally-col">0</td><td class="tally-col">-970,000</td>
+          <td class="tally-col">0</td><td class="tally-col">-10,000</td>
+          <td class="tally-col">0</td><td class="tally-col">-10,000</td>
+          <td class="tally-col">0</td><td class="tally-col">+990,000</td>
+          <td class="tally-col">0</td><td class="tally-col">0</td>
+        </tr>
+        <tr>
+          <td class="clsfy">추가비용</td><td class="code">1010</td>
+          <td class="sign-neg">-1</td><td class="sign-zero">0</td>
+          <td class="sign-zero">0</td><td class="sign-zero">0</td>
+          <td class="sign-zero">0</td><td class="sign-zero">0</td>
+          <td class="sign-pos">+1</td><td class="sign-zero">0</td>
+          <td class="sign-zero">0</td><td class="sign-zero">0</td>
+          <td class="amount">150,000</td><td>1</td>
+          <td class="tally-col">-150,000</td><td class="tally-col">-1,120,000</td>
+          <td class="tally-col">0</td><td class="tally-col">-10,000</td>
+          <td class="tally-col">0</td><td class="tally-col">-10,000</td>
+          <td class="tally-col">+150,000</td><td class="tally-col">+1,140,000</td>
+          <td class="tally-col">0</td><td class="tally-col">0</td>
+        </tr>
+        <tr>
+          <td class="clsfy">추가비용결제(PG)</td><td class="code">4001</td>
+          <td class="sign-zero">0</td><td class="sign-pos">+1</td>
+          <td class="sign-zero">0</td><td class="sign-zero">0</td>
+          <td class="sign-zero">0</td><td class="sign-zero">0</td>
+          <td class="sign-zero">0</td><td class="sign-zero">0</td>
+          <td class="sign-zero">0</td><td class="sign-pos">+1</td>
+          <td class="amount">150,000</td><td>1</td>
+          <td class="tally-col">0</td><td class="tally-col">-1,120,000</td>
+          <td class="tally-col">0</td><td class="tally-col">-10,000</td>
+          <td class="tally-col">0</td><td class="tally-col">-10,000</td>
+          <td class="tally-col">0</td><td class="tally-col">+1,140,000</td>
+          <td class="tally-col">0</td><td class="tally-col">0</td>
+        </tr>
+
+        <tr class="cat-sep"><td colspan="23"></td></tr>
+
+        <!-- 취소 (9 rows) -->
+        <tr class="cancel-row">
+          <td class="cat cat-cancel" rowspan="9">취소</td>
+          <td class="clsfy">부분취소</td><td class="code">7100</td>
+          <td class="sign-pos">+1</td><td class="sign-zero">0</td>
+          <td class="sign-zero">0</td><td class="sign-zero">0</td>
+          <td class="sign-zero">0</td><td class="sign-zero">0</td>
+          <td class="sign-neg">-1</td><td class="sign-zero">0</td>
+          <td class="sign-zero">0</td><td class="sign-zero">0</td>
+          <td class="amount">50,000</td><td>0</td>
+          <td class="tally-col">0</td><td class="tally-col">-1,120,000</td>
+          <td class="tally-col">0</td><td class="tally-col">-10,000</td>
+          <td class="tally-col">0</td><td class="tally-col">-10,000</td>
+          <td class="tally-col">0</td><td class="tally-col">+1,140,000</td>
+          <td class="tally-col">0</td><td class="tally-col">0</td>
+        </tr>
+        <tr class="cancel-row">
+          <td class="clsfy">부분환불실행(PG)</td><td class="code">7021</td>
           <td class="sign-zero">0</td><td class="sign-neg">-1</td>
-          <td class="amount">150,000</td>
-          <td style="text-align:left;font-size:11px;">PG가 보유 자금에서 환불</td>
-          <td><span class="rsv-status rs-cancel-done">취소완료</span></td>
+          <td class="sign-zero">0</td><td class="sign-zero">0</td>
+          <td class="sign-zero">0</td><td class="sign-zero">0</td>
+          <td class="sign-zero">0</td><td class="sign-zero">0</td>
+          <td class="sign-zero">0</td><td class="sign-neg">-1</td>
+          <td class="amount">50,000</td><td>0</td>
+          <td class="tally-col">0</td><td class="tally-col">-1,120,000</td>
+          <td class="tally-col">0</td><td class="tally-col">-10,000</td>
+          <td class="tally-col">0</td><td class="tally-col">-10,000</td>
+          <td class="tally-col">0</td><td class="tally-col">+1,140,000</td>
+          <td class="tally-col">0</td><td class="tally-col">0</td>
+        </tr>
+        <tr class="cancel-row">
+          <td class="clsfy">예약취소</td><td class="code">7000</td>
+          <td class="sign-pos">+1</td><td class="sign-zero">0</td>
+          <td class="sign-zero">0</td><td class="sign-zero">0</td>
+          <td class="sign-zero">0</td><td class="sign-zero">0</td>
+          <td class="sign-neg">-1</td><td class="sign-zero">0</td>
+          <td class="sign-zero">0</td><td class="sign-zero">0</td>
+          <td class="amount">1,120,000</td><td>0</td>
+          <td class="tally-col">0</td><td class="tally-col">-1,120,000</td>
+          <td class="tally-col">0</td><td class="tally-col">-10,000</td>
+          <td class="tally-col">0</td><td class="tally-col">-10,000</td>
+          <td class="tally-col">0</td><td class="tally-col">+1,140,000</td>
+          <td class="tally-col">0</td><td class="tally-col">0</td>
+        </tr>
+        <tr class="cancel-row">
+          <td class="clsfy">취소위약금</td><td class="code">7010</td>
+          <td class="sign-neg">-1</td><td class="sign-zero">0</td>
+          <td class="sign-zero">0</td><td class="sign-zero">0</td>
+          <td class="sign-zero">0</td><td class="sign-zero">0</td>
+          <td class="sign-pos">+1</td><td class="sign-zero">0</td>
+          <td class="sign-zero">0</td><td class="sign-zero">0</td>
+          <td class="amount">112,000</td><td>0</td>
+          <td class="tally-col">0</td><td class="tally-col">-1,120,000</td>
+          <td class="tally-col">0</td><td class="tally-col">-10,000</td>
+          <td class="tally-col">0</td><td class="tally-col">-10,000</td>
+          <td class="tally-col">0</td><td class="tally-col">+1,140,000</td>
+          <td class="tally-col">0</td><td class="tally-col">0</td>
+        </tr>
+        <tr class="cancel-row">
+          <td class="clsfy">환불실행(PG)</td><td class="code">7021</td>
+          <td class="sign-zero">0</td><td class="sign-neg">-1</td>
+          <td class="sign-zero">0</td><td class="sign-zero">0</td>
+          <td class="sign-zero">0</td><td class="sign-zero">0</td>
+          <td class="sign-zero">0</td><td class="sign-zero">0</td>
+          <td class="sign-zero">0</td><td class="sign-neg">-1</td>
+          <td class="amount">1,120,000</td><td>0</td>
+          <td class="tally-col">0</td><td class="tally-col">-1,120,000</td>
+          <td class="tally-col">0</td><td class="tally-col">-10,000</td>
+          <td class="tally-col">0</td><td class="tally-col">-10,000</td>
+          <td class="tally-col">0</td><td class="tally-col">+1,140,000</td>
+          <td class="tally-col">0</td><td class="tally-col">0</td>
+        </tr>
+        <tr class="cancel-row">
+          <td class="clsfy">특가취소(채널사)</td><td class="code">7200</td>
+          <td class="sign-neg">-1</td><td class="sign-zero">0</td>
+          <td class="sign-pos">+1</td><td class="sign-zero">0</td>
+          <td class="sign-zero">0</td><td class="sign-zero">0</td>
+          <td class="sign-zero">0</td><td class="sign-zero">0</td>
+          <td class="sign-zero">0</td><td class="sign-zero">0</td>
+          <td class="amount">10,000</td><td>0</td>
+          <td class="tally-col">0</td><td class="tally-col">-1,120,000</td>
+          <td class="tally-col">0</td><td class="tally-col">-10,000</td>
+          <td class="tally-col">0</td><td class="tally-col">-10,000</td>
+          <td class="tally-col">0</td><td class="tally-col">+1,140,000</td>
+          <td class="tally-col">0</td><td class="tally-col">0</td>
+        </tr>
+        <tr class="cancel-row">
+          <td class="clsfy">특가취소(플랫폼)</td><td class="code">7201</td>
+          <td class="sign-neg">-1</td><td class="sign-zero">0</td>
+          <td class="sign-zero">0</td><td class="sign-zero">0</td>
+          <td class="sign-pos">+1</td><td class="sign-zero">0</td>
+          <td class="sign-zero">0</td><td class="sign-zero">0</td>
+          <td class="sign-zero">0</td><td class="sign-zero">0</td>
+          <td class="amount">10,000</td><td>0</td>
+          <td class="tally-col">0</td><td class="tally-col">-1,120,000</td>
+          <td class="tally-col">0</td><td class="tally-col">-10,000</td>
+          <td class="tally-col">0</td><td class="tally-col">-10,000</td>
+          <td class="tally-col">0</td><td class="tally-col">+1,140,000</td>
+          <td class="tally-col">0</td><td class="tally-col">0</td>
+        </tr>
+        <tr class="cancel-row">
+          <td class="clsfy">특가취소(여행사)</td><td class="code">7202</td>
+          <td class="sign-neg">-1</td><td class="sign-zero">0</td>
+          <td class="sign-zero">0</td><td class="sign-zero">0</td>
+          <td class="sign-zero">0</td><td class="sign-zero">0</td>
+          <td class="sign-pos">+1</td><td class="sign-zero">0</td>
+          <td class="sign-zero">0</td><td class="sign-zero">0</td>
+          <td class="amount">10,000</td><td>0</td>
+          <td class="tally-col">0</td><td class="tally-col">-1,120,000</td>
+          <td class="tally-col">0</td><td class="tally-col">-10,000</td>
+          <td class="tally-col">0</td><td class="tally-col">-10,000</td>
+          <td class="tally-col">0</td><td class="tally-col">+1,140,000</td>
+          <td class="tally-col">0</td><td class="tally-col">0</td>
+        </tr>
+        <tr class="cancel-row">
+          <td class="clsfy">쿠폰취소(3종)</td><td class="code">7300~2</td>
+          <td class="sign-neg">-3</td><td class="sign-zero">0</td>
+          <td class="sign-pos">+1</td><td class="sign-zero">0</td>
+          <td class="sign-pos">+1</td><td class="sign-zero">0</td>
+          <td class="sign-pos">+1</td><td class="sign-zero">0</td>
+          <td class="sign-zero">0</td><td class="sign-zero">0</td>
+          <td class="amount">5,000 × 3</td><td>0</td>
+          <td class="tally-col">0</td><td class="tally-col">-1,120,000</td>
+          <td class="tally-col">0</td><td class="tally-col">-10,000</td>
+          <td class="tally-col">0</td><td class="tally-col">-10,000</td>
+          <td class="tally-col">0</td><td class="tally-col">+1,140,000</td>
+          <td class="tally-col">0</td><td class="tally-col">0</td>
+        </tr>
+
+        <tr class="cat-sep"><td colspan="23"></td></tr>
+
+        <!-- 정산 (7 rows) -->
+        <tr>
+          <td class="cat" rowspan="7">정산</td>
+          <td class="clsfy">플랫폼이용료</td><td class="code">6020</td>
+          <td class="sign-zero">0</td><td class="sign-zero">0</td>
+          <td class="sign-zero">0</td><td class="sign-zero">0</td>
+          <td class="sign-pos">+1</td><td class="sign-zero">0</td>
+          <td class="sign-neg">-1</td><td class="sign-zero">0</td>
+          <td class="sign-zero">0</td><td class="sign-zero">0</td>
+          <td class="amount">60,000</td><td>1</td>
+          <td class="tally-col">0</td><td class="tally-col">-1,120,000</td>
+          <td class="tally-col">0</td><td class="tally-col">-10,000</td>
+          <td class="tally-col">+60,000</td><td class="tally-col">+50,000</td>
+          <td class="tally-col">-60,000</td><td class="tally-col">+1,080,000</td>
+          <td class="tally-col">0</td><td class="tally-col">0</td>
+        </tr>
+        <tr>
+          <td class="clsfy">채널사수수료</td><td class="code">6000</td>
+          <td class="sign-zero">0</td><td class="sign-zero">0</td>
+          <td class="sign-pos">+1</td><td class="sign-zero">0</td>
+          <td class="sign-neg">-1</td><td class="sign-zero">0</td>
+          <td class="sign-zero">0</td><td class="sign-zero">0</td>
+          <td class="sign-zero">0</td><td class="sign-zero">0</td>
+          <td class="amount">22,400</td><td>1</td>
+          <td class="tally-col">0</td><td class="tally-col">-1,120,000</td>
+          <td class="tally-col">+22,400</td><td class="tally-col">+12,400</td>
+          <td class="tally-col">-22,400</td><td class="tally-col">+27,600</td>
+          <td class="tally-col">0</td><td class="tally-col">+1,080,000</td>
+          <td class="tally-col">0</td><td class="tally-col">0</td>
+        </tr>
+        <tr>
+          <td class="clsfy">PG수수료</td><td class="code">6010</td>
+          <td class="sign-zero">0</td><td class="sign-zero">0</td>
+          <td class="sign-zero">0</td><td class="sign-zero">0</td>
+          <td class="sign-neg">-1</td><td class="sign-zero">0</td>
+          <td class="sign-zero">0</td><td class="sign-zero">0</td>
+          <td class="sign-pos">+1</td><td class="sign-zero">0</td>
+          <td class="amount">1,120</td><td>1</td>
+          <td class="tally-col">0</td><td class="tally-col">-1,120,000</td>
+          <td class="tally-col">0</td><td class="tally-col">+12,400</td>
+          <td class="tally-col">-1,120</td><td class="tally-col">+26,480</td>
+          <td class="tally-col">0</td><td class="tally-col">+1,080,000</td>
+          <td class="tally-col">+1,120</td><td class="tally-col">+1,120</td>
+        </tr>
+        <tr>
+          <td class="clsfy">PGto여행사</td><td class="code">5010</td>
+          <td class="sign-zero">0</td><td class="sign-zero">0</td>
+          <td class="sign-zero">0</td><td class="sign-zero">0</td>
+          <td class="sign-zero">0</td><td class="sign-zero">0</td>
+          <td class="sign-zero">0</td><td class="sign-pos">+1</td>
+          <td class="sign-zero">0</td><td class="sign-neg">-1</td>
+          <td class="amount">1,080,000</td><td>1</td>
+          <td class="tally-col">0</td><td class="tally-col">-1,120,000</td>
+          <td class="tally-col">0</td><td class="tally-col">+12,400</td>
+          <td class="tally-col">0</td><td class="tally-col">+26,480</td>
+          <td class="tally-col">0</td><td class="tally-col">+1,080,000</td>
+          <td class="tally-col">0</td><td class="tally-col">+1,120</td>
+        </tr>
+        <tr>
+          <td class="clsfy">PGto플랫폼</td><td class="code">5020</td>
+          <td class="sign-zero">0</td><td class="sign-zero">0</td>
+          <td class="sign-zero">0</td><td class="sign-zero">0</td>
+          <td class="sign-zero">0</td><td class="sign-pos">+1</td>
+          <td class="sign-zero">0</td><td class="sign-zero">0</td>
+          <td class="sign-zero">0</td><td class="sign-neg">-1</td>
+          <td class="amount">40,000</td><td>1</td>
+          <td class="tally-col">0</td><td class="tally-col">-1,120,000</td>
+          <td class="tally-col">0</td><td class="tally-col">+12,400</td>
+          <td class="tally-col">0</td><td class="tally-col">+26,480</td>
+          <td class="tally-col">0</td><td class="tally-col">+1,080,000</td>
+          <td class="tally-col">0</td><td class="tally-col">+1,120</td>
+        </tr>
+        <tr>
+          <td class="clsfy">플랫폼to채널</td><td class="code">5000</td>
+          <td class="sign-zero">0</td><td class="sign-zero">0</td>
+          <td class="sign-zero">0</td><td class="sign-pos">+1</td>
+          <td class="sign-zero">0</td><td class="sign-neg">-1</td>
+          <td class="sign-zero">0</td><td class="sign-zero">0</td>
+          <td class="sign-zero">0</td><td class="sign-zero">0</td>
+          <td class="amount">22,400</td><td>1</td>
+          <td class="tally-col">0</td><td class="tally-col">-1,120,000</td>
+          <td class="tally-col">0</td><td class="tally-col">+12,400</td>
+          <td class="tally-col">0</td><td class="tally-col">+26,480</td>
+          <td class="tally-col">0</td><td class="tally-col">+1,080,000</td>
+          <td class="tally-col">0</td><td class="tally-col">+1,120</td>
+        </tr>
+        <tr>
+          <td class="clsfy">플랫폼toPG수수료</td><td class="code">5021</td>
+          <td class="sign-zero">0</td><td class="sign-zero">0</td>
+          <td class="sign-zero">0</td><td class="sign-zero">0</td>
+          <td class="sign-zero">0</td><td class="sign-neg">-1</td>
+          <td class="sign-zero">0</td><td class="sign-zero">0</td>
+          <td class="sign-zero">0</td><td class="sign-pos">+1</td>
+          <td class="amount">1,120</td><td>1</td>
+          <td class="tally-col">0</td><td class="tally-col">-1,120,000</td>
+          <td class="tally-col">0</td><td class="tally-col">+12,400</td>
+          <td class="tally-col">0</td><td class="tally-col">+26,480</td>
+          <td class="tally-col">0</td><td class="tally-col">+1,080,000</td>
+          <td class="tally-col">0</td><td class="tally-col">+1,120</td>
+        </tr>
+
+        <tr class="cat-sep"><td colspan="23"></td></tr>
+
+        <!-- 결산 (4 rows) -->
+        <tr>
+          <td class="cat" rowspan="4">결산</td>
+          <td class="clsfy">여행사지급완료</td><td class="code">9000</td>
+          <td class="sign-zero">0</td><td class="sign-zero">0</td>
+          <td class="sign-zero">0</td><td class="sign-zero">0</td>
+          <td class="sign-zero">0</td><td class="sign-zero">0</td>
+          <td class="sign-zero">0</td><td class="sign-neg">-1</td>
+          <td class="sign-zero">0</td><td class="sign-zero">0</td>
+          <td class="amount">1,080,000</td><td>1</td>
+          <td class="tally-col">0</td><td class="tally-col">-1,120,000</td>
+          <td class="tally-col">0</td><td class="tally-col">+12,400</td>
+          <td class="tally-col">0</td><td class="tally-col">+26,480</td>
+          <td class="tally-col">0</td><td class="tally-col">+1,080,000</td>
+          <td class="tally-col">0</td><td class="tally-col">+1,120</td>
+        </tr>
+        <tr>
+          <td class="clsfy">채널사지급완료</td><td class="code">9001</td>
+          <td class="sign-zero">0</td><td class="sign-zero">0</td>
+          <td class="sign-zero">0</td><td class="sign-neg">-1</td>
+          <td class="sign-zero">0</td><td class="sign-zero">0</td>
+          <td class="sign-zero">0</td><td class="sign-zero">0</td>
+          <td class="sign-zero">0</td><td class="sign-zero">0</td>
+          <td class="amount">22,400</td><td>1</td>
+          <td class="tally-col">0</td><td class="tally-col">-1,120,000</td>
+          <td class="tally-col">0</td><td class="tally-col">+12,400</td>
+          <td class="tally-col">0</td><td class="tally-col">+26,480</td>
+          <td class="tally-col">0</td><td class="tally-col">+1,080,000</td>
+          <td class="tally-col">0</td><td class="tally-col">+1,120</td>
+        </tr>
+        <tr>
+          <td class="clsfy">플랫폼잔액결산</td><td class="code">9002</td>
+          <td class="sign-zero">0</td><td class="sign-zero">0</td>
+          <td class="sign-zero">0</td><td class="sign-zero">0</td>
+          <td class="sign-zero">0</td><td class="sign-neg">-1</td>
+          <td class="sign-zero">0</td><td class="sign-zero">0</td>
+          <td class="sign-zero">0</td><td class="sign-zero">0</td>
+          <td class="amount">16,480</td><td>1</td>
+          <td class="tally-col">0</td><td class="tally-col">-1,120,000</td>
+          <td class="tally-col">0</td><td class="tally-col">+12,400</td>
+          <td class="tally-col">0</td><td class="tally-col">+26,480</td>
+          <td class="tally-col">0</td><td class="tally-col">+1,080,000</td>
+          <td class="tally-col">0</td><td class="tally-col">+1,120</td>
+        </tr>
+        <tr>
+          <td class="clsfy">PG수수료출금</td><td class="code">9003</td>
+          <td class="sign-zero">0</td><td class="sign-zero">0</td>
+          <td class="sign-zero">0</td><td class="sign-zero">0</td>
+          <td class="sign-zero">0</td><td class="sign-zero">0</td>
+          <td class="sign-zero">0</td><td class="sign-zero">0</td>
+          <td class="sign-zero">0</td><td class="sign-neg">-1</td>
+          <td class="amount">1,120</td><td>1</td>
+          <td class="tally-col">0</td><td class="tally-col">-1,120,000</td>
+          <td class="tally-col">0</td><td class="tally-col">+12,400</td>
+          <td class="tally-col">0</td><td class="tally-col">+26,480</td>
+          <td class="tally-col">0</td><td class="tally-col">+1,080,000</td>
+          <td class="tally-col">0</td><td class="tally-col">+1,120</td>
+        </tr>
+
+        <tr class="cat-sep"><td colspan="23"></td></tr>
+
+        <!-- 검산 -->
+        <tr class="check-row">
+          <td class="cat">검산</td>
+          <td class="clsfy">최종잔액 확인</td><td class="code">—</td>
+          <td>-1,120,000</td><td>0</td>
+          <td>+12,400</td><td>0</td>
+          <td>+26,480</td><td>0</td>
+          <td>+1,080,000</td><td>0</td>
+          <td>+1,120</td><td>0</td>
+          <td class="amount">시뮬레이터 최종잔액</td><td>—</td>
+          <td colspan="10" style="text-align:left;font-size:11px;padding-left:12px;">
+            상문님 시뮬레이터 시트 [49] row 그대로. 취소 + 정산 + 결산이 모두 실행된 상태의 잔액.
+            <strong>고객 자금 잔액 = 0</strong>, 사업주체 자금 잔액 = 0 이지만 손익 잔액은 각 주체별로 남음 (경제적 결과).
+          </td>
         </tr>
       </tbody>
     </table>
   </div>
-  <div style="padding:10px 16px;font-size:11px;color:rgba(0,0,0,.55);background:#fafafa;border-top:1px solid #f0f0f0;">
-    <strong>주의:</strong> 정산까지 진행된 후 취소면 <code>6500/6510/6520 수수료 reversal</code> + <code>7500/7510/7520/7521 자금이전 reversal</code> 행도 추가됨. · 결산까지 끝난 후 취소면 운영자 강제 보정(<code>ADMIN_FORCE_CHANGED</code> 전이) + 8000번대 정산 조정 사용 (ADR-0006).
+  <div class="foot-note">
+    <strong>제어 컬럼</strong>: <code>1</code>=결제필요금액에 영향, <code>0</code>=원장 기록만 (예: 쿠폰할인은 실제 결제금액에 영향 X, 별도 정산).
+    <strong>취소 카테고리(붉은 배경)</strong>는 mutually exclusive 케이스이지만 시뮬레이터가 학습 목적으로 함께 나열.
   </div>
 </div>
 
-<div class="checksum-card" style="display:block;">
-  <div class="lab" style="margin-bottom:8px;">검산식 (07-verification-and-operations.md §최종 결산 검산 기준)</div>
-  <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;font-size:12px;">
+<!-- ================ 지급원장_V2 ================ -->
+<div class="main-card">
+  <div class="card-head">
+    ② 지급원장_V2 — 여행사 지급 상세
+    <span class="sub">정산기준금액 · 서비스이용료 · 공제금액 · 정산금액 · 세금계산서금액 · 지급상태 5단계</span>
+  </div>
+  <div class="ledger-wrap">
+    <table class="payout-tbl">
+      <thead>
+        <tr>
+          <th rowspan="2" style="min-width:80px;">예약</th>
+          <th rowspan="2">정산기준일</th>
+          <th rowspan="2">구분</th>
+          <th class="calc" colspan="7">여행사 지급 계산</th>
+          <th class="tax" colspan="4">세금계산서 처리</th>
+          <th rowspan="2">지급예정일</th>
+          <th rowspan="2">지급상태</th>
+        </tr>
+        <tr>
+          <th class="calc">상품금액</th>
+          <th class="calc">여행사할인</th>
+          <th class="calc">트립할인</th>
+          <th class="calc">수수료율</th>
+          <th class="calc">서비스이용료</th>
+          <th class="calc">공제금액</th>
+          <th class="calc"><strong>정산금액</strong></th>
+          <th class="tax">정산기준금액</th>
+          <th class="tax">서비스이용료</th>
+          <th class="tax">회사비용</th>
+          <th class="tax"><strong>세금계산서금액</strong></th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td class="label"><span class="rsv-tag">예약1</span></td>
+          <td>2024-09-28</td><td>예약</td>
+          <td class="calc-col">4,290,000</td>
+          <td class="calc-col" style="color:#cf1322;">-354,000</td>
+          <td class="calc-col" style="color:#cf1322;">-40,000</td>
+          <td class="calc-col">8.80%</td>
+          <td class="calc-col" style="color:#cf1322;">-342,848</td>
+          <td class="calc-col" style="color:#cf1322;">-302,848</td>
+          <td class="calc-col" style="font-weight:700;color:#237804;">3,593,152</td>
+          <td class="tax-col">3,896,000</td>
+          <td class="tax-col">342,848</td>
+          <td class="tax-col" style="color:#cf1322;">-40,000</td>
+          <td class="tax-col" style="font-weight:700;">302,848</td>
+          <td>2024-10-03</td>
+          <td><span class="payout-status ps-complete">지급완료</span></td>
+        </tr>
+        <tr>
+          <td class="label"><span class="rsv-tag">예약1</span></td>
+          <td>2024-09-28</td><td>위약금</td>
+          <td class="calc-col">130,000</td>
+          <td class="calc-col">—</td>
+          <td class="calc-col">—</td>
+          <td class="calc-col" style="color:#d4380d;">3.30% <span class="zero-note">※위약금율</span></td>
+          <td class="calc-col" style="color:#cf1322;">-4,290</td>
+          <td class="calc-col" style="color:#cf1322;">-4,290</td>
+          <td class="calc-col" style="font-weight:700;color:#237804;">125,710</td>
+          <td class="tax-col">130,000</td>
+          <td class="tax-col">4,290</td>
+          <td class="tax-col">0</td>
+          <td class="tax-col" style="font-weight:700;">4,290</td>
+          <td>2024-10-03</td>
+          <td><span class="payout-status ps-complete">지급완료</span></td>
+        </tr>
+        <tr>
+          <td class="label"><span class="rsv-tag">예약1-1</span></td>
+          <td>2024-10-05</td><td>예약 (취소)</td>
+          <td class="calc-col" style="color:#cf1322;">-4,290,000</td>
+          <td class="calc-col">354,000</td>
+          <td class="calc-col">40,000</td>
+          <td class="calc-col">8.80%</td>
+          <td class="calc-col">342,848</td>
+          <td class="calc-col">302,848</td>
+          <td class="calc-col" style="font-weight:700;color:#cf1322;">-3,593,152</td>
+          <td class="tax-col" style="color:#cf1322;">-3,896,000</td>
+          <td class="tax-col" style="color:#cf1322;">-342,848</td>
+          <td class="tax-col">40,000</td>
+          <td class="tax-col" style="font-weight:700;color:#cf1322;">-302,848</td>
+          <td>2024-10-10</td>
+          <td><span class="payout-status ps-defer">지급이월</span></td>
+        </tr>
+        <tr>
+          <td class="label"><span class="rsv-tag">예약2</span></td>
+          <td>2024-10-05</td><td>예약</td>
+          <td class="calc-col">3,060,000</td>
+          <td class="calc-col" style="color:#cf1322;">-236,000</td>
+          <td class="calc-col" style="color:#cf1322;">-44,500</td>
+          <td class="calc-col">8.80%</td>
+          <td class="calc-col" style="color:#cf1322;">-244,596</td>
+          <td class="calc-col" style="color:#cf1322;">-200,096</td>
+          <td class="calc-col" style="font-weight:700;color:#237804;">2,579,404</td>
+          <td class="tax-col">2,779,500</td>
+          <td class="tax-col">244,596</td>
+          <td class="tax-col" style="color:#cf1322;">-44,500</td>
+          <td class="tax-col" style="font-weight:700;">200,096</td>
+          <td>2024-10-10</td>
+          <td><span class="payout-status ps-complete">지급완료</span></td>
+        </tr>
+        <tr>
+          <td class="label"><span class="rsv-tag">예약3</span></td>
+          <td>2024-10-15</td><td>위약금</td>
+          <td class="calc-col">300,000</td>
+          <td class="calc-col">—</td>
+          <td class="calc-col">—</td>
+          <td class="calc-col" style="color:#d4380d;">3.30%</td>
+          <td class="calc-col" style="color:#cf1322;">-9,900</td>
+          <td class="calc-col" style="color:#cf1322;">-9,900</td>
+          <td class="calc-col" style="font-weight:700;color:#237804;">290,100</td>
+          <td class="tax-col">300,000</td>
+          <td class="tax-col">9,900</td>
+          <td class="tax-col">0</td>
+          <td class="tax-col" style="font-weight:700;">9,900</td>
+          <td>2024-10-20</td>
+          <td><span class="payout-status ps-complete">지급완료</span></td>
+        </tr>
+        <tr style="background:#fff8f2;">
+          <td class="label"><span class="rsv-tag" style="background:#fff2e8;color:#d4380d;">예약4</span></td>
+          <td>2024-11-08</td><td>예약</td>
+          <td class="calc-col">1,000,000</td>
+          <td class="calc-col">0</td>
+          <td class="calc-col" style="color:#cf1322;">-300,000</td>
+          <td class="calc-col">8.80%</td>
+          <td class="calc-col" style="color:#cf1322;">-61,600</td>
+          <td class="calc-col" style="color:#237804;font-weight:700;">+238,400</td>
+          <td class="calc-col" style="font-weight:700;color:#237804;">938,400</td>
+          <td class="tax-col">700,000</td>
+          <td class="tax-col">61,600</td>
+          <td class="tax-col" style="color:#cf1322;">-300,000</td>
+          <td class="tax-col" style="font-weight:700;color:#cf1322;">0 <span class="zero-note">⚠️ 세법상 0원</span></td>
+          <td>2024-11-13</td>
+          <td><span class="payout-status ps-defer">지급이월</span></td>
+        </tr>
+        <tr>
+          <td class="label"><span class="rsv-tag">예약5</span></td>
+          <td>2024-11-09</td><td>예약</td>
+          <td class="calc-col">2,000,000</td>
+          <td class="calc-col" style="color:#cf1322;">-100,000</td>
+          <td class="calc-col" style="color:#cf1322;">-50,000</td>
+          <td class="calc-col">8.80%</td>
+          <td class="calc-col" style="color:#cf1322;">-162,800</td>
+          <td class="calc-col" style="color:#cf1322;">-112,800</td>
+          <td class="calc-col" style="font-weight:700;color:#237804;">1,737,200</td>
+          <td class="tax-col">1,850,000</td>
+          <td class="tax-col">162,800</td>
+          <td class="tax-col" style="color:#cf1322;">-50,000</td>
+          <td class="tax-col" style="font-weight:700;">112,800</td>
+          <td>2024-11-14</td>
+          <td><span class="payout-status ps-complete">지급완료</span></td>
+        </tr>
+        <tr>
+          <td class="label"><span class="rsv-tag">예약6</span></td>
+          <td>2024-12-05</td><td>예약</td>
+          <td class="calc-col">1,500,000</td>
+          <td class="calc-col" style="color:#cf1322;">-100,000</td>
+          <td class="calc-col" style="color:#cf1322;">-50,000</td>
+          <td class="calc-col">8.80%</td>
+          <td class="calc-col" style="color:#cf1322;">-118,800</td>
+          <td class="calc-col" style="color:#cf1322;">-68,800</td>
+          <td class="calc-col" style="font-weight:700;color:#237804;">1,281,200</td>
+          <td class="tax-col">1,350,000</td>
+          <td class="tax-col">118,800</td>
+          <td class="tax-col" style="color:#cf1322;">-50,000</td>
+          <td class="tax-col" style="font-weight:700;">68,800</td>
+          <td>2024-12-10</td>
+          <td><span class="payout-status ps-complete">지급완료</span></td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+  <div class="foot-note">
+    <strong>계산식</strong>:
+    ⓐ <code>정산기준금액 = 상품금액 + 여행사할인</code> (트립할인은 포함 X) ·
+    ⓑ <code>서비스이용료 = 정산기준금액 × 수수료율</code> (일반 8.80% / 위약금 3.30%) ·
+    ⓒ <code>공제금액 = 서비스이용료 + 회사부담할인</code> ·
+    ⓓ <code>정산금액 = 정산기준금액 + 공제금액</code> (여행사 실지급) ·
+    ⓔ <code>세금계산서금액 = max(0, 서비스이용료 - 회사비용)</code> (음수는 세법상 0원 처리)
+    <br><strong style="color:#d4380d;">⚠️ 예약4</strong>: 트립할인(300,000)이 서비스이용료(61,600)보다 커서 회사가 매출보다 비용이 큰 상태 → 세금계산서금액 = 0
+  </div>
+</div>
+
+<!-- ================ 조정내역 관리 ================ -->
+<div class="main-card">
+  <div class="card-head">
+    ③ 조정내역 관리
+    <span class="sub">수동등록 조정 · 지급-연결정보(자동) · 상계연결 매핑</span>
+  </div>
+  <div class="ledger-wrap">
+    <table class="payout-tbl">
+      <thead>
+        <tr>
+          <th>등록방식</th>
+          <th>등록일</th>
+          <th>구분</th>
+          <th>조정번호</th>
+          <th>상계연결</th>
+          <th>발생</th>
+          <th>회수</th>
+          <th>잔액</th>
+          <th>발생일자</th>
+          <th>회수일자</th>
+          <th>메모</th>
+          <th>지급상태</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td class="label">수동등록</td>
+          <td>2024-10-01</td><td>조정</td><td>1조정</td><td>—</td>
+          <td style="color:#cf1322;">-55,000</td><td>—</td>
+          <td style="font-weight:600;">-55,000</td>
+          <td>2024-10-01</td><td>—</td>
+          <td class="label" style="font-size:10px;">발생만 등록</td>
+          <td><span class="payout-status ps-pending">지급대기</span></td>
+        </tr>
+        <tr>
+          <td class="label">수동등록</td>
+          <td>2024-10-01</td><td>조정</td><td>2조정</td><td>—</td>
+          <td style="color:#cf1322;">-55,000</td><td>—</td>
+          <td style="font-weight:600;">-110,000</td>
+          <td>2024-10-01</td><td>—</td>
+          <td class="label" style="font-size:10px;">발생만 등록</td>
+          <td><span class="payout-status ps-pending">지급대기</span></td>
+        </tr>
+        <tr>
+          <td class="label">수동등록</td>
+          <td>2024-10-01</td><td>조정</td><td>3조정</td><td>—</td>
+          <td style="color:#237804;">+55,000</td><td>—</td>
+          <td style="font-weight:600;">-55,000</td>
+          <td>2024-10-01</td><td>—</td>
+          <td class="label" style="font-size:10px;">양수 조정</td>
+          <td><span class="payout-status ps-pending">지급대기</span></td>
+        </tr>
+        <tr style="background:#f0fdf9;">
+          <td class="label">지급-연결정보</td>
+          <td>2024-10-03</td><td>조정</td><td>1조정</td>
+          <td style="color:#0958d9;font-weight:600;">예약1 지급1</td>
+          <td>—</td><td style="color:#cf1322;">-55,000</td>
+          <td style="font-weight:600;">0</td>
+          <td>—</td><td>2024-10-03</td>
+          <td class="label" style="font-size:10px;">예약1과 상계</td>
+          <td><span class="payout-status ps-complete">지급완료</span></td>
+        </tr>
+        <tr style="background:#f0fdf9;">
+          <td class="label">지급-연결정보</td>
+          <td>2024-10-03</td><td>조정</td><td>2조정</td>
+          <td style="color:#0958d9;font-weight:600;">예약1 지급1</td>
+          <td>—</td><td style="color:#cf1322;">-55,000</td>
+          <td style="font-weight:600;">+55,000</td>
+          <td>—</td><td>2024-10-03</td>
+          <td class="label" style="font-size:10px;">예약1과 상계</td>
+          <td><span class="payout-status ps-complete">지급완료</span></td>
+        </tr>
+        <tr style="background:#f0fdf9;">
+          <td class="label">지급-연결정보</td>
+          <td>2024-10-03</td><td>조정</td><td>3조정</td>
+          <td style="color:#0958d9;font-weight:600;">예약1 지급1</td>
+          <td>—</td><td style="color:#237804;">+55,000</td>
+          <td style="font-weight:600;">0</td>
+          <td>—</td><td>2024-10-03</td>
+          <td class="label" style="font-size:10px;">예약1과 상계</td>
+          <td><span class="payout-status ps-complete">지급완료</span></td>
+        </tr>
+        <tr>
+          <td class="label">수동등록</td>
+          <td>2024-10-03</td><td>조정</td><td>4조정</td><td>—</td>
+          <td style="color:#cf1322;">-1,000,000</td><td>—</td>
+          <td style="font-weight:600;">-1,000,000</td>
+          <td>2024-10-03</td><td>—</td>
+          <td class="label" style="font-size:10px;">대규모 조정</td>
+          <td><span class="payout-status ps-pending">지급대기</span></td>
+        </tr>
+        <tr style="background:#f0fdf9;">
+          <td class="label">지급-연결정보</td>
+          <td>2024-10-10</td><td>조정</td><td>4조정</td>
+          <td style="color:#0958d9;font-weight:600;">예약2 지급2</td>
+          <td>—</td><td style="color:#cf1322;">-1,000,000</td>
+          <td style="font-weight:600;">0</td>
+          <td>—</td><td>2024-10-10</td>
+          <td class="label" style="font-size:10px;">예약2와 상계 완료</td>
+          <td><span class="payout-status ps-complete">지급완료</span></td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+  <div class="foot-note">
+    <strong>조정 처리 흐름</strong>:
+    ① <code>수동등록</code> 조정 (금액 발생, 지급대기 상태) →
+    ② 어느 예약과 상계할지 결정 →
+    ③ <code>지급-연결정보</code> 자동 생성 (상계연결에 예약 명시) →
+    ④ 예약의 지급단위와 함께 지급완료로 전환.
+    <br><strong>N:M 관계</strong>: 1건의 조정이 여러 예약과 상계될 수 있고, 1건의 예약이 여러 조정과 매핑될 수 있음. 별도 매핑 테이블(예: base_payment) 필요.
+  </div>
+</div>
+
+<!-- ================ 정책 요약 ================ -->
+<div class="policy-card">
+  <div class="card-head">
+    ④ 상문님 v2 정책 요약 (실무 정리)
+  </div>
+  <div class="policy-list">
+    <ol style="list-style-position:inside;">
+      <li><strong>정산기준금액에서 트립할인은 뺴지 않는다.</strong> 여행사 입장에서는 여행사 부담 할인만 뺀 값이 정산 base가 됨. 트립할인은 나중에 "공제금액"으로 여행사에게 되돌려주는 컨셉.</li>
+      <li><strong>공제금액 = 서비스이용료 + 회사부담할인 (트립할인).</strong> 트립할인이 더 크면 공제금액이 양수가 되어 <em>여행사에 더 지급됨</em>.</li>
+      <li><strong>정산금액 = 정산기준금액 + 공제금액</strong> — 이 값이 여행사가 실제 받는 금액.</li>
+      <li><strong>세금계산서금액 = max(0, 서비스이용료 - 회사비용).</strong> 회사가 매출보다 비용이 더 크면 <em>세법상 0원 처리</em> (예약4).</li>
+      <li><strong>위약금은 별도 수수료율 3.30%</strong> 적용 (일반 예약 8.80%와 별도).</li>
+      <li><strong>지급 상태 5단계</strong>: <span class="payout-status ps-pending">지급대기</span> → <span class="payout-status ps-request">지급요청</span> → <span class="payout-status ps-complete">지급완료</span> · <span class="payout-status ps-defer">지급이월</span> (사유 기재) · <span class="payout-status ps-fail">지급실패</span> (1안 재요청 / 2안 이월처리)</li>
+      <li><strong>지급실패 → 이월 전환</strong>은 운영자가 사유 확인 후 수동 처리. 자동 재요청 아님.</li>
+      <li><strong>조정 ↔ 예약 관계는 N:M</strong>. 별도 매핑 테이블 필요 (base_payment 같은 연결정보).</li>
+      <li><strong>취소 시 예약1-1 자동 생성</strong> — 원본 예약과 반대부호로 지급원장에 append.</li>
+    </ol>
+  </div>
+</div>
+
+<!-- ================ 검산 ================ -->
+<div class="checksum-card">
+  <div class="lab">검산식 (상문님 시뮬레이터 시트 [49] 검산 row 재현)</div>
+  <div class="check-grid">
     <div>
       <div style="font-weight:700;color:#237804;margin-bottom:4px;">고객 (단일식)</div>
-      <div class="eq">고객 손익 합계 + 고객 자금 합계 = 0</div>
-      <div style="font-size:11px;color:rgba(0,0,0,.55);margin-top:2px;">미수·초과수납 0 검증. 중간 상태에서도 성립</div>
+      <div class="eq">고객 손익 합계 + 고객 자금 합계 = -1,120,000 + 1,120,000 = <strong>0</strong></div>
+      <div style="font-size:11px;color:rgba(0,0,0,.55);margin-top:2px;">미수·초과수납 없음 ✅</div>
     </div>
     <div>
-      <div style="font-weight:700;color:#237804;margin-bottom:4px;">사업주체 (결산 후)</div>
-      <div class="eq">채널 / 플랫폼 / 여행사 / PG 자금 잔액 = 0</div>
-      <div style="font-size:11px;color:rgba(0,0,0,.55);margin-top:2px;">9xxx 결산 출금 완료 후에만 성립. 손익은 0으로 닫지 않음</div>
+      <div style="font-weight:700;color:#237804;margin-bottom:4px;">모든 사업주체 자금잔액 (결산 후)</div>
+      <div class="eq">채널 / 플랫폼 / 여행사 / PG 자금잔액 = <strong>모두 0</strong></div>
+      <div style="font-size:11px;color:rgba(0,0,0,.55);margin-top:2px;">9xxx 결산 완료 상태 ✅</div>
     </div>
     <div>
-      <div style="font-weight:700;color:#237804;margin-bottom:4px;">전체 손익 (완전 closure)</div>
-      <div class="eq">고객 손익 + 사업주체 손익 = 0</div>
-      <div style="font-size:11px;color:rgba(0,0,0,.55);margin-top:2px;">경제적 사건이 모두 원장에 기록된 예약에서만 성립</div>
+      <div style="font-weight:700;color:#237804;margin-bottom:4px;">사업주체 손익 잔액</div>
+      <div class="eq">채널 +12,400 · 플랫폼 +26,480 · 여행사 +1,080,000 · PG +1,120</div>
+      <div style="font-size:11px;color:rgba(0,0,0,.55);margin-top:2px;">각 주체의 경제적 결과 (손익은 0으로 닫지 않음)</div>
     </div>
     <div>
-      <div style="font-weight:700;color:#cf1322;margin-bottom:4px;">중간 상태 (정상)</div>
-      <div style="font-size:11px;color:rgba(0,0,0,.65);">정산 전: PG 자금잔액 보유 정상<br>플랫폼이 채널/PG수수료 미지급: 플랫폼 자금 잔액 보유 정상<br>세금·외부비용·반올림: 별도 시스템 분리 시 손익 총합 차이 정상 (운영 리포트 설명)</div>
+      <div style="font-weight:700;color:#cf1322;margin-bottom:4px;">⚠️ 이건 시뮬레이터 특수 케이스</div>
+      <div style="font-size:11px;color:rgba(0,0,0,.65);">시뮬레이터는 취소 + 정산 + 결산을 동시에 나열해 각 코드의 의미를 보여주기 위한 것. 실제로는 취소 케이스와 정상 케이스는 mutually exclusive.</div>
     </div>
   </div>
-  <div class="ok" style="margin-top:10px;">✓ 본 예시 예약은 결산 완료 단계 = 모든 자금 0</div>
 </div>
-
-<script>
-document.querySelectorAll('.src-row').forEach(row => {
-  row.addEventListener('click', () => {
-    document.querySelectorAll('.src-row').forEach(r => r.classList.remove('active'));
-    document.querySelectorAll('.ledger tbody tr').forEach(r => r.classList.remove('hl'));
-    row.classList.add('active');
-    const target = row.dataset.target;
-    document.querySelectorAll(`.ledger tbody tr[data-src="${target}"]`).forEach(r => r.classList.add('hl'));
-    const first = document.querySelector(`.ledger tbody tr[data-src="${target}"]`);
-    if (first) first.scrollIntoView({behavior:'smooth', block:'center'});
-  });
-});
-</script>
 
 </body>
 </html>
