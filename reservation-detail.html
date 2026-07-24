@@ -430,11 +430,11 @@
       </div>
       <div class="section-body">
 
-        <!-- PR #217 반영 안내 -->
+        <!-- 항목 통합형 UI 안내 (PR #217 대비 개선안) -->
         <div class="pr217-banner">
-          <strong>PR #217 반영</strong> — 추가 할인금액을 <strong>여행사·트립·채널</strong> 3주체로 나누고, 각 주체별 <strong>+/− 원장 누적</strong> 방식으로 관리합니다.
-          음수 커스텀 할인 이력이 있어도 이후 양수 커스텀 할인을 계속 적용할 수 있습니다.
-          (기존 오류 <code>reservations.error.internalError · 음수 커스텀 할인 이력이 있는 예약은 자동 보정할 수 없습니다</code> 자동 보정 로직 제거)
+          <strong>항목 통합형 UI</strong> — 추가 할인금액은 <strong>여행사 금액 조정 / 트립 금액 조정 / 채널 금액 조정</strong> 3개 항목으로 관리.
+          각 항목마다 <code>+/−</code> 부호와 금액을 입력하면 BE가 부호에 따라 원장 코드를 자동 라우팅합니다 (<code>+</code> → 2100~2102 커스텀할인 신규 · <code>−</code> → 3100~3102 커스텀할인취소).
+          <br>PR #217 대비 개선: <strong>양수/음수 UI 분리 없이 한 카드에서 통합 처리</strong>, 자동 보정 로직 제거로 음수 이력 후에도 양수 항목을 계속 누적 가능.
         </div>
 
         <div class="rsv-info-grid">
@@ -483,49 +483,56 @@
 
             <!-- 커스텀 할인 수정 패널 (수정하기 클릭 시 오픈) -->
             <div class="disc-edit-panel" id="disc-edit-panel">
-              <div class="panel-title">🛠 커스텀 할인 추가/차감 <span style="font-weight:400;font-size:10.5px;color:#a16207;margin-left:4px;">— 저장 시 각 주체별 원장 1건이 신규 기록됩니다 (누적 방식)</span></div>
-              <div class="disc-input-row">
-                <span class="sub-lbl">ㄴ 여행사</span>
-                <select class="sign-select plus" id="edit-sign-agency" onchange="updateSignColor(this);previewDiscTotal()">
+              <div class="panel-title">🛠 커스텀 할인 항목 조정 <span style="font-weight:400;font-size:10.5px;color:#a16207;margin-left:4px;">— 주체별 항목 3개. 저장 시 각 항목당 원장 1건 신규 기록 (누적)</span></div>
+
+              <!-- 항목 1: 여행사 -->
+              <div class="disc-input-row" style="grid-template-columns:110px 55px 130px 1fr 30px;gap:6px;">
+                <span class="sub-lbl" style="padding-left:0;font-weight:600;color:#333;">여행사</span>
+                <select class="sign-select plus" id="edit-sign-agency" onchange="onSignChange('agency')">
                   <option value="+">+</option><option value="-">−</option>
                 </select>
                 <input type="number" class="amt-input" id="edit-amt-agency" value="0" min="0" oninput="previewDiscTotal()">
+                <select id="edit-reason-agency" class="reason-select" style="padding:6px 10px;border:1px solid #d0d0d0;border-radius:6px;font-size:11.5px;background:#fff;">
+                  <!-- JS로 부호에 따라 옵션 채움 -->
+                </select>
                 <span style="font-size:11px;color:#666;">원</span>
               </div>
-              <div class="disc-input-row">
-                <span class="sub-lbl">ㄴ 트립</span>
-                <select class="sign-select plus" id="edit-sign-trip" onchange="updateSignColor(this);previewDiscTotal()">
+
+              <!-- 항목 2: 트립 (사유 자동) -->
+              <div class="disc-input-row" style="grid-template-columns:110px 55px 130px 1fr 30px;gap:6px;">
+                <span class="sub-lbl" style="padding-left:0;font-weight:600;color:#333;">트립 <span style="font-size:10px;font-weight:400;color:#888;">(플랫폼)</span></span>
+                <select class="sign-select plus" id="edit-sign-trip" onchange="onSignChange('trip')">
                   <option value="+">+</option><option value="-">−</option>
                 </select>
                 <input type="number" class="amt-input" id="edit-amt-trip" value="0" min="0" oninput="previewDiscTotal()">
+                <div id="auto-reason-trip" style="padding:6px 10px;background:#f5f5f5;border:1px dashed #d0d0d0;border-radius:6px;font-size:11px;color:#666;">자동: 커스텀할인(플랫폼) · <code style="background:#fce4ec;color:#880e4f;padding:1px 4px;border-radius:2px;">2101</code></div>
                 <span style="font-size:11px;color:#666;">원</span>
               </div>
-              <div class="disc-input-row">
-                <span class="sub-lbl">ㄴ 채널</span>
-                <select class="sign-select plus" id="edit-sign-channel" onchange="updateSignColor(this);previewDiscTotal()">
+
+              <!-- 항목 3: 채널 (사유 자동) -->
+              <div class="disc-input-row" style="grid-template-columns:110px 55px 130px 1fr 30px;gap:6px;">
+                <span class="sub-lbl" style="padding-left:0;font-weight:600;color:#333;">채널</span>
+                <select class="sign-select plus" id="edit-sign-channel" onchange="onSignChange('channel')">
                   <option value="+">+</option><option value="-">−</option>
                 </select>
                 <input type="number" class="amt-input" id="edit-amt-channel" value="0" min="0" oninput="previewDiscTotal()">
+                <div id="auto-reason-channel" style="padding:6px 10px;background:#f5f5f5;border:1px dashed #d0d0d0;border-radius:6px;font-size:11px;color:#666;">자동: 커스텀할인(채널) · <code style="background:#fce4ec;color:#880e4f;padding:1px 4px;border-radius:2px;">2100</code></div>
                 <span style="font-size:11px;color:#666;">원</span>
               </div>
 
-              <!-- 프리뷰 -->
-              <div style="margin-top:10px;padding:8px 10px;background:#fff;border:1px dashed #ffb74d;border-radius:6px;font-size:11.5px;color:#78350f;display:flex;justify-content:space-between;">
-                <span>저장 후 예상 <strong>추가 할인금액 합계</strong></span>
-                <span style="font-family:monospace;font-weight:700;" id="disc-preview-sum">0</span>
+              <!-- 원장 라우팅 안내 -->
+              <div style="margin-top:10px;padding:8px 10px;background:#fff;border:1px dashed #ffb74d;border-radius:6px;font-size:10.5px;color:#78350f;line-height:1.65;">
+                <strong>원장 라우팅 규칙</strong><br>
+                · <strong>여행사 +</strong>: 사유 선택 → <code style="background:#fce4ec;color:#880e4f;padding:1px 4px;border-radius:2px;">2102</code> 커스텀할인(여행사)<br>
+                · <strong>여행사 −</strong>: 사유 2택 → <code style="background:#e8eaf6;color:#283593;padding:1px 4px;border-radius:2px;">1010</code> 추가비용 <em>or</em> <code style="background:#ffebee;color:#c62828;padding:1px 4px;border-radius:2px;">3102</code> 커스텀할인취소(여행사)<br>
+                · <strong>트립 +/−</strong>: 자동 → <code style="background:#fce4ec;color:#880e4f;padding:1px 4px;border-radius:2px;">2101</code> / <code style="background:#ffebee;color:#c62828;padding:1px 4px;border-radius:2px;">3101</code><br>
+                · <strong>채널 +/−</strong>: 자동 → <code style="background:#fce4ec;color:#880e4f;padding:1px 4px;border-radius:2px;">2100</code> / <code style="background:#ffebee;color:#c62828;padding:1px 4px;border-radius:2px;">3100</code>
               </div>
 
-              <div class="reason-row">
-                <label>사유 <span style="color:#d32f2f;">*</span> · 원장 memo에 기록됩니다</label>
-                <select id="edit-reason" onchange="toggleReasonEtc()" style="width:100%;padding:7px 10px;border:1px solid #d0d0d0;border-radius:6px;font-size:12px;background:#fff;">
-                  <option value="">-- 사유를 선택하세요 --</option>
-                  <option value="추가비용 발생(엑스트라베드 등)">추가비용 발생(엑스트라베드 등)</option>
-                  <option value="커스텀 할인취소">커스텀 할인취소</option>
-                  <option value="할인금액 조정(고객 취소)">할인금액 조정(고객 취소)</option>
-                  <option value="고객/응대 대응">고객/응대 대응</option>
-                  <option value="기타">기타</option>
-                </select>
-                <input type="text" id="edit-reason-etc" placeholder="사유를 입력하세요" style="display:none;width:100%;margin-top:6px;padding:7px 10px;border:1px solid #d0d0d0;border-radius:6px;font-size:12px;">
+              <!-- 프리뷰 -->
+              <div style="margin-top:8px;padding:8px 10px;background:#fff;border:1px solid #ffb74d;border-radius:6px;font-size:11.5px;color:#78350f;display:flex;justify-content:space-between;">
+                <span>저장 후 예상 <strong>추가 할인금액 합계</strong> <span style="font-size:10px;color:#a16207;">(추가비용은 청구 증가라 할인 합계 −)</span></span>
+                <span style="font-family:monospace;font-weight:700;" id="disc-preview-sum">0</span>
               </div>
 
               <div class="panel-actions">
@@ -569,8 +576,8 @@
                 <th>일시</th>
                 <th>주체</th>
                 <th class="text-center" style="width:50px;">부호</th>
-                <th class="text-right">금액</th>
-                <th>사유</th>
+                <th class="text-right">금액 (원장)</th>
+                <th>항목</th>
                 <th>운영자</th>
                 <th style="width:80px;">원장코드</th>
               </tr>
@@ -581,33 +588,34 @@
                 <td>여행사</td>
                 <td class="text-center"><span class="sign-badge sign-plus">+</span></td>
                 <td class="text-right text-mono" style="color:#1565c0;">15,000</td>
-                <td>2차 회원 프로모션</td>
+                <td>여행사 금액 조정</td>
                 <td>김서현</td>
-                <td><code style="font-size:10px;background:#fce4ec;color:#880e4f;padding:1px 5px;border-radius:3px;">2091</code></td>
+                <td><code style="font-size:10px;background:#fce4ec;color:#880e4f;padding:1px 5px;border-radius:3px;">2102</code></td>
               </tr>
               <tr>
                 <td>2026-07-24 14:18</td>
                 <td>여행사</td>
                 <td class="text-center"><span class="sign-badge sign-minus">−</span></td>
-                <td class="text-right text-mono" style="color:#d32f2f;">-15,000</td>
-                <td>중복 적용 취소 <span style="font-size:10px;background:#ffebee;color:#c62828;padding:1px 5px;border-radius:3px;margin-left:4px;">음수 커스텀</span></td>
+                <td class="text-right text-mono" style="color:#d32f2f;">15,000</td>
+                <td>여행사 금액 조정 <span style="font-size:10px;background:#ffebee;color:#c62828;padding:1px 5px;border-radius:3px;margin-left:4px;">차감</span></td>
                 <td>김서현</td>
-                <td><code style="font-size:10px;background:#ffebee;color:#c62828;padding:1px 5px;border-radius:3px;">2191</code></td>
+                <td><code style="font-size:10px;background:#ffebee;color:#c62828;padding:1px 5px;border-radius:3px;">3102</code></td>
               </tr>
               <tr style="background:#fffbeb;">
                 <td>2026-07-24 15:35</td>
                 <td>여행사</td>
                 <td class="text-center"><span class="sign-badge sign-plus">+</span></td>
                 <td class="text-right text-mono" style="color:#1565c0;">10,000</td>
-                <td>이후 재적용 <span style="font-size:10px;background:#dcfce7;color:#166534;padding:1px 5px;border-radius:3px;margin-left:4px;">PR #217 이전엔 여기서 오류</span></td>
+                <td>여행사 금액 조정 <span style="font-size:10px;background:#dcfce7;color:#166534;padding:1px 5px;border-radius:3px;margin-left:4px;">PR #217 이전엔 여기서 오류</span></td>
                 <td>김서현</td>
-                <td><code style="font-size:10px;background:#fce4ec;color:#880e4f;padding:1px 5px;border-radius:3px;">2091</code></td>
+                <td><code style="font-size:10px;background:#fce4ec;color:#880e4f;padding:1px 5px;border-radius:3px;">2102</code></td>
               </tr>
             </tbody>
           </table>
           <div class="disc-history-note">
-            ※ <strong>자동 보정 로직 제거</strong> — 음수·양수 원장이 시간 순으로 누적되며, 최종 합계가 <strong>추가 할인금액</strong>에 반영됩니다.<br>
-            ※ 원장 코드: <code style="font-size:10px;background:#fce4ec;color:#880e4f;padding:1px 5px;border-radius:3px;">2091/2092/2093</code> = 커스텀 할인(여행사/트립/채널), <code style="font-size:10px;background:#ffebee;color:#c62828;padding:1px 5px;border-radius:3px;">2191/2192/2193</code> = 커스텀 할인 취소.
+            ※ 원장 금액은 항상 <strong>양수</strong>로 기록되며, 방향은 원장 코드가 표현합니다. UI의 부호(+/−)는 BE 라우팅 스위치 역할.<br>
+            ※ 원장 코드 매핑 — <code style="font-size:10px;background:#fce4ec;color:#880e4f;padding:1px 5px;border-radius:3px;">2100/2101/2102</code> 커스텀할인(채널/플랫폼/여행사) · <code style="font-size:10px;background:#ffebee;color:#c62828;padding:1px 5px;border-radius:3px;">3100/3101/3102</code> 커스텀할인취소(채널/플랫폼/여행사).<br>
+            ※ 자동 보정 로직 없음 — 각 항목별 원장이 시간 순으로 누적되며, 최종 합계 = Σ(2xxx) − Σ(3xxx)가 추가 할인금액에 반영됩니다.
           </div>
         </div>
 
@@ -5724,7 +5732,12 @@ function toggleDiscEdit(){
   btn.innerHTML = open
     ? '<span class="feature-tag" style="background:#fff;color:#78350f;">닫기</span> 수정 취소'
     : '<span class="feature-tag" style="background:#e3f2fd;color:#1565c0;">신규</span> 커스텀 할인 수정하기';
-  if (open) previewDiscTotal();
+  if (open) {
+    refreshAgencyReasonOptions();
+    refreshAutoReasonHint('trip');
+    refreshAutoReasonHint('channel');
+    previewDiscTotal();
+  }
 }
 function cancelDiscEdit(){
   ['agency','trip','channel'].forEach(k=>{
@@ -5732,74 +5745,131 @@ function cancelDiscEdit(){
     const s = document.getElementById('edit-sign-'+k);
     s.value = '+'; updateSignColor(s);
   });
-  document.getElementById('edit-reason').value = '';
-  const etc = document.getElementById('edit-reason-etc');
-  etc.value = ''; etc.style.display = 'none';
+  refreshAgencyReasonOptions();
   toggleDiscEdit();
-}
-function toggleReasonEtc(){
-  const sel = document.getElementById('edit-reason');
-  const etc = document.getElementById('edit-reason-etc');
-  etc.style.display = (sel.value === '기타') ? 'block' : 'none';
-  if (sel.value !== '기타') etc.value = '';
 }
 function getEditDelta(k){
   const sign = document.getElementById('edit-sign-'+k).value;
   const amt = parseInt(document.getElementById('edit-amt-'+k).value||0,10) || 0;
   return (sign === '−' || sign === '-') ? -amt : amt;
 }
+/* 여행사 사유 옵션 (부호에 따라 동적 변경) */
+const AGENCY_REASON_PLUS = [
+  { value:'2102|할인조정',        label:'할인조정 (2102)' },
+  { value:'2102|프로모션 재적용',  label:'프로모션 재적용 (2102)' },
+  { value:'2102|파트너 정산 반영', label:'파트너 정산 반영 (2102)' },
+  { value:'2102|고객/응대 대응',   label:'고객/응대 대응 (2102)' },
+  { value:'2102|기타',            label:'기타 (2102)' }
+];
+const AGENCY_REASON_MINUS = [
+  { value:'1010|추가비용 발생(엑스트라베드 등)', label:'추가비용 발생(엑스트라베드 등) → 1010' },
+  { value:'3102|커스텀 할인취소(여행사)',         label:'커스텀 할인취소(여행사) → 3102' }
+];
+function refreshAgencyReasonOptions(){
+  const sign = document.getElementById('edit-sign-agency').value;
+  const isPlus = (sign === '+');
+  const sel = document.getElementById('edit-reason-agency');
+  const opts = isPlus ? AGENCY_REASON_PLUS : AGENCY_REASON_MINUS;
+  sel.innerHTML = opts.map(o=>`<option value="${o.value}">${o.label}</option>`).join('');
+}
+function refreshAutoReasonHint(subj){
+  const sign = document.getElementById('edit-sign-'+subj).value;
+  const isPlus = (sign === '+');
+  const codeMap = { trip:['2101','3101','플랫폼'], channel:['2100','3100','채널'] };
+  const [pc,mc,label] = codeMap[subj];
+  const code = isPlus ? pc : mc;
+  const kind = isPlus ? '커스텀할인' : '커스텀할인취소';
+  const bg = isPlus ? '#fce4ec' : '#ffebee';
+  const fg = isPlus ? '#880e4f' : '#c62828';
+  document.getElementById('auto-reason-'+subj).innerHTML =
+    `자동: ${kind}(${label}) · <code style="background:${bg};color:${fg};padding:1px 4px;border-radius:2px;">${code}</code>`;
+}
+function onSignChange(subj){
+  const s = document.getElementById('edit-sign-'+subj);
+  updateSignColor(s);
+  if (subj === 'agency') refreshAgencyReasonOptions();
+  else refreshAutoReasonHint(subj);
+  previewDiscTotal();
+}
 function previewDiscTotal(){
-  const dA = getEditDelta('agency');
+  // 여행사: 추가비용(1010)은 청구 증가 → 할인 합계에서 마이너스로 반영
+  //         커스텀할인취소(3102)는 그냥 할인 차감
+  const dA = getAgencyDelta();
   const dT = getEditDelta('trip');
   const dC = getEditDelta('channel');
   const nextExtra = DISC_STATE.agency + DISC_STATE.trip + DISC_STATE.channel + dA + dT + dC;
   document.getElementById('disc-preview-sum').textContent = nextExtra.toLocaleString();
 }
+function getAgencyDelta(){
+  const sign = document.getElementById('edit-sign-agency').value;
+  const amt = parseInt(document.getElementById('edit-amt-agency').value||0,10) || 0;
+  if (amt === 0) return 0;
+  if (sign === '+') return amt;
+  // 음수: 추가비용(1010)이든 커스텀할인취소(3102)든, 결과적으로 할인 총합에서 차감
+  return -amt;
+}
 function applyDiscEdit(){
-  const reasonSel = document.getElementById('edit-reason').value;
-  if (!reasonSel) { alert('사유를 선택하세요. (원장 memo 필수)'); return; }
-  let reason = reasonSel;
-  if (reasonSel === '기타') {
-    const etc = document.getElementById('edit-reason-etc').value.trim();
-    if (!etc) { alert('기타 사유를 입력하세요.'); return; }
-    reason = '기타: ' + etc;
-  }
-  const deltas = {
-    agency: getEditDelta('agency'),
-    trip:   getEditDelta('trip'),
-    channel:getEditDelta('channel')
-  };
-  if (deltas.agency===0 && deltas.trip===0 && deltas.channel===0){
+  const agencySign = document.getElementById('edit-sign-agency').value;
+  const agencyAmt  = parseInt(document.getElementById('edit-amt-agency').value||0,10) || 0;
+  const tripDelta = getEditDelta('trip');
+  const channelDelta = getEditDelta('channel');
+
+  if (agencyAmt===0 && tripDelta===0 && channelDelta===0){
     alert('변동 금액이 0원입니다.'); return;
   }
-  const ledgerCodeMap = { agency:['2091','2191'], trip:['2092','2192'], channel:['2093','2193'] };
-  const subjLabel = { agency:'여행사', trip:'트립', channel:'채널' };
+
   const now = new Date();
   const ts = now.getFullYear()+'-'+String(now.getMonth()+1).padStart(2,'0')+'-'+String(now.getDate()).padStart(2,'0')+' '+String(now.getHours()).padStart(2,'0')+':'+String(now.getMinutes()).padStart(2,'0');
   const tbody = document.getElementById('disc-history-tbody');
-  ['agency','trip','channel'].forEach(k=>{
-    const d = deltas[k];
+
+  const rows = [];
+
+  // ---- 여행사 (사유 선택 기반 코드 라우팅) ----
+  if (agencyAmt !== 0) {
+    const [code, reasonLabel] = document.getElementById('edit-reason-agency').value.split('|');
+    const isPlus = (agencySign === '+');
+    const isExtraCharge = (code === '1010');
+    // 원장 금액은 항상 양수, 방향은 코드로 표현
+    rows.push({
+      subj:'여행사', sign:isPlus?'+':'−', amt:agencyAmt, code,
+      item:reasonLabel + (isExtraCharge?' (추가비용 · 청구 증가)':''),
+      // DISC_STATE 합산: + → 할인 +, − → 할인 −
+      delta: isPlus ? agencyAmt : -agencyAmt,
+      stateKey:'agency'
+    });
+  }
+
+  // ---- 트립 / 채널 (부호 → 자동 코드) ----
+  [['trip', tripDelta, {plus:['2101','커스텀할인(플랫폼)'], minus:['3101','커스텀할인취소(플랫폼)']}, '트립'],
+   ['channel', channelDelta, {plus:['2100','커스텀할인(채널)'], minus:['3100','커스텀할인취소(채널)']}, '채널']]
+  .forEach(([k, d, m, subj])=>{
     if (d === 0) return;
-    DISC_STATE[k] += d;
     const isPlus = d > 0;
-    const code = isPlus ? ledgerCodeMap[k][0] : ledgerCodeMap[k][1];
-    const codeBg = isPlus ? '#fce4ec' : '#ffebee';
-    const codeFg = isPlus ? '#880e4f' : '#c62828';
+    const [code, item] = isPlus ? m.plus : m.minus;
+    rows.push({ subj, sign:isPlus?'+':'−', amt:Math.abs(d), code, item, delta:d, stateKey:k });
+  });
+
+  rows.forEach(r=>{
+    DISC_STATE[r.stateKey] += r.delta;
+    const isPlus = (r.sign === '+');
+    const codeBg = r.code.startsWith('2') ? '#fce4ec' : (r.code === '1010' ? '#e8eaf6' : '#ffebee');
+    const codeFg = r.code.startsWith('2') ? '#880e4f' : (r.code === '1010' ? '#283593' : '#c62828');
     const tr = document.createElement('tr');
     tr.style.background = '#f0fdf4';
     tr.innerHTML = `
       <td>${ts}</td>
-      <td>${subjLabel[k]}</td>
-      <td class="text-center"><span class="sign-badge ${isPlus?'sign-plus':'sign-minus'}">${isPlus?'+':'−'}</span></td>
-      <td class="text-right text-mono" style="color:${isPlus?'#1565c0':'#d32f2f'};">${d.toLocaleString()}</td>
-      <td>${reason} <span style="font-size:10px;background:#dcfce7;color:#166534;padding:1px 5px;border-radius:3px;margin-left:4px;">신규 저장</span></td>
+      <td>${r.subj}</td>
+      <td class="text-center"><span class="sign-badge ${isPlus?'sign-plus':'sign-minus'}">${r.sign}</span></td>
+      <td class="text-right text-mono" style="color:${isPlus?'#1565c0':'#d32f2f'};">${r.amt.toLocaleString()}</td>
+      <td>${r.item} <span style="font-size:10px;background:#dcfce7;color:#166534;padding:1px 5px;border-radius:3px;margin-left:4px;">신규 저장</span></td>
       <td>김서현</td>
-      <td><code style="font-size:10px;background:${codeBg};color:${codeFg};padding:1px 5px;border-radius:3px;">${code}</code></td>`;
+      <td><code style="font-size:10px;background:${codeBg};color:${codeFg};padding:1px 5px;border-radius:3px;">${r.code}</code></td>`;
     tbody.appendChild(tr);
   });
+
   redrawDiscSummary();
   cancelDiscEdit();
-  showToast('원장 저장 완료 · 추가 할인이 반영되었습니다.');
+  showToast(`원장 저장 완료 · ${rows.length}건 신규 기록`);
 }
 function redrawDiscSummary(){
   const extraTotal = DISC_STATE.agency + DISC_STATE.trip + DISC_STATE.channel;
