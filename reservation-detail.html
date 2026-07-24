@@ -516,8 +516,18 @@
               </div>
 
               <div class="reason-row">
-                <label>사유 (필수) · 원장 memo에 기록됩니다</label>
-                <input type="text" id="edit-reason" placeholder="예: 프로모션 재적용 / 중복 적용 취소 / 파트너 정산 반영 등">
+                <label>사유 <span style="color:#d32f2f;">*</span> · 원장 memo에 기록됩니다</label>
+                <select id="edit-reason" style="width:100%;padding:7px 10px;border:1px solid #d0d0d0;border-radius:6px;font-size:12px;background:#fff;">
+                  <option value="">-- 사유를 선택하세요 --</option>
+                  <option value="추가비용 발생">추가비용 발생</option>
+                  <option value="프로모션 재적용">프로모션 재적용</option>
+                  <option value="중복 적용 취소">중복 적용 취소</option>
+                  <option value="파트너 정산 반영">파트너 정산 반영</option>
+                  <option value="항공/숙박 요금 변동">항공/숙박 요금 변동</option>
+                  <option value="고객 응대 대응">고객 응대 대응</option>
+                  <option value="오등록 정정">오등록 정정</option>
+                  <option value="기타">기타</option>
+                </select>
               </div>
 
               <div class="panel-actions">
@@ -5724,7 +5734,8 @@ function cancelDiscEdit(){
     const s = document.getElementById('edit-sign-'+k);
     s.value = '+'; updateSignColor(s);
   });
-  document.getElementById('edit-reason').value = '';
+  const r = document.getElementById('edit-reason');
+  r.value = '';
   toggleDiscEdit();
 }
 function getEditDelta(k){
@@ -5740,8 +5751,8 @@ function previewDiscTotal(){
   document.getElementById('disc-preview-sum').textContent = nextExtra.toLocaleString();
 }
 function applyDiscEdit(){
-  const reason = document.getElementById('edit-reason').value.trim();
-  if (!reason) { alert('사유를 입력하세요. (원장 memo 필수)'); return; }
+  const reason = document.getElementById('edit-reason').value;
+  if (!reason) { alert('사유를 선택하세요. (원장 memo 필수)'); return; }
   const deltas = {
     agency: getEditDelta('agency'),
     trip:   getEditDelta('trip'),
