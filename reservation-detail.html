@@ -517,17 +517,15 @@
 
               <div class="reason-row">
                 <label>사유 <span style="color:#d32f2f;">*</span> · 원장 memo에 기록됩니다</label>
-                <select id="edit-reason" style="width:100%;padding:7px 10px;border:1px solid #d0d0d0;border-radius:6px;font-size:12px;background:#fff;">
+                <select id="edit-reason" onchange="toggleReasonEtc()" style="width:100%;padding:7px 10px;border:1px solid #d0d0d0;border-radius:6px;font-size:12px;background:#fff;">
                   <option value="">-- 사유를 선택하세요 --</option>
-                  <option value="추가비용 발생">추가비용 발생</option>
-                  <option value="프로모션 재적용">프로모션 재적용</option>
-                  <option value="중복 적용 취소">중복 적용 취소</option>
-                  <option value="파트너 정산 반영">파트너 정산 반영</option>
-                  <option value="항공/숙박 요금 변동">항공/숙박 요금 변동</option>
-                  <option value="고객 응대 대응">고객 응대 대응</option>
-                  <option value="오등록 정정">오등록 정정</option>
+                  <option value="추가비용 발생(엑스트라베드 등)">추가비용 발생(엑스트라베드 등)</option>
+                  <option value="커스텀 할인취소">커스텀 할인취소</option>
+                  <option value="할인금액 조정(고객 취소)">할인금액 조정(고객 취소)</option>
+                  <option value="고객/응대 대응">고객/응대 대응</option>
                   <option value="기타">기타</option>
                 </select>
+                <input type="text" id="edit-reason-etc" placeholder="사유를 입력하세요" style="display:none;width:100%;margin-top:6px;padding:7px 10px;border:1px solid #d0d0d0;border-radius:6px;font-size:12px;">
               </div>
 
               <div class="panel-actions">
@@ -5734,9 +5732,16 @@ function cancelDiscEdit(){
     const s = document.getElementById('edit-sign-'+k);
     s.value = '+'; updateSignColor(s);
   });
-  const r = document.getElementById('edit-reason');
-  r.value = '';
+  document.getElementById('edit-reason').value = '';
+  const etc = document.getElementById('edit-reason-etc');
+  etc.value = ''; etc.style.display = 'none';
   toggleDiscEdit();
+}
+function toggleReasonEtc(){
+  const sel = document.getElementById('edit-reason');
+  const etc = document.getElementById('edit-reason-etc');
+  etc.style.display = (sel.value === '기타') ? 'block' : 'none';
+  if (sel.value !== '기타') etc.value = '';
 }
 function getEditDelta(k){
   const sign = document.getElementById('edit-sign-'+k).value;
@@ -5751,8 +5756,14 @@ function previewDiscTotal(){
   document.getElementById('disc-preview-sum').textContent = nextExtra.toLocaleString();
 }
 function applyDiscEdit(){
-  const reason = document.getElementById('edit-reason').value;
-  if (!reason) { alert('사유를 선택하세요. (원장 memo 필수)'); return; }
+  const reasonSel = document.getElementById('edit-reason').value;
+  if (!reasonSel) { alert('사유를 선택하세요. (원장 memo 필수)'); return; }
+  let reason = reasonSel;
+  if (reasonSel === '기타') {
+    const etc = document.getElementById('edit-reason-etc').value.trim();
+    if (!etc) { alert('기타 사유를 입력하세요.'); return; }
+    reason = '기타: ' + etc;
+  }
   const deltas = {
     agency: getEditDelta('agency'),
     trip:   getEditDelta('trip'),
