@@ -34,6 +34,7 @@ body { font-family: 'Pretendard', 'Apple SD Gothic Neo', -apple-system, sans-ser
 
 /* PB 관리 멀티컬럼 드롭다운 (스크린샷 재현 + 파트너스 컬럼 추가) */
 .gnb-mega { position: fixed; top: 64px; left: 50%; transform: translateX(-50%); width: min(960px, calc(100vw - 48px)); background: #fff; border-radius: 8px; box-shadow: 0 8px 32px rgba(0,0,0,0.14); display: none; z-index: 300; border: 1px solid #f0f0f0; padding: 24px; }
+.gnb-mega.gnb-mega-sm { width: min(560px, calc(100vw - 48px)); }
 .gnb-item.open .gnb-mega { display: flex; gap: 0; }
 .mega-col { padding: 0 24px; min-width: 180px; border-right: 1px solid #f5f5f5; flex: 1; }
 .mega-col:first-child { padding-left: 0; }
@@ -47,6 +48,7 @@ body { font-family: 'Pretendard', 'Apple SD Gothic Neo', -apple-system, sans-ser
 .mega-item .arrow { margin-left: auto; opacity: 0; transition: opacity 0.15s; font-size: 12px; }
 .mega-item:hover .arrow { opacity: 1; }
 .mega-item.partners-item .icon-lock { font-size: 10px; opacity: 0.5; }
+.mega-item .direct-tag { font-size: 10px; color: #722ed1; background: #f9f0ff; border: 1px solid #d3adf7; padding: 1px 6px; border-radius: 4px; font-weight: 600; margin-left: auto; }
 .mega-col .hint-line { font-size: 10px; color: rgba(0,0,0,0.4); margin-top: 8px; padding-top: 8px; border-top: 1px dashed #efdbff; line-height: 1.5; }
 
 .gnb-right { margin-left: auto; display: flex; align-items: center; gap: 14px; }
@@ -224,7 +226,30 @@ tr:hover td { background: #fafbfc; }
       <div class="gnb-item">페이지 관리 <span class="gnb-caret">▾</span></div>
       <div class="gnb-item">상품관리 <span class="gnb-caret">▾</span></div>
       <div class="gnb-item">태그</div>
-      <div class="gnb-item active">예약 관리 <span class="gnb-caret">▾</span></div>
+      <!-- 예약 관리 (mega 드롭다운 - 파트너스 예약관리 컬럼 포함) -->
+      <div class="gnb-item active" id="resvMenu" onclick="toggleResvMenu(event)">
+        예약 관리 <span class="gnb-caret">▾</span>
+        <div class="gnb-mega gnb-mega-sm" id="resvMega" onclick="event.stopPropagation()">
+          <div class="mega-col">
+            <div class="mega-title">예약 관리</div>
+            <div class="mega-item">전체 예약 <span class="arrow">›</span></div>
+            <div class="mega-item">취소 관리 <span class="arrow">›</span></div>
+            <div class="mega-item">환불 관리 <span class="arrow">›</span></div>
+            <div class="mega-item">예약 검색 <span class="arrow">›</span></div>
+          </div>
+          <div class="mega-col partners-col">
+            <div class="mega-title">
+              <span class="badge-partners">파트너스</span>
+            </div>
+            <div class="mega-item partners-item" onclick="openOrgPicker(event, '예약관리')">
+              📋 예약관리 <span class="direct-tag">파트너 선택</span> <span class="arrow">›</span>
+            </div>
+            <div class="hint-line">
+              파트너를 선택 후 해당 org의 파트너스 예약관리로 이동해요.
+            </div>
+          </div>
+        </div>
+      </div>
 
       <!-- PB 관리 (mega 드롭다운 - 파트너스 컬럼 포함) -->
       <div class="gnb-item" id="pbMenu" onclick="togglePbMenu(event)">
@@ -258,11 +283,11 @@ tr:hover td { background: #fafbfc; }
             <div class="mega-title">
               <span class="badge-partners">파트너스</span>
             </div>
-            <div class="mega-item partners-item" onclick="openOrgPicker(event, '상품관리')">
-              📦 상품관리 <span class="arrow">›</span>
+            <div class="mega-item partners-item" onclick="goTripstorePartners(event)">
+              📦 상품관리 <span class="direct-tag">트립스토어 org</span> <span class="arrow">›</span>
             </div>
             <div class="hint-line">
-              org 선택 후 파트너스 사이트가 새 탭으로 열려요.
+              트립스토어 org의 파트너스 상품관리 페이지가 새 탭으로 바로 열려요.
             </div>
           </div>
         </div>
@@ -299,9 +324,11 @@ tr:hover td { background: #fafbfc; }
     <div class="info-card">
       <div class="info-icon">✨</div>
       <div class="info-body">
-        <h3><code>PB 관리</code> 메뉴 안에 <span class="badge-partners" style="font-size:10px;padding:2px 6px;">파트너스</span> 상품관리 링크가 추가되었어요</h3>
+        <h3><span class="badge-partners" style="font-size:10px;padding:2px 6px;">파트너스</span> 바로가기가 두 곳에 추가되었어요</h3>
         <p>
-          <strong>PB 관리</strong> 클릭 → 드롭다운 우측 <strong>[파트너스] 상품관리</strong> 클릭 → org 선택 → 해당 org의 파트너스 상품관리 페이지가 새 탭으로 열려요.
+          <strong>PB 관리 → 파트너스 상품관리</strong> · <span style="color:#722ed1;font-weight:600;">트립스토어 org 직행</span> (자주 쓰는 자체 org라서 org 선택 스킵)<br>
+          <strong>예약 관리 → 파트너스 예약관리</strong> · <span style="color:#722ed1;font-weight:600;">파트너 선택 필요</span> (여러 파트너 예약을 확인해야 하는 경우)<br>
+          두 경로 모두 새 탭으로 파트너스 사이트가 열려요.
         </p>
       </div>
     </div>
@@ -474,19 +501,29 @@ function setFlowStep(step) {
 
 function togglePbMenu(e) {
   e.stopPropagation();
-  const menu = document.getElementById('pbMenu');
-  menu.classList.toggle('open');
+  document.getElementById('resvMenu').classList.remove('open');
+  document.getElementById('pbMenu').classList.toggle('open');
+}
+
+function toggleResvMenu(e) {
+  e.stopPropagation();
+  document.getElementById('pbMenu').classList.remove('open');
+  document.getElementById('resvMenu').classList.toggle('open');
 }
 
 document.addEventListener('click', (e) => {
   if (!e.target.closest('#pbMenu')) {
     document.getElementById('pbMenu').classList.remove('open');
   }
+  if (!e.target.closest('#resvMenu')) {
+    document.getElementById('resvMenu').classList.remove('open');
+  }
 });
 
 function openOrgPicker(e, menuName) {
   e.stopPropagation();
   document.getElementById('pbMenu').classList.remove('open');
+  document.getElementById('resvMenu').classList.remove('open');
   document.getElementById('modalMenuTitle').textContent = menuName;
   document.getElementById('orgModal').classList.add('show');
   window._selectedMenu = menuName;
@@ -528,14 +565,26 @@ const orgStats = {
 
 function selectOrg(orgName) {
   const code = orgCodes[orgName] || 'org_unknown';
-  const url = `https://partners.tripstore.kr/${code}/products`;
+  const menu = window._selectedMenu || '상품관리';
+  const path = menu === '예약관리' ? 'reservations' : 'products';
+  const url = `https://partners.tripstore.kr/${code}/${path}`;
 
   document.getElementById('orgModal').classList.remove('show');
   setFlowStep(3);
-
-  // 목업: 실제 파트너스 URL을 새 탭으로 여는 대신 알림 표시
   setTimeout(() => {
-    alert(`✅ 새 탭으로 이동합니다\n\n${orgName} (${code})\n→ ${url}`);
+    alert(`✅ 새 탭으로 이동합니다\n\n${orgName} (${code})\n메뉴: 파트너스 ${menu}\n→ ${url}`);
+    setFlowStep(1);
+  }, 200);
+}
+
+// PB 관리 → [파트너스] 상품관리: 트립스토어 org로 바로 이동 (숏컷)
+function goTripstorePartners(e) {
+  e.stopPropagation();
+  document.getElementById('pbMenu').classList.remove('open');
+  const url = 'https://partners.tripstore.kr/org_tripstore/products';
+  setFlowStep(3);
+  setTimeout(() => {
+    alert(`✅ 새 탭으로 이동합니다 (트립스토어 org 직행)\n\n트립스토어 (org_tripstore)\n메뉴: 파트너스 상품관리\n→ ${url}`);
     setFlowStep(1);
   }, 200);
 }
