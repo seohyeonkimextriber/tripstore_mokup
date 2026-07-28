@@ -49,6 +49,10 @@ body { font-family: 'Pretendard', 'Apple SD Gothic Neo', -apple-system, sans-ser
 .mega-item:hover .arrow { opacity: 1; }
 .mega-item.partners-item .icon-lock { font-size: 10px; opacity: 0.5; }
 .mega-item .direct-tag { font-size: 10px; color: #722ed1; background: #f9f0ff; border: 1px solid #d3adf7; padding: 1px 6px; border-radius: 4px; font-weight: 600; margin-left: auto; }
+.mega-divider { height: 1px; background: #f0f0f0; margin: 8px 0; }
+.mega-item.partners-item { color: #531dab; font-weight: 600; }
+.mega-item.partners-item:hover { color: #531dab; background: #faf5ff; margin: 0 -8px; padding-left: 8px; padding-right: 8px; border-radius: 6px; }
+.mega-item.partners-item .badge-partners { font-size: 9px; padding: 2px 5px; margin-right: 6px; }
 .mega-col .hint-line { font-size: 10px; color: rgba(0,0,0,0.4); margin-top: 8px; padding-top: 8px; border-top: 1px dashed #efdbff; line-height: 1.5; }
 
 .gnb-right { margin-left: auto; display: flex; align-items: center; gap: 14px; }
@@ -147,6 +151,28 @@ tr:hover td { background: #fafbfc; }
 .embed-btn:hover { background: rgba(255,255,255,0.18); }
 .embed-btn-ghost { height: 28px; padding: 0 10px; background: transparent; color: rgba(255,255,255,0.75); border: 1px solid rgba(255,255,255,0.15); border-radius: 4px; font-size: 11px; font-weight: 500; cursor: pointer; font-family: inherit; }
 .embed-btn-ghost:hover { background: rgba(255,255,255,0.08); color: #fff; }
+.embed-hint { color: rgba(255,255,255,0.65); font-size: 11px; }
+
+/* 파트너스 로그인 화면 */
+.p-login { min-height: calc(100vh - 64px - 40px - 52px); display: flex; align-items: center; justify-content: center; padding: 40px 20px; background: linear-gradient(135deg, #f0f5ff 0%, #e6f4ff 100%); }
+.p-login-box { background: #fff; border-radius: 16px; padding: 40px 44px; width: 440px; max-width: 100%; box-shadow: 0 20px 60px rgba(24,144,255,0.12); }
+.p-login-header { text-align: center; margin-bottom: 28px; }
+.p-login-brand { font-size: 18px; font-weight: 800; color: #222; margin-bottom: 12px; }
+.p-login-target { font-size: 12px; color: rgba(0,0,0,0.55); background: #f5f5f5; padding: 8px 14px; border-radius: 999px; display: inline-block; }
+.p-login-target strong { color: #1677ff; font-weight: 700; }
+.p-login-form { display: flex; flex-direction: column; gap: 14px; }
+.p-form-row { display: flex; flex-direction: column; gap: 6px; }
+.p-form-row label { font-size: 12px; font-weight: 600; color: rgba(0,0,0,0.75); }
+.p-form-row input { height: 44px; padding: 0 14px; border: 1px solid #d9d9d9; border-radius: 8px; font-size: 14px; outline: none; font-family: inherit; transition: border 0.15s; }
+.p-form-row input:focus { border-color: #1677ff; box-shadow: 0 0 0 3px rgba(22,119,255,0.1); }
+.p-form-check { display: flex; align-items: center; justify-content: space-between; font-size: 12px; }
+.p-form-check label { color: rgba(0,0,0,0.55); display: flex; align-items: center; gap: 6px; cursor: pointer; }
+.p-form-check a { color: #1677ff; text-decoration: none; font-weight: 500; }
+.p-form-check a:hover { text-decoration: underline; }
+.p-login-btn { height: 46px; background: #1677ff; color: #fff; border: none; border-radius: 8px; font-size: 15px; font-weight: 600; cursor: pointer; margin-top: 4px; font-family: inherit; transition: background 0.15s; }
+.p-login-btn:hover { background: #4096ff; }
+.p-login-help { text-align: center; font-size: 12px; color: rgba(0,0,0,0.45); margin-top: 8px; }
+.p-login-help a { color: #1677ff; text-decoration: none; font-weight: 600; }
 
 /* 위임 접속 배너 */
 .impersonation-bar { background: linear-gradient(90deg, #fff7e6 0%, #fffbe6 100%); border-bottom: 2px solid #ffc53d; padding: 10px 24px; display: flex; align-items: center; justify-content: space-between; gap: 16px; font-size: 13px; }
@@ -242,36 +268,13 @@ tr:hover td { background: #fafbfc; }
       <div class="gnb-item">페이지 관리 <span class="gnb-caret">▾</span></div>
       <div class="gnb-item">상품관리 <span class="gnb-caret">▾</span></div>
       <div class="gnb-item">태그</div>
-      <!-- 예약 관리 (mega 드롭다운 - 파트너스 예약관리 컬럼 포함) -->
-      <div class="gnb-item active" id="resvMenu" onclick="toggleResvMenu(event)">
-        예약 관리 <span class="gnb-caret">▾</span>
-        <div class="gnb-mega gnb-mega-sm" id="resvMega" onclick="event.stopPropagation()">
-          <div class="mega-col">
-            <div class="mega-title">예약 관리</div>
-            <div class="mega-item">전체 예약 <span class="arrow">›</span></div>
-            <div class="mega-item">취소 관리 <span class="arrow">›</span></div>
-            <div class="mega-item">환불 관리 <span class="arrow">›</span></div>
-            <div class="mega-item">예약 검색 <span class="arrow">›</span></div>
-          </div>
-          <div class="mega-col partners-col">
-            <div class="mega-title">
-              <span class="badge-partners">파트너스</span>
-            </div>
-            <div class="mega-item partners-item" onclick="openOrgPicker(event, '예약관리')">
-              📋 예약관리 <span class="direct-tag">파트너 선택</span> <span class="arrow">›</span>
-            </div>
-            <div class="hint-line">
-              파트너를 선택 후 해당 org의 파트너스 예약관리로 이동해요.
-            </div>
-          </div>
-        </div>
-      </div>
+      <div class="gnb-item active">예약 관리 <span class="gnb-caret">▾</span></div>
 
-      <!-- PB 관리 (mega 드롭다운 - 파트너스 컬럼 포함) -->
+      <!-- PB 관리 (mega 드롭다운 - 각 컬럼 안에 [파트너스] 임베드 항목 삽입) -->
       <div class="gnb-item" id="pbMenu" onclick="togglePbMenu(event)">
         PB 관리 <span class="gnb-caret">▾</span>
         <div class="gnb-mega" id="pbMega" onclick="event.stopPropagation()">
-          <!-- Col 1: PB 관리 -->
+          <!-- Col 1: PB 관리 (+ [파트너스] 상품관리 / 행사관리) -->
           <div class="mega-col">
             <div class="mega-title">PB 관리</div>
             <div class="mega-item">PB 설정 <span class="arrow">›</span></div>
@@ -280,6 +283,13 @@ tr:hover td { background: #fafbfc; }
             <div class="mega-item">숙박권 관리 <span class="arrow">›</span></div>
             <div class="mega-item">투어·티켓 관리 <span class="arrow">›</span></div>
             <div class="mega-item">PB 콘텐츠 관리 <span class="arrow">›</span></div>
+            <div class="mega-divider"></div>
+            <div class="mega-item partners-item" onclick="openEmbedLogin(event, '상품관리')">
+              <span class="badge-partners">파트너스</span>상품관리 <span class="arrow">›</span>
+            </div>
+            <div class="mega-item partners-item" onclick="openEmbedLogin(event, '행사관리')">
+              <span class="badge-partners">파트너스</span>행사관리 <span class="arrow">›</span>
+            </div>
           </div>
           <!-- Col 2: 연동 관리 -->
           <div class="mega-col">
@@ -287,23 +297,15 @@ tr:hover td { background: #fafbfc; }
             <div class="mega-item">TMG 숙소 요금표 관리 <span class="arrow">›</span></div>
             <div class="mega-item">NUUA 항공권 소싱 <span class="arrow">›</span></div>
           </div>
-          <!-- Col 3: PB 예약관리 -->
+          <!-- Col 3: PB 예약관리 (+ [파트너스] 예약관리) -->
           <div class="mega-col">
             <div class="mega-title">PB 예약관리</div>
             <div class="mega-item">항공권 예약관리 <span class="arrow">›</span></div>
             <div class="mega-item">숙박권 예약관리 <span class="arrow">›</span></div>
             <div class="mega-item">여행자보험 예약관리 <span class="arrow">›</span></div>
-          </div>
-          <!-- Col 4: 파트너스 -->
-          <div class="mega-col partners-col">
-            <div class="mega-title">
-              <span class="badge-partners">파트너스</span>
-            </div>
-            <div class="mega-item partners-item" onclick="goTripstorePartners(event)">
-              📦 상품관리 <span class="direct-tag">트립스토어 org</span> <span class="arrow">›</span>
-            </div>
-            <div class="hint-line">
-              트립스토어 org의 파트너스 상품관리 페이지가 새 탭으로 바로 열려요.
+            <div class="mega-divider"></div>
+            <div class="mega-item partners-item" onclick="openEmbedLogin(event, '예약관리')">
+              <span class="badge-partners">파트너스</span>예약관리 <span class="arrow">›</span>
             </div>
           </div>
         </div>
@@ -340,11 +342,11 @@ tr:hover td { background: #fafbfc; }
     <div class="info-card">
       <div class="info-icon">🖼️</div>
       <div class="info-body">
-        <h3><span class="badge-partners" style="font-size:10px;padding:2px 6px;">파트너스</span> 화면을 어드민 안에서 바로 열 수 있어요 <span style="font-size:11px;color:#722ed1;background:#f9f0ff;border:1px solid #d3adf7;padding:2px 6px;border-radius:4px;margin-left:6px;">임베드 초안</span></h3>
+        <h3>어드민 안에 <span class="badge-partners" style="font-size:10px;padding:2px 6px;">파트너스</span> 화면 3종을 임베드하는 초안이에요 <span style="font-size:11px;color:#722ed1;background:#f9f0ff;border:1px solid #d3adf7;padding:2px 6px;border-radius:4px;margin-left:6px;">iframe 초안</span></h3>
         <p>
-          <strong>PB 관리 → 파트너스 상품관리</strong> · 트립스토어 org 직행 (org 선택 스킵)<br>
-          <strong>예약 관리 → 파트너스 예약관리</strong> · 파트너 선택 후 임베드<br>
-          어드민 GNB는 유지되고, 컨텐츠 영역에 파트너스 화면이 로드돼요. 상단 검정 URL 바에서 <strong>새 탭 열기 / 닫기</strong> 가능.
+          <strong>PB 관리 → PB관리 컬럼</strong> · [파트너스] <strong>상품관리</strong> / [파트너스] <strong>행사관리</strong><br>
+          <strong>PB 관리 → PB 예약관리 컬럼</strong> · [파트너스] <strong>예약관리</strong><br>
+          클릭 → 파트너스 로그인 화면(임베드) → 로그인 → 해당 메뉴 컨텐츠. 상단 검정 띠는 임베드 영역을 시각적으로 구분하는 표시(닫기만 기능).
         </p>
       </div>
     </div>
@@ -377,144 +379,22 @@ tr:hover td { background: #fafbfc; }
   </div>
 </div>
 
-<!-- ================= STATE 2: Org 선택 모달 ================= -->
-<div class="modal-backdrop" id="orgModal">
-  <div class="modal">
-    <div class="modal-header">
-      <div class="modal-header-row">
-        <div>
-          <div class="modal-title">
-            <span class="badge-partners">파트너스</span>
-            <span id="modalMenuTitle">상품관리</span> · 파트너 선택
-          </div>
-          <div class="modal-sub">
-            선택한 org의 파트너스 화면이 <strong>어드민 안에 임베드로 열려요</strong>. (iframe 초안)
-          </div>
-        </div>
-        <button class="btn-close" onclick="closeOrgPicker()">×</button>
-      </div>
-    </div>
-    <div class="modal-body">
-      <div class="modal-search">
-        <input placeholder="org 이름, ID, 사업자번호로 검색..." oninput="filterOrgs(this.value)">
-      </div>
-      <div class="org-list" id="orgList">
-        <div class="org-item" onclick="selectOrg('하나투어')">
-          <div class="org-avatar">HT</div>
-          <div class="org-info">
-            <div class="org-name">하나투어</div>
-            <div class="org-meta">
-              <span>🏢 org_hanatour</span>
-              <span>· 사업자 220-81-XXXXX</span>
-              <span>· 활성 상품 1,204건</span>
-            </div>
-          </div>
-          <div class="org-arrow">›</div>
-        </div>
-        <div class="org-item" onclick="selectOrg('모두투어')">
-          <div class="org-avatar alt-1">MT</div>
-          <div class="org-info">
-            <div class="org-name">모두투어</div>
-            <div class="org-meta">
-              <span>🏢 org_modetour</span>
-              <span>· 사업자 220-81-YYYYY</span>
-              <span>· 활성 상품 892건</span>
-            </div>
-          </div>
-          <div class="org-arrow">›</div>
-        </div>
-        <div class="org-item" onclick="selectOrg('노랑풍선')">
-          <div class="org-avatar alt-2">NR</div>
-          <div class="org-info">
-            <div class="org-name">노랑풍선</div>
-            <div class="org-meta">
-              <span>🏢 org_ybtour</span>
-              <span>· 사업자 220-81-ZZZZZ</span>
-              <span>· 활성 상품 610건</span>
-            </div>
-          </div>
-          <div class="org-arrow">›</div>
-        </div>
-        <div class="org-item" onclick="selectOrg('참좋은여행')">
-          <div class="org-avatar alt-3">CJ</div>
-          <div class="org-info">
-            <div class="org-name">참좋은여행</div>
-            <div class="org-meta">
-              <span>🏢 org_verygood</span>
-              <span>· 사업자 220-81-AAAAA</span>
-              <span>· 활성 상품 458건</span>
-            </div>
-          </div>
-          <div class="org-arrow">›</div>
-        </div>
-        <div class="org-item" onclick="selectOrg('레드캡투어')">
-          <div class="org-avatar alt-4">RC</div>
-          <div class="org-info">
-            <div class="org-name">레드캡투어</div>
-            <div class="org-meta">
-              <span>🏢 org_redcap</span>
-              <span>· 사업자 220-81-BBBBB</span>
-              <span>· 활성 상품 312건</span>
-            </div>
-          </div>
-          <div class="org-arrow">›</div>
-        </div>
-        <div class="org-item" onclick="selectOrg('TMG')">
-          <div class="org-avatar">TM</div>
-          <div class="org-info">
-            <div class="org-name">TMG (베트남)</div>
-            <div class="org-meta">
-              <span>🏢 org_tmg</span>
-              <span>· JV 파트너</span>
-              <span>· 활성 상품 245건</span>
-            </div>
-          </div>
-          <div class="org-arrow">›</div>
-        </div>
-        <div class="org-item" onclick="selectOrg('솔바이멜리아')">
-          <div class="org-avatar alt-2">SB</div>
-          <div class="org-info">
-            <div class="org-name">솔바이멜리아 푸꾸옥</div>
-            <div class="org-meta">
-              <span>🏢 org_solbymelia</span>
-              <span>· 직판</span>
-              <span>· 활성 상품 8건</span>
-            </div>
-          </div>
-          <div class="org-arrow">›</div>
-        </div>
-      </div>
-    </div>
-    <div class="modal-footer">
-      <span class="hint">💡 자주 사용하는 org는 즐겨찾기에 추가할 수 있어요 (예정)</span>
-      <button class="btn btn-default" onclick="closeOrgPicker()">취소</button>
-    </div>
-  </div>
-</div>
-
 <!-- ================= STATE 3: 어드민 안에 임베드된 파트너스 화면 ================= -->
 <div class="embed-shell" id="embedShell">
-  <!-- 임베드 URL 바 -->
+  <!-- 임베드 표시 띠배너 (기능 없음, 시각 구분만) -->
   <div class="embed-bar">
     <div class="embed-left">
       <span class="embed-icon">🖼️</span>
       <span class="embed-label">파트너스 임베드</span>
       <span class="embed-sep">·</span>
-      <span class="embed-org">
-        🏢 <strong id="embedOrgName">트립스토어</strong>
-        <code id="embedOrgCode">org_tripstore</code>
-      </span>
-      <span class="embed-sep">·</span>
-      <span class="embed-url" id="embedUrl">https://partners.tripstore.kr/org_tripstore/products</span>
+      <span class="embed-hint">아래 화면은 파트너스 사이트를 어드민 안에 iframe으로 임베드한 영역입니다.</span>
     </div>
     <div class="embed-right">
-      <button class="embed-btn-ghost" onclick="openInNewTab()">🗗 새 탭으로 열기</button>
-      <button class="embed-btn-ghost" onclick="reloadEmbed()">↻ 새로고침</button>
-      <button class="embed-btn" onclick="closeEmbed()">✕ 닫기</button>
+      <button class="embed-btn" onclick="closeEmbed()">✕ 닫고 어드민으로</button>
     </div>
   </div>
 
-  <!-- 파트너스 서브네비 (임베드된 화면의 일부처럼 보이게) -->
+  <!-- 파트너스 서브네비 (파트너스 상단 메뉴바 유지) -->
   <div class="p-subnav">
     <div class="p-logo">
       트립스토어 <span class="p-badge">Partners</span>
@@ -522,15 +402,44 @@ tr:hover td { background: #fafbfc; }
     <div class="p-nav">
       <a>대시보드</a>
       <a class="p-active" id="embedActiveMenu">상품관리</a>
+      <a>행사관리</a>
       <a>예약관리</a>
       <a>정산</a>
       <a>고객문의</a>
     </div>
-    <div class="p-user">🏢 <span id="embedUserOrg">트립스토어</span></div>
+    <div class="p-user" id="embedUserBox">🔒 로그인 필요</div>
+  </div>
+
+  <!-- 파트너스 로그인 화면 (임베드 진입 시 첫 화면) -->
+  <div class="p-login" id="embedLogin">
+    <div class="p-login-box">
+      <div class="p-login-header">
+        <div class="p-login-brand">트립스토어 <span class="p-badge">Partners</span></div>
+        <div class="p-login-target">
+          로그인 후 <strong id="loginTargetMenu">상품관리</strong>로 이동합니다.
+        </div>
+      </div>
+      <form class="p-login-form" onsubmit="event.preventDefault(); doEmbedLogin();">
+        <div class="p-form-row">
+          <label>파트너스 계정 ID</label>
+          <input type="text" id="loginId" placeholder="예: partner@company.co.kr" autocomplete="off">
+        </div>
+        <div class="p-form-row">
+          <label>비밀번호</label>
+          <input type="password" id="loginPw" placeholder="비밀번호 입력" autocomplete="off">
+        </div>
+        <div class="p-form-check">
+          <label><input type="checkbox"> 로그인 상태 유지</label>
+          <a href="#" onclick="event.preventDefault()">비밀번호 찾기</a>
+        </div>
+        <button type="submit" class="p-login-btn">로그인</button>
+        <div class="p-login-help">파트너스 계정이 없으신가요? <a href="#" onclick="event.preventDefault()">가입 문의</a></div>
+      </form>
+    </div>
   </div>
 
   <!-- 파트너스 상품관리 컨텐츠 -->
-  <div class="p-layout" id="embedProducts">
+  <div class="p-layout" id="embedProducts" style="display:none">
     <div class="p-breadcrumb"><span>파트너스 홈</span> <span class="p-sep">/</span> <span class="p-current">상품관리</span></div>
     <div class="p-page-header">
       <div>
@@ -589,6 +498,66 @@ tr:hover td { background: #fafbfc; }
     </div>
   </div>
 
+  <!-- 파트너스 행사관리 컨텐츠 (숨김 상태로 대기) -->
+  <div class="p-layout" id="embedEvents" style="display:none">
+    <div class="p-breadcrumb"><span>파트너스 홈</span> <span class="p-sep">/</span> <span class="p-current">행사관리</span></div>
+    <div class="p-page-header">
+      <div>
+        <div class="p-page-title">행사관리</div>
+        <div class="p-page-desc"><span id="embedEventOrg">트립스토어</span>의 등록 행사(개별 출발일자)를 관리합니다.</div>
+      </div>
+      <div class="p-actions">
+        <button class="btn btn-default">📥 엑셀 다운로드</button>
+        <button class="btn btn-primary">＋ 신규 행사 등록</button>
+      </div>
+    </div>
+    <div class="p-stats">
+      <div class="p-stat"><div class="p-stat-label">전체 행사</div><div class="p-stat-value">8,412</div></div>
+      <div class="p-stat"><div class="p-stat-label">모객중</div><div class="p-stat-value blue">6,240</div></div>
+      <div class="p-stat"><div class="p-stat-label">출발확정</div><div class="p-stat-value" style="color:#52c41a">1,802</div></div>
+      <div class="p-stat"><div class="p-stat-label">모객마감</div><div class="p-stat-value gray">370</div></div>
+    </div>
+    <div class="card">
+      <div class="filter-bar">
+        <select class="fi" style="width:140px"><option>전체 카테고리</option><option>항공+숙박</option><option>숙박</option><option>투어</option></select>
+        <select class="fi" style="width:120px"><option>전체 상태</option><option>모객중</option><option>출발확정</option><option>모객마감</option></select>
+        <input class="fi" placeholder="행사코드 / 상품명" style="width:220px">
+        <input class="fi" type="date" style="width:150px">
+        <button class="btn btn-primary">검색</button>
+        <button class="btn btn-default">초기화</button>
+      </div>
+      <table class="p-table">
+        <thead>
+          <tr>
+            <th>행사코드</th><th>상품명</th><th>출발일</th><th>귀국일</th>
+            <th style="text-align:right">모집인원</th><th style="text-align:right">현재예약</th>
+            <th style="text-align:right">판매가</th><th>상태</th><th style="width:80px">액션</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td class="mono">EV-20260815-DAD01</td><td class="prod"><span class="thumb">✈️</span>다낭 4박5일 자유일정</td><td>2026-08-15</td><td>2026-08-19</td><td class="num">30</td><td class="num">28</td><td class="num">899,000원</td><td><span class="tag green" style="color:#52c41a;background:#f6ffed;border-color:#b7eb8f">출발확정</span></td><td><a href="#" class="link">수정</a></td></tr>
+          <tr><td class="mono">EV-20260822-DAD02</td><td class="prod"><span class="thumb">✈️</span>다낭 4박5일 자유일정</td><td>2026-08-22</td><td>2026-08-26</td><td class="num">30</td><td class="num">18</td><td class="num">899,000원</td><td><span class="tag green">모객중</span></td><td><a href="#" class="link">수정</a></td></tr>
+          <tr><td class="mono">EV-20260810-NHA01</td><td class="prod"><span class="thumb">✈️</span>나트랑 5일 반자유</td><td>2026-08-10</td><td>2026-08-14</td><td class="num">25</td><td class="num">12</td><td class="num">1,050,000원</td><td><span class="tag green">모객중</span></td><td><a href="#" class="link">수정</a></td></tr>
+          <tr><td class="mono">EV-20260901-PQC01</td><td class="prod"><span class="thumb">✈️</span>[허니문] 푸꾸옥 5박</td><td>2026-09-01</td><td>2026-09-06</td><td class="num">10</td><td class="num">8</td><td class="num">2,190,000원</td><td><span class="tag green" style="color:#52c41a;background:#f6ffed;border-color:#b7eb8f">출발확정</span></td><td><a href="#" class="link">수정</a></td></tr>
+          <tr><td class="mono">EV-20260805-BKK01</td><td class="prod"><span class="thumb">✈️</span>[특가] 방콕 4박5일</td><td>2026-08-05</td><td>2026-08-09</td><td class="num">40</td><td class="num">40</td><td class="num">690,000원</td><td><span class="tag gray">모객마감</span></td><td><a href="#" class="link">수정</a></td></tr>
+          <tr><td class="mono">EV-20260812-HAN01</td><td class="prod"><span class="thumb">✈️</span>하노이 3박4일 시내투어</td><td>2026-08-12</td><td>2026-08-15</td><td class="num">30</td><td class="num">6</td><td class="num">649,000원</td><td><span class="tag orange">모객부진</span></td><td><a href="#" class="link">수정</a></td></tr>
+          <tr><td class="mono">EV-20260829-BNH01</td><td class="prod"><span class="thumb">🎫</span>바나힐 케이블카 데이투어</td><td>2026-08-29</td><td>2026-08-29</td><td class="num">50</td><td class="num">32</td><td class="num">78,000원</td><td><span class="tag green">모객중</span></td><td><a href="#" class="link">수정</a></td></tr>
+          <tr><td class="mono">EV-20260906-DAD03</td><td class="prod"><span class="thumb">✈️</span>다낭 4박5일 자유일정</td><td>2026-09-06</td><td>2026-09-10</td><td class="num">30</td><td class="num">2</td><td class="num">920,000원</td><td><span class="tag green">모객중</span></td><td><a href="#" class="link">수정</a></td></tr>
+        </tbody>
+      </table>
+      <div class="p-pagination">
+        <span class="p-page-info">1-8 / 8,412건</span>
+        <div class="p-page-nav">
+          <button class="p-page-btn" disabled>‹</button>
+          <button class="p-page-btn p-page-active">1</button>
+          <button class="p-page-btn">2</button>
+          <button class="p-page-btn">3</button>
+          <button class="p-page-btn">›</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <!-- 파트너스 예약관리 컨텐츠 (숨김 상태로 대기) -->
   <div class="p-layout" id="embedReservations" style="display:none">
     <div class="p-breadcrumb"><span>파트너스 홈</span> <span class="p-sep">/</span> <span class="p-current">예약관리</span></div>
@@ -635,9 +604,9 @@ tr:hover td { background: #fafbfc; }
 <div class="flow-indicator">
   <div class="flow-step" id="fs1">1. 어드민 GNB</div>
   <div class="flow-arrow">→</div>
-  <div class="flow-step" id="fs2">2. org 선택</div>
+  <div class="flow-step" id="fs2">2. 파트너스 로그인 (임베드)</div>
   <div class="flow-arrow">→</div>
-  <div class="flow-step" id="fs3">3. 어드민 안 임베드</div>
+  <div class="flow-step" id="fs3">3. 파트너스 컨텐츠 로드</div>
 </div>
 
 <script>
@@ -655,113 +624,59 @@ function setFlowStep(step) {
 
 function togglePbMenu(e) {
   e.stopPropagation();
-  document.getElementById('resvMenu').classList.remove('open');
   document.getElementById('pbMenu').classList.toggle('open');
-}
-
-function toggleResvMenu(e) {
-  e.stopPropagation();
-  document.getElementById('pbMenu').classList.remove('open');
-  document.getElementById('resvMenu').classList.toggle('open');
 }
 
 document.addEventListener('click', (e) => {
   if (!e.target.closest('#pbMenu')) {
     document.getElementById('pbMenu').classList.remove('open');
   }
-  if (!e.target.closest('#resvMenu')) {
-    document.getElementById('resvMenu').classList.remove('open');
-  }
 });
 
-function openOrgPicker(e, menuName) {
+// 3개 임베드 메뉴 공통 진입: PB관리→[파트너스] 상품관리/행사관리, PB예약관리→[파트너스] 예약관리
+function openEmbedLogin(e, menuName) {
   e.stopPropagation();
   document.getElementById('pbMenu').classList.remove('open');
-  document.getElementById('resvMenu').classList.remove('open');
-  document.getElementById('modalMenuTitle').textContent = menuName;
-  document.getElementById('orgModal').classList.add('show');
-  window._selectedMenu = menuName;
-  setFlowStep(2);
-}
 
-function closeOrgPicker() {
-  document.getElementById('orgModal').classList.remove('show');
-  setFlowStep(1);
-}
+  // 파트너스 서브네비 active 표시
+  document.getElementById('embedActiveMenu').textContent = menuName;
+  document.getElementById('loginTargetMenu').textContent = menuName;
+  document.getElementById('embedUserBox').innerHTML = '🔒 로그인 필요';
 
-function filterOrgs(query) {
-  const q = query.toLowerCase().trim();
-  document.querySelectorAll('#orgList .org-item').forEach(item => {
-    const text = item.textContent.toLowerCase();
-    item.style.display = !q || text.includes(q) ? 'flex' : 'none';
-  });
-}
+  // 컨텐츠 초기화: 로그인 화면만 표시
+  document.getElementById('embedLogin').style.display = '';
+  document.getElementById('embedProducts').style.display = 'none';
+  document.getElementById('embedEvents').style.display = 'none';
+  document.getElementById('embedReservations').style.display = 'none';
 
-const orgCodes = {
-  '하나투어': 'org_hanatour',
-  '모두투어': 'org_modetour',
-  '노랑풍선': 'org_ybtour',
-  '참좋은여행': 'org_verygood',
-  '레드캡투어': 'org_redcap',
-  'TMG': 'org_tmg',
-  '솔바이멜리아': 'org_solbymelia'
-};
-
-const orgStats = {
-  '하나투어': { all: '1,204', selling: '982' },
-  '모두투어': { all: '892', selling: '741' },
-  '노랑풍선': { all: '610', selling: '498' },
-  '참좋은여행': { all: '458', selling: '380' },
-  '레드캡투어': { all: '312', selling: '256' },
-  'TMG': { all: '245', selling: '198' },
-  '솔바이멜리아': { all: '8', selling: '6' }
-};
-
-function selectOrg(orgName) {
-  const code = orgCodes[orgName] || 'org_unknown';
-  const menu = window._selectedMenu || '상품관리';
-  document.getElementById('orgModal').classList.remove('show');
-  openEmbed({ orgName, code, menu });
-}
-
-// PB 관리 → [파트너스] 상품관리: 트립스토어 org로 바로 임베드
-function goTripstorePartners(e) {
-  e.stopPropagation();
-  document.getElementById('pbMenu').classList.remove('open');
-  openEmbed({ orgName: '트립스토어', code: 'org_tripstore', menu: '상품관리' });
-}
-
-function openEmbed({ orgName, code, menu }) {
-  const path = menu === '예약관리' ? 'reservations' : 'products';
-  const url = `https://partners.tripstore.kr/${code}/${path}`;
-  const stats = orgStats[orgName] || { all: '3,890', selling: '3,102' };
-
-  // 임베드 URL 바
-  document.getElementById('embedOrgName').textContent = orgName;
-  document.getElementById('embedOrgCode').textContent = code;
-  document.getElementById('embedUrl').textContent = url;
-  document.getElementById('embedActiveMenu').textContent = menu;
-  document.getElementById('embedUserOrg').textContent = orgName;
-
-  // 컨텐츠 - 메뉴에 따라 상품관리/예약관리 전환
-  if (menu === '예약관리') {
-    document.getElementById('embedProducts').style.display = 'none';
-    document.getElementById('embedReservations').style.display = '';
-    document.getElementById('embedResvOrg').textContent = orgName;
-  } else {
-    document.getElementById('embedProducts').style.display = '';
-    document.getElementById('embedReservations').style.display = 'none';
-    document.getElementById('embedDescOrg').textContent = orgName;
-    document.getElementById('statAll').textContent = stats.all;
-    document.getElementById('statSelling').textContent = stats.selling;
-    document.getElementById('totalCount').textContent = stats.all;
-  }
-
-  // 어드민 컨텐츠 숨기고 임베드 표시 (GNB는 유지)
+  // 어드민 컨텐츠 숨김, 임베드 표시
   document.querySelector('.breadcrumb').style.display = 'none';
   document.querySelector('.layout').style.display = 'none';
   document.getElementById('embedShell').classList.add('show');
-  window._embedUrl = url;
+
+  window._pendingMenu = menuName;
+  setFlowStep(2);
+  window.scrollTo(0, 0);
+
+  // 데모: 로그인 인풋 초기값 미리 채워두기
+  document.getElementById('loginId').value = 'partner@tripstore.kr';
+  document.getElementById('loginPw').value = '';
+  setTimeout(() => document.getElementById('loginPw').focus(), 300);
+}
+
+// 로그인 성공 → 해당 메뉴 컨텐츠로 전환
+function doEmbedLogin() {
+  const menu = window._pendingMenu || '상품관리';
+  document.getElementById('embedLogin').style.display = 'none';
+  document.getElementById('embedUserBox').innerHTML = '🏢 <span>파트너 계정</span>';
+
+  if (menu === '상품관리') {
+    document.getElementById('embedProducts').style.display = '';
+  } else if (menu === '행사관리') {
+    document.getElementById('embedEvents').style.display = '';
+  } else if (menu === '예약관리') {
+    document.getElementById('embedReservations').style.display = '';
+  }
   setFlowStep(3);
   window.scrollTo(0, 0);
 }
@@ -772,15 +687,6 @@ function closeEmbed() {
   document.querySelector('.layout').style.display = '';
   setFlowStep(1);
   window.scrollTo(0, 0);
-}
-
-function openInNewTab() {
-  const url = window._embedUrl || 'https://partners.tripstore.kr';
-  alert(`목업 · 새 탭으로 이동:\n${url}`);
-}
-
-function reloadEmbed() {
-  alert('목업 · iframe 새로고침');
 }
 </script>
 
