@@ -253,26 +253,16 @@ tr:hover td { background: #fafbfc; }
             <div class="mega-item">숙박권 예약관리 <span class="arrow">›</span></div>
             <div class="mega-item">여행자보험 예약관리 <span class="arrow">›</span></div>
           </div>
-          <!-- ✨ Col 4: 파트너스 (신규 추가) -->
+          <!-- Col 4: 파트너스 -->
           <div class="mega-col partners-col">
             <div class="mega-title">
-              <span class="badge-partners">파트너스</span>바로가기
+              <span class="badge-partners">파트너스</span>
             </div>
             <div class="mega-item partners-item" onclick="openOrgPicker(event, '상품관리')">
-              📦 상품관리 <span class="icon-lock">🔒</span><span class="arrow">›</span>
-            </div>
-            <div class="mega-item partners-item" onclick="openOrgPicker(event, '예약관리')">
-              📋 예약관리 <span class="icon-lock">🔒</span><span class="arrow">›</span>
-            </div>
-            <div class="mega-item partners-item" onclick="openOrgPicker(event, '정산')">
-              💰 정산 <span class="icon-lock">🔒</span><span class="arrow">›</span>
-            </div>
-            <div class="mega-item partners-item" onclick="openOrgPicker(event, '대시보드')">
-              📊 대시보드 <span class="icon-lock">🔒</span><span class="arrow">›</span>
+              📦 상품관리 <span class="arrow">›</span>
             </div>
             <div class="hint-line">
-              org 선택 후 파트너스 화면으로 진입합니다.<br>
-              🔒 파트너스 계정 로그인 필요
+              org 선택 후 파트너스 사이트가 새 탭으로 열려요.
             </div>
           </div>
         </div>
@@ -309,11 +299,9 @@ tr:hover td { background: #fafbfc; }
     <div class="info-card">
       <div class="info-icon">✨</div>
       <div class="info-body">
-        <h3><code>PB 관리</code> 메뉴 안에 <span class="badge-partners" style="font-size:10px;padding:2px 6px;">파트너스</span> 바로가기가 추가되었어요</h3>
+        <h3><code>PB 관리</code> 메뉴 안에 <span class="badge-partners" style="font-size:10px;padding:2px 6px;">파트너스</span> 상품관리 링크가 추가되었어요</h3>
         <p>
-          상단 <strong>PB 관리</strong> 메뉴를 클릭하면, 드롭다운 우측에 <strong>[파트너스] 바로가기</strong> 컬럼이 나와요.<br>
-          상품관리/예약관리/정산/대시보드 중 하나를 선택 → <strong>org 선택 모달</strong> → 해당 org의 파트너스 화면으로 진입합니다.<br>
-          단, 파트너스 화면은 <strong>파트너스 계정 로그인</strong>이 별도로 필요합니다. (어드민 세션 ≠ 파트너스 세션)
+          <strong>PB 관리</strong> 클릭 → 드롭다운 우측 <strong>[파트너스] 상품관리</strong> 클릭 → org 선택 → 해당 org의 파트너스 상품관리 페이지가 새 탭으로 열려요.
         </p>
       </div>
     </div>
@@ -354,11 +342,10 @@ tr:hover td { background: #fafbfc; }
         <div>
           <div class="modal-title">
             <span class="badge-partners">파트너스</span>
-            <span id="modalMenuTitle">상품관리</span> · 진입할 파트너 선택
+            <span id="modalMenuTitle">상품관리</span> · 파트너 선택
           </div>
           <div class="modal-sub">
-            어드민에서 해당 org의 <strong>파트너스 화면을 바로 띄웁니다</strong>.<br>
-            <span style="color:#d46b08;font-weight:600;">🔓 SSO 위임 접속</span> — 별도 로그인 없이 어드민 권한으로 파트너스 계정에 접속합니다. (감사 로그 자동 기록)
+            선택한 org의 파트너스 상품관리 페이지가 <strong>새 탭으로 열려요</strong>.
           </div>
         </div>
         <button class="btn-close" onclick="closeOrgPicker()">×</button>
@@ -462,141 +449,6 @@ tr:hover td { background: #fafbfc; }
   </div>
 </div>
 
-<!-- ================= STATE 3: 파트너스 상품관리 (어드민 안에서 위임 접속) ================= -->
-<div class="partners-shell" id="partnersShell">
-  <!-- 위임 접속 배너 -->
-  <div class="impersonation-bar">
-    <div class="imp-left">
-      <span class="imp-dot"></span>
-      <span class="imp-label">위임 접속 중</span>
-      <span class="imp-sep">·</span>
-      <span class="imp-detail">어드민 <strong>김서현</strong> → <strong id="impOrgName">하나투어</strong>(<code id="impOrgCode">org_hanatour</code>) 파트너스 계정</span>
-      <span class="imp-sep">·</span>
-      <span class="imp-menu">파트너스 <strong id="impMenuName">상품관리</strong></span>
-    </div>
-    <div class="imp-right">
-      <button class="imp-btn-ghost" onclick="alert('감사 로그: 이 세션은 access_log 테이블에 자동 기록됩니다.')">📝 감사 로그</button>
-      <button class="imp-btn" onclick="backToAdmin()">✕ 위임 종료 · 어드민으로</button>
-    </div>
-  </div>
-
-  <!-- 파트너스 서브 네비 -->
-  <div class="p-subnav">
-    <div class="p-logo">
-      트립스토어 <span class="p-badge">Partners</span>
-    </div>
-    <div class="p-nav">
-      <a>대시보드</a>
-      <a class="p-active" id="partnersActiveMenu">상품관리</a>
-      <a>예약관리</a>
-      <a>정산</a>
-      <a>고객문의</a>
-    </div>
-    <div class="p-user">
-      🏢 <span id="pUserOrgName">하나투어</span> · 위임세션
-    </div>
-  </div>
-
-  <!-- 파트너스 상품관리 컨텐츠 -->
-  <div class="p-layout">
-    <div class="p-breadcrumb">
-      <span>파트너스 홈</span> <span class="p-sep">/</span> <span class="p-current">상품관리</span>
-    </div>
-
-    <div class="p-page-header">
-      <div>
-        <div class="p-page-title">상품관리</div>
-        <div class="p-page-desc"><span id="pDescOrg">하나투어</span>의 등록 상품을 관리합니다.</div>
-      </div>
-      <div class="p-actions">
-        <button class="btn btn-default">📥 엑셀 다운로드</button>
-        <button class="btn btn-primary">＋ 신규 상품 등록</button>
-      </div>
-    </div>
-
-    <!-- 통계 카드 -->
-    <div class="p-stats">
-      <div class="p-stat">
-        <div class="p-stat-label">전체 상품</div>
-        <div class="p-stat-value" id="statAll">1,204</div>
-      </div>
-      <div class="p-stat">
-        <div class="p-stat-label">판매중</div>
-        <div class="p-stat-value blue" id="statSelling">982</div>
-      </div>
-      <div class="p-stat">
-        <div class="p-stat-label">판매중지</div>
-        <div class="p-stat-value gray">184</div>
-      </div>
-      <div class="p-stat">
-        <div class="p-stat-label">검수 대기</div>
-        <div class="p-stat-value orange">38</div>
-      </div>
-    </div>
-
-    <!-- 필터 + 테이블 -->
-    <div class="card">
-      <div class="filter-bar">
-        <select class="fi" style="width:140px">
-          <option>전체 카테고리</option>
-          <option>항공</option><option>숙박</option><option>투어·티켓</option><option>여행자보험</option>
-        </select>
-        <select class="fi" style="width:120px">
-          <option>전체 상태</option>
-          <option>판매중</option><option>판매중지</option><option>검수대기</option><option>반려</option>
-        </select>
-        <input class="fi" placeholder="상품코드 / 상품명 검색" style="width:260px">
-        <select class="fi" style="width:120px">
-          <option>최근 등록순</option><option>판매량 순</option><option>재고 순</option>
-        </select>
-        <button class="btn btn-primary">검색</button>
-        <button class="btn btn-default">초기화</button>
-      </div>
-
-      <table class="p-table">
-        <thead>
-          <tr>
-            <th style="width:32px"><input type="checkbox"></th>
-            <th>상품코드</th>
-            <th>상품명</th>
-            <th>카테고리</th>
-            <th>상태</th>
-            <th style="text-align:right">재고</th>
-            <th style="text-align:right">판매가</th>
-            <th>최근 예약일</th>
-            <th>등록일</th>
-            <th style="width:80px">액션</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr><td><input type="checkbox"></td><td class="mono">HT-24080-A</td><td class="prod"><span class="thumb">✈️</span>[여름특가] 다낭 4박5일 자유일정</td><td>항공+숙박</td><td><span class="tag green">판매중</span></td><td class="num">42</td><td class="num">899,000원</td><td>2026-07-27</td><td>2026-05-12</td><td><a href="#" class="link">수정</a></td></tr>
-          <tr><td><input type="checkbox"></td><td class="mono">HT-24081-B</td><td class="prod"><span class="thumb">🏨</span>인터컨티넨탈 다낭 리조트 3박</td><td>숙박</td><td><span class="tag green">판매중</span></td><td class="num">18</td><td class="num">1,240,000원</td><td>2026-07-28</td><td>2026-05-18</td><td><a href="#" class="link">수정</a></td></tr>
-          <tr><td><input type="checkbox"></td><td class="mono">HT-24082-A</td><td class="prod"><span class="thumb">✈️</span>[가족여행] 나트랑 5일 반자유</td><td>항공+숙박</td><td><span class="tag orange">검수대기</span></td><td class="num">30</td><td class="num">1,050,000원</td><td>-</td><td>2026-07-25</td><td><a href="#" class="link">수정</a></td></tr>
-          <tr><td><input type="checkbox"></td><td class="mono">HT-24083-C</td><td class="prod"><span class="thumb">🎫</span>바나힐 케이블카+뷔페</td><td>투어·티켓</td><td><span class="tag green">판매중</span></td><td class="num">158</td><td class="num">78,000원</td><td>2026-07-28</td><td>2026-04-02</td><td><a href="#" class="link">수정</a></td></tr>
-          <tr><td><input type="checkbox"></td><td class="mono">HT-24084-A</td><td class="prod"><span class="thumb">✈️</span>[허니문] 푸꾸옥 솔바이멜리아 5박</td><td>항공+숙박</td><td><span class="tag green">판매중</span></td><td class="num">8</td><td class="num">2,190,000원</td><td>2026-07-27</td><td>2026-06-17</td><td><a href="#" class="link">수정</a></td></tr>
-          <tr><td><input type="checkbox"></td><td class="mono">HT-24085-B</td><td class="prod"><span class="thumb">🏨</span>메리어트 푸꾸옥 EMR 4박</td><td>숙박</td><td><span class="tag gray">판매중지</span></td><td class="num">0</td><td class="num">1,580,000원</td><td>2026-07-10</td><td>2026-03-22</td><td><a href="#" class="link">수정</a></td></tr>
-          <tr><td><input type="checkbox"></td><td class="mono">HT-24086-A</td><td class="prod"><span class="thumb">✈️</span>[특가] 하노이 3박4일 시내투어 포함</td><td>항공+숙박</td><td><span class="tag green">판매중</span></td><td class="num">72</td><td class="num">649,000원</td><td>2026-07-28</td><td>2026-06-05</td><td><a href="#" class="link">수정</a></td></tr>
-          <tr><td><input type="checkbox"></td><td class="mono">HT-24087-D</td><td class="prod"><span class="thumb">🛡️</span>여행자보험 프리미엄 5일</td><td>여행자보험</td><td><span class="tag green">판매중</span></td><td class="num">∞</td><td class="num">18,000원</td><td>2026-07-28</td><td>2026-02-14</td><td><a href="#" class="link">수정</a></td></tr>
-          <tr><td><input type="checkbox"></td><td class="mono">HT-24088-A</td><td class="prod"><span class="thumb">✈️</span>[MZ여행] 방콕 4박 자유 + 왕궁투어</td><td>항공+숙박</td><td><span class="tag red">반려</span></td><td class="num">-</td><td class="num">790,000원</td><td>-</td><td>2026-07-20</td><td><a href="#" class="link">수정</a></td></tr>
-          <tr><td><input type="checkbox"></td><td class="mono">HT-24089-C</td><td class="prod"><span class="thumb">🎫</span>씨엠립 앙코르와트 일출 투어</td><td>투어·티켓</td><td><span class="tag green">판매중</span></td><td class="num">45</td><td class="num">128,000원</td><td>2026-07-26</td><td>2026-05-30</td><td><a href="#" class="link">수정</a></td></tr>
-        </tbody>
-      </table>
-
-      <div class="p-pagination">
-        <span class="p-page-info">1-10 / 1,204건</span>
-        <div class="p-page-nav">
-          <button class="p-page-btn" disabled>‹</button>
-          <button class="p-page-btn p-page-active">1</button>
-          <button class="p-page-btn">2</button>
-          <button class="p-page-btn">3</button>
-          <button class="p-page-btn">...</button>
-          <button class="p-page-btn">121</button>
-          <button class="p-page-btn">›</button>
-        </div>
-      </div>
-    </div>
-  </div>
-</div>
 
 <!-- ================= 플로우 인디케이터 ================= -->
 <div class="flow-indicator">
@@ -604,7 +456,7 @@ tr:hover td { background: #fafbfc; }
   <div class="flow-arrow">→</div>
   <div class="flow-step" id="fs2">2. org 선택</div>
   <div class="flow-arrow">→</div>
-  <div class="flow-step" id="fs3">3. 파트너스 화면 (위임접속)</div>
+  <div class="flow-step" id="fs3">3. 새 탭으로 이동</div>
 </div>
 
 <script>
@@ -675,35 +527,17 @@ const orgStats = {
 };
 
 function selectOrg(orgName) {
-  const menu = window._selectedMenu || '상품관리';
   const code = orgCodes[orgName] || 'org_unknown';
-  const stats = orgStats[orgName] || { all: '0', selling: '0' };
+  const url = `https://partners.tripstore.kr/${code}/products`;
 
-  // 위임 배너 & 파트너스 서브네비 채우기
-  document.getElementById('impOrgName').textContent = orgName;
-  document.getElementById('impOrgCode').textContent = code;
-  document.getElementById('impMenuName').textContent = menu;
-  document.getElementById('pUserOrgName').textContent = orgName;
-  document.getElementById('pDescOrg').textContent = orgName;
-  document.getElementById('partnersActiveMenu').textContent = menu;
-  document.getElementById('statAll').textContent = stats.all;
-  document.getElementById('statSelling').textContent = stats.selling;
-
-  // 어드민 GNB는 유지, 컨텐츠만 숨김
-  document.querySelector('.breadcrumb').style.display = 'none';
-  document.querySelector('.layout').style.display = 'none';
   document.getElementById('orgModal').classList.remove('show');
-  document.getElementById('partnersShell').classList.add('show');
   setFlowStep(3);
-  window.scrollTo(0, 0);
-}
 
-function backToAdmin() {
-  document.getElementById('partnersShell').classList.remove('show');
-  document.querySelector('.breadcrumb').style.display = '';
-  document.querySelector('.layout').style.display = '';
-  setFlowStep(1);
-  window.scrollTo(0, 0);
+  // 목업: 실제 파트너스 URL을 새 탭으로 여는 대신 알림 표시
+  setTimeout(() => {
+    alert(`✅ 새 탭으로 이동합니다\n\n${orgName} (${code})\n→ ${url}`);
+    setFlowStep(1);
+  }, 200);
 }
 </script>
 
