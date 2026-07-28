@@ -1,0 +1,531 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>어드민 → 파트너스 메뉴 진입 플로우</title>
+<link href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.6/dist/web/static/pretendard.css" rel="stylesheet">
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: 'Pretendard', 'Apple SD Gothic Neo', -apple-system, sans-serif; font-size: 14px; color: rgba(0,0,0,0.88); background: #f5f5f5; }
+
+/* ===== 어드민 GNB ===== */
+.gnb { background: #fff; height: 64px; display: flex; align-items: center; position: sticky; top: 0; z-index: 100; padding: 0 24px; border-bottom: 1px solid #f0f0f0; box-shadow: 0 1px 2px rgba(0,0,0,0.04); }
+.gnb-logo { display: flex; align-items: center; gap: 10px; margin-right: 40px; white-space: nowrap; }
+.gnb-logo .mark { width: 30px; height: 30px; border: 1.5px solid rgba(0,0,0,0.88); border-radius: 6px; display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 15px; color: rgba(0,0,0,0.88); }
+.gnb-logo .text { font-size: 13px; font-weight: 600; color: rgba(0,0,0,0.88); line-height: 1.25; }
+.gnb-logo .text small { display: block; font-size: 13px; font-weight: 600; }
+.gnb-menu { display: flex; align-items: center; gap: 0; flex-wrap: nowrap; overflow-x: auto; }
+.gnb-item { color: rgba(0,0,0,0.75); padding: 0 14px; height: 64px; display: flex; align-items: center; cursor: pointer; font-size: 14px; white-space: nowrap; position: relative; font-weight: 500; transition: color 0.15s; }
+.gnb-item:hover { color: rgba(0,0,0,0.95); }
+.gnb-item.active { color: #1677ff; border: 1.5px solid #1677ff; border-radius: 6px; height: 34px; padding: 0 12px; }
+.gnb-item.partners-menu { color: #722ed1; font-weight: 600; }
+.gnb-item.partners-menu:hover { color: #531dab; }
+.gnb-item.partners-menu.active { color: #722ed1; border-color: #722ed1; }
+.badge-partners { display: inline-flex; align-items: center; background: linear-gradient(135deg, #722ed1, #9254de); color: #fff; font-size: 10px; font-weight: 800; padding: 2px 6px; border-radius: 4px; margin-right: 6px; letter-spacing: 0.3px; }
+.gnb-caret { margin-left: 4px; font-size: 9px; opacity: 0.55; }
+
+.gnb-dropdown { position: absolute; top: 64px; left: 0; background: #fff; border-radius: 8px; box-shadow: 0 8px 24px rgba(0,0,0,0.12); min-width: 200px; padding: 8px 0; display: none; z-index: 200; border: 1px solid #f0f0f0; }
+.gnb-item:hover .gnb-dropdown, .gnb-item.open .gnb-dropdown { display: block; }
+.gnb-item.partners-menu:hover .gnb-dropdown, .gnb-item.partners-menu.open .gnb-dropdown { display: block; min-width: 240px; }
+.gnb-dropdown-item { padding: 9px 20px; cursor: pointer; font-size: 13px; color: rgba(0,0,0,0.75); white-space: nowrap; transition: all 0.12s; display: flex; align-items: center; gap: 8px; }
+.gnb-dropdown-item:hover { background: #f0f5ff; color: #1677ff; }
+.gnb-dropdown-item.partners:hover { background: #f9f0ff; color: #722ed1; }
+.gnb-dropdown-item .item-tag { font-size: 10px; color: rgba(0,0,0,0.35); background: #fafafa; padding: 1px 6px; border-radius: 3px; margin-left: auto; }
+
+.gnb-right { margin-left: auto; display: flex; align-items: center; gap: 14px; }
+.gnb-user { font-size: 12px; color: rgba(0,0,0,0.55); }
+.gnb-user strong { color: rgba(0,0,0,0.88); }
+
+/* ===== BREADCRUMB ===== */
+.breadcrumb { padding: 16px 24px 0; font-size: 12px; color: rgba(0,0,0,0.45); display: flex; align-items: center; gap: 6px; }
+.breadcrumb-sep { color: rgba(0,0,0,0.25); }
+.breadcrumb .current { color: rgba(0,0,0,0.88); font-weight: 500; }
+
+/* ===== 페이지 ===== */
+.layout { padding: 12px 24px 40px; min-height: calc(100vh - 64px); }
+.page-header { display: flex; align-items: center; justify-content: space-between; margin: 14px 0 18px; }
+.page-title { font-size: 22px; font-weight: 700; color: rgba(0,0,0,0.88); display: flex; align-items: center; gap: 10px; }
+.page-desc { font-size: 13px; color: rgba(0,0,0,0.55); margin-top: 4px; }
+
+/* ===== 안내 카드 ===== */
+.info-card { background: linear-gradient(135deg, #f9f0ff 0%, #f0f5ff 100%); border: 1px solid #d3adf7; border-radius: 12px; padding: 20px 24px; margin-bottom: 20px; display: flex; align-items: flex-start; gap: 16px; }
+.info-card .info-icon { font-size: 28px; }
+.info-card .info-body h3 { font-size: 15px; font-weight: 700; color: #531dab; margin-bottom: 6px; }
+.info-card .info-body p { font-size: 13px; color: rgba(0,0,0,0.65); line-height: 1.7; }
+.info-card code { background: #fff; padding: 2px 6px; border-radius: 4px; font-family: 'SF Mono', Menlo, monospace; font-size: 12px; color: #722ed1; }
+
+/* ===== 상품 리스트 (더미) ===== */
+.card { background: #fff; border-radius: 8px; box-shadow: 0 1px 3px rgba(0,0,0,0.06); }
+.filter-bar { padding: 16px 20px; border-bottom: 1px solid #f0f0f0; display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+.fi { height: 32px; border: 1px solid #d9d9d9; border-radius: 6px; font-size: 13px; padding: 0 10px; outline: none; }
+.fi:focus { border-color: #1677ff; }
+.btn { height: 32px; padding: 0 14px; border-radius: 6px; font-size: 13px; cursor: pointer; border: 1px solid transparent; font-weight: 500; transition: all 0.15s; font-family: inherit; }
+.btn-primary { background: #1677ff; color: #fff; border-color: #1677ff; }
+.btn-primary:hover { background: #4096ff; }
+.btn-default { background: #fff; color: rgba(0,0,0,0.88); border-color: #d9d9d9; }
+.btn-default:hover { color: #1677ff; border-color: #1677ff; }
+
+table { width: 100%; border-collapse: collapse; }
+th { text-align: left; padding: 12px 16px; font-size: 12px; font-weight: 600; color: rgba(0,0,0,0.55); background: #fafafa; border-bottom: 1px solid #f0f0f0; }
+td { padding: 14px 16px; font-size: 13px; color: rgba(0,0,0,0.85); border-bottom: 1px solid #f5f5f5; }
+tr:hover td { background: #fafbfc; }
+.tag { display: inline-block; padding: 2px 8px; border-radius: 4px; font-size: 11px; font-weight: 600; }
+.tag.green { background: #f6ffed; color: #389e0d; border: 1px solid #b7eb8f; }
+.tag.gray { background: #fafafa; color: rgba(0,0,0,0.65); border: 1px solid #d9d9d9; }
+
+/* ===== Org 선택 모달 ===== */
+.modal-backdrop { position: fixed; inset: 0; background: rgba(0,0,0,0.45); z-index: 1000; display: none; align-items: center; justify-content: center; padding: 20px; }
+.modal-backdrop.show { display: flex; animation: fadeIn 0.2s; }
+@keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+.modal { background: #fff; border-radius: 12px; width: 560px; max-width: 100%; max-height: 90vh; display: flex; flex-direction: column; overflow: hidden; box-shadow: 0 20px 60px rgba(0,0,0,0.25); }
+.modal-header { padding: 20px 24px 16px; border-bottom: 1px solid #f0f0f0; }
+.modal-title { font-size: 17px; font-weight: 700; color: rgba(0,0,0,0.88); display: flex; align-items: center; gap: 10px; }
+.modal-title .badge-partners { font-size: 11px; padding: 3px 8px; }
+.modal-sub { font-size: 12px; color: rgba(0,0,0,0.55); margin-top: 6px; line-height: 1.6; }
+.modal-body { padding: 16px 24px; overflow-y: auto; flex: 1; }
+.modal-search { position: relative; margin-bottom: 12px; }
+.modal-search input { width: 100%; height: 40px; border: 1px solid #d9d9d9; border-radius: 8px; padding: 0 12px 0 38px; font-size: 14px; outline: none; font-family: inherit; }
+.modal-search input:focus { border-color: #722ed1; box-shadow: 0 0 0 3px rgba(114,46,209,0.1); }
+.modal-search::before { content: '🔍'; position: absolute; left: 12px; top: 50%; transform: translateY(-50%); font-size: 14px; opacity: 0.5; }
+
+.org-list { display: flex; flex-direction: column; gap: 6px; max-height: 380px; overflow-y: auto; }
+.org-item { display: flex; align-items: center; gap: 12px; padding: 12px 14px; border-radius: 8px; cursor: pointer; border: 1px solid transparent; transition: all 0.12s; }
+.org-item:hover { background: #f9f0ff; border-color: #d3adf7; }
+.org-avatar { width: 36px; height: 36px; border-radius: 8px; background: linear-gradient(135deg, #722ed1, #9254de); color: #fff; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 13px; flex-shrink: 0; }
+.org-avatar.alt-1 { background: linear-gradient(135deg, #1677ff, #4096ff); }
+.org-avatar.alt-2 { background: linear-gradient(135deg, #13c2c2, #36cfc9); }
+.org-avatar.alt-3 { background: linear-gradient(135deg, #fa8c16, #ffa940); }
+.org-avatar.alt-4 { background: linear-gradient(135deg, #52c41a, #73d13d); }
+.org-info { flex: 1; min-width: 0; }
+.org-name { font-size: 14px; font-weight: 600; color: rgba(0,0,0,0.88); margin-bottom: 3px; }
+.org-meta { font-size: 11px; color: rgba(0,0,0,0.5); display: flex; gap: 8px; }
+.org-meta span { display: inline-flex; align-items: center; gap: 4px; }
+.org-arrow { color: rgba(0,0,0,0.25); font-size: 16px; }
+.org-item:hover .org-arrow { color: #722ed1; }
+
+.modal-footer { padding: 12px 24px; border-top: 1px solid #f0f0f0; display: flex; justify-content: space-between; align-items: center; background: #fafafa; }
+.modal-footer .hint { font-size: 11px; color: rgba(0,0,0,0.45); }
+.btn-close { background: transparent; border: none; font-size: 20px; color: rgba(0,0,0,0.45); cursor: pointer; padding: 4px 8px; }
+.btn-close:hover { color: rgba(0,0,0,0.88); }
+.modal-header-row { display: flex; justify-content: space-between; align-items: flex-start; }
+
+/* ===== 파트너스 로그인 요구 화면 ===== */
+.partners-shell { display: none; }
+.partners-shell.show { display: block; }
+.partners-gnb { background: #f0f5ff; height: 56px; display: flex; align-items: center; padding: 0 24px; border-bottom: 1px solid #d6e4ff; }
+.partners-logo { display: flex; align-items: center; gap: 8px; font-weight: 800; font-size: 15px; color: #222; margin-right: 32px; }
+.partners-logo .badge { background: #1677ff; color: #fff; font-size: 10px; font-weight: 700; padding: 2px 6px; border-radius: 4px; }
+.partners-menu-nav { display: flex; gap: 4px; flex: 1; }
+.partners-menu-nav a { padding: 8px 14px; color: #999; font-size: 13px; font-weight: 500; text-decoration: none; border-radius: 6px; pointer-events: none; }
+.partners-menu-nav a.active-locked { color: #1677ff; font-weight: 700; background: #fff; opacity: 0.6; }
+.partners-right { font-size: 12px; color: rgba(0,0,0,0.45); }
+.login-hero { min-height: calc(100vh - 56px); display: flex; align-items: center; justify-content: center; padding: 40px 20px; background: linear-gradient(135deg, #f0f5ff 0%, #e6f4ff 100%); }
+.login-box { background: #fff; border-radius: 16px; padding: 40px 44px; width: 480px; max-width: 100%; box-shadow: 0 20px 60px rgba(24,144,255,0.12); }
+.login-header { text-align: center; margin-bottom: 28px; }
+.login-header .org-chip { display: inline-flex; align-items: center; gap: 8px; padding: 6px 14px; background: #f9f0ff; border: 1px solid #d3adf7; border-radius: 999px; font-size: 12px; color: #722ed1; font-weight: 600; margin-bottom: 16px; }
+.login-header h1 { font-size: 22px; font-weight: 700; color: rgba(0,0,0,0.88); margin-bottom: 8px; }
+.login-header p { font-size: 13px; color: rgba(0,0,0,0.55); line-height: 1.6; }
+.login-header p code { background: #fafafa; padding: 2px 6px; border-radius: 4px; font-family: 'SF Mono', Menlo, monospace; font-size: 12px; color: #1677ff; }
+.login-form { display: flex; flex-direction: column; gap: 12px; }
+.login-form label { font-size: 12px; font-weight: 600; color: rgba(0,0,0,0.75); }
+.login-form input { height: 44px; padding: 0 14px; border: 1px solid #d9d9d9; border-radius: 8px; font-size: 14px; outline: none; font-family: inherit; }
+.login-form input:focus { border-color: #1677ff; box-shadow: 0 0 0 3px rgba(22,119,255,0.1); }
+.login-form .form-row { display: flex; flex-direction: column; gap: 6px; }
+.login-btn { height: 46px; background: #1677ff; color: #fff; border: none; border-radius: 8px; font-size: 15px; font-weight: 600; cursor: pointer; margin-top: 8px; font-family: inherit; transition: background 0.15s; }
+.login-btn:hover { background: #4096ff; }
+.login-alt { text-align: center; margin-top: 18px; font-size: 12px; color: rgba(0,0,0,0.45); }
+.login-alt a { color: #1677ff; text-decoration: none; font-weight: 600; }
+.login-back { margin-top: 24px; text-align: center; }
+.login-back button { background: transparent; border: none; color: rgba(0,0,0,0.45); font-size: 12px; cursor: pointer; font-family: inherit; }
+.login-back button:hover { color: #1677ff; }
+.sso-divider { text-align: center; font-size: 11px; color: rgba(0,0,0,0.35); margin: 18px 0 12px; position: relative; }
+.sso-divider::before, .sso-divider::after { content: ''; position: absolute; top: 50%; width: calc(50% - 40px); height: 1px; background: #f0f0f0; }
+.sso-divider::before { left: 0; }
+.sso-divider::after { right: 0; }
+.sso-btn { height: 44px; background: #fff; border: 1px solid #d9d9d9; border-radius: 8px; font-size: 13px; font-weight: 600; color: rgba(0,0,0,0.75); cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; font-family: inherit; }
+.sso-btn:hover { border-color: #1677ff; color: #1677ff; }
+
+/* ===== 플로우 인디케이터 ===== */
+.flow-indicator { position: fixed; bottom: 24px; right: 24px; background: #fff; border-radius: 12px; padding: 12px 16px; box-shadow: 0 8px 24px rgba(0,0,0,0.15); border: 1px solid #f0f0f0; display: flex; align-items: center; gap: 8px; z-index: 500; }
+.flow-step { display: flex; align-items: center; gap: 6px; font-size: 11px; font-weight: 600; padding: 4px 10px; border-radius: 999px; background: #fafafa; color: rgba(0,0,0,0.45); transition: all 0.2s; }
+.flow-step.active { background: #722ed1; color: #fff; }
+.flow-step.done { background: #f6ffed; color: #389e0d; border: 1px solid #b7eb8f; }
+.flow-arrow { color: rgba(0,0,0,0.25); font-size: 12px; }
+
+/* ===== 하이라이트 툴팁 ===== */
+.spotlight { position: absolute; border: 2px dashed #722ed1; border-radius: 8px; pointer-events: none; animation: pulse 1.8s infinite; box-shadow: 0 0 0 4px rgba(114,46,209,0.1); }
+@keyframes pulse { 0%, 100% { box-shadow: 0 0 0 4px rgba(114,46,209,0.1); } 50% { box-shadow: 0 0 0 10px rgba(114,46,209,0.05); } }
+
+.tip-bubble { position: absolute; background: #722ed1; color: #fff; font-size: 12px; padding: 8px 12px; border-radius: 8px; font-weight: 500; box-shadow: 0 4px 12px rgba(114,46,209,0.3); z-index: 50; }
+.tip-bubble::before { content: ''; position: absolute; top: -6px; left: 20px; border: 6px solid transparent; border-top: 0; border-bottom: 6px solid #722ed1; }
+</style>
+</head>
+<body>
+
+<!-- ================= STATE 1 & 2: 어드민 ================= -->
+<div class="admin-shell" id="adminShell">
+  <!-- GNB -->
+  <div class="gnb">
+    <div class="gnb-logo">
+      <div class="mark">E</div>
+      <div class="text">트립스토어<small>관리자</small></div>
+    </div>
+    <div class="gnb-menu">
+      <div class="gnb-item">대시보드</div>
+      <div class="gnb-item">페이지 관리 <span class="gnb-caret">▾</span></div>
+      <div class="gnb-item">상품관리 <span class="gnb-caret">▾</span></div>
+      <div class="gnb-item">태그</div>
+      <div class="gnb-item active">예약 관리 <span class="gnb-caret">▾</span></div>
+      <div class="gnb-item">PB 관리 <span class="gnb-caret">▾</span></div>
+      <div class="gnb-item">카탈로그 <span class="gnb-caret">▾</span></div>
+      <div class="gnb-item">쿠폰</div>
+      <div class="gnb-item">정산 <span class="gnb-caret">▾</span></div>
+      <div class="gnb-item">파트너스관리 <span class="gnb-caret">▾</span></div>
+
+      <!-- ✨ 신규 추가된 [파트너스] 메뉴 그룹 -->
+      <div class="gnb-item partners-menu" id="partnersMenu" onclick="togglePartnersMenu(event)">
+        <span class="badge-partners">파트너스</span>상품관리
+        <span class="gnb-caret">▾</span>
+        <div class="gnb-dropdown" id="partnersDropdown">
+          <div class="gnb-dropdown-item partners" onclick="openOrgPicker(event, '상품관리')">
+            <span>📦</span>상품관리
+            <span class="item-tag">파트너스 화면</span>
+          </div>
+          <div class="gnb-dropdown-item partners" onclick="openOrgPicker(event, '예약관리')">
+            <span>📋</span>예약관리
+            <span class="item-tag">파트너스 화면</span>
+          </div>
+          <div class="gnb-dropdown-item partners" onclick="openOrgPicker(event, '정산')">
+            <span>💰</span>정산
+            <span class="item-tag">파트너스 화면</span>
+          </div>
+          <div class="gnb-dropdown-item partners" onclick="openOrgPicker(event, '대시보드')">
+            <span>📊</span>대시보드
+            <span class="item-tag">파트너스 화면</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="gnb-item">후기</div>
+      <div class="gnb-item">사내도구</div>
+      <div class="gnb-item">마케팅</div>
+      <div class="gnb-item">실험실</div>
+    </div>
+    <div class="gnb-right">
+      <div class="gnb-user">👤 <strong>김서현</strong> · 어드민</div>
+    </div>
+  </div>
+
+  <!-- Breadcrumb -->
+  <div class="breadcrumb">
+    <span>홈</span><span class="breadcrumb-sep">/</span><span>예약 관리</span><span class="breadcrumb-sep">/</span><span class="current">전체 예약</span>
+  </div>
+
+  <div class="layout">
+    <div class="page-header">
+      <div>
+        <div class="page-title">예약관리</div>
+        <div class="page-desc">총 예약건: 202,166건 / 총 예약인원: 605,504명</div>
+      </div>
+    </div>
+
+    <!-- 안내 카드 -->
+    <div class="info-card">
+      <div class="info-icon">✨</div>
+      <div class="info-body">
+        <h3>새로 추가된 <span class="badge-partners" style="font-size:10px;padding:2px 6px;">파트너스</span> 상품관리 메뉴를 사용해보세요</h3>
+        <p>
+          어드민에서 특정 파트너 <code>org</code>를 선택하면, <strong>해당 org의 파트너스 상품관리 화면</strong>으로 바로 진입할 수 있어요.<br>
+          단, 파트너스 화면 진입 시에는 <strong>파트너스 계정 로그인</strong>이 별도로 필요합니다. (어드민 세션 ≠ 파트너스 세션)
+        </p>
+      </div>
+    </div>
+
+    <!-- 더미 필터/테이블 -->
+    <div class="card">
+      <div class="filter-bar">
+        <input class="fi" placeholder="예약채널" style="width:120px">
+        <input class="fi" placeholder="결제유형" style="width:120px">
+        <input class="fi" placeholder="트립 예약번호" style="width:160px">
+        <input class="fi" placeholder="여행사 예약번호" style="width:160px">
+        <input class="fi" placeholder="예약자" style="width:120px">
+        <button class="btn btn-primary">검색</button>
+        <button class="btn btn-default">초기화</button>
+      </div>
+      <table>
+        <thead>
+          <tr>
+            <th>예약채널</th><th>결제유형</th><th>트립 예약번호</th><th>여행사 예약번호</th><th>예약자</th><th>인원</th><th>상태</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td>트립닷컴</td><td>일반결제</td><td>TS20260728-001</td><td>H2K-9821</td><td>홍길동</td><td>2</td><td><span class="tag green">완료</span></td></tr>
+          <tr><td>SSG</td><td>400결제</td><td>TS20260728-002</td><td>SSG-42901</td><td>김철수</td><td>4</td><td><span class="tag green">완료</span></td></tr>
+          <tr><td>NOL</td><td>400결제</td><td>TS20260728-003</td><td>NOL-1023</td><td>이영희</td><td>3</td><td><span class="tag gray">접수</span></td></tr>
+          <tr><td>트립스토어</td><td>일반결제</td><td>TS20260728-004</td><td>-</td><td>박민수</td><td>2</td><td><span class="tag green">완료</span></td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<!-- ================= STATE 2: Org 선택 모달 ================= -->
+<div class="modal-backdrop" id="orgModal">
+  <div class="modal">
+    <div class="modal-header">
+      <div class="modal-header-row">
+        <div>
+          <div class="modal-title">
+            <span class="badge-partners">파트너스</span>
+            <span id="modalMenuTitle">상품관리</span> · 진입할 파트너 선택
+          </div>
+          <div class="modal-sub">
+            어드민에서 파트너스 화면으로 진입합니다. 선택한 org의 파트너스 상품관리 페이지로 이동하며,<br>
+            <strong>파트너스 계정 로그인</strong>이 필요합니다.
+          </div>
+        </div>
+        <button class="btn-close" onclick="closeOrgPicker()">×</button>
+      </div>
+    </div>
+    <div class="modal-body">
+      <div class="modal-search">
+        <input placeholder="org 이름, ID, 사업자번호로 검색..." oninput="filterOrgs(this.value)">
+      </div>
+      <div class="org-list" id="orgList">
+        <div class="org-item" onclick="selectOrg('하나투어')">
+          <div class="org-avatar">HT</div>
+          <div class="org-info">
+            <div class="org-name">하나투어</div>
+            <div class="org-meta">
+              <span>🏢 org_hanatour</span>
+              <span>· 사업자 220-81-XXXXX</span>
+              <span>· 활성 상품 1,204건</span>
+            </div>
+          </div>
+          <div class="org-arrow">›</div>
+        </div>
+        <div class="org-item" onclick="selectOrg('모두투어')">
+          <div class="org-avatar alt-1">MT</div>
+          <div class="org-info">
+            <div class="org-name">모두투어</div>
+            <div class="org-meta">
+              <span>🏢 org_modetour</span>
+              <span>· 사업자 220-81-YYYYY</span>
+              <span>· 활성 상품 892건</span>
+            </div>
+          </div>
+          <div class="org-arrow">›</div>
+        </div>
+        <div class="org-item" onclick="selectOrg('노랑풍선')">
+          <div class="org-avatar alt-2">NR</div>
+          <div class="org-info">
+            <div class="org-name">노랑풍선</div>
+            <div class="org-meta">
+              <span>🏢 org_ybtour</span>
+              <span>· 사업자 220-81-ZZZZZ</span>
+              <span>· 활성 상품 610건</span>
+            </div>
+          </div>
+          <div class="org-arrow">›</div>
+        </div>
+        <div class="org-item" onclick="selectOrg('참좋은여행')">
+          <div class="org-avatar alt-3">CJ</div>
+          <div class="org-info">
+            <div class="org-name">참좋은여행</div>
+            <div class="org-meta">
+              <span>🏢 org_verygood</span>
+              <span>· 사업자 220-81-AAAAA</span>
+              <span>· 활성 상품 458건</span>
+            </div>
+          </div>
+          <div class="org-arrow">›</div>
+        </div>
+        <div class="org-item" onclick="selectOrg('레드캡투어')">
+          <div class="org-avatar alt-4">RC</div>
+          <div class="org-info">
+            <div class="org-name">레드캡투어</div>
+            <div class="org-meta">
+              <span>🏢 org_redcap</span>
+              <span>· 사업자 220-81-BBBBB</span>
+              <span>· 활성 상품 312건</span>
+            </div>
+          </div>
+          <div class="org-arrow">›</div>
+        </div>
+        <div class="org-item" onclick="selectOrg('TMG')">
+          <div class="org-avatar">TM</div>
+          <div class="org-info">
+            <div class="org-name">TMG (베트남)</div>
+            <div class="org-meta">
+              <span>🏢 org_tmg</span>
+              <span>· JV 파트너</span>
+              <span>· 활성 상품 245건</span>
+            </div>
+          </div>
+          <div class="org-arrow">›</div>
+        </div>
+        <div class="org-item" onclick="selectOrg('솔바이멜리아')">
+          <div class="org-avatar alt-2">SB</div>
+          <div class="org-info">
+            <div class="org-name">솔바이멜리아 푸꾸옥</div>
+            <div class="org-meta">
+              <span>🏢 org_solbymelia</span>
+              <span>· 직판</span>
+              <span>· 활성 상품 8건</span>
+            </div>
+          </div>
+          <div class="org-arrow">›</div>
+        </div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <span class="hint">💡 자주 사용하는 org는 즐겨찾기에 추가할 수 있어요 (예정)</span>
+      <button class="btn btn-default" onclick="closeOrgPicker()">취소</button>
+    </div>
+  </div>
+</div>
+
+<!-- ================= STATE 3: 파트너스 로그인 요구 ================= -->
+<div class="partners-shell" id="partnersShell">
+  <div class="partners-gnb">
+    <div class="partners-logo">
+      트립스토어 <span class="badge">Partners</span>
+    </div>
+    <div class="partners-menu-nav">
+      <a>대시보드</a>
+      <a class="active-locked" id="partnersActiveMenu">상품관리</a>
+      <a>예약관리</a>
+      <a>정산</a>
+      <a>고객문의</a>
+    </div>
+    <div class="partners-right">🔒 로그인 필요</div>
+  </div>
+
+  <div class="login-hero">
+    <div class="login-box">
+      <div class="login-header">
+        <div class="org-chip">
+          <span>🏢</span>
+          <span id="loginOrgName">하나투어</span>
+          <span style="opacity:0.5;">· 파트너스 <span id="loginMenuName">상품관리</span></span>
+        </div>
+        <h1>파트너스 로그인이 필요합니다</h1>
+        <p>
+          어드민에서 <code id="loginOrgCode">org_hanatour</code>의 파트너스 화면으로 진입했습니다.<br>
+          <strong>파트너스 계정</strong>으로 로그인해주세요. (어드민 세션은 파트너스에서 사용할 수 없습니다)
+        </p>
+      </div>
+      <form class="login-form" onsubmit="event.preventDefault(); alert('목업 — 실제 로그인은 파트너스 시스템 연동 필요');">
+        <div class="form-row">
+          <label>파트너스 계정 ID</label>
+          <input type="text" placeholder="hanatour@partner.co.kr">
+        </div>
+        <div class="form-row">
+          <label>비밀번호</label>
+          <input type="password" placeholder="비밀번호 입력">
+        </div>
+        <button type="submit" class="login-btn">로그인 후 상품관리로 이동</button>
+      </form>
+      <div class="sso-divider">또는</div>
+      <button class="sso-btn" onclick="alert('목업 — 어드민 SSO 위임 로그인 (검토 필요)');">
+        🔑 어드민 SSO로 위임 로그인 (검토 중)
+      </button>
+      <div class="login-alt">
+        계정이 없으신가요? <a href="#">파트너스 가입 문의</a>
+      </div>
+      <div class="login-back">
+        <button onclick="backToAdmin()">← 어드민으로 돌아가기</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ================= 플로우 인디케이터 ================= -->
+<div class="flow-indicator">
+  <div class="flow-step" id="fs1">1. 어드민 GNB</div>
+  <div class="flow-arrow">→</div>
+  <div class="flow-step" id="fs2">2. org 선택</div>
+  <div class="flow-arrow">→</div>
+  <div class="flow-step" id="fs3">3. 파트너스 로그인</div>
+</div>
+
+<script>
+// 초기 상태
+setFlowStep(1);
+
+function setFlowStep(step) {
+  ['fs1', 'fs2', 'fs3'].forEach((id, i) => {
+    const el = document.getElementById(id);
+    el.classList.remove('active', 'done');
+    if (i + 1 === step) el.classList.add('active');
+    else if (i + 1 < step) el.classList.add('done');
+  });
+}
+
+function togglePartnersMenu(e) {
+  e.stopPropagation();
+  const menu = document.getElementById('partnersMenu');
+  menu.classList.toggle('open');
+}
+
+document.addEventListener('click', (e) => {
+  if (!e.target.closest('#partnersMenu')) {
+    document.getElementById('partnersMenu').classList.remove('open');
+  }
+});
+
+function openOrgPicker(e, menuName) {
+  e.stopPropagation();
+  document.getElementById('partnersMenu').classList.remove('open');
+  document.getElementById('modalMenuTitle').textContent = menuName;
+  document.getElementById('orgModal').classList.add('show');
+  window._selectedMenu = menuName;
+  setFlowStep(2);
+}
+
+function closeOrgPicker() {
+  document.getElementById('orgModal').classList.remove('show');
+  setFlowStep(1);
+}
+
+function filterOrgs(query) {
+  const q = query.toLowerCase().trim();
+  document.querySelectorAll('#orgList .org-item').forEach(item => {
+    const text = item.textContent.toLowerCase();
+    item.style.display = !q || text.includes(q) ? 'flex' : 'none';
+  });
+}
+
+const orgCodes = {
+  '하나투어': 'org_hanatour',
+  '모두투어': 'org_modetour',
+  '노랑풍선': 'org_ybtour',
+  '참좋은여행': 'org_verygood',
+  '레드캡투어': 'org_redcap',
+  'TMG': 'org_tmg',
+  '솔바이멜리아': 'org_solbymelia'
+};
+
+function selectOrg(orgName) {
+  const menu = window._selectedMenu || '상품관리';
+  document.getElementById('loginOrgName').textContent = orgName;
+  document.getElementById('loginOrgCode').textContent = orgCodes[orgName] || 'org_unknown';
+  document.getElementById('loginMenuName').textContent = menu;
+  document.getElementById('partnersActiveMenu').textContent = menu;
+  document.getElementById('orgModal').classList.remove('show');
+  document.getElementById('adminShell').style.display = 'none';
+  document.getElementById('partnersShell').classList.add('show');
+  setFlowStep(3);
+  window.scrollTo(0, 0);
+}
+
+function backToAdmin() {
+  document.getElementById('partnersShell').classList.remove('show');
+  document.getElementById('adminShell').style.display = 'block';
+  setFlowStep(1);
+}
+</script>
+
+</body>
+</html>
