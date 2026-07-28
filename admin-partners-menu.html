@@ -27,11 +27,26 @@ body { font-family: 'Pretendard', 'Apple SD Gothic Neo', -apple-system, sans-ser
 
 .gnb-dropdown { position: absolute; top: 64px; left: 0; background: #fff; border-radius: 8px; box-shadow: 0 8px 24px rgba(0,0,0,0.12); min-width: 200px; padding: 8px 0; display: none; z-index: 200; border: 1px solid #f0f0f0; }
 .gnb-item:hover .gnb-dropdown, .gnb-item.open .gnb-dropdown { display: block; }
-.gnb-item.partners-menu:hover .gnb-dropdown, .gnb-item.partners-menu.open .gnb-dropdown { display: block; min-width: 240px; }
 .gnb-dropdown-item { padding: 9px 20px; cursor: pointer; font-size: 13px; color: rgba(0,0,0,0.75); white-space: nowrap; transition: all 0.12s; display: flex; align-items: center; gap: 8px; }
 .gnb-dropdown-item:hover { background: #f0f5ff; color: #1677ff; }
 .gnb-dropdown-item.partners:hover { background: #f9f0ff; color: #722ed1; }
 .gnb-dropdown-item .item-tag { font-size: 10px; color: rgba(0,0,0,0.35); background: #fafafa; padding: 1px 6px; border-radius: 3px; margin-left: auto; }
+
+/* PB 관리 멀티컬럼 드롭다운 (스크린샷 재현 + 파트너스 컬럼 추가) */
+.gnb-mega { position: absolute; top: 64px; left: 0; background: #fff; border-radius: 8px; box-shadow: 0 8px 32px rgba(0,0,0,0.14); display: none; z-index: 200; border: 1px solid #f0f0f0; padding: 20px 8px; min-width: 800px; }
+.gnb-item.open .gnb-mega, .gnb-item:hover .gnb-mega { display: flex; gap: 8px; }
+.mega-col { padding: 0 20px; min-width: 180px; border-right: 1px solid #f5f5f5; }
+.mega-col:last-child { border-right: none; }
+.mega-col.partners-col { background: linear-gradient(180deg, #faf5ff 0%, #ffffff 100%); border-radius: 8px; border-right: none; border: 1px solid #efdbff; margin-left: 4px; }
+.mega-title { font-size: 13px; font-weight: 700; color: rgba(0,0,0,0.88); margin-bottom: 14px; padding-bottom: 8px; border-bottom: 1px solid #f0f0f0; display: flex; align-items: center; gap: 6px; }
+.mega-title .badge-partners { font-size: 9px; padding: 2px 5px; margin-right: 0; }
+.mega-item { padding: 8px 0; cursor: pointer; font-size: 13px; color: rgba(0,0,0,0.65); transition: color 0.12s; display: flex; align-items: center; gap: 8px; }
+.mega-item:hover { color: #1677ff; }
+.mega-item.partners-item:hover { color: #722ed1; }
+.mega-item .arrow { margin-left: auto; opacity: 0; transition: opacity 0.15s; font-size: 12px; }
+.mega-item:hover .arrow { opacity: 1; }
+.mega-item.partners-item .icon-lock { font-size: 10px; opacity: 0.5; }
+.mega-col .hint-line { font-size: 10px; color: rgba(0,0,0,0.4); margin-top: 8px; padding-top: 8px; border-top: 1px dashed #efdbff; line-height: 1.5; }
 
 .gnb-right { margin-left: auto; display: flex; align-items: center; gap: 14px; }
 .gnb-user { font-size: 12px; color: rgba(0,0,0,0.55); }
@@ -177,36 +192,63 @@ tr:hover td { background: #fafbfc; }
       <div class="gnb-item">상품관리 <span class="gnb-caret">▾</span></div>
       <div class="gnb-item">태그</div>
       <div class="gnb-item active">예약 관리 <span class="gnb-caret">▾</span></div>
-      <div class="gnb-item">PB 관리 <span class="gnb-caret">▾</span></div>
-      <div class="gnb-item">카탈로그 <span class="gnb-caret">▾</span></div>
-      <div class="gnb-item">쿠폰</div>
-      <div class="gnb-item">정산 <span class="gnb-caret">▾</span></div>
-      <div class="gnb-item">파트너스관리 <span class="gnb-caret">▾</span></div>
 
-      <!-- ✨ 신규 추가된 [파트너스] 메뉴 그룹 -->
-      <div class="gnb-item partners-menu" id="partnersMenu" onclick="togglePartnersMenu(event)">
-        <span class="badge-partners">파트너스</span>상품관리
-        <span class="gnb-caret">▾</span>
-        <div class="gnb-dropdown" id="partnersDropdown">
-          <div class="gnb-dropdown-item partners" onclick="openOrgPicker(event, '상품관리')">
-            <span>📦</span>상품관리
-            <span class="item-tag">파트너스 화면</span>
+      <!-- PB 관리 (mega 드롭다운 - 파트너스 컬럼 포함) -->
+      <div class="gnb-item" id="pbMenu" onclick="togglePbMenu(event)">
+        PB 관리 <span class="gnb-caret">▾</span>
+        <div class="gnb-mega" id="pbMega" onclick="event.stopPropagation()">
+          <!-- Col 1: PB 관리 -->
+          <div class="mega-col">
+            <div class="mega-title">PB 관리</div>
+            <div class="mega-item">PB 설정 <span class="arrow">›</span></div>
+            <div class="mega-item">공급사 관리 <span class="arrow">›</span></div>
+            <div class="mega-item">항공권 관리 <span class="arrow">›</span></div>
+            <div class="mega-item">숙박권 관리 <span class="arrow">›</span></div>
+            <div class="mega-item">투어·티켓 관리 <span class="arrow">›</span></div>
+            <div class="mega-item">PB 콘텐츠 관리 <span class="arrow">›</span></div>
           </div>
-          <div class="gnb-dropdown-item partners" onclick="openOrgPicker(event, '예약관리')">
-            <span>📋</span>예약관리
-            <span class="item-tag">파트너스 화면</span>
+          <!-- Col 2: 연동 관리 -->
+          <div class="mega-col">
+            <div class="mega-title">연동 관리</div>
+            <div class="mega-item">TMG 숙소 요금표 관리 <span class="arrow">›</span></div>
+            <div class="mega-item">NUUA 항공권 소싱 <span class="arrow">›</span></div>
           </div>
-          <div class="gnb-dropdown-item partners" onclick="openOrgPicker(event, '정산')">
-            <span>💰</span>정산
-            <span class="item-tag">파트너스 화면</span>
+          <!-- Col 3: PB 예약관리 -->
+          <div class="mega-col">
+            <div class="mega-title">PB 예약관리</div>
+            <div class="mega-item">항공권 예약관리 <span class="arrow">›</span></div>
+            <div class="mega-item">숙박권 예약관리 <span class="arrow">›</span></div>
+            <div class="mega-item">여행자보험 예약관리 <span class="arrow">›</span></div>
           </div>
-          <div class="gnb-dropdown-item partners" onclick="openOrgPicker(event, '대시보드')">
-            <span>📊</span>대시보드
-            <span class="item-tag">파트너스 화면</span>
+          <!-- ✨ Col 4: 파트너스 (신규 추가) -->
+          <div class="mega-col partners-col">
+            <div class="mega-title">
+              <span class="badge-partners">파트너스</span>바로가기
+            </div>
+            <div class="mega-item partners-item" onclick="openOrgPicker(event, '상품관리')">
+              📦 상품관리 <span class="icon-lock">🔒</span><span class="arrow">›</span>
+            </div>
+            <div class="mega-item partners-item" onclick="openOrgPicker(event, '예약관리')">
+              📋 예약관리 <span class="icon-lock">🔒</span><span class="arrow">›</span>
+            </div>
+            <div class="mega-item partners-item" onclick="openOrgPicker(event, '정산')">
+              💰 정산 <span class="icon-lock">🔒</span><span class="arrow">›</span>
+            </div>
+            <div class="mega-item partners-item" onclick="openOrgPicker(event, '대시보드')">
+              📊 대시보드 <span class="icon-lock">🔒</span><span class="arrow">›</span>
+            </div>
+            <div class="hint-line">
+              org 선택 후 파트너스 화면으로 진입합니다.<br>
+              🔒 파트너스 계정 로그인 필요
+            </div>
           </div>
         </div>
       </div>
 
+      <div class="gnb-item">카탈로그 <span class="gnb-caret">▾</span></div>
+      <div class="gnb-item">쿠폰</div>
+      <div class="gnb-item">정산 <span class="gnb-caret">▾</span></div>
+      <div class="gnb-item">파트너스관리 <span class="gnb-caret">▾</span></div>
       <div class="gnb-item">후기</div>
       <div class="gnb-item">사내도구</div>
       <div class="gnb-item">마케팅</div>
@@ -234,10 +276,11 @@ tr:hover td { background: #fafbfc; }
     <div class="info-card">
       <div class="info-icon">✨</div>
       <div class="info-body">
-        <h3>새로 추가된 <span class="badge-partners" style="font-size:10px;padding:2px 6px;">파트너스</span> 상품관리 메뉴를 사용해보세요</h3>
+        <h3><code>PB 관리</code> 메뉴 안에 <span class="badge-partners" style="font-size:10px;padding:2px 6px;">파트너스</span> 바로가기가 추가되었어요</h3>
         <p>
-          어드민에서 특정 파트너 <code>org</code>를 선택하면, <strong>해당 org의 파트너스 상품관리 화면</strong>으로 바로 진입할 수 있어요.<br>
-          단, 파트너스 화면 진입 시에는 <strong>파트너스 계정 로그인</strong>이 별도로 필요합니다. (어드민 세션 ≠ 파트너스 세션)
+          상단 <strong>PB 관리</strong> 메뉴를 클릭하면, 드롭다운 우측에 <strong>[파트너스] 바로가기</strong> 컬럼이 나와요.<br>
+          상품관리/예약관리/정산/대시보드 중 하나를 선택 → <strong>org 선택 모달</strong> → 해당 org의 파트너스 화면으로 진입합니다.<br>
+          단, 파트너스 화면은 <strong>파트너스 계정 로그인</strong>이 별도로 필요합니다. (어드민 세션 ≠ 파트너스 세션)
         </p>
       </div>
     </div>
@@ -463,21 +506,21 @@ function setFlowStep(step) {
   });
 }
 
-function togglePartnersMenu(e) {
+function togglePbMenu(e) {
   e.stopPropagation();
-  const menu = document.getElementById('partnersMenu');
+  const menu = document.getElementById('pbMenu');
   menu.classList.toggle('open');
 }
 
 document.addEventListener('click', (e) => {
-  if (!e.target.closest('#partnersMenu')) {
-    document.getElementById('partnersMenu').classList.remove('open');
+  if (!e.target.closest('#pbMenu')) {
+    document.getElementById('pbMenu').classList.remove('open');
   }
 });
 
 function openOrgPicker(e, menuName) {
   e.stopPropagation();
-  document.getElementById('partnersMenu').classList.remove('open');
+  document.getElementById('pbMenu').classList.remove('open');
   document.getElementById('modalMenuTitle').textContent = menuName;
   document.getElementById('orgModal').classList.add('show');
   window._selectedMenu = menuName;
