@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>숙박권 관리 — 박수 고정 + 애드온 정책 — TripStore Partners</title>
+<title>숙박권 관리 — 박수 고정 + 일별 요금 앵커 — TripStore Partners</title>
 <link href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.6/dist/web/static/pretendard.css" rel="stylesheet">
 <style>
 * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -30,7 +30,7 @@ button { font-family: inherit; cursor: pointer; }
 /* Page header */
 .page-header { display: flex; align-items: flex-end; justify-content: space-between; margin: 12px 0 18px; gap: 14px; flex-wrap: wrap; }
 .page-title-wrap { display: flex; align-items: center; gap: 12px; }
-.hotel-thumb { width: 52px; height: 52px; border-radius: 12px; display: flex; align-items: center; justify-content: center; color: #fff; font-weight: 800; font-size: 13px; background: linear-gradient(135deg, #91caff, #1677ff); }
+.hotel-thumb { width: 52px; height: 52px; border-radius: 12px; display: flex; align-items: center; justify-content: center; color: #fff; font-weight: 800; font-size: 13px; background: linear-gradient(135deg, #91caff, #1677ff); text-align: center; line-height: 1.1; }
 .page-title { font-size: 22px; font-weight: 800; letter-spacing: -0.3px; }
 .page-meta { font-size: 12px; color: rgba(0,0,0,0.55); margin-top: 4px; display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
 .id-pill { background: #f5f5f5; padding: 1px 7px; border-radius: 3px; font-family: 'SF Mono', monospace; font-size: 10.5px; color: rgba(0,0,0,0.6); font-weight: 600; }
@@ -73,11 +73,22 @@ button { font-family: inherit; cursor: pointer; }
 .nights-seg button.active { background: #1677ff; color: #fff; }
 .nights-seg button:hover:not(.active) { background: #f0f7ff; color: #1677ff; }
 
-/* Derived value chip */
-.derived { display: inline-flex; align-items: center; gap: 8px; padding: 8px 14px; background: linear-gradient(135deg, #f0f7ff, #e6f4ff); border: 1px dashed #91caff; border-radius: 8px; font-size: 12.5px; color: #0958d9; }
-.derived .lbl { color: rgba(0,0,0,0.55); font-weight: 600; font-size: 11px; }
-.derived .val { font-weight: 800; font-size: 15px; color: #0958d9; }
-.derived .formula { color: rgba(0,0,0,0.45); font-size: 11px; font-family: 'SF Mono', monospace; margin-left: 4px; }
+/* Daily rates */
+.daily-wrap { border: 1px solid #e6f4ff; border-radius: 10px; padding: 14px; background: linear-gradient(135deg, #f9fbff, #f0f7ff); }
+.daily-title { font-size: 12px; font-weight: 800; color: #0958d9; margin-bottom: 10px; display: flex; align-items: center; gap: 6px; }
+.daily-strip { display: flex; gap: 8px; overflow-x: auto; padding-bottom: 4px; }
+.day-cell { flex: 1; min-width: 110px; background: #fff; border: 1px solid #d6e4ff; border-radius: 8px; padding: 10px 12px; position: relative; transition: all 0.2s; }
+.day-cell.anchor-early { border-color: #ff7a45; background: #fff2e8; box-shadow: 0 2px 8px rgba(255,122,69,0.12); }
+.day-cell.anchor-late { border-color: #722ed1; background: #f9f0ff; box-shadow: 0 2px 8px rgba(114,46,209,0.12); }
+.day-cell .day-idx { font-size: 10px; font-weight: 700; color: rgba(0,0,0,0.4); text-transform: uppercase; letter-spacing: 0.4px; }
+.day-cell .day-date { font-size: 13px; font-weight: 800; color: rgba(0,0,0,0.85); margin-top: 2px; }
+.day-cell .day-dow { font-size: 11px; color: rgba(0,0,0,0.5); margin-left: 4px; font-weight: 600; }
+.day-cell .day-price { font-size: 15px; font-weight: 800; color: #1677ff; margin-top: 6px; font-family: 'SF Mono', monospace; }
+.day-cell .anchor-tag { position: absolute; top: -8px; right: 8px; font-size: 9.5px; font-weight: 800; padding: 2px 6px; border-radius: 3px; }
+.day-cell.anchor-early .anchor-tag { background: #ff7a45; color: #fff; }
+.day-cell.anchor-late .anchor-tag { background: #722ed1; color: #fff; }
+.daily-total { margin-top: 10px; padding-top: 10px; border-top: 1px dashed #d6e4ff; display: flex; justify-content: space-between; align-items: center; font-size: 12px; color: rgba(0,0,0,0.65); }
+.daily-total strong { font-size: 16px; color: #0958d9; font-weight: 800; font-family: 'SF Mono', monospace; }
 
 /* Addon table */
 .addon-table { width: 100%; border-collapse: collapse; margin-top: 4px; }
@@ -88,12 +99,21 @@ button { font-family: inherit; cursor: pointer; }
 .addon-tag { font-size: 10px; padding: 2px 7px; border-radius: 3px; font-weight: 700; }
 .addon-tag.fixed { background: #f9f0ff; color: #722ed1; border: 1px solid #d3adf7; }
 .addon-tag.percent { background: #e6f4ff; color: #0958d9; border: 1px solid #91caff; }
+.addon-tag.anchor-early { background: #fff2e8; color: #d4380d; border: 1px solid #ffbb96; }
+.addon-tag.anchor-late { background: #f9f0ff; color: #531dab; border: 1px solid #b37feb; }
 .addon-desc { font-size: 11.5px; color: rgba(0,0,0,0.5); margin-top: 3px; }
 .addon-input { display: inline-flex; align-items: center; gap: 6px; }
 .addon-input .input { width: 130px; text-align: right; }
 .addon-preview { font-size: 12px; color: rgba(0,0,0,0.55); }
 .addon-preview .val { font-weight: 800; color: #1677ff; font-size: 13.5px; margin-left: 4px; }
 .addon-preview .arrow { color: rgba(0,0,0,0.3); margin: 0 6px; }
+.addon-preview .anchor-ref { display: inline-block; padding: 1px 6px; border-radius: 3px; font-size: 10.5px; font-weight: 700; margin-right: 4px; }
+.addon-preview .anchor-ref.early { background: #fff2e8; color: #d4380d; }
+.addon-preview .anchor-ref.late { background: #f9f0ff; color: #531dab; }
+
+/* Anchor select */
+.anchor-select { display: flex; gap: 6px; align-items: center; margin-top: 6px; font-size: 11px; color: rgba(0,0,0,0.55); }
+.anchor-select select { height: 24px; font-size: 11px; border: 1px solid #d9d9d9; border-radius: 4px; padding: 0 6px; background: #fff; font-family: inherit; }
 
 /* Simulation card */
 .sim-card { background: linear-gradient(135deg, #f9fbff 0%, #eef4ff 100%); border: 1px solid #d6e4ff; border-radius: 10px; padding: 18px; margin-bottom: 14px; }
@@ -135,10 +155,17 @@ button { font-family: inherit; cursor: pointer; }
 .btn.primary:hover { background: #4096ff; color: #fff; }
 
 /* Section title */
-.section-title { font-size: 12px; font-weight: 800; color: rgba(0,0,0,0.75); text-transform: uppercase; letter-spacing: 0.5px; margin: 20px 0 10px; padding-left: 4px; border-left: 3px solid #1677ff; padding-left: 10px; }
+.section-title { font-size: 12px; font-weight: 800; color: rgba(0,0,0,0.75); text-transform: uppercase; letter-spacing: 0.5px; margin: 20px 0 10px; padding-left: 10px; border-left: 3px solid #1677ff; }
 
 .note { font-size: 11.5px; color: rgba(0,0,0,0.45); margin-top: 10px; line-height: 1.6; }
 .note strong { color: rgba(0,0,0,0.65); }
+
+/* Legend */
+.legend { display: flex; gap: 16px; font-size: 11px; color: rgba(0,0,0,0.55); margin-top: 8px; align-items: center; flex-wrap: wrap; }
+.legend-item { display: inline-flex; align-items: center; gap: 5px; }
+.legend-dot { width: 10px; height: 10px; border-radius: 3px; border: 1px solid; }
+.legend-dot.early { background: #fff2e8; border-color: #ff7a45; }
+.legend-dot.late { background: #f9f0ff; border-color: #722ed1; }
 </style>
 </head>
 <body>
@@ -186,9 +213,10 @@ button { font-family: inherit; cursor: pointer; }
   <div class="policy-banner">
     <div class="ico">📌</div>
     <div class="body">
-      <strong>박수 고정 + 애드온 정책 변경 (2026-08-03)</strong><br>
-      다이나믹 요금 소스가 1박 조회를 지원하지 않고 <span class="tag">min_stay</span> 제약이 있어, 숙박권마다 <strong>박수를 고정</strong>하고 <strong>N박 총액</strong>을 조회·저장합니다.
-      애드온은 성격에 따라 분리 관리: <span class="tag">아동가 = 고정 금액</span> · <span class="tag">얼리/레이트 = %</span> (평균 1박 앵커).
+      <strong>박수 고정 + 일별 요금 앵커 정책 (2026-08-03)</strong><br>
+      다이나믹 요금은 <span class="tag">min_stay</span> 제약이 있어 N박 총액으로만 조회되지만, 응답에는 <strong>일별 요금 breakdown</strong>이 포함됩니다.
+      숙박권은 <strong>박수 고정</strong> + <strong>일별 요금 그대로 저장</strong>. 애드온은:
+      <span class="tag">아동가 = 고정 금액</span> · <span class="tag">얼리 = 체크인일 요금 × %</span> · <span class="tag">레이트 = 마지막날 요금 × %</span>
     </div>
   </div>
 
@@ -207,9 +235,9 @@ button { font-family: inherit; cursor: pointer; }
       <div class="compare-title">✅ TO-BE (신규)</div>
       <ul class="compare-list">
         <li><strong>박수 고정</strong> (숙박권 등록 시 결정)</li>
-        <li>N박 총액 다이나믹 조회 → 평균 1박 파생</li>
+        <li>N박 총액 + <strong>일별 요금 breakdown</strong> 저장</li>
         <li>아동가 = <strong>고정 금액</strong> (관리자 직접 입력)</li>
-        <li>얼리/레이트 = <strong>% × 평균 1박</strong></li>
+        <li>얼리 = <strong>체크인일 요금 × %</strong> · 레이트 = <strong>마지막날 요금 × %</strong></li>
       </ul>
     </div>
   </div>
@@ -244,7 +272,7 @@ button { font-family: inherit; cursor: pointer; }
             <button onclick="setNights(4)" id="n4">4박</button>
             <button onclick="setNights(5)" id="n5">5박</button>
           </div>
-          <div class="field-hint">⚠️ 변경 시 다이나믹 요금·애드온 실제 금액이 재계산됩니다</div>
+          <div class="field-hint">⚠️ 변경 시 일별 요금·애드온 실제 금액이 재계산됩니다</div>
         </div>
         <div class="field">
           <label class="field-label">요금 타입</label>
@@ -254,39 +282,32 @@ button { font-family: inherit; cursor: pointer; }
     </div>
   </div>
 
-  <!-- Section 2: 요금 구조 -->
+  <!-- Section 2: 요금 구조 (일별) -->
   <div class="card">
     <div class="card-head">
       <div>
-        <div class="card-title"><span class="num">2</span>요금 구조</div>
-        <div class="card-desc">N박 총액은 다이나믹 조회 결과. 평균 1박은 애드온 % 계산용 파생값 (스냅샷 저장)</div>
+        <div class="card-title"><span class="num">2</span>요금 구조 <span style="font-size:11px; font-weight:700; padding:2px 7px; border-radius:3px; background:#e6f4ff; color:#0958d9; margin-left:6px;">일별 요금 기준</span></div>
+        <div class="card-desc">다이나믹 응답의 <strong>일별 요금 breakdown</strong>을 그대로 저장. 얼리/레이트 %는 특정 일자 요금을 앵커로 사용.</div>
       </div>
     </div>
     <div class="card-body">
-      <div class="field-grid">
-        <div class="field">
-          <label class="field-label">N박 총액 (조회 결과)</label>
-          <div class="input-group">
-            <input class="input readonly" id="stayBase" value="900,000" readonly style="width: 180px; text-align: right;">
-            <span class="input-suffix">원 / <span id="nightsLabel">3</span>박</span>
-          </div>
-          <div class="field-hint">TMG checkAvailability 응답 그대로 저장. STATIC은 스킵.</div>
+      <div class="daily-wrap">
+        <div class="daily-title">📅 일별 요금 (다이나믹 조회 결과)</div>
+        <div class="daily-strip" id="dailyStrip"></div>
+        <div class="daily-total">
+          <span>N박 총액 <span style="font-size:11px; color:rgba(0,0,0,0.45);">(일별 합계)</span></span>
+          <strong id="stayTotal">₩900,000</strong>
         </div>
-        <div class="field">
-          <label class="field-label">
-            평균 1박 (파생 · 스냅샷)
-            <span class="new-badge">NEW</span>
-          </label>
-          <div class="derived">
-            <span class="lbl">= N박 총액 ÷ 박수</span>
-            <span class="val" id="perNightAvg">₩300,000</span>
-            <span class="formula" id="perNightFormula">(900,000 ÷ 3)</span>
-          </div>
+        <div class="legend">
+          <div class="legend-item"><span class="legend-dot early"></span>얼리체크인 앵커</div>
+          <div class="legend-item"><span class="legend-dot late"></span>레이트체크아웃 앵커</div>
+          <div class="legend-item" style="margin-left:auto; color:rgba(0,0,0,0.4);">TMG checkAvailability 응답 기준 · 재조회 시 덮어쓰기</div>
         </div>
       </div>
       <div class="note">
-        <strong>왜 파생·스냅샷 방식인가:</strong> 다이나믹 리프레시 시 N박 총액이 바뀌면 평균 1박도 재계산되어 얼리/레이트 실제 금액이 자동 반영됩니다.
-        단, 산술 평균이라 실제 첫날/마지막날 요금과 다를 수 있음 → 정책 문서 명시 필요.
+        <strong>왜 일별 요금 앵커인가:</strong> 평균값이 아니라 실제 그 날짜 요금이 애드온의 기준이 됩니다.
+        얼리체크인은 체크인 첫날의 요금과 성격이 맞고, 레이트체크아웃은 마지막 박(체크아웃 직전) 요금과 성격이 맞습니다.
+        주말/평일·성수기 혼합 케이스에서도 왜곡 없이 반영됩니다.
       </div>
     </div>
   </div>
@@ -296,15 +317,15 @@ button { font-family: inherit; cursor: pointer; }
     <div class="card-head">
       <div>
         <div class="card-title"><span class="num">3</span>애드온 관리</div>
-        <div class="card-desc">아동가는 관리자가 직접 금액 입력 · 얼리/레이트는 평균 1박 대비 % 유지</div>
+        <div class="card-desc">아동가 = 관리자 직접 금액 입력 · 얼리/레이트 = 특정 일자 요금 × %</div>
       </div>
     </div>
     <div class="card-body" style="padding: 0;">
       <table class="addon-table">
         <thead>
           <tr>
-            <th style="width: 30%;">애드온</th>
-            <th style="width: 30%;">입력 값</th>
+            <th style="width: 32%;">애드온</th>
+            <th style="width: 28%;">입력 값</th>
             <th style="width: 40%;">실제 적용 금액 (미리보기)</th>
           </tr>
         </thead>
@@ -315,7 +336,7 @@ button { font-family: inherit; cursor: pointer; }
                 아동가 (Extra Bed / Child)
                 <span class="addon-tag fixed">고정 금액</span>
               </div>
-              <div class="addon-desc">인당·박당이 아닌 <strong>박수 반영 총액</strong>을 관리자가 입력. 다이나믹 변동과 무관.</div>
+              <div class="addon-desc">인당·박당이 아닌 <strong>박수 반영 총액</strong>을 관리자가 직접 입력. 다이나믹 변동과 무관.</div>
             </td>
             <td>
               <div class="addon-input">
@@ -334,9 +355,17 @@ button { font-family: inherit; cursor: pointer; }
             <td>
               <div class="addon-name">
                 얼리체크인 (Early Check-in)
-                <span class="addon-tag percent">% (평균 1박 × %)</span>
+                <span class="addon-tag percent">% × 일별 요금</span>
+                <span class="addon-tag anchor-early">앵커: 체크인일</span>
               </div>
-              <div class="addon-desc">체크인 -1일 개념. 평균 1박의 % 유지 → 다이나믹 변동 시 자동 반영.</div>
+              <div class="addon-desc">체크인 첫날 요금을 기준으로 %. 다이나믹 변동 시 그 날짜 요금 반영.</div>
+              <div class="anchor-select">
+                앵커 일자:
+                <select id="earlyAnchor" onchange="recalc()">
+                  <option value="first" selected>체크인일 (Night 1)</option>
+                  <option value="last">마지막날 (Night N)</option>
+                </select>
+              </div>
             </td>
             <td>
               <div class="addon-input">
@@ -346,9 +375,10 @@ button { font-family: inherit; cursor: pointer; }
             </td>
             <td>
               <div class="addon-preview">
-                <span id="earlyFormula" style="font-family: 'SF Mono', monospace; font-size: 11.5px;">30% × 300,000</span>
+                <span class="anchor-ref early" id="earlyAnchorRef">Night 1: ₩320,000</span>
+                <span id="earlyFormula" style="font-family: 'SF Mono', monospace; font-size: 11.5px;">× 30%</span>
                 <span class="arrow">→</span>
-                <span class="val" id="earlyPreview">₩90,000</span>
+                <span class="val" id="earlyPreview">₩96,000</span>
               </div>
             </td>
           </tr>
@@ -356,9 +386,17 @@ button { font-family: inherit; cursor: pointer; }
             <td>
               <div class="addon-name">
                 레이트체크아웃 (Late Check-out)
-                <span class="addon-tag percent">% (평균 1박 × %)</span>
+                <span class="addon-tag percent">% × 일별 요금</span>
+                <span class="addon-tag anchor-late">앵커: 마지막날</span>
               </div>
-              <div class="addon-desc">체크아웃 +1일 개념. 평균 1박의 % 유지 → 다이나믹 변동 시 자동 반영.</div>
+              <div class="addon-desc">마지막 박(체크아웃 직전) 요금을 기준으로 %. 다이나믹 변동 시 그 날짜 요금 반영.</div>
+              <div class="anchor-select">
+                앵커 일자:
+                <select id="lateAnchor" onchange="recalc()">
+                  <option value="last" selected>마지막날 (Night N)</option>
+                  <option value="first">체크인일 (Night 1)</option>
+                </select>
+              </div>
             </td>
             <td>
               <div class="addon-input">
@@ -368,9 +406,10 @@ button { font-family: inherit; cursor: pointer; }
             </td>
             <td>
               <div class="addon-preview">
-                <span id="lateFormula" style="font-family: 'SF Mono', monospace; font-size: 11.5px;">30% × 300,000</span>
+                <span class="anchor-ref late" id="lateAnchorRef">Night 3: ₩280,000</span>
+                <span id="lateFormula" style="font-family: 'SF Mono', monospace; font-size: 11.5px;">× 30%</span>
                 <span class="arrow">→</span>
-                <span class="val" id="latePreview">₩90,000</span>
+                <span class="val" id="latePreview">₩84,000</span>
               </div>
             </td>
           </tr>
@@ -384,7 +423,7 @@ button { font-family: inherit; cursor: pointer; }
   <div class="sim-card">
     <div class="sim-title">💳 성인 2명 + 아동 1명 · 얼리·레이트 모두 선택 시</div>
     <div class="sim-row">
-      <span class="lbl">N박 총액 (다이나믹) <span class="mini-tag" id="simNightsTag">3박</span></span>
+      <span class="lbl">N박 총액 (일별 합계) <span class="mini-tag" id="simNightsTag">3박</span></span>
       <span class="val" id="simStay">₩900,000</span>
     </div>
     <div class="sim-row">
@@ -392,12 +431,12 @@ button { font-family: inherit; cursor: pointer; }
       <span class="val" id="simChild">+ ₩150,000</span>
     </div>
     <div class="sim-row">
-      <span class="lbl">+ 얼리체크인 <span class="mini-tag">% × 평균 1박</span></span>
-      <span class="val" id="simEarly">+ ₩90,000</span>
+      <span class="lbl">+ 얼리체크인 <span class="mini-tag" id="simEarlyTag">Night 1 × 30%</span></span>
+      <span class="val" id="simEarly">+ ₩96,000</span>
     </div>
     <div class="sim-row">
-      <span class="lbl">+ 레이트체크아웃 <span class="mini-tag">% × 평균 1박</span></span>
-      <span class="val" id="simLate">+ ₩90,000</span>
+      <span class="lbl">+ 레이트체크아웃 <span class="mini-tag" id="simLateTag">Night 3 × 30%</span></span>
+      <span class="val" id="simLate">+ ₩84,000</span>
     </div>
     <div class="sim-total">
       <span class="lbl">최종 결제 금액</span>
@@ -408,22 +447,36 @@ button { font-family: inherit; cursor: pointer; }
   <!-- Data Model -->
   <div class="section-title">🗂 데이터 모델 초안</div>
   <div class="datamodel">
-<span class="c">// AccommodationVoucher — 박수 고정 + 애드온 분리 정책</span>
+<span class="c">// AccommodationVoucher — 박수 고정 + 일별 요금 앵커</span>
 {
   <span class="k">id</span>: <span class="t">"ACCOM-253"</span>,
   <span class="k">name</span>: <span class="t">"솔바이멜리아 푸꾸옥 · 디럭스 오션뷰"</span>,
-  <span class="k">nights</span>: <span class="t">3</span>,                          <span class="c">// ← <span class="new">NEW</span> 고정 박수</span>
-  <span class="k">rateType</span>: <span class="t">"DYNAMIC"</span>,               <span class="c">// STATIC | ALM | DYNAMIC</span>
+  <span class="k">nights</span>: <span class="t">3</span>,                            <span class="c">// ← <span class="new">NEW</span> 고정 박수</span>
+  <span class="k">rateType</span>: <span class="t">"DYNAMIC"</span>,                 <span class="c">// STATIC | ALM | DYNAMIC</span>
 
-  <span class="c">// 요금 (다이나믹)</span>
-  <span class="k">stayBaseAmount</span>: <span class="t">900000</span>,             <span class="c">// N박 총액 (다이나믹 조회)</span>
-  <span class="k">perNightAvgAmount</span>: <span class="t">300000</span>,          <span class="c">// ← <span class="new">NEW</span> 파생 · 스냅샷 (= stayBase / nights)</span>
+  <span class="c">// 요금 — 일별 breakdown 그대로 저장</span>
+  <span class="k">stayBaseAmount</span>: <span class="t">900000</span>,               <span class="c">// N박 총액 (= dailyRates 합계)</span>
+  <span class="k">dailyRates</span>: [                              <span class="c">// ← <span class="new">NEW</span> 다이나믹 응답 일별 요금</span>
+    { <span class="k">date</span>: <span class="t">"2026-08-10"</span>, <span class="k">amount</span>: <span class="t">320000</span> },   <span class="c">// Night 1 (체크인일)</span>
+    { <span class="k">date</span>: <span class="t">"2026-08-11"</span>, <span class="k">amount</span>: <span class="t">300000</span> },   <span class="c">// Night 2</span>
+    { <span class="k">date</span>: <span class="t">"2026-08-12"</span>, <span class="k">amount</span>: <span class="t">280000</span> }    <span class="c">// Night N (마지막 박)</span>
+  ],
 
   <span class="c">// 애드온</span>
-  <span class="k">childFixedAmount</span>: <span class="t">150000</span>,           <span class="c">// ← <span class="new">NEW</span> 관리자 직접 입력 (박수 반영 총액)</span>
-  <span class="k">earlyCheckInRate</span>: <span class="t">0.30</span>,             <span class="c">// % × perNightAvgAmount</span>
-  <span class="k">lateCheckOutRate</span>: <span class="t">0.30</span>              <span class="c">// % × perNightAvgAmount</span>
+  <span class="k">childFixedAmount</span>: <span class="t">150000</span>,             <span class="c">// ← <span class="new">NEW</span> 관리자 직접 입력</span>
+  <span class="k">earlyCheckIn</span>: {                            <span class="c">// ← <span class="new">NEW</span> 앵커 명시</span>
+    <span class="k">rate</span>: <span class="t">0.30</span>,
+    <span class="k">anchor</span>: <span class="t">"FIRST_NIGHT"</span>              <span class="c">// FIRST_NIGHT | LAST_NIGHT</span>
+  },
+  <span class="k">lateCheckOut</span>: {
+    <span class="k">rate</span>: <span class="t">0.30</span>,
+    <span class="k">anchor</span>: <span class="t">"LAST_NIGHT"</span>
+  }
 }
+
+<span class="c">// 계산 로직</span>
+<span class="k">earlyCheckInAmount</span> = dailyRates[<span class="t">0</span>].amount × earlyCheckIn.rate     <span class="c">// = 320,000 × 30% = 96,000</span>
+<span class="k">lateCheckOutAmount</span>  = dailyRates[nights-<span class="t">1</span>].amount × lateCheckOut.rate <span class="c">// = 280,000 × 30% = 84,000</span>
   </div>
 
   <!-- 정리 필요 항목 -->
@@ -431,11 +484,11 @@ button { font-family: inherit; cursor: pointer; }
   <div class="card">
     <div class="card-body">
       <ol style="padding-left: 20px; font-size: 13px; line-height: 2; color: rgba(0,0,0,0.8);">
-        <li><strong>기존 % 데이터 마이그레이션</strong> — 얼리/레이트 %는 그대로 사용 가능 (컬럼 의미 동일). 아동가는 스냅샷 시점 1박 × 기존% → 절대금액 환산 후 저장.</li>
-        <li><strong>박수 변경 시 재계산 룰</strong> — 3박권 → 4박권 개편 시 아동가 재입력 필요. 얼리/레이트는 % 그대로.</li>
-        <li><strong>다이나믹 refresh 트리거</strong> — stayBaseAmount 갱신 시 perNightAvgAmount 자동 재계산 + 얼리/레이트 실제 금액 재계산 훅 추가.</li>
-        <li><strong>평균 1박 앵커 정책 명문화</strong> — 산술 평균 근사 → 극단 케이스(주말/평일 혼합) 왜곡 감수 여부 재무·CS 사전 공유.</li>
-        <li><strong>STATIC 타입 처리</strong> — TMG 요금표 v7 정책 동일 (배치·고객 refresh 모두 스킵). 애드온 금액도 스킵.</li>
+        <li><strong>다이나믹 응답 파싱</strong> — TMG checkAvailability가 일별 요금 breakdown을 반환하는지 확인 (현재 요금 정책 v7에 "밤=1박씩"으로 명시되어 있어 저장은 되어 있을 것).</li>
+        <li><strong>앵커 정책 default</strong> — 얼리 = 첫날 / 레이트 = 마지막날. 관리자가 변경 가능하게 할지, 시스템 고정으로 갈지 결정.</li>
+        <li><strong>기존 % 데이터 마이그레이션</strong> — 얼리/레이트 %는 그대로 사용 가능. 아동가만 절대금액으로 환산 후 저장 (스냅샷 시점 요금 × 기존%).</li>
+        <li><strong>일별 요금 refresh 트리거</strong> — dailyRates 갱신 시 얼리/레이트 실제 금액 자동 재계산 훅 추가 필요. STATIC 타입은 스킵 (요금 정책 v7 동일).</li>
+        <li><strong>박수 변경 시 재계산 룰</strong> — 3박권 → 4박권 개편 시 일별 요금 전량 재조회 + 아동가 재입력 필요. 얼리/레이트 %는 그대로 유지.</li>
       </ol>
     </div>
   </div>
@@ -448,56 +501,122 @@ button { font-family: inherit; cursor: pointer; }
 </div>
 
 <script>
-let state = {
+const state = {
   nights: 3,
-  stayBase: 900000,
-  childAmount: 150000,
   earlyRate: 30,
-  lateRate: 30
+  lateRate: 30,
+  childAmount: 150000,
+  earlyAnchor: 'first',
+  lateAnchor: 'last'
+};
+
+const dailyRatesByNights = {
+  1: [{ date: '2026-08-10', amount: 340000, dow: '월' }],
+  2: [
+    { date: '2026-08-10', amount: 330000, dow: '월' },
+    { date: '2026-08-11', amount: 305000, dow: '화' }
+  ],
+  3: [
+    { date: '2026-08-10', amount: 320000, dow: '월' },
+    { date: '2026-08-11', amount: 300000, dow: '화' },
+    { date: '2026-08-12', amount: 280000, dow: '수' }
+  ],
+  4: [
+    { date: '2026-08-10', amount: 310000, dow: '월' },
+    { date: '2026-08-11', amount: 290000, dow: '화' },
+    { date: '2026-08-12', amount: 275000, dow: '수' },
+    { date: '2026-08-13', amount: 265000, dow: '목' }
+  ],
+  5: [
+    { date: '2026-08-10', amount: 305000, dow: '월' },
+    { date: '2026-08-11', amount: 285000, dow: '화' },
+    { date: '2026-08-12', amount: 275000, dow: '수' },
+    { date: '2026-08-13', amount: 265000, dow: '목' },
+    { date: '2026-08-14', amount: 340000, dow: '금' }
+  ]
 };
 
 function fmt(n) { return '₩' + n.toLocaleString(); }
 function fmtPlain(n) { return n.toLocaleString(); }
+function parseNum(v) { return parseInt(String(v).replace(/[^0-9]/g, '')) || 0; }
 
 function setNights(n) {
   state.nights = n;
   document.querySelectorAll('.nights-seg button').forEach(b => b.classList.remove('active'));
   document.getElementById('n' + n).classList.add('active');
-  const perNightRates = { 1: 300000, 2: 310000, 3: 300000, 4: 285000, 5: 275000 };
-  state.stayBase = perNightRates[n] * n;
-  document.getElementById('stayBase').value = fmtPlain(state.stayBase);
-  document.getElementById('nightsLabel').textContent = n;
   document.getElementById('simNightsTag').textContent = n + '박';
   recalc();
 }
 
-function parseNum(v) { return parseInt(String(v).replace(/[^0-9]/g, '')) || 0; }
+function renderDailyStrip() {
+  const rates = dailyRatesByNights[state.nights];
+  const strip = document.getElementById('dailyStrip');
+  const earlyIdx = state.earlyAnchor === 'first' ? 0 : rates.length - 1;
+  const lateIdx = state.lateAnchor === 'first' ? 0 : rates.length - 1;
+
+  strip.innerHTML = rates.map((r, i) => {
+    let cls = '';
+    let tag = '';
+    if (i === earlyIdx && i === lateIdx) {
+      cls = 'anchor-early';
+      tag = '<div class="anchor-tag">얼리·레이트</div>';
+    } else if (i === earlyIdx) {
+      cls = 'anchor-early';
+      tag = '<div class="anchor-tag">얼리</div>';
+    } else if (i === lateIdx) {
+      cls = 'anchor-late';
+      tag = '<div class="anchor-tag">레이트</div>';
+    }
+    return `
+      <div class="day-cell ${cls}">
+        ${tag}
+        <div class="day-idx">Night ${i + 1}</div>
+        <div class="day-date">${r.date.slice(5)}<span class="day-dow">${r.dow}</span></div>
+        <div class="day-price">${fmt(r.amount)}</div>
+      </div>
+    `;
+  }).join('');
+}
 
 function recalc() {
-  state.stayBase = parseNum(document.getElementById('stayBase').value);
   state.childAmount = parseNum(document.getElementById('childAmount').value);
   state.earlyRate = parseFloat(document.getElementById('earlyRate').value) || 0;
   state.lateRate = parseFloat(document.getElementById('lateRate').value) || 0;
+  state.earlyAnchor = document.getElementById('earlyAnchor').value;
+  state.lateAnchor = document.getElementById('lateAnchor').value;
 
-  const perNight = Math.round(state.stayBase / state.nights);
-  const earlyAmt = Math.round(perNight * state.earlyRate / 100);
-  const lateAmt = Math.round(perNight * state.lateRate / 100);
-  const total = state.stayBase + state.childAmount + earlyAmt + lateAmt;
+  const rates = dailyRatesByNights[state.nights];
+  const total = rates.reduce((s, r) => s + r.amount, 0);
 
-  document.getElementById('perNightAvg').textContent = fmt(perNight);
-  document.getElementById('perNightFormula').textContent = '(' + fmtPlain(state.stayBase) + ' ÷ ' + state.nights + ')';
+  const earlyIdx = state.earlyAnchor === 'first' ? 0 : rates.length - 1;
+  const lateIdx = state.lateAnchor === 'first' ? 0 : rates.length - 1;
+  const earlyAnchorAmt = rates[earlyIdx].amount;
+  const lateAnchorAmt = rates[lateIdx].amount;
+
+  const earlyAmt = Math.round(earlyAnchorAmt * state.earlyRate / 100);
+  const lateAmt = Math.round(lateAnchorAmt * state.lateRate / 100);
+  const grandTotal = total + state.childAmount + earlyAmt + lateAmt;
+
+  renderDailyStrip();
+  document.getElementById('stayTotal').textContent = fmt(total);
 
   document.getElementById('childPreview').textContent = fmt(state.childAmount);
-  document.getElementById('earlyFormula').textContent = state.earlyRate + '% × ' + fmtPlain(perNight);
+
+  document.getElementById('earlyAnchorRef').textContent = `Night ${earlyIdx + 1}: ${fmt(earlyAnchorAmt)}`;
+  document.getElementById('earlyFormula').textContent = `× ${state.earlyRate}%`;
   document.getElementById('earlyPreview').textContent = fmt(earlyAmt);
-  document.getElementById('lateFormula').textContent = state.lateRate + '% × ' + fmtPlain(perNight);
+
+  document.getElementById('lateAnchorRef').textContent = `Night ${lateIdx + 1}: ${fmt(lateAnchorAmt)}`;
+  document.getElementById('lateFormula').textContent = `× ${state.lateRate}%`;
   document.getElementById('latePreview').textContent = fmt(lateAmt);
 
-  document.getElementById('simStay').textContent = fmt(state.stayBase);
+  document.getElementById('simStay').textContent = fmt(total);
   document.getElementById('simChild').textContent = '+ ' + fmt(state.childAmount);
   document.getElementById('simEarly').textContent = '+ ' + fmt(earlyAmt);
   document.getElementById('simLate').textContent = '+ ' + fmt(lateAmt);
-  document.getElementById('simTotal').textContent = fmt(total);
+  document.getElementById('simEarlyTag').textContent = `Night ${earlyIdx + 1} × ${state.earlyRate}%`;
+  document.getElementById('simLateTag').textContent = `Night ${lateIdx + 1} × ${state.lateRate}%`;
+  document.getElementById('simTotal').textContent = fmt(grandTotal);
 }
 
 recalc();
