@@ -3,758 +3,505 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>항공 설정 — TripStore Partners</title>
+<title>숙박권 관리 — 박수 고정 + 애드온 정책 — TripStore Partners</title>
 <link href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.6/dist/web/static/pretendard.css" rel="stylesheet">
 <style>
 * { box-sizing: border-box; margin: 0; padding: 0; }
 body { font-family: 'Pretendard', 'Apple SD Gothic Neo', -apple-system, sans-serif; font-size: 14px; color: rgba(0,0,0,0.88); background: #f5f5f5; }
+button { font-family: inherit; cursor: pointer; }
 
 /* GNB */
-.gnb { background: #001529; height: 48px; display: flex; align-items: center; position: sticky; top: 0; z-index: 100; padding: 0 24px; }
-.gnb-logo { color: #fff; font-weight: 800; font-size: 15px; margin-right: 40px; letter-spacing: -0.3px; }
-.gnb-logo span { color: #40a9ff; }
-.gnb-logo sup { font-size: 9px; font-weight: 600; color: #40a9ff; background: rgba(64,169,255,0.15); padding: 1px 5px; border-radius: 4px; margin-left: 6px; vertical-align: middle; }
-.gnb-item { color: rgba(255,255,255,0.55); padding: 0 14px; height: 48px; display: flex; align-items: center; cursor: pointer; font-size: 13px; white-space: nowrap; position: relative; transition: color 0.15s; font-weight: 500; }
-.gnb-item:hover { color: #fff; }
-.gnb-item.active { color: #40a9ff; }
-.gnb-item.active::after { content: ''; position: absolute; bottom: 0; left: 0; right: 0; height: 2px; background: #40a9ff; }
-.gnb-right { margin-left: auto; color: rgba(255,255,255,0.55); font-size: 12px; }
+.gnb { background: #f0f5ff; height: 48px; display: flex; align-items: center; padding: 0 20px; border-bottom: 1px solid #d6e4ff; }
+.gnb-logo { color: #222427; font-weight: 800; font-size: 15px; margin-right: 24px; }
+.gnb-logo span { color: #1677ff; }
+.gnb-logo .badge { background: #1677ff; color: #fff; font-size: 10px; font-weight: 700; padding: 2px 6px; border-radius: 4px; margin-left: 6px; }
+.gnb-item { color: rgba(0,0,0,0.55); padding: 0 14px; height: 48px; display: flex; align-items: center; font-size: 13px; font-weight: 500; position: relative; }
+.gnb-item.active { color: #1677ff; }
+.gnb-item.active::after { content: ''; position: absolute; bottom: 0; left: 0; right: 0; height: 2px; background: #1677ff; }
+.gnb-right { margin-left: auto; font-size: 12px; color: rgba(0,0,0,0.55); }
 
-/* SUB NAV */
-.subnav { background: #fff; border-bottom: 1px solid #f0f0f0; padding: 0 24px; display: flex; gap: 0; }
-.subnav-item { height: 40px; padding: 0 16px; display: flex; align-items: center; font-size: 13px; color: rgba(0,0,0,0.55); cursor: pointer; position: relative; transition: color 0.15s; font-weight: 500; white-space: nowrap; }
-.subnav-item:hover { color: rgba(0,0,0,0.88); }
-.subnav-item.active { color: #1677ff; }
-.subnav-item.active::after { content: ''; position: absolute; bottom: 0; left: 0; right: 0; height: 2px; background: #1677ff; }
+/* Breadcrumb */
+.breadcrumb { padding: 14px 24px 0; font-size: 12px; color: rgba(0,0,0,0.45); }
+.sep { color: rgba(0,0,0,0.2); margin: 0 6px; }
+.bc-current { color: rgba(0,0,0,0.88); }
 
-/* BREADCRUMB */
-.breadcrumb { padding: 14px 24px 0; font-size: 12px; color: rgba(0,0,0,0.45); display: flex; align-items: center; gap: 6px; }
-.breadcrumb span:not(.sep) { cursor: pointer; transition: color 0.15s; }
-.breadcrumb span:not(.sep):hover { color: #1677ff; }
-.sep { color: rgba(0,0,0,0.2); cursor: default !important; }
-.bc-current { color: rgba(0,0,0,0.88) !important; cursor: default !important; }
+.layout { padding: 14px 24px 48px; max-width: 1240px; margin: 0 auto; }
 
-/* LAYOUT */
-.layout { padding: 14px 24px 48px; }
+/* Page header */
+.page-header { display: flex; align-items: flex-end; justify-content: space-between; margin: 12px 0 18px; gap: 14px; flex-wrap: wrap; }
+.page-title-wrap { display: flex; align-items: center; gap: 12px; }
+.hotel-thumb { width: 52px; height: 52px; border-radius: 12px; display: flex; align-items: center; justify-content: center; color: #fff; font-weight: 800; font-size: 13px; background: linear-gradient(135deg, #91caff, #1677ff); }
+.page-title { font-size: 22px; font-weight: 800; letter-spacing: -0.3px; }
+.page-meta { font-size: 12px; color: rgba(0,0,0,0.55); margin-top: 4px; display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+.id-pill { background: #f5f5f5; padding: 1px 7px; border-radius: 3px; font-family: 'SF Mono', monospace; font-size: 10.5px; color: rgba(0,0,0,0.6); font-weight: 600; }
+.prov-pill { display: inline-flex; align-items: center; gap: 5px; padding: 3px 9px; border-radius: 5px; font-size: 12px; font-weight: 700; background: #f6ffed; color: #389e0d; border: 1px solid #b7eb8f; }
+.prov-pill .pdot { width: 6px; height: 6px; border-radius: 50%; background: #389e0d; }
 
-/* PAGE HEADER */
-.page-header { margin: 12px 0 16px; display: flex; align-items: center; gap: 10px; }
-.page-title { font-size: 20px; font-weight: 600; }
-.readonly-badge { display: inline-flex; align-items: center; gap: 4px; background: #fff7e6; color: #d48806; border: 1px solid #ffd666; border-radius: 4px; font-size: 11px; font-weight: 600; padding: 3px 9px; }
+/* Policy banner */
+.policy-banner { background: linear-gradient(135deg, #fffbe6 0%, #fff7e6 100%); border: 1px solid #ffd666; border-radius: 10px; padding: 14px 18px; margin-bottom: 18px; display: flex; gap: 12px; align-items: flex-start; }
+.policy-banner .ico { font-size: 20px; }
+.policy-banner .body { flex: 1; font-size: 12.5px; line-height: 1.65; color: #874d00; }
+.policy-banner .body strong { color: #ad4e00; font-weight: 800; }
+.policy-banner .body .tag { display: inline-block; padding: 1px 6px; background: #fff; border: 1px solid #ffd666; border-radius: 3px; font-size: 11px; color: #ad6800; font-weight: 700; margin: 0 2px; }
 
-/* INFO BANNER */
-.info-banner { background: #e6f4ff; border: 1px solid #91caff; border-radius: 8px; padding: 10px 16px; margin-bottom: 16px; display: flex; align-items: center; gap: 10px; font-size: 13px; color: #0958d9; }
+/* Card */
+.card { background: #fff; border: 1px solid #f0f0f0; border-radius: 10px; margin-bottom: 14px; overflow: hidden; }
+.card-head { padding: 14px 18px; border-bottom: 1px solid #f5f5f5; display: flex; align-items: center; justify-content: space-between; }
+.card-title { font-size: 15px; font-weight: 800; display: flex; align-items: center; gap: 8px; }
+.card-title .num { width: 22px; height: 22px; border-radius: 50%; background: #1677ff; color: #fff; font-size: 12px; display: inline-flex; align-items: center; justify-content: center; font-weight: 800; }
+.card-body { padding: 18px; }
+.card-desc { font-size: 12px; color: rgba(0,0,0,0.55); margin-top: 3px; }
 
-/* FILTER BAR */
-.filter-bar { background: #fff; border-radius: 8px 8px 0 0; border: 1px solid #f0f0f0; border-bottom: none; padding: 12px 16px; display: flex; align-items: center; gap: 8px; }
-.search-wrap { position: relative; }
-.search-wrap input { height: 32px; border: 1px solid #d9d9d9; border-radius: 6px; padding: 0 10px 0 32px; font-size: 13px; font-family: inherit; outline: none; width: 220px; transition: border 0.2s; background: #fff; color: rgba(0,0,0,0.88); }
-.search-wrap input:focus { border-color: #1677ff; box-shadow: 0 0 0 2px rgba(22,119,255,0.1); }
-.search-wrap input::placeholder { color: rgba(0,0,0,0.25); }
-.search-icon { position: absolute; left: 10px; top: 50%; transform: translateY(-50%); color: rgba(0,0,0,0.3); font-size: 13px; pointer-events: none; }
-.fi { height: 32px; border: 1px solid #d9d9d9; border-radius: 6px; font-size: 13px; font-family: inherit; color: rgba(0,0,0,0.88); outline: none; background: #fff; padding: 0 28px 0 10px; appearance: none; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='%23bbb'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 8px center; cursor: pointer; transition: border 0.2s; }
-.fi:focus { border-color: #1677ff; }
-.filter-total { margin-left: auto; font-size: 13px; color: rgba(0,0,0,0.45); }
-.filter-total strong { color: rgba(0,0,0,0.65); }
+/* Field grid */
+.field-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 14px 22px; }
+.field { display: flex; flex-direction: column; gap: 6px; }
+.field.full { grid-column: 1 / -1; }
+.field-label { font-size: 12px; color: rgba(0,0,0,0.65); font-weight: 700; display: flex; align-items: center; gap: 5px; }
+.field-label .req { color: #ef3737; }
+.field-label .new-badge { background: #ff4d4f; color: #fff; font-size: 9.5px; padding: 1px 5px; border-radius: 3px; font-weight: 700; letter-spacing: 0.3px; }
+.field-hint { font-size: 11px; color: rgba(0,0,0,0.45); }
+.input, .select { height: 34px; border: 1px solid #d9d9d9; border-radius: 6px; padding: 0 11px; font-size: 13px; font-family: inherit; outline: none; background: #fff; }
+.input:focus, .select:focus { border-color: #1677ff; box-shadow: 0 0 0 2px rgba(22,119,255,0.1); }
+.input.readonly { background: #fafafa; color: rgba(0,0,0,0.55); border-color: #e8e8e8; }
+.input-group { display: flex; align-items: center; gap: 8px; }
+.input-suffix { font-size: 12px; color: rgba(0,0,0,0.55); font-weight: 600; }
 
-/* CARD */
-.main-card { background: #fff; border-radius: 0 0 8px 8px; border: 1px solid #f0f0f0; overflow: hidden; }
+/* Nights segmented */
+.nights-seg { display: inline-flex; border: 1px solid #d9d9d9; border-radius: 6px; overflow: hidden; }
+.nights-seg button { height: 34px; padding: 0 16px; background: #fff; border: none; font-size: 13px; font-weight: 700; color: rgba(0,0,0,0.65); border-right: 1px solid #f0f0f0; min-width: 60px; }
+.nights-seg button:last-child { border-right: none; }
+.nights-seg button.active { background: #1677ff; color: #fff; }
+.nights-seg button:hover:not(.active) { background: #f0f7ff; color: #1677ff; }
 
-/* TABLE BASE */
-.table-wrap { overflow-x: auto; }
-table { width: 100%; border-collapse: collapse; }
-thead th { padding: 10px 16px; text-align: left; font-weight: 500; font-size: 12px; color: rgba(0,0,0,0.55); background: #fafafa; border-bottom: 1px solid #f0f0f0; white-space: nowrap; }
-td { padding: 13px 16px; font-size: 13px; color: rgba(0,0,0,0.88); border-bottom: 1px solid #f5f5f5; vertical-align: middle; }
-tr:last-child td { border-bottom: none; }
-tbody tr.clickable { cursor: pointer; transition: background 0.12s; }
-tbody tr.clickable:hover td { background: #f0f7ff; }
+/* Derived value chip */
+.derived { display: inline-flex; align-items: center; gap: 8px; padding: 8px 14px; background: linear-gradient(135deg, #f0f7ff, #e6f4ff); border: 1px dashed #91caff; border-radius: 8px; font-size: 12.5px; color: #0958d9; }
+.derived .lbl { color: rgba(0,0,0,0.55); font-weight: 600; font-size: 11px; }
+.derived .val { font-weight: 800; font-size: 15px; color: #0958d9; }
+.derived .formula { color: rgba(0,0,0,0.45); font-size: 11px; font-family: 'SF Mono', monospace; margin-left: 4px; }
 
-/* CELLS */
-.airline-cell { display: flex; align-items: center; gap: 10px; }
-.airline-logo { width: 36px; height: 36px; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 800; flex-shrink: 0; }
-.cell-name { font-weight: 600; font-size: 13px; line-height: 1.3; }
-.cell-sub { font-size: 11px; color: rgba(0,0,0,0.4); }
-.count-badge { display: inline-flex; align-items: center; justify-content: center; min-width: 26px; height: 26px; border-radius: 13px; padding: 0 8px; background: #e6f4ff; color: #1677ff; font-size: 13px; font-weight: 700; }
-.route-tags { display: flex; flex-wrap: wrap; gap: 4px; max-width: 380px; }
-.route-tag { display: inline-flex; align-items: center; padding: 2px 8px; border-radius: 4px; font-size: 11px; font-weight: 500; white-space: nowrap; background: #f5f5f5; color: rgba(0,0,0,0.65); border: 1px solid #e8e8e8; }
-.route-tag-more { background: transparent; color: rgba(0,0,0,0.35); border: 1px dashed #d9d9d9; font-size: 11px; padding: 2px 8px; border-radius: 4px; }
-.currency-tag { display: inline-flex; padding: 2px 8px; border-radius: 4px; font-size: 11px; font-weight: 600; }
-.currency-krw { background: #f6ffed; color: #52c41a; }
-.currency-usd { background: #fff7e6; color: #fa8c16; }
-.currency-php { background: #f9f0ff; color: #722ed1; }
-.date-cell { font-size: 12px; color: rgba(0,0,0,0.45); }
-.detail-link { display: inline-flex; align-items: center; gap: 4px; color: #1677ff; font-size: 13px; white-space: nowrap; }
-tbody tr.clickable:hover .detail-link { gap: 7px; transition: gap 0.15s; }
+/* Addon table */
+.addon-table { width: 100%; border-collapse: collapse; margin-top: 4px; }
+.addon-table th { text-align: left; font-size: 11px; font-weight: 700; color: rgba(0,0,0,0.5); text-transform: uppercase; letter-spacing: 0.3px; padding: 8px 12px; background: #fafafa; border-bottom: 1px solid #f0f0f0; }
+.addon-table td { padding: 14px 12px; border-bottom: 1px solid #f5f5f5; vertical-align: middle; }
+.addon-table tr:last-child td { border-bottom: none; }
+.addon-name { font-weight: 700; font-size: 13.5px; display: flex; align-items: center; gap: 8px; }
+.addon-tag { font-size: 10px; padding: 2px 7px; border-radius: 3px; font-weight: 700; }
+.addon-tag.fixed { background: #f9f0ff; color: #722ed1; border: 1px solid #d3adf7; }
+.addon-tag.percent { background: #e6f4ff; color: #0958d9; border: 1px solid #91caff; }
+.addon-desc { font-size: 11.5px; color: rgba(0,0,0,0.5); margin-top: 3px; }
+.addon-input { display: inline-flex; align-items: center; gap: 6px; }
+.addon-input .input { width: 130px; text-align: right; }
+.addon-preview { font-size: 12px; color: rgba(0,0,0,0.55); }
+.addon-preview .val { font-weight: 800; color: #1677ff; font-size: 13.5px; margin-left: 4px; }
+.addon-preview .arrow { color: rgba(0,0,0,0.3); margin: 0 6px; }
 
-/* BACK BUTTON */
-.btn-back { background: transparent; border: none; color: rgba(0,0,0,0.45); font-size: 13px; cursor: pointer; display: flex; align-items: center; gap: 6px; padding: 0; font-family: inherit; transition: color 0.15s; margin-bottom: 16px; }
-.btn-back:hover { color: rgba(0,0,0,0.88); }
+/* Simulation card */
+.sim-card { background: linear-gradient(135deg, #f9fbff 0%, #eef4ff 100%); border: 1px solid #d6e4ff; border-radius: 10px; padding: 18px; margin-bottom: 14px; }
+.sim-title { font-size: 14px; font-weight: 800; color: #0958d9; margin-bottom: 12px; display: flex; align-items: center; gap: 8px; }
+.sim-row { display: flex; justify-content: space-between; align-items: center; padding: 8px 0; border-bottom: 1px dashed rgba(22,119,255,0.15); font-size: 13px; }
+.sim-row:last-of-type { border-bottom: none; padding-bottom: 2px; }
+.sim-row .lbl { color: rgba(0,0,0,0.7); font-weight: 600; display: flex; align-items: center; gap: 6px; }
+.sim-row .lbl .mini-tag { font-size: 10px; padding: 1px 5px; border-radius: 3px; background: rgba(22,119,255,0.1); color: #0958d9; font-weight: 700; }
+.sim-row .val { font-weight: 700; color: rgba(0,0,0,0.85); font-family: 'SF Mono', monospace; }
+.sim-total { margin-top: 10px; padding-top: 14px; border-top: 2px solid rgba(22,119,255,0.25); display: flex; justify-content: space-between; align-items: center; }
+.sim-total .lbl { font-size: 14px; font-weight: 800; color: #0958d9; }
+.sim-total .val { font-size: 22px; font-weight: 800; color: #1677ff; letter-spacing: -0.3px; font-family: 'SF Mono', monospace; }
 
-/* SUMMARY CARD */
-.summary-card { background: #fff; border-radius: 8px; border: 1px solid #f0f0f0; padding: 16px 20px; margin-bottom: 16px; display: flex; align-items: center; gap: 16px; }
-.summary-stats { margin-left: auto; display: flex; gap: 32px; }
-.stat-item { text-align: right; }
-.stat-label { font-size: 11px; color: rgba(0,0,0,0.35); margin-bottom: 2px; }
-.stat-value { font-size: 18px; font-weight: 700; color: rgba(0,0,0,0.88); }
-.stat-value.blue { color: #1677ff; }
+/* Data model callout */
+.datamodel { background: #0f1419; color: #d4d4d4; border-radius: 10px; padding: 16px 18px; font-family: 'SF Mono', monospace; font-size: 12px; line-height: 1.7; margin-bottom: 14px; overflow-x: auto; }
+.datamodel .k { color: #79c0ff; }
+.datamodel .t { color: #ffa657; }
+.datamodel .c { color: #8b949e; font-style: italic; }
+.datamodel .new { color: #ff7b72; font-weight: 700; }
 
-/* YEAR TABS */
-.filter-bar-detail { background: #fff; border-radius: 8px 8px 0 0; border: 1px solid #f0f0f0; border-bottom: none; padding: 12px 16px; display: flex; align-items: center; gap: 8px; }
-.filter-label { font-size: 13px; color: rgba(0,0,0,0.45); font-weight: 500; }
-.year-tabs { display: flex; gap: 4px; }
-.year-tab { height: 30px; padding: 0 14px; border-radius: 6px; font-size: 13px; cursor: pointer; border: 1px solid #d9d9d9; background: #fff; color: rgba(0,0,0,0.65); font-family: inherit; transition: all 0.15s; }
-.year-tab:hover { color: #1677ff; border-color: #1677ff; }
-.year-tab.active { background: #1677ff; border-color: #1677ff; color: #fff; font-weight: 500; }
+/* Comparison table */
+.compare-wrap { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-bottom: 14px; }
+.compare-card { border: 1px solid #f0f0f0; border-radius: 10px; padding: 14px 16px; background: #fff; }
+.compare-card.before { border-color: #ffccc7; background: #fff2f0; }
+.compare-card.after { border-color: #b7eb8f; background: #f6ffed; }
+.compare-title { font-size: 12px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.4px; margin-bottom: 8px; display: flex; align-items: center; gap: 6px; }
+.compare-card.before .compare-title { color: #cf1322; }
+.compare-card.after .compare-title { color: #389e0d; }
+.compare-list { list-style: none; font-size: 12.5px; line-height: 1.7; color: rgba(0,0,0,0.7); }
+.compare-list li { padding: 3px 0; }
+.compare-list li::before { content: '·'; margin-right: 6px; color: rgba(0,0,0,0.4); }
+.compare-list strong { color: rgba(0,0,0,0.9); font-weight: 700; }
 
-/* DETAIL TABLE */
-table.dtbl { min-width: 900px; }
-table.dtbl thead th { padding: 10px 12px; font-size: 12px; }
-table.dtbl td { padding: 11px 12px; }
-table.dtbl th.mc { text-align: right; width: 64px; }
-table.dtbl td.mc { text-align: right; font-variant-numeric: tabular-nums; }
-table.dtbl td.mc.cur { background: #e6f4ff; color: #1677ff; font-weight: 600; }
-table.dtbl td.mc.empty { color: rgba(0,0,0,0.2); }
-table.dtbl tbody tr:hover td { background: #fafafa; }
-table.dtbl tbody tr:hover td.mc.cur { background: #d6ecff; }
-.type-label { display: inline-flex; align-items: center; padding: 2px 8px; border-radius: 4px; font-size: 11px; font-weight: 600; }
-.type-adult { background: #e6f4ff; color: #1677ff; }
-.type-child { background: #fff7e6; color: #fa8c16; }
+/* Footer buttons */
+.footer-actions { display: flex; justify-content: flex-end; gap: 8px; margin-top: 24px; padding-top: 20px; border-top: 1px solid #f0f0f0; }
+.btn { height: 36px; padding: 0 18px; border-radius: 6px; font-size: 13px; font-weight: 700; border: 1px solid #d9d9d9; background: #fff; color: rgba(0,0,0,0.75); }
+.btn:hover { color: #1677ff; border-color: #1677ff; }
+.btn.primary { background: #1677ff; color: #fff; border-color: #1677ff; }
+.btn.primary:hover { background: #4096ff; color: #fff; }
 
-/* AIRPORT CELL */
-.airport-icon { width: 36px; height: 36px; border-radius: 8px; background: #f0f7ff; display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 800; color: #1677ff; flex-shrink: 0; font-family: 'SF Mono', monospace; }
-.iata-code { font-size: 12px; font-weight: 700; font-family: 'SF Mono', monospace; color: rgba(0,0,0,0.55); margin-top: 1px; }
+/* Section title */
+.section-title { font-size: 12px; font-weight: 800; color: rgba(0,0,0,0.75); text-transform: uppercase; letter-spacing: 0.5px; margin: 20px 0 10px; padding-left: 4px; border-left: 3px solid #1677ff; padding-left: 10px; }
 
-/* TABLE FOOTER */
-.table-footer { border-top: 1px solid #f0f0f0; padding: 10px 16px; display: flex; align-items: center; gap: 16px; }
-.footer-stat { font-size: 12px; color: rgba(0,0,0,0.45); }
-.footer-stat strong { color: rgba(0,0,0,0.65); font-weight: 600; }
-
-/* AIRLINE CHIPS IN DETAIL */
-.airline-chips { display: flex; flex-wrap: wrap; gap: 4px; }
-.airline-chip { background: #f5f5f5; color: rgba(0,0,0,0.65); border-radius: 4px; padding: 2px 8px; font-size: 11px; font-weight: 600; font-family: 'SF Mono', monospace; }
-
-/* AIRPORT CODES */
-.airport-list { display: flex; flex-wrap: wrap; gap: 3px; }
-.airport-code { display: inline-block; background: #f5f5f5; color: rgba(0,0,0,0.65); border-radius: 3px; padding: 1px 6px; font-size: 11px; font-weight: 600; font-family: 'SF Mono', monospace; }
-
-/* TOOLTIP */
-[data-tip] { position: relative; cursor: default; }
-[data-tip]:hover::after { content: attr(data-tip); position: absolute; bottom: calc(100% + 6px); left: 50%; transform: translateX(-50%); background: rgba(0,0,0,0.75); color: #fff; border-radius: 4px; padding: 4px 8px; font-size: 11px; white-space: nowrap; pointer-events: none; z-index: 999; }
-[data-tip]:hover::before { content: ''; position: absolute; bottom: calc(100% + 1px); left: 50%; transform: translateX(-50%); border: 4px solid transparent; border-top-color: rgba(0,0,0,0.75); pointer-events: none; z-index: 999; }
-
-/* PAGE SWITCH */
-.page { display: none; }
-.page.active { display: block; }
+.note { font-size: 11.5px; color: rgba(0,0,0,0.45); margin-top: 10px; line-height: 1.6; }
+.note strong { color: rgba(0,0,0,0.65); }
 </style>
 </head>
 <body>
 
-<!-- GNB -->
-<nav class="gnb">
-  <div class="gnb-logo">TripStore<span>Partners</span> <sup>ADMIN</sup></div>
-  <div class="gnb-item">대시보드</div>
-  <div class="gnb-item active">상품·재고</div>
-  <div class="gnb-item">정산</div>
-  <div class="gnb-item">공지·안내</div>
-  <div class="gnb-right">🏢 트립스토어항공 · 운영팀</div>
-</nav>
-
-<!-- SUB NAV -->
-<div class="subnav">
-  <div class="subnav-item" id="subnav-fuel" onclick="goFuelList()">유류할증료</div>
-  <div class="subnav-item active" id="subnav-airport" onclick="goAirportList()">공항이용료</div>
+<div class="gnb">
+  <div class="gnb-logo">TripStore<span>PB</span><span class="badge">Admin</span></div>
+  <div style="display: flex;">
+    <div class="gnb-item">대시보드</div>
+    <div class="gnb-item active">숙박권 관리</div>
+    <div class="gnb-item">PB 상품</div>
+    <div class="gnb-item">예약 관리</div>
+    <div class="gnb-item">정산</div>
+  </div>
+  <div class="gnb-right">서현 · PM Admin</div>
 </div>
 
-
-<!-- ============================================================ -->
-<!-- PAGE: 유류할증료 목록                                          -->
-<!-- ============================================================ -->
-<div id="page-fuel-list" class="page">
-  <div class="breadcrumb layout" style="padding-bottom:0">
-    <span>상품·재고</span><span class="sep">›</span>
-    <span>항공 설정</span><span class="sep">›</span>
-    <span class="bc-current">유류할증료</span>
-  </div>
-  <div class="layout">
-    <div class="info-banner">ℹ️&nbsp; 이 화면은 <strong>조회 전용</strong>입니다. 수정·삭제는 내부 어드민에서만 가능합니다.</div>
-    <div class="page-header">
-      <div class="page-title">유류할증료</div>
-      <div class="readonly-badge">🔒 조회 전용</div>
-    </div>
-    <div class="filter-bar">
-      <div class="search-wrap">
-        <span class="search-icon">🔍</span>
-        <input type="text" placeholder="항공사명, 코드 검색">
-      </div>
-      <select class="fi" style="width:110px">
-        <option>전체 통화</option><option>KRW</option><option>USD</option>
-      </select>
-      <div class="filter-total">총 <strong>11개</strong> 항공사</div>
-    </div>
-    <div class="main-card">
-      <div class="table-wrap">
-        <table>
-          <thead>
-            <tr>
-              <th style="width:200px">항공사</th>
-              <th style="width:70px;text-align:center">구간 수</th>
-              <th>적용 구간</th>
-              <th style="width:70px;text-align:center">통화</th>
-              <th style="width:130px">최근 업데이트</th>
-              <th style="width:90px"></th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr class="clickable" onclick="goFuelDetail('VJ','비엣젯항공',7,'KRW','#f5222d','#fff1f0','2026.04.10')">
-              <td><div class="airline-cell"><div class="airline-logo" style="background:#fff1f0;color:#f5222d">VJ</div><div><div class="cell-name">비엣젯항공</div><div class="cell-sub">VietJet Air</div></div></div></td>
-              <td style="text-align:center"><span class="count-badge">7</span></td>
-              <td><div class="route-tags"><span class="route-tag">인천 → 나트랑</span><span class="route-tag">인천 → 푸꾸옥</span><span class="route-tag">인천 → 다낭</span><span class="route-tag">인천 → 하이퐁</span><span class="route-tag route-tag-more">+3개 더</span></div></td>
-              <td style="text-align:center"><span class="currency-tag currency-krw">KRW</span></td>
-              <td class="date-cell">2026.04.10</td>
-              <td><span class="detail-link">상세 보기 →</span></td>
-            </tr>
-            <tr class="clickable" onclick="goFuelDetail('ZE','이스타항공',3,'USD','#722ed1','#f9f0ff','2026.03.31')">
-              <td><div class="airline-cell"><div class="airline-logo" style="background:#f9f0ff;color:#722ed1">ZE</div><div><div class="cell-name">이스타항공</div><div class="cell-sub">Eastar Jet</div></div></div></td>
-              <td style="text-align:center"><span class="count-badge">3</span></td>
-              <td><div class="route-tags"><span class="route-tag">나트랑/푸꾸옥</span><span class="route-tag">다낭</span><span class="route-tag">푸꾸옥</span></div></td>
-              <td style="text-align:center"><span class="currency-tag currency-usd">USD</span></td>
-              <td class="date-cell">2026.03.31</td>
-              <td><span class="detail-link">상세 보기 →</span></td>
-            </tr>
-            <tr class="clickable" onclick="goFuelDetail('TW','티웨이항공',3,'KRW','#13c2c2','#e6fffb','2025.11.20')">
-              <td><div class="airline-cell"><div class="airline-logo" style="background:#e6fffb;color:#13c2c2">TW</div><div><div class="cell-name">티웨이항공</div><div class="cell-sub">T'way Air</div></div></div></td>
-              <td style="text-align:center"><span class="count-badge">3</span></td>
-              <td><div class="route-tags"><span class="route-tag">인천 → 나트랑</span><span class="route-tag">부산 → 나트랑</span><span class="route-tag">인천 → 세부</span></div></td>
-              <td style="text-align:center"><span class="currency-tag currency-krw">KRW</span></td>
-              <td class="date-cell">2025.11.20</td>
-              <td><span class="detail-link">상세 보기 →</span></td>
-            </tr>
-            <tr class="clickable" onclick="goFuelDetail('RS','에어서울',2,'KRW','#1677ff','#e6f4ff','2025.05.16')">
-              <td><div class="airline-cell"><div class="airline-logo" style="background:#e6f4ff;color:#1677ff">RS</div><div><div class="cell-name">에어서울</div><div class="cell-sub">Air Seoul</div></div></div></td>
-              <td style="text-align:center"><span class="count-badge">2</span></td>
-              <td><div class="route-tags"><span class="route-tag">에어서울 유류할증료</span></div></td>
-              <td style="text-align:center"><span class="currency-tag currency-krw">KRW</span></td>
-              <td class="date-cell">2025.05.16</td>
-              <td><span class="detail-link">상세 보기 →</span></td>
-            </tr>
-            <tr class="clickable" onclick="goFuelDetail('7C','제주항공',1,'KRW','#f5222d','#fff1f0','2025.09.22')">
-              <td><div class="airline-cell"><div class="airline-logo" style="background:#fff1f0;color:#f5222d">7C</div><div><div class="cell-name">제주항공</div><div class="cell-sub">Jeju Air</div></div></div></td>
-              <td style="text-align:center"><span class="count-badge">1</span></td>
-              <td><div class="route-tags"><span class="route-tag">제주항공 유류할증료</span></div></td>
-              <td style="text-align:center"><span class="currency-tag currency-krw">KRW</span></td>
-              <td class="date-cell">2025.09.22</td>
-              <td><span class="detail-link">상세 보기 →</span></td>
-            </tr>
-            <tr class="clickable" onclick="goFuelDetail('LJ','진에어',1,'KRW','#722ed1','#f9f0ff','2025.07.18')">
-              <td><div class="airline-cell"><div class="airline-logo" style="background:#f9f0ff;color:#722ed1">LJ</div><div><div class="cell-name">진에어</div><div class="cell-sub">Jin Air</div></div></div></td>
-              <td style="text-align:center"><span class="count-badge">1</span></td>
-              <td><div class="route-tags"><span class="route-tag">진에어 유류할증료</span></div></td>
-              <td style="text-align:center"><span class="currency-tag currency-krw">KRW</span></td>
-              <td class="date-cell">2025.07.18</td>
-              <td><span class="detail-link">상세 보기 →</span></td>
-            </tr>
-            <tr class="clickable" onclick="goFuelDetail('BX','에어부산',1,'USD','#52c41a','#f6ffed','2025.09.04')">
-              <td><div class="airline-cell"><div class="airline-logo" style="background:#f6ffed;color:#52c41a">BX</div><div><div class="cell-name">에어부산</div><div class="cell-sub">Air Busan</div></div></div></td>
-              <td style="text-align:center"><span class="count-badge">1</span></td>
-              <td><div class="route-tags"><span class="route-tag">인천 → 보홀</span></div></td>
-              <td style="text-align:center"><span class="currency-tag currency-usd">USD</span></td>
-              <td class="date-cell">2025.09.04</td>
-              <td><span class="detail-link">상세 보기 →</span></td>
-            </tr>
-            <tr class="clickable" onclick="goFuelDetail('XJ','타이에어아시아X',1,'KRW','#0958d9','#e6f4ff','2026.03.20')">
-              <td><div class="airline-cell"><div class="airline-logo" style="background:#e6f4ff;color:#0958d9">XJ</div><div><div class="cell-name">타이에어아시아X</div><div class="cell-sub">Thai AirAsia X</div></div></div></td>
-              <td style="text-align:center"><span class="count-badge">1</span></td>
-              <td><div class="route-tags"><span class="route-tag">타이에어아시아X 유류할증료</span></div></td>
-              <td style="text-align:center"><span class="currency-tag currency-krw">KRW</span></td>
-              <td class="date-cell">2026.03.20</td>
-              <td><span class="detail-link">상세 보기 →</span></td>
-            </tr>
-            <tr class="clickable" onclick="goFuelDetail('PR','필리핀항공',1,'KRW','#1677ff','#e6f4ff','2025.05.30')">
-              <td><div class="airline-cell"><div class="airline-logo" style="background:#e6f4ff;color:#1677ff">PR</div><div><div class="cell-name">필리핀항공</div><div class="cell-sub">Philippine Airlines</div></div></div></td>
-              <td style="text-align:center"><span class="count-badge">1</span></td>
-              <td><div class="route-tags"><span class="route-tag">필리핀항공 유류할증료</span></div></td>
-              <td style="text-align:center"><span class="currency-tag currency-krw">KRW</span></td>
-              <td class="date-cell">2025.05.30</td>
-              <td><span class="detail-link">상세 보기 →</span></td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
-    </div>
-  </div>
+<div class="breadcrumb">
+  <span>PB</span><span class="sep">/</span>
+  <span>숙박권</span><span class="sep">/</span>
+  <span class="bc-current">숙박권 상세 · 편집</span>
 </div>
 
-
-<!-- ============================================================ -->
-<!-- PAGE: 유류할증료 상세                                          -->
-<!-- ============================================================ -->
-<div id="page-fuel-detail" class="page">
-  <div class="breadcrumb layout" style="padding-bottom:0">
-    <span>상품·재고</span><span class="sep">›</span>
-    <span onclick="goFuelList()" style="color:#1677ff;cursor:pointer">유류할증료</span><span class="sep">›</span>
-    <span class="bc-current" id="fuel-bc">비엣젯항공 (VJ)</span>
-  </div>
-  <div class="layout">
-    <div class="info-banner">ℹ️&nbsp; 이 화면은 <strong>조회 전용</strong>입니다. 수정·삭제는 내부 어드민에서만 가능합니다.</div>
-    <button class="btn-back" onclick="goFuelList()">← 목록으로</button>
-    <div class="page-header">
-      <div class="page-title" id="fuel-title">비엣젯항공 유류할증료 조회</div>
-      <div class="readonly-badge">🔒 조회 전용</div>
-    </div>
-    <div class="summary-card">
-      <div class="airline-logo" id="fuel-logo" style="width:40px;height:40px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:800;flex-shrink:0">VJ</div>
-      <div>
-        <div style="font-size:15px;font-weight:600;margin-bottom:2px" id="fuel-name">비엣젯항공</div>
-        <div style="font-size:12px;color:rgba(0,0,0,0.45)" id="fuel-sub">통화 KRW</div>
-      </div>
-      <div class="summary-stats">
-        <div class="stat-item"><div class="stat-label">적용 구간 수</div><div class="stat-value blue" id="fuel-seg-count">7</div></div>
-        <div class="stat-item"><div class="stat-label">최근 업데이트</div><div class="stat-value" style="font-size:14px;padding-top:3px" id="fuel-updated">2026.04.10</div></div>
-      </div>
-    </div>
-    <div class="filter-bar-detail">
-      <span class="filter-label">적용 연도</span>
-      <div class="year-tabs">
-        <button class="year-tab">2024</button><button class="year-tab">2025</button><button class="year-tab active">2026</button>
-      </div>
-      <div style="margin-left:auto;display:flex;align-items:center;gap:5px;font-size:11px;color:rgba(0,0,0,0.4)">
-        <div style="width:10px;height:10px;border-radius:2px;background:#e6f4ff;border:1px solid #91caff"></div> 현재 월
-      </div>
-    </div>
-    <div class="main-card">
-      <div class="table-wrap">
-        <table class="dtbl">
-          <thead>
-            <tr>
-              <th style="width:200px">구간명</th>
-              <th style="width:70px">출발</th>
-              <th style="width:70px">도착</th>
-              <th class="mc">1월</th><th class="mc">2월</th><th class="mc">3월</th><th class="mc">4월</th>
-              <th class="mc" style="background:#e6f4ff">5월</th>
-              <th class="mc">6월</th><th class="mc">7월</th><th class="mc">8월</th><th class="mc">9월</th><th class="mc">10월</th><th class="mc">11월</th><th class="mc">12월</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr>
-              <td style="font-size:13px;font-weight:500">비엣젯 항공_인천_나트랑</td>
-              <td><span class="airport-code">ICN</span></td><td><span class="airport-code">CXR</span></td>
-              <td class="mc empty">-</td><td class="mc empty">-</td><td class="mc empty">-</td><td class="mc">90,000</td>
-              <td class="mc cur">-</td>
-              <td class="mc empty">-</td><td class="mc empty">-</td><td class="mc empty">-</td><td class="mc empty">-</td><td class="mc empty">-</td><td class="mc empty">-</td><td class="mc empty">-</td>
-            </tr>
-            <tr>
-              <td style="font-size:13px;font-weight:500">비엣젯 항공_인천_푸꾸옥</td>
-              <td><span class="airport-code">ICN</span></td><td><span class="airport-code">PQC</span></td>
-              <td class="mc empty">-</td><td class="mc empty">-</td><td class="mc empty">-</td><td class="mc">90,000</td>
-              <td class="mc cur">-</td>
-              <td class="mc empty">-</td><td class="mc empty">-</td><td class="mc empty">-</td><td class="mc empty">-</td><td class="mc empty">-</td><td class="mc empty">-</td><td class="mc empty">-</td>
-            </tr>
-            <tr>
-              <td style="font-size:13px;font-weight:500">비엣젯 항공_인천_다낭</td>
-              <td><span class="airport-code">ICN</span></td><td><span class="airport-code">DAD</span></td>
-              <td class="mc empty">-</td><td class="mc empty">-</td><td class="mc empty">-</td><td class="mc">75,900</td>
-              <td class="mc cur">-</td>
-              <td class="mc empty">-</td><td class="mc empty">-</td><td class="mc empty">-</td><td class="mc empty">-</td><td class="mc empty">-</td><td class="mc empty">-</td><td class="mc empty">-</td>
-            </tr>
-            <tr>
-              <td style="font-size:13px;font-weight:500">비엣젯 항공_인천_하이퐁</td>
-              <td><span class="airport-code">ICN</span></td><td><span class="airport-code">HPH</span></td>
-              <td class="mc empty">-</td><td class="mc empty">-</td><td class="mc empty">-</td><td class="mc">75,900</td>
-              <td class="mc cur">-</td>
-              <td class="mc empty">-</td><td class="mc empty">-</td><td class="mc empty">-</td><td class="mc empty">-</td><td class="mc empty">-</td><td class="mc empty">-</td><td class="mc empty">-</td>
-            </tr>
-            <tr>
-              <td style="font-size:13px;font-weight:500">비엣젯 항공_부산_다낭</td>
-              <td><span class="airport-code">PUS</span></td><td><span class="airport-code">DAD</span></td>
-              <td class="mc empty">-</td><td class="mc empty">-</td><td class="mc empty">-</td><td class="mc">75,900</td>
-              <td class="mc cur">-</td>
-              <td class="mc empty">-</td><td class="mc empty">-</td><td class="mc empty">-</td><td class="mc empty">-</td><td class="mc empty">-</td><td class="mc empty">-</td><td class="mc empty">-</td>
-            </tr>
-            <tr>
-              <td style="font-size:13px;font-weight:500">비엣젯 항공_부산_나트랑</td>
-              <td><span class="airport-code">PUS</span></td><td><span class="airport-code">CXR</span></td>
-              <td class="mc empty">-</td><td class="mc empty">-</td><td class="mc empty">-</td><td class="mc">90,000</td>
-              <td class="mc cur">-</td>
-              <td class="mc empty">-</td><td class="mc empty">-</td><td class="mc empty">-</td><td class="mc empty">-</td><td class="mc empty">-</td><td class="mc empty">-</td><td class="mc empty">-</td>
-            </tr>
-            <tr>
-              <td style="font-size:13px;font-weight:500">비엣젯 항공_부산_푸꾸옥</td>
-              <td><span class="airport-code">PUS</span></td><td><span class="airport-code">PQC</span></td>
-              <td class="mc empty">-</td><td class="mc empty">-</td><td class="mc empty">-</td><td class="mc">90,000</td>
-              <td class="mc cur">-</td>
-              <td class="mc empty">-</td><td class="mc empty">-</td><td class="mc empty">-</td><td class="mc empty">-</td><td class="mc empty">-</td><td class="mc empty">-</td><td class="mc empty">-</td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
-      <div class="table-footer">
-        <div class="footer-stat">총 <strong>7개 구간</strong></div>
-        <div class="footer-stat">단위: <strong>원 (KRW)</strong></div>
-        <div class="footer-stat" style="margin-left:auto;color:rgba(0,0,0,0.3);font-size:11px">마지막 업데이트 2026.04.10 · 내부 어드민에서 수정 가능</div>
-      </div>
-    </div>
-  </div>
-</div>
-
-
-<!-- ============================================================ -->
-<!-- PAGE: 공항이용료 목록                                          -->
-<!-- ============================================================ -->
-<div id="page-airport-list" class="page active">
-  <div class="breadcrumb layout" style="padding-bottom:0">
-    <span>상품·재고</span><span class="sep">›</span>
-    <span>항공 설정</span><span class="sep">›</span>
-    <span class="bc-current">공항이용료</span>
-  </div>
-  <div class="layout">
-    <div class="info-banner">ℹ️&nbsp; 이 화면은 <strong>조회 전용</strong>입니다. 수정·삭제는 내부 어드민에서만 가능합니다.</div>
-    <div class="page-header">
-      <div class="page-title">공항이용료</div>
-      <div class="readonly-badge">🔒 조회 전용</div>
-    </div>
-    <div class="filter-bar">
-      <div class="search-wrap">
-        <span class="search-icon">🔍</span>
-        <input type="text" placeholder="공항명, IATA 코드 검색">
-      </div>
-      <select class="fi" style="width:110px">
-        <option>전체 통화</option><option>KRW</option><option>USD</option><option>PHP</option>
-      </select>
-      <div class="filter-total">총 <strong>17개</strong> 항목</div>
-    </div>
-    <div class="main-card">
-      <div class="table-wrap">
-        <table>
-          <thead>
-            <tr>
-              <th style="width:220px">공항</th>
-              <th style="width:180px">터미널명</th>
-              <th>적용 항공사</th>
-              <th style="width:70px;text-align:center">통화</th>
-              <th style="width:130px">최근 업데이트</th>
-              <th style="width:90px"></th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr class="clickable" onclick="goAirportDetail('ICN','인천국제공항','1터미널 공항이용료','KRW','7C, 9G, BX, PR, RS, TW, VJ, ZE','2026.04.09')">
-              <td><div class="airline-cell">
-                <div class="airport-icon">ICN</div>
-                <div><div class="cell-name">인천국제공항</div><div class="iata-code">ICN</div></div>
-              </div></td>
-              <td>1터미널 공항이용료</td>
-              <td><div class="airline-chips"><span class="airline-chip">제주항공</span><span class="airline-chip">썬푸꾸옥</span><span class="airline-chip">에어부산</span><span class="airline-chip">필리핀항공</span><span class="airline-chip">에어서울</span><span class="airline-chip">티웨이항공</span><span class="airline-chip">비엣젯항공</span><span class="airline-chip">이스타항공</span></div></td>
-              <td style="text-align:center"><span class="currency-tag currency-krw">KRW</span></td>
-              <td class="date-cell">2026.04.09</td>
-              <td><span class="detail-link">상세 보기 →</span></td>
-            </tr>
-            <tr class="clickable" onclick="goAirportDetail('ICN','인천국제공항','1터미널 공항이용료1','KRW','__','2026.04.09')">
-              <td><div class="airline-cell">
-                <div class="airport-icon">ICN</div>
-                <div><div class="cell-name">인천국제공항</div><div class="iata-code">ICN</div></div>
-              </div></td>
-              <td>1터미널 공항이용료1</td>
-              <td><div class="airline-chips"><span class="airline-chip">항공미포함</span></div></td>
-              <td style="text-align:center"><span class="currency-tag currency-krw">KRW</span></td>
-              <td class="date-cell">2026.04.09</td>
-              <td><span class="detail-link">상세 보기 →</span></td>
-            </tr>
-            <tr class="clickable" onclick="goAirportDetail('ICN','인천국제공항','2터미널 공항이용료','KRW','LJ','2026.04.09')">
-              <td><div class="airline-cell">
-                <div class="airport-icon">ICN</div>
-                <div><div class="cell-name">인천국제공항</div><div class="iata-code">ICN</div></div>
-              </div></td>
-              <td>2터미널 공항이용료</td>
-              <td><div class="airline-chips"><span class="airline-chip">진에어</span></div></td>
-              <td style="text-align:center"><span class="currency-tag currency-krw">KRW</span></td>
-              <td class="date-cell">2026.04.09</td>
-              <td><span class="detail-link">상세 보기 →</span></td>
-            </tr>
-            <tr class="clickable" onclick="goAirportDetail('PUS','부산(김해)','공항이용료','KRW','LJ, TW, ZE','2025.12.03')">
-              <td><div class="airline-cell">
-                <div class="airport-icon">PUS</div>
-                <div><div class="cell-name">부산(김해)</div><div class="iata-code">PUS</div></div>
-              </div></td>
-              <td>공항이용료</td>
-              <td><div class="airline-chips"><span class="airline-chip">진에어</span><span class="airline-chip">티웨이항공</span><span class="airline-chip">이스타항공</span></div></td>
-              <td style="text-align:center"><span class="currency-tag currency-krw">KRW</span></td>
-              <td class="date-cell">2025.12.03</td>
-              <td><span class="detail-link">상세 보기 →</span></td>
-            </tr>
-            <tr class="clickable" onclick="goAirportDetail('CXR','나트랑 깜라인 국제공항','공항이용료','USD','BX, TW, ZE','2025.10.30')">
-              <td><div class="airline-cell">
-                <div class="airport-icon" style="background:#fff7e6;color:#fa8c16">CXR</div>
-                <div><div class="cell-name">나트랑 깜라인 국제공항</div><div class="iata-code">CXR</div></div>
-              </div></td>
-              <td>공항이용료</td>
-              <td><div class="airline-chips"><span class="airline-chip">에어부산</span><span class="airline-chip">티웨이항공</span><span class="airline-chip">이스타항공</span></div></td>
-              <td style="text-align:center"><span class="currency-tag currency-usd">USD</span></td>
-              <td class="date-cell">2025.10.30</td>
-              <td><span class="detail-link">상세 보기 →</span></td>
-            </tr>
-            <tr class="clickable" onclick="goAirportDetail('CXR','나트랑 깜라인 국제공항','공항이용료1','USD','__, VJ','2025.10.30')">
-              <td><div class="airline-cell">
-                <div class="airport-icon" style="background:#fff7e6;color:#fa8c16">CXR</div>
-                <div><div class="cell-name">나트랑 깜라인 국제공항</div><div class="iata-code">CXR</div></div>
-              </div></td>
-              <td>공항이용료1</td>
-              <td><div class="airline-chips"><span class="airline-chip">항공미포함</span><span class="airline-chip">비엣젯항공</span></div></td>
-              <td style="text-align:center"><span class="currency-tag currency-usd">USD</span></td>
-              <td class="date-cell">2025.10.30</td>
-              <td><span class="detail-link">상세 보기 →</span></td>
-            </tr>
-            <tr class="clickable" onclick="goAirportDetail('DAD','다낭 국제공항','공항이용료','USD','7C, LJ, ZE','2025.08.04')">
-              <td><div class="airline-cell">
-                <div class="airport-icon" style="background:#fff7e6;color:#fa8c16">DAD</div>
-                <div><div class="cell-name">다낭 국제공항</div><div class="iata-code">DAD</div></div>
-              </div></td>
-              <td>공항이용료</td>
-              <td><div class="airline-chips"><span class="airline-chip">제주항공</span><span class="airline-chip">진에어</span><span class="airline-chip">이스타항공</span></div></td>
-              <td style="text-align:center"><span class="currency-tag currency-usd">USD</span></td>
-              <td class="date-cell">2025.08.04</td>
-              <td><span class="detail-link">상세 보기 →</span></td>
-            </tr>
-            <tr class="clickable" onclick="goAirportDetail('DAD','다낭 국제공항','공항이용료1','USD','VJ','2025.08.04')">
-              <td><div class="airline-cell">
-                <div class="airport-icon" style="background:#fff7e6;color:#fa8c16">DAD</div>
-                <div><div class="cell-name">다낭 국제공항</div><div class="iata-code">DAD</div></div>
-              </div></td>
-              <td>공항이용료1</td>
-              <td><div class="airline-chips"><span class="airline-chip">비엣젯항공</span></div></td>
-              <td style="text-align:center"><span class="currency-tag currency-usd">USD</span></td>
-              <td class="date-cell">2025.08.04</td>
-              <td><span class="detail-link">상세 보기 →</span></td>
-            </tr>
-            <tr class="clickable" onclick="goAirportDetail('PQC','푸꾸옥 국제공항','공항이용료','KRW','VJ, ZE','2026.04.09')">
-              <td><div class="airline-cell">
-                <div class="airport-icon" style="background:#fff7e6;color:#fa8c16">PQC</div>
-                <div><div class="cell-name">푸꾸옥 국제공항</div><div class="iata-code">PQC</div></div>
-              </div></td>
-              <td>공항이용료</td>
-              <td><div class="airline-chips"><span class="airline-chip">비엣젯항공</span><span class="airline-chip">이스타항공</span></div></td>
-              <td style="text-align:center"><span class="currency-tag currency-krw">KRW</span></td>
-              <td class="date-cell">2026.04.09</td>
-              <td><span class="detail-link">상세 보기 →</span></td>
-            </tr>
-            <tr class="clickable" onclick="goAirportDetail('PQC','푸꾸옥 국제공항','공항이용료1','KRW','__, 7C, 9G','2026.04.09')">
-              <td><div class="airline-cell">
-                <div class="airport-icon" style="background:#fff7e6;color:#fa8c16">PQC</div>
-                <div><div class="cell-name">푸꾸옥 국제공항</div><div class="iata-code">PQC</div></div>
-              </div></td>
-              <td>공항이용료1</td>
-              <td><div class="airline-chips"><span class="airline-chip">항공미포함</span><span class="airline-chip">제주항공</span><span class="airline-chip">썬푸꾸옥</span></div></td>
-              <td style="text-align:center"><span class="currency-tag currency-krw">KRW</span></td>
-              <td class="date-cell">2026.04.09</td>
-              <td><span class="detail-link">상세 보기 →</span></td>
-            </tr>
-            <tr class="clickable" onclick="goAirportDetail('DMK','돈무앙 국제공항','공항이용료','KRW','XJ','2026.03.20')">
-              <td><div class="airline-cell">
-                <div class="airport-icon" style="background:#fff7e6;color:#fa8c16">DMK</div>
-                <div><div class="cell-name">돈무앙 국제공항</div><div class="iata-code">DMK</div></div>
-              </div></td>
-              <td>공항이용료</td>
-              <td><div class="airline-chips"><span class="airline-chip">타이에어아시아X</span></div></td>
-              <td style="text-align:center"><span class="currency-tag currency-krw">KRW</span></td>
-              <td class="date-cell">2026.03.20</td>
-              <td><span class="detail-link">상세 보기 →</span></td>
-            </tr>
-            <tr class="clickable" onclick="goAirportDetail('CEB','세부 막탄 국제공항','공항이용료','PHP','PR','2024.12.30')">
-              <td><div class="airline-cell">
-                <div class="airport-icon" style="background:#f9f0ff;color:#722ed1">CEB</div>
-                <div><div class="cell-name">세부 막탄 국제공항</div><div class="iata-code">CEB</div></div>
-              </div></td>
-              <td>공항이용료</td>
-              <td><div class="airline-chips"><span class="airline-chip">필리핀항공</span></div></td>
-              <td style="text-align:center"><span class="currency-tag currency-php">PHP</span></td>
-              <td class="date-cell">2024.12.30</td>
-              <td><span class="detail-link">상세 보기 →</span></td>
-            </tr>
-            <tr class="clickable" onclick="goAirportDetail('KLO','보라카이 칼리보 국제공항','공항이용료','KRW','PR','2024.12.30')">
-              <td><div class="airline-cell">
-                <div class="airport-icon" style="background:#f9f0ff;color:#722ed1">KLO</div>
-                <div><div class="cell-name">보라카이 칼리보 국제공항</div><div class="iata-code">KLO</div></div>
-              </div></td>
-              <td>공항이용료</td>
-              <td><div class="airline-chips"><span class="airline-chip">필리핀항공</span></div></td>
-              <td style="text-align:center"><span class="currency-tag currency-krw">KRW</span></td>
-              <td class="date-cell">2024.12.30</td>
-              <td><span class="detail-link">상세 보기 →</span></td>
-            </tr>
-            <tr class="clickable" onclick="goAirportDetail('TAG','보홀 팡라오 국제공항','공항이용료','KRW','BX','2024.12.30')">
-              <td><div class="airline-cell">
-                <div class="airport-icon" style="background:#f9f0ff;color:#722ed1">TAG</div>
-                <div><div class="cell-name">보홀 팡라오 국제공항</div><div class="iata-code">TAG</div></div>
-              </div></td>
-              <td>공항이용료</td>
-              <td><div class="airline-chips"><span class="airline-chip">에어부산</span></div></td>
-              <td style="text-align:center"><span class="currency-tag currency-krw">KRW</span></td>
-              <td class="date-cell">2024.12.30</td>
-              <td><span class="detail-link">상세 보기 →</span></td>
-            </tr>
-            <tr class="clickable" onclick="goAirportDetail('HPH','하이퐁 깟비 국제공항','공항이용료','KRW','VJ','2025.09.08')">
-              <td><div class="airline-cell">
-                <div class="airport-icon" style="background:#fff7e6;color:#fa8c16">HPH</div>
-                <div><div class="cell-name">하이퐁 깟비 국제공항</div><div class="iata-code">HPH</div></div>
-              </div></td>
-              <td>공항이용료</td>
-              <td><div class="airline-chips"><span class="airline-chip">비엣젯항공</span></div></td>
-              <td style="text-align:center"><span class="currency-tag currency-krw">KRW</span></td>
-              <td class="date-cell">2025.09.08</td>
-              <td><span class="detail-link">상세 보기 →</span></td>
-            </tr>
-            <tr class="clickable" onclick="goAirportDetail('LHR','런던 히드로 공항','공항이용료','KRW','__','2025.05.15')">
-              <td><div class="airline-cell">
-                <div class="airport-icon" style="background:#e6f4ff;color:#0958d9">LHR</div>
-                <div><div class="cell-name">런던 히드로 공항</div><div class="iata-code">LHR</div></div>
-              </div></td>
-              <td>공항이용료</td>
-              <td><div class="airline-chips"><span class="airline-chip">항공미포함</span></div></td>
-              <td style="text-align:center"><span class="currency-tag currency-krw">KRW</span></td>
-              <td class="date-cell">2025.05.15</td>
-              <td><span class="detail-link">상세 보기 →</span></td>
-            </tr>
-            <tr class="clickable" onclick="goAirportDetail('BCN','바르셀로나 엘프라트 공항','공항이용료','KRW','__','2025.04.18')">
-              <td><div class="airline-cell">
-                <div class="airport-icon" style="background:#e6f4ff;color:#0958d9">BCN</div>
-                <div><div class="cell-name">바르셀로나 엘프라트 공항</div><div class="iata-code">BCN</div></div>
-              </div></td>
-              <td>공항이용료</td>
-              <td><div class="airline-chips"><span class="airline-chip">항공미포함</span></div></td>
-              <td style="text-align:center"><span class="currency-tag currency-krw">KRW</span></td>
-              <td class="date-cell">2025.04.18</td>
-              <td><span class="detail-link">상세 보기 →</span></td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
-    </div>
-  </div>
-</div>
-
-
-<!-- ============================================================ -->
-<!-- PAGE: 공항이용료 상세                                          -->
-<!-- ============================================================ -->
-<div id="page-airport-detail" class="page">
-  <div class="breadcrumb layout" style="padding-bottom:0">
-    <span>상품·재고</span><span class="sep">›</span>
-    <span onclick="goAirportList()" style="color:#1677ff;cursor:pointer">공항이용료</span><span class="sep">›</span>
-    <span class="bc-current" id="airport-bc">인천국제공항 (ICN)</span>
-  </div>
-  <div class="layout">
-    <div class="info-banner">ℹ️&nbsp; 이 화면은 <strong>조회 전용</strong>입니다. 수정·삭제는 내부 어드민에서만 가능합니다.</div>
-    <button class="btn-back" onclick="goAirportList()">← 목록으로</button>
-    <div class="page-header">
-      <div class="page-title" id="airport-title">인천국제공항 공항이용료 조회</div>
-      <div class="readonly-badge">🔒 조회 전용</div>
-    </div>
-    <div class="summary-card">
-      <div class="airport-icon" id="airport-logo" style="width:40px;height:40px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:800;flex-shrink:0;font-family:'SF Mono',monospace">ICN</div>
-      <div>
-        <div style="font-size:15px;font-weight:600;margin-bottom:4px" id="airport-name">인천국제공항</div>
-        <div style="font-size:12px;color:rgba(0,0,0,0.45);margin-bottom:6px" id="airport-terminal">1터미널 공항이용료 · 통화 KRW</div>
-        <div style="font-size:12px;color:rgba(0,0,0,0.55)">적용 항공사 &nbsp;
-          <span id="airport-airlines" style="font-size:11px;background:#f5f5f5;padding:2px 8px;border-radius:4px">제주항공, 썬푸꾸옥, 에어부산, 필리핀항공, 에어서울, 티웨이항공, 비엣젯항공, 이스타항공</span>
+<div class="layout">
+  <div class="page-header">
+    <div>
+      <div class="page-title-wrap">
+        <div class="hotel-thumb">SBM<br>PQ</div>
+        <div>
+          <div class="page-title">솔바이멜리아 푸꾸옥 — 디럭스 오션뷰</div>
+          <div class="page-meta">
+            <span class="id-pill">ACCOM-253</span>
+            <span class="prov-pill"><span class="pdot"></span>TMG</span>
+            <span>다이나믹 요금</span>
+          </div>
         </div>
       </div>
-      <div class="summary-stats">
-        <div class="stat-item"><div class="stat-label">최근 업데이트</div><div class="stat-value" style="font-size:14px;padding-top:3px" id="airport-updated">2026.04.09</div></div>
+    </div>
+    <div style="display: flex; gap: 8px;">
+      <button class="btn">취소</button>
+      <button class="btn primary">저장</button>
+    </div>
+  </div>
+
+  <!-- Policy Banner -->
+  <div class="policy-banner">
+    <div class="ico">📌</div>
+    <div class="body">
+      <strong>박수 고정 + 애드온 정책 변경 (2026-08-03)</strong><br>
+      다이나믹 요금 소스가 1박 조회를 지원하지 않고 <span class="tag">min_stay</span> 제약이 있어, 숙박권마다 <strong>박수를 고정</strong>하고 <strong>N박 총액</strong>을 조회·저장합니다.
+      애드온은 성격에 따라 분리 관리: <span class="tag">아동가 = 고정 금액</span> · <span class="tag">얼리/레이트 = %</span> (평균 1박 앵커).
+    </div>
+  </div>
+
+  <!-- Before/After -->
+  <div class="compare-wrap">
+    <div class="compare-card before">
+      <div class="compare-title">🚫 AS-IS (기존)</div>
+      <ul class="compare-list">
+        <li>1박 요금 기준 조회 · 저장</li>
+        <li>아동가·얼리·레이트 = <strong>1박 요금의 %</strong></li>
+        <li>다박 상품은 "1박 × N" 산술 계산</li>
+        <li>연박 할인·min_stay 다이나믹 반영 불가</li>
+      </ul>
+    </div>
+    <div class="compare-card after">
+      <div class="compare-title">✅ TO-BE (신규)</div>
+      <ul class="compare-list">
+        <li><strong>박수 고정</strong> (숙박권 등록 시 결정)</li>
+        <li>N박 총액 다이나믹 조회 → 평균 1박 파생</li>
+        <li>아동가 = <strong>고정 금액</strong> (관리자 직접 입력)</li>
+        <li>얼리/레이트 = <strong>% × 평균 1박</strong></li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- Section 1: 기본 정보 -->
+  <div class="card">
+    <div class="card-head">
+      <div>
+        <div class="card-title"><span class="num">1</span>숙박권 기본 정보</div>
+        <div class="card-desc">박수는 이 숙박권의 <strong>고정 속성</strong>입니다. 변경 시 요금·재고 전량 재조회됩니다.</div>
       </div>
     </div>
-    <div class="filter-bar-detail">
-      <span class="filter-label">적용 연도</span>
-      <div class="year-tabs">
-        <button class="year-tab">2024</button><button class="year-tab">2025</button><button class="year-tab active">2026</button>
-      </div>
-      <div style="margin-left:auto;display:flex;align-items:center;gap:5px;font-size:11px;color:rgba(0,0,0,0.4)">
-        <div style="width:10px;height:10px;border-radius:2px;background:#e6f4ff;border:1px solid #91caff"></div> 현재 월
-      </div>
-    </div>
-    <div class="main-card">
-      <div class="table-wrap">
-        <table class="dtbl">
-          <thead>
-            <tr>
-              <th style="width:80px">구분</th>
-              <th class="mc">1월</th><th class="mc">2월</th><th class="mc">3월</th><th class="mc">4월</th>
-              <th class="mc" style="background:#e6f4ff">5월</th>
-              <th class="mc">6월</th><th class="mc">7월</th><th class="mc">8월</th><th class="mc">9월</th><th class="mc">10월</th><th class="mc">11월</th><th class="mc">12월</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr>
-              <td><span class="type-label type-adult">성인</span></td>
-              <td class="mc">1</td><td class="mc empty">-</td>
-              <td class="mc">28,000</td><td class="mc empty">-</td>
-              <td class="mc cur">-</td>
-              <td class="mc empty">-</td><td class="mc empty">-</td><td class="mc empty">-</td><td class="mc empty">-</td><td class="mc empty">-</td><td class="mc empty">-</td><td class="mc empty">-</td>
-            </tr>
-            <tr>
-              <td><span class="type-label type-child">아동</span></td>
-              <td class="mc">1</td><td class="mc empty">-</td>
-              <td class="mc">28,000</td><td class="mc empty">-</td>
-              <td class="mc cur">-</td>
-              <td class="mc empty">-</td><td class="mc empty">-</td><td class="mc empty">-</td><td class="mc empty">-</td><td class="mc empty">-</td><td class="mc empty">-</td><td class="mc empty">-</td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
-      <div class="table-footer">
-        <div class="footer-stat">단위: <strong>원 (KRW)</strong></div>
-        <div class="footer-stat" style="margin-left:auto;color:rgba(0,0,0,0.3);font-size:11px">마지막 업데이트 2026.04.09 · 내부 어드민에서 수정 가능</div>
+    <div class="card-body">
+      <div class="field-grid">
+        <div class="field">
+          <label class="field-label">숙박권명 <span class="req">*</span></label>
+          <input class="input" value="솔바이멜리아 푸꾸옥 · 디럭스 오션뷰 · 3박">
+        </div>
+        <div class="field">
+          <label class="field-label">공급 채널</label>
+          <input class="input readonly" value="TMG · Sol by Meliá Phú Quốc" readonly>
+        </div>
+        <div class="field">
+          <label class="field-label">
+            박수 (고정) <span class="req">*</span>
+            <span class="new-badge">NEW</span>
+          </label>
+          <div class="nights-seg">
+            <button onclick="setNights(1)" id="n1">1박</button>
+            <button onclick="setNights(2)" id="n2">2박</button>
+            <button onclick="setNights(3)" class="active" id="n3">3박</button>
+            <button onclick="setNights(4)" id="n4">4박</button>
+            <button onclick="setNights(5)" id="n5">5박</button>
+          </div>
+          <div class="field-hint">⚠️ 변경 시 다이나믹 요금·애드온 실제 금액이 재계산됩니다</div>
+        </div>
+        <div class="field">
+          <label class="field-label">요금 타입</label>
+          <input class="input readonly" value="DYNAMIC (다이나믹)" readonly>
+        </div>
       </div>
     </div>
   </div>
+
+  <!-- Section 2: 요금 구조 -->
+  <div class="card">
+    <div class="card-head">
+      <div>
+        <div class="card-title"><span class="num">2</span>요금 구조</div>
+        <div class="card-desc">N박 총액은 다이나믹 조회 결과. 평균 1박은 애드온 % 계산용 파생값 (스냅샷 저장)</div>
+      </div>
+    </div>
+    <div class="card-body">
+      <div class="field-grid">
+        <div class="field">
+          <label class="field-label">N박 총액 (조회 결과)</label>
+          <div class="input-group">
+            <input class="input readonly" id="stayBase" value="900,000" readonly style="width: 180px; text-align: right;">
+            <span class="input-suffix">원 / <span id="nightsLabel">3</span>박</span>
+          </div>
+          <div class="field-hint">TMG checkAvailability 응답 그대로 저장. STATIC은 스킵.</div>
+        </div>
+        <div class="field">
+          <label class="field-label">
+            평균 1박 (파생 · 스냅샷)
+            <span class="new-badge">NEW</span>
+          </label>
+          <div class="derived">
+            <span class="lbl">= N박 총액 ÷ 박수</span>
+            <span class="val" id="perNightAvg">₩300,000</span>
+            <span class="formula" id="perNightFormula">(900,000 ÷ 3)</span>
+          </div>
+        </div>
+      </div>
+      <div class="note">
+        <strong>왜 파생·스냅샷 방식인가:</strong> 다이나믹 리프레시 시 N박 총액이 바뀌면 평균 1박도 재계산되어 얼리/레이트 실제 금액이 자동 반영됩니다.
+        단, 산술 평균이라 실제 첫날/마지막날 요금과 다를 수 있음 → 정책 문서 명시 필요.
+      </div>
+    </div>
+  </div>
+
+  <!-- Section 3: 애드온 -->
+  <div class="card">
+    <div class="card-head">
+      <div>
+        <div class="card-title"><span class="num">3</span>애드온 관리</div>
+        <div class="card-desc">아동가는 관리자가 직접 금액 입력 · 얼리/레이트는 평균 1박 대비 % 유지</div>
+      </div>
+    </div>
+    <div class="card-body" style="padding: 0;">
+      <table class="addon-table">
+        <thead>
+          <tr>
+            <th style="width: 30%;">애드온</th>
+            <th style="width: 30%;">입력 값</th>
+            <th style="width: 40%;">실제 적용 금액 (미리보기)</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>
+              <div class="addon-name">
+                아동가 (Extra Bed / Child)
+                <span class="addon-tag fixed">고정 금액</span>
+              </div>
+              <div class="addon-desc">인당·박당이 아닌 <strong>박수 반영 총액</strong>을 관리자가 입력. 다이나믹 변동과 무관.</div>
+            </td>
+            <td>
+              <div class="addon-input">
+                <input class="input" id="childAmount" value="150,000" oninput="recalc()">
+                <span class="input-suffix">원</span>
+              </div>
+            </td>
+            <td>
+              <div class="addon-preview">
+                고정 <span class="val" id="childPreview">₩150,000</span>
+                <div class="field-hint" style="margin-top: 4px;">3박권 아동 1명 기준 (박수 바꾸면 재입력 필요)</div>
+              </div>
+            </td>
+          </tr>
+          <tr>
+            <td>
+              <div class="addon-name">
+                얼리체크인 (Early Check-in)
+                <span class="addon-tag percent">% (평균 1박 × %)</span>
+              </div>
+              <div class="addon-desc">체크인 -1일 개념. 평균 1박의 % 유지 → 다이나믹 변동 시 자동 반영.</div>
+            </td>
+            <td>
+              <div class="addon-input">
+                <input class="input" id="earlyRate" value="30" oninput="recalc()">
+                <span class="input-suffix">%</span>
+              </div>
+            </td>
+            <td>
+              <div class="addon-preview">
+                <span id="earlyFormula" style="font-family: 'SF Mono', monospace; font-size: 11.5px;">30% × 300,000</span>
+                <span class="arrow">→</span>
+                <span class="val" id="earlyPreview">₩90,000</span>
+              </div>
+            </td>
+          </tr>
+          <tr>
+            <td>
+              <div class="addon-name">
+                레이트체크아웃 (Late Check-out)
+                <span class="addon-tag percent">% (평균 1박 × %)</span>
+              </div>
+              <div class="addon-desc">체크아웃 +1일 개념. 평균 1박의 % 유지 → 다이나믹 변동 시 자동 반영.</div>
+            </td>
+            <td>
+              <div class="addon-input">
+                <input class="input" id="lateRate" value="30" oninput="recalc()">
+                <span class="input-suffix">%</span>
+              </div>
+            </td>
+            <td>
+              <div class="addon-preview">
+                <span id="lateFormula" style="font-family: 'SF Mono', monospace; font-size: 11.5px;">30% × 300,000</span>
+                <span class="arrow">→</span>
+                <span class="val" id="latePreview">₩90,000</span>
+              </div>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- Simulation -->
+  <div class="section-title">🧮 결제 시뮬레이션</div>
+  <div class="sim-card">
+    <div class="sim-title">💳 성인 2명 + 아동 1명 · 얼리·레이트 모두 선택 시</div>
+    <div class="sim-row">
+      <span class="lbl">N박 총액 (다이나믹) <span class="mini-tag" id="simNightsTag">3박</span></span>
+      <span class="val" id="simStay">₩900,000</span>
+    </div>
+    <div class="sim-row">
+      <span class="lbl">+ 아동가 <span class="mini-tag">고정</span></span>
+      <span class="val" id="simChild">+ ₩150,000</span>
+    </div>
+    <div class="sim-row">
+      <span class="lbl">+ 얼리체크인 <span class="mini-tag">% × 평균 1박</span></span>
+      <span class="val" id="simEarly">+ ₩90,000</span>
+    </div>
+    <div class="sim-row">
+      <span class="lbl">+ 레이트체크아웃 <span class="mini-tag">% × 평균 1박</span></span>
+      <span class="val" id="simLate">+ ₩90,000</span>
+    </div>
+    <div class="sim-total">
+      <span class="lbl">최종 결제 금액</span>
+      <span class="val" id="simTotal">₩1,230,000</span>
+    </div>
+  </div>
+
+  <!-- Data Model -->
+  <div class="section-title">🗂 데이터 모델 초안</div>
+  <div class="datamodel">
+<span class="c">// AccommodationVoucher — 박수 고정 + 애드온 분리 정책</span>
+{
+  <span class="k">id</span>: <span class="t">"ACCOM-253"</span>,
+  <span class="k">name</span>: <span class="t">"솔바이멜리아 푸꾸옥 · 디럭스 오션뷰"</span>,
+  <span class="k">nights</span>: <span class="t">3</span>,                          <span class="c">// ← <span class="new">NEW</span> 고정 박수</span>
+  <span class="k">rateType</span>: <span class="t">"DYNAMIC"</span>,               <span class="c">// STATIC | ALM | DYNAMIC</span>
+
+  <span class="c">// 요금 (다이나믹)</span>
+  <span class="k">stayBaseAmount</span>: <span class="t">900000</span>,             <span class="c">// N박 총액 (다이나믹 조회)</span>
+  <span class="k">perNightAvgAmount</span>: <span class="t">300000</span>,          <span class="c">// ← <span class="new">NEW</span> 파생 · 스냅샷 (= stayBase / nights)</span>
+
+  <span class="c">// 애드온</span>
+  <span class="k">childFixedAmount</span>: <span class="t">150000</span>,           <span class="c">// ← <span class="new">NEW</span> 관리자 직접 입력 (박수 반영 총액)</span>
+  <span class="k">earlyCheckInRate</span>: <span class="t">0.30</span>,             <span class="c">// % × perNightAvgAmount</span>
+  <span class="k">lateCheckOutRate</span>: <span class="t">0.30</span>              <span class="c">// % × perNightAvgAmount</span>
+}
+  </div>
+
+  <!-- 정리 필요 항목 -->
+  <div class="section-title">📋 정리 필요 (진희·BE 협의)</div>
+  <div class="card">
+    <div class="card-body">
+      <ol style="padding-left: 20px; font-size: 13px; line-height: 2; color: rgba(0,0,0,0.8);">
+        <li><strong>기존 % 데이터 마이그레이션</strong> — 얼리/레이트 %는 그대로 사용 가능 (컬럼 의미 동일). 아동가는 스냅샷 시점 1박 × 기존% → 절대금액 환산 후 저장.</li>
+        <li><strong>박수 변경 시 재계산 룰</strong> — 3박권 → 4박권 개편 시 아동가 재입력 필요. 얼리/레이트는 % 그대로.</li>
+        <li><strong>다이나믹 refresh 트리거</strong> — stayBaseAmount 갱신 시 perNightAvgAmount 자동 재계산 + 얼리/레이트 실제 금액 재계산 훅 추가.</li>
+        <li><strong>평균 1박 앵커 정책 명문화</strong> — 산술 평균 근사 → 극단 케이스(주말/평일 혼합) 왜곡 감수 여부 재무·CS 사전 공유.</li>
+        <li><strong>STATIC 타입 처리</strong> — TMG 요금표 v7 정책 동일 (배치·고객 refresh 모두 스킵). 애드온 금액도 스킵.</li>
+      </ol>
+    </div>
+  </div>
+
+  <div class="footer-actions">
+    <button class="btn">취소</button>
+    <button class="btn">임시저장</button>
+    <button class="btn primary">저장하고 요금 재조회</button>
+  </div>
 </div>
 
-
 <script>
-const AIRLINE_KO = {'7C':'제주항공','9G':'썬푸꾸옥','BX':'에어부산','PR':'필리핀항공','RS':'에어서울','TW':'티웨이항공','VJ':'비엣젯항공','ZE':'이스타항공','LJ':'진에어','XJ':'타이에어아시아X','__':'항공미포함'};
-function toKoNames(codes) {
-  return codes.split(', ').map(c => AIRLINE_KO[c.trim()] || c.trim()).join(', ');
+let state = {
+  nights: 3,
+  stayBase: 900000,
+  childAmount: 150000,
+  earlyRate: 30,
+  lateRate: 30
+};
+
+function fmt(n) { return '₩' + n.toLocaleString(); }
+function fmtPlain(n) { return n.toLocaleString(); }
+
+function setNights(n) {
+  state.nights = n;
+  document.querySelectorAll('.nights-seg button').forEach(b => b.classList.remove('active'));
+  document.getElementById('n' + n).classList.add('active');
+  const perNightRates = { 1: 300000, 2: 310000, 3: 300000, 4: 285000, 5: 275000 };
+  state.stayBase = perNightRates[n] * n;
+  document.getElementById('stayBase').value = fmtPlain(state.stayBase);
+  document.getElementById('nightsLabel').textContent = n;
+  document.getElementById('simNightsTag').textContent = n + '박';
+  recalc();
 }
-function showOnly(id) {
-  ['page-fuel-list','page-fuel-detail','page-airport-list','page-airport-detail'].forEach(p => {
-    document.getElementById(p).classList.remove('active');
-  });
-  document.getElementById(id).classList.add('active');
-  window.scrollTo(0,0);
+
+function parseNum(v) { return parseInt(String(v).replace(/[^0-9]/g, '')) || 0; }
+
+function recalc() {
+  state.stayBase = parseNum(document.getElementById('stayBase').value);
+  state.childAmount = parseNum(document.getElementById('childAmount').value);
+  state.earlyRate = parseFloat(document.getElementById('earlyRate').value) || 0;
+  state.lateRate = parseFloat(document.getElementById('lateRate').value) || 0;
+
+  const perNight = Math.round(state.stayBase / state.nights);
+  const earlyAmt = Math.round(perNight * state.earlyRate / 100);
+  const lateAmt = Math.round(perNight * state.lateRate / 100);
+  const total = state.stayBase + state.childAmount + earlyAmt + lateAmt;
+
+  document.getElementById('perNightAvg').textContent = fmt(perNight);
+  document.getElementById('perNightFormula').textContent = '(' + fmtPlain(state.stayBase) + ' ÷ ' + state.nights + ')';
+
+  document.getElementById('childPreview').textContent = fmt(state.childAmount);
+  document.getElementById('earlyFormula').textContent = state.earlyRate + '% × ' + fmtPlain(perNight);
+  document.getElementById('earlyPreview').textContent = fmt(earlyAmt);
+  document.getElementById('lateFormula').textContent = state.lateRate + '% × ' + fmtPlain(perNight);
+  document.getElementById('latePreview').textContent = fmt(lateAmt);
+
+  document.getElementById('simStay').textContent = fmt(state.stayBase);
+  document.getElementById('simChild').textContent = '+ ' + fmt(state.childAmount);
+  document.getElementById('simEarly').textContent = '+ ' + fmt(earlyAmt);
+  document.getElementById('simLate').textContent = '+ ' + fmt(lateAmt);
+  document.getElementById('simTotal').textContent = fmt(total);
 }
-function setSubnav(active) {
-  document.getElementById('subnav-fuel').classList.toggle('active', active === 'fuel');
-  document.getElementById('subnav-airport').classList.toggle('active', active === 'airport');
-}
-function goFuelList() { showOnly('page-fuel-list'); setSubnav('fuel'); }
-function goAirportList() { showOnly('page-airport-list'); setSubnav('airport'); }
-function goFuelDetail(code, nameKo, segCount, currency, color, bg, updated) {
-  document.getElementById('fuel-bc').textContent = nameKo + ' (' + code + ')';
-  document.getElementById('fuel-title').textContent = nameKo + ' 유류할증료 조회';
-  document.getElementById('fuel-logo').textContent = code;
-  document.getElementById('fuel-logo').style.background = bg;
-  document.getElementById('fuel-logo').style.color = color;
-  document.getElementById('fuel-name').textContent = nameKo;
-  document.getElementById('fuel-sub').textContent = '통화 ' + currency;
-  document.getElementById('fuel-seg-count').textContent = segCount;
-  document.getElementById('fuel-updated').textContent = updated;
-  showOnly('page-fuel-detail'); setSubnav('fuel');
-}
-function goAirportDetail(iata, airportName, terminal, currency, airlines, updated) {
-  document.getElementById('airport-bc').textContent = airportName + ' (' + iata + ')';
-  document.getElementById('airport-title').textContent = airportName + ' 공항이용료 조회';
-  document.getElementById('airport-logo').textContent = iata;
-  document.getElementById('airport-name').textContent = airportName;
-  document.getElementById('airport-terminal').textContent = terminal + ' · 통화 ' + currency;
-  document.getElementById('airport-airlines').textContent = toKoNames(airlines);
-  document.getElementById('airport-updated').textContent = updated;
-  showOnly('page-airport-detail'); setSubnav('airport');
-}
-document.querySelectorAll('.year-tabs').forEach(tabs => {
-  tabs.querySelectorAll('.year-tab').forEach(btn => {
-    btn.addEventListener('click', function() {
-      tabs.querySelectorAll('.year-tab').forEach(b => b.classList.remove('active'));
-      this.classList.add('active');
-    });
-  });
-});
+
+recalc();
 </script>
+
 </body>
 </html>
