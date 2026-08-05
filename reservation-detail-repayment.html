@@ -398,7 +398,7 @@
         <button class="btn btn-plus btn-sm btn-icon">
           <span class="feature-tag">신규</span> + 수동 결제 등록
         </button>
-        <button class="btn btn-primary btn-sm btn-icon" onclick="openLinkModal()">
+        <button class="btn btn-primary btn-sm btn-icon" id="mainActionBtn" onclick="openLinkModal()">
           🔗 결제 링크 발송
         </button>
       </div>
@@ -530,11 +530,11 @@
 <div class="modal-overlay" id="modal-link">
   <div class="modal">
     <div class="modal-header">
-      <h3>결제 링크 발송</h3>
+      <h3 id="linkModalTitle">결제 링크 발송</h3>
       <button class="close" onclick="closeLinkModal()">&times;</button>
     </div>
     <div class="modal-body">
-      <div class="modal-hint">
+      <div class="modal-hint" id="linkModalHintTop">
         <strong>ℹ 재결제·부족금액 결제·오버 결제 모두 이 모달로 처리</strong><br>
         예약관리 금액 초과 금액도 발송 가능합니다. 초과분은 결제 완료 후 관리자가 개별 [취소] 처리하세요.
       </div>
@@ -556,16 +556,6 @@
         <div style="padding:10px 12px;background:#f5f5f5;border-radius:6px;font-size:13px;">
           홍길동 · 010-1234-5678 · hong@example.com
         </div>
-      </div>
-
-      <div class="form-group">
-        <label>발송 사유 (선택)</label>
-        <select class="form-input" id="linkReason">
-          <option>재결제 (결제수단 변경)</option>
-          <option>재결제 (카드 만료/오류)</option>
-          <option>추가결제 (금액 변동)</option>
-          <option>기타 (아래 메모)</option>
-        </select>
       </div>
 
       <div class="process-steps">
@@ -676,7 +666,7 @@ const SCENARIOS = {
       { id: 'PAY-NEW-1', method: '신용카드', pg: 'nice_v2', pgCode: '26080512-0005', name: '재결제 · 현대카드 (승인 87654321)', amount: 250000, status: 'new-payment', paidAt: '08-05 14:32', cancelledAt: null },
     ],
     links: [
-      { id: 'LINK-001', amount: 250000, sentAt: '08-05 14:15', expiresAt: '08-06 14:15', status: 'paid', paidAt: '08-05 14:32', reason: '재결제 (결제수단 변경)' }
+      { id: 'LINK-001', amount: 250000, sentAt: '08-05 14:15', expiresAt: '08-06 14:15', status: 'paid', paidAt: '08-05 14:32', label: '재결제 링크' }
     ]
   },
   mixed: {
@@ -883,7 +873,21 @@ function renderBanner() {
   }
 }
 
-function renderHeader() {}
+function renderHeader() {
+  const diff = getDiff();
+  const btn = document.getElementById('mainActionBtn');
+  if (!btn) return;
+  if (diff === 0) {
+    btn.innerHTML = '🔄 재결제';
+    btn.className = 'btn btn-primary btn-sm btn-icon';
+  } else if (diff < 0) {
+    btn.innerHTML = '🔗 결제 링크 발송';
+    btn.className = 'btn btn-primary btn-sm btn-icon';
+  } else {
+    btn.innerHTML = '🔗 결제 링크 발송';
+    btn.className = 'btn btn-primary btn-sm btn-icon';
+  }
+}
 
 function renderLinks() {
   const list = document.getElementById('linkHistoryList');
@@ -912,7 +916,7 @@ function renderLinks() {
     list.innerHTML += `
       <div class="link-item ${cls}">
         <div>
-          <div style="font-weight:700;font-size:13px;">${l.reason}</div>
+          <div style="font-weight:700;font-size:13px;">${l.label || '결제 링크 발송'}</div>
           <div class="link-meta">발송 ${l.sentAt} · 유효 ~${l.expiresAt}${l.paidAt ? ` · 결제 ${l.paidAt}` : ''}</div>
           <div class="link-url">https://pay.tripstore.kr/repay/${l.id.toLowerCase()}</div>
         </div>
@@ -927,6 +931,19 @@ function renderLinks() {
 function openLinkModal() {
   document.getElementById('modal-link').classList.add('show');
   document.getElementById('linkAmountInput').value = '';
+  // 정합 상태면 재결제 문맥, 아니면 결제 링크 발송 문맥
+  const diff = getDiff();
+  const title = document.getElementById('linkModalTitle');
+  const hintTop = document.getElementById('linkModalHintTop');
+  if (diff === 0) {
+    title.textContent = '재결제';
+    hintTop.innerHTML = `<strong>ℹ 재결제 · 결제수단 변경 등을 위한 신규 결제 링크 발송</strong><br>
+      결제 완료 시 <strong>오버 상태</strong>가 되며, 이후 관리자가 기존 결제 중 취소할 건을 <strong>개별 [취소]</strong> 클릭으로 처리하세요. 취소는 자동 실행되지 않습니다.`;
+  } else {
+    title.textContent = '결제 링크 발송';
+    hintTop.innerHTML = `<strong>ℹ 재결제·부족금액 결제·오버 결제 모두 이 모달로 처리</strong><br>
+      예약관리 금액 초과 금액도 발송 가능합니다. 초과분은 결제 완료 후 관리자가 개별 [취소] 처리하세요.`;
+  }
   updateModalHint();
   document.getElementById('linkAmountInput').focus();
 }
@@ -973,7 +990,6 @@ function sendPaymentLink() {
   const raw = document.getElementById('linkAmountInput').value.replace(/[^\d]/g, '');
   const amount = parseInt(raw) || 0;
   if (amount <= 0) { alert('금액을 입력하세요'); return; }
-  const reason = document.getElementById('linkReason').value;
 
   const linkId = 'LINK-' + String(state.links.length + 1).padStart(3, '0');
   const now = new Date();
@@ -987,7 +1003,7 @@ function sendPaymentLink() {
     expiresAt,
     status: 'pending',
     paidAt: null,
-    reason,
+    label: '결제 링크 발송',
   });
   state.currentLinkId = linkId;
   state.pendingLinkAmount = amount;
