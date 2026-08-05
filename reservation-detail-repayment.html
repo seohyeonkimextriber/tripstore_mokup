@@ -561,9 +561,6 @@
         <div class="link-history-title">
           결제 링크 발송 이력
           <span class="count" id="linkCount">0</span>
-          <div style="margin-left:auto;">
-            <button class="btn btn-primary btn-sm btn-icon" onclick="openLinkModal()">🔗 결제 URL 전송</button>
-          </div>
         </div>
         <div id="linkHistoryEmpty" class="link-history-empty">
           발송된 결제 링크가 없습니다. [결제 링크 발송] 버튼으로 발송하세요.
@@ -710,6 +707,7 @@
   <button class="active" onclick="loadScenario('match', event)">정합 (기본)</button>
   <button onclick="loadScenario('underpay', event)">부족</button>
   <button onclick="loadScenario('overpay', event)">오버 (재결제 후)</button>
+  <button onclick="loadScenario('multiLink', event)">결제링크 N개 발송</button>
 </div>
 
 <script>
@@ -757,6 +755,21 @@ const SCENARIOS = {
       { id: 'PAY-004', method: '신용카드', pg: 'nice_v2', pgCode: '26080512-0004', name: '롯데카드', amount: 100000, status: 'paid', paidAt: '08-05 10:32', cancelledAt: null },
     ],
     links: []
+  },
+  // 결제링크 N개 동시 발송 시나리오 (500,000원을 3명에게 균등분할하여 발송 → 3명 모두 결제완료)
+  multiLink: {
+    reservationAmount: 1000000,
+    payments: [
+      { id: 'PAY-001', method: '신용카드', pg: 'nice_v2', pgCode: '26080512-0001', name: '신한카드 (예약금 결제)', amount: 500000, status: 'paid', paidAt: '08-05 10:26', cancelledAt: null },
+      { id: 'PAY-LINK-1', method: '신용카드', pg: 'nice_v2', pgCode: '26080512-0002', name: '링크결제 · 신한카드 (승인 87654321)', amount: 166666, status: 'paid', paidAt: '08-05 14:50', cancelledAt: null, linkedRecipient: { name: '동행자님', phone: '010-1234-5678' } },
+      { id: 'PAY-LINK-2', method: '신용카드', pg: 'nice_v2', pgCode: '26080512-0003', name: '링크결제 · 삼성카드 (승인 45678901)', amount: 166666, status: 'paid', paidAt: '08-05 14:51', cancelledAt: null, linkedRecipient: { name: '동행자님', phone: '010-1234-5678' } },
+      { id: 'PAY-LINK-3', method: '신용카드', pg: 'nice_v2', pgCode: '26080512-0004', name: '링크결제 · 현대카드 (승인 23456789)', amount: 166668, status: 'paid', paidAt: '08-05 14:52', cancelledAt: null, linkedRecipient: { name: '홍길동', phone: '010-1234-5678' } },
+    ],
+    links: [
+      { id: 'LINK-001', recipientName: '동행자님', recipientPhone: '010-1234-5678', amount: 166666, sentAt: '08-05 14:15', expiresAt: '08-08 14:15', status: 'paid', paidAt: '08-05 14:50' },
+      { id: 'LINK-002', recipientName: '동행자님', recipientPhone: '010-1234-5678', amount: 166666, sentAt: '08-05 14:15', expiresAt: '08-08 14:15', status: 'paid', paidAt: '08-05 14:51' },
+      { id: 'LINK-003', recipientName: '홍길동', recipientPhone: '010-1234-5678', amount: 166668, sentAt: '08-05 14:15', expiresAt: '08-08 14:15', status: 'paid', paidAt: '08-05 14:52' },
+    ]
   }
 };
 
