@@ -89,7 +89,7 @@
 
   /* Amount cards */
   .amount-summary { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-bottom: 20px; }
-  .amount-card { background: #fafafa; border: 1px solid #e8e8e8; border-radius: 12px; padding: 20px 24px; display: flex; align-items: center; justify-content: space-between; gap: 16px; }
+  .amount-card { background: #fafafa; border: 1px solid #e8e8e8; border-radius: 12px; padding: 20px 24px; display: flex; align-items: center; justify-content: space-between; gap: 16px; transition: background 0.2s, border-color 0.2s; }
   .amount-card .label { font-size: 14px; font-weight: 700; color: #333; white-space: nowrap; }
   .amount-card .value { font-size: 18px; font-weight: 700; font-family: 'SF Mono', monospace; color: #1a1a1a; }
   .amount-card .value .unit { font-size: 14px; font-weight: 600; color: #666; margin-left: 4px; font-family: 'Pretendard', sans-serif; }
@@ -97,9 +97,16 @@
   .amount-card.penalty .label { color: #d32f2f; }
   .amount-card.penalty .value { color: #d32f2f; }
   .amount-card.receivable .label { color: #1a1a1a; }
+  .amount-card.receivable .value-wrap { text-align: right; }
+  .amount-card.receivable .sub { font-size: 11px; font-weight: 600; margin-top: 3px; letter-spacing: 0.2px; }
   .amount-card.receivable.over .value { color: #d32f2f; }
+  .amount-card.receivable.over .sub { color: #d32f2f; }
+  .amount-card.receivable.over { border-color: #ffa39e; background: #fff1f0; }
   .amount-card.receivable.under .value { color: #d46b08; }
+  .amount-card.receivable.under .sub { color: #d46b08; }
+  .amount-card.receivable.under { border-color: #ffd591; background: #fff7e6; }
   .amount-card.receivable.match .value { color: #2e7d32; }
+  .amount-card.receivable.match .sub { color: #2e7d32; }
 
   /* ============== 결제 상태 배너 (핵심 UI) ============== */
   .payment-state-banner {
@@ -414,29 +421,6 @@
 
     <div class="section-body" style="padding-top:0;">
 
-      <!-- 결제 금액 비교 -->
-      <div class="payment-comparison">
-        <div class="payment-comparison-grid">
-          <div class="payment-comparison-item">
-            <div class="label">예약관리 금액 (고객 결제해야 할 금액)</div>
-            <div class="value" id="reservationAmountDisplay">1,000,000</div>
-            <div class="sub">calculateTotalPaymentPrice()</div>
-          </div>
-          <div class="payment-comparison-op">vs</div>
-          <div class="payment-comparison-item">
-            <div class="label">실 결제 금액 (활성 결제 합계)</div>
-            <div class="value positive" id="paidAmountDisplay">1,000,000</div>
-            <div class="sub" id="paidAmountSub">4건 결제 완료</div>
-          </div>
-          <div class="payment-comparison-op">=</div>
-          <div class="payment-comparison-item">
-            <div class="label">차액</div>
-            <div class="value" id="diffAmountDisplay">0</div>
-            <div class="sub" id="diffAmountSub">정합 상태</div>
-          </div>
-        </div>
-      </div>
-
       <!-- 결제 요약 카드 (실제 화면 구조: 입금금액 / 취소위약금 / 미수금액) -->
       <div class="amount-summary">
         <div class="amount-card deposit">
@@ -449,7 +433,10 @@
         </div>
         <div class="amount-card receivable match" id="receivableCard">
           <div class="label">미수금액</div>
-          <div class="value"><span id="receivableAmount">0</span><span class="unit">원</span></div>
+          <div class="value-wrap">
+            <div class="value"><span id="receivableAmount">0</span><span class="unit">원</span></div>
+            <div class="sub" id="receivableSub">정합 상태</div>
+          </div>
         </div>
       </div>
 
@@ -717,7 +704,6 @@ function getDiff() {
 
 // ================ 렌더 ================
 function render() {
-  renderComparison();
   renderCards();
   renderTable();
   renderBanner();
@@ -725,39 +711,8 @@ function render() {
   renderLinks();
 }
 
-function renderComparison() {
-  document.getElementById('reservationAmountDisplay').textContent = fmt(state.reservationAmount);
-  document.getElementById('paidAmountDisplay').textContent = fmt(getActiveSum());
-  document.getElementById('paidAmountSub').textContent = `${state.payments.filter(p => p.status === 'paid' || p.status === 'new-payment').length}건 결제 완료`;
-
-  const diff = getDiff();
-  const diffEl = document.getElementById('diffAmountDisplay');
-  const diffSub = document.getElementById('diffAmountSub');
-  diffEl.classList.remove('positive', 'negative', 'warning');
-  if (diff > 0) {
-    diffEl.textContent = '+' + fmt(diff);
-    diffEl.classList.add('negative');
-    diffSub.textContent = '오버 상태 · 취소 필요';
-    diffSub.style.color = '#d32f2f';
-    diffSub.style.fontWeight = '700';
-  } else if (diff < 0) {
-    diffEl.textContent = '-' + fmt(Math.abs(diff));
-    diffEl.classList.add('warning');
-    diffSub.textContent = '부족 상태 · 결제 필요';
-    diffSub.style.color = '#d46b08';
-    diffSub.style.fontWeight = '700';
-  } else {
-    diffEl.textContent = '0';
-    diffEl.classList.add('positive');
-    diffSub.textContent = '정합 상태';
-    diffSub.style.color = '#2e7d32';
-    diffSub.style.fontWeight = '700';
-  }
-}
-
 function renderCards() {
   const activeSum = getActiveSum();
-  const diff = getDiff(); // activeSum - reservationAmount
 
   // 입금금액 = 활성 결제 합
   document.getElementById('depositCard').textContent = fmt(activeSum);
@@ -772,16 +727,20 @@ function renderCards() {
   const receivable = state.reservationAmount - activeSum;
   const card = document.getElementById('receivableCard');
   const el = document.getElementById('receivableAmount');
+  const sub = document.getElementById('receivableSub');
   card.classList.remove('over', 'under', 'match');
   if (receivable > 0) {
     el.textContent = '+' + fmt(receivable);
     card.classList.add('under');
+    sub.textContent = '부족 · 결제 링크 발송 필요';
   } else if (receivable < 0) {
     el.textContent = '−' + fmt(Math.abs(receivable));
     card.classList.add('over');
+    sub.textContent = '오버 · 취소 처리 필요';
   } else {
     el.textContent = '0';
     card.classList.add('match');
+    sub.textContent = '정합 상태';
   }
 }
 
