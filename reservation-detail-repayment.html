@@ -198,18 +198,56 @@
   .link-history-title { font-size: 13px; font-weight: 700; margin-bottom: 12px; display: flex; align-items: center; gap: 8px; }
   .link-history-title .count { background: #f0f0f0; padding: 1px 8px; border-radius: 10px; font-size: 10.5px; }
   .link-history-empty { text-align: center; padding: 24px; color: #bbb; font-size: 12px; background: #fafafa; border-radius: 8px; }
-  .link-item {
-    background: #fafafa; border: 1px solid #e8e8e8; border-radius: 8px;
-    padding: 12px 16px; margin-bottom: 8px;
-    display: grid; grid-template-columns: 1fr auto auto; gap: 16px; align-items: center;
+
+  /* 요약 바 (한 줄 인라인) */
+  .link-summary-inline {
+    background: #f0f5ff; border: 1px solid #d9e8ff; border-radius: 8px;
+    padding: 12px 18px; margin-bottom: 10px;
+    display: flex; align-items: center; gap: 24px; flex-wrap: wrap; font-size: 12.5px;
   }
-  .link-item.pending { background: #e6f4ff; border-color: #91caff; }
+  .link-summary-inline .k { color: #666; font-weight: 500; margin-right: 4px; }
+  .link-summary-inline .v { font-weight: 800; font-family: 'SF Mono', monospace; }
+  .link-summary-inline .valid .v { color: #d32f2f; }
+  .link-summary-inline .paid .v { color: #2e7d32; }
+  .link-summary-inline .expired .v { color: #999; }
+  .link-summary-inline .balance { margin-left: auto; }
+  .link-summary-inline .balance .v { color: #d32f2f; }
+  .link-summary-inline .balance.zero .v { color: #d32f2f; }
+  .link-summary-inline .balance.plus .v { color: #d46b08; }
+
+  /* 링크 아이템 (단일 행 grid) */
+  .link-item {
+    background: #fff; border: 1px solid #e0e0e0; border-radius: 10px;
+    padding: 14px 18px; margin-bottom: 8px;
+    display: grid; grid-template-columns: 120px 160px 140px 90px 1fr auto; gap: 16px; align-items: center;
+    font-size: 12.5px;
+  }
+  .link-item.pending { background: #fffbe6; border-color: #ffe58f; }
   .link-item.paid { background: #f6ffed; border-color: #b7eb8f; }
-  .link-item.expired { background: #fafafa; opacity: 0.6; }
-  .link-item .link-meta { font-size: 11.5px; color: #888; }
-  .link-item .link-url { font-family: 'SF Mono', monospace; font-size: 11px; color: #555; margin-top: 2px; }
-  .link-item .link-amount { font-size: 15px; font-weight: 700; font-family: 'SF Mono', monospace; }
-  .link-item .link-status { display: flex; align-items: center; gap: 8px; }
+  .link-item.expired { background: #fafafa; border-color: #e0e0e0; opacity: 0.75; }
+  .link-item .cell-name { font-weight: 600; color: #1a1a1a; }
+  .link-item .cell-phone { font-family: 'SF Mono', monospace; color: #333; letter-spacing: 0.3px; }
+  .link-item .cell-amount { font-family: 'SF Mono', monospace; font-weight: 700; font-size: 14px; text-align: right; }
+  .link-item .cell-status { text-align: center; }
+  .link-item .cell-meta { font-size: 11.5px; color: #666; line-height: 1.55; }
+  .link-item .cell-meta .label { color: #999; margin-right: 3px; }
+  .link-item .cell-actions { display: flex; gap: 6px; }
+  .link-item .cell-actions button {
+    padding: 5px 12px; font-size: 11.5px; font-weight: 700;
+    border-radius: 16px; background: #fff; cursor: pointer;
+    border: 1px solid #ffa39e; color: #cf1322;
+  }
+  .link-item .cell-actions button.resend { border-color: #d0d0d0; color: #333; }
+  .link-item .cell-actions button.resend:hover { border-color: #1565c0; color: #1565c0; }
+  .link-item .cell-actions button.expire:hover { background: #fff1f0; }
+  .link-item .cell-actions button.test { border-color: #91caff; color: #0958d9; background: #e6f4ff; }
+  .link-item .cell-actions button.test:hover { background: #bae0ff; }
+
+  /* 링크아이템 상태 pill */
+  .link-item .status-pill-lg { display: inline-block; padding: 4px 12px; border-radius: 4px; font-size: 12px; font-weight: 700; }
+  .link-item .status-pill-lg.waiting { background: #fff7e6; color: #d46b08; border: 1px solid #ffd591; }
+  .link-item .status-pill-lg.paid { background: #f6ffed; color: #389e0d; border: 1px solid #b7eb8f; }
+  .link-item .status-pill-lg.expired { background: #f5f5f5; color: #999; border: 1px solid #d9d9d9; }
 
   /* Modal */
   .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 500; display: none; align-items: center; justify-content: center; padding: 20px; }
@@ -524,7 +562,7 @@
           결제 링크 발송 이력
           <span class="count" id="linkCount">0</span>
           <div style="margin-left:auto;">
-            <button class="btn btn-primary btn-sm btn-icon" onclick="openLinkModal()">🔗 결제 링크 발송</button>
+            <button class="btn btn-primary btn-sm btn-icon" onclick="openLinkModal()">🔗 결제 URL 전송</button>
           </div>
         </div>
         <div id="linkHistoryEmpty" class="link-history-empty">
@@ -956,13 +994,11 @@ function renderLinks() {
   const countEl = document.getElementById('linkCount');
   countEl.textContent = state.links.length;
 
-  // 요약 바 계산
   const validLinks = state.links.filter(l => l.status === 'pending');
   const paidLinks = state.links.filter(l => l.status === 'paid');
   const expiredLinks = state.links.filter(l => l.status === 'expired');
   const validSum = validLinks.reduce((s, l) => s + l.amount, 0);
   const paidSum = paidLinks.reduce((s, l) => s + l.amount, 0);
-  // 발송가능잔액 = 예약관리 금액 − 유효링크금액 − 결제완료금액 (링크가 아닌 기존 결제도 포함해야 하지만 목업 단순화)
   const activeNonLink = state.payments.filter(p => (p.status === 'paid' || p.status === 'new-payment') && !p.linkedRecipient).reduce((s, p) => s + p.amount, 0);
   const sendable = state.reservationAmount - validSum - paidSum - activeNonLink;
 
@@ -974,67 +1010,71 @@ function renderLinks() {
   list.style.display = '';
   empty.style.display = 'none';
 
+  const balanceCls = sendable > 0 ? 'plus' : 'zero';
   const summaryBar = `
-    <div class="link-summary-bar">
-      <div class="link-summary-item valid">
-        <div class="k">유효 링크</div>
-        <div class="v">${validLinks.length}건 · ${fmt(validSum)}원</div>
-      </div>
-      <div class="link-summary-item paid">
-        <div class="k">결제완료</div>
-        <div class="v">${paidLinks.length}건 · ${fmt(paidSum)}원</div>
-      </div>
-      <div class="link-summary-item expired">
-        <div class="k">만료</div>
-        <div class="v">${expiredLinks.length}건</div>
-      </div>
-      <div class="link-summary-item balance ${sendable < 0 ? 'overpay' : ''}">
-        <div class="k">발송가능잔액 <span style="font-size:9px;color:#aaa;">(참고용 · 초과 발송 가능)</span></div>
-        <div class="v">${sendable < 0 ? '−' : ''}${fmt(Math.abs(sendable))}원</div>
-      </div>
+    <div class="link-summary-inline">
+      <div class="valid"><span class="k">유효 링크:</span><span class="v">${validLinks.length}건 (${fmt(validSum)}원)</span></div>
+      <div class="paid"><span class="k">결제완료:</span><span class="v">${paidLinks.length}건 (${fmt(paidSum)}원)</span></div>
+      <div class="expired"><span class="k">만료:</span><span class="v">${expiredLinks.length}건</span></div>
+      <div class="balance ${balanceCls}"><span class="k">발송가능잔액:</span><span class="v">${sendable < 0 ? '−' : ''}${fmt(Math.abs(sendable))}원</span></div>
     </div>
   `;
 
   const items = state.links.slice().reverse().map(l => {
     const cls = l.status === 'pending' ? 'pending' : (l.status === 'paid' ? 'paid' : 'expired');
     const statusPill = {
-      pending: '<span class="status-pill paid">발송됨 · 결제대기</span>',
-      paid: '<span class="status-pill new-payment">✓ 결제완료</span>',
-      expired: '<span class="status-pill cancelled">만료</span>',
+      pending: '<span class="status-pill-lg waiting">대기</span>',
+      paid: '<span class="status-pill-lg paid">결제완료</span>',
+      expired: '<span class="status-pill-lg expired">만료</span>',
     }[l.status];
 
     let actions = '';
     if (l.status === 'pending') {
       actions = `
-        <div class="link-item-actions">
-          <button onclick="openCustomerSim('${l.id}')">🖥 고객 결제 (시뮬)</button>
-          <button class="resend-btn" onclick="resendLink('${l.id}')">재발송</button>
-          <button class="expire-btn" onclick="expireLink('${l.id}')">만료처리</button>
-        </div>`;
+        <button class="expire" onclick="expireLink('${l.id}')">만료처리</button>
+        <button class="resend" onclick="resendLink('${l.id}')">재발송</button>
+        <button class="test" onclick="markLinkPaid('${l.id}')">결제완료(테스트)</button>
+      `;
     } else if (l.status === 'expired') {
-      actions = `
-        <div class="link-item-actions">
-          <button class="resend-btn" onclick="resendLink('${l.id}')">재발송</button>
-        </div>`;
+      actions = `<button class="resend" onclick="resendLink('${l.id}')">재발송</button>`;
     }
 
     return `
       <div class="link-item ${cls}">
-        <div>
-          <div style="font-weight:700;font-size:13px;">🔗 결제 링크</div>
-          <div class="recipient-info">
-            <span class="name">${l.recipientName}</span><span class="phone">${l.recipientPhone}</span>
-          </div>
-          <div class="link-meta">발송 ${l.sentAt} · 유효 ~${l.expiresAt} (72h)${l.paidAt ? ` · 결제 ${l.paidAt}` : ''}</div>
-          <div class="link-url">https://pay.tripstore.kr/repay/${l.id.toLowerCase()}</div>
+        <div class="cell-name">${l.recipientName}</div>
+        <div class="cell-phone">${l.recipientPhone}</div>
+        <div class="cell-amount">${fmt(l.amount)}원</div>
+        <div class="cell-status">${statusPill}</div>
+        <div class="cell-meta">
+          <div><span class="label">발송</span>${formatDateLong(l.sentAt)}</div>
+          <div><span class="label">만료</span>${formatDateLong(l.expiresAt)}${l.paidAt ? ` · <span class="label">결제</span>${formatDateLong(l.paidAt)}` : ''}</div>
         </div>
-        <div class="link-amount">₩ ${fmt(l.amount)}</div>
-        <div class="link-status">${statusPill}${actions}</div>
+        <div class="cell-actions">${actions}</div>
       </div>
     `;
   }).join('');
 
   list.innerHTML = summaryBar + items;
+}
+
+// MM-DD HH:mm → 2026-MM-DD 오전/오후 HH:mm
+function formatDateLong(md) {
+  if (!md) return '';
+  const parts = md.match(/(\d{2})-(\d{2})\s+(\d{2}):(\d{2})/);
+  if (!parts) return md;
+  const [, mo, d, hh, mm] = parts;
+  const h = parseInt(hh);
+  const period = h >= 12 ? '오후' : '오전';
+  const displayH = h > 12 ? h - 12 : (h === 0 ? 12 : h);
+  return `2026-${mo}-${d} ${period} ${String(displayH).padStart(2,'0')}:${mm}`;
+}
+
+// 결제완료 테스트 - 시뮬레이터 열지 않고 바로 결제완료 처리
+function markLinkPaid(linkId) {
+  const link = state.links.find(l => l.id === linkId);
+  if (!link || link.status !== 'pending') return;
+  state.currentLinkId = linkId;
+  customerResult('success');
 }
 
 // ================ 결제 링크 발송 (다중 수신자) ================
