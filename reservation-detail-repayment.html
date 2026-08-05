@@ -89,12 +89,17 @@
 
   /* Amount cards */
   .amount-summary { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-bottom: 20px; }
-  .amount-card { background: #fafafa; border-radius: 8px; padding: 16px; text-align: center; }
-  .amount-card .label { font-size: 11px; color: #888; margin-bottom: 6px; }
-  .amount-card .value { font-size: 18px; font-weight: 700; font-family: 'SF Mono', monospace; }
-  .amount-card .value.positive { color: #1565c0; }
-  .amount-card .value.negative { color: #d32f2f; }
-  .amount-card.highlight { border: 2px solid #e65100; background: #fff8e1; }
+  .amount-card { background: #fafafa; border: 1px solid #e8e8e8; border-radius: 12px; padding: 20px 24px; display: flex; align-items: center; justify-content: space-between; gap: 16px; }
+  .amount-card .label { font-size: 14px; font-weight: 700; color: #333; white-space: nowrap; }
+  .amount-card .value { font-size: 18px; font-weight: 700; font-family: 'SF Mono', monospace; color: #1a1a1a; }
+  .amount-card .value .unit { font-size: 14px; font-weight: 600; color: #666; margin-left: 4px; font-family: 'Pretendard', sans-serif; }
+  .amount-card.deposit .label { color: #1565c0; }
+  .amount-card.penalty .label { color: #d32f2f; }
+  .amount-card.penalty .value { color: #d32f2f; }
+  .amount-card.receivable .label { color: #1a1a1a; }
+  .amount-card.receivable.over .value { color: #d32f2f; }
+  .amount-card.receivable.under .value { color: #d46b08; }
+  .amount-card.receivable.match .value { color: #2e7d32; }
 
   /* ============== 결제 상태 배너 (핵심 UI) ============== */
   .payment-state-banner {
@@ -392,7 +397,7 @@
   <!-- ★ 결제 정보 섹션 (메인) ★ -->
   <div class="section" id="paymentSection">
     <div class="section-header">
-      <h2>결제 정보 <span class="badge yellow" id="sectionHeadBadge">정합</span></h2>
+      <h2>결제금액 관리 (트립결제) <span class="badge yellow" id="sectionHeadBadge">정합</span></h2>
       <div class="actions">
         <button class="btn btn-outline btn-sm btn-icon" onclick="showLog()">📜 이력</button>
         <button class="btn btn-plus btn-sm btn-icon">
@@ -432,19 +437,19 @@
         </div>
       </div>
 
-      <!-- 결제 요약 카드 -->
+      <!-- 결제 요약 카드 (실제 화면 구조: 입금금액 / 취소위약금 / 미수금액) -->
       <div class="amount-summary">
-        <div class="amount-card">
-          <div class="label">총 결제 금액</div>
-          <div class="value positive" id="totalPaidCard">1,000,000</div>
+        <div class="amount-card deposit">
+          <div class="label">입금금액</div>
+          <div class="value"><span id="depositCard">1,000,000</span><span class="unit">원</span></div>
         </div>
-        <div class="amount-card">
-          <div class="label">총 취소/환불</div>
-          <div class="value" id="totalCancelledCard">0</div>
+        <div class="amount-card penalty">
+          <div class="label">취소위약금</div>
+          <div class="value"><span id="penaltyCard">0</span><span class="unit">원</span></div>
         </div>
-        <div class="amount-card">
-          <div class="label">미수 금액</div>
-          <div class="value" id="unpaidCard">0</div>
+        <div class="amount-card receivable match" id="receivableCard">
+          <div class="label">미수금액</div>
+          <div class="value"><span id="receivableAmount">0</span><span class="unit">원</span></div>
         </div>
       </div>
 
@@ -453,15 +458,16 @@
         <thead>
           <tr>
             <th style="width:40px;">#</th>
-            <th style="width:70px;">구분</th>
-            <th style="width:90px;">PG사</th>
+            <th style="width:100px;">PG사</th>
             <th style="width:110px;">결제수단</th>
-            <th>결제번호</th>
+            <th>트립결제번호</th>
             <th class="text-right" style="width:110px;">결제금액</th>
-            <th class="text-right" style="width:110px;">취소/환불</th>
-            <th>결제일시</th>
-            <th class="text-center" style="width:80px;">상태</th>
-            <th class="text-center" style="width:80px;">액션</th>
+            <th class="text-right" style="width:100px;">취소위약금</th>
+            <th class="text-right" style="width:100px;">취소금액</th>
+            <th class="text-right" style="width:110px;background:#f0f5ff;">입금금액</th>
+            <th style="width:110px;">결제일시</th>
+            <th class="text-center" style="width:90px;">결제상태</th>
+            <th class="text-center" style="width:90px;">결제관리</th>
           </tr>
         </thead>
         <tbody id="paymentTableBody"></tbody>
@@ -750,10 +756,33 @@ function renderComparison() {
 }
 
 function renderCards() {
-  document.getElementById('totalPaidCard').textContent = fmt(getActiveSum());
-  document.getElementById('totalCancelledCard').textContent = fmt(getCancelledSum());
-  const unpaid = state.reservationAmount - getActiveSum();
-  document.getElementById('unpaidCard').textContent = unpaid > 0 ? fmt(unpaid) : '0';
+  const activeSum = getActiveSum();
+  const diff = getDiff(); // activeSum - reservationAmount
+
+  // 입금금액 = 활성 결제 합
+  document.getElementById('depositCard').textContent = fmt(activeSum);
+
+  // 취소위약금 (현 목업에선 0 고정 — 실 서비스는 penalty 추적)
+  document.getElementById('penaltyCard').textContent = '0';
+
+  // 미수금액 = 예약관리 금액 − 입금금액 (부호 포함)
+  //   부족(underpay) → +금액 (아직 받을 돈)
+  //   오버(overpay)  → -금액 (돌려줘야 할 돈)
+  //   정합(match)    → 0
+  const receivable = state.reservationAmount - activeSum;
+  const card = document.getElementById('receivableCard');
+  const el = document.getElementById('receivableAmount');
+  card.classList.remove('over', 'under', 'match');
+  if (receivable > 0) {
+    el.textContent = '+' + fmt(receivable);
+    card.classList.add('under');
+  } else if (receivable < 0) {
+    el.textContent = '−' + fmt(Math.abs(receivable));
+    card.classList.add('over');
+  } else {
+    el.textContent = '0';
+    card.classList.add('match');
+  }
 }
 
 function renderTable() {
@@ -767,11 +796,11 @@ function renderTable() {
     if (p.status === 'cancel-failed') cls.push('cancel-failed');
 
     const pill = {
-      paid: '<span class="status-pill paid">완료</span>',
+      paid: '<span class="status-pill paid">결제완료</span>',
       cancelling: '<span class="status-pill cancelling"><span class="spinner"></span> 취소중</span>',
-      cancelled: '<span class="status-pill cancelled">취소</span>',
+      cancelled: '<span class="status-pill cancelled">취소완료</span>',
       'cancel-failed': '<span class="status-pill cancel-failed">취소실패 ⚠</span>',
-      'new-payment': '<span class="status-pill new-payment">신규(재결제)</span>',
+      'new-payment': '<span class="status-pill new-payment">결제완료 (재결제)</span>',
     }[p.status];
 
     let actionBtn = '';
@@ -783,18 +812,30 @@ function renderTable() {
       actionBtn = `<button class="cancel-btn-inline" disabled>처리중</button>`;
     }
 
-    const amountCls = p.status === 'cancelled' ? 'line-through' : '';
-    const refund = p.status === 'cancelled' ? `<span style="color:#d32f2f;font-weight:700;">-${fmt(p.amount)}</span>` : '-';
+    // 컬럼별 값
+    const isCancelled = p.status === 'cancelled';
+    const paymentAmountDisplay = isCancelled
+      ? `<span class="line-through">${fmt(p.amount)}</span>`
+      : fmt(p.amount);
+    const penaltyDisplay = '0'; // 목업: 취소위약금 미추적
+    const cancelAmountDisplay = isCancelled
+      ? `<span style="color:#d32f2f;font-weight:700;">-${fmt(p.amount)}</span>`
+      : '-';
+    const depositAmount = isCancelled ? 0 : p.amount;
+    const depositDisplay = isCancelled
+      ? `<span style="color:#bbb;">0</span>`
+      : `<span style="color:#1565c0;font-weight:700;">${fmt(depositAmount)}</span>`;
 
     tbody.innerHTML += `
       <tr class="${cls.join(' ')}">
         <td>${idx + 1}</td>
-        <td><span class="badge blue">PG</span></td>
         <td>${p.pg}</td>
         <td>${p.method}</td>
         <td class="text-mono" style="font-size:11px;">${p.pgCode}<br><span style="color:#888;font-size:10px;">${p.name}</span></td>
-        <td class="text-right text-mono ${amountCls}">${fmt(p.amount)}</td>
-        <td class="text-right text-mono">${refund}</td>
+        <td class="text-right text-mono">${paymentAmountDisplay}</td>
+        <td class="text-right text-mono" style="color:#d32f2f;">${penaltyDisplay}</td>
+        <td class="text-right text-mono">${cancelAmountDisplay}</td>
+        <td class="text-right text-mono" style="background:#f8fbff;">${depositDisplay}</td>
         <td style="font-size:11px;">${p.paidAt}${p.cancelledAt ? `<br><span style="color:#d32f2f;">${p.cancelledAt}</span>` : ''}</td>
         <td class="text-center">${pill}</td>
         <td class="text-center">${actionBtn}</td>
