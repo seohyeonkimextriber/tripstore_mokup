@@ -13,13 +13,15 @@
   --red:#c94a4a; --xmas-red:#c1272d; --xmas-green:#1a5928;
 }
 *{box-sizing:border-box;margin:0;padding:0}
+html, body{overflow-x:hidden; max-width:100%}
 body{
   background:var(--paper); color:var(--ink);
   font-family:'Pretendard','Apple SD Gothic Neo',system-ui,sans-serif;
   -webkit-font-smoothing:antialiased;
   padding:40px 20px;
+  word-break:keep-all;
 }
-.wrap{max-width:1080px;margin:0 auto}
+.wrap{max-width:1080px;margin:0 auto; width:100%}
 .mono{font-family:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,monospace;font-variant-numeric:tabular-nums}
 
 /* Header */
@@ -272,18 +274,106 @@ tr.total td{
   font-family:ui-monospace,monospace;
 }
 
+/* Freetime block in daily itinerary */
+.freetime{
+  margin-top:16px; padding:14px 16px;
+  background:linear-gradient(135deg, #f0faf6 0%, #e6f5ef 100%);
+  border-left:3px solid var(--mint);
+}
+.freetime-title{
+  color:var(--mint-dark); font-weight:800; font-size:12px;
+  letter-spacing:-.01em; margin-bottom:8px;
+}
+.freetime-list{list-style:none; padding:0; margin:0}
+.freetime-list li{
+  display:block; padding:5px 0;
+  font-size:12.5px; line-height:1.6; color:var(--ink);
+}
+.freetime-list li b{color:var(--ink); font-weight:700}
+
+/* Route flow contained scrolling */
+.route-flow-wrap{overflow-x:auto; -webkit-overflow-scrolling:touch; padding-bottom:12px; margin:0 -8px; padding-left:8px; padding-right:8px}
+
+/* Table wrap for horizontal safety */
+.table-wrap{width:100%; overflow-x:auto; -webkit-overflow-scrolling:touch}
+
 @media (max-width:720px){
-  body{padding:20px 12px}
-  .header{padding:32px 24px}
-  .header h1{font-size:26px}
+  body{padding:16px 8px}
+  .header{padding:26px 20px}
+  .header h1{font-size:22px; line-height:1.25}
+  .header .sub{font-size:12px}
   .header-meta{grid-template-columns:1fr 1fr}
-  .section, .payment-summary{padding:26px 22px}
-  .timeline .day-row{grid-template-columns:1fr; gap:8px}
+  .header-meta div{padding:12px 14px}
+  .header-meta b{font-size:13px}
+  .section, .payment-summary{padding:22px 18px}
+  .section h2{font-size:18px}
+  .timeline .day-row{grid-template-columns:1fr; gap:8px; padding:18px 0}
   .timeline .flag-badge{display:none}
+  .timeline .day-label{
+    display:flex; flex-direction:row; align-items:center; gap:10px;
+    padding-bottom:6px; border-bottom:1px solid var(--line);
+    flex-wrap:wrap;
+  }
+  .timeline .day-label .date{font-size:14px}
+  .timeline .day-label .dow{font-size:11px; margin-top:0}
+  .timeline .day-label .city-name{margin-top:0}
+  .timeline .day-content h3{font-size:14px}
+  .timeline .day-content li{grid-template-columns:52px 1fr; gap:8px; font-size:12.5px}
+  .timeline .day-content li .time{font-size:11px}
   .tips-grid, .payment-boxes{grid-template-columns:1fr}
-  .transport-list .trip{grid-template-columns:1fr; gap:8px}
-  .route-flow{gap:4px}
-  .route-flow .city{min-width:100px; padding:12px}
+  .tips-grid .tip{padding:20px 18px}
+  .tips-grid .tip p{font-size:12.5px}
+  .transport-list .trip{
+    grid-template-columns:1fr; gap:6px; padding:16px 18px;
+  }
+  .transport-list .trip .icon{
+    text-align:left; font-size:20px;
+  }
+  .transport-list .trip .route{
+    flex-wrap:wrap;
+  }
+  .transport-list .trip .date-tag{
+    display:inline-block; width:fit-content; margin-top:4px;
+  }
+  .route-flow{gap:4px; padding:8px 0 12px}
+  .route-flow .city{min-width:90px; padding:10px 8px}
+  .route-flow .city .name{font-size:12px}
+  .route-flow .city .date{font-size:9px}
+  .route-flow .arrow{padding:0 2px; font-size:11px}
+  .payment-boxes .box{padding:18px}
+  .payment-boxes .box strong{font-size:22px}
+
+  /* Hotel table → card layout on mobile */
+  table.data{display:block; width:100%}
+  table.data thead{display:none}
+  table.data tbody{display:block; width:100%}
+  table.data tr{
+    display:block; width:100%;
+    border:1px solid var(--line); border-radius:0;
+    padding:14px 16px; margin-bottom:10px;
+    background:#fff;
+  }
+  table.data tr.total{
+    display:flex; justify-content:space-between; align-items:center;
+    background:#eef2ef; padding:14px 16px; margin-bottom:6px;
+  }
+  table.data tr.total td{
+    display:inline; padding:0; border:none; font-size:13px;
+  }
+  table.data tr.total td:last-child{text-align:right}
+  table.data tr.total td::before{content:''}
+  table.data td{
+    display:flex; justify-content:space-between; align-items:center;
+    padding:6px 0; border:none; font-size:13px;
+    text-align:right;
+  }
+  table.data td::before{
+    content:attr(data-label);
+    color:var(--muted); font-size:10px; font-weight:700;
+    letter-spacing:.06em; text-transform:uppercase;
+    text-align:left; flex-shrink:0; margin-right:12px;
+  }
+  table.data td.num{text-align:right}
 }
 
 @media print{
@@ -325,6 +415,7 @@ tr.total td{
 <div class="section">
   <div class="section-label">01 · Route</div>
   <h2>여행 경로</h2>
+  <div class="route-flow-wrap">
   <div class="route-flow">
     <div class="city">
       <div class="date">12/2 IN</div>
@@ -362,6 +453,7 @@ tr.total td{
       <div class="flag">🇪🇬</div>
     </div>
   </div>
+  </div>
 </div>
 
 <!-- Daily Itinerary -->
@@ -383,6 +475,12 @@ tr.total td{
           <li><span class="time">저녁</span><span>프랑크푸르트 도착 · ibis Frankfurt Centrum 체크인<br><span class="note">체크인 15:00</span></span></li>
           <li><span class="time">20-21시</span><span>뢰머 광장 크리스마스 마켓 야간 방문<br><span class="note">글뤼바인 · 브랏부어스트 · 마켓 첫날 감상</span></span></li>
         </ul>
+        <div class="freetime">
+          <div class="freetime-title">🎁 자유시간에 (밤 or 마켓 후)</div>
+          <ul class="freetime-list">
+            <li><b>⭐ 마인강 Eiserner Steg 다리</b> — 사랑의 자물쇠 · 야경 스팟 (마켓에서 도보 5분)</li>
+          </ul>
+        </div>
       </div>
       <div class="flag-badge">🇩🇪</div>
     </div>
@@ -402,6 +500,16 @@ tr.total td{
           <li><span class="time">저녁</span><span>대성당 앞 마켓 · 야경</span></li>
           <li><span class="time">22:18</span><span>쾰른 출발 (직항) · 프랑크푸르트 복귀</span></li>
         </ul>
+        <div class="freetime">
+          <div class="freetime-title">🎁 쾰른 자유시간 추천 (당일 12시간 활용)</div>
+          <ul class="freetime-list">
+            <li><b>⭐ 쾰른 대성당 전망대</b> — 533개 계단 · 100m 파노라마 (2시간)</li>
+            <li><b>⭐ Hohenzollern Bridge</b> — 라인강 사랑의 자물쇠 다리</li>
+            <li><b>Lindt 초콜릿 박물관</b> — 시식 · 초콜릿 분수 (라인강변)</li>
+            <li><b>Fischmarkt</b> — 파스텔 하우스 사진 명소</li>
+            <li><b>Ludwig 미술관</b> — 팝아트 · 현대미술</li>
+          </ul>
+        </div>
       </div>
       <div class="flag-badge">🇩🇪</div>
     </div>
@@ -420,6 +528,15 @@ tr.total td{
           <li><span class="time">17:19</span><span>프랑크푸르트 중앙역 → 드레스덴 중앙역 (기차)</span></li>
           <li><span class="time">21:45</span><span>드레스덴 도착 · MEININGER Hotel 체크인</span></li>
         </ul>
+        <div class="freetime">
+          <div class="freetime-title">🎁 프랑크푸르트 낮 6시간 추천 코스</div>
+          <ul class="freetime-list">
+            <li><b>⭐ Main Tower 전망대</b> — 200m 스카이라인 · 프푸 유일 전망대</li>
+            <li><b>⭐ 뢰머 (Römer)</b> — 구시청사 · 마켓 옆 상징 건물</li>
+            <li><b>Kleinmarkthalle</b> — 로컬 시장 · 아펠바인(사과와인) 시식</li>
+            <li><b>알트슈타트 산책</b> — 구시가 골목 · 사진 명소</li>
+          </ul>
+        </div>
       </div>
       <div class="flag-badge">🇩🇪</div>
     </div>
@@ -432,12 +549,23 @@ tr.total td{
         <span class="city-name">드레스덴</span>
       </div>
       <div class="day-content">
-        <h3>드레스덴 온전한 하루 (드레스덴 슈트리첼 마켓 하이라이트)</h3>
+        <h3>드레스덴 온전한 하루 (Striezelmarkt 하이라이트)</h3>
         <ul>
           <li><span class="time">오전</span><span>츠빙거 궁전 · 젬퍼오페라 · 성모교회 (프라우엔 교회)</span></li>
           <li><span class="time">오후</span><span>브륄의 테라스 · 알슈타트 산책</span></li>
-          <li><span class="time">저녁</span><span>슈트리첼 마켓 (독일 최고 크리스마스 마켓 중 하나)<br><span class="note">슈톨렌·글뤼바인·수공예품 필수</span></span></li>
+          <li><span class="time">저녁</span><span>슈트리첼 마켓 (독일 최고 크리스마스 마켓)<br><span class="note">슈톨렌·글뤼바인·수공예품 필수</span></span></li>
         </ul>
+        <div class="freetime">
+          <div class="freetime-title">🎁 드레스덴 자유시간 (온전한 하루 · 최다 여유)</div>
+          <ul class="freetime-list">
+            <li><b>⭐ 츠빙거 궁전 · 알테 마이스터 회화관</b> — 라파엘로 · 페르메르 · 렘브란트</li>
+            <li><b>⭐ Residenzschloss (Green Vault)</b> — 유럽 최대 보물 컬렉션 <b style="color:#c94a4a">사전 예약 필수</b></li>
+            <li><b>⭐ 프라우엔 교회 돔 전망대</b> — 파괴 후 재건</li>
+            <li><b>Neustadt (신시가지)</b> — Kunsthofpassage 예술 골목 · 힙한 카페</li>
+            <li><b>Pfunds Molkerei</b> — "세계에서 가장 아름다운 우유가게" (기네스 등재)</li>
+            <li><b>Elbe 강 유람선</b> — 브륄의 테라스에서 겨울 크루즈</li>
+          </ul>
+        </div>
       </div>
       <div class="flag-badge">🇩🇪</div>
     </div>
@@ -456,6 +584,17 @@ tr.total td{
           <li><span class="time">12:00</span><span>프라하 도착 · EAHotel Downtown 체크인 (14:00)</span></li>
           <li><span class="time">오후-저녁</span><span>구시가 광장 크리스마스 마켓 · 카를교 야경 · 천문시계</span></li>
         </ul>
+        <div class="freetime">
+          <div class="freetime-title">🎁 프라하 자유시간 추천 (오후~밤)</div>
+          <ul class="freetime-list">
+            <li><b>⭐ 카를교 야경</b> — 프라하 상징 · 해질녘~밤 필수</li>
+            <li><b>⭐ 천문시계</b> — 매시 정각 인형 행진 (구시가 광장)</li>
+            <li><b>Petřín 언덕 전망대</b> — 미니 에펠탑 · 프라하 전경</li>
+            <li><b>존 레논 벽</b> — 자유·평화 낙서 벽 (카를교 근처)</li>
+            <li><b>Café Louvre</b> — 카프카·아인슈타인 단골 100년 카페</li>
+            <li><b>트르들로 (Trdelník)</b> — 마켓 필수 간식, 아이스크림 넣은 버전</li>
+          </ul>
+        </div>
       </div>
       <div class="flag-badge">🇨🇿</div>
     </div>
@@ -470,10 +609,22 @@ tr.total td{
       <div class="day-content">
         <h3>비엔나 이동 · 오후 관광</h3>
         <ul>
+          <li><span class="time">이른 아침</span><span>🎁 <b>프라하성 · 성 비투스 대성당</b> — 개장 6시, 인파 적음 (선택)</span></li>
           <li><span class="time">08:37</span><span>프라하 중앙역 → 비엔나 중앙역 (기차, 소요 4시간 12분)</span></li>
           <li><span class="time">12:49</span><span>비엔나 도착 · Hotel Mercure Wien City 체크인 (15:00)</span></li>
-          <li><span class="time">오후-저녁</span><span>슈테판 대성당 · 링거리 · 시청 앞 크리스마스 마켓 (라스하우스플라츠)</span></li>
+          <li><span class="time">오후-저녁</span><span>슈테판 대성당 · 링거리 · Rathausplatz 크리스마스 마켓</span></li>
         </ul>
+        <div class="freetime">
+          <div class="freetime-title">🎁 비엔나 자유시간 추천 (오후~밤)</div>
+          <ul class="freetime-list">
+            <li><b>⭐ 슈테판 대성당 남탑 전망대</b> — 343개 계단 · 시내 파노라마</li>
+            <li><b>⭐ 카페 자허 (Café Sacher)</b> — 원조 자허토르테 필수</li>
+            <li><b>Café Central</b> — 아름다운 아치 천장, 프로이트·트로츠키 단골</li>
+            <li><b>벨베데레 궁전</b> — 클림트 "키스" 원본</li>
+            <li><b>알베르티나 미술관</b> — 뒤러·모네·피카소</li>
+            <li><b>Café Demel</b> — 왕실 제과, 자허와 라이벌</li>
+          </ul>
+        </div>
       </div>
       <div class="flag-badge">🇦🇹</div>
     </div>
@@ -488,11 +639,19 @@ tr.total td{
       <div class="day-content">
         <h3>유럽 여정 종료 · 이집트 이동</h3>
         <ul>
-          <li><span class="time">오전</span><span>비엔나 마지막 산책 · 카페 (자허·데멜)<br><span class="note">체크아웃 12:00</span></span></li>
+          <li><span class="time">오전</span><span>🎁 <b>쇤브룬 궁전 & 정원</b> — 지하철 30분 · 겨울 정원 아침 방문 추천</span></li>
+          <li><span class="time">~11시</span><span>비엔나 마지막 산책 · 카페 (자허·데멜)<br><span class="note">체크아웃 12:00</span></span></li>
           <li><span class="time">13:00</span><span>공항 이동 시작 (인터내셔널 3시간 전 도착 권장)</span></li>
           <li><span class="time">16:10</span><span>비엔나 → 카이로 항공 출발</span></li>
           <li><span class="time">20:30</span><span>카이로 도착 🇪🇬</span></li>
         </ul>
+        <div class="freetime">
+          <div class="freetime-title">🎁 비엔나 마지막 아침 추천</div>
+          <ul class="freetime-list">
+            <li><b>⭐ 쇤브룬 궁전</b> — 오전 일찍 방문, 정원만이라도 (내부 관람 시 90분 필요)</li>
+            <li><b>나슈마르크트</b> — 오스트리아 최대 야외 시장 (아침 브런치)</li>
+          </ul>
+        </div>
       </div>
       <div class="flag-badge">✈️</div>
     </div>
@@ -605,40 +764,40 @@ tr.total td{
     </thead>
     <tbody>
       <tr>
-        <td>12/2-12/4</td>
-        <td>🇩🇪 프랑크푸르트</td>
-        <td><b>ibis Frankfurt Centrum</b><br><small style="color:var(--muted)">Accor</small></td>
-        <td>15:00 / 12:00</td>
-        <td><span class="person-tag">서현</span></td>
-        <td><span class="chip field">현장결제</span></td>
-        <td class="num">₩145,131<br><small style="color:var(--muted)">약 €88</small></td>
+        <td data-label="일자">12/2-12/4</td>
+        <td data-label="도시">🇩🇪 프랑크푸르트</td>
+        <td data-label="호텔"><b>ibis Frankfurt Centrum</b><br><small style="color:var(--muted)">Accor</small></td>
+        <td data-label="체크인/아웃">15:00 / 12:00</td>
+        <td data-label="예약자"><span class="person-tag">서현</span></td>
+        <td data-label="결제"><span class="chip field">현장결제</span></td>
+        <td data-label="금액" class="num">₩145,131 <small style="color:var(--muted)">(€88)</small></td>
       </tr>
       <tr>
-        <td>12/4-12/6</td>
-        <td>🇩🇪 드레스덴</td>
-        <td><b>MEININGER Hotel Dresden Zentrum</b><br><small style="color:var(--muted)">호텔 직사이트</small></td>
-        <td>15:00 / 11:00</td>
-        <td><span class="person-tag">서현</span></td>
-        <td><span class="chip paid">✓ 결제완료</span></td>
-        <td class="num">₩220,000<br><small style="color:var(--muted)">약 €135</small></td>
+        <td data-label="일자">12/4-12/6</td>
+        <td data-label="도시">🇩🇪 드레스덴</td>
+        <td data-label="호텔"><b>MEININGER Hotel Dresden Zentrum</b><br><small style="color:var(--muted)">호텔 직사이트</small></td>
+        <td data-label="체크인/아웃">15:00 / 11:00</td>
+        <td data-label="예약자"><span class="person-tag">서현</span></td>
+        <td data-label="결제"><span class="chip paid">✓ 결제완료</span></td>
+        <td data-label="금액" class="num">₩220,000 <small style="color:var(--muted)">(€135)</small></td>
       </tr>
       <tr>
-        <td>12/6-12/7</td>
-        <td>🇨🇿 프라하</td>
-        <td><b>EAHotel Downtown</b><br><small style="color:var(--muted)">아고다 · 1757859215</small></td>
-        <td>14:00 / 11:00</td>
-        <td><span class="person-tag">서현</span></td>
-        <td><span class="chip paid">✓ 결제완료</span></td>
-        <td class="num">₩100,000</td>
+        <td data-label="일자">12/6-12/7</td>
+        <td data-label="도시">🇨🇿 프라하</td>
+        <td data-label="호텔"><b>EAHotel Downtown</b><br><small style="color:var(--muted)">아고다 · 1757859215</small></td>
+        <td data-label="체크인/아웃">14:00 / 11:00</td>
+        <td data-label="예약자"><span class="person-tag">서현</span></td>
+        <td data-label="결제"><span class="chip paid">✓ 결제완료</span></td>
+        <td data-label="금액" class="num">₩100,000</td>
       </tr>
       <tr>
-        <td>12/7-12/8</td>
-        <td>🇦🇹 비엔나</td>
-        <td><b>Hotel Mercure Wien City</b><br><small style="color:var(--muted)">Accor</small></td>
-        <td>15:00 / 12:00</td>
-        <td><span class="person-tag taeeun">태은</span></td>
-        <td><span class="chip field">현장결제</span></td>
-        <td class="num">₩122,933</td>
+        <td data-label="일자">12/7-12/8</td>
+        <td data-label="도시">🇦🇹 비엔나</td>
+        <td data-label="호텔"><b>Hotel Mercure Wien City</b><br><small style="color:var(--muted)">Accor</small></td>
+        <td data-label="체크인/아웃">15:00 / 12:00</td>
+        <td data-label="예약자"><span class="person-tag taeeun">태은</span></td>
+        <td data-label="결제"><span class="chip field">현장결제</span></td>
+        <td data-label="금액" class="num">₩122,933</td>
       </tr>
       <tr class="total">
         <td colspan="6">✅ 결제 완료 소계</td>
