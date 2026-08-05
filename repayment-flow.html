@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>재결제 플로우 목업 v3 (B옵션 하이브리드) — TripStore Admin</title>
+<title>재결제 플로우 목업 v4 (순차 처리 · 심플) — TripStore Admin</title>
 <link href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.6/dist/web/static/pretendard.css" rel="stylesheet">
 <style>
 * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -16,57 +16,55 @@ button { font-family: inherit; cursor: pointer; }
 .gnb-menu { display: flex; gap: 4px; }
 .gnb-item { padding: 8px 14px; font-size: 13px; color: rgba(0,0,0,0.65); border-radius: 6px; }
 .gnb-item.active { background: #f0f5ff; color: #1677ff; font-weight: 600; }
-.gnb-right { margin-left: auto; font-size: 12px; color: rgba(0,0,0,0.55); display: flex; align-items: center; gap: 14px; }
+.gnb-right { margin-left: auto; font-size: 12px; color: rgba(0,0,0,0.55); }
 .gnb-right strong { color: rgba(0,0,0,0.88); }
-.gnb-alert { display: inline-flex; align-items: center; gap: 4px; padding: 4px 10px; border-radius: 12px; background: #fff1f0; color: #cf1322; font-size: 11px; font-weight: 700; border: 1px solid #ffa39e; }
-.gnb-alert .n { font-family: 'SF Mono', monospace; }
 
 .breadcrumb { padding: 14px 24px 0; font-size: 12px; color: rgba(0,0,0,0.45); }
 .breadcrumb .sep { color: rgba(0,0,0,0.25); margin: 0 6px; }
 .breadcrumb .cur { color: rgba(0,0,0,0.88); }
 
-.layout { max-width: 1280px; margin: 0 auto; padding: 12px 24px 60px; }
+.layout { max-width: 1200px; margin: 0 auto; padding: 12px 24px 60px; }
 
 .page-header { display: flex; align-items: flex-end; justify-content: space-between; margin: 14px 0 20px; }
 .page-title { font-size: 22px; font-weight: 800; letter-spacing: -0.3px; }
 .page-desc { font-size: 13px; color: rgba(0,0,0,0.55); margin-top: 6px; }
-.page-badge { display: inline-block; background: #fff2e8; color: #d4380d; border: 1px solid #ffbb96; font-size: 11px; font-weight: 700; padding: 3px 8px; border-radius: 4px; margin-left: 8px; vertical-align: middle; }
+.page-badge { display: inline-block; background: #f6ffed; color: #389e0d; border: 1px solid #b7eb8f; font-size: 11px; font-weight: 700; padding: 3px 8px; border-radius: 4px; margin-left: 8px; vertical-align: middle; }
 
-.hint { background: linear-gradient(135deg, #fffbe6 0%, #fff7e6 100%); border: 1px solid #ffd666; border-radius: 10px; padding: 14px 18px; margin-bottom: 20px; display: flex; gap: 12px; align-items: flex-start; }
-.hint .ico { font-size: 20px; color: #d48806; }
-.hint .body { flex: 1; font-size: 12.5px; line-height: 1.7; color: #874d00; }
-.hint .body strong { color: #ad4e00; font-weight: 800; }
-.hint .body code { background: #fff; padding: 1px 6px; border-radius: 3px; font-family: 'SF Mono', monospace; font-size: 11.5px; color: #ad6800; border: 1px solid #ffe58f; }
+.hint { background: linear-gradient(135deg, #f6ffed 0%, #f0f9ff 100%); border: 1px solid #b7eb8f; border-radius: 10px; padding: 14px 18px; margin-bottom: 20px; display: flex; gap: 12px; align-items: flex-start; }
+.hint .ico { font-size: 20px; color: #389e0d; }
+.hint .body { flex: 1; font-size: 12.5px; line-height: 1.7; color: #135200; }
+.hint .body strong { color: #135200; font-weight: 800; }
+.hint .body code { background: #fff; padding: 1px 6px; border-radius: 3px; font-family: 'SF Mono', monospace; font-size: 11.5px; color: #135200; border: 1px solid #b7eb8f; }
 
-/* 취소 처리 대기 빨간 배너 (놓침 방지 UI 1) */
-.urgent-banner { background: linear-gradient(135deg, #fff1f0 0%, #fff2f0 100%); border: 2px solid #ff7875; border-radius: 12px; padding: 18px 22px; margin-bottom: 20px; display: flex; gap: 16px; align-items: center; box-shadow: 0 4px 16px rgba(255, 77, 79, 0.15); position: relative; overflow: hidden; }
-.urgent-banner::before { content: ''; position: absolute; left: 0; top: 0; bottom: 0; width: 4px; background: #cf1322; animation: pulse-red 2s infinite; }
-@keyframes pulse-red { 0%, 100% { opacity: 1; } 50% { opacity: 0.4; } }
-.urgent-banner .ico { font-size: 28px; }
-.urgent-banner .body { flex: 1; }
-.urgent-banner .title { font-size: 15px; font-weight: 800; color: #a8071a; margin-bottom: 4px; }
-.urgent-banner .desc { font-size: 12.5px; color: #820014; line-height: 1.65; }
-.urgent-banner .desc strong { font-weight: 800; }
-.urgent-banner .meta { display: flex; gap: 16px; margin-top: 8px; font-size: 11px; color: #820014; }
-.urgent-banner .meta .m { display: flex; gap: 4px; align-items: center; }
-.urgent-banner .meta .m .k { opacity: 0.65; }
-.urgent-banner .meta .m .v { font-weight: 700; font-family: 'SF Mono', monospace; }
+/* 오버 상태 안내 배너 (재결제 외 케이스) */
+.overpay-banner { background: linear-gradient(135deg, #fff1f0 0%, #fff2f0 100%); border: 2px solid #ff7875; border-radius: 12px; padding: 16px 20px; margin-bottom: 16px; display: flex; gap: 14px; align-items: center; box-shadow: 0 2px 8px rgba(255, 77, 79, 0.1); }
+.overpay-banner .ico { font-size: 24px; }
+.overpay-banner .body { flex: 1; }
+.overpay-banner .title { font-size: 14px; font-weight: 800; color: #a8071a; }
+.overpay-banner .desc { font-size: 12.5px; color: #820014; line-height: 1.6; margin-top: 3px; }
+.overpay-banner .desc strong { font-weight: 800; }
+.overpay-banner .actions { display: flex; gap: 8px; }
+
+/* 결제 부족 배너 (취소~재결제 갭 상태) */
+.underpay-banner { background: linear-gradient(135deg, #fffbe6 0%, #fff7e6 100%); border: 2px solid #ffd666; border-radius: 12px; padding: 16px 20px; margin-bottom: 16px; display: flex; gap: 14px; align-items: center; }
+.underpay-banner .ico { font-size: 24px; }
+.underpay-banner .body { flex: 1; }
+.underpay-banner .title { font-size: 14px; font-weight: 800; color: #ad4e00; }
+.underpay-banner .desc { font-size: 12.5px; color: #874d00; line-height: 1.6; margin-top: 3px; }
 
 /* 프로그레스 스텝퍼 */
 .stepper { background: #fff; border: 1px solid #f0f0f0; border-radius: 12px; padding: 20px 24px; margin-bottom: 20px; }
-.stepper-title { font-size: 12px; font-weight: 700; color: rgba(0,0,0,0.55); margin-bottom: 14px; letter-spacing: 0.4px; }
-.stepper-track { display: grid; grid-template-columns: repeat(6, 1fr) auto; gap: 0; align-items: center; }
+.stepper-title { font-size: 12px; font-weight: 700; color: rgba(0,0,0,0.55); margin-bottom: 14px; letter-spacing: 0.4px; display: flex; align-items: center; gap: 8px; }
+.stepper-title .steps-summary { margin-left: auto; font-size: 11px; color: rgba(0,0,0,0.45); font-weight: 500; }
+.stepper-track { display: grid; grid-template-columns: repeat(5, 1fr) auto; gap: 0; align-items: center; }
 .step-node { display: flex; flex-direction: column; align-items: center; gap: 6px; position: relative; }
 .step-circle { width: 34px; height: 34px; border-radius: 50%; background: #f0f0f0; border: 2px solid #f0f0f0; display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 800; color: rgba(0,0,0,0.35); transition: all 0.3s; }
 .step-circle.done { background: #52c41a; border-color: #52c41a; color: #fff; }
 .step-circle.current { background: #1677ff; border-color: #1677ff; color: #fff; box-shadow: 0 0 0 4px rgba(22,119,255,0.12); }
-.step-circle.awaiting { background: #fa8c16; border-color: #fa8c16; color: #fff; box-shadow: 0 0 0 4px rgba(250,140,22,0.18); animation: pulse-orange 1.4s infinite; }
-@keyframes pulse-orange { 0%, 100% { box-shadow: 0 0 0 4px rgba(250,140,22,0.18); } 50% { box-shadow: 0 0 0 8px rgba(250,140,22,0.28); } }
 .step-circle.fail { background: #cf1322; border-color: #cf1322; color: #fff; }
-.step-label { font-size: 11px; color: rgba(0,0,0,0.55); font-weight: 600; text-align: center; line-height: 1.3; max-width: 100px; }
+.step-label { font-size: 11px; color: rgba(0,0,0,0.55); font-weight: 600; text-align: center; line-height: 1.3; max-width: 110px; }
 .step-node.done .step-label { color: #389e0d; }
 .step-node.current .step-label { color: #1677ff; font-weight: 800; }
-.step-node.awaiting .step-label { color: #d46b08; font-weight: 800; }
 .step-node.fail .step-label { color: #cf1322; }
 .step-line { height: 2px; background: #f0f0f0; margin: 0 -20px; align-self: center; transform: translateY(-14px); }
 .step-line.done { background: #52c41a; }
@@ -79,18 +77,18 @@ button { font-family: inherit; cursor: pointer; }
 .rsv-summary .value.mono { font-family: 'SF Mono', monospace; font-size: 13px; }
 .rsv-summary .value.big { font-size: 20px; color: #1677ff; }
 
-/* 금액 검증 */
+/* 금액 요약 */
 .balance-card { background: #fff; border: 1px solid #f0f0f0; border-radius: 10px; padding: 18px 22px; margin-bottom: 16px; }
-.balance-row { display: flex; justify-content: space-between; align-items: center; padding: 10px 0; border-bottom: 1px dashed #f0f0f0; }
-.balance-row:last-child { border-bottom: none; padding-top: 14px; }
+.balance-row { display: flex; justify-content: space-between; align-items: center; padding: 8px 0; }
 .balance-row .k { font-size: 13px; color: rgba(0,0,0,0.65); }
 .balance-row .v { font-size: 15px; font-weight: 700; font-variant-numeric: tabular-nums; }
-.balance-row.total { border-top: 2px solid #1f2937; margin-top: 4px; }
+.balance-row.total { border-top: 2px solid #1f2937; margin-top: 4px; padding-top: 12px; }
 .balance-row.total .k { font-weight: 700; color: rgba(0,0,0,0.88); }
 .balance-row.total .v { font-size: 18px; color: #1677ff; }
 .balance-row.mismatch .v { color: #cf1322; }
 .balance-row.match .v { color: #389e0d; }
-.balance-hint { font-size: 11px; color: rgba(0,0,0,0.45); margin-top: 6px; font-style: italic; }
+.balance-row.under .v { color: #d46b08; }
+.balance-hint { font-size: 11px; color: rgba(0,0,0,0.45); margin-top: 4px; font-style: italic; }
 
 /* 결제 카드 */
 .section-title { font-size: 15px; font-weight: 800; margin: 24px 0 12px; display: flex; align-items: center; gap: 10px; }
@@ -100,35 +98,23 @@ button { font-family: inherit; cursor: pointer; }
 .payments { display: flex; flex-direction: column; gap: 10px; }
 .pay-item { background: #fff; border: 1px solid #f0f0f0; border-radius: 10px; padding: 14px 18px; display: grid; grid-template-columns: 40px 1fr auto auto; gap: 16px; align-items: center; transition: all 0.2s; }
 .pay-item.selected { border-color: #1677ff; background: #f0f5ff; box-shadow: 0 0 0 2px rgba(22,119,255,0.08); }
-.pay-item.status-reserved { border-color: #fa8c16; background: #fff7e6; }
-.pay-item.status-partial { border-color: #fa8c16; background: #fff7e6; }
 .pay-item.status-cancelling { border-color: #fa8c16; background: #fff7e6; }
 .pay-item.status-cancelled { opacity: 0.55; background: #fafafa; }
 .pay-item.status-cancel-failed { border-color: #cf1322; background: #fff1f0; }
 .pay-item.status-new { border-color: #52c41a; background: #f6ffed; }
-.pay-item.status-new-pending { border-color: #91caff; background: #e6f4ff; }
 .pay-item .check { display: flex; justify-content: center; align-items: center; }
 .pay-item .check input { width: 18px; height: 18px; accent-color: #1677ff; cursor: pointer; }
+.pay-item .check input:disabled { cursor: not-allowed; opacity: 0.4; }
 .pay-item .method { display: flex; flex-direction: column; gap: 3px; }
 .pay-item .method .name { font-size: 14px; font-weight: 700; }
 .pay-item .method .meta { font-size: 11.5px; color: rgba(0,0,0,0.5); font-family: 'SF Mono', monospace; }
 .pay-item .amount { font-size: 16px; font-weight: 800; font-variant-numeric: tabular-nums; }
 .pay-item .status-pill { padding: 3px 8px; border-radius: 4px; font-size: 11px; font-weight: 700; white-space: nowrap; }
 .pay-item .status-pill.active { background: #e6f4ff; color: #0958d9; border: 1px solid #91caff; }
-.pay-item .status-pill.reserved { background: #fff7e6; color: #d46b08; border: 1px solid #ffd591; }
-.pay-item .status-pill.partial { background: #fff7e6; color: #d46b08; border: 1px solid #ffd591; }
 .pay-item .status-pill.cancelling { background: #fff7e6; color: #d46b08; border: 1px solid #ffd591; }
 .pay-item .status-pill.cancelled { background: #fafafa; color: rgba(0,0,0,0.4); border: 1px solid #f0f0f0; }
 .pay-item .status-pill.cancel-failed { background: #fff1f0; color: #cf1322; border: 1px solid #ffa39e; }
 .pay-item .status-pill.new { background: #f6ffed; color: #389e0d; border: 1px solid #b7eb8f; }
-.pay-item .status-pill.new-pending { background: #e6f4ff; color: #0958d9; border: 1px solid #91caff; }
-
-.partial-input { display: flex; align-items: center; gap: 4px; margin-top: 6px; }
-.partial-input input { width: 100px; padding: 4px 8px; border: 1px solid #d9d9d9; border-radius: 4px; font-size: 12px; font-family: 'SF Mono', monospace; text-align: right; }
-.partial-input input:focus { outline: none; border-color: #1677ff; }
-.partial-input .cap { font-size: 11px; color: rgba(0,0,0,0.45); }
-.partial-tag { display: inline-block; margin-left: 6px; font-size: 10px; background: #e6f4ff; color: #0958d9; padding: 1px 5px; border-radius: 3px; font-weight: 700; }
-.partial-tag.no { background: #fff1f0; color: #cf1322; }
 
 /* 액션 바 */
 .action-bar { position: sticky; bottom: 20px; background: #fff; border: 1px solid #f0f0f0; border-radius: 12px; padding: 16px 20px; margin-top: 24px; box-shadow: 0 4px 16px rgba(0,0,0,0.06); display: flex; align-items: center; gap: 14px; z-index: 50; }
@@ -148,25 +134,11 @@ button { font-family: inherit; cursor: pointer; }
 .btn-secondary:hover { border-color: #1677ff; color: #1677ff; }
 .btn-danger { background: #fff; color: #cf1322; border-color: #ffa39e; }
 .btn-danger:hover:not(:disabled) { background: #fff1f0; }
-.btn-warning { background: #fa8c16; color: #fff; }
-.btn-warning:hover:not(:disabled) { background: #d46b08; }
-.btn-warning:disabled { background: #d9d9d9; cursor: not-allowed; }
+.btn-critical { background: #cf1322; color: #fff; }
+.btn-critical:hover:not(:disabled) { background: #a8071a; }
 .btn-success { background: #52c41a; color: #fff; }
 .btn-success:hover:not(:disabled) { background: #389e0d; }
-.btn-critical { background: #cf1322; color: #fff; box-shadow: 0 4px 12px rgba(207, 19, 34, 0.3); }
-.btn-critical:hover:not(:disabled) { background: #a8071a; }
-.btn.lg { padding: 14px 28px; font-size: 15px; }
-
-/* 모달 */
-.modal-mask { position: fixed; inset: 0; background: rgba(0,0,0,0.45); z-index: 500; display: none; justify-content: center; align-items: center; padding: 20px; }
-.modal-mask.show { display: flex; }
-.modal { background: #fff; border-radius: 12px; padding: 28px 32px; max-width: 560px; width: 100%; box-shadow: 0 12px 40px rgba(0,0,0,0.15); }
-.modal h3 { font-size: 18px; font-weight: 800; margin-bottom: 8px; }
-.modal p { font-size: 13.5px; color: rgba(0,0,0,0.65); line-height: 1.7; margin-bottom: 20px; }
-.modal .amount-input { width: 100%; padding: 14px 16px; border: 2px solid #d9d9d9; border-radius: 8px; font-size: 18px; font-weight: 700; font-family: 'SF Mono', monospace; text-align: right; margin-bottom: 8px; }
-.modal .amount-input:focus { outline: none; border-color: #1677ff; }
-.modal .amount-hint { font-size: 11.5px; color: rgba(0,0,0,0.5); margin-bottom: 20px; }
-.modal .modal-actions { display: flex; justify-content: flex-end; gap: 10px; }
+.btn.lg { padding: 12px 24px; font-size: 14px; }
 
 /* 결제 URL 발송 카드 */
 .link-card { background: linear-gradient(135deg, #e6f4ff 0%, #f0f5ff 100%); border: 2px solid #91caff; border-radius: 12px; padding: 20px 24px; margin: 16px 0; }
@@ -198,57 +170,13 @@ button { font-family: inherit; cursor: pointer; }
 .customer-sim .cs-methods { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin: 16px 0; }
 .customer-sim .cs-methods button { padding: 12px 8px; border: 1px solid #d9d9d9; border-radius: 6px; background: #fff; font-size: 12px; font-weight: 600; }
 .customer-sim .cs-methods button:hover:not(:disabled) { border-color: #1677ff; background: #f0f5ff; color: #1677ff; }
-.customer-sim .cs-methods button:disabled { opacity: 0.4; cursor: not-allowed; }
 .customer-sim .cs-actions { display: flex; gap: 8px; }
 .customer-sim .cs-actions button { flex: 1; padding: 12px; font-size: 13px; font-weight: 700; border-radius: 6px; border: 1px solid transparent; }
 .customer-sim .cs-actions .pay-ok { background: #52c41a; color: #fff; }
 .customer-sim .cs-actions .pay-ng { background: #fff; color: #cf1322; border-color: #ffa39e; }
 .customer-sim .cs-actions .pay-close { background: #fff; color: rgba(0,0,0,0.55); border-color: #d9d9d9; }
 
-/* 승인 대기 카드 (Step 4 B옵션 핵심) */
-.approval-card { background: linear-gradient(135deg, #fff7e6 0%, #fffbe6 100%); border: 3px solid #fa8c16; border-radius: 14px; padding: 24px 28px; margin: 20px 0; box-shadow: 0 6px 20px rgba(250, 140, 22, 0.15); position: relative; overflow: hidden; }
-.approval-card::before { content: 'STEP 4 · 관리자 승인 필요'; position: absolute; top: 0; right: 0; background: #fa8c16; color: #fff; padding: 6px 14px; font-size: 10.5px; font-weight: 800; letter-spacing: 0.4px; border-bottom-left-radius: 10px; }
-.approval-card .head { font-size: 16px; font-weight: 800; color: #ad4e00; margin-bottom: 14px; display: flex; align-items: center; gap: 10px; }
-.approval-card .head .ico { font-size: 24px; }
-.approval-card .desc { font-size: 12.5px; color: #874d00; line-height: 1.7; margin-bottom: 16px; padding: 12px 14px; background: #fff; border-radius: 8px; border: 1px solid #ffd591; }
-.approval-card .desc strong { color: #ad4e00; }
-
-.approval-summary { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 18px; }
-.approval-block { background: #fff; padding: 16px; border-radius: 10px; border: 1px solid #ffd591; }
-.approval-block .bh { font-size: 11px; font-weight: 800; color: #ad4e00; margin-bottom: 10px; letter-spacing: 0.3px; display: flex; align-items: center; gap: 6px; }
-.approval-block .bh .badge { background: #52c41a; color: #fff; font-size: 9.5px; padding: 2px 6px; border-radius: 3px; font-weight: 800; }
-.approval-block .bh .badge.pending { background: #fa8c16; }
-.approval-block .row { display: flex; justify-content: space-between; padding: 5px 0; font-size: 12.5px; }
-.approval-block .row .k { color: rgba(0,0,0,0.55); }
-.approval-block .row .v { font-weight: 700; font-family: 'SF Mono', monospace; }
-.approval-block .row .v.big { font-size: 15px; color: #1677ff; }
-.approval-block ul { list-style: none; padding: 0; margin: 0; }
-.approval-block li { padding: 5px 0; font-size: 12.5px; display: flex; justify-content: space-between; }
-.approval-block li .kk { color: rgba(0,0,0,0.65); }
-.approval-block li .vv { font-weight: 700; font-family: 'SF Mono', monospace; }
-
-.approval-actions { display: flex; gap: 12px; align-items: center; }
-.approval-actions .spacer { flex: 1; font-size: 12px; color: #874d00; }
-.approval-actions .spacer strong { font-weight: 800; }
-
-/* 대기 큐 미리보기 (놓침 방지 UI 3) */
-.pending-queue-preview { background: #fff; border: 1px solid #f0f0f0; border-radius: 12px; padding: 18px 22px; margin: 20px 0; }
-.pending-queue-preview .qh { font-size: 13px; font-weight: 800; margin-bottom: 12px; display: flex; align-items: center; gap: 8px; }
-.pending-queue-preview .qh .cnt { background: #cf1322; color: #fff; font-size: 10.5px; font-weight: 800; padding: 2px 7px; border-radius: 10px; }
-.pending-queue-preview .qh .sub { margin-left: auto; font-size: 11px; color: rgba(0,0,0,0.5); font-weight: 500; }
-.q-item { display: grid; grid-template-columns: 130px 1fr auto auto auto; gap: 12px; padding: 10px 12px; border: 1px solid #f0f0f0; border-radius: 8px; margin-bottom: 6px; align-items: center; font-size: 12.5px; }
-.q-item.this { background: #fff7e6; border-color: #ffd591; }
-.q-item .id { font-family: 'SF Mono', monospace; font-weight: 700; font-size: 11.5px; }
-.q-item .customer { color: rgba(0,0,0,0.65); }
-.q-item .amount { font-family: 'SF Mono', monospace; font-weight: 700; }
-.q-item .elapsed { padding: 2px 8px; border-radius: 4px; font-size: 11px; font-weight: 700; }
-.q-item .elapsed.ok { background: #f6ffed; color: #389e0d; border: 1px solid #b7eb8f; }
-.q-item .elapsed.warn { background: #fff7e6; color: #d46b08; border: 1px solid #ffd591; }
-.q-item .elapsed.danger { background: #fff1f0; color: #cf1322; border: 1px solid #ffa39e; }
-.q-item .go { font-size: 11px; color: #1677ff; font-weight: 600; }
-.q-item .thistag { font-size: 10px; background: #fa8c16; color: #fff; padding: 1px 6px; border-radius: 3px; font-weight: 800; }
-
-/* 취소 처리 진행 카드 */
+/* 취소 처리 진행 */
 .cancel-progress { background: #fff7e6; border: 2px solid #ffd591; border-radius: 12px; padding: 18px 22px; margin: 16px 0; }
 .cancel-progress .head { font-size: 14px; font-weight: 800; color: #d46b08; margin-bottom: 12px; display: flex; align-items: center; gap: 8px; }
 .cancel-progress .spinner { width: 14px; height: 14px; border: 2px solid #ffd591; border-top-color: #fa8c16; border-radius: 50%; animation: spin 0.9s linear infinite; }
@@ -259,7 +187,7 @@ button { font-family: inherit; cursor: pointer; }
 .cancel-progress .list .row .ok { color: #389e0d; }
 .cancel-progress .list .row .err { color: #cf1322; }
 
-/* 로그/타임라인 */
+/* 로그 */
 .timeline { background: #1f2937; color: #e5e7eb; border-radius: 10px; padding: 16px 20px; margin-top: 24px; font-family: 'SF Mono', Menlo, monospace; font-size: 12px; max-height: 240px; overflow-y: auto; }
 .timeline .row { display: flex; gap: 12px; padding: 3px 0; line-height: 1.7; }
 .timeline .ts { color: #6b7280; flex-shrink: 0; }
@@ -270,29 +198,25 @@ button { font-family: inherit; cursor: pointer; }
 .timeline .lv.err { color: #f87171; }
 .timeline .msg { color: #e5e7eb; }
 
-/* Slack 알림 */
-.slack-toast { position: fixed; bottom: 90px; right: 30px; background: #4a154b; color: #fff; padding: 16px 20px; border-radius: 10px; box-shadow: 0 8px 24px rgba(0,0,0,0.25); max-width: 380px; z-index: 400; animation: slideIn 0.3s ease-out; }
-.slack-toast .head { display: flex; align-items: center; gap: 8px; margin-bottom: 8px; font-size: 12px; font-weight: 700; }
-.slack-toast .head .dot { width: 8px; height: 8px; border-radius: 2px; background: #ecb22e; }
-.slack-toast .head .ch { opacity: 0.75; margin-left: auto; }
-.slack-toast .msg { font-size: 12.5px; line-height: 1.6; }
-.slack-toast .msg strong { color: #ecb22e; }
-@keyframes slideIn { from { transform: translateY(20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
-
 /* 시나리오 */
 .scenarios { display: flex; gap: 8px; margin-bottom: 16px; flex-wrap: wrap; align-items: center; }
 .scenarios button { padding: 6px 12px; border: 1px solid #d9d9d9; border-radius: 6px; background: #fff; font-size: 12px; font-weight: 600; color: rgba(0,0,0,0.65); }
 .scenarios button:hover { border-color: #1677ff; color: #1677ff; }
 .scenarios button.active { background: #1677ff; color: #fff; border-color: #1677ff; }
 .scenarios .divider { width: 1px; height: 20px; background: #e0e0e0; margin: 0 6px; }
-.scenarios button.time { background: #fff1f0; color: #cf1322; border-color: #ffa39e; }
-.scenarios button.time:hover { background: #ffccc7; }
+.scenarios button.over { background: #fff1f0; color: #cf1322; border-color: #ffa39e; }
+.scenarios button.over:hover { background: #ffccc7; }
 
-/* 정책 카드 */
+/* 정책 */
 .policy-card { background: #f9f0ff; border: 1px solid #d3adf7; border-radius: 10px; padding: 14px 18px; margin-top: 20px; font-size: 12px; color: #531dab; line-height: 1.7; }
 .policy-card strong { color: #391085; font-weight: 800; }
 .policy-card ul { padding-left: 18px; margin-top: 6px; }
 .policy-card code { background: #fff; padding: 1px 5px; border-radius: 3px; font-family: 'SF Mono', monospace; font-size: 11.5px; color: #391085; border: 1px solid #efdbff; }
+
+/* 걷어낸 것 표시 */
+.removed { background: #fafafa; border: 1px dashed #d9d9d9; border-radius: 8px; padding: 10px 14px; margin-top: 12px; font-size: 11.5px; color: rgba(0,0,0,0.55); line-height: 1.7; }
+.removed strong { color: rgba(0,0,0,0.88); }
+.removed s { color: rgba(0,0,0,0.4); }
 </style>
 </head>
 <body>
@@ -305,10 +229,7 @@ button { font-family: inherit; cursor: pointer; }
     <div class="gnb-item">정산관리</div>
     <div class="gnb-item">파트너스</div>
   </div>
-  <div class="gnb-right">
-    <div class="gnb-alert" id="gnbAlert" style="display:none;">🔴 취소 승인 대기 <span class="n" id="gnbAlertCnt">3</span>건</div>
-    <div>관리자 <strong>김서현</strong></div>
-  </div>
+  <div class="gnb-right">관리자 <strong>김서현</strong></div>
 </div>
 
 <div class="breadcrumb">
@@ -318,68 +239,77 @@ button { font-family: inherit; cursor: pointer; }
 <div class="layout">
   <div class="page-header">
     <div>
-      <div class="page-title">재결제 처리 <span class="page-badge">MOCKUP v3 · B옵션 하이브리드</span></div>
-      <div class="page-desc">시스템이 대기 큐 편성 → <strong>관리자 원클릭 승인으로 취소 실행</strong> · 놓침 방지 3중 장치</div>
+      <div class="page-title">재결제 처리 <span class="page-badge">MOCKUP v4 · 순차 처리 (심플)</span></div>
+      <div class="page-desc">취소 먼저 → 재결제 URL 발송 → 고객 결제 · 특별한 중간 상태 없음</div>
     </div>
   </div>
 
   <div class="hint">
-    <div class="ico">💡</div>
+    <div class="ico">✓</div>
     <div class="body">
-      <strong>v3 (B옵션 하이브리드): 자동 취소 X, 관리자 원클릭 승인 O</strong><br>
-      · v2 대비 변경 지점: 신규 결제 완료 후 자동으로 취소 API 안 태우고 <strong>"관리자 승인 대기"</strong> 상태로 전이<br>
-      · 관리자가 신규 결제를 실제로 확인 → <strong>[승인 및 취소 실행]</strong> 원클릭으로 취소 API 호출<br>
-      · <strong>놓침 방지 3중 장치</strong>: (1) 상단 빨간 배너 + 경과 시간 (2) GNB 우측 승인 대기 카운터 (3) 결제관리 대시보드 대기 큐
+      <strong>v4 최종안 (심플 · 3원칙 부합)</strong><br>
+      · <strong>기존 오버 방지 로직 그대로 유지</strong> — 결제 금액이 예약관리 금액 초과 시 신규 결제 승인 불가<br>
+      · <strong>재결제 = 취소 → 재결제 순차 처리</strong> · 관리자가 먼저 취소 실행 → 재결제 URL 발송<br>
+      · <strong>취소예정 · 자동 취소 · 하이브리드 승인 · SLA 관리 · 대기 큐 → 모두 불필요</strong><br>
+      · 오버 상태 안내는 <strong>재결제 외 다른 이유</strong>로 발생한 경우만 (상품 금액 변경 등) 배너로 알림
     </div>
   </div>
 
-  <!-- 취소 처리 대기 빨간 배너 (Step 4 대기 시 노출) -->
-  <div id="urgentBanner" class="urgent-banner" style="display: none;">
+  <!-- 오버 상태 안내 배너 (재결제 외 케이스) -->
+  <div id="overpayBanner" class="overpay-banner" style="display: none;">
     <div class="ico">⚠️</div>
     <div class="body">
-      <div class="title">기존 결제 취소 대기 중 · 관리자 승인 필요</div>
+      <div class="title">현재 결제 금액이 예약관리 금액을 초과합니다</div>
       <div class="desc">
-        신규 결제는 완료됐지만 <strong>기존 결제 취소가 아직 실행되지 않았습니다.</strong> 화면 하단의 [승인 및 취소 실행] 버튼을 눌러야 정리됩니다.
-        방치 시 원장 잔액이 실제와 어긋나고, 고객이 이중결제 상태로 잠깁니다.
+        <strong>현재 <span id="overpayAmount">100,000</span>원 오버 중</strong> · 상품 금액 변경 등의 이유로 결제가 남았습니다.
+        결제 취소가 필요합니다.
       </div>
-      <div class="meta">
-        <div class="m"><span class="k">경과 시간:</span><span class="v" id="bannerElapsed">00:00</span></div>
-        <div class="m"><span class="k">SLA:</span><span class="v">2시간 내 처리 (미처리 시 Slack 알림)</span></div>
-        <div class="m"><span class="k">담당:</span><span class="v">김서현</span></div>
+    </div>
+    <div class="actions">
+      <button class="btn btn-danger" onclick="startRepayment()">취소 처리 시작</button>
+    </div>
+  </div>
+
+  <!-- 결제 부족 배너 (취소~재결제 갭) -->
+  <div id="underpayBanner" class="underpay-banner" style="display: none;">
+    <div class="ico">💳</div>
+    <div class="body">
+      <div class="title">결제 부족 상태 · 재결제 URL 발송이 필요합니다</div>
+      <div class="desc">
+        기존 결제 <strong id="underpayCancelled">250,000</strong>원 취소 완료 · 현재 예약관리 금액 대비 <strong id="underpayAmount">250,000</strong>원 부족
+        · 아래에서 재결제 URL 발송을 진행하세요.
       </div>
     </div>
   </div>
 
   <!-- 프로그레스 스텝퍼 -->
   <div class="stepper">
-    <div class="stepper-title">재결제 프로세스 (B옵션 하이브리드 · 6단계)</div>
+    <div class="stepper-title">
+      재결제 프로세스 (순차 처리 · 5단계)
+      <div class="steps-summary">취소 → 재결제 URL 발송 → 고객 결제 → 완료</div>
+    </div>
     <div class="stepper-track" id="stepperTrack">
       <div class="step-node" data-step="1">
         <div class="step-circle">1</div>
-        <div class="step-label">취소 대상 지정 &<br>취소예정 마킹</div>
+        <div class="step-label">취소할 결제<br>선택</div>
       </div>
       <div class="step-line" data-line="1"></div>
       <div class="step-node" data-step="2">
         <div class="step-circle">2</div>
-        <div class="step-label">결제 URL 발송</div>
+        <div class="step-label">기존 결제<br>취소 실행</div>
       </div>
       <div class="step-line" data-line="2"></div>
       <div class="step-node" data-step="3">
         <div class="step-circle">3</div>
-        <div class="step-label">고객 결제 완료<br>(신규 결제 승인)</div>
+        <div class="step-label">재결제 URL<br>발송</div>
       </div>
       <div class="step-line" data-line="3"></div>
       <div class="step-node" data-step="4">
         <div class="step-circle">4</div>
-        <div class="step-label">관리자 승인 대기<br>(신규 결제 확인)</div>
+        <div class="step-label">고객 결제<br>완료</div>
       </div>
       <div class="step-line" data-line="4"></div>
       <div class="step-node" data-step="5">
-        <div class="step-circle">5</div>
-        <div class="step-label">기존 결제<br>취소 API 호출</div>
-      </div>
-      <div class="step-line" data-line="5"></div>
-      <div class="step-node" data-step="6">
         <div class="step-circle">✓</div>
         <div class="step-label">완료</div>
       </div>
@@ -388,10 +318,9 @@ button { font-family: inherit; cursor: pointer; }
 
   <div class="scenarios">
     <button class="active" onclick="loadScenario('default', event)">기본 (25만×4건)</button>
-    <button onclick="loadScenario('mixed', event)">부분취소 불가 혼재</button>
+    <button onclick="loadScenario('mixed', event)">다양한 결제수단</button>
+    <button class="over" onclick="loadScenario('overpay', event)">⚠ 오버 상태 (상품금액 변경 시뮬)</button>
     <button onclick="loadScenario('reset', event)">리셋</button>
-    <div class="divider"></div>
-    <button class="time" onclick="fastForward()" id="ffBtn" style="display:none;">⏩ 시간 앞으로 (2시간 뒤 SLA 초과 시뮬)</button>
   </div>
 
   <!-- 예약 요약 -->
@@ -414,32 +343,28 @@ button { font-family: inherit; cursor: pointer; }
     </div>
   </div>
 
-  <!-- 금액 검증 -->
+  <!-- 금액 요약 -->
   <div class="balance-card">
     <div class="balance-row">
-      <div class="k">활성 결제 합계</div>
+      <div class="k">현재 결제 총액 (활성 결제만)</div>
       <div class="v" id="activeSum">₩ 1,000,000</div>
     </div>
     <div class="balance-row">
-      <div class="k">취소예정 결제 합계 (검증에서 제외)</div>
-      <div class="v" id="reservedSum" style="color: #d46b08;">₩ 0</div>
+      <div class="k">예약관리 금액</div>
+      <div class="v">₩ <span id="reservationAmountRow">1,000,000</span></div>
     </div>
-    <div class="balance-row">
-      <div class="k">신규 결제 합계 (재결제 진행 중)</div>
-      <div class="v" id="newSum" style="color: #389e0d;">₩ 0</div>
-    </div>
-    <div class="balance-row total" id="validationRow">
-      <div class="k">검증 대상 합계 = 활성 − 취소예정 + 신규</div>
-      <div class="v" id="validationSum">₩ 1,000,000</div>
+    <div class="balance-row total" id="diffRow">
+      <div class="k">차액 (결제 총액 − 예약관리 금액)</div>
+      <div class="v" id="diffValue">₩ 0</div>
     </div>
     <div class="balance-hint">
-      ※ 이 값이 예약관리 금액(<span id="reservationAmountHint">1,000,000</span>원)을 <strong>초과하면 새 결제 승인 불가</strong>
+      ※ 오버 상태(+) → 취소 필요 안내 · 부족 상태(−) → 재결제 필요 안내 · 0 = 정합
     </div>
   </div>
 
-  <!-- 결제 URL 발송 카드 (Step 2~3) -->
+  <!-- 결제 URL 발송 카드 -->
   <div id="linkCard" class="link-card" style="display: none;">
-    <div class="head"><span class="dot"></span> Step 2 · 결제 URL 발송됨 · 고객 결제 대기 중</div>
+    <div class="head"><span class="dot"></span> Step 3 · 결제 URL 발송됨 · 고객 결제 대기 중</div>
     <div class="url-row">
       <input type="text" id="paymentUrl" readonly>
       <button class="copy-btn" onclick="copyUrl()">복사</button>
@@ -451,7 +376,7 @@ button { font-family: inherit; cursor: pointer; }
       </div>
       <div class="m">
         <div class="k">유효기간</div>
-        <div class="v">24시간 (D+1 자동 만료)</div>
+        <div class="v">24시간</div>
       </div>
       <div class="m">
         <div class="k">발송 채널</div>
@@ -464,7 +389,7 @@ button { font-family: inherit; cursor: pointer; }
     </div>
   </div>
 
-  <!-- 고객 결제 시뮬레이터 (Step 3) -->
+  <!-- 고객 결제 시뮬레이터 -->
   <div id="customerSim" class="customer-sim" style="display: none;">
     <div class="cs-head">
       <div class="dots"><div class="dot"></div><div class="dot"></div><div class="dot"></div></div>
@@ -479,53 +404,19 @@ button { font-family: inherit; cursor: pointer; }
       <div class="cs-methods">
         <button>신용카드</button>
         <button>계좌이체</button>
-        <button disabled>가상계좌</button>
+        <button>가상계좌</button>
       </div>
       <div class="cs-actions">
         <button class="pay-ok" onclick="customerResult('success')">결제 완료</button>
-        <button class="pay-ng" onclick="customerResult('fail')">결제 실패 (한도초과 등)</button>
+        <button class="pay-ng" onclick="customerResult('fail')">결제 실패</button>
         <button class="pay-close" onclick="closeCustomerSim()">닫기</button>
       </div>
     </div>
   </div>
 
-  <!-- 관리자 승인 대기 카드 (Step 4 B옵션 핵심) -->
-  <div id="approvalCard" class="approval-card" style="display: none;">
-    <div class="head"><span class="ico">👁</span> 신규 결제 완료 확인 · 취소 실행 승인</div>
-    <div class="desc">
-      아래 <strong>신규 결제가 실제로 완료됐는지 관리자가 눈으로 확인</strong>한 후, 하단 [승인 및 취소 실행] 버튼을 눌러야 기존 결제 취소 API가 호출됩니다.
-      <strong>자동 실행되지 않습니다</strong> — 이중결제 방지를 위한 안전장치입니다.
-    </div>
-
-    <div class="approval-summary">
-      <div class="approval-block">
-        <div class="bh">신규 결제 <span class="badge">완료됨</span></div>
-        <ul id="newPaymentsSummary"></ul>
-      </div>
-      <div class="approval-block">
-        <div class="bh">취소 실행 대상 <span class="badge pending">승인 대기</span></div>
-        <ul id="cancelTargetsSummary"></ul>
-      </div>
-    </div>
-
-    <div class="approval-actions">
-      <div class="spacer"><strong>확인 사항:</strong> PG 관리자 페이지에서 신규 결제 승인번호가 확인되었나요? 승인 후에는 되돌릴 수 없습니다.</div>
-      <button class="btn btn-critical lg" onclick="approveCancel()">✓ 승인 및 취소 실행</button>
-    </div>
-  </div>
-
-  <!-- 다른 예약 취소 대기 큐 미리보기 (놓침 방지 UI 3) -->
-  <div id="queuePreview" class="pending-queue-preview" style="display: none;">
-    <div class="qh">
-      🔔 결제관리 · 취소 승인 대기 큐 <span class="cnt" id="qCnt">3</span>
-      <span class="sub">이 화면 하단에도 목록으로 노출됨 · 매일 오전 09:00 미처리 건 일괄 리포트</span>
-    </div>
-    <div id="queueList"></div>
-  </div>
-
-  <!-- 취소 처리 진행 카드 (Step 5) -->
+  <!-- 취소 처리 진행 -->
   <div id="cancelProgress" class="cancel-progress" style="display: none;">
-    <div class="head"><span class="spinner"></span> Step 5 · 기존 결제 취소 API 호출 중</div>
+    <div class="head"><span class="spinner"></span> Step 2 진행 중 · 기존 결제 취소 API 호출...</div>
     <div class="list" id="cancelList"></div>
   </div>
 
@@ -544,42 +435,41 @@ button { font-family: inherit; cursor: pointer; }
     </div>
     <button class="btn btn-secondary" onclick="showTimeline()">이벤트 로그</button>
 
-    <button class="btn btn-warning" onclick="openRepaymentModal()" id="startBtn">재결제 시작</button>
-    <button class="btn btn-danger" onclick="rollback('managerCancel')" id="rollbackBtn" style="display: none;">재결제 취소 (롤백)</button>
-    <button class="btn btn-primary" onclick="confirmReserveAndSendLink()" id="sendLinkBtn" style="display: none;" disabled>취소예정 확정 & 결제 URL 발송</button>
-    <button class="btn btn-warning" onclick="retryCancel()" id="retryBtn" style="display: none;">취소 API 재호출</button>
+    <button class="btn btn-primary" onclick="startRepayment()" id="startBtn">재결제 시작</button>
+    <button class="btn btn-danger" onclick="cancelSelection()" id="cancelSelectionBtn" style="display: none;">선택 취소</button>
+    <button class="btn btn-critical lg" onclick="executeCancel()" id="executeCancelBtn" style="display: none;" disabled>선택한 결제 취소 실행</button>
+    <button class="btn btn-primary lg" onclick="sendRepayLink()" id="sendLinkBtn" style="display: none;">재결제 URL 발송</button>
+    <button class="btn btn-secondary" onclick="retryCancel()" id="retryBtn" style="display: none;">취소 API 재호출</button>
     <button class="btn btn-success" onclick="resetAll()" id="doneBtn" style="display: none;">새로 시작</button>
   </div>
 
-  <!-- 이벤트 로그 -->
+  <!-- 로그 -->
   <div class="timeline" id="timeline" style="display: none;">
-    <div class="row"><span class="ts">--:--:--</span><span class="lv info">READY</span><span class="msg">목업 초기화 완료</span></div>
+    <div class="row"><span class="ts">--:--:--</span><span class="lv info">READY</span><span class="msg">목업 초기화</span></div>
   </div>
 
   <!-- 정책 -->
   <div class="policy-card">
-    <strong>이 목업이 검증하는 정책 초안 (B옵션 하이브리드)</strong>
+    <strong>이 목업이 검증하는 정책 초안 (v4 · 최종안)</strong>
     <ul>
-      <li><strong>6단계 명시 프로세스</strong>: 취소 대상 지정 → URL 발송 → 고객 결제 → <strong>관리자 승인 대기</strong> → 취소 API 호출 → 완료</li>
-      <li>결제 검증 룰 = <code>SUM(활성) − SUM(취소예정) + SUM(신규) ≤ 예약관리금액</code></li>
-      <li>취소 API 호출은 <strong>절대 자동으로 실행되지 않음</strong> · 관리자가 신규 결제 확인 후 원클릭 승인</li>
-      <li><strong>놓침 방지 3중 장치</strong>: (1) 예약 상세 상단 빨간 배너 + 경과시간 (2) GNB 승인 대기 카운터 (3) 결제관리 대시보드 대기 큐</li>
-      <li>SLA 2시간 초과 시 <strong>Slack 자동 알림</strong> · 매일 오전 09:00 미처리 건 일괄 리포트 이메일</li>
-      <li>신규 결제 실패 시 → 취소예정 자동 롤백 · 취소 API 실패 시 → <code>취소실패</code> 상태 + Slack 알림</li>
+      <li><strong>5단계 순차 프로세스</strong>: 취소할 결제 선택 → 취소 실행 → 재결제 URL 발송 → 고객 결제 완료 → 완료</li>
+      <li><strong>기존 오버 방지 로직 유지</strong>: <code>SUM(활성) ≤ 예약관리 금액</code> — 신규 결제 승인 시점에 검증</li>
+      <li>재결제 시 관리자는 <strong>먼저 취소를 실행</strong>해야 URL 발송 가능 (실제 결제 상태 이하로 내려야 신규 결제 가능)</li>
+      <li>재결제 UI에서는 <strong>전액취소만 지원</strong> (부분취소는 환불 프로세스로 이관)</li>
+      <li>결제 부족 상태는 <strong>재결제 URL 발송 대기</strong> 배너로 안내 (Step 3 진입 유도)</li>
+      <li>오버 상태(재결제 외 원인)는 <strong>배너로만 안내</strong> · 관리자가 [취소 처리 시작] 눌러 재결제 플로우 진입</li>
     </ul>
-  </div>
-</div>
-
-<!-- 재결제 시작 모달 -->
-<div class="modal-mask" id="repaymentModal">
-  <div class="modal">
-    <h3>재결제 시작</h3>
-    <p>얼마를 재결제 하시겠어요? 이 금액에 맞춰 <strong>취소할 기존 결제 조합</strong>을 선택하게 됩니다.</p>
-    <input type="text" class="amount-input" id="repayAmount" placeholder="0" oninput="formatRepayInput(this)">
-    <div class="amount-hint">예: 300,000 입력 시 → 25만원 1건(전액) + 5만원(부분취소) 등 조합 가능</div>
-    <div class="modal-actions">
-      <button class="btn btn-secondary" onclick="closeRepaymentModal()">취소</button>
-      <button class="btn btn-primary" onclick="confirmRepayAmount()">다음 · 취소 대상 지정</button>
+    <div class="removed">
+      <strong>v3 대비 걷어낸 것</strong> —
+      <s>취소예정 상태값</s> ·
+      <s>활성 합산 검증 룰</s> ·
+      <s>하이브리드 승인 UI</s> ·
+      <s>승인 대기 카드</s> ·
+      <s>놓침 방지 3중 장치 (배너/GNB 카운터/대기 큐)</s> ·
+      <s>SLA 배치</s> ·
+      <s>롤백 로직</s> ·
+      <s>Slack 승인 대기 알림</s> ·
+      <s>부분취소 UI (입력·조합)</s>
     </div>
   </div>
 </div>
@@ -588,32 +478,40 @@ button { font-family: inherit; cursor: pointer; }
 const RESERVATION_AMOUNT = 1000000;
 
 const SCENARIOS = {
-  default: [
-    { id: 'PAY-001', method: '카드', name: '신한카드 (승인번호 12345678)', amount: 250000, status: 'active', canPartial: true },
-    { id: 'PAY-002', method: '카드', name: '삼성카드 (승인번호 23456789)', amount: 250000, status: 'active', canPartial: true },
-    { id: 'PAY-003', method: '계좌이체', name: '토스뱅크 실시간 이체', amount: 250000, status: 'active', canPartial: false },
-    { id: 'PAY-004', method: '가상계좌', name: '국민은행 가상계좌', amount: 250000, status: 'active', canPartial: false },
-  ],
-  mixed: [
-    { id: 'PAY-001', method: '카드', name: '신한카드', amount: 400000, status: 'active', canPartial: true },
-    { id: 'PAY-002', method: '카카오페이', name: '카카오페이 (즉시결제)', amount: 200000, status: 'active', canPartial: false },
-    { id: 'PAY-003', method: '가상계좌', name: '우리은행 가상계좌', amount: 300000, status: 'active', canPartial: false },
-    { id: 'PAY-004', method: '카드', name: '롯데카드', amount: 100000, status: 'active', canPartial: true },
-  ]
+  default: {
+    payments: [
+      { id: 'PAY-001', method: '카드', name: '신한카드 (승인번호 12345678)', amount: 250000, status: 'active' },
+      { id: 'PAY-002', method: '카드', name: '삼성카드 (승인번호 23456789)', amount: 250000, status: 'active' },
+      { id: 'PAY-003', method: '계좌이체', name: '토스뱅크 실시간 이체', amount: 250000, status: 'active' },
+      { id: 'PAY-004', method: '가상계좌', name: '국민은행 가상계좌', amount: 250000, status: 'active' },
+    ],
+    reservationAmount: 1000000,
+  },
+  mixed: {
+    payments: [
+      { id: 'PAY-001', method: '카드', name: '신한카드', amount: 400000, status: 'active' },
+      { id: 'PAY-002', method: '카카오페이', name: '카카오페이 (즉시결제)', amount: 200000, status: 'active' },
+      { id: 'PAY-003', method: '가상계좌', name: '우리은행 가상계좌', amount: 300000, status: 'active' },
+      { id: 'PAY-004', method: '카드', name: '롯데카드', amount: 100000, status: 'active' },
+    ],
+    reservationAmount: 1000000,
+  },
+  overpay: {
+    // 상품금액 변경 시뮬: 결제 100만인데 예약관리 금액이 90만으로 줄어듦
+    payments: [
+      { id: 'PAY-001', method: '카드', name: '신한카드 (승인번호 12345678)', amount: 250000, status: 'active' },
+      { id: 'PAY-002', method: '카드', name: '삼성카드 (승인번호 23456789)', amount: 250000, status: 'active' },
+      { id: 'PAY-003', method: '계좌이체', name: '토스뱅크 실시간 이체', amount: 250000, status: 'active' },
+      { id: 'PAY-004', method: '가상계좌', name: '국민은행 가상계좌', amount: 250000, status: 'active' },
+    ],
+    reservationAmount: 900000,
+  },
 };
 
-// 다른 예약의 대기 큐 (놓침 방지 UI 3)
-const OTHER_QUEUE = [
-  { id: 'R2026080511111', customer: '김철수', amount: 800000, mins: 25, level: 'ok' },
-  { id: 'R2026080511222', customer: '이영희', amount: 350000, mins: 95, level: 'warn' },
-  { id: 'R2026080511333', customer: '박민수', amount: 1200000, mins: 185, level: 'danger' },
-];
-
-let payments = JSON.parse(JSON.stringify(SCENARIOS.default));
-let repayAmount = 0;
+let payments = JSON.parse(JSON.stringify(SCENARIOS.default.payments));
+let reservationAmount = SCENARIOS.default.reservationAmount;
+// phase: idle → selecting → cancelling → linkSent → customerPaying → done / cancelFailed
 let phase = 'idle';
-let approvalStartTime = null;
-let bannerTimer = null;
 
 function fmt(n) { return new Intl.NumberFormat('ko-KR').format(n); }
 
@@ -623,48 +521,29 @@ function render() {
   renderStepper();
   renderActionBar();
   renderStageCards();
-  renderGnbAlert();
-  renderUrgentBanner();
+  renderBanners();
 }
 
 function renderPayments() {
   const list = document.getElementById('paymentList');
   list.innerHTML = '';
   payments.forEach(p => {
-    const isSelectable = phase === 'selectingTargets' && p.status === 'active';
+    const isSelectable = phase === 'selecting' && p.status === 'active';
     const isSelected = p._selectedForCancel === true;
-    const partialAmt = p._partialAmount || 0;
     const cls = ['pay-item'];
-    if (p.status === 'cancel_reserved') cls.push('status-reserved');
-    if (p.status === 'partial_cancel_reserved') cls.push('status-partial');
     if (p.status === 'cancelling') cls.push('status-cancelling');
     if (p.status === 'cancelled') cls.push('status-cancelled');
     if (p.status === 'cancel_failed') cls.push('status-cancel-failed');
     if (p.status === 'new') cls.push('status-new');
-    if (p.status === 'new_pending') cls.push('status-new-pending');
     if (isSelected) cls.push('selected');
 
     const statusPill = {
       active: '<span class="status-pill active">활성</span>',
-      cancel_reserved: '<span class="status-pill reserved">취소예정 (전액)</span>',
-      partial_cancel_reserved: `<span class="status-pill partial">취소예정 (부분 ₩${fmt(partialAmt)})</span>`,
       cancelling: '<span class="status-pill cancelling">취소 처리 중</span>',
       cancelled: '<span class="status-pill cancelled">취소완료</span>',
       cancel_failed: '<span class="status-pill cancel-failed">취소실패 ⚠</span>',
       new: '<span class="status-pill new">신규결제 완료</span>',
-      new_pending: '<span class="status-pill new-pending">신규결제 (승인대기)</span>',
     }[p.status];
-
-    const partialUI = (isSelectable && p.canPartial && isSelected) ? `
-      <div class="partial-input">
-        <input type="text" value="${fmt(partialAmt || p.amount)}" oninput="setPartialAmount('${p.id}', this.value)" placeholder="0">
-        <span class="cap">/ ₩${fmt(p.amount)} 최대</span>
-      </div>
-    ` : '';
-
-    const partialTag = p.canPartial
-      ? '<span class="partial-tag">부분취소 지원</span>'
-      : '<span class="partial-tag no">전액취소만</span>';
 
     list.innerHTML += `
       <div class="${cls.join(' ')}">
@@ -672,9 +551,8 @@ function renderPayments() {
           ${isSelectable ? `<input type="checkbox" ${isSelected ? 'checked' : ''} onchange="toggleTarget('${p.id}', this.checked)">` : '<span></span>'}
         </div>
         <div class="method">
-          <div class="name">${p.method} · ${p.name}${partialTag}</div>
+          <div class="name">${p.method} · ${p.name}</div>
           <div class="meta">${p.id}</div>
-          ${partialUI}
         </div>
         <div class="amount">₩ ${fmt(p.amount)}</div>
         <div>${statusPill}</div>
@@ -684,59 +562,61 @@ function renderPayments() {
   document.getElementById('paymentCount').textContent = payments.length + '건';
 
   const sub = document.getElementById('listSub');
-  if (phase === 'idle') sub.textContent = '현재 활성 결제 목록 · 재결제 시작 버튼을 누르면 취소 대상을 선택할 수 있습니다';
-  else if (phase === 'selectingTargets') sub.textContent = '체크박스로 취소 대상 지정 · 부분취소 지원 결제수단만 부분 금액 입력 가능';
-  else if (phase === 'linkSent') sub.textContent = '취소예정 마킹 완료 · 결제 URL 발송됨 · 고객 결제 완료 대기 중';
+  if (phase === 'idle') sub.textContent = '현재 결제 상태 · [재결제 시작] 눌러 취소할 결제 지정';
+  else if (phase === 'selecting') sub.textContent = '체크박스로 취소할 결제 선택 (전액취소만 지원)';
+  else if (phase === 'cancelling') sub.textContent = '취소 처리 중...';
+  else if (phase === 'linkSent') sub.textContent = '취소 완료 · 재결제 URL 발송됨 · 고객 결제 대기';
   else if (phase === 'customerPaying') sub.textContent = '고객 결제 진행 중';
-  else if (phase === 'awaitingApproval') sub.textContent = '신규 결제 완료 · 관리자 승인 대기 (자동 취소 없음)';
-  else if (phase === 'cancelling') sub.textContent = '관리자 승인 완료 · 취소 API 호출 진행 중';
-  else if (phase === 'done') sub.textContent = '재결제 완료 · 모든 상태 정리됨';
-  else if (phase === 'cancelFailed') sub.textContent = '취소 API 실패 · 관리자 재시도 필요';
+  else if (phase === 'done') sub.textContent = '완료 · 결제 상태 정합';
+  else if (phase === 'cancelFailed') sub.textContent = '취소 API 실패 · 재시도 필요';
 }
 
 function renderSummary() {
-  const activeSum = payments.filter(p => p.status === 'active' || p.status === 'cancel_reserved' || p.status === 'partial_cancel_reserved' || p.status === 'cancelling').reduce((s, p) => s + p.amount, 0);
-  const reservedSum = payments.filter(p => p.status === 'cancel_reserved').reduce((s, p) => s + p.amount, 0)
-    + payments.filter(p => p.status === 'partial_cancel_reserved').reduce((s, p) => s + (p._partialAmount || 0), 0);
-  const newSum = payments.filter(p => p.status === 'new' || p.status === 'new_pending').reduce((s, p) => s + p.amount, 0);
-  const validation = activeSum - reservedSum + newSum;
+  const activeSum = payments.filter(p => p.status === 'active' || p.status === 'cancelling').reduce((s, p) => s + p.amount, 0);
+  const newSum = payments.filter(p => p.status === 'new').reduce((s, p) => s + p.amount, 0);
+  const totalActive = activeSum + newSum;
+  const diff = totalActive - reservationAmount;
 
-  document.getElementById('activeSum').textContent = '₩ ' + fmt(activeSum);
-  document.getElementById('reservedSum').textContent = '₩ ' + fmt(reservedSum);
-  document.getElementById('newSum').textContent = '₩ ' + fmt(newSum);
-  document.getElementById('validationSum').textContent = '₩ ' + fmt(validation);
+  document.getElementById('activeSum').textContent = '₩ ' + fmt(totalActive);
+  document.getElementById('reservationAmountRow').textContent = fmt(reservationAmount);
+  document.getElementById('reservationAmount').textContent = fmt(reservationAmount);
 
-  const row = document.getElementById('validationRow');
-  row.classList.remove('mismatch', 'match');
-  if (validation > RESERVATION_AMOUNT) row.classList.add('mismatch');
-  else if (validation === RESERVATION_AMOUNT) row.classList.add('match');
+  const row = document.getElementById('diffRow');
+  const val = document.getElementById('diffValue');
+  row.classList.remove('mismatch', 'match', 'under');
+  if (diff > 0) {
+    row.classList.add('mismatch');
+    val.textContent = '+ ₩ ' + fmt(diff) + '  (오버)';
+  } else if (diff < 0) {
+    row.classList.add('under');
+    val.textContent = '− ₩ ' + fmt(Math.abs(diff)) + '  (부족)';
+  } else {
+    row.classList.add('match');
+    val.textContent = '₩ 0  (정합)';
+  }
 }
 
 function renderStepper() {
   const map = {
     idle: { current: 0, done: 0 },
-    selectingTargets: { current: 1, done: 0 },
-    linkSent: { current: 2, done: 1 },
-    customerPaying: { current: 3, done: 2 },
-    awaitingApproval: { awaiting: 4, done: 3 },
-    cancelling: { current: 5, done: 4 },
-    done: { current: 6, done: 6 },
-    paymentFailed: { current: 2, done: 1, failAt: 3 },
-    cancelFailed: { current: 5, done: 4, failAt: 5 },
+    selecting: { current: 1, done: 0 },
+    cancelling: { current: 2, done: 1 },
+    linkSent: { current: 3, done: 2 },
+    customerPaying: { current: 4, done: 3 },
+    done: { current: 5, done: 5 },
+    cancelFailed: { current: 2, done: 1, failAt: 2 },
   };
   const state = map[phase] || map.idle;
-
-  for (let i = 1; i <= 6; i++) {
+  for (let i = 1; i <= 5; i++) {
     const node = document.querySelector(`.step-node[data-step="${i}"]`);
     const circle = node.querySelector('.step-circle');
-    circle.classList.remove('done', 'current', 'awaiting', 'fail');
-    node.classList.remove('done', 'current', 'awaiting', 'fail');
+    circle.classList.remove('done', 'current', 'fail');
+    node.classList.remove('done', 'current', 'fail');
     if (state.failAt === i) { circle.classList.add('fail'); node.classList.add('fail'); }
     else if (i <= state.done) { circle.classList.add('done'); node.classList.add('done'); }
-    else if (state.awaiting === i) { circle.classList.add('awaiting'); node.classList.add('awaiting'); }
     else if (i === state.current) { circle.classList.add('current'); node.classList.add('current'); }
   }
-  for (let i = 1; i <= 5; i++) {
+  for (let i = 1; i <= 4; i++) {
     const line = document.querySelector(`.step-line[data-line="${i}"]`);
     line.classList.remove('done');
     if (i <= state.done) line.classList.add('done');
@@ -744,147 +624,75 @@ function renderStepper() {
 }
 
 function renderActionBar() {
-  const startBtn = document.getElementById('startBtn');
-  const sendLinkBtn = document.getElementById('sendLinkBtn');
-  const rollbackBtn = document.getElementById('rollbackBtn');
-  const retryBtn = document.getElementById('retryBtn');
-  const doneBtn = document.getElementById('doneBtn');
+  const buttons = ['startBtn', 'cancelSelectionBtn', 'executeCancelBtn', 'sendLinkBtn', 'retryBtn', 'doneBtn'];
+  buttons.forEach(id => document.getElementById(id).style.display = 'none');
   const status = document.getElementById('actionStatus');
-
-  [startBtn, sendLinkBtn, rollbackBtn, retryBtn, doneBtn].forEach(b => b.style.display = 'none');
-
-  const reservedSum = payments.filter(p => p.status === 'cancel_reserved').reduce((s, p) => s + p.amount, 0)
-    + payments.filter(p => p.status === 'partial_cancel_reserved').reduce((s, p) => s + (p._partialAmount || 0), 0);
+  const activeSum = payments.filter(p => p.status === 'active' || p.status === 'cancelling').reduce((s, p) => s + p.amount, 0);
+  const diff = activeSum - reservationAmount;
 
   if (phase === 'idle') {
-    startBtn.style.display = '';
-    status.innerHTML = `활성 결제 <span class="n">${payments.filter(p => p.status === 'active').length}건</span> · 재결제 대기`;
-  } else if (phase === 'selectingTargets') {
-    sendLinkBtn.style.display = '';
-    rollbackBtn.style.display = '';
-    const matched = reservedSum === repayAmount;
-    sendLinkBtn.disabled = !matched;
-    if (matched) {
-      status.innerHTML = `<span class="ok">✓</span> 취소예정 조합 = 재결제 금액(<span class="n">₩${fmt(repayAmount)}</span>) 일치 · 확정 후 URL 발송 가능`;
+    document.getElementById('startBtn').style.display = '';
+    if (diff > 0) status.innerHTML = `<span class="ng">⚠ 오버 상태</span> · <span class="n">+₩${fmt(diff)}</span> · 취소 필요`;
+    else if (diff < 0) status.innerHTML = `<span class="wait">💳 부족 상태</span> · <span class="n">−₩${fmt(Math.abs(diff))}</span> · 재결제 필요`;
+    else status.innerHTML = `활성 결제 <span class="n">${payments.filter(p => p.status === 'active').length}건</span> · 정합 상태`;
+  } else if (phase === 'selecting') {
+    document.getElementById('cancelSelectionBtn').style.display = '';
+    document.getElementById('executeCancelBtn').style.display = '';
+    const selected = payments.filter(p => p._selectedForCancel);
+    const selectedSum = selected.reduce((s, p) => s + p.amount, 0);
+    document.getElementById('executeCancelBtn').disabled = selected.length === 0;
+    if (selected.length === 0) {
+      status.innerHTML = `취소할 결제를 선택하세요 (체크박스)`;
     } else {
-      const diff = repayAmount - reservedSum;
-      status.innerHTML = `취소예정 <span class="n">₩${fmt(reservedSum)}</span> / 목표 <span class="n">₩${fmt(repayAmount)}</span> · <span class="ng">${diff > 0 ? diff + '원 더 지정 필요' : Math.abs(diff) + '원 초과'}</span>`;
+      status.innerHTML = `선택 <span class="n">${selected.length}건</span> · 취소 금액 <span class="n">₩${fmt(selectedSum)}</span> · 취소 실행 시 이 금액만큼 결제 부족 상태로 전이`;
     }
-  } else if (phase === 'linkSent') {
-    rollbackBtn.style.display = '';
-    status.innerHTML = `<span class="wait">⏳ Step 2 완료 · 결제 URL 발송됨</span> · 고객 결제 완료 대기 중`;
-  } else if (phase === 'customerPaying') {
-    status.innerHTML = `<span class="wait">⏳ 고객이 결제 화면 열람 중...</span>`;
-  } else if (phase === 'awaitingApproval') {
-    status.innerHTML = `<span class="ng">🔴 Step 4 · 관리자 승인 대기</span> · 위 승인 카드에서 [승인 및 취소 실행] 눌러야 진행됨`;
   } else if (phase === 'cancelling') {
-    status.innerHTML = `<span class="wait">⏳ Step 5 진행 중 · 기존 결제 취소 API 호출...</span>`;
+    status.innerHTML = `<span class="wait">⏳ 취소 API 호출 중...</span>`;
+  } else if (phase === 'linkSent') {
+    status.innerHTML = `<span class="wait">⏳ Step 3 · 결제 URL 발송됨</span> · 고객 결제 대기 중`;
+  } else if (phase === 'customerPaying') {
+    status.innerHTML = `<span class="wait">⏳ 고객이 결제 화면 열람 중</span>`;
+  } else if (phase === 'postCancel') {
+    document.getElementById('sendLinkBtn').style.display = '';
+    document.getElementById('cancelSelectionBtn').style.display = '';
+    status.innerHTML = `<span class="ok">✓ 취소 완료</span> · 결제 부족 <span class="n">₩${fmt(Math.abs(diff))}</span> · 재결제 URL 발송 필요`;
   } else if (phase === 'done') {
-    doneBtn.style.display = '';
-    status.innerHTML = `<span class="ok">✓ 재결제 완료</span> · 모든 상태 정리됨`;
+    document.getElementById('doneBtn').style.display = '';
+    status.innerHTML = `<span class="ok">✓ 재결제 완료</span> · 결제 상태 정합`;
   } else if (phase === 'cancelFailed') {
-    retryBtn.style.display = '';
-    status.innerHTML = `<span class="ng">✕ 취소 API 실패</span> · 이중결제 상태 · 관리자 개입 필요`;
+    document.getElementById('retryBtn').style.display = '';
+    status.innerHTML = `<span class="ng">✕ 취소 API 실패</span> · 재시도 필요`;
   }
 }
 
 function renderStageCards() {
   document.getElementById('linkCard').style.display = (phase === 'linkSent' || phase === 'customerPaying') ? '' : 'none';
   document.getElementById('customerSim').style.display = (phase === 'customerPaying') ? '' : 'none';
-  document.getElementById('approvalCard').style.display = (phase === 'awaitingApproval') ? '' : 'none';
-  document.getElementById('queuePreview').style.display = (phase === 'awaitingApproval') ? '' : 'none';
   document.getElementById('cancelProgress').style.display = (phase === 'cancelling') ? '' : 'none';
-  document.getElementById('ffBtn').style.display = (phase === 'awaitingApproval') ? '' : 'none';
+}
 
-  if (phase === 'awaitingApproval') {
-    renderApprovalCard();
-    renderQueuePreview();
+function renderBanners() {
+  const activeSum = payments.filter(p => p.status === 'active' || p.status === 'cancelling').reduce((s, p) => s + p.amount, 0);
+  const diff = activeSum - reservationAmount;
+
+  const overBanner = document.getElementById('overpayBanner');
+  const underBanner = document.getElementById('underpayBanner');
+  overBanner.style.display = 'none';
+  underBanner.style.display = 'none';
+
+  // 오버 상태: idle에서만 배너 (재결제 프로세스 안 탈 때)
+  if (phase === 'idle' && diff > 0) {
+    overBanner.style.display = '';
+    document.getElementById('overpayAmount').textContent = fmt(diff);
   }
-}
 
-function renderApprovalCard() {
-  const newPays = payments.filter(p => p.status === 'new_pending');
-  const cancelTargets = payments.filter(p => p.status === 'cancel_reserved' || p.status === 'partial_cancel_reserved');
-
-  document.getElementById('newPaymentsSummary').innerHTML = newPays.map(p => `
-    <li><span class="kk">${p.method} · ${p.id}</span><span class="vv">₩${fmt(p.amount)}</span></li>
-  `).join('') + `
-    <li style="border-top:1px dashed #ffd591; margin-top:6px; padding-top:6px;"><span class="kk"><strong>합계</strong></span><span class="vv" style="color:#389e0d;">₩${fmt(newPays.reduce((s,p)=>s+p.amount,0))}</span></li>
-    <li style="font-size: 11px; color: rgba(0,0,0,0.5);">승인시각: ${new Date().toLocaleTimeString('ko-KR', {hour: '2-digit', minute: '2-digit'})} · PG: NICEPAY</li>
-  `;
-
-  document.getElementById('cancelTargetsSummary').innerHTML = cancelTargets.map(p => {
-    const amt = p.status === 'partial_cancel_reserved' ? p._partialAmount : p.amount;
-    const tag = p.status === 'partial_cancel_reserved' ? ` (부분 · 원금 ₩${fmt(p.amount)})` : '';
-    return `<li><span class="kk">${p.method} · ${p.id}${tag}</span><span class="vv" style="color:#d46b08;">−₩${fmt(amt)}</span></li>`;
-  }).join('') + `
-    <li style="border-top:1px dashed #ffd591; margin-top:6px; padding-top:6px;"><span class="kk"><strong>합계</strong></span><span class="vv" style="color:#d46b08;">−₩${fmt(repayAmount)}</span></li>
-    <li style="font-size: 11px; color: rgba(0,0,0,0.5);">취소 상태: <strong>취소예정 · 대기 중</strong></li>
-  `;
-}
-
-function renderQueuePreview() {
-  const list = document.getElementById('queueList');
-  list.innerHTML = '';
-  // 이 예약 (현재)
-  const currentMins = Math.floor((Date.now() - approvalStartTime) / 60000);
-  const currentLevel = currentMins < 60 ? 'ok' : (currentMins < 120 ? 'warn' : 'danger');
-  const currentItem = { id: 'R2026080512345', customer: '홍길동 (현재 예약)', amount: repayAmount, mins: currentMins, level: currentLevel, isCurrent: true };
-  const allItems = [currentItem, ...OTHER_QUEUE].sort((a, b) => b.mins - a.mins);
-
-  allItems.forEach(item => {
-    const elapsed = item.mins < 60 ? `${item.mins}분` : `${Math.floor(item.mins/60)}시간 ${item.mins%60}분`;
-    list.innerHTML += `
-      <div class="q-item ${item.isCurrent ? 'this' : ''}">
-        <div class="id">${item.id}</div>
-        <div class="customer">${item.customer} · ₩${fmt(item.amount)}</div>
-        <div class="elapsed ${item.level}">${elapsed} 경과</div>
-        <div>${item.level === 'danger' ? '🔔 Slack 알림 전송됨' : ''}</div>
-        ${item.isCurrent ? '<div class="thistag">현재 예약</div>' : '<div class="go">→ 이동</div>'}
-      </div>
-    `;
-  });
-  document.getElementById('qCnt').textContent = allItems.length + '건';
-}
-
-function renderGnbAlert() {
-  const alert = document.getElementById('gnbAlert');
-  if (phase === 'awaitingApproval' || phase === 'cancelFailed') {
-    alert.style.display = '';
-    const count = OTHER_QUEUE.length + (phase === 'awaitingApproval' ? 1 : 0);
-    document.getElementById('gnbAlertCnt').textContent = count;
-  } else {
-    alert.style.display = 'none';
+  // 부족 상태: 취소 완료 후 재결제 URL 발송 대기
+  if (phase === 'postCancel' && diff < 0) {
+    underBanner.style.display = '';
+    const cancelled = payments.filter(p => p.status === 'cancelled').reduce((s, p) => s + p.amount, 0);
+    document.getElementById('underpayCancelled').textContent = fmt(cancelled);
+    document.getElementById('underpayAmount').textContent = fmt(Math.abs(diff));
   }
-}
-
-function renderUrgentBanner() {
-  const banner = document.getElementById('urgentBanner');
-  if (phase === 'awaitingApproval' || phase === 'cancelFailed') {
-    banner.style.display = '';
-    startBannerTimer();
-  } else {
-    banner.style.display = 'none';
-    stopBannerTimer();
-  }
-}
-
-function startBannerTimer() {
-  if (bannerTimer) return;
-  bannerTimer = setInterval(() => {
-    if (!approvalStartTime) return;
-    const elapsed = Math.floor((Date.now() - approvalStartTime) / 1000);
-    const mm = String(Math.floor(elapsed / 60)).padStart(2, '0');
-    const ss = String(elapsed % 60).padStart(2, '0');
-    const h = Math.floor(elapsed / 3600);
-    const el = document.getElementById('bannerElapsed');
-    if (el) el.textContent = h > 0 ? `${h}시간 ${mm}분 ${ss}초` : `${mm}:${ss}`;
-    if (phase === 'awaitingApproval') renderQueuePreview();
-  }, 1000);
-}
-
-function stopBannerTimer() {
-  if (bannerTimer) { clearInterval(bannerTimer); bannerTimer = null; }
 }
 
 const logs = [];
@@ -903,96 +711,98 @@ function showTimeline() {
   t.style.display = t.style.display === 'none' ? 'block' : 'none';
 }
 
-function showSlack(msg) {
-  const existing = document.querySelector('.slack-toast');
-  if (existing) existing.remove();
-  const toast = document.createElement('div');
-  toast.className = 'slack-toast';
-  toast.innerHTML = `
-    <div class="head"><div class="dot"></div><div>Slack 알림</div><div class="ch">#결제-알림</div></div>
-    <div class="msg">${msg}</div>
-  `;
-  document.body.appendChild(toast);
-  setTimeout(() => toast.remove(), 10000);
-}
-
-// ============= 재결제 플로우 =============
-function openRepaymentModal() {
-  document.getElementById('repaymentModal').classList.add('show');
-  document.getElementById('repayAmount').value = '';
-  document.getElementById('repayAmount').focus();
-}
-
-function closeRepaymentModal() {
-  document.getElementById('repaymentModal').classList.remove('show');
-}
-
-function formatRepayInput(input) {
-  const raw = input.value.replace(/[^\d]/g, '');
-  if (raw) input.value = fmt(parseInt(raw));
-  else input.value = '';
-}
-
-function confirmRepayAmount() {
-  const raw = document.getElementById('repayAmount').value.replace(/[^\d]/g, '');
-  const amount = parseInt(raw) || 0;
-  if (amount <= 0) { alert('금액을 입력하세요'); return; }
-  if (amount > RESERVATION_AMOUNT) { alert('예약관리 금액보다 클 수 없습니다'); return; }
-  repayAmount = amount;
-  phase = 'selectingTargets';
-  closeRepaymentModal();
-  log('info', `[Step 1] 재결제 시작 · 목표 금액 ₩${fmt(amount)} · 관리자: 김서현`);
+// ============= 플로우 =============
+function startRepayment() {
+  phase = 'selecting';
+  payments.forEach(p => { p._selectedForCancel = false; });
+  log('info', `[Step 1] 재결제 시작 · 관리자: 김서현`);
   render();
 }
 
 function toggleTarget(id, checked) {
   const p = payments.find(x => x.id === id);
-  if (!checked) {
-    p._selectedForCancel = false;
-    p._partialAmount = 0;
-    if (p.status === 'cancel_reserved' || p.status === 'partial_cancel_reserved') p.status = 'active';
-  } else {
-    p._selectedForCancel = true;
-    p._partialAmount = p.amount;
-    p.status = 'cancel_reserved';
-  }
+  p._selectedForCancel = checked;
   render();
 }
 
-function setPartialAmount(id, valStr) {
-  const p = payments.find(x => x.id === id);
-  if (!p.canPartial) return;
-  const raw = valStr.replace(/[^\d]/g, '');
-  const val = parseInt(raw) || 0;
-  if (val > p.amount) { alert('결제 금액을 초과할 수 없습니다'); render(); return; }
-  p._partialAmount = val;
-  if (val === p.amount) p.status = 'cancel_reserved';
-  else if (val > 0) p.status = 'partial_cancel_reserved';
-  else p.status = 'active';
+function cancelSelection() {
+  if (!confirm('선택을 취소하고 원래 상태로 돌아갑니다.')) return;
+  payments.forEach(p => { p._selectedForCancel = false; });
+  phase = 'idle';
+  log('warn', `[취소] 재결제 프로세스 중단 · 관리자 취소`);
   render();
 }
 
-function confirmReserveAndSendLink() {
-  const targets = payments.filter(p => p.status === 'cancel_reserved' || p.status === 'partial_cancel_reserved');
-  log('ok', `[Step 1 완료] 취소예정 마킹 확정 · ${targets.length}건 · 총 ₩${fmt(repayAmount)}`);
-  targets.forEach(t => {
-    if (t.status === 'partial_cancel_reserved') {
-      log('info', `　└ ${t.id} · 부분취소 예정 ₩${fmt(t._partialAmount)} (원금 ₩${fmt(t.amount)})`);
-    } else {
-      log('info', `　└ ${t.id} · 전액취소 예정 ₩${fmt(t.amount)}`);
-    }
+function executeCancel() {
+  const targets = payments.filter(p => p._selectedForCancel);
+  if (targets.length === 0) return;
+
+  const confirmMsg = `아래 ${targets.length}건 취소를 실행합니다.\n\n${targets.map(t => `· ${t.id} · ${t.method} · ₩${fmt(t.amount)}`).join('\n')}\n\n총 ₩${fmt(targets.reduce((s,p)=>s+p.amount,0))}\n\n승인하시겠습니까?`;
+  if (!confirm(confirmMsg)) return;
+
+  phase = 'cancelling';
+  targets.forEach(t => { t.status = 'cancelling'; });
+  log('ok', `[Step 2 시작] 취소 API 호출 · ${targets.length}건 · 총 ₩${fmt(targets.reduce((s,p)=>s+p.amount,0))}`);
+  render();
+
+  const progressList = document.getElementById('cancelList');
+  progressList.innerHTML = targets.map(t => `
+    <div class="row" data-id="${t.id}">
+      <span class="st">${t.id}</span>
+      <span>${t.method} · ₩${fmt(t.amount)}</span>
+      <span class="pending">대기 중...</span>
+    </div>
+  `).join('');
+
+  const shouldFail = !confirm('취소 API 호출 시뮬레이션.\n\n[확인] = 모두 성공\n[취소] = 마지막 건 실패');
+
+  targets.forEach((t, i) => {
+    setTimeout(() => {
+      const failThis = shouldFail && i === targets.length - 1;
+      const row = progressList.querySelector(`[data-id="${t.id}"]`);
+      if (failThis) {
+        t.status = 'cancel_failed';
+        row.querySelector('.pending').innerHTML = '<span class="err">✕ 실패</span>';
+        log('err', `[Step 2] 취소 API 실패 · ${t.id} · PG timeout`);
+      } else {
+        t.status = 'cancelled';
+        row.querySelector('.pending').innerHTML = '<span class="ok">✓ 완료</span>';
+        log('ok', `[Step 2] 취소 완료 · ${t.id} · ₩${fmt(t.amount)}`);
+      }
+      renderPayments();
+      renderSummary();
+      if (i === targets.length - 1) {
+        setTimeout(() => {
+          const anyFail = payments.some(p => p.status === 'cancel_failed');
+          if (anyFail) {
+            phase = 'cancelFailed';
+            log('err', `[Step 2 실패] 일부 취소 실패 · 재시도 필요`);
+          } else {
+            // 취소 완료 → 결제 부족 상태 → 재결제 URL 발송 대기
+            phase = 'postCancel';
+            log('ok', `[Step 2 완료] 취소 완료 · 결제 부족 상태 · 재결제 URL 발송 대기`);
+          }
+          render();
+        }, 500);
+      }
+    }, (i + 1) * 800);
   });
+}
+
+function sendRepayLink() {
+  const activeSum = payments.filter(p => p.status === 'active').reduce((s, p) => s + p.amount, 0);
+  const needed = reservationAmount - activeSum;
 
   const token = Math.random().toString(36).substring(2, 10);
   const url = `https://pay.tripstore.kr/repay/${token}`;
   document.getElementById('paymentUrl').value = url;
   document.getElementById('simAddr').textContent = url;
-  document.getElementById('simAmount').textContent = fmt(repayAmount);
+  document.getElementById('simAmount').textContent = fmt(needed);
   const now = new Date();
   document.getElementById('sentAt').textContent = `${String(now.getMonth()+1).padStart(2,'0')}/${String(now.getDate()).padStart(2,'0')} ${String(now.getHours()).padStart(2,'0')}:${String(now.getMinutes()).padStart(2,'0')}`;
 
-  log('ok', `[Step 2] 결제 URL 생성 & 발송 완료 · ${url}`);
-  log('info', `[Step 2] SMS/카카오톡/이메일 발송 · 홍길동 (010-1234-5678) · 유효 24h`);
+  log('ok', `[Step 3] 결제 URL 생성 & 발송 · ${url} · 결제금액 ₩${fmt(needed)}`);
+  log('info', `[Step 3] SMS/카카오톡/이메일 발송 · 홍길동 · 유효 24h`);
 
   phase = 'linkSent';
   render();
@@ -1004,137 +814,38 @@ function copyUrl() {
 }
 
 function resendLink() {
-  log('info', `[Step 2] 결제 URL 재발송`);
+  log('info', `[Step 3] 결제 URL 재발송`);
   alert('결제 URL 재발송 완료');
 }
 
 function openCustomerSim() {
   phase = 'customerPaying';
-  log('info', `[Step 3] 고객이 결제 URL 열람 · 결제 화면 진입`);
+  log('info', `[Step 4] 고객이 결제 URL 열람`);
   render();
 }
 
 function closeCustomerSim() {
   phase = 'linkSent';
-  log('info', `[Step 3] 고객이 결제 화면 닫음 · 취소예정 유지`);
+  log('info', `[Step 4] 고객이 결제 화면 닫음`);
   render();
 }
 
 function customerResult(result) {
   if (result === 'success') {
+    const activeSum = payments.filter(p => p.status === 'active').reduce((s, p) => s + p.amount, 0);
+    const needed = reservationAmount - activeSum;
     const newId = 'PAY-NEW-' + (payments.filter(p => p.id.startsWith('PAY-NEW')).length + 1);
-    payments.push({ id: newId, method: '신용카드', name: '재결제 · 신한카드 (신규 승인 87654321)', amount: repayAmount, status: 'new_pending' });
-    log('ok', `[Step 3 완료] 고객 결제 승인 완료 · ${newId} · ₩${fmt(repayAmount)}`);
-    log('warn', `[Step 4] 관리자 승인 대기 상태로 전이 · 자동 취소 안 함 (B옵션)`);
-    log('info', `[Step 4] SLA 2시간 · 미처리 시 Slack 알림 & 매일 09:00 일괄 리포트`);
-
-    // B옵션: 자동 취소 안 함, 승인 대기 상태로
-    phase = 'awaitingApproval';
-    approvalStartTime = Date.now();
+    payments.push({ id: newId, method: '신용카드', name: '재결제 · 신한카드 (신규 승인 87654321)', amount: needed, status: 'new' });
+    log('ok', `[Step 4 완료] 고객 결제 승인 완료 · ${newId} · ₩${fmt(needed)}`);
+    log('ok', `[Step 5] 재결제 프로세스 완료 · 결제 상태 정합`);
+    phase = 'done';
     render();
   } else {
-    log('err', `[Step 3 실패] 고객 결제 실패 · PG 응답: card_declined`);
-    log('warn', `[자동 롤백] 취소예정 → 활성 복구`);
-    payments.forEach(p => {
-      if (p.status === 'cancel_reserved' || p.status === 'partial_cancel_reserved') {
-        p.status = 'active';
-        p._selectedForCancel = false;
-        p._partialAmount = 0;
-      }
-    });
-    phase = 'idle';
-    repayAmount = 0;
+    log('err', `[Step 4 실패] 고객 결제 실패 · PG 응답: card_declined`);
+    alert('결제 실패. 다시 URL 재발송하거나 새로운 결제수단으로 시도하세요.');
+    phase = 'linkSent';
     render();
-    setTimeout(() => alert('결제 실패로 재결제 롤백됨'), 100);
   }
-}
-
-// B옵션 핵심: 관리자 승인 → 취소 실행
-function approveCancel() {
-  const targets = payments.filter(p => p.status === 'cancel_reserved' || p.status === 'partial_cancel_reserved');
-  const newPays = payments.filter(p => p.status === 'new_pending');
-  const confirmMsg = `신규 결제 ${newPays.length}건 (₩${fmt(newPays.reduce((s,p)=>s+p.amount,0))}) 확인 완료\n\n아래 ${targets.length}건 취소 실행:\n${targets.map(t => `· ${t.id} · ₩${fmt(t.status === 'partial_cancel_reserved' ? t._partialAmount : t.amount)}`).join('\n')}\n\n승인하시겠습니까?`;
-  if (!confirm(confirmMsg)) return;
-
-  log('ok', `[Step 4 완료] 관리자 승인 · 김서현 · 취소 실행 트리거`);
-  phase = 'cancelling';
-  render();
-  processCancellations();
-}
-
-function processCancellations() {
-  const targets = payments.filter(p => p.status === 'cancel_reserved' || p.status === 'partial_cancel_reserved');
-  const progressList = document.getElementById('cancelList');
-  progressList.innerHTML = targets.map(t => `
-    <div class="row" data-id="${t.id}">
-      <span class="st">${t.id}</span>
-      <span>${t.method} · ₩${fmt(t.status === 'partial_cancel_reserved' ? t._partialAmount : t.amount)}</span>
-      <span class="pending">대기 중...</span>
-    </div>
-  `).join('');
-
-  const shouldFail = confirm('취소 API 호출을 시뮬레이션합니다.\n\n[확인] = 모두 성공\n[취소] = 일부 실패 (취소실패 상태 + Slack 알림)');
-
-  targets.forEach((t, i) => {
-    setTimeout(() => {
-      const failThis = !shouldFail && i === targets.length - 1;
-      const row = progressList.querySelector(`[data-id="${t.id}"]`);
-
-      if (failThis) {
-        t.status = 'cancel_failed';
-        row.querySelector('.pending').innerHTML = '<span class="err">✕ 실패</span>';
-        log('err', `[Step 5] 취소 API 실패 · ${t.id} · PG timeout / error`);
-      } else {
-        if (t.status === 'partial_cancel_reserved') {
-          const partial = t._partialAmount;
-          t.amount = t.amount - partial;
-          t.status = 'active';
-          t._partialAmount = 0;
-          t._selectedForCancel = false;
-          log('ok', `[Step 5] 부분취소 완료 · ${t.id} · ₩${fmt(partial)} 취소 (잔여 ₩${fmt(t.amount)})`);
-        } else {
-          t.status = 'cancelled';
-          log('ok', `[Step 5] 취소 완료 · ${t.id} · ₩${fmt(t.amount)}`);
-        }
-        row.querySelector('.pending').innerHTML = '<span class="ok">✓ 완료</span>';
-      }
-      renderPayments();
-      renderSummary();
-
-      if (i === targets.length - 1) {
-        setTimeout(() => {
-          const anyFail = payments.some(p => p.status === 'cancel_failed');
-          payments.forEach(p => { if (p.status === 'new_pending') p.status = 'new'; });
-          if (anyFail) {
-            phase = 'cancelFailed';
-            log('err', `[Step 5 실패] 취소 API 일부 실패 · Slack 알림 발송`);
-            showSlack(`<strong>취소 API 실패</strong> · 예약 R2026080512345 · 관리자 승인 후 취소 실행했으나 일부 실패. 재시도 필요.`);
-          } else {
-            phase = 'done';
-            approvalStartTime = null;
-            log('ok', `[Step 6] 재결제 프로세스 완료`);
-          }
-          render();
-        }, 600);
-      }
-    }, (i + 1) * 900);
-  });
-}
-
-function rollback(reason) {
-  const label = { managerCancel: '관리자 수동 취소' }[reason] || '알 수 없음';
-  if (reason === 'managerCancel' && !confirm('진행 중인 재결제를 취소하고 원래 상태로 되돌립니다.')) return;
-  payments.forEach(p => {
-    if (p.status === 'cancel_reserved' || p.status === 'partial_cancel_reserved') {
-      p.status = 'active';
-      p._selectedForCancel = false;
-      p._partialAmount = 0;
-    }
-  });
-  log('warn', `[롤백] 모든 취소예정 → 활성 복구 · 사유: ${label}`);
-  phase = 'idle';
-  repayAmount = 0;
-  render();
 }
 
 function retryCancel() {
@@ -1145,16 +856,7 @@ function retryCancel() {
       log('ok', `[재시도] 취소 API 재호출 성공 · ${p.id}`);
     }
   });
-  phase = 'done';
-  approvalStartTime = null;
-  render();
-}
-
-// SLA 초과 시뮬 (2시간 전으로 시간 조작)
-function fastForward() {
-  approvalStartTime = Date.now() - (135 * 60 * 1000); // 2시간 15분 전
-  log('warn', `[SLA 초과] 승인 대기 2시간 초과 · Slack 자동 알림 발송`);
-  showSlack(`<strong>승인 대기 SLA 초과</strong> · 예약 R2026080512345 · 2시간 15분 경과 · 관리자 확인 요망 (김서현)`);
+  phase = 'postCancel';
   render();
 }
 
@@ -1166,19 +868,16 @@ function loadScenario(key, evt) {
   document.querySelectorAll('.scenarios button').forEach(b => b.classList.remove('active'));
   if (evt) evt.target.classList.add('active');
   if (key === 'reset') key = 'default';
-  payments = JSON.parse(JSON.stringify(SCENARIOS[key]));
+  const s = SCENARIOS[key];
+  payments = JSON.parse(JSON.stringify(s.payments));
+  reservationAmount = s.reservationAmount;
   phase = 'idle';
-  repayAmount = 0;
-  approvalStartTime = null;
-  stopBannerTimer();
   logs.length = 0;
-  log('info', `시나리오 로드: ${key}`);
+  log('info', `시나리오 로드: ${key} · 예약관리 ₩${fmt(reservationAmount)}`);
   render();
 }
 
-document.getElementById('reservationAmount').textContent = fmt(RESERVATION_AMOUNT);
-document.getElementById('reservationAmountHint').textContent = fmt(RESERVATION_AMOUNT);
-log('info', '목업 v3 초기화 완료 · B옵션 하이브리드');
+log('info', '목업 v4 초기화 완료 · 순차 처리 심플 버전');
 render();
 </script>
 
