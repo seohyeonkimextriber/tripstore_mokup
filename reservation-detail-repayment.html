@@ -427,12 +427,14 @@
   </div>
   <div class="spec-note" style="margin-top:8px;background:#f6ffed;border-color:#b7eb8f;">
     <strong>🆕 링크결제 복수 발송 API 반영 (2026-08-06)</strong><br>
-    · <strong>POST</strong> <code>/admin(또는 /partners)/link-payments/send-urls/by-reservation-code/{code}</code> · header <code>X-TRIPSTORE-IDEMPOTENCY-KEY</code><br>
+    · <strong>POST 발송</strong> <code>/admin(또는 /partners)/link-payments/send-urls/by-reservation-code/{code}</code> · header <code>X-TRIPSTORE-IDEMPOTENCY-KEY</code><br>
     · body <code>{ links:[{ amount, recipient:{ name, mobile } }] }</code> — <code>amount</code>>0 · <code>name</code> 공백X·≤40 · <code>mobile</code> 공백X·≤20<br>
+    · <strong>[만료처리] API</strong> 관리자·파트너스 <strong>둘 다 존재</strong> · <strong>[재발송]</strong>은 발송 API 재호출 → <strong>새 hash·새 URL 발급</strong><br>
     · 채널 제약: <strong style="color:#0958d9;">PLATFORM 복수 OK</strong> / <strong style="color:#cf1322;">CHANNEL·베네피아 1건만</strong> — 시나리오 <em>[외부 채널]</em>에서 [+ 수신자 추가] 비활성화 확인<br>
     · 조회 <code>paymentDetail.linkPayments[]</code>: <code>hash·url·recipientName·recipientMobile·status(ACTIVE|PAID|EXPIRED)·expiresAt·lastIssuedAt·expirationReason</code> · <strong>최신 발급순</strong><br>
-    · 결제행 <code>paymentDetail.payments[].linkPaymentRecipient { name, mobile }</code> — 링크결제 발생분에만, 아니면 null<br>
-    · <strong>유효시간 72시간 고정</strong> · 1/N 분할은 프론트에서 계산 후 각 <code>amount</code>로 전달
+    · 결제행 <code>paymentDetail.payments[].linkPaymentRecipient { name, mobile }</code> — 링크결제 발생분에만, 아니면 null · <strong>표기는 서브 행 방식 확정</strong><br>
+    · <strong>유효시간 72시간 고정</strong> · 1/N 분할은 프론트에서 계산 후 각 <code>amount</code>로 전달<br>
+    · ⚠️ <code>expirationReason</code> 반환 값(enum·문자열) 스펙 확인 중 — 목업 표기 값은 <strong>예시</strong>
   </div>
 </div>
 
@@ -1124,7 +1126,7 @@ function renderLinks() {
     const urlLine = l.url ? `<div><span class="label">URL</span><a href="${l.url}" target="_blank" style="color:#1565c0;text-decoration:underline;font-family:monospace;font-size:11px;">${l.url}</a></div>` : '';
     const reissueLine = reissued ? `<div><span class="label">최근 재발송</span>${formatDateLong(l.lastIssuedAt)}</div>` : '';
     const expReasonLine = (l.status === 'expired' && l.expirationReason)
-      ? `<div><span class="label" style="color:#cf1322;">만료사유</span><span style="color:#cf1322;font-weight:600;">${l.expirationReason}</span></div>`
+      ? `<div><span class="label" style="color:#cf1322;">만료사유</span><span style="color:#cf1322;font-weight:600;">${l.expirationReason}</span><span style="color:#999;font-size:10px;margin-left:4px;font-weight:500;">※ 예시값 · 백엔드 스펙 확인 대기</span></div>`
       : '';
 
     return `
@@ -1402,6 +1404,10 @@ function resendLink(linkId) {
   if (!link) return;
   const now = new Date();
   const stamp = `${String(now.getMonth()+1).padStart(2,'0')}-${String(now.getDate()).padStart(2,'0')} ${String(now.getHours()).padStart(2,'0')}:${String(now.getMinutes()).padStart(2,'0')}`;
+  // 재발송 = 새 hash / 새 URL 발급 (2026-08-06 확정)
+  const newHash = 'lnk_' + Math.random().toString(36).slice(2, 8);
+  link.hash = newHash;
+  link.url = `https://pay.tripstore.kr/repay/${newHash}`;
   link.lastIssuedAt = stamp;
   link.expiresAt = stamp.replace(/^(\d\d)-(\d\d)/, (m, mo, d) => `${mo}-${String(parseInt(d)+3).padStart(2,'0')}`);
   if (link.status === 'expired') {
@@ -1409,7 +1415,7 @@ function resendLink(linkId) {
     link.expirationReason = null;
   }
   render();
-  showToast(`재발송 완료 · ${link.recipientName} (${link.recipientPhone}) · 유효시간 72시간 재설정`, 'ok');
+  showToast(`재발송 완료 · ${link.recipientName} (${link.recipientPhone}) · 새 URL 발급 · 유효시간 72시간`, 'ok');
 }
 
 function expireLink(linkId) {
