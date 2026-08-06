@@ -433,7 +433,7 @@
     · 채널 제약: <strong style="color:#0958d9;">PLATFORM 복수 OK</strong> / <strong style="color:#cf1322;">CHANNEL·베네피아 1건만</strong> — 시나리오 <em>[외부 채널]</em>에서 [+ 수신자 추가] 비활성화 확인<br>
     · 조회 <code>paymentDetail.linkPayments[]</code>: <code>hash·url·recipientName·recipientMobile·status(ACTIVE|PAID|EXPIRED)·expiresAt·lastIssuedAt·expirationReason</code> · <strong>최신 발급순</strong><br>
     · 결제행 <code>paymentDetail.payments[].linkPaymentRecipient { name, mobile }</code> — 링크결제 발생분에만, 아니면 null · <strong>표기는 서브 행 방식 확정</strong><br>
-    · <strong>유효시간 72시간 고정</strong> · 1/N 분할은 프론트에서 계산 후 각 <code>amount</code>로 전달<br>
+    · <strong>유효시간 72시간 고정</strong> · <strong>1/N 분할</strong>은 프론트에서 계산 · 나머지는 <strong>1번(첫 수신자)에 자동 몰기</strong> + 안내 문구·뱃지 노출 (수동 재분배 가능)<br>
     · ⚠️ <code>expirationReason</code> 반환 값(enum·문자열) 스펙 확인 중 — 목업 표기 값은 <strong>예시</strong>
   </div>
 </div>
@@ -719,6 +719,7 @@
   <button onclick="loadScenario('underpay', event)">부족</button>
   <button onclick="loadScenario('overpay', event)">오버 (재결제 후)</button>
   <button onclick="loadScenario('multiLink', event)">결제링크 N개 발송</button>
+  <button onclick="loadScenario('splitRemainder', event)">1/N 나머지 몰림</button>
   <button onclick="loadScenario('channelSSG', event)">외부 채널 (1건 제한)</button>
   <button onclick="loadScenario('expiredCase', event)">만료·재발송 케이스</button>
 </div>
@@ -818,6 +819,19 @@ const SCENARIOS = {
       { id: 'PAY-001', method: 'SSG포인트', pg: 'ssg', pgCode: 'SSG-260805-001', name: 'SSG 결제 (통과자금)', amount: 800000, status: 'paid', paidAt: '08-05 10:10', cancelledAt: null },
     ],
     links: []
+  },
+  // 1/N 분할 나머지 몰림 케이스 (100만원 ÷ 3명 = 333,333원 + 나머지 1원 → 1번에 자동 추가)
+  splitRemainder: {
+    channelType: 'PLATFORM',
+    reservationAmount: 1000000,
+    payments: [
+      { id: 'PAY-001', method: '신용카드', pg: 'nice_v2', pgCode: '26080512-0001', name: '신한카드 (예약금)', amount: 0, status: 'paid', paidAt: '08-05 10:00', cancelledAt: null },
+    ],
+    links: [
+      { id: 'LINK-001', hash: 'lnk_sr01', url: 'https://pay.tripstore.kr/repay/sr01', recipientName: '홍길동', recipientPhone: '010-1234-5678', amount: 333334, sentAt: '08-05 15:00', lastIssuedAt: '08-05 15:00', expiresAt: '08-08 15:00', status: 'pending', paidAt: null, expirationReason: null, splitBonus: 1 },
+      { id: 'LINK-002', hash: 'lnk_sr02', url: 'https://pay.tripstore.kr/repay/sr02', recipientName: '김영희', recipientPhone: '010-2222-3333', amount: 333333, sentAt: '08-05 15:00', lastIssuedAt: '08-05 15:00', expiresAt: '08-08 15:00', status: 'pending', paidAt: null, expirationReason: null },
+      { id: 'LINK-003', hash: 'lnk_sr03', url: 'https://pay.tripstore.kr/repay/sr03', recipientName: '박철수', recipientPhone: '010-4444-5555', amount: 333333, sentAt: '08-05 15:00', lastIssuedAt: '08-05 15:00', expiresAt: '08-08 15:00', status: 'pending', paidAt: null, expirationReason: null },
+    ]
   },
   // 만료 케이스 (expirationReason 예시)
   expiredCase: {
@@ -1129,11 +1143,14 @@ function renderLinks() {
       ? `<div><span class="label" style="color:#cf1322;">만료사유</span><span style="color:#cf1322;font-weight:600;">${l.expirationReason}</span><span style="color:#999;font-size:10px;margin-left:4px;font-weight:500;">※ 예시값 · 백엔드 스펙 확인 대기</span></div>`
       : '';
 
+    const splitBonusBadge = l.splitBonus
+      ? `<div style="font-size:10px;color:#d46b08;font-weight:700;margin-top:2px;" title="1/N 분할 나머지 자동 추가">+${fmt(l.splitBonus)}원 (1/N 나머지)</div>`
+      : '';
     return `
       <div class="link-item ${cls}">
         <div class="cell-name">${l.recipientName}</div>
         <div class="cell-phone">${l.recipientPhone}</div>
-        <div class="cell-amount">${fmt(l.amount)}원</div>
+        <div class="cell-amount">${fmt(l.amount)}원${splitBonusBadge}</div>
         <div class="cell-status">${statusPill}</div>
         <div class="cell-meta">
           <div><span class="label">발송</span>${formatDateLong(l.sentAt)}</div>
@@ -1221,16 +1238,41 @@ function renderRecipientList() {
     </div>
   `;
   modalRecipients.forEach((r, i) => {
+    // 하이브리드 C: 나머지 몰림 뱃지 (splitEqual 직후 · 수동 수정 전까지만 노출)
+    const isSplitPrimary = lastSplitInfo && i === lastSplitInfo.primaryIdx && lastSplitInfo.remainder > 0;
+    const bonusBadge = isSplitPrimary
+      ? `<span style="display:inline-block;margin-left:6px;padding:1px 6px;background:#fff7e6;color:#d46b08;border:1px solid #ffd591;border-radius:10px;font-size:10.5px;font-weight:700;font-family:'SF Mono',monospace;" title="1/N 분할 나머지 자동 추가">+${fmt(lastSplitInfo.remainder)}원</span>`
+      : '';
     listEl.innerHTML += `
       <div class="recipient-row">
         <div class="row-num">${i + 1}</div>
         <input type="text" maxlength="40" placeholder="동행자님" value="${r.name || ''}" oninput="updateRecipient(${i}, 'name', this.value)">
         <input type="tel" maxlength="20" placeholder="010-0000-0000" value="${r.phone || ''}" oninput="updateRecipient(${i}, 'phone', this.value)">
-        <input type="text" class="amount-field" placeholder="0" value="${r.amount ? fmt(r.amount) : ''}" oninput="updateRecipientAmount(${i}, this)">
+        <div style="display:flex;align-items:center;gap:4px;">
+          <input type="text" class="amount-field" placeholder="0" value="${r.amount ? fmt(r.amount) : ''}" oninput="updateRecipientAmount(${i}, this)" style="flex:1;">
+          ${bonusBadge}
+        </div>
         <button class="remove-btn" onclick="removeRecipient(${i})" ${modalRecipients.length === 1 ? 'disabled' : ''}>×</button>
       </div>
     `;
   });
+  // 1/N 분할 안내 문구 (나머지가 있을 때만)
+  if (lastSplitInfo && lastSplitInfo.remainder > 0) {
+    listEl.innerHTML += `
+      <div style="margin-top:8px;padding:8px 12px;background:#fff7e6;border:1px solid #ffd591;border-radius:6px;font-size:11.5px;color:#874d00;line-height:1.5;">
+        💡 <strong>${fmt(lastSplitInfo.total)}원 ÷ ${lastSplitInfo.n}명 = ${fmt(lastSplitInfo.base)}원씩</strong>
+        · 나머지 <strong style="color:#d46b08;">${fmt(lastSplitInfo.remainder)}원</strong>은
+        <strong>1번(${lastSplitInfo.primaryName})</strong>에 자동 추가됨.
+        <span style="color:#999;">다른 수신자에게 몰고 싶으면 금액을 직접 수정하세요.</span>
+      </div>
+    `;
+  } else if (lastSplitInfo && lastSplitInfo.remainder === 0) {
+    listEl.innerHTML += `
+      <div style="margin-top:8px;padding:6px 12px;background:#f6ffed;border:1px solid #b7eb8f;border-radius:6px;font-size:11.5px;color:#389e0d;">
+        ✓ ${fmt(lastSplitInfo.total)}원을 ${lastSplitInfo.n}명에게 <strong>${fmt(lastSplitInfo.base)}원씩</strong> 균등 분할했습니다.
+      </div>
+    `;
+  }
   // 채널 제약: PLATFORM 외에는 수신자 추가/균등분할 불가 (1건만)
   const ch = CHANNEL_TYPES[state.channelType] || CHANNEL_TYPES.PLATFORM;
   const addBtn = document.querySelector('.recipient-actions .add-btn');
@@ -1261,6 +1303,10 @@ function renderRecipientList() {
 
 function updateRecipient(idx, field, value) {
   modalRecipients[idx][field] = value;
+  // 수신자명 수정은 splitInfo 유지 (primaryName 재계산만)
+  if (lastSplitInfo && field === 'name' && idx === lastSplitInfo.primaryIdx) {
+    lastSplitInfo.primaryName = value || '동행자님';
+  }
   updateModalSummary();
 }
 
@@ -1268,6 +1314,12 @@ function updateRecipientAmount(idx, input) {
   const raw = input.value.replace(/[^\d]/g, '');
   input.value = raw ? fmt(parseInt(raw)) : '';
   modalRecipients[idx].amount = parseInt(raw) || 0;
+  // 금액 수동 수정 시 1/N 분할 안내·뱃지 초기화 (관리자가 재분배한다는 시그널)
+  if (lastSplitInfo) {
+    lastSplitInfo = null;
+    renderRecipientList();
+    return;
+  }
   updateModalSummary();
 }
 
@@ -1287,6 +1339,9 @@ function removeRecipient(idx) {
   renderRecipientList();
 }
 
+// 1/N 분할 마지막 실행 정보 (안내 문구·뱃지 표기용 · 수동 수정 시 초기화)
+let lastSplitInfo = null;
+
 function splitEqual() {
   const ch = CHANNEL_TYPES[state.channelType] || CHANNEL_TYPES.PLATFORM;
   if (!ch.allowMulti) {
@@ -1302,6 +1357,15 @@ function splitEqual() {
   modalRecipients.forEach((r, i) => {
     r.amount = base + (i === 0 ? remainder : 0);
   });
+  // 하이브리드 C: 나머지가 있으면 1번에 자동 몰기 + 안내 문구·뱃지 표기
+  lastSplitInfo = {
+    total: needAmount,
+    n,
+    base,
+    remainder,
+    primaryIdx: 0,
+    primaryName: modalRecipients[0].name || '동행자님',
+  };
   renderRecipientList();
 }
 
