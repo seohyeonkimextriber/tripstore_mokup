@@ -420,10 +420,19 @@
 <!-- 스펙 안내 (프론트 개발자용) -->
 <div style="max-width:1400px;margin:0 auto;padding:14px 24px 0;">
   <div class="spec-note">
-    <strong>📋 프론트 구현 참조 · 재결제 플로우 최종안 (v6 · MOCKUP)</strong><br>
+    <strong>📋 프론트 구현 참조 · 재결제 플로우 최종안 (v7 · MOCKUP)</strong><br>
     · 기존 예약상세 화면 구조 유지 · 결제 정보 섹션만 재결제 대응으로 확장<br>
     · <strong>핵심 변경</strong>: 결제 링크 발송 시 <code>예약관리 금액 초과 검증 로직 제거</code> — 오버 결제 허용 · 취소는 관리자 개별 [취소] 클릭<br>
-    · 하단 시나리오 스위처로 상태별 UI 체험 가능 (정합 / 부족 / 오버 / 재결제 진행 / 취소실패)
+    · 하단 시나리오 스위처로 상태별 UI 체험 가능 (정합 / 부족 / 오버 / 재결제 · N개 발송 · 외부 채널 · 만료)
+  </div>
+  <div class="spec-note" style="margin-top:8px;background:#f6ffed;border-color:#b7eb8f;">
+    <strong>🆕 링크결제 복수 발송 API 반영 (2026-08-06)</strong><br>
+    · <strong>POST</strong> <code>/admin(또는 /partners)/link-payments/send-urls/by-reservation-code/{code}</code> · header <code>X-TRIPSTORE-IDEMPOTENCY-KEY</code><br>
+    · body <code>{ links:[{ amount, recipient:{ name, mobile } }] }</code> — <code>amount</code>>0 · <code>name</code> 공백X·≤40 · <code>mobile</code> 공백X·≤20<br>
+    · 채널 제약: <strong style="color:#0958d9;">PLATFORM 복수 OK</strong> / <strong style="color:#cf1322;">CHANNEL·베네피아 1건만</strong> — 시나리오 <em>[외부 채널]</em>에서 [+ 수신자 추가] 비활성화 확인<br>
+    · 조회 <code>paymentDetail.linkPayments[]</code>: <code>hash·url·recipientName·recipientMobile·status(ACTIVE|PAID|EXPIRED)·expiresAt·lastIssuedAt·expirationReason</code> · <strong>최신 발급순</strong><br>
+    · 결제행 <code>paymentDetail.payments[].linkPaymentRecipient { name, mobile }</code> — 링크결제 발생분에만, 아니면 null<br>
+    · <strong>유효시간 72시간 고정</strong> · 1/N 분할은 프론트에서 계산 후 각 <code>amount</code>로 전달
   </div>
 </div>
 
@@ -708,14 +717,38 @@
   <button onclick="loadScenario('underpay', event)">부족</button>
   <button onclick="loadScenario('overpay', event)">오버 (재결제 후)</button>
   <button onclick="loadScenario('multiLink', event)">결제링크 N개 발송</button>
+  <button onclick="loadScenario('channelSSG', event)">외부 채널 (1건 제한)</button>
+  <button onclick="loadScenario('expiredCase', event)">만료·재발송 케이스</button>
 </div>
 
 <script>
 // ================ 상태 ================
 const RESERVATION_AMOUNT_BASE = 1000000;
 
+// ─── API 매핑 (2026-08-06 링크결제 복수 발송 API 릴리스 기준) ───
+// [발송] POST /admin(또는 /partners)/link-payments/send-urls/by-reservation-code/{code}
+//   header: X-TRIPSTORE-IDEMPOTENCY-KEY
+//   body:   { links:[{ amount, recipient:{ name, mobile } }] }
+//   제약:   links≥1, amount>0, name 공백X·≤40, mobile 공백X·≤20
+//           PLATFORM=복수 OK / CHANNEL·BENEPIA=1건만
+//           1/N 분할은 프론트에서 계산 후 각 amount로 전달
+// [조회] paymentDetail.linkPayments[]
+//   fields: hash, url, amount, recipientName, recipientMobile,
+//           status (ACTIVE|PAID|EXPIRED), expiresAt,
+//           lastIssuedAt, expirationReason (nullable)
+//   정렬:   최신 발급순 (lastIssuedAt DESC)
+// [결제행] paymentDetail.payments[].linkPaymentRecipient
+//   fields: { name, mobile }  (링크결제로 생성된 결제만, 아니면 null)
+// 내부 status 매핑: pending→ACTIVE, paid→PAID, expired→EXPIRED
+const CHANNEL_TYPES = {
+  PLATFORM: { label: '플랫폼(자사)', allowMulti: true },
+  CHANNEL:  { label: '외부 채널(SSG·11번가·NOL·카카오쇼핑)', allowMulti: false },
+  BENEPIA:  { label: '베네피아', allowMulti: false },
+};
+
 const SCENARIOS = {
   match: {
+    channelType: 'PLATFORM',
     reservationAmount: 1000000,
     payments: [
       { id: 'PAY-001', method: '신용카드', pg: 'nice_v2', pgCode: '26080512-0001', name: '신한카드 (승인 12345678)', amount: 250000, status: 'paid', paidAt: '08-05 10:26', cancelledAt: null },
@@ -726,6 +759,7 @@ const SCENARIOS = {
     links: []
   },
   underpay: {
+    channelType: 'PLATFORM',
     reservationAmount: 1000000,
     payments: [
       { id: 'PAY-001', method: '신용카드', pg: 'nice_v2', pgCode: '26080512-0001', name: '신한카드 (승인 12345678)', amount: 250000, status: 'paid', paidAt: '08-05 10:26', cancelledAt: null },
@@ -734,6 +768,7 @@ const SCENARIOS = {
     links: []
   },
   overpay: {
+    channelType: 'PLATFORM',
     reservationAmount: 1000000,
     payments: [
       { id: 'PAY-001', method: '신용카드', pg: 'nice_v2', pgCode: '26080512-0001', name: '신한카드 (승인 12345678)', amount: 250000, status: 'paid', paidAt: '08-05 10:26', cancelledAt: null },
@@ -743,10 +778,11 @@ const SCENARIOS = {
       { id: 'PAY-NEW-1', method: '신용카드', pg: 'nice_v2', pgCode: '26080512-0005', name: '재결제 · 현대카드 (승인 87654321)', amount: 250000, status: 'new-payment', paidAt: '08-05 14:32', cancelledAt: null, linkedRecipient: { name: '홍길동', phone: '010-1234-5678' } },
     ],
     links: [
-      { id: 'LINK-001', recipientName: '홍길동', recipientPhone: '010-1234-5678', amount: 250000, sentAt: '08-05 14:15', expiresAt: '08-08 14:15', status: 'paid', paidAt: '08-05 14:32' }
+      { id: 'LINK-001', hash: 'lnk_a1b2c3', url: 'https://pay.tripstore.kr/repay/a1b2c3', recipientName: '홍길동', recipientPhone: '010-1234-5678', amount: 250000, sentAt: '08-05 14:15', lastIssuedAt: '08-05 14:15', expiresAt: '08-08 14:15', status: 'paid', paidAt: '08-05 14:32', expirationReason: null }
     ]
   },
   mixed: {
+    channelType: 'PLATFORM',
     reservationAmount: 1000000,
     payments: [
       { id: 'PAY-001', method: '신용카드', pg: 'nice_v2', pgCode: '26080512-0001', name: '신한카드', amount: 400000, status: 'paid', paidAt: '08-05 10:26', cancelledAt: null },
@@ -758,6 +794,7 @@ const SCENARIOS = {
   },
   // 결제링크 N개 동시 발송 시나리오 (500,000원을 3명에게 균등분할하여 발송 → 3명 모두 결제완료)
   multiLink: {
+    channelType: 'PLATFORM',
     reservationAmount: 1000000,
     payments: [
       { id: 'PAY-001', method: '신용카드', pg: 'nice_v2', pgCode: '26080512-0001', name: '신한카드 (예약금 결제)', amount: 500000, status: 'paid', paidAt: '08-05 10:26', cancelledAt: null },
@@ -766,14 +803,36 @@ const SCENARIOS = {
       { id: 'PAY-LINK-3', method: '신용카드', pg: 'nice_v2', pgCode: '26080512-0004', name: '링크결제 · 현대카드 (승인 23456789)', amount: 166668, status: 'paid', paidAt: '08-05 14:52', cancelledAt: null, linkedRecipient: { name: '홍길동', phone: '010-1234-5678' } },
     ],
     links: [
-      { id: 'LINK-001', recipientName: '동행자님', recipientPhone: '010-1234-5678', amount: 166666, sentAt: '08-05 14:15', expiresAt: '08-08 14:15', status: 'paid', paidAt: '08-05 14:50' },
-      { id: 'LINK-002', recipientName: '동행자님', recipientPhone: '010-1234-5678', amount: 166666, sentAt: '08-05 14:15', expiresAt: '08-08 14:15', status: 'paid', paidAt: '08-05 14:51' },
-      { id: 'LINK-003', recipientName: '홍길동', recipientPhone: '010-1234-5678', amount: 166668, sentAt: '08-05 14:15', expiresAt: '08-08 14:15', status: 'paid', paidAt: '08-05 14:52' },
+      { id: 'LINK-001', hash: 'lnk_m01x', url: 'https://pay.tripstore.kr/repay/m01x', recipientName: '동행자님', recipientPhone: '010-1234-5678', amount: 166666, sentAt: '08-05 14:15', lastIssuedAt: '08-05 14:15', expiresAt: '08-08 14:15', status: 'paid', paidAt: '08-05 14:50', expirationReason: null },
+      { id: 'LINK-002', hash: 'lnk_m02x', url: 'https://pay.tripstore.kr/repay/m02x', recipientName: '동행자님', recipientPhone: '010-1234-5678', amount: 166666, sentAt: '08-05 14:15', lastIssuedAt: '08-05 14:15', expiresAt: '08-08 14:15', status: 'paid', paidAt: '08-05 14:51', expirationReason: null },
+      { id: 'LINK-003', hash: 'lnk_m03x', url: 'https://pay.tripstore.kr/repay/m03x', recipientName: '홍길동', recipientPhone: '010-1234-5678', amount: 166668, sentAt: '08-05 14:15', lastIssuedAt: '08-05 14:15', expiresAt: '08-08 14:15', status: 'paid', paidAt: '08-05 14:52', expirationReason: null },
+    ]
+  },
+  // 외부 채널 예약 시나리오 (SSG·11번가·NOL·카카오쇼핑) — 링크결제 1건만 발송 가능
+  channelSSG: {
+    channelType: 'CHANNEL',
+    reservationAmount: 800000,
+    payments: [
+      { id: 'PAY-001', method: 'SSG포인트', pg: 'ssg', pgCode: 'SSG-260805-001', name: 'SSG 결제 (통과자금)', amount: 800000, status: 'paid', paidAt: '08-05 10:10', cancelledAt: null },
+    ],
+    links: []
+  },
+  // 만료 케이스 (expirationReason 예시)
+  expiredCase: {
+    channelType: 'PLATFORM',
+    reservationAmount: 1000000,
+    payments: [
+      { id: 'PAY-001', method: '신용카드', pg: 'nice_v2', pgCode: '26080512-0001', name: '신한카드 (승인 12345678)', amount: 500000, status: 'paid', paidAt: '08-03 10:26', cancelledAt: null },
+    ],
+    links: [
+      { id: 'LINK-001', hash: 'lnk_e01x', url: 'https://pay.tripstore.kr/repay/e01x', recipientName: '홍길동', recipientPhone: '010-1234-5678', amount: 500000, sentAt: '08-01 14:15', lastIssuedAt: '08-01 14:15', expiresAt: '08-04 14:15', status: 'expired', paidAt: null, expirationReason: '유효시간 경과 (72시간)' },
+      { id: 'LINK-002', hash: 'lnk_e02x', url: 'https://pay.tripstore.kr/repay/e02x', recipientName: '김영희', recipientPhone: '010-9876-5432', amount: 500000, sentAt: '08-02 09:00', lastIssuedAt: '08-05 11:30', expiresAt: '08-08 11:30', status: 'pending', paidAt: null, expirationReason: null },
     ]
   }
 };
 
 let state = {
+  channelType: SCENARIOS.match.channelType || 'PLATFORM',
   reservationAmount: SCENARIOS.match.reservationAmount,
   payments: JSON.parse(JSON.stringify(SCENARIOS.match.payments)),
   links: JSON.parse(JSON.stringify(SCENARIOS.match.links)),
@@ -904,11 +963,12 @@ function renderTable() {
     `;
 
     // 링크결제 서브 행 (수신자 정보)
+    // API: paymentDetail.payments[].linkPaymentRecipient { name, mobile }
     if (p.linkedRecipient && !isCancelled) {
       tbody.innerHTML += `
         <tr class="recipient-sub">
           <td colspan="11" style="padding: 6px 12px;">
-            <span class="recipient-badge">수신자</span>
+            <span class="recipient-badge" title="paymentDetail.payments[].linkPaymentRecipient">수신자</span>
             <strong>${p.linkedRecipient.name}</strong> · ${p.linkedRecipient.phone}
             <span style="color:#888;margin-left:8px;">· 결제 URL 발송분 · 알림톡 수신자가 직접 결제</span>
           </td>
@@ -1033,12 +1093,20 @@ function renderLinks() {
     </div>
   `;
 
-  const items = state.links.slice().reverse().map(l => {
+  // API: linkPayments[]는 최신 발급순(lastIssuedAt DESC) 응답
+  const sorted = state.links.slice().sort((a, b) => {
+    const ka = a.lastIssuedAt || a.sentAt || '';
+    const kb = b.lastIssuedAt || b.sentAt || '';
+    return kb.localeCompare(ka);
+  });
+  const items = sorted.map(l => {
     const cls = l.status === 'pending' ? 'pending' : (l.status === 'paid' ? 'paid' : 'expired');
+    // 내부 status → API status
+    // pending → ACTIVE / paid → PAID / expired → EXPIRED
     const statusPill = {
-      pending: '<span class="status-pill-lg waiting">대기</span>',
-      paid: '<span class="status-pill-lg paid">결제완료</span>',
-      expired: '<span class="status-pill-lg expired">만료</span>',
+      pending: '<span class="status-pill-lg waiting" title="API status: ACTIVE">대기 (ACTIVE)</span>',
+      paid: '<span class="status-pill-lg paid" title="API status: PAID">결제완료 (PAID)</span>',
+      expired: '<span class="status-pill-lg expired" title="API status: EXPIRED">만료 (EXPIRED)</span>',
     }[l.status];
 
     let actions = '';
@@ -1052,6 +1120,13 @@ function renderLinks() {
       actions = `<button class="resend" onclick="resendLink('${l.id}')">재발송</button>`;
     }
 
+    const reissued = l.lastIssuedAt && l.sentAt && l.lastIssuedAt !== l.sentAt;
+    const urlLine = l.url ? `<div><span class="label">URL</span><a href="${l.url}" target="_blank" style="color:#1565c0;text-decoration:underline;font-family:monospace;font-size:11px;">${l.url}</a></div>` : '';
+    const reissueLine = reissued ? `<div><span class="label">최근 재발송</span>${formatDateLong(l.lastIssuedAt)}</div>` : '';
+    const expReasonLine = (l.status === 'expired' && l.expirationReason)
+      ? `<div><span class="label" style="color:#cf1322;">만료사유</span><span style="color:#cf1322;font-weight:600;">${l.expirationReason}</span></div>`
+      : '';
+
     return `
       <div class="link-item ${cls}">
         <div class="cell-name">${l.recipientName}</div>
@@ -1060,7 +1135,10 @@ function renderLinks() {
         <div class="cell-status">${statusPill}</div>
         <div class="cell-meta">
           <div><span class="label">발송</span>${formatDateLong(l.sentAt)}</div>
+          ${reissueLine}
           <div><span class="label">만료</span>${formatDateLong(l.expiresAt)}${l.paidAt ? ` · <span class="label">결제</span>${formatDateLong(l.paidAt)}` : ''}</div>
+          ${expReasonLine}
+          ${urlLine}
         </div>
         <div class="cell-actions">${actions}</div>
       </div>
@@ -1100,14 +1178,18 @@ function openLinkModal() {
   const diff = getDiff();
   const title = document.getElementById('linkModalTitle');
   const hintTop = document.getElementById('linkModalHintTop');
+  const ch = CHANNEL_TYPES[state.channelType] || CHANNEL_TYPES.PLATFORM;
+  const chBadge = `<span style="display:inline-block;padding:2px 8px;margin-left:6px;font-size:11px;font-weight:700;border-radius:10px;background:${ch.allowMulti ? '#e6f4ff' : '#fff1f0'};color:${ch.allowMulti ? '#0958d9' : '#cf1322'};border:1px solid ${ch.allowMulti ? '#91caff' : '#ffa39e'};">${ch.label} · ${ch.allowMulti ? '복수 발송 가능' : '1건만 가능'}</span>`;
   if (diff === 0) {
     title.textContent = '재결제';
-    hintTop.innerHTML = `<strong>ℹ 재결제 · 결제수단 변경 등 신규 결제링크 발송</strong><br>
+    hintTop.innerHTML = `<strong>ℹ 재결제 · 결제수단 변경 등 신규 결제링크 발송</strong>${chBadge}<br>
       결제 완료 시 <strong>오버 상태</strong>가 되며, 이후 관리자가 기존 결제 중 취소할 건을 <strong>개별 [취소]</strong> 클릭으로 처리하세요.`;
   } else {
     title.textContent = '결제 링크 발송';
-    hintTop.innerHTML = `<strong>ℹ 수신자별 개별 결제링크가 각각 알림톡으로 발송됩니다</strong><br>
-      예약관리 금액 초과 금액도 발송 가능합니다. 초과분은 결제 완료 후 관리자가 개별 [취소] 처리하세요.`;
+    hintTop.innerHTML = `<strong>ℹ 수신자별 개별 결제링크가 각각 알림톡으로 발송됩니다</strong>${chBadge}<br>
+      ${ch.allowMulti
+        ? '예약관리 금액 초과 금액도 발송 가능합니다. 초과분은 결제 완료 후 관리자가 개별 [취소] 처리하세요.'
+        : '<strong style="color:#cf1322;">외부 채널·베네피아 예약</strong>은 링크결제 <strong>1건</strong>만 발송할 수 있습니다. 수신자 추가 비활성화.'}`;
   }
   // 첫 행에 예약자 자동 채움 (금액은 부족액 or 0)
   const needAmount = diff < 0 ? Math.abs(diff) : 0;
@@ -1130,8 +1212,8 @@ function renderRecipientList() {
   listEl.innerHTML = `
     <div class="recipient-row header">
       <div>#</div>
-      <div>수신자명</div>
-      <div>휴대폰 번호</div>
+      <div>수신자명 <span style="color:#999;font-weight:400;">(≤40자)</span></div>
+      <div>휴대폰 번호 <span style="color:#999;font-weight:400;">(≤20자)</span></div>
       <div style="text-align:right;">결제금액</div>
       <div></div>
     </div>
@@ -1140,13 +1222,38 @@ function renderRecipientList() {
     listEl.innerHTML += `
       <div class="recipient-row">
         <div class="row-num">${i + 1}</div>
-        <input type="text" placeholder="동행자님" value="${r.name || ''}" oninput="updateRecipient(${i}, 'name', this.value)">
-        <input type="tel" placeholder="010-0000-0000" value="${r.phone || ''}" oninput="updateRecipient(${i}, 'phone', this.value)">
+        <input type="text" maxlength="40" placeholder="동행자님" value="${r.name || ''}" oninput="updateRecipient(${i}, 'name', this.value)">
+        <input type="tel" maxlength="20" placeholder="010-0000-0000" value="${r.phone || ''}" oninput="updateRecipient(${i}, 'phone', this.value)">
         <input type="text" class="amount-field" placeholder="0" value="${r.amount ? fmt(r.amount) : ''}" oninput="updateRecipientAmount(${i}, this)">
         <button class="remove-btn" onclick="removeRecipient(${i})" ${modalRecipients.length === 1 ? 'disabled' : ''}>×</button>
       </div>
     `;
   });
+  // 채널 제약: PLATFORM 외에는 수신자 추가/균등분할 불가 (1건만)
+  const ch = CHANNEL_TYPES[state.channelType] || CHANNEL_TYPES.PLATFORM;
+  const addBtn = document.querySelector('.recipient-actions .add-btn');
+  const splitBtn = document.querySelector('.recipient-actions .split-btn');
+  if (addBtn && splitBtn) {
+    if (!ch.allowMulti) {
+      addBtn.disabled = true;
+      splitBtn.disabled = true;
+      addBtn.title = `${ch.label}은 링크결제 1건만 가능`;
+      splitBtn.title = `${ch.label}은 링크결제 1건만 가능`;
+      addBtn.style.opacity = '0.4';
+      splitBtn.style.opacity = '0.4';
+      addBtn.style.cursor = 'not-allowed';
+      splitBtn.style.cursor = 'not-allowed';
+    } else {
+      addBtn.disabled = false;
+      splitBtn.disabled = false;
+      addBtn.title = '';
+      splitBtn.title = '';
+      addBtn.style.opacity = '';
+      splitBtn.style.opacity = '';
+      addBtn.style.cursor = '';
+      splitBtn.style.cursor = '';
+    }
+  }
   updateModalSummary();
 }
 
@@ -1163,6 +1270,11 @@ function updateRecipientAmount(idx, input) {
 }
 
 function addRecipient() {
+  const ch = CHANNEL_TYPES[state.channelType] || CHANNEL_TYPES.PLATFORM;
+  if (!ch.allowMulti) {
+    alert(`${ch.label} 예약은 링크결제 1건만 발송할 수 있습니다.`);
+    return;
+  }
   modalRecipients.push({ name: '동행자님', phone: '', amount: 0 });
   renderRecipientList();
 }
@@ -1174,6 +1286,11 @@ function removeRecipient(idx) {
 }
 
 function splitEqual() {
+  const ch = CHANNEL_TYPES[state.channelType] || CHANNEL_TYPES.PLATFORM;
+  if (!ch.allowMulti) {
+    alert(`${ch.label} 예약은 링크결제 1건만 발송할 수 있어 균등분할이 불필요합니다.`);
+    return;
+  }
   const diff = getDiff();
   const needAmount = diff < 0 ? Math.abs(diff) : (parseInt(prompt('균등분할할 총 금액을 입력하세요', String(state.reservationAmount))) || 0);
   if (needAmount <= 0) return;
@@ -1217,27 +1334,52 @@ function updateModalSummary() {
 }
 
 function sendPaymentLink() {
-  const valid = modalRecipients.filter(r => (r.amount || 0) > 0 && (r.phone || '').trim());
-  if (valid.length === 0) { alert('수신자 정보와 금액을 입력하세요'); return; }
-  if (valid.length !== modalRecipients.length) {
-    if (!confirm(`금액/번호가 비어있는 ${modalRecipients.length - valid.length}건은 발송에서 제외됩니다. 계속?`)) return;
+  // 채널 제약 (PLATFORM만 복수 가능)
+  const ch = CHANNEL_TYPES[state.channelType] || CHANNEL_TYPES.PLATFORM;
+  if (!ch.allowMulti && modalRecipients.length > 1) {
+    alert(`${ch.label} 예약은 링크결제 1건만 발송할 수 있습니다.`);
+    return;
+  }
+
+  // API 검증: links≥1, amount>0, name 공백X·≤40, mobile 공백X·≤20
+  const errors = [];
+  modalRecipients.forEach((r, i) => {
+    const name = (r.name || '').trim();
+    const phone = (r.phone || '').trim();
+    if (!name) errors.push(`${i+1}행: 수신자명은 공백일 수 없습니다`);
+    if (name.length > 40) errors.push(`${i+1}행: 수신자명은 최대 40자입니다`);
+    if (!phone) errors.push(`${i+1}행: 휴대폰 번호는 공백일 수 없습니다`);
+    if (phone.length > 20) errors.push(`${i+1}행: 휴대폰 번호는 최대 20자입니다`);
+    if (!r.amount || r.amount <= 0) errors.push(`${i+1}행: 결제금액은 양수여야 합니다`);
+  });
+  if (errors.length) {
+    alert('입력값을 확인해주세요.\n\n' + errors.join('\n'));
+    return;
   }
 
   const now = new Date();
   const sentAt = `${String(now.getMonth()+1).padStart(2,'0')}-${String(now.getDate()).padStart(2,'0')} ${String(now.getHours()).padStart(2,'0')}:${String(now.getMinutes()).padStart(2,'0')}`;
-  const expiresAt = sentAt.replace(/^(\d\d)-(\d\d)/, (m, mo, d) => `${mo}-${String(parseInt(d)+3).padStart(2,'0')}`); // 72h
+  const expiresAt = sentAt.replace(/^(\d\d)-(\d\d)/, (m, mo, d) => `${mo}-${String(parseInt(d)+3).padStart(2,'0')}`); // 72h 고정
 
-  const newLinks = valid.map((r, i) => {
+  // 실제 API 호출 시 X-TRIPSTORE-IDEMPOTENCY-KEY 헤더 필요 (프론트 UUID 생성)
+  const _idempotencyKey = 'idem_' + Date.now() + '_' + Math.random().toString(36).slice(2, 8);
+
+  const newLinks = modalRecipients.map((r, i) => {
     const linkId = 'LINK-' + String(state.links.length + i + 1).padStart(3, '0');
+    const hash = 'lnk_' + Math.random().toString(36).slice(2, 8);
     return {
       id: linkId,
-      recipientName: (r.name || '동행자님').trim() || '동행자님',
+      hash,
+      url: `https://pay.tripstore.kr/repay/${hash}`,
+      recipientName: r.name.trim(),
       recipientPhone: r.phone.trim(),
       amount: r.amount,
       sentAt,
+      lastIssuedAt: sentAt,
       expiresAt,
-      status: 'pending',
+      status: 'pending', // API: ACTIVE
       paidAt: null,
+      expirationReason: null,
     };
   });
   newLinks.forEach(l => state.links.push(l));
@@ -1245,7 +1387,7 @@ function sendPaymentLink() {
   closeLinkModal();
   render();
   const totalAmt = newLinks.reduce((s, l) => s + l.amount, 0);
-  showToast(`결제 링크 ${newLinks.length}건 발송 · 총 ₩${fmt(totalAmt)}`, 'ok');
+  showToast(`결제 링크 ${newLinks.length}건 발송 · 총 ₩${fmt(totalAmt)} · idem=${_idempotencyKey.slice(-6)}`, 'ok');
 
   // 첫 건 시뮬 제안
   setTimeout(() => {
@@ -1259,11 +1401,15 @@ function resendLink(linkId) {
   const link = state.links.find(l => l.id === linkId);
   if (!link) return;
   const now = new Date();
-  link.sentAt = `${String(now.getMonth()+1).padStart(2,'0')}-${String(now.getDate()).padStart(2,'0')} ${String(now.getHours()).padStart(2,'0')}:${String(now.getMinutes()).padStart(2,'0')}`;
-  link.expiresAt = link.sentAt.replace(/^(\d\d)-(\d\d)/, (m, mo, d) => `${mo}-${String(parseInt(d)+3).padStart(2,'0')}`);
-  if (link.status === 'expired') link.status = 'pending';
+  const stamp = `${String(now.getMonth()+1).padStart(2,'0')}-${String(now.getDate()).padStart(2,'0')} ${String(now.getHours()).padStart(2,'0')}:${String(now.getMinutes()).padStart(2,'0')}`;
+  link.lastIssuedAt = stamp;
+  link.expiresAt = stamp.replace(/^(\d\d)-(\d\d)/, (m, mo, d) => `${mo}-${String(parseInt(d)+3).padStart(2,'0')}`);
+  if (link.status === 'expired') {
+    link.status = 'pending';
+    link.expirationReason = null;
+  }
   render();
-  showToast(`재발송 완료 · ${link.recipientName} (${link.recipientPhone})`, 'ok');
+  showToast(`재발송 완료 · ${link.recipientName} (${link.recipientPhone}) · 유효시간 72시간 재설정`, 'ok');
 }
 
 function expireLink(linkId) {
@@ -1271,6 +1417,7 @@ function expireLink(linkId) {
   if (!link || link.status !== 'pending') return;
   if (!confirm(`${link.recipientName}님의 결제 링크를 즉시 만료 처리합니다. 계속?`)) return;
   link.status = 'expired';
+  link.expirationReason = '관리자 수동 만료';
   render();
   showToast(`만료 처리 완료 · ${link.recipientName}`, 'warn');
 }
@@ -1414,6 +1561,7 @@ function loadScenario(key, evt) {
   if (evt) evt.target.classList.add('active');
   if (key === 'reset') key = 'match';
   const s = SCENARIOS[key];
+  state.channelType = s.channelType || 'PLATFORM';
   state.reservationAmount = s.reservationAmount;
   state.payments = JSON.parse(JSON.stringify(s.payments));
   state.links = JSON.parse(JSON.stringify(s.links));
