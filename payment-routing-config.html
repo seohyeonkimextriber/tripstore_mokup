@@ -1,0 +1,841 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>결제 라우팅 설정 (드릴다운) — TripStore Admin</title>
+<link href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.6/dist/web/static/pretendard.css" rel="stylesheet">
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: 'Pretendard', 'Apple SD Gothic Neo', -apple-system, sans-serif; font-size: 14px; color: rgba(0,0,0,0.88); background: #f5f5f5; line-height: 1.5; }
+
+/* GNB */
+.gnb { background: #fff; height: 56px; display: flex; align-items: center; padding: 0 24px; border-bottom: 1px solid #f0f0f0; position: sticky; top: 0; z-index: 100; }
+.gnb-logo { font-weight: 800; font-size: 15px; margin-right: 32px; letter-spacing: -0.3px; }
+.gnb-logo span { color: #3055ff; }
+.gnb-menu { display: flex; gap: 0; }
+.gnb-item { color: rgba(0,0,0,0.65); padding: 0 16px; height: 56px; display: flex; align-items: center; cursor: pointer; font-size: 13px; font-weight: 500; position: relative; }
+.gnb-item.active { color: #3055ff; }
+.gnb-item.active::after { content: ''; position: absolute; bottom: 0; left: 0; right: 0; height: 2px; background: #3055ff; }
+.gnb-user { margin-left: auto; font-size: 13px; color: rgba(0,0,0,0.55); }
+
+.breadcrumb { padding: 16px 24px 0; font-size: 12px; color: rgba(0,0,0,0.45); max-width: 1600px; margin: 0 auto; }
+.breadcrumb-sep { margin: 0 6px; color: rgba(0,0,0,0.25); }
+.layout { padding: 12px 24px 40px; max-width: 1600px; margin: 0 auto; }
+.page-header { display: flex; align-items: flex-end; justify-content: space-between; margin: 12px 0 20px; }
+.page-title { font-size: 22px; font-weight: 700; letter-spacing: -0.3px; }
+.page-sub { font-size: 13px; color: rgba(0,0,0,0.55); margin-top: 6px; }
+
+.btn { height: 32px; padding: 0 14px; border-radius: 6px; font-size: 13px; font-weight: 500; cursor: pointer; border: 1px solid #d9d9d9; background: #fff; color: rgba(0,0,0,0.88); display: inline-flex; align-items: center; gap: 6px; font-family: inherit; }
+.btn:hover { border-color: #3055ff; color: #3055ff; }
+.btn.primary { background: #3055ff; color: #fff; border-color: #3055ff; }
+.btn.primary:hover { background: #4a6eff; }
+.btn-sm { height: 28px; padding: 0 10px; font-size: 12px; }
+
+/* Info banner */
+.info-banner { background: #f0f5ff; border: 1px solid #d6e4ff; border-radius: 8px; padding: 14px 18px; margin-bottom: 16px; display: flex; align-items: flex-start; gap: 12px; font-size: 13px; color: #1d3f9c; }
+.info-banner .ib-icon { width: 20px; height: 20px; background: #3055ff; color: #fff; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 700; flex-shrink: 0; }
+.info-banner strong { font-weight: 700; }
+.info-banner .ib-body { line-height: 1.65; }
+.info-banner .prio-mini { display: inline-flex; align-items: center; gap: 8px; margin-top: 8px; }
+.info-banner .prio-tag { padding: 2px 8px; border-radius: 3px; font-size: 11px; font-weight: 600; font-family: 'SF Mono', Monaco, monospace; }
+.pt-1 { background: #fff2e8; color: #d4380d; }
+.pt-2 { background: #e6f7ff; color: #096dd9; }
+.pt-3 { background: #f6ffed; color: #389e0d; }
+.pt-arrow { color: rgba(0,0,0,0.35); }
+
+/* Card */
+.card { background: #fff; border-radius: 10px; border: 1px solid #f0f0f0; margin-bottom: 16px; overflow: hidden; }
+.card-head { padding: 16px 20px; border-bottom: 1px solid #f0f0f0; display: flex; align-items: center; justify-content: space-between; }
+.card-title { font-size: 16px; font-weight: 700; letter-spacing: -0.2px; }
+.card-title .status-tag { display: inline-block; margin-left: 10px; padding: 2px 8px; background: #f0f5ff; color: #3055ff; border-radius: 3px; font-size: 11px; font-weight: 600; }
+.card-body { padding: 20px; }
+.card-body.p-0 { padding: 0; }
+
+/* Filter bar */
+.filter-bar { display: flex; align-items: center; gap: 14px; padding: 14px 20px; background: #fafafa; border-bottom: 1px solid #f0f0f0; }
+.filter-item { display: flex; flex-direction: column; gap: 4px; }
+.filter-label { font-size: 11px; color: rgba(0,0,0,0.55); font-weight: 500; }
+.filter-value { height: 32px; border: 1px solid #d9d9d9; border-radius: 6px; padding: 0 10px; font-size: 13px; background: #fff; min-width: 140px; display: flex; align-items: center; cursor: pointer; }
+.filter-value:hover { border-color: #3055ff; }
+.filter-value .caret { margin-left: auto; color: rgba(0,0,0,0.3); font-size: 10px; }
+.filter-spacer { flex: 1; }
+
+/* Simulator inline */
+.simulator-strip { display: flex; align-items: center; gap: 8px; padding: 12px 20px; background: #fffbf0; border-bottom: 1px solid #ffe58f; }
+.simulator-strip .sim-label { font-size: 12px; color: #874d00; font-weight: 600; display: flex; align-items: center; gap: 6px; margin-right: 6px; }
+.simulator-strip .sim-input { height: 30px; border: 1px solid #d9d9d9; border-radius: 6px; padding: 0 10px; font-size: 12px; background: #fff; min-width: 120px; }
+.simulator-strip .sim-arrow { color: rgba(0,0,0,0.35); margin: 0 4px; font-family: 'SF Mono', Monaco, monospace; }
+.simulator-strip .sim-result { padding: 6px 10px; background: #fff; border: 1px solid #ffd591; border-radius: 6px; font-size: 12px; font-family: 'SF Mono', Monaco, monospace; color: #d46b08; font-weight: 600; }
+
+/* Matrix table */
+.matrix { width: 100%; border-collapse: collapse; font-size: 13px; }
+.matrix thead th { background: #fafafa; padding: 12px 14px; text-align: left; font-weight: 600; color: rgba(0,0,0,0.65); border-bottom: 1px solid #f0f0f0; font-size: 12px; }
+.matrix thead th.method-col { min-width: 200px; }
+.matrix tbody td { padding: 0; border-bottom: 1px solid #f5f5f5; vertical-align: top; }
+.matrix tbody tr:hover { background: #fafcff; }
+.agency-cell { padding: 16px 14px; font-weight: 600; color: rgba(0,0,0,0.85); display: flex; flex-direction: column; gap: 4px; min-width: 130px; }
+.agency-cell small { font-size: 11px; color: rgba(0,0,0,0.4); font-weight: 400; font-family: 'SF Mono', Monaco, monospace; }
+.result-cell { padding: 12px 14px; cursor: pointer; position: relative; transition: background 0.12s; border-left: 1px solid #f5f5f5; }
+.result-cell:hover { background: #f0f5ff; }
+.result-cell.selected { background: #e6f0ff; box-shadow: inset 0 0 0 2px #3055ff; }
+.result-cell .rc-group { font-weight: 600; font-size: 12px; color: rgba(0,0,0,0.88); margin-bottom: 4px; }
+.result-cell .rc-id { font-size: 10px; color: rgba(0,0,0,0.45); font-family: 'SF Mono', Monaco, monospace; margin-bottom: 6px; word-break: break-all; }
+.result-cell .rc-prio { display: inline-flex; align-items: center; gap: 4px; font-size: 10px; font-family: 'SF Mono', Monaco, monospace; padding: 2px 6px; border-radius: 3px; font-weight: 600; }
+.result-cell .rc-prio.p1 { background: #fff2e8; color: #d4380d; }
+.result-cell .rc-prio.p2 { background: #e6f7ff; color: #096dd9; }
+.result-cell .rc-prio.p3 { background: #f6ffed; color: #389e0d; }
+.result-cell .rc-hint { position: absolute; top: 12px; right: 10px; font-size: 10px; color: rgba(0,0,0,0.25); opacity: 0; transition: opacity 0.15s; }
+.result-cell:hover .rc-hint { opacity: 1; }
+
+/* Priority stack (bottom) */
+.stack-layout { display: grid; grid-template-columns: 2fr 1fr; gap: 16px; padding: 20px; }
+.stack-rules { display: flex; flex-direction: column; gap: 10px; }
+.stack-item { border: 1px solid #f0f0f0; border-radius: 8px; padding: 16px; background: #fff; }
+.stack-item.p1 { border-left: 4px solid #d4380d; }
+.stack-item.p2 { border-left: 4px solid #096dd9; }
+.stack-item.p3 { border-left: 4px solid #389e0d; }
+.stack-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; }
+.stack-head-l { display: flex; align-items: center; gap: 10px; }
+.stack-prio { font-family: 'SF Mono', Monaco, monospace; font-size: 11px; padding: 3px 8px; border-radius: 3px; font-weight: 700; }
+.stack-item.p1 .stack-prio { background: #fff2e8; color: #d4380d; }
+.stack-item.p2 .stack-prio { background: #e6f7ff; color: #096dd9; }
+.stack-item.p3 .stack-prio { background: #f6ffed; color: #389e0d; }
+.stack-title { font-size: 15px; font-weight: 700; }
+.stack-count { font-size: 12px; color: rgba(0,0,0,0.5); margin-left: 6px; }
+.stack-desc { font-size: 12px; color: rgba(0,0,0,0.55); margin-bottom: 12px; line-height: 1.65; }
+.rule-list { display: flex; flex-direction: column; gap: 6px; }
+.rule-row { display: grid; grid-template-columns: 1.6fr 1fr 1fr auto; align-items: center; gap: 10px; padding: 8px 10px; background: #fafafa; border-radius: 6px; font-size: 12px; }
+.rule-row .rr-title { font-weight: 600; }
+.rule-row .rr-meta { font-size: 11px; color: rgba(0,0,0,0.55); }
+.rule-row .rr-badge { font-size: 10px; padding: 2px 6px; border-radius: 3px; background: #e6f7ff; color: #096dd9; font-family: 'SF Mono', Monaco, monospace; }
+
+/* Dictionary panel (right) */
+.dict-panel { border: 1px solid #f0f0f0; border-radius: 8px; padding: 16px; background: #fafafa; }
+.dict-title { font-size: 13px; font-weight: 700; margin-bottom: 4px; }
+.dict-desc { font-size: 11px; color: rgba(0,0,0,0.5); margin-bottom: 12px; line-height: 1.6; }
+.dict-search { width: 100%; height: 30px; border: 1px solid #d9d9d9; border-radius: 6px; padding: 0 10px; font-size: 12px; margin-bottom: 10px; font-family: inherit; }
+.dict-list { max-height: 320px; overflow-y: auto; display: flex; flex-direction: column; gap: 4px; }
+.dict-item { padding: 8px 10px; background: #fff; border: 1px solid #f0f0f0; border-radius: 5px; font-size: 11px; cursor: pointer; }
+.dict-item:hover { border-color: #3055ff; }
+.dict-item strong { font-weight: 600; font-size: 12px; color: rgba(0,0,0,0.85); }
+.dict-item .di-id { color: rgba(0,0,0,0.4); font-family: 'SF Mono', Monaco, monospace; font-size: 10px; margin-top: 2px; word-break: break-all; }
+
+/* Side drawer */
+.drawer-mask { position: fixed; inset: 0; background: rgba(0,0,0,0.4); z-index: 200; opacity: 0; pointer-events: none; transition: opacity 0.2s; }
+.drawer-mask.open { opacity: 1; pointer-events: auto; }
+.drawer { position: fixed; top: 0; right: 0; bottom: 0; width: 560px; background: #fff; z-index: 201; box-shadow: -8px 0 24px rgba(0,0,0,0.12); transform: translateX(100%); transition: transform 0.25s cubic-bezier(0.4, 0, 0.2, 1); display: flex; flex-direction: column; }
+.drawer.open { transform: translateX(0); }
+.drawer-head { padding: 20px 24px; border-bottom: 1px solid #f0f0f0; display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; }
+.drawer-head-l h3 { font-size: 17px; font-weight: 700; margin-bottom: 6px; letter-spacing: -0.2px; }
+.drawer-head-l .dh-sub { font-size: 12px; color: rgba(0,0,0,0.55); display: flex; align-items: center; gap: 8px; }
+.drawer-head-l .dh-tag { padding: 2px 8px; background: #f0f5ff; color: #3055ff; border-radius: 3px; font-size: 11px; font-weight: 600; }
+.drawer-close { background: none; border: none; font-size: 22px; color: rgba(0,0,0,0.4); cursor: pointer; padding: 0; line-height: 1; }
+.drawer-close:hover { color: rgba(0,0,0,0.8); }
+.drawer-body { flex: 1; overflow-y: auto; padding: 24px; }
+
+.eval-block { background: #fafafa; border-radius: 8px; padding: 16px; margin-bottom: 16px; }
+.eval-header { font-size: 12px; font-weight: 700; color: rgba(0,0,0,0.55); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 12px; }
+.eval-input { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.eval-input .ei-row { display: flex; flex-direction: column; gap: 3px; }
+.eval-input .ei-label { font-size: 10px; color: rgba(0,0,0,0.5); text-transform: uppercase; letter-spacing: 0.4px; }
+.eval-input .ei-value { font-size: 13px; font-weight: 600; color: rgba(0,0,0,0.88); }
+
+.eval-chain { position: relative; }
+.eval-step { border: 1px solid #f0f0f0; border-radius: 8px; padding: 14px 16px; margin-bottom: 10px; background: #fff; position: relative; }
+.eval-step.skipped { background: #fafafa; opacity: 0.75; }
+.eval-step.matched { border-color: #3055ff; border-width: 2px; background: #f0f5ff; }
+.eval-step-head { display: flex; align-items: center; gap: 10px; margin-bottom: 8px; }
+.eval-step .step-prio { font-family: 'SF Mono', Monaco, monospace; font-size: 10px; padding: 2px 7px; border-radius: 3px; font-weight: 700; }
+.eval-step.p1 .step-prio { background: #fff2e8; color: #d4380d; }
+.eval-step.p2 .step-prio { background: #e6f7ff; color: #096dd9; }
+.eval-step.p3 .step-prio { background: #f6ffed; color: #389e0d; }
+.eval-step .step-title { font-size: 13px; font-weight: 700; flex: 1; }
+.eval-step .step-verdict { font-size: 11px; font-weight: 600; padding: 2px 8px; border-radius: 3px; }
+.eval-step .step-verdict.miss { background: #fff1f0; color: #cf1322; }
+.eval-step .step-verdict.hit { background: #e6f7ff; color: #096dd9; }
+.eval-step .step-verdict.skip { background: #f5f5f5; color: rgba(0,0,0,0.45); }
+.eval-step .step-body { font-size: 12px; color: rgba(0,0,0,0.6); padding-left: 6px; border-left: 2px solid #f0f0f0; margin-left: 4px; }
+.eval-step .step-body b { color: rgba(0,0,0,0.85); font-weight: 600; }
+.eval-step .step-body code { background: #f5f5f5; padding: 1px 5px; border-radius: 3px; font-size: 11px; font-family: 'SF Mono', Monaco, monospace; }
+.eval-step .step-action { margin-top: 10px; padding-top: 10px; border-top: 1px dashed #e0e0e0; display: flex; justify-content: flex-end; gap: 6px; }
+.eval-step.matched .step-action { border-top-color: #d6e4ff; }
+
+.final-verdict { background: #001529; color: #fff; border-radius: 8px; padding: 16px 18px; margin-top: 8px; }
+.final-verdict .fv-label { font-size: 10px; text-transform: uppercase; letter-spacing: 0.6px; color: #8fa3b8; font-weight: 700; margin-bottom: 8px; }
+.final-verdict .fv-group { font-size: 16px; font-weight: 700; margin-bottom: 4px; }
+.final-verdict .fv-id { font-size: 11px; color: #5ce1b9; font-family: 'SF Mono', Monaco, monospace; word-break: break-all; }
+.final-verdict .fv-mid { margin-top: 12px; padding-top: 12px; border-top: 1px solid rgba(255,255,255,0.1); display: flex; justify-content: space-between; align-items: center; font-size: 12px; }
+.final-verdict .fv-mid b { color: #5ce1b9; }
+
+.drawer-foot { padding: 16px 24px; border-top: 1px solid #f0f0f0; display: flex; gap: 8px; justify-content: flex-end; }
+
+/* Empty hint */
+.hint-inline { display: inline-flex; align-items: center; gap: 6px; font-size: 12px; color: rgba(0,0,0,0.45); padding: 6px 12px; background: #fafafa; border-radius: 6px; margin-left: 12px; }
+
+.kbd { display: inline-block; padding: 1px 6px; background: #fff; border: 1px solid #d9d9d9; border-bottom-width: 2px; border-radius: 3px; font-family: 'SF Mono', Monaco, monospace; font-size: 10px; color: rgba(0,0,0,0.65); }
+</style>
+</head>
+<body>
+
+<div class="gnb">
+  <div class="gnb-logo">TRIPSTORE <span>관리자</span></div>
+  <div class="gnb-menu">
+    <div class="gnb-item">대시보드</div>
+    <div class="gnb-item">페이지 관리</div>
+    <div class="gnb-item">상품관리</div>
+    <div class="gnb-item">태그</div>
+    <div class="gnb-item">예약 관리</div>
+    <div class="gnb-item">PB 관리</div>
+    <div class="gnb-item">카탈로그</div>
+    <div class="gnb-item">쿠폰</div>
+    <div class="gnb-item active">정산</div>
+    <div class="gnb-item">파트너스관리</div>
+    <div class="gnb-item">후기</div>
+  </div>
+  <div class="gnb-user">김서현 님 반가워요!</div>
+</div>
+
+<div class="breadcrumb">
+  정산 <span class="breadcrumb-sep">/</span> 결제 <span class="breadcrumb-sep">/</span> 라우팅 설정
+</div>
+
+<div class="layout">
+  <div class="page-header">
+    <div>
+      <div class="page-title">결제 라우팅 설정</div>
+      <div class="page-sub">여행사 · 결제수단 · 채널 조합별로 어느 채널 그룹(MID)으로 결제 호출할지 관리</div>
+    </div>
+    <div style="display:flex; gap:8px;">
+      <button class="btn">변경 이력</button>
+      <button class="btn primary">+ 룰 추가</button>
+    </div>
+  </div>
+
+  <!-- Priority explainer -->
+  <div class="info-banner">
+    <div class="ib-icon">i</div>
+    <div class="ib-body">
+      <strong>룰 평가 순서</strong> — 예약이 들어오면 아래 순서로 룰을 평가해 첫 매칭되는 채널 그룹을 사용해요.
+      아래 매트릭스에서 <strong>셀을 클릭</strong>하면 어떤 룰에 의해 그 결과가 나왔는지 볼 수 있어요.
+      <div class="prio-mini">
+        <span class="prio-tag pt-1">P1 프로모션 라우팅</span>
+        <span class="pt-arrow">→</span>
+        <span class="prio-tag pt-2">P2 채널·여행사 라우팅</span>
+        <span class="pt-arrow">→</span>
+        <span class="prio-tag pt-3">P3 기본 호출 대상</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Matrix -->
+  <div class="card">
+    <div class="card-head">
+      <div class="card-title">호출 결과 <span class="status-tag">현재 조건 기준</span></div>
+      <span class="hint-inline">💡 셀을 클릭해 왜 이 결과가 나왔는지 확인하세요</span>
+    </div>
+
+    <div class="filter-bar">
+      <div class="filter-item">
+        <div class="filter-label">채널 기준</div>
+        <div class="filter-value">트립스토어 <span class="caret">▾</span></div>
+      </div>
+      <div class="filter-item">
+        <div class="filter-label">카드 조건</div>
+        <div class="filter-value">카드사 조건 없음 <span class="caret">▾</span></div>
+      </div>
+      <div class="filter-item">
+        <div class="filter-label">기준 시각</div>
+        <div class="filter-value">2026-08-11 15:20 (현재) <span class="caret">▾</span></div>
+      </div>
+      <div class="filter-spacer"></div>
+    </div>
+
+    <div class="simulator-strip">
+      <div class="sim-label">🎯 가상 예약 시뮬레이션</div>
+      <input class="sim-input" value="교원투어 여행이지" readonly>
+      <span class="sim-arrow">×</span>
+      <input class="sim-input" value="카드결제 · 롯데카드" readonly>
+      <span class="sim-arrow">×</span>
+      <input class="sim-input" value="트립스토어(자체)" readonly>
+      <span class="sim-arrow">→</span>
+      <div class="sim-result">SHARED card 채널 그룹 (P2 매칭)</div>
+      <button class="btn btn-sm" style="margin-left:auto;">이 조건으로 매트릭스 보기</button>
+    </div>
+
+    <table class="matrix">
+      <thead>
+        <tr>
+          <th style="width:170px;">여행사</th>
+          <th class="method-col">카드결제</th>
+          <th class="method-col">카카오페이</th>
+          <th class="method-col">계좌이체</th>
+          <th class="method-col">네이버페이</th>
+          <th class="method-col">토스페이</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>
+            <div class="agency-cell">모두투어<small>#3</small></div>
+          </td>
+          <td>
+            <div class="result-cell" data-agency="모두투어" data-method="카드결제" data-group="MODETOUR card 채널 그룹" data-id="channel-group-live-cc666259-fad3-4409-99a6-..." data-prio="p2">
+              <div class="rc-group">MODETOUR card 채널 그룹</div>
+              <div class="rc-id">channel-group-live-cc666259-fad3-4409-99a6-...</div>
+              <span class="rc-prio p2">P2 여행사 라우팅</span>
+              <span class="rc-hint">클릭 →</span>
+            </div>
+          </td>
+          <td>
+            <div class="result-cell" data-agency="모두투어" data-method="카카오페이" data-group="MODETOUR kakaopay 채널 그룹" data-id="channel-group-live-67d700cd-baf8-4ed9-a8c0-..." data-prio="p2">
+              <div class="rc-group">MODETOUR kakaopay 채널 그룹</div>
+              <div class="rc-id">channel-group-live-67d700cd-baf8-4ed9-a8c0-...</div>
+              <span class="rc-prio p2">P2 여행사 라우팅</span>
+              <span class="rc-hint">클릭 →</span>
+            </div>
+          </td>
+          <td>
+            <div class="result-cell" data-agency="모두투어" data-method="계좌이체" data-group="MODETOUR vbank 채널 그룹" data-id="channel-group-live-fb5f35e7-0091-4738-bf73-..." data-prio="p2">
+              <div class="rc-group">MODETOUR vbank 채널 그룹</div>
+              <div class="rc-id">channel-group-live-fb5f35e7-0091-4738-bf73-...</div>
+              <span class="rc-prio p2">P2 여행사 라우팅</span>
+              <span class="rc-hint">클릭 →</span>
+            </div>
+          </td>
+          <td>
+            <div class="result-cell" data-agency="모두투어" data-method="네이버페이" data-group="MODETOUR naverpay 채널 그룹" data-id="channel-group-live-f6fd0d2a-6a69-415a-8fa0-..." data-prio="p2">
+              <div class="rc-group">MODETOUR naverpay 채널 그룹</div>
+              <div class="rc-id">channel-group-live-f6fd0d2a-6a69-415a-8fa0-...</div>
+              <span class="rc-prio p2">P2 여행사 라우팅</span>
+              <span class="rc-hint">클릭 →</span>
+            </div>
+          </td>
+          <td>
+            <div class="result-cell" data-agency="모두투어" data-method="토스페이" data-group="MODETOUR tosspay 채널 그룹" data-id="channel-group-live-fb587e70-3a7c-418a-b14b-..." data-prio="p2">
+              <div class="rc-group">MODETOUR tosspay 채널 그룹</div>
+              <div class="rc-id">channel-group-live-fb587e70-3a7c-418a-b14b-...</div>
+              <span class="rc-prio p2">P2 여행사 라우팅</span>
+              <span class="rc-hint">클릭 →</span>
+            </div>
+          </td>
+        </tr>
+        <tr>
+          <td>
+            <div class="agency-cell">노랑풍선<small>#4</small></div>
+          </td>
+          <td>
+            <div class="result-cell" data-agency="노랑풍선" data-method="카드결제" data-group="YBTOUR card 채널 그룹" data-id="channel-group-live-c5ea3a05-b454-4ac6-9ac8-..." data-prio="p2">
+              <div class="rc-group">YBTOUR card 채널 그룹</div>
+              <div class="rc-id">channel-group-live-c5ea3a05-b454-4ac6-9ac8-...</div>
+              <span class="rc-prio p2">P2 여행사 라우팅</span>
+              <span class="rc-hint">클릭 →</span>
+            </div>
+          </td>
+          <td>
+            <div class="result-cell" data-agency="노랑풍선" data-method="카카오페이" data-group="YBTOUR kakaopay 채널 그룹" data-id="channel-group-live-61ca9beb-f49b-4ffd-8b03-..." data-prio="p2">
+              <div class="rc-group">YBTOUR kakaopay 채널 그룹</div>
+              <div class="rc-id">channel-group-live-61ca9beb-f49b-4ffd-8b03-...</div>
+              <span class="rc-prio p2">P2 여행사 라우팅</span>
+              <span class="rc-hint">클릭 →</span>
+            </div>
+          </td>
+          <td>
+            <div class="result-cell" data-agency="노랑풍선" data-method="계좌이체" data-group="YBTOUR vbank 채널 그룹" data-id="channel-group-live-db6172ba-74f7-4540-bb50-..." data-prio="p2">
+              <div class="rc-group">YBTOUR vbank 채널 그룹</div>
+              <div class="rc-id">channel-group-live-db6172ba-74f7-4540-bb50-...</div>
+              <span class="rc-prio p2">P2 여행사 라우팅</span>
+              <span class="rc-hint">클릭 →</span>
+            </div>
+          </td>
+          <td>
+            <div class="result-cell" data-agency="노랑풍선" data-method="네이버페이" data-group="YBTOUR naverpay 채널 그룹" data-id="channel-group-live-6a68ddc7-28bc-41ad-9c94-..." data-prio="p2">
+              <div class="rc-group">YBTOUR naverpay 채널 그룹</div>
+              <div class="rc-id">channel-group-live-6a68ddc7-28bc-41ad-9c94-...</div>
+              <span class="rc-prio p2">P2 여행사 라우팅</span>
+              <span class="rc-hint">클릭 →</span>
+            </div>
+          </td>
+          <td>
+            <div class="result-cell" data-agency="노랑풍선" data-method="토스페이" data-group="YBTOUR tosspay 채널 그룹" data-id="channel-group-live-fb587e70-3a7c-418a-b14b-..." data-prio="p2">
+              <div class="rc-group">YBTOUR tosspay 채널 그룹</div>
+              <div class="rc-id">channel-group-live-fb587e70-3a7c-418a-b14b-...</div>
+              <span class="rc-prio p2">P2 여행사 라우팅</span>
+              <span class="rc-hint">클릭 →</span>
+            </div>
+          </td>
+        </tr>
+        <tr>
+          <td>
+            <div class="agency-cell">교원투어 여행이지<small>#7</small></div>
+          </td>
+          <td>
+            <div class="result-cell" data-agency="교원투어 여행이지" data-method="카드결제" data-group="SHARED card 채널 그룹" data-id="channel-group-live-81f157d3-1446-4272-a2b2-..." data-prio="p2">
+              <div class="rc-group">SHARED card 채널 그룹</div>
+              <div class="rc-id">channel-group-live-81f157d3-1446-4272-a2b2-...</div>
+              <span class="rc-prio p2">P2 여행사 라우팅</span>
+              <span class="rc-hint">클릭 →</span>
+            </div>
+          </td>
+          <td>
+            <div class="result-cell" data-agency="교원투어 여행이지" data-method="카카오페이" data-group="SHARED kakaopay 채널 그룹" data-id="channel-group-live-b8995618-4544-442b-81c9-..." data-prio="p2">
+              <div class="rc-group">SHARED kakaopay 채널 그룹</div>
+              <div class="rc-id">channel-group-live-b8995618-4544-442b-81c9-...</div>
+              <span class="rc-prio p2">P2 여행사 라우팅</span>
+              <span class="rc-hint">클릭 →</span>
+            </div>
+          </td>
+          <td>
+            <div class="result-cell" data-agency="교원투어 여행이지" data-method="계좌이체" data-group="SHARED vbank 채널 그룹" data-id="channel-group-live-48a4f22d-86e1-45f5-a0ab-..." data-prio="p2">
+              <div class="rc-group">SHARED vbank 채널 그룹</div>
+              <div class="rc-id">channel-group-live-48a4f22d-86e1-45f5-a0ab-...</div>
+              <span class="rc-prio p2">P2 여행사 라우팅</span>
+              <span class="rc-hint">클릭 →</span>
+            </div>
+          </td>
+          <td>
+            <div class="result-cell" data-agency="교원투어 여행이지" data-method="네이버페이" data-group="SHARED naverpay 채널 그룹" data-id="channel-group-live-80b4618d-04ad-43ce-b178-..." data-prio="p2">
+              <div class="rc-group">SHARED naverpay 채널 그룹</div>
+              <div class="rc-id">channel-group-live-80b4618d-04ad-43ce-b178-...</div>
+              <span class="rc-prio p2">P2 여행사 라우팅</span>
+              <span class="rc-hint">클릭 →</span>
+            </div>
+          </td>
+          <td>
+            <div class="result-cell" data-agency="교원투어 여행이지" data-method="토스페이" data-group="SHARED tosspay 채널 그룹" data-id="channel-group-live-699067cb-a50c-4fd3-b871-..." data-prio="p1">
+              <div class="rc-group">여름프로모 tosspay</div>
+              <div class="rc-id">channel-group-live-p1summer-tosspay-2026...</div>
+              <span class="rc-prio p1">P1 프로모션 (8/1~8/31)</span>
+              <span class="rc-hint">클릭 →</span>
+            </div>
+          </td>
+        </tr>
+        <tr>
+          <td>
+            <div class="agency-cell">롯데관광<small>#8</small></div>
+          </td>
+          <td>
+            <div class="result-cell" data-agency="롯데관광" data-method="카드결제" data-group="SHARED card 채널 그룹" data-id="channel-group-live-81f157d3-1446-4272-a2b2-..." data-prio="p2">
+              <div class="rc-group">SHARED card 채널 그룹</div>
+              <div class="rc-id">channel-group-live-81f157d3-1446-4272-a2b2-...</div>
+              <span class="rc-prio p2">P2 여행사 라우팅</span>
+              <span class="rc-hint">클릭 →</span>
+            </div>
+          </td>
+          <td>
+            <div class="result-cell" data-agency="롯데관광" data-method="카카오페이" data-group="SHARED kakaopay 채널 그룹" data-id="channel-group-live-b8995618-4544-442b-81c9-..." data-prio="p2">
+              <div class="rc-group">SHARED kakaopay 채널 그룹</div>
+              <div class="rc-id">channel-group-live-b8995618-4544-442b-81c9-...</div>
+              <span class="rc-prio p2">P2 여행사 라우팅</span>
+              <span class="rc-hint">클릭 →</span>
+            </div>
+          </td>
+          <td>
+            <div class="result-cell" data-agency="롯데관광" data-method="계좌이체" data-group="SHARED vbank 채널 그룹" data-id="channel-group-live-48a4f22d-86e1-45f5-a0ab-..." data-prio="p2">
+              <div class="rc-group">SHARED vbank 채널 그룹</div>
+              <div class="rc-id">channel-group-live-48a4f22d-86e1-45f5-a0ab-...</div>
+              <span class="rc-prio p2">P2 여행사 라우팅</span>
+              <span class="rc-hint">클릭 →</span>
+            </div>
+          </td>
+          <td>
+            <div class="result-cell" data-agency="롯데관광" data-method="네이버페이" data-group="SHARED naverpay 채널 그룹" data-id="channel-group-live-80b4618d-04ad-43ce-b178-..." data-prio="p2">
+              <div class="rc-group">SHARED naverpay 채널 그룹</div>
+              <div class="rc-id">channel-group-live-80b4618d-04ad-43ce-b178-...</div>
+              <span class="rc-prio p2">P2 여행사 라우팅</span>
+              <span class="rc-hint">클릭 →</span>
+            </div>
+          </td>
+          <td>
+            <div class="result-cell" data-agency="롯데관광" data-method="토스페이" data-group="SHARED tosspay 채널 그룹" data-id="channel-group-live-699067cb-a50c-4fd3-b871-..." data-prio="p2">
+              <div class="rc-group">SHARED tosspay 채널 그룹</div>
+              <div class="rc-id">channel-group-live-699067cb-a50c-4fd3-b871-...</div>
+              <span class="rc-prio p2">P2 여행사 라우팅</span>
+              <span class="rc-hint">클릭 →</span>
+            </div>
+          </td>
+        </tr>
+        <tr>
+          <td>
+            <div class="agency-cell">온라인투어<small>#9</small></div>
+          </td>
+          <td>
+            <div class="result-cell" data-agency="온라인투어" data-method="카드결제" data-group="ONLINETOUR card 채널 그룹" data-id="channel-group-live-b3142695-8bbf-425b-9e5d-..." data-prio="p2">
+              <div class="rc-group">ONLINETOUR card 채널 그룹</div>
+              <div class="rc-id">channel-group-live-b3142695-8bbf-425b-9e5d-...</div>
+              <span class="rc-prio p2">P2 여행사 라우팅</span>
+              <span class="rc-hint">클릭 →</span>
+            </div>
+          </td>
+          <td>
+            <div class="result-cell" data-agency="온라인투어" data-method="카카오페이" data-group="ONLINETOUR kakaopay 채널 그룹" data-id="channel-group-live-2e86934d-53bd-4d3e-b776-..." data-prio="p2">
+              <div class="rc-group">ONLINETOUR kakaopay 채널 그룹</div>
+              <div class="rc-id">channel-group-live-2e86934d-53bd-4d3e-b776-...</div>
+              <span class="rc-prio p2">P2 여행사 라우팅</span>
+              <span class="rc-hint">클릭 →</span>
+            </div>
+          </td>
+          <td>
+            <div class="result-cell" data-agency="온라인투어" data-method="계좌이체" data-group="ONLINETOUR vbank 채널 그룹" data-id="channel-group-live-458917b4-e20-4d1a-97bc-..." data-prio="p3">
+              <div class="rc-group">기본 vbank 채널 그룹</div>
+              <div class="rc-id">channel-group-live-default-vbank-fallback...</div>
+              <span class="rc-prio p3">P3 기본값(폴백)</span>
+              <span class="rc-hint">클릭 →</span>
+            </div>
+          </td>
+          <td>
+            <div class="result-cell" data-agency="온라인투어" data-method="네이버페이" data-group="ONLINETOUR naverpay 채널 그룹" data-id="channel-group-live-8715da46-e20a-4932-9fca-..." data-prio="p2">
+              <div class="rc-group">ONLINETOUR naverpay 채널 그룹</div>
+              <div class="rc-id">channel-group-live-8715da46-e20a-4932-9fca-...</div>
+              <span class="rc-prio p2">P2 여행사 라우팅</span>
+              <span class="rc-hint">클릭 →</span>
+            </div>
+          </td>
+          <td>
+            <div class="result-cell" data-agency="온라인투어" data-method="토스페이" data-group="ONLINETOUR tosspay 채널 그룹" data-id="channel-group-live-ffe622d3-21b9-4f1c-a97c-..." data-prio="p2">
+              <div class="rc-group">ONLINETOUR tosspay 채널 그룹</div>
+              <div class="rc-id">channel-group-live-ffe622d3-21b9-4f1c-a97c-...</div>
+              <span class="rc-prio p2">P2 여행사 라우팅</span>
+              <span class="rc-hint">클릭 →</span>
+            </div>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- Priority Stack -->
+  <div class="card">
+    <div class="card-head">
+      <div class="card-title">설정 편집 <span class="status-tag">우선순위 스택</span></div>
+      <button class="btn primary btn-sm">+ 룰 추가</button>
+    </div>
+
+    <div class="stack-layout">
+      <div class="stack-rules">
+
+        <div class="stack-item p1">
+          <div class="stack-head">
+            <div class="stack-head-l">
+              <span class="stack-prio">P1</span>
+              <span class="stack-title">프로모션 라우팅</span>
+              <span class="stack-count">8건</span>
+            </div>
+            <button class="btn btn-sm">전체 보기</button>
+          </div>
+          <div class="stack-desc">기간 한정으로 특정 조건에 다른 채널 그룹을 강제 매핑. 유효기간 내에만 활성화되고, 다른 룰보다 항상 먼저 평가돼요.</div>
+          <div class="rule-list">
+            <div class="rule-row">
+              <div>
+                <div class="rr-title">여름프로모 토스페이 매핑</div>
+                <div class="rr-meta">교원투어 여행이지 · 토스페이 · 트립스토어 채널</div>
+              </div>
+              <div class="rr-meta">8/1 ~ 8/31</div>
+              <div><span class="rr-badge">활성</span></div>
+              <button class="btn btn-sm">수정</button>
+            </div>
+            <div class="rule-row">
+              <div>
+                <div class="rr-title">추석 명절 카드결제 매핑</div>
+                <div class="rr-meta">전체 여행사 · 카드결제 · 전체 채널</div>
+              </div>
+              <div class="rr-meta">9/25 ~ 10/2</div>
+              <div><span class="rr-badge" style="background:#f5f5f5; color:rgba(0,0,0,0.45);">예약</span></div>
+              <button class="btn btn-sm">수정</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="stack-item p2">
+          <div class="stack-head">
+            <div class="stack-head-l">
+              <span class="stack-prio">P2</span>
+              <span class="stack-title">채널·여행사 라우팅</span>
+              <span class="stack-count">10건</span>
+            </div>
+            <button class="btn btn-sm">전체 보기</button>
+          </div>
+          <div class="stack-desc">특정 채널 × 여행사 조합에 사용할 채널 그룹 세트를 지정. 대부분의 일반 결제가 여기서 결정돼요.</div>
+          <div class="rule-list">
+            <div class="rule-row">
+              <div>
+                <div class="rr-title">HANATOUR 여행사 호출 대상</div>
+                <div class="rr-meta">전체 채널 · 하나투어(#41)</div>
+              </div>
+              <div class="rr-meta">5종 결제수단</div>
+              <div><span class="rr-badge">활성</span></div>
+              <button class="btn btn-sm">수정</button>
+            </div>
+            <div class="rule-row">
+              <div>
+                <div class="rr-title">TRIPPB 여행사 호출 대상</div>
+                <div class="rr-meta">전체 채널 · 트립스토어(#58)</div>
+              </div>
+              <div class="rr-meta">5종 결제수단</div>
+              <div><span class="rr-badge">활성</span></div>
+              <button class="btn btn-sm">수정</button>
+            </div>
+            <div class="rule-row">
+              <div>
+                <div class="rr-title">SHARED 여행사 호출 대상</div>
+                <div class="rr-meta">전체 채널 · 교원투어(#7), 롯데관광(#8), 에어텔닷컴(...)</div>
+              </div>
+              <div class="rr-meta">5종 결제수단</div>
+              <div><span class="rr-badge">활성</span></div>
+              <button class="btn btn-sm">수정</button>
+            </div>
+            <div class="rule-row">
+              <div>
+                <div class="rr-title">ONLINETOUR 여행사 호출 대상</div>
+                <div class="rr-meta">전체 채널 · 온라인투어(#9)</div>
+              </div>
+              <div class="rr-meta">4종 결제수단 <span style="color:#d4380d;">(vbank 누락)</span></div>
+              <div><span class="rr-badge">활성</span></div>
+              <button class="btn btn-sm">수정</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="stack-item p3">
+          <div class="stack-head">
+            <div class="stack-head-l">
+              <span class="stack-prio">P3</span>
+              <span class="stack-title">기본 호출 대상 (폴백)</span>
+              <span class="stack-count">5건</span>
+            </div>
+            <button class="btn btn-sm">전체 보기</button>
+          </div>
+          <div class="stack-desc">P1·P2 어디에도 걸리지 않을 때 최종 사용되는 안전망 채널 그룹. 결제수단별로 1개씩만 존재.</div>
+          <div class="rule-list">
+            <div class="rule-row">
+              <div>
+                <div class="rr-title">기본 카드결제</div>
+                <div class="rr-meta">모든 조건 폴백</div>
+              </div>
+              <div class="rr-meta">-</div>
+              <div><span class="rr-badge">활성</span></div>
+              <button class="btn btn-sm">수정</button>
+            </div>
+            <div class="rule-row">
+              <div>
+                <div class="rr-title">기본 계좌이체(vbank)</div>
+                <div class="rr-meta">모든 조건 폴백</div>
+              </div>
+              <div class="rr-meta">-</div>
+              <div><span class="rr-badge">활성</span></div>
+              <button class="btn btn-sm">수정</button>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+      <div class="dict-panel">
+        <div class="dict-title">📚 호출 대상 사전 <span style="color:rgba(0,0,0,0.4); font-weight:400;">(43)</span></div>
+        <div class="dict-desc">위 룰들이 참조하는 원자 정의체. 여기서 개별 채널 그룹(MID)을 등록·수정해요.</div>
+        <input class="dict-search" placeholder="채널 그룹 검색...">
+        <div class="dict-list">
+          <div class="dict-item">
+            <strong>MODETOUR card 채널 그룹</strong>
+            <div class="di-id">channel-group-live-cc666259-fad3-4409-99a6-...</div>
+          </div>
+          <div class="dict-item">
+            <strong>MODETOUR kakaopay 채널 그룹</strong>
+            <div class="di-id">channel-group-live-67d700cd-baf8-4ed9-a8c0-...</div>
+          </div>
+          <div class="dict-item">
+            <strong>SHARED card 채널 그룹</strong>
+            <div class="di-id">channel-group-live-81f157d3-1446-4272-a2b2-...</div>
+          </div>
+          <div class="dict-item">
+            <strong>SHARED kakaopay 채널 그룹</strong>
+            <div class="di-id">channel-group-live-b8995618-4544-442b-81c9-...</div>
+          </div>
+          <div class="dict-item">
+            <strong>ONLINETOUR card 채널 그룹</strong>
+            <div class="di-id">channel-group-live-b3142695-8bbf-425b-9e5d-...</div>
+          </div>
+          <div class="dict-item">
+            <strong>기본 카드 채널 그룹 (폴백)</strong>
+            <div class="di-id">channel-group-live-default-card-fallback...</div>
+          </div>
+          <div class="dict-item">
+            <strong>기본 vbank 채널 그룹 (폴백)</strong>
+            <div class="di-id">channel-group-live-default-vbank-fallback...</div>
+          </div>
+          <div style="text-align:center; padding:8px; color:rgba(0,0,0,0.4); font-size:11px;">... 36 more</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div style="text-align:center; color:rgba(0,0,0,0.35); font-size:11px; padding:24px 0;">
+    💡 <span class="kbd">Esc</span> 로 사이드패널 닫기 · 셀 클릭으로 열기
+  </div>
+</div>
+
+<!-- Drawer -->
+<div class="drawer-mask" id="drawerMask"></div>
+<div class="drawer" id="drawer">
+  <div class="drawer-head">
+    <div class="drawer-head-l">
+      <h3 id="drawerTitle">교원투어 여행이지 × 토스페이</h3>
+      <div class="dh-sub">
+        <span class="dh-tag">채널: 트립스토어</span>
+        <span>· 카드조건 없음 · 2026-08-11 15:20</span>
+      </div>
+    </div>
+    <button class="drawer-close" id="drawerClose">×</button>
+  </div>
+  <div class="drawer-body">
+
+    <div class="eval-block">
+      <div class="eval-header">입력 조건</div>
+      <div class="eval-input">
+        <div class="ei-row"><span class="ei-label">여행사</span><span class="ei-value" id="dInAgency">교원투어 여행이지 (#7)</span></div>
+        <div class="ei-row"><span class="ei-label">결제수단</span><span class="ei-value" id="dInMethod">토스페이</span></div>
+        <div class="ei-row"><span class="ei-label">채널</span><span class="ei-value">트립스토어</span></div>
+        <div class="ei-row"><span class="ei-label">기준 시각</span><span class="ei-value">2026-08-11 15:20</span></div>
+      </div>
+    </div>
+
+    <div class="eval-header" style="margin-bottom:12px;">룰 평가 체인</div>
+
+    <div class="eval-chain">
+      <div class="eval-step p1 matched" id="stepP1">
+        <div class="eval-step-head">
+          <span class="step-prio">P1</span>
+          <span class="step-title">프로모션 라우팅</span>
+          <span class="step-verdict hit" id="v1">HIT</span>
+        </div>
+        <div class="step-body" id="body1">
+          <b>여름프로모 tosspay 매핑</b>에 매칭됐어요. <br>
+          조건: 여행사 = 교원투어 여행이지 · 결제수단 = 토스페이 · 채널 = 트립스토어 · 기간 = 2026-08-01 ~ 2026-08-31<br>
+          → 채널 그룹 <code>channel-group-live-p1summer-tosspay-2026...</code> 사용
+        </div>
+        <div class="step-action">
+          <button class="btn btn-sm">이 프로모션 룰 편집</button>
+        </div>
+      </div>
+
+      <div class="eval-step p2 skipped" id="stepP2">
+        <div class="eval-step-head">
+          <span class="step-prio">P2</span>
+          <span class="step-title">채널·여행사 라우팅</span>
+          <span class="step-verdict skip" id="v2">SKIP</span>
+        </div>
+        <div class="step-body" id="body2">
+          P1에서 이미 결정됐으므로 평가하지 않아요. (평가했다면 <b>SHARED 여행사 호출 대상 → SHARED tosspay 채널 그룹</b>이 매칭됐을 거예요)
+        </div>
+        <div class="step-action">
+          <button class="btn btn-sm">이 라우팅 룰 편집</button>
+        </div>
+      </div>
+
+      <div class="eval-step p3 skipped" id="stepP3">
+        <div class="eval-step-head">
+          <span class="step-prio">P3</span>
+          <span class="step-title">기본 호출 대상 (폴백)</span>
+          <span class="step-verdict skip" id="v3">SKIP</span>
+        </div>
+        <div class="step-body" id="body3">
+          상위 룰에서 결정되어 평가하지 않아요.
+        </div>
+      </div>
+    </div>
+
+    <div class="final-verdict">
+      <div class="fv-label">최종 라우팅</div>
+      <div class="fv-group" id="fvGroup">여름프로모 tosspay</div>
+      <div class="fv-id" id="fvId">channel-group-live-p1summer-tosspay-2026...</div>
+      <div class="fv-mid">
+        <span>실제 호출 MID</span>
+        <b>NICEPAY MID: nicepay_tripstore_promo01</b>
+      </div>
+    </div>
+
+  </div>
+  <div class="drawer-foot">
+    <button class="btn" id="drawerCancel">닫기</button>
+    <button class="btn primary">이 셀 일괄 재정의</button>
+  </div>
+</div>
+
+<script>
+const drawer = document.getElementById('drawer');
+const mask = document.getElementById('drawerMask');
+const cells = document.querySelectorAll('.result-cell');
+const closeBtn = document.getElementById('drawerClose');
+const cancelBtn = document.getElementById('drawerCancel');
+
+function openDrawer(cell) {
+  document.querySelectorAll('.result-cell.selected').forEach(c => c.classList.remove('selected'));
+  cell.classList.add('selected');
+
+  const agency = cell.dataset.agency;
+  const method = cell.dataset.method;
+  const group = cell.dataset.group;
+  const id = cell.dataset.id;
+  const prio = cell.dataset.prio;
+
+  document.getElementById('drawerTitle').textContent = `${agency} × ${method}`;
+  document.getElementById('dInAgency').textContent = agency;
+  document.getElementById('dInMethod').textContent = method;
+  document.getElementById('fvGroup').textContent = group;
+  document.getElementById('fvId').textContent = id;
+
+  const stepP1 = document.getElementById('stepP1');
+  const stepP2 = document.getElementById('stepP2');
+  const stepP3 = document.getElementById('stepP3');
+  const v1 = document.getElementById('v1'), v2 = document.getElementById('v2'), v3 = document.getElementById('v3');
+  const b1 = document.getElementById('body1'), b2 = document.getElementById('body2'), b3 = document.getElementById('body3');
+
+  [stepP1, stepP2, stepP3].forEach(s => { s.classList.remove('matched'); s.classList.add('skipped'); });
+  [v1, v2, v3].forEach(v => { v.classList.remove('hit'); v.classList.add('skip'); v.textContent = 'SKIP'; });
+
+  if (prio === 'p1') {
+    stepP1.classList.remove('skipped'); stepP1.classList.add('matched');
+    v1.classList.remove('skip'); v1.classList.add('hit'); v1.textContent = 'HIT';
+    b1.innerHTML = `<b>여름프로모 ${method} 매핑</b>에 매칭됐어요. <br>조건: 여행사 = ${agency} · 결제수단 = ${method} · 채널 = 트립스토어 · 기간 = 2026-08-01 ~ 2026-08-31<br>→ 채널 그룹 <code>${id}</code> 사용`;
+    b2.innerHTML = `P1에서 이미 결정됐으므로 평가하지 않아요.`;
+    b3.innerHTML = `상위 룰에서 결정되어 평가하지 않아요.`;
+  } else if (prio === 'p2') {
+    v1.textContent = 'MISS'; v1.classList.remove('skip'); v1.classList.add('miss');
+    b1.innerHTML = `조건에 맞는 프로모션 룰이 없어요. (활성 8건 중 매칭 0건)`;
+    stepP2.classList.remove('skipped'); stepP2.classList.add('matched');
+    v2.classList.remove('skip'); v2.classList.add('hit'); v2.textContent = 'HIT';
+    const ruleName = group.startsWith('SHARED') ? 'SHARED 여행사 호출 대상' :
+                     group.startsWith('MODETOUR') ? 'HANATOUR 여행사 호출 대상 (MODETOUR)' :
+                     group.startsWith('YBTOUR') ? 'YBTOUR 여행사 호출 대상' :
+                     group.startsWith('ONLINETOUR') ? 'ONLINETOUR 여행사 호출 대상' : '여행사 라우팅 룰';
+    b2.innerHTML = `<b>${ruleName}</b>에 매칭됐어요. <br>조건: 채널 = 전체 · 여행사 = ${agency} · 결제수단 = ${method}<br>→ 채널 그룹 <code>${id}</code> 사용`;
+    b3.innerHTML = `상위 룰에서 결정되어 평가하지 않아요.`;
+  } else if (prio === 'p3') {
+    v1.textContent = 'MISS'; v1.classList.remove('skip'); v1.classList.add('miss');
+    b1.innerHTML = `조건에 맞는 프로모션 룰이 없어요.`;
+    v2.textContent = 'MISS'; v2.classList.remove('skip'); v2.classList.add('miss');
+    b2.innerHTML = `<b>${agency}</b>의 <b>${method}</b> 라우팅이 등록돼있지 않아요. <span style="color:#d4380d;">⚠ 이건 설정 누락 신호일 수 있어요</span> — 폴백으로 넘어가면 정산·마감 시 혼동 가능.`;
+    stepP3.classList.remove('skipped'); stepP3.classList.add('matched');
+    v3.classList.remove('skip'); v3.classList.add('hit'); v3.textContent = 'HIT (폴백)';
+    b3.innerHTML = `기본 <b>${method}</b> 폴백 채널 그룹으로 처리. <br>→ 채널 그룹 <code>${id}</code> 사용`;
+  }
+
+  drawer.classList.add('open');
+  mask.classList.add('open');
+}
+
+function closeDrawer() {
+  drawer.classList.remove('open');
+  mask.classList.remove('open');
+  document.querySelectorAll('.result-cell.selected').forEach(c => c.classList.remove('selected'));
+}
+
+cells.forEach(c => c.addEventListener('click', () => openDrawer(c)));
+closeBtn.addEventListener('click', closeDrawer);
+cancelBtn.addEventListener('click', closeDrawer);
+mask.addEventListener('click', closeDrawer);
+document.addEventListener('keydown', (e) => { if (e.key === 'Escape') closeDrawer(); });
+</script>
+
+</body>
+</html>
