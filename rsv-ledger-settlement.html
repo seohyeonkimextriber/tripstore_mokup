@@ -2,7 +2,7 @@
 <html lang="ko">
 <head>
 <meta charset="UTF-8">
-<title>예약원장 + 지급원장 (상문님 v2 시뮬레이터) — TripStore Admin</title>
+<title>예약원장 이벤트 카탈로그 + 예시 (2026-08-10 최종) — TripStore Admin</title>
 <link href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.6/dist/web/static/pretendard.css" rel="stylesheet">
 <style>
 * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -112,6 +112,54 @@ table.ledger{width:100%;border-collapse:collapse;font-size:12px;}
 .checksum-card .eq{font-family:'SF Mono',monospace;font-size:13px;font-weight:600;color:#237804;}
 .checksum-card .ok{font-size:14px;font-weight:700;color:#389e0d;margin-top:10px;}
 .check-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;font-size:12px;}
+
+/* 원장항목 카탈로그 */
+.catalog-tbl{width:100%;border-collapse:collapse;font-size:11.5px;}
+.catalog-tbl thead th{padding:7px 6px;background:#fafafa;border-bottom:1px solid #e8e8e8;font-weight:600;color:rgba(0,0,0,.65);white-space:nowrap;font-size:11px;text-align:center;}
+.catalog-tbl thead th.party{background:#f0f5ff;color:#1d39c4;}
+.catalog-tbl tbody td{padding:4px 6px;border-bottom:1px solid #f5f5f5;font-size:11px;text-align:center;white-space:nowrap;}
+.catalog-tbl tbody td.enum{font-family:'SF Mono',monospace;font-size:10.5px;color:rgba(0,0,0,.55);text-align:left;padding-left:8px;}
+.catalog-tbl tbody td.name{text-align:left;padding-left:10px;font-weight:500;}
+.catalog-tbl tbody td.code{font-family:'SF Mono',monospace;font-weight:700;color:#0958d9;font-size:12px;}
+.catalog-tbl tbody tr.grp-1001 td.code{color:#0958d9;}
+.catalog-tbl tbody tr.grp-2000 td.code{color:#237804;}
+.catalog-tbl tbody tr.grp-3000 td.code{color:#08979c;}
+.catalog-tbl tbody tr.grp-4000 td.code{color:#c41d7f;}
+.catalog-tbl tbody tr.grp-5000 td.code{color:#d4380d;}
+.catalog-tbl tbody tr.grp-6000 td.code{color:#874d00;}
+.catalog-tbl tbody tr.grp-9000 td.code{color:#531dab;}
+.catalog-tbl tbody tr.status-hold td{background:#fafafa;color:rgba(0,0,0,.4);}
+.catalog-tbl tbody tr.grp-sep td{background:#f5f5f5;padding:0;height:4px;border-bottom:1px solid #e8e8e8;}
+.catalog-tbl .sign-pos{color:#1677ff;font-weight:600;}
+.catalog-tbl .sign-neg{color:#cf1322;font-weight:600;}
+.catalog-tbl .sign-zero{color:rgba(0,0,0,.2);}
+.catalog-tbl td.desc{text-align:left;color:rgba(0,0,0,.6);font-size:10.5px;padding-left:8px;white-space:normal;max-width:280px;line-height:1.4;}
+.badge-hold{display:inline-block;padding:1px 5px;border-radius:3px;background:#f0f0f0;color:rgba(0,0,0,.45);font-size:9.5px;font-weight:600;}
+.badge-mig{display:inline-block;padding:1px 5px;border-radius:3px;background:#fff7e6;color:#874d00;font-size:9.5px;font-weight:600;}
+.badge-live{display:inline-block;padding:1px 5px;border-radius:3px;background:#f6ffed;color:#389e0d;font-size:9.5px;font-weight:600;}
+
+/* 예시 케이스 카드 */
+.case-card{background:#fff;border:1px solid #f0f0f0;border-radius:8px;overflow:hidden;margin:14px 24px 0;}
+.case-head{padding:10px 16px;border-bottom:1px solid #f0f0f0;background:#fafcff;display:flex;align-items:center;gap:10px;flex-wrap:wrap;font-size:12px;}
+.case-num{display:inline-flex;align-items:center;justify-content:center;width:22px;height:22px;border-radius:50%;background:#1677ff;color:#fff;font-weight:700;font-size:11px;}
+.case-tag{display:inline-flex;align-items:center;padding:1px 7px;border-radius:10px;font-size:10px;font-weight:600;}
+.case-tag-normal{background:#e6f7ff;color:#0958d9;border:1px solid #91caff;}
+.case-tag-recalc{background:#fff7e6;color:#d48806;border:1px solid #ffd666;}
+.case-tag-penalty{background:#fff1f0;color:#cf1322;border:1px solid #ffa39e;}
+.case-tag-negm{background:#f9f0ff;color:#531dab;border:1px solid #d3adf7;}
+.case-title{font-weight:700;font-size:13px;color:rgba(0,0,0,.85);}
+.case-meta{font-size:11px;color:rgba(0,0,0,.55);margin-left:auto;font-family:'SF Mono',monospace;}
+.case-events{width:100%;border-collapse:collapse;font-size:11px;}
+.case-events thead th{padding:6px 6px;background:#fafafa;border-bottom:1px solid #e8e8e8;font-weight:600;color:rgba(0,0,0,.6);font-size:10.5px;text-align:center;}
+.case-events tbody td{padding:4px 6px;border-bottom:1px solid #f5f5f5;font-size:11px;text-align:center;}
+.case-events tbody td.name{text-align:left;padding-left:8px;font-weight:500;}
+.case-events tbody td.amount{text-align:right;padding-right:10px;font-variant-numeric:tabular-nums;font-weight:500;}
+.case-events tbody td.code{font-family:'SF Mono',monospace;font-weight:700;color:#0958d9;}
+.case-events tbody tr.evt-cancel td{background:#fff8f6;}
+.case-events tbody tr.evt-cancel td.code{color:#cf1322;}
+.case-events tbody tr.evt-settle td{background:#fffbf5;}
+.case-events tbody tr.evt-settle td.code{color:#874d00;}
+.case-events tbody tr.evt-payment td.code{color:#c41d7f;}
 </style>
 </head>
 <body>
@@ -124,19 +172,17 @@ table.ledger{width:100%;border-collapse:collapse;font-size:12px;}
 <div class="bc">예약관리<span class="sep">/</span>예약 상세<span class="sep">/</span><strong>예약원장 + 지급원장</strong></div>
 
 <div class="page-head">
-  <div class="page-title">예약원장 + 지급원장 (상문님 v2)</div>
-  <span class="tag tag-v2">RsvLedgerItem v2</span>
-  <span class="tag tag-sim">시뮬레이터 재현</span>
+  <div class="page-title">예약원장 이벤트 카탈로그 + 예시 원장항목</div>
+  <span class="tag tag-v2">2026-08-10 최종</span>
+  <span class="tag tag-sim">hj확인본</span>
 </div>
 
 <div class="changelog">
-  <strong>2026-07-06 갱신</strong> · 상문님 <strong>rsv-ledger-item-simulator (2).ods</strong> 기준으로 재구성 ·
-  ① 예약원장-상문 매트릭스에 <strong>5주체 손익 증감/잔액 running tally</strong> 열 추가 ·
-  ② <strong>지급원장 카드 신설</strong> — 정산기준금액 / 서비스이용료 / 공제금액 / 정산금액 / <strong>세금계산서금액</strong> ·
-  ③ <strong>조정내역 관리 카드</strong> — 수동등록·지급-연결정보·상계연결 ·
-  ④ <strong>지급 5단계 상태</strong> (지급대기·지급요청·지급완료·지급이월·지급실패) ·
-  ⑤ 위약금 <strong>3.30%</strong> 별도 수수료율 반영 ·
-  ⑥ <strong>공제금액 = 서비스이용료 + 회사부담할인</strong> 공식 명시
+  <strong>2026-08-11 갱신</strong> · <strong>원장_케이스 정리_서현님260730_hj확인</strong> 시트 기준 재구성 ·
+  ① <strong>원장항목 코드체계(2026-08-10 최종)</strong> — 7 그룹 × 5주체 손익/자금 매트릭스 (40+ 코드) ·
+  ② <strong>예시 원장항목 리스트업</strong> — 9개 실 예약 케이스별 rsv_ledger_items 예상 이벤트 ·
+  ③ 기존 지급원장/조정내역 카드 유지(참고) ·
+  ⓘ <strong>4,001/4,101/4,501</strong>=마이그레이션·미래대비용 / <strong>4,003/4,103/4,503, 6,020/6,520, 9,001~9,504</strong>=이번 스코프 제외
 </div>
 
 <div class="info-banner">
@@ -155,11 +201,638 @@ table.ledger{width:100%;border-collapse:collapse;font-size:12px;}
   <div class="sum-item"><div class="sum-label">RsvStatus</div><div class="sum-value"><span class="rsv-status rs-done">출발완료</span></div></div>
 </div>
 
+<!-- ================ ① 원장항목 코드체계 (최종) ================ -->
+<div class="main-card">
+  <div class="card-head">
+    ① 원장항목 코드체계 (2026-08-10 최종)
+    <span class="sub">7 그룹 × 5주체(고객·여행사·회사·PG·채널) 손익/자금 · rsv_ledger_item_types</span>
+  </div>
+  <div class="ledger-wrap">
+    <table class="catalog-tbl">
+      <thead>
+        <tr>
+          <th rowspan="2" style="min-width:60px;">코드</th>
+          <th rowspan="2" style="min-width:150px;">항목명</th>
+          <th rowspan="2" style="min-width:180px;">Enum</th>
+          <th class="party" colspan="2">고객</th>
+          <th class="party" colspan="2">여행사</th>
+          <th class="party" colspan="2">회사</th>
+          <th class="party" colspan="2">PG</th>
+          <th class="party" colspan="2">채널</th>
+          <th rowspan="2">상태</th>
+          <th rowspan="2" style="min-width:260px;">발생 트리거</th>
+        </tr>
+        <tr>
+          <th class="party">손익</th><th class="party">자금</th>
+          <th class="party">손익</th><th class="party">자금</th>
+          <th class="party">손익</th><th class="party">자금</th>
+          <th class="party">손익</th><th class="party">자금</th>
+          <th class="party">손익</th><th class="party">자금</th>
+        </tr>
+      </thead>
+      <tbody>
+        <!-- 1000: 고객 거래 발생 -->
+        <tr class="grp-1001"><td class="code">1,001</td><td class="name">상품/정가</td><td class="enum">PRODUCT_CHARGE</td>
+          <td class="sign-neg">-1</td><td class="sign-zero">0</td><td class="sign-pos">+1</td><td class="sign-zero">0</td>
+          <td class="sign-zero">0</td><td class="sign-zero">0</td><td class="sign-zero">0</td><td class="sign-zero">0</td>
+          <td class="sign-zero">0</td><td class="sign-zero">0</td><td><span class="badge-live">사용</span></td>
+          <td class="desc">고객 예약 당시 상품 정가 (인원별)</td></tr>
+        <tr class="grp-1001"><td class="code">1,010</td><td class="name">상품/추가금</td><td class="enum">PRODUCT_EXTRA_CHARGE</td>
+          <td class="sign-neg">-1</td><td class="sign-zero">0</td><td class="sign-pos">+1</td><td class="sign-zero">0</td>
+          <td class="sign-zero">0</td><td class="sign-zero">0</td><td class="sign-zero">0</td><td class="sign-zero">0</td>
+          <td class="sign-zero">0</td><td class="sign-zero">0</td><td><span class="badge-live">사용</span></td>
+          <td class="desc">관리자 상품가격 상향 조정 / 커스텀 음수할인</td></tr>
+
+        <tr class="grp-sep"><td colspan="15"></td></tr>
+
+        <!-- 2000: 고객 할인 -->
+        <tr class="grp-2000"><td class="code">2,001</td><td class="name">할인/특가_여행사</td><td class="enum">DISCOUNT_SPECIAL</td>
+          <td class="sign-pos">+1</td><td class="sign-zero">0</td><td class="sign-neg">-1</td><td class="sign-zero">0</td>
+          <td class="sign-zero">0</td><td class="sign-zero">0</td><td class="sign-zero">0</td><td class="sign-zero">0</td>
+          <td class="sign-zero">0</td><td class="sign-zero">0</td><td><span class="badge-live">사용</span></td>
+          <td class="desc">여행사 부담 특가 (사전설정 or 관리자 추가부담)</td></tr>
+        <tr class="grp-2000"><td class="code">2,002</td><td class="name">할인/특가_플랫폼</td><td class="enum">DISCOUNT_SPECIAL</td>
+          <td class="sign-pos">+1</td><td class="sign-zero">0</td><td class="sign-zero">0</td><td class="sign-zero">0</td>
+          <td class="sign-zero">0</td><td class="sign-neg">-1</td><td class="sign-zero">0</td><td class="sign-zero">0</td>
+          <td class="sign-zero">0</td><td class="sign-zero">0</td><td><span class="badge-live">사용</span></td>
+          <td class="desc">플랫폼 부담 특가 (사전설정 or 관리자 추가부담)</td></tr>
+        <tr class="grp-2000 status-hold"><td class="code">2,003</td><td class="name">할인/특가_채널</td><td class="enum">DISCOUNT_SPECIAL</td>
+          <td class="sign-pos">+1</td><td class="sign-zero">0</td><td class="sign-zero">0</td><td class="sign-zero">0</td>
+          <td class="sign-zero">0</td><td class="sign-zero">0</td><td class="sign-zero">0</td><td class="sign-zero">0</td>
+          <td class="sign-neg">-1</td><td class="sign-zero">0</td><td><span class="badge-hold">스코프外</span></td>
+          <td class="desc">채널 부담 특가 (채널정산 미시행 → 이번 스코프 제외)</td></tr>
+        <tr class="grp-2000"><td class="code">2,101</td><td class="name">할인/수동_여행사</td><td class="enum">DISCOUNT_CUSTOM</td>
+          <td class="sign-pos">+1</td><td class="sign-zero">0</td><td class="sign-neg">-1</td><td class="sign-zero">0</td>
+          <td class="sign-zero">0</td><td class="sign-zero">0</td><td class="sign-zero">0</td><td class="sign-zero">0</td>
+          <td class="sign-zero">0</td><td class="sign-zero">0</td><td><span class="badge-live">사용</span></td>
+          <td class="desc">관리자 수동 할인 (예외 케이스)</td></tr>
+        <tr class="grp-2000"><td class="code">2,102</td><td class="name">할인/수동_플랫폼</td><td class="enum">DISCOUNT_CUSTOM</td>
+          <td class="sign-pos">+1</td><td class="sign-zero">0</td><td class="sign-zero">0</td><td class="sign-zero">0</td>
+          <td class="sign-zero">0</td><td class="sign-neg">-1</td><td class="sign-zero">0</td><td class="sign-zero">0</td>
+          <td class="sign-zero">0</td><td class="sign-zero">0</td><td><span class="badge-live">사용</span></td>
+          <td class="desc">관리자 수동 할인 (플랫폼 부담)</td></tr>
+        <tr class="grp-2000 status-hold"><td class="code">2,103</td><td class="name">할인/수동_채널</td><td class="enum">DISCOUNT_CUSTOM</td>
+          <td class="sign-pos">+1</td><td class="sign-zero">0</td><td class="sign-zero">0</td><td class="sign-zero">0</td>
+          <td class="sign-zero">0</td><td class="sign-zero">0</td><td class="sign-zero">0</td><td class="sign-zero">0</td>
+          <td class="sign-neg">-1</td><td class="sign-zero">0</td><td><span class="badge-hold">스코프外</span></td>
+          <td class="desc">채널 부담 수동 할인 (제외)</td></tr>
+        <tr class="grp-2000"><td class="code">2,201</td><td class="name">할인/쿠폰_여행사</td><td class="enum">DISCOUNT_COUPON</td>
+          <td class="sign-pos">+1</td><td class="sign-zero">0</td><td class="sign-neg">-1</td><td class="sign-zero">0</td>
+          <td class="sign-zero">0</td><td class="sign-zero">0</td><td class="sign-zero">0</td><td class="sign-zero">0</td>
+          <td class="sign-zero">0</td><td class="sign-zero">0</td><td><span class="badge-live">사용</span></td>
+          <td class="desc">쿠폰 (여행사 분담분)</td></tr>
+        <tr class="grp-2000"><td class="code">2,202</td><td class="name">할인/쿠폰_플랫폼</td><td class="enum">DISCOUNT_COUPON</td>
+          <td class="sign-pos">+1</td><td class="sign-zero">0</td><td class="sign-zero">0</td><td class="sign-zero">0</td>
+          <td class="sign-zero">0</td><td class="sign-neg">-1</td><td class="sign-zero">0</td><td class="sign-zero">0</td>
+          <td class="sign-zero">0</td><td class="sign-zero">0</td><td><span class="badge-live">사용</span></td>
+          <td class="desc">쿠폰 (플랫폼 분담분)</td></tr>
+        <tr class="grp-2000 status-hold"><td class="code">2,203</td><td class="name">할인/쿠폰_채널</td><td class="enum">DISCOUNT_COUPON</td>
+          <td class="sign-pos">+1</td><td class="sign-zero">0</td><td class="sign-zero">0</td><td class="sign-zero">0</td>
+          <td class="sign-zero">0</td><td class="sign-zero">0</td><td class="sign-zero">0</td><td class="sign-zero">0</td>
+          <td class="sign-neg">-1</td><td class="sign-zero">0</td><td><span class="badge-hold">스코프外</span></td>
+          <td class="desc">쿠폰 (채널 분담분) - 제외</td></tr>
+
+        <tr class="grp-sep"><td colspan="15"></td></tr>
+
+        <!-- 3000: 할인 원복 (SPECIAL/CUSTOM/COUPON 각 3주체 × 취소/원복 = 18개) -->
+        <tr class="grp-3000"><td class="code">3,001</td><td class="name">할인/특가_여행사-취소</td><td class="enum">DISCOUNT_SPECIAL_CANCEL</td>
+          <td class="sign-neg">-1</td><td class="sign-zero">0</td><td class="sign-pos">+1</td><td class="sign-zero">0</td>
+          <td class="sign-zero">0</td><td class="sign-zero">0</td><td class="sign-zero">0</td><td class="sign-zero">0</td>
+          <td class="sign-zero">0</td><td class="sign-zero">0</td><td><span class="badge-live">사용</span></td>
+          <td class="desc">여행사특가 감소/취소완료</td></tr>
+        <tr class="grp-3000"><td class="code">3,002</td><td class="name">할인/특가_플랫폼-취소</td><td class="enum">DISCOUNT_SPECIAL_CANCEL</td>
+          <td class="sign-neg">-1</td><td class="sign-zero">0</td><td class="sign-zero">0</td><td class="sign-zero">0</td>
+          <td class="sign-pos">+1</td><td class="sign-zero">0</td><td class="sign-zero">0</td><td class="sign-zero">0</td>
+          <td class="sign-zero">0</td><td class="sign-zero">0</td><td><span class="badge-live">사용</span></td>
+          <td class="desc">트립특가 감소/취소완료</td></tr>
+        <tr class="grp-3000 status-hold"><td class="code">3,003</td><td class="name">할인/특가_채널-취소</td><td class="enum">DISCOUNT_SPECIAL_CANCEL</td>
+          <td class="sign-neg">-1</td><td class="sign-zero">0</td><td class="sign-zero">0</td><td class="sign-zero">0</td>
+          <td class="sign-zero">0</td><td class="sign-zero">0</td><td class="sign-zero">0</td><td class="sign-zero">0</td>
+          <td class="sign-pos">+1</td><td class="sign-zero">0</td><td><span class="badge-hold">스코프外</span></td>
+          <td class="desc">채널특가 취소 - 제외</td></tr>
+        <tr class="grp-3000"><td class="code">3,101</td><td class="name">할인/수동_여행사-취소</td><td class="enum">DISCOUNT_CUSTOM_CANCEL</td>
+          <td class="sign-neg">-1</td><td class="sign-zero">0</td><td class="sign-pos">+1</td><td class="sign-zero">0</td>
+          <td class="sign-zero">0</td><td class="sign-zero">0</td><td class="sign-zero">0</td><td class="sign-zero">0</td>
+          <td class="sign-zero">0</td><td class="sign-zero">0</td><td><span class="badge-live">사용</span></td>
+          <td class="desc">수동할인 감소/취소</td></tr>
+        <tr class="grp-3000"><td class="code">3,102</td><td class="name">할인/수동_플랫폼-취소</td><td class="enum">DISCOUNT_CUSTOM_CANCEL</td>
+          <td class="sign-neg">-1</td><td class="sign-zero">0</td><td class="sign-zero">0</td><td class="sign-zero">0</td>
+          <td class="sign-pos">+1</td><td class="sign-zero">0</td><td class="sign-zero">0</td><td class="sign-zero">0</td>
+          <td class="sign-zero">0</td><td class="sign-zero">0</td><td><span class="badge-live">사용</span></td>
+          <td class="desc">플랫폼 수동할인 감소/취소</td></tr>
+        <tr class="grp-3000"><td class="code">3,201</td><td class="name">할인/쿠폰_여행사-취소</td><td class="enum">DISCOUNT_COUPON_CANCEL</td>
+          <td class="sign-neg">-1</td><td class="sign-zero">0</td><td class="sign-pos">+1</td><td class="sign-zero">0</td>
+          <td class="sign-zero">0</td><td class="sign-zero">0</td><td class="sign-zero">0</td><td class="sign-zero">0</td>
+          <td class="sign-zero">0</td><td class="sign-zero">0</td><td><span class="badge-live">사용</span></td>
+          <td class="desc">쿠폰 ID 취소처리 (여행사 분담)</td></tr>
+        <tr class="grp-3000"><td class="code">3,202</td><td class="name">할인/쿠폰_플랫폼-취소</td><td class="enum">DISCOUNT_COUPON_CANCEL</td>
+          <td class="sign-neg">-1</td><td class="sign-zero">0</td><td class="sign-zero">0</td><td class="sign-zero">0</td>
+          <td class="sign-pos">+1</td><td class="sign-zero">0</td><td class="sign-zero">0</td><td class="sign-zero">0</td>
+          <td class="sign-zero">0</td><td class="sign-zero">0</td><td><span class="badge-live">사용</span></td>
+          <td class="desc">쿠폰 ID 취소처리 (플랫폼 분담)</td></tr>
+        <tr class="grp-3000"><td class="code">3,501</td><td class="name">할인/특가_여행사-원복</td><td class="enum">DISCOUNT_SPECIAL_CANCEL_RETURN</td>
+          <td class="sign-pos">+1</td><td class="sign-zero">0</td><td class="sign-neg">-1</td><td class="sign-zero">0</td>
+          <td class="sign-zero">0</td><td class="sign-zero">0</td><td class="sign-zero">0</td><td class="sign-zero">0</td>
+          <td class="sign-zero">0</td><td class="sign-zero">0</td><td><span class="badge-live">사용</span></td>
+          <td class="desc">취소완료→예약접수 원복 시</td></tr>
+        <tr class="grp-3000"><td class="code">3,502</td><td class="name">할인/특가_플랫폼-원복</td><td class="enum">DISCOUNT_SPECIAL_CANCEL_RETURN</td>
+          <td class="sign-pos">+1</td><td class="sign-zero">0</td><td class="sign-zero">0</td><td class="sign-zero">0</td>
+          <td class="sign-neg">-1</td><td class="sign-zero">0</td><td class="sign-zero">0</td><td class="sign-zero">0</td>
+          <td class="sign-zero">0</td><td class="sign-zero">0</td><td><span class="badge-live">사용</span></td>
+          <td class="desc">취소완료→예약접수 원복 시</td></tr>
+        <tr class="grp-3000"><td class="code">3,601</td><td class="name">할인/수동_여행사-원복</td><td class="enum">DISCOUNT_CUSTOM_CANCEL_RETURN</td>
+          <td class="sign-pos">+1</td><td class="sign-zero">0</td><td class="sign-neg">-1</td><td class="sign-zero">0</td>
+          <td class="sign-zero">0</td><td class="sign-zero">0</td><td class="sign-zero">0</td><td class="sign-zero">0</td>
+          <td class="sign-zero">0</td><td class="sign-zero">0</td><td><span class="badge-live">사용</span></td>
+          <td class="desc">수동할인 취소 원복</td></tr>
+        <tr class="grp-3000"><td class="code">3,602</td><td class="name">할인/수동_플랫폼-원복</td><td class="enum">DISCOUNT_CUSTOM_CANCEL_RETURN</td>
+          <td class="sign-pos">+1</td><td class="sign-zero">0</td><td class="sign-zero">0</td><td class="sign-zero">0</td>
+          <td class="sign-neg">-1</td><td class="sign-zero">0</td><td class="sign-zero">0</td><td class="sign-zero">0</td>
+          <td class="sign-zero">0</td><td class="sign-zero">0</td><td><span class="badge-live">사용</span></td>
+          <td class="desc">플랫폼 수동할인 취소 원복</td></tr>
+        <tr class="grp-3000"><td class="code">3,701</td><td class="name">할인/쿠폰_여행사-원복</td><td class="enum">DISCOUNT_COUPON_CANCEL_RETURN</td>
+          <td class="sign-pos">+1</td><td class="sign-zero">0</td><td class="sign-neg">-1</td><td class="sign-zero">0</td>
+          <td class="sign-zero">0</td><td class="sign-zero">0</td><td class="sign-zero">0</td><td class="sign-zero">0</td>
+          <td class="sign-zero">0</td><td class="sign-zero">0</td><td><span class="badge-live">사용</span></td>
+          <td class="desc">쿠폰 취소 원복</td></tr>
+        <tr class="grp-3000"><td class="code">3,702</td><td class="name">할인/쿠폰_플랫폼-원복</td><td class="enum">DISCOUNT_COUPON_CANCEL_RETURN</td>
+          <td class="sign-pos">+1</td><td class="sign-zero">0</td><td class="sign-zero">0</td><td class="sign-zero">0</td>
+          <td class="sign-neg">-1</td><td class="sign-zero">0</td><td class="sign-zero">0</td><td class="sign-zero">0</td>
+          <td class="sign-zero">0</td><td class="sign-zero">0</td><td><span class="badge-live">사용</span></td>
+          <td class="desc">플랫폼 쿠폰 취소 원복</td></tr>
+
+        <tr class="grp-sep"><td colspan="15"></td></tr>
+
+        <!-- 4000: 결제 거래 -->
+        <tr class="grp-4000 status-hold"><td class="code">4,001</td><td class="name">결제/승인_여행사</td><td class="enum">PAYMENT</td>
+          <td class="sign-zero">0</td><td class="sign-pos">+1</td><td class="sign-zero">0</td><td class="sign-pos">+1</td>
+          <td class="sign-zero">0</td><td class="sign-zero">0</td><td class="sign-zero">0</td><td class="sign-zero">0</td>
+          <td class="sign-zero">0</td><td class="sign-zero">0</td><td><span class="badge-mig">MIG</span></td>
+          <td class="desc">여행사 자체결제(마이그레이션·미래대비, 서비스 미제공)</td></tr>
+        <tr class="grp-4000"><td class="code">4,002</td><td class="name">결제/승인_PG</td><td class="enum">PAYMENT</td>
+          <td class="sign-zero">0</td><td class="sign-pos">+1</td><td class="sign-zero">0</td><td class="sign-zero">0</td>
+          <td class="sign-zero">0</td><td class="sign-zero">0</td><td class="sign-zero">0</td><td class="sign-pos">+1</td>
+          <td class="sign-zero">0</td><td class="sign-zero">0</td><td><span class="badge-live">사용</span></td>
+          <td class="desc">PG '완료' 응답 (실행일=PG정산완료일)</td></tr>
+        <tr class="grp-4000 status-hold"><td class="code">4,003</td><td class="name">결제/승인_채널</td><td class="enum">PAYMENT</td>
+          <td class="sign-zero">0</td><td class="sign-pos">+1</td><td class="sign-zero">0</td><td class="sign-zero">0</td>
+          <td class="sign-zero">0</td><td class="sign-zero">0</td><td class="sign-zero">0</td><td class="sign-zero">0</td>
+          <td class="sign-zero">0</td><td class="sign-pos">+1</td><td><span class="badge-hold">스코프外</span></td>
+          <td class="desc">채널결제 - 채널정산 시스템 미반영</td></tr>
+        <tr class="grp-4000 status-hold"><td class="code">4,101</td><td class="name">결제/취소_여행사</td><td class="enum">PAYMENT_CANCEL</td>
+          <td class="sign-zero">0</td><td class="sign-neg">-1</td><td class="sign-zero">0</td><td class="sign-neg">-1</td>
+          <td class="sign-zero">0</td><td class="sign-zero">0</td><td class="sign-zero">0</td><td class="sign-zero">0</td>
+          <td class="sign-zero">0</td><td class="sign-zero">0</td><td><span class="badge-mig">MIG</span></td>
+          <td class="desc">여행사 결제취소 (마이그레이션·미래대비)</td></tr>
+        <tr class="grp-4000"><td class="code">4,102</td><td class="name">결제/취소_PG</td><td class="enum">PAYMENT_CANCEL</td>
+          <td class="sign-zero">0</td><td class="sign-neg">-1</td><td class="sign-zero">0</td><td class="sign-zero">0</td>
+          <td class="sign-zero">0</td><td class="sign-zero">0</td><td class="sign-zero">0</td><td class="sign-neg">-1</td>
+          <td class="sign-zero">0</td><td class="sign-zero">0</td><td><span class="badge-live">사용</span></td>
+          <td class="desc">PG 결제취소 완료 (실행일=PG정산완료일)</td></tr>
+        <tr class="grp-4000 status-hold"><td class="code">4,103</td><td class="name">결제/취소_채널</td><td class="enum">PAYMENT_CANCEL</td>
+          <td class="sign-zero">0</td><td class="sign-neg">-1</td><td class="sign-zero">0</td><td class="sign-zero">0</td>
+          <td class="sign-zero">0</td><td class="sign-zero">0</td><td class="sign-zero">0</td><td class="sign-zero">0</td>
+          <td class="sign-zero">0</td><td class="sign-neg">-1</td><td><span class="badge-hold">스코프外</span></td>
+          <td class="desc">채널결제 취소 - 제외</td></tr>
+        <tr class="grp-4000 status-hold"><td class="code">4,501</td><td class="name">결제/취소_여행사-원복</td><td class="enum">PAYMENT_CANCEL_RETURN</td>
+          <td class="sign-zero">0</td><td class="sign-pos">+1</td><td class="sign-zero">0</td><td class="sign-pos">+1</td>
+          <td class="sign-zero">0</td><td class="sign-zero">0</td><td class="sign-zero">0</td><td class="sign-zero">0</td>
+          <td class="sign-zero">0</td><td class="sign-zero">0</td><td><span class="badge-mig">MIG</span></td>
+          <td class="desc">여행사 결제취소 원복 (마이그레이션)</td></tr>
+        <tr class="grp-4000"><td class="code">4,502</td><td class="name">결제/취소_PG-원복</td><td class="enum">PAYMENT_CANCEL_RETURN</td>
+          <td class="sign-zero">0</td><td class="sign-pos">+1</td><td class="sign-zero">0</td><td class="sign-zero">0</td>
+          <td class="sign-zero">0</td><td class="sign-zero">0</td><td class="sign-zero">0</td><td class="sign-pos">+1</td>
+          <td class="sign-zero">0</td><td class="sign-zero">0</td><td><span class="badge-live">사용</span></td>
+          <td class="desc">PG 취소원복 (수동, 포트원 웹훅)</td></tr>
+        <tr class="grp-4000 status-hold"><td class="code">4,503</td><td class="name">결제/취소_채널-원복</td><td class="enum">PAYMENT_CANCEL_RETURN</td>
+          <td class="sign-zero">0</td><td class="sign-pos">+1</td><td class="sign-zero">0</td><td class="sign-zero">0</td>
+          <td class="sign-zero">0</td><td class="sign-zero">0</td><td class="sign-zero">0</td><td class="sign-zero">0</td>
+          <td class="sign-zero">0</td><td class="sign-pos">+1</td><td><span class="badge-hold">미사용</span></td>
+          <td class="desc">채널 취소원복 = 불가능</td></tr>
+
+        <tr class="grp-sep"><td colspan="15"></td></tr>
+
+        <!-- 5000: 고객 거래 발생 취소 + 위약금 -->
+        <tr class="grp-5000"><td class="code">5,001</td><td class="name">상품/정가-취소</td><td class="enum">PRODUCT_CHARGE_CANCEL</td>
+          <td class="sign-pos">+1</td><td class="sign-zero">0</td><td class="sign-neg">-1</td><td class="sign-zero">0</td>
+          <td class="sign-zero">0</td><td class="sign-zero">0</td><td class="sign-zero">0</td><td class="sign-zero">0</td>
+          <td class="sign-zero">0</td><td class="sign-zero">0</td><td><span class="badge-live">사용</span></td>
+          <td class="desc">인원취소/취소완료/가격하락</td></tr>
+        <tr class="grp-5000"><td class="code">5,010</td><td class="name">상품/추가금-취소</td><td class="enum">PRODUCT_EXTRA_CHARGE_CANCEL</td>
+          <td class="sign-pos">+1</td><td class="sign-zero">0</td><td class="sign-neg">-1</td><td class="sign-zero">0</td>
+          <td class="sign-zero">0</td><td class="sign-zero">0</td><td class="sign-zero">0</td><td class="sign-zero">0</td>
+          <td class="sign-zero">0</td><td class="sign-zero">0</td><td><span class="badge-live">사용</span></td>
+          <td class="desc">추가금 부분/전액 취소</td></tr>
+        <tr class="grp-5000"><td class="code">5,020</td><td class="name">상품/취소위약금</td><td class="enum">PRODUCT_CANCELLATION_PENALTY</td>
+          <td class="sign-neg">-1</td><td class="sign-zero">0</td><td class="sign-pos">+1</td><td class="sign-zero">0</td>
+          <td class="sign-zero">0</td><td class="sign-zero">0</td><td class="sign-zero">0</td><td class="sign-zero">0</td>
+          <td class="sign-zero">0</td><td class="sign-zero">0</td><td><span class="badge-live">사용</span></td>
+          <td class="desc">결제항목→취소위약금 처리 시</td></tr>
+        <tr class="grp-5000"><td class="code">5,501</td><td class="name">상품/정가-취소-원복</td><td class="enum">PRODUCT_CHARGE_CANCEL_RETURN</td>
+          <td class="sign-neg">-1</td><td class="sign-zero">0</td><td class="sign-pos">+1</td><td class="sign-zero">0</td>
+          <td class="sign-zero">0</td><td class="sign-zero">0</td><td class="sign-zero">0</td><td class="sign-zero">0</td>
+          <td class="sign-zero">0</td><td class="sign-zero">0</td><td><span class="badge-live">사용</span></td>
+          <td class="desc">취소완료→예약접수 재활성화</td></tr>
+        <tr class="grp-5000"><td class="code">5,510</td><td class="name">상품/추가금-취소-원복</td><td class="enum">PRODUCT_EXTRA_CHARGE_CANCEL_RETURN</td>
+          <td class="sign-neg">-1</td><td class="sign-zero">0</td><td class="sign-pos">+1</td><td class="sign-zero">0</td>
+          <td class="sign-zero">0</td><td class="sign-zero">0</td><td class="sign-zero">0</td><td class="sign-zero">0</td>
+          <td class="sign-zero">0</td><td class="sign-zero">0</td><td><span class="badge-live">사용</span></td>
+          <td class="desc">추가금 취소 원복</td></tr>
+        <tr class="grp-5000"><td class="code">5,520</td><td class="name">상품/취소위약금-원복</td><td class="enum">PRODUCT_CANCELLATION_PENALTY_RETURN</td>
+          <td class="sign-pos">+1</td><td class="sign-zero">0</td><td class="sign-neg">-1</td><td class="sign-zero">0</td>
+          <td class="sign-zero">0</td><td class="sign-zero">0</td><td class="sign-zero">0</td><td class="sign-zero">0</td>
+          <td class="sign-zero">0</td><td class="sign-zero">0</td><td><span class="badge-live">사용</span></td>
+          <td class="desc">위약금 마이너스 조정 (전액/부분)</td></tr>
+
+        <tr class="grp-sep"><td colspan="15"></td></tr>
+
+        <!-- 6000: 정산 -->
+        <tr class="grp-6000"><td class="code">6,001</td><td class="name">정산/플랫폼이용료</td><td class="enum">PLATFORM_FEE</td>
+          <td class="sign-zero">0</td><td class="sign-zero">0</td><td class="sign-neg">-1</td><td class="sign-neg">-1</td>
+          <td class="sign-pos">+1</td><td class="sign-pos">+1</td><td class="sign-zero">0</td><td class="sign-zero">0</td>
+          <td class="sign-zero">0</td><td class="sign-zero">0</td><td><span class="badge-live">사용</span></td>
+          <td class="desc">서비스이용료 계산 (실행일=지급완료일)</td></tr>
+        <tr class="grp-6000"><td class="code">6,002</td><td class="name">정산/플랫폼할인</td><td class="enum">PLATFORM_FEE</td>
+          <td class="sign-zero">0</td><td class="sign-zero">0</td><td class="sign-zero">0</td><td class="sign-pos">+1</td>
+          <td class="sign-zero">0</td><td class="sign-neg">-1</td><td class="sign-zero">0</td><td class="sign-zero">0</td>
+          <td class="sign-zero">0</td><td class="sign-zero">0</td><td><span class="badge-live">사용</span></td>
+          <td class="desc">플랫폼 할인 정산 (채널할인 미포함)</td></tr>
+        <tr class="grp-6000"><td class="code">6,003</td><td class="name">정산/플랫폼기준금액</td><td class="enum">PLATFORM_FEE</td>
+          <td class="sign-zero">0</td><td class="sign-zero">0</td><td class="sign-zero">0</td><td class="sign-pos">+1</td>
+          <td class="sign-zero">0</td><td class="sign-neg">-1</td><td class="sign-zero">0</td><td class="sign-zero">0</td>
+          <td class="sign-zero">0</td><td class="sign-zero">0</td><td><span class="badge-live">사용</span></td>
+          <td class="desc">플랫폼 기준금액 (회계 분리목적)</td></tr>
+        <tr class="grp-6000"><td class="code">6,010</td><td class="name">정산/PG수수료</td><td class="enum">PG_FEE</td>
+          <td class="sign-zero">0</td><td class="sign-zero">0</td><td class="sign-zero">0</td><td class="sign-zero">0</td>
+          <td class="sign-neg">-1</td><td class="sign-neg">-1</td><td class="sign-pos">+1</td><td class="sign-pos">+1</td>
+          <td class="sign-zero">0</td><td class="sign-zero">0</td><td><span class="badge-live">사용</span></td>
+          <td class="desc">PG거래일 소급 (실행일=PG정산완료일)</td></tr>
+        <tr class="grp-6000"><td class="code">6,011</td><td class="name">정산/PG거래금액</td><td class="enum">PG_FEE</td>
+          <td class="sign-zero">0</td><td class="sign-zero">0</td><td class="sign-zero">0</td><td class="sign-zero">0</td>
+          <td class="sign-zero">0</td><td class="sign-pos">+1</td><td class="sign-zero">0</td><td class="sign-neg">-1</td>
+          <td class="sign-zero">0</td><td class="sign-zero">0</td><td><span class="badge-live">사용</span></td>
+          <td class="desc">PG 정산 거래금액</td></tr>
+        <tr class="grp-6000 status-hold"><td class="code">6,020</td><td class="name">정산/채널수수료</td><td class="enum">CHANNEL_FEE</td>
+          <td class="sign-zero">0</td><td class="sign-zero">0</td><td class="sign-zero">0</td><td class="sign-zero">0</td>
+          <td class="sign-neg">-1</td><td class="sign-neg">-1</td><td class="sign-zero">0</td><td class="sign-zero">0</td>
+          <td class="sign-pos">+1</td><td class="sign-pos">+1</td><td><span class="badge-hold">스코프外</span></td>
+          <td class="desc">채널정산 시스템 미반영</td></tr>
+        <tr class="grp-6000"><td class="code">6,501</td><td class="name">정산/플랫폼이용료-취소</td><td class="enum">PLATFORM_FEE_CANCEL</td>
+          <td class="sign-zero">0</td><td class="sign-zero">0</td><td class="sign-pos">+1</td><td class="sign-pos">+1</td>
+          <td class="sign-neg">-1</td><td class="sign-neg">-1</td><td class="sign-zero">0</td><td class="sign-zero">0</td>
+          <td class="sign-zero">0</td><td class="sign-zero">0</td><td><span class="badge-live">사용</span></td>
+          <td class="desc">재정산 시 기존 이용료 취소 (음수정산)</td></tr>
+        <tr class="grp-6000"><td class="code">6,502</td><td class="name">정산/플랫폼할인-취소</td><td class="enum">PLATFORM_FEE_CANCEL</td>
+          <td class="sign-zero">0</td><td class="sign-zero">0</td><td class="sign-zero">0</td><td class="sign-neg">-1</td>
+          <td class="sign-zero">0</td><td class="sign-pos">+1</td><td class="sign-zero">0</td><td class="sign-zero">0</td>
+          <td class="sign-zero">0</td><td class="sign-zero">0</td><td><span class="badge-live">사용</span></td>
+          <td class="desc">재정산 시 기존 플랫폼할인 취소</td></tr>
+        <tr class="grp-6000"><td class="code">6,503</td><td class="name">정산/플랫폼기준금액-취소</td><td class="enum">PLATFORM_FEE_CANCEL</td>
+          <td class="sign-zero">0</td><td class="sign-zero">0</td><td class="sign-zero">0</td><td class="sign-neg">-1</td>
+          <td class="sign-zero">0</td><td class="sign-pos">+1</td><td class="sign-zero">0</td><td class="sign-zero">0</td>
+          <td class="sign-zero">0</td><td class="sign-zero">0</td><td><span class="badge-live">사용</span></td>
+          <td class="desc">재정산 시 기존 기준금액 취소</td></tr>
+        <tr class="grp-6000"><td class="code">6,510</td><td class="name">정산/PG수수료-취소</td><td class="enum">PG_FEE_CANCEL</td>
+          <td class="sign-zero">0</td><td class="sign-zero">0</td><td class="sign-zero">0</td><td class="sign-zero">0</td>
+          <td class="sign-pos">+1</td><td class="sign-pos">+1</td><td class="sign-neg">-1</td><td class="sign-neg">-1</td>
+          <td class="sign-zero">0</td><td class="sign-zero">0</td><td><span class="badge-live">사용</span></td>
+          <td class="desc">PG 취소 시 수수료 취소</td></tr>
+        <tr class="grp-6000"><td class="code">6,511</td><td class="name">정산/PG거래금액-취소</td><td class="enum">PG_FEE_CANCEL</td>
+          <td class="sign-zero">0</td><td class="sign-zero">0</td><td class="sign-zero">0</td><td class="sign-zero">0</td>
+          <td class="sign-zero">0</td><td class="sign-neg">-1</td><td class="sign-zero">0</td><td class="sign-pos">+1</td>
+          <td class="sign-zero">0</td><td class="sign-zero">0</td><td><span class="badge-live">사용</span></td>
+          <td class="desc">PG 취소 시 거래금액 취소</td></tr>
+        <tr class="grp-6000 status-hold"><td class="code">6,520</td><td class="name">정산/채널수수료-취소</td><td class="enum">CHANNEL_FEE_CANCEL</td>
+          <td class="sign-zero">0</td><td class="sign-zero">0</td><td class="sign-zero">0</td><td class="sign-zero">0</td>
+          <td class="sign-pos">+1</td><td class="sign-pos">+1</td><td class="sign-zero">0</td><td class="sign-zero">0</td>
+          <td class="sign-neg">-1</td><td class="sign-neg">-1</td><td><span class="badge-hold">스코프外</span></td>
+          <td class="desc">채널수수료 취소 - 제외</td></tr>
+
+        <tr class="grp-sep"><td colspan="15"></td></tr>
+
+        <!-- 9000: 마감 (전체 스코프 제외 - 정책 후결정) -->
+        <tr class="grp-9000 status-hold"><td class="code">9,001</td><td class="name">마감/여행사</td><td class="enum">CLOSE_AGENCY</td>
+          <td class="sign-zero">0</td><td class="sign-zero">0</td><td class="sign-neg">-1</td><td class="sign-neg">-1</td>
+          <td class="sign-zero">0</td><td class="sign-zero">0</td><td class="sign-zero">0</td><td class="sign-zero">0</td>
+          <td class="sign-zero">0</td><td class="sign-zero">0</td><td><span class="badge-hold">스코프外</span></td>
+          <td class="desc">마감 정책 후결정 (트리거/주기 미확정)</td></tr>
+        <tr class="grp-9000 status-hold"><td class="code">9,002</td><td class="name">마감/플랫폼</td><td class="enum">CLOSE_PLATFORM</td>
+          <td class="sign-zero">0</td><td class="sign-zero">0</td><td class="sign-zero">0</td><td class="sign-zero">0</td>
+          <td class="sign-neg">-1</td><td class="sign-neg">-1</td><td class="sign-zero">0</td><td class="sign-zero">0</td>
+          <td class="sign-zero">0</td><td class="sign-zero">0</td><td><span class="badge-hold">스코프外</span></td>
+          <td class="desc">플랫폼 마감</td></tr>
+        <tr class="grp-9000 status-hold"><td class="code">9,003</td><td class="name">마감/PG사</td><td class="enum">CLOSE_PG</td>
+          <td class="sign-zero">0</td><td class="sign-zero">0</td><td class="sign-zero">0</td><td class="sign-zero">0</td>
+          <td class="sign-zero">0</td><td class="sign-zero">0</td><td class="sign-neg">-1</td><td class="sign-neg">-1</td>
+          <td class="sign-zero">0</td><td class="sign-zero">0</td><td><span class="badge-hold">스코프外</span></td>
+          <td class="desc">PG 마감</td></tr>
+        <tr class="grp-9000 status-hold"><td class="code">9,004</td><td class="name">마감/채널사</td><td class="enum">CLOSE_CHANNEL</td>
+          <td class="sign-zero">0</td><td class="sign-zero">0</td><td class="sign-zero">0</td><td class="sign-zero">0</td>
+          <td class="sign-zero">0</td><td class="sign-zero">0</td><td class="sign-zero">0</td><td class="sign-zero">0</td>
+          <td class="sign-neg">-1</td><td class="sign-neg">-1</td><td><span class="badge-hold">스코프外</span></td>
+          <td class="desc">채널 마감</td></tr>
+        <tr class="grp-9000 status-hold"><td class="code">9,501~9,504</td><td class="name">마감-원복 4종</td><td class="enum">CLOSE_*_RETURN</td>
+          <td class="sign-zero">0</td><td class="sign-zero">0</td><td class="sign-pos">+1</td><td class="sign-pos">+1</td>
+          <td class="sign-pos">+1</td><td class="sign-pos">+1</td><td class="sign-pos">+1</td><td class="sign-pos">+1</td>
+          <td class="sign-pos">+1</td><td class="sign-pos">+1</td><td><span class="badge-hold">스코프外</span></td>
+          <td class="desc">주체별 마감 원복 (여행사·플랫폼·PG·채널)</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <div class="foot-note">
+    <strong>기호</strong>: 손익 <span class="sign-neg">-1</span>=비용/부담 · <span class="sign-pos">+1</span>=매출/수익 · 자금 <span class="sign-neg">-1</span>=출금 · <span class="sign-pos">+1</span>=입금 ·
+    <strong>상태</strong>: <span class="badge-live">사용</span>=정상 사용 · <span class="badge-mig">MIG</span>=마이그레이션·미래대비 (스키마 존재/로직 미활성) · <span class="badge-hold">스코프外</span>=이번 iteration 제외 (채널정산·마감정책 미확정)
+    <br><strong>3개 날짜 정의</strong>: <code>created_at</code>=DB 인서트시각 · <code>발생일</code>=비즈니스 이벤트 발생 (관리자 backdated=조정일) · <code>실행일</code>=자금 실질 이동/손익 확정 (미래일 가능)
+  </div>
+</div>
+
+<!-- ================ ② 예시 원장항목 리스트업 ================ -->
+<div class="main-card">
+  <div class="card-head">
+    ② 예시 원장항목 리스트업 — 9개 실 예약 케이스
+    <span class="sub">원장_케이스 정리 시트 기준 · 각 케이스별 rsv_ledger_items 예상 이벤트</span>
+  </div>
+  <div class="foot-note" style="border-top:none;border-bottom:1px solid #f0f0f0;background:#fafcff;">
+    <strong>예시 예약 7건 + 취소위약금 2건 = 총 9건.</strong> 각 케이스의 실제 결제·정산 데이터를 최종 코드체계로 매핑한 예약원장 이벤트 리스트. 관리자 화면상 "예약원장" 탭에서 보게 될 로우 예시.
+  </div>
+</div>
+
+<!-- Case 1 -->
+<div class="case-card">
+  <div class="case-head">
+    <span class="case-num">1</span>
+    <span class="case-tag case-tag-normal">일반-선취/일정산</span>
+    <span class="case-title">교원투어 여행이지 · 전액결제 · 출발완료</span>
+    <span class="case-meta">26062912-2000101N · 상품가 1,438,000 · 결제 1,433,000</span>
+  </div>
+  <div class="ledger-wrap">
+    <table class="case-events">
+      <thead><tr><th>순번</th><th>코드</th><th>항목</th><th>발생일</th><th>실행일</th><th>주체</th><th style="width:120px;">금액</th><th>비고</th></tr></thead>
+      <tbody>
+        <tr><td>1</td><td class="code">1,001</td><td class="name">상품/정가</td><td>2026-06-29</td><td>2026-06-29</td><td>고객→여행사</td><td class="amount">1,438,000</td><td>인원2 (성인1+아동1)</td></tr>
+        <tr><td>2</td><td class="code">2,002</td><td class="name">할인/특가_플랫폼</td><td>2026-06-29</td><td>2026-06-29</td><td>고객+/회사-</td><td class="amount">5,000</td><td>트립특가</td></tr>
+        <tr class="evt-payment"><td>3</td><td class="code">4,002</td><td class="name">결제/승인_PG (NICE)</td><td>2026-06-29</td><td>2026-07-07</td><td>고객+/PG+</td><td class="amount">1,433,000</td><td>카드결제 (imp_430219744027)</td></tr>
+        <tr class="evt-settle"><td>4</td><td class="code">6,003</td><td class="name">정산/플랫폼기준금액</td><td>2026-07-07</td><td>2026-07-14</td><td>여행사+/회사-</td><td class="amount">1,438,000</td><td>정산기준일=출발일+1</td></tr>
+        <tr class="evt-settle"><td>5</td><td class="code">6,002</td><td class="name">정산/플랫폼할인</td><td>2026-07-07</td><td>2026-07-14</td><td>여행사+/회사-</td><td class="amount">5,000</td><td>트립특가 정산</td></tr>
+        <tr class="evt-settle"><td>6</td><td class="code">6,001</td><td class="name">정산/플랫폼이용료</td><td>2026-07-07</td><td>2026-07-14</td><td>여행사-/회사+</td><td class="amount">126,104</td><td>8.80% × 1,433,000</td></tr>
+        <tr class="evt-settle"><td>7</td><td class="code">6,011</td><td class="name">정산/PG거래금액</td><td>2026-06-29</td><td>2026-07-07</td><td>회사+/PG-</td><td class="amount">1,433,000</td><td>PG정산완료일 소급</td></tr>
+        <tr class="evt-settle"><td>8</td><td class="code">6,010</td><td class="name">정산/PG수수료</td><td>2026-06-29</td><td>2026-07-07</td><td>회사-/PG+</td><td class="amount">35,467</td><td>2.25%+VAT (32,243+3,224)</td></tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- Case 2 -->
+<div class="case-card">
+  <div class="case-head">
+    <span class="case-num">2</span>
+    <span class="case-tag case-tag-normal">일반-선취/월정산</span>
+    <span class="case-title">웹투어 · 전액결제 · 슈퍼세일 할인대전</span>
+    <span class="case-meta">26030714-3900101G · 상품가 3,983,000 · 결제 3,316,000</span>
+  </div>
+  <div class="ledger-wrap">
+    <table class="case-events">
+      <thead><tr><th>순번</th><th>코드</th><th>항목</th><th>발생일</th><th>실행일</th><th>주체</th><th style="width:120px;">금액</th><th>비고</th></tr></thead>
+      <tbody>
+        <tr><td>1</td><td class="code">1,001</td><td class="name">상품/정가</td><td>2026-03-07</td><td>2026-03-07</td><td>고객→여행사</td><td class="amount">3,983,000</td><td>인원7 (성인6+아동1)</td></tr>
+        <tr><td>2</td><td class="code">2,001</td><td class="name">할인/특가_여행사</td><td>2026-03-07</td><td>2026-03-07</td><td>고객+/여행사-</td><td class="amount">79,625</td><td>여행사 2%</td></tr>
+        <tr><td>3</td><td class="code">2,002</td><td class="name">할인/특가_플랫폼</td><td>2026-03-07</td><td>2026-03-07</td><td>고객+/회사-</td><td class="amount">557,375</td><td>트립 14% (슈퍼세일)</td></tr>
+        <tr><td>4</td><td class="code">2,202</td><td class="name">할인/쿠폰_플랫폼</td><td>2026-03-07</td><td>2026-03-07</td><td>고객+/회사-</td><td class="amount">30,000</td><td>트립쿠폰</td></tr>
+        <tr class="evt-payment"><td>5</td><td class="code">4,002</td><td class="name">결제/승인_PG (NICE 토스페이)</td><td>2026-03-07</td><td>2026-03-16</td><td>고객+/PG+</td><td class="amount">3,316,000</td><td>imp_025000417930</td></tr>
+        <tr class="evt-settle"><td>6</td><td class="code">6,003</td><td class="name">정산/플랫폼기준금액</td><td>2026-04-06</td><td>2026-05-11</td><td>여행사+/회사-</td><td class="amount">3,903,375</td><td>정산기준일=출발일+1</td></tr>
+        <tr class="evt-settle"><td>7</td><td class="code">6,002</td><td class="name">정산/플랫폼할인</td><td>2026-04-06</td><td>2026-05-11</td><td>여행사+/회사-</td><td class="amount">587,375</td><td>트립특가+트립쿠폰</td></tr>
+        <tr class="evt-settle"><td>8</td><td class="code">6,001</td><td class="name">정산/플랫폼이용료</td><td>2026-04-06</td><td>2026-05-11</td><td>여행사-/회사+</td><td class="amount">291,808</td><td>8.80%</td></tr>
+        <tr class="evt-settle"><td>9</td><td class="code">6,011</td><td class="name">정산/PG거래금액</td><td>2026-03-07</td><td>2026-03-16</td><td>회사+/PG-</td><td class="amount">3,316,000</td><td>PG정산완료일 소급</td></tr>
+        <tr class="evt-settle"><td>10</td><td class="code">6,010</td><td class="name">정산/PG수수료</td><td>2026-03-07</td><td>2026-03-16</td><td>회사-/PG+</td><td class="amount">82,800</td><td>75,273 + VAT 7,527</td></tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- Case 3 -->
+<div class="case-card">
+  <div class="case-head">
+    <span class="case-num">3</span>
+    <span class="case-tag case-tag-normal">일반-선취/월정산</span>
+    <span class="case-title">웹투어 · 예약금결제 (3회 분할) · 취소완료</span>
+    <span class="case-meta">26031914-3100101Q · 상품가 3,196,000 · 결제 2,716,000</span>
+  </div>
+  <div class="ledger-wrap">
+    <table class="case-events">
+      <thead><tr><th>순번</th><th>코드</th><th>항목</th><th>발생일</th><th>실행일</th><th>주체</th><th style="width:120px;">금액</th><th>비고</th></tr></thead>
+      <tbody>
+        <tr><td>1</td><td class="code">1,001</td><td class="name">상품/정가</td><td>2026-03-19</td><td>2026-03-19</td><td>고객→여행사</td><td class="amount">3,196,000</td><td>인원4 (성인2+아동2)</td></tr>
+        <tr><td>2</td><td class="code">2,001</td><td class="name">할인/특가_여행사</td><td>2026-03-19</td><td>2026-03-19</td><td>고객+/여행사-</td><td class="amount">60,000</td><td>여행사 2%</td></tr>
+        <tr><td>3</td><td class="code">2,002</td><td class="name">할인/특가_플랫폼</td><td>2026-03-19</td><td>2026-03-19</td><td>고객+/회사-</td><td class="amount">400,000</td><td>트립 14%</td></tr>
+        <tr><td>4</td><td class="code">2,202</td><td class="name">할인/쿠폰_플랫폼</td><td>2026-03-19</td><td>2026-03-19</td><td>고객+/회사-</td><td class="amount">20,000</td><td>트립쿠폰</td></tr>
+        <tr class="evt-payment"><td>5</td><td class="code">4,002</td><td class="name">결제/승인_PG #1 (NICE)</td><td>2026-03-19</td><td>2026-03-30</td><td>고객+/PG+</td><td class="amount">400,000</td><td>예약금 카드</td></tr>
+        <tr class="evt-payment"><td>6</td><td class="code">4,002</td><td class="name">결제/승인_PG #2 (NICE)</td><td>2026-03-24</td><td>2026-04-08</td><td>고객+/PG+</td><td class="amount">400,000</td><td>예약금 카드</td></tr>
+        <tr class="evt-payment"><td>7</td><td class="code">4,002</td><td class="name">결제/승인_PG #3 (TOSS)</td><td>2026-05-21</td><td>2026-06-05</td><td>고객+/PG+</td><td class="amount">1,916,000</td><td>잔금 카드</td></tr>
+        <tr class="evt-settle"><td>8</td><td class="code">6,003</td><td class="name">정산/플랫폼기준금액</td><td>2026-06-18</td><td>2026-07-07</td><td>여행사+/회사-</td><td class="amount">3,136,000</td><td>정산기준일=출발일+1</td></tr>
+        <tr class="evt-settle"><td>9</td><td class="code">6,002</td><td class="name">정산/플랫폼할인</td><td>2026-06-18</td><td>2026-07-07</td><td>여행사+/회사-</td><td class="amount">420,000</td><td>트립특가+트립쿠폰</td></tr>
+        <tr class="evt-settle"><td>10</td><td class="code">6,001</td><td class="name">정산/플랫폼이용료</td><td>2026-06-18</td><td>2026-07-07</td><td>여행사-/회사+</td><td class="amount">239,008</td><td>8.80%</td></tr>
+        <tr class="evt-settle"><td>11</td><td class="code">6,010</td><td class="name">정산/PG수수료 (합계)</td><td>—</td><td>—</td><td>회사-/PG+</td><td class="amount">67,397</td><td>9,988+9,988+47,421</td></tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- Case 4 -->
+<div class="case-card">
+  <div class="case-head">
+    <span class="case-num">4</span>
+    <span class="case-tag case-tag-normal">일반-후취/주정산</span>
+    <span class="case-title">모두투어 · 전액결제 · 출발완료</span>
+    <span class="case-meta">26063015-2200101F · 상품가 4,257,000 · 결제 4,027,000</span>
+  </div>
+  <div class="ledger-wrap">
+    <table class="case-events">
+      <thead><tr><th>순번</th><th>코드</th><th>항목</th><th>발생일</th><th>실행일</th><th>주체</th><th style="width:120px;">금액</th><th>비고</th></tr></thead>
+      <tbody>
+        <tr><td>1</td><td class="code">1,001</td><td class="name">상품/정가</td><td>2026-06-30</td><td>2026-06-30</td><td>고객→여행사</td><td class="amount">4,257,000</td><td>인원3 (성인3)</td></tr>
+        <tr><td>2</td><td class="code">2,001</td><td class="name">할인/특가_여행사</td><td>2026-06-30</td><td>2026-06-30</td><td>고객+/여행사-</td><td class="amount">210,000</td><td>VIP기획전 여행사부담 5%</td></tr>
+        <tr><td>3</td><td class="code">2,202</td><td class="name">할인/쿠폰_플랫폼</td><td>2026-06-30</td><td>2026-06-30</td><td>고객+/회사-</td><td class="amount">20,000</td><td>트립쿠폰</td></tr>
+        <tr class="evt-payment"><td>4</td><td class="code">4,002</td><td class="name">결제/승인_PG (NICE)</td><td>2026-06-30</td><td>2026-07-07</td><td>고객+/PG+</td><td class="amount">4,027,000</td><td>imp_666578413864</td></tr>
+        <tr class="evt-settle"><td>5</td><td class="code">6,003</td><td class="name">정산/플랫폼기준금액</td><td>2026-07-05</td><td>2026-07-14</td><td>여행사+/회사-</td><td class="amount">4,047,000</td><td>정산기준일=출발일+1 (후취)</td></tr>
+        <tr class="evt-settle"><td>6</td><td class="code">6,002</td><td class="name">정산/플랫폼할인</td><td>2026-07-05</td><td>2026-07-14</td><td>여행사+/회사-</td><td class="amount">20,000</td><td>트립쿠폰</td></tr>
+        <tr class="evt-settle"><td>7</td><td class="code">6,001</td><td class="name">정산/플랫폼이용료</td><td>2026-07-05</td><td>2026-07-14</td><td>여행사-/회사+</td><td class="amount">354,376</td><td>8.80%</td></tr>
+        <tr class="evt-settle"><td>8</td><td class="code">6,011</td><td class="name">정산/PG거래금액</td><td>2026-06-30</td><td>2026-07-07</td><td>회사+/PG-</td><td class="amount">4,027,000</td><td>—</td></tr>
+        <tr class="evt-settle"><td>9</td><td class="code">6,010</td><td class="name">정산/PG수수료</td><td>2026-06-30</td><td>2026-07-07</td><td>회사-/PG+</td><td class="amount">99,668</td><td>90,608 + VAT 9,060</td></tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- Case 5 -->
+<div class="case-card">
+  <div class="case-head">
+    <span class="case-num">5</span>
+    <span class="case-tag case-tag-recalc">재정산-선취/일정산</span>
+    <span class="case-title">하나투어 · 예약금결제 + 취소환불 → 재정산</span>
+    <span class="case-meta">25121216-2000101M · 상품가 794,000 · 최종결제 779,000</span>
+  </div>
+  <div class="ledger-wrap">
+    <table class="case-events">
+      <thead><tr><th>순번</th><th>코드</th><th>항목</th><th>발생일</th><th>실행일</th><th>주체</th><th style="width:120px;">금액</th><th>비고</th></tr></thead>
+      <tbody>
+        <tr><td>1</td><td class="code">1,001</td><td class="name">상품/정가</td><td>2025-12-12</td><td>2025-12-12</td><td>고객→여행사</td><td class="amount">794,000</td><td>인원1 (성인)</td></tr>
+        <tr><td>2</td><td class="code">2,001</td><td class="name">할인/특가_여행사</td><td>2025-12-12</td><td>2025-12-12</td><td>고객+/여행사-</td><td class="amount">15,000</td><td>하나특가 2%</td></tr>
+        <tr class="evt-payment"><td>3</td><td class="code">4,002</td><td class="name">결제/승인_PG #1 (NICE)</td><td>2025-12-12</td><td>2025-12-22</td><td>고객+/PG+</td><td class="amount">100,000</td><td>예약금 계좌이체</td></tr>
+        <tr class="evt-payment"><td>4</td><td class="code">4,002</td><td class="name">결제/승인_PG #2 (NICE)</td><td>2025-12-16</td><td>2025-12-29</td><td>고객+/PG+</td><td class="amount">791,000</td><td>잔금 계좌이체</td></tr>
+        <tr class="evt-cancel"><td>5</td><td class="code">4,102</td><td class="name">결제/취소_PG (환불)</td><td>2026-01-02</td><td>2026-01-15</td><td>고객-/PG-</td><td class="amount">112,000</td><td>부분환불 (계좌이체)</td></tr>
+        <tr class="evt-settle"><td>6</td><td class="code">6,003</td><td class="name">정산/플랫폼기준금액 (1차)</td><td>2025-12-31</td><td>2026-01-15</td><td>여행사+/회사-</td><td class="amount">891,000</td><td>1차 정산 (재정산 전)</td></tr>
+        <tr class="evt-cancel evt-settle"><td>7</td><td class="code">6,503</td><td class="name">정산/플랫폼기준금액-취소</td><td>2026-01-31</td><td>—</td><td>여행사-/회사+</td><td class="amount">-112,000</td><td>재정산 (환불분 취소)</td></tr>
+        <tr class="evt-settle"><td>8</td><td class="code">6,003</td><td class="name">정산/플랫폼기준금액 (재정산)</td><td>2026-01-31</td><td>—</td><td>여행사+/회사-</td><td class="amount">779,000</td><td>최종 정산기준</td></tr>
+        <tr class="evt-settle"><td>9</td><td class="code">6,010</td><td class="name">정산/PG수수료</td><td>—</td><td>—</td><td>회사-/PG+</td><td class="amount">660</td><td>300+30 × 2회</td></tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- Case 6 -->
+<div class="case-card">
+  <div class="case-head">
+    <span class="case-num">6</span>
+    <span class="case-tag case-tag-recalc">재정산-선취/월정산</span>
+    <span class="case-title">웹투어 · 전액결제 · 재정산 (정산기준일 조정)</span>
+    <span class="case-meta">26032717-1400101N · 상품가 1,258,000 · 결제 1,248,000</span>
+  </div>
+  <div class="ledger-wrap">
+    <table class="case-events">
+      <thead><tr><th>순번</th><th>코드</th><th>항목</th><th>발생일</th><th>실행일</th><th>주체</th><th style="width:120px;">금액</th><th>비고</th></tr></thead>
+      <tbody>
+        <tr><td>1</td><td class="code">1,001</td><td class="name">상품/정가</td><td>2026-03-27</td><td>2026-03-27</td><td>고객→여행사</td><td class="amount">1,258,000</td><td>인원2 (성인2)</td></tr>
+        <tr><td>2</td><td class="code">2,202</td><td class="name">할인/쿠폰_플랫폼</td><td>2026-03-27</td><td>2026-03-27</td><td>고객+/회사-</td><td class="amount">10,000</td><td>트립쿠폰</td></tr>
+        <tr class="evt-payment"><td>3</td><td class="code">4,002</td><td class="name">결제/승인_PG (NICE)</td><td>2026-03-27</td><td>2026-04-08</td><td>고객+/PG+</td><td class="amount">1,248,000</td><td>imp_913248354549</td></tr>
+        <tr class="evt-settle"><td>4</td><td class="code">6,003</td><td class="name">정산/플랫폼기준금액 (1차)</td><td>2026-04-06</td><td>—</td><td>여행사+/회사-</td><td class="amount">1,258,000</td><td>1차 정산 완료</td></tr>
+        <tr class="evt-cancel evt-settle"><td>5</td><td class="code">6,503</td><td class="name">정산/플랫폼기준금액-취소</td><td>2026-05-11</td><td>—</td><td>여행사-/회사+</td><td class="amount">-1,258,000</td><td>재정산 트리거</td></tr>
+        <tr class="evt-settle"><td>6</td><td class="code">6,003</td><td class="name">정산/플랫폼기준금액 (재정산)</td><td>2026-05-11</td><td>—</td><td>여행사+/회사-</td><td class="amount">1,258,000</td><td>재정산기준일 반영</td></tr>
+        <tr class="evt-settle"><td>7</td><td class="code">6,001</td><td class="name">정산/플랫폼이용료</td><td>2026-05-11</td><td>—</td><td>여행사-/회사+</td><td class="amount">109,824</td><td>8.80%</td></tr>
+        <tr class="evt-settle"><td>8</td><td class="code">6,010</td><td class="name">정산/PG수수료</td><td>2026-03-27</td><td>2026-04-08</td><td>회사-/PG+</td><td class="amount">31,163</td><td>28,330 + VAT 2,833</td></tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- Case 7 -->
+<div class="case-card">
+  <div class="case-head">
+    <span class="case-num">7</span>
+    <span class="case-tag case-tag-negm">판매+위약금+역마진</span>
+    <span class="case-title">웹투어 · 예약금결제 · 1인 취소 위약금 194,000</span>
+    <span class="case-meta">26031815-5400102M · 상품가 6,831,000 · 결제 5,936,000</span>
+  </div>
+  <div class="ledger-wrap">
+    <table class="case-events">
+      <thead><tr><th>순번</th><th>코드</th><th>항목</th><th>발생일</th><th>실행일</th><th>주체</th><th style="width:120px;">금액</th><th>비고</th></tr></thead>
+      <tbody>
+        <tr><td>1</td><td class="code">1,001</td><td class="name">상품/정가</td><td>2026-03-18</td><td>2026-03-18</td><td>고객→여행사</td><td class="amount">6,831,000</td><td>인원9 (성인9)</td></tr>
+        <tr><td>2</td><td class="code">2,001</td><td class="name">할인/특가_여행사</td><td>2026-03-18</td><td>2026-03-18</td><td>고객+/여행사-</td><td class="amount">135,000</td><td>슈퍼세일 여행사 2%</td></tr>
+        <tr><td>3</td><td class="code">2,002</td><td class="name">할인/특가_플랫폼</td><td>2026-03-18</td><td>2026-03-18</td><td>고객+/회사-</td><td class="amount">900,000</td><td>트립 14%</td></tr>
+        <tr><td>4</td><td class="code">2,102</td><td class="name">할인/수동_플랫폼</td><td>2026-03-18</td><td>2026-03-18</td><td>고객+/회사-</td><td class="amount">54,000</td><td>추가할인 (트립 부담)</td></tr>
+        <tr class="evt-payment"><td>5</td><td class="code">4,002</td><td class="name">결제/승인_PG #1 (네이버페이)</td><td>2026-03-18</td><td>2026-03-30</td><td>고객+/PG+</td><td class="amount">1,000,000</td><td>예약금</td></tr>
+        <tr class="evt-payment"><td>6</td><td class="code">4,002</td><td class="name">결제/승인_PG #2 (네이버페이)</td><td>2026-03-19</td><td>2026-03-30</td><td>고객+/PG+</td><td class="amount">2,690,000</td><td>—</td></tr>
+        <tr class="evt-payment"><td>7</td><td class="code">4,002</td><td class="name">결제/승인_PG #3 (카드)</td><td>2026-04-20</td><td>2026-04-29</td><td>고객+/PG+</td><td class="amount">2,690,000</td><td>—</td></tr>
+        <tr class="evt-cancel"><td>8</td><td class="code">5,001</td><td class="name">상품/정가-취소 (1인)</td><td>2026-04-27</td><td>2026-04-27</td><td>고객+/여행사-</td><td class="amount">759,000</td><td>1인 취소분</td></tr>
+        <tr class="evt-cancel"><td>9</td><td class="code">5,020</td><td class="name">상품/취소위약금</td><td>2026-04-27</td><td>2026-04-27</td><td>고객-/여행사+</td><td class="amount">194,000</td><td>1인 위약금 (담당 이충희)</td></tr>
+        <tr class="evt-cancel"><td>10</td><td class="code">4,102</td><td class="name">결제/취소_PG (환불)</td><td>2026-04-27</td><td>2026-05-08</td><td>고객-/PG-</td><td class="amount">444,000</td><td>부분환불 (카드)</td></tr>
+        <tr class="evt-settle"><td>11</td><td class="code">6,003</td><td class="name">정산/플랫폼기준금액</td><td>2026-05-16</td><td>—</td><td>여행사+/회사-</td><td class="amount">6,696,000</td><td>취소 반영 후</td></tr>
+        <tr class="evt-settle"><td>12</td><td class="code">6,002</td><td class="name">정산/플랫폼할인</td><td>2026-05-16</td><td>—</td><td>여행사+/회사-</td><td class="amount">954,000</td><td>트립특가+수동</td></tr>
+        <tr class="evt-settle"><td>13</td><td class="code">6,001</td><td class="name">정산/플랫폼이용료 (판매분)</td><td>2026-05-16</td><td>—</td><td>여행사-/회사+</td><td class="amount">505,296</td><td>8.80%</td></tr>
+        <tr class="evt-settle"><td>14</td><td class="code">6,001</td><td class="name">정산/플랫폼이용료 (위약금)</td><td>2026-05-16</td><td>—</td><td>여행사-/회사+</td><td class="amount">6,402</td><td>3.30% × 194,000</td></tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- Case 8 -->
+<div class="case-card">
+  <div class="case-head">
+    <span class="case-num">8</span>
+    <span class="case-tag case-tag-penalty">일반-취소위약금만</span>
+    <span class="case-title">노랑풍선 · 예약금결제 · 취소완료 (위약금만 정산)</span>
+    <span class="case-meta">26030914-4300101D · 위약금만 발생</span>
+  </div>
+  <div class="ledger-wrap">
+    <table class="case-events">
+      <thead><tr><th>순번</th><th>코드</th><th>항목</th><th>발생일</th><th>실행일</th><th>주체</th><th style="width:120px;">금액</th><th>비고</th></tr></thead>
+      <tbody>
+        <tr><td>1</td><td class="code">1,001</td><td class="name">상품/정가</td><td>2026-03-09</td><td>2026-03-09</td><td>고객→여행사</td><td class="amount">(상품가)</td><td>초기 예약 접수</td></tr>
+        <tr class="evt-payment"><td>2</td><td class="code">4,002</td><td class="name">결제/승인_PG</td><td>2026-03-09</td><td>—</td><td>고객+/PG+</td><td class="amount">(예약금)</td><td>예약금 결제</td></tr>
+        <tr class="evt-cancel"><td>3</td><td class="code">5,001</td><td class="name">상품/정가-취소</td><td>취소일</td><td>취소일</td><td>고객+/여행사-</td><td class="amount">(전액)</td><td>취소완료 전환</td></tr>
+        <tr class="evt-cancel"><td>4</td><td class="code">5,020</td><td class="name">상품/취소위약금</td><td>취소일</td><td>취소일</td><td>고객-/여행사+</td><td class="amount">(위약금)</td><td>위약금 부과</td></tr>
+        <tr class="evt-cancel"><td>5</td><td class="code">4,102</td><td class="name">결제/취소_PG</td><td>취소일</td><td>PG정산일</td><td>고객-/PG-</td><td class="amount">(예약금-위약금)</td><td>부분환불</td></tr>
+        <tr class="evt-settle"><td>6</td><td class="code">6,003</td><td class="name">정산/플랫폼기준금액</td><td>—</td><td>—</td><td>여행사+/회사-</td><td class="amount">(위약금)</td><td>위약금만 정산 대상</td></tr>
+        <tr class="evt-settle"><td>7</td><td class="code">6,001</td><td class="name">정산/플랫폼이용료 (위약금)</td><td>—</td><td>—</td><td>여행사-/회사+</td><td class="amount">위약금 × 3.30%</td><td>위약금 별도 수수료율</td></tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- Case 9 -->
+<div class="case-card">
+  <div class="case-head">
+    <span class="case-num">9</span>
+    <span class="case-tag case-tag-normal">일반</span>
+    <span class="case-tag case-tag-penalty">위약금 병존</span>
+    <span class="case-title">교원투어 · 예약금결제 · 판매+취소위약금 통합</span>
+    <span class="case-meta">26033016-4200101U · 출발완료</span>
+  </div>
+  <div class="ledger-wrap">
+    <table class="case-events">
+      <thead><tr><th>순번</th><th>코드</th><th>항목</th><th>발생일</th><th>실행일</th><th>주체</th><th style="width:120px;">금액</th><th>비고</th></tr></thead>
+      <tbody>
+        <tr><td>1</td><td class="code">1,001</td><td class="name">상품/정가</td><td>2026-03-30</td><td>2026-03-30</td><td>고객→여행사</td><td class="amount">(상품가)</td><td>인원 다수</td></tr>
+        <tr class="evt-payment"><td>2</td><td class="code">4,002</td><td class="name">결제/승인_PG</td><td>2026-03-30</td><td>—</td><td>고객+/PG+</td><td class="amount">(예약금)</td><td>예약금</td></tr>
+        <tr class="evt-cancel"><td>3</td><td class="code">5,001</td><td class="name">상품/정가-취소 (일부)</td><td>—</td><td>—</td><td>고객+/여행사-</td><td class="amount">(취소분)</td><td>인원 일부 취소</td></tr>
+        <tr class="evt-cancel"><td>4</td><td class="code">5,020</td><td class="name">상품/취소위약금</td><td>—</td><td>—</td><td>고객-/여행사+</td><td class="amount">(위약금)</td><td>취소 인원 위약금</td></tr>
+        <tr class="evt-payment"><td>5</td><td class="code">4,002</td><td class="name">결제/승인_PG (잔금)</td><td>—</td><td>—</td><td>고객+/PG+</td><td class="amount">(잔금)</td><td>잔금결제 (출발전)</td></tr>
+        <tr class="evt-settle"><td>6</td><td class="code">6,003</td><td class="name">정산/플랫폼기준금액 (판매+위약금)</td><td>정산기준일</td><td>—</td><td>여행사+/회사-</td><td class="amount">(합계)</td><td>판매분+위약금 통합</td></tr>
+        <tr class="evt-settle"><td>7</td><td class="code">6,001</td><td class="name">정산/플랫폼이용료 (판매)</td><td>정산기준일</td><td>—</td><td>여행사-/회사+</td><td class="amount">판매 × 8.80%</td><td>—</td></tr>
+        <tr class="evt-settle"><td>8</td><td class="code">6,001</td><td class="name">정산/플랫폼이용료 (위약금)</td><td>정산기준일</td><td>—</td><td>여행사-/회사+</td><td class="amount">위약금 × 3.30%</td><td>위약금 별도율</td></tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- 예시 요약 -->
+<div class="checksum-card" style="background:#e6f4ff;border-color:#91caff;">
+  <div class="lab" style="color:#0958d9;">예시 리스트업 요약</div>
+  <div class="check-grid">
+    <div>
+      <div style="font-weight:700;color:#0958d9;margin-bottom:4px;">코드 등장 빈도 (9 케이스 기준)</div>
+      <div style="font-family:'SF Mono',monospace;font-size:11px;line-height:1.7;">
+        <strong>1,001</strong> 상품정가 · 9회 (모든 케이스)<br>
+        <strong>4,002</strong> 결제/승인_PG · 18회 (분할결제 포함)<br>
+        <strong>6,001/6,002/6,003</strong> 정산 3종 · 9회 세트<br>
+        <strong>6,010/6,011</strong> PG수수료 · 15회<br>
+        <strong>2,001/2,002</strong> 여/트립특가 · 8회<br>
+        <strong>2,202</strong> 트립쿠폰 · 6회<br>
+        <strong>5,020</strong> 위약금 · 2회 (Case 7·8)<br>
+        <strong>6,501~6,503</strong> 재정산 · 2회 (Case 5·6)<br>
+        <strong>4,102</strong> 결제취소 · 2회 (Case 5·7)
+      </div>
+    </div>
+    <div>
+      <div style="font-weight:700;color:#0958d9;margin-bottom:4px;">이 예시들이 검증하는 것</div>
+      <div style="font-size:11px;color:rgba(0,0,0,.7);line-height:1.7;">
+        ✅ <strong>선취/후취</strong>: 정산기준일 vs 지급완료일 실행일 분리<br>
+        ✅ <strong>월/일/주정산</strong>: 실행일 스케줄이 정산주기와 무관하게 개별 발생일 유지<br>
+        ✅ <strong>분할결제</strong>: 4,002가 결제 건수만큼 반복 (Case 3=3회, Case 7=3회)<br>
+        ✅ <strong>재정산</strong>: 6,501~6,503으로 기존 정산 취소 후 6,001~6,003 신규 발생 (Case 5·6)<br>
+        ✅ <strong>위약금</strong>: 5,020 발생 + 정산 시 별도 수수료율 3.30% 적용 (Case 7·8)<br>
+        ✅ <strong>3주체 할인</strong>: 여행사(2,001) / 플랫폼(2,002) / 쿠폰(2,202) 분리 기록<br>
+        ⚠️ <strong>스코프外</strong>: 채널결제(4,003), 채널수수료(6,020), 마감(9,xxx) 이번 예시 없음
+      </div>
+    </div>
+  </div>
+</div>
+
 <!-- ================ 예약원장-상문 매트릭스 ================ -->
 <div class="main-card">
   <div class="card-head">
-    ① 예약원장-상문 매트릭스
-    <span class="sub">5주체 × (손익 · 자금) + 러닝 tally · 시뮬레이터 시트 그대로 재현</span>
+    ③ 예약원장-상문 매트릭스 (참고 — 시뮬레이터 재현)
+    <span class="sub">5주체 × (손익 · 자금) + 러닝 tally · 상문님 시뮬레이터 시트 그대로 · 코드체계는 ①번 최종본과 별개</span>
   </div>
   <div class="ledger-wrap">
     <table class="ledger">
@@ -681,7 +1354,7 @@ table.ledger{width:100%;border-collapse:collapse;font-size:12px;}
 <!-- ================ 지급원장_V2 ================ -->
 <div class="main-card">
   <div class="card-head">
-    ② 지급원장_V2 — 여행사 지급 상세
+    ④ 지급원장_V2 — 여행사 지급 상세
     <span class="sub">정산기준금액 · 서비스이용료 · 공제금액 · 정산금액 · 세금계산서금액 · 지급상태 5단계</span>
   </div>
   <div class="ledger-wrap">
@@ -864,7 +1537,7 @@ table.ledger{width:100%;border-collapse:collapse;font-size:12px;}
 <!-- ================ 조정내역 관리 ================ -->
 <div class="main-card">
   <div class="card-head">
-    ③ 조정내역 관리
+    ⑤ 조정내역 관리
     <span class="sub">수동등록 조정 · 지급-연결정보(자동) · 상계연결 매핑</span>
   </div>
   <div class="ledger-wrap">
@@ -978,7 +1651,7 @@ table.ledger{width:100%;border-collapse:collapse;font-size:12px;}
 <!-- ================ 정책 요약 ================ -->
 <div class="policy-card">
   <div class="card-head">
-    ④ 상문님 v2 정책 요약 (실무 정리)
+    ⑥ 상문님 v2 정책 요약 (실무 정리)
   </div>
   <div class="policy-list">
     <ol style="list-style-position:inside;">
