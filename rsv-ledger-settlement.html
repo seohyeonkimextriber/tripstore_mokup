@@ -549,11 +549,11 @@ table.ledger{width:100%;border-collapse:collapse;font-size:12px;}
 <!-- ================ ② 예시 원장항목 리스트업 ================ -->
 <div class="main-card">
   <div class="card-head">
-    ② 예시 원장항목 리스트업 — 9개 실 예약 케이스
-    <span class="sub">원장_케이스 정리 시트 기준 · 각 케이스별 rsv_ledger_items 예상 이벤트</span>
+    ② 예시 원장항목 리스트업 — 10개 예약 케이스
+    <span class="sub">원장_케이스 정리 시트 9건 + 실 어드민 원장 재구성 1건 · 각 케이스별 rsv_ledger_items 예상 이벤트</span>
   </div>
   <div class="foot-note" style="border-top:none;border-bottom:1px solid #f0f0f0;background:#fafcff;">
-    <strong>예시 예약 7건 + 취소위약금 2건 = 총 9건.</strong> 각 케이스의 실제 결제·정산 데이터를 최종 코드체계로 매핑한 예약원장 이벤트 리스트. 관리자 화면상 "예약원장" 탭에서 보게 될 로우 예시.
+    <strong>예시 예약 7건 + 취소위약금 2건 + 실 어드민 재구성 1건 = 총 10건.</strong> 각 케이스의 결제·정산 데이터를 최종 코드체계로 매핑한 예약원장 이벤트 리스트. 관리자 화면상 "예약원장" 탭에서 보게 될 로우 예시.
   </div>
 </div>
 
@@ -795,19 +795,62 @@ table.ledger{width:100%;border-collapse:collapse;font-size:12px;}
   </div>
 </div>
 
+<!-- Case 10 (실제 어드민 원장 → 최종 코드 매핑) -->
+<div class="case-card" style="border-color:#91caff;box-shadow:0 0 0 2px #e6f4ff;">
+  <div class="case-head" style="background:#f0f5ff;">
+    <span class="case-num" style="background:#0958d9;">10</span>
+    <span class="case-tag case-tag-normal">일반-선취</span>
+    <span class="case-tag" style="background:#e6f7ff;color:#0958d9;border:1px solid #91caff;">실 어드민 원장 → 최종 코드 재구성</span>
+    <span class="case-title">참좋은여행 · 전액결제 · 출발완료 · 트립쿠폰만</span>
+    <span class="case-meta">26041623-5300101Q · 상품가 2,298,000 · 결제 2,283,000 · 대만 3박4일</span>
+  </div>
+  <div class="foot-note" style="border-top:none;border-bottom:1px solid #f0f0f0;background:#fafcff;">
+    <strong>실제 어드민 원장(<a href="https://admin.tripstore.kr/reservation/ledger/26041623-5300101Q" target="_blank" style="color:#0958d9;font-weight:600;">reservation/ledger/26041623-5300101Q</a>)을 조회해서 최종 코드체계로 재구성한 예시.</strong>
+    예약자 김세경(01062947484)·성인 2명·상품 APP130-260501LJQ2(대만 4일 노쇼핑)·예약 2026-04-16 → 출발 2026-05-01 → 출발완료 2026-05-02.
+    쿠폰 = 4월 앱전용 쿠폰_1.5만원(트립부담 100%).
+  </div>
+  <div class="ledger-wrap">
+    <table class="case-events">
+      <thead><tr><th>순번</th><th>코드</th><th>항목</th><th>발생일</th><th>실행일</th><th>주체 이동</th><th style="width:130px;">금액</th><th>비고</th></tr></thead>
+      <tbody>
+        <tr><td>1</td><td class="code">1,001</td><td class="name">상품/정가 (성인 #1)</td><td>2026-04-16</td><td>2026-04-16</td><td>고객− / 여행사+</td><td class="amount">1,149,000</td><td>인원별 개별 로우</td></tr>
+        <tr><td>2</td><td class="code">1,001</td><td class="name">상품/정가 (성인 #2)</td><td>2026-04-16</td><td>2026-04-16</td><td>고객− / 여행사+</td><td class="amount">1,149,000</td><td>인원별 개별 로우</td></tr>
+        <tr><td>3</td><td class="code">2,202</td><td class="name">할인/쿠폰_플랫폼</td><td>2026-04-16</td><td>2026-04-16</td><td>고객+ / 회사−</td><td class="amount">15,000</td><td>4월 앱전용 쿠폰 (트립부담 100%)</td></tr>
+        <tr class="evt-payment"><td>4</td><td class="code">4,002</td><td class="name">결제/승인_PG</td><td>2026-04-16</td><td>PG정산완료일</td><td>고객+ / PG+</td><td class="amount">2,283,000</td><td>전액결제 1건</td></tr>
+        <tr class="evt-settle"><td>5</td><td class="code">6,011</td><td class="name">정산/PG거래금액</td><td>2026-04-16</td><td>PG정산완료일</td><td>회사+ / PG−</td><td class="amount">2,283,000</td><td>PG 거래 반영</td></tr>
+        <tr class="evt-settle"><td>6</td><td class="code">6,010</td><td class="name">정산/PG수수료 (VAT 포함)</td><td>2026-04-16</td><td>PG정산완료일</td><td>회사− / PG+</td><td class="amount">59,517</td><td>본항 54,107 + VAT 5,410 통합</td></tr>
+        <tr class="evt-settle"><td>7</td><td class="code">6,003</td><td class="name">정산/플랫폼기준금액</td><td>2026-05-02</td><td>지급완료일</td><td>여행사+ / 회사−</td><td class="amount">2,283,000</td><td>정산기준일 = 출발완료일 (선취)</td></tr>
+        <tr class="evt-settle"><td>8</td><td class="code">6,002</td><td class="name">정산/플랫폼할인</td><td>2026-05-02</td><td>지급완료일</td><td>여행사+ / 회사−</td><td class="amount">15,000</td><td>트립쿠폰 정산 반영</td></tr>
+        <tr class="evt-settle"><td>9</td><td class="code">6,001</td><td class="name">정산/플랫폼이용료</td><td>2026-05-02</td><td>지급완료일</td><td>여행사− / 회사+</td><td class="amount">200,904</td><td>2,283,000 × 8.80% (참좋은여행)</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <div class="foot-note" style="background:#f0fdf9;">
+    <strong>검산</strong>:
+    상품가 2,298,000 − 쿠폰 15,000 = <strong>결제필요액 2,283,000</strong> ✅ ·
+    서비스이용료 200,904 = 2,283,000 × 8.80% ✅ ·
+    공제금액 = 200,904 − 15,000(회사부담할인) = <strong>185,904</strong> ·
+    정산금액 = 2,283,000 − 185,904 = <strong>2,097,096</strong> = 어드민 🚩여행사 전체 손익 값 일치 ✅
+    <br><strong style="color:#d4380d;">차이점 (어드민 v1 → 최종본)</strong>:
+    ① 어드민의 `7010 PG→여행사 이전` = 최종본에서는 별도 이벤트 없이 `6,003` 정산 이벤트의 자금 컬럼으로 표현 ·
+    ② 어드민의 `6030 PG수수료부가세` = 최종본에서는 `6,010`에 흡수 (본항+VAT 통합) ·
+    ③ 어드민의 `9000/9500 결산출금/원복` = 최종본 스코프外 (마감정책 후결정)
+  </div>
+</div>
+
 <!-- 예시 요약 -->
 <div class="checksum-card" style="background:#e6f4ff;border-color:#91caff;">
   <div class="lab" style="color:#0958d9;">예시 리스트업 요약</div>
   <div class="check-grid">
     <div>
-      <div style="font-weight:700;color:#0958d9;margin-bottom:4px;">코드 등장 빈도 (9 케이스 기준)</div>
+      <div style="font-weight:700;color:#0958d9;margin-bottom:4px;">코드 등장 빈도 (10 케이스 기준)</div>
       <div style="font-family:'SF Mono',monospace;font-size:11px;line-height:1.7;">
-        <strong>1,001</strong> 상품정가 · 9회 (모든 케이스)<br>
-        <strong>4,002</strong> 결제/승인_PG · 18회 (분할결제 포함)<br>
-        <strong>6,001/6,002/6,003</strong> 정산 3종 · 9회 세트<br>
-        <strong>6,010/6,011</strong> PG수수료 · 15회<br>
+        <strong>1,001</strong> 상품정가 · 11회 (Case 10 인원별 로우 2개)<br>
+        <strong>4,002</strong> 결제/승인_PG · 19회 (분할결제 포함)<br>
+        <strong>6,001/6,002/6,003</strong> 정산 3종 · 10회 세트<br>
+        <strong>6,010/6,011</strong> PG수수료 · 16회<br>
         <strong>2,001/2,002</strong> 여/트립특가 · 8회<br>
-        <strong>2,202</strong> 트립쿠폰 · 6회<br>
+        <strong>2,202</strong> 트립쿠폰 · 7회 (Case 10 추가)<br>
         <strong>5,020</strong> 위약금 · 2회 (Case 7·8)<br>
         <strong>6,501~6,503</strong> 재정산 · 2회 (Case 5·6)<br>
         <strong>4,102</strong> 결제취소 · 2회 (Case 5·7)
