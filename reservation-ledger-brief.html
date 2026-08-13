@@ -1,0 +1,721 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>예약원장 프로젝트 · 2026-08-13 · 인수인계용</title>
+<meta name="description" content="트립스토어 신규 예약원장 프로젝트 종합 정리 - 트랙 구조, 마무리 스코프, 남은 설계, 원장 도메인 지식" />
+<style>
+  :root{
+    --navy:#0a1628; --navy-2:#101f34; --ink:#152031; --muted:#657386;
+    --line:#dce3e5; --paper:#f4f6f3; --white:#fff;
+    --mint:#5ce1b9; --mint-dark:#0d8d6b; --amber:#f2b84b; --blue-gray:#8fa3b8;
+    --emerald:#10b981; --amber-2:#f59e0b; --sky:#3b82f6; --orange:#ea580c;
+  }
+  *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;border:0 solid}
+  html{scroll-behavior:smooth;-webkit-text-size-adjust:100%}
+  body{background:var(--paper);color:var(--ink);-webkit-font-smoothing:antialiased;
+    font-family:Pretendard,"Apple SD Gothic Neo","Noto Sans KR",system-ui,sans-serif;line-height:1.5}
+  a{color:inherit;text-decoration:none;-webkit-tap-highlight-color:transparent}
+  ul,ol{list-style:none}
+  em{font-style:normal;color:var(--mint)}
+  code{color:#0e6f58;background:#e2e8e5;padding:2px 6px;
+    font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:.88em}
+
+  /* HEADER */
+  .site-header{position:sticky;top:0;left:0;z-index:30;height:64px;
+    padding:0 max(28px,50vw - 610px);display:flex;justify-content:space-between;align-items:center;
+    background:#0a1628ed;color:#dbe4eb;-webkit-backdrop-filter:blur(18px);backdrop-filter:blur(18px);
+    border-bottom:1px solid #ffffff1a}
+  .brand{display:flex;align-items:center;gap:11px;font-size:14px;font-weight:750;letter-spacing:-.01em}
+  .brand-mark{display:inline-flex;justify-content:center;align-items:center;width:28px;height:28px;
+    background:var(--mint);color:var(--navy);font-size:11px;font-weight:900;letter-spacing:-.06em}
+  .site-header nav{display:flex;gap:22px}
+  .site-header nav a{color:#aebbc8;font-size:12px;font-weight:650;transition:color .2s}
+  .site-header nav a:hover,.site-header nav a:focus-visible{color:var(--mint)}
+  .header-status{display:flex;align-items:center;gap:8px;color:#eef4f4;font-size:11px;font-weight:700}
+  .header-status i{width:7px;height:7px;border-radius:50%;background:var(--mint);
+    display:inline-block;box-shadow:0 0 0 4px #5ce1b91f}
+
+  /* HERO */
+  .hero{position:relative;background:var(--navy);color:#fff;overflow:hidden;
+    padding:80px max(28px,50vw - 610px) 60px}
+  .hero-grid{position:absolute;inset:0;
+    background-image:linear-gradient(#8fa3b80f 1px,#0000 1px),linear-gradient(90deg,#8fa3b80f 1px,#0000 1px);
+    background-size:48px 48px;
+    -webkit-mask-image:linear-gradient(#000 0%,#0000 85%);mask-image:linear-gradient(#000 0%,#0000 85%)}
+  .hero-copy{position:relative;z-index:2;max-width:820px}
+  .eyebrow{display:flex;align-items:center;gap:16px;color:var(--blue-gray);
+    font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:11px;font-weight:700;
+    letter-spacing:.06em;text-transform:uppercase}
+  .eyebrow span:first-child{color:var(--mint)}
+  .eyebrow span+span::before{content:"/";color:#52667a;margin-right:16px}
+  .hero h1{margin:28px 0 24px;font-size:clamp(42px,5.5vw,64px);line-height:1.05;letter-spacing:-.055em;font-weight:850}
+  .hero-lede{max-width:720px;color:#acbac7;font-size:17px;line-height:1.7}
+  .hero-meta{margin-top:32px;display:flex;gap:32px;flex-wrap:wrap;
+    padding-top:22px;border-top:1px solid #23364c;
+    font-family:ui-monospace,monospace;font-size:12px;color:#7d8fa2}
+  .hero-meta b{color:var(--mint);font-weight:700;margin-right:8px}
+
+  /* SECTIONS */
+  section{max-width:1220px;margin:0 auto;padding:70px 28px 20px}
+  .section-label{color:var(--mint-dark);letter-spacing:.1em;text-transform:uppercase;
+    margin:0 0 14px;font-family:ui-monospace,monospace;font-size:11px;font-weight:800}
+  h2{letter-spacing:-.045em;margin:0 0 8px;font-size:34px;line-height:1.15;font-weight:800}
+  .section-desc{color:var(--muted);max-width:820px;margin:0 0 34px;font-size:15px;line-height:1.75}
+
+  /* CALLOUT */
+  .callout{background:var(--navy);color:#fff;padding:38px 34px;margin:20px 0 40px;position:relative}
+  .callout::before{content:"";position:absolute;top:0;left:0;width:112px;height:3px;background:var(--mint)}
+  .callout-kicker{color:var(--mint);font-family:ui-monospace,monospace;font-size:11px;font-weight:800;
+    letter-spacing:.08em;text-transform:uppercase;margin-bottom:20px}
+  .callout p{font-size:20px;line-height:1.55;letter-spacing:-.02em;margin-bottom:16px}
+  .callout p:last-child{margin-bottom:0}
+  .callout small{color:#8ea0b2;font-size:13px;line-height:1.7;display:block}
+
+  /* TIMELINE TABLE */
+  .table-wrap{border:1px solid var(--line);background:#fff;overflow-x:auto}
+  table{width:100%;border-collapse:collapse;font-size:14px}
+  thead{background:#eef2ef}
+  th{padding:14px 18px;text-align:left;color:#485663;font-weight:750;font-size:11px;
+    text-transform:uppercase;letter-spacing:.05em}
+  td{padding:14px 18px;border-top:1px solid #e5eae7;color:var(--ink);vertical-align:top;line-height:1.6}
+  td code{white-space:nowrap}
+  td.mono{font-family:ui-monospace,monospace;font-size:13px;color:var(--mint-dark);white-space:nowrap}
+
+  /* TRACK CARDS */
+  .tracks{display:grid;grid-template-columns:repeat(4,1fr);gap:1px;background:var(--line);border:1px solid var(--line);margin-bottom:22px}
+  .track{background:#fff;padding:24px;min-height:120px;position:relative}
+  .track-1 .track-badge{background:var(--emerald)}
+  .track-2 .track-badge{background:var(--amber-2)}
+  .track-3 .track-badge{background:var(--orange)}
+  .track-4 .track-badge{background:var(--sky)}
+  .track-badge{color:#fff;font-size:11px;font-weight:800;padding:5px 8px;
+    font-family:ui-monospace,monospace;display:inline-block}
+  .track h3{margin:14px 0 6px;font-size:17px;letter-spacing:-.025em}
+  .track p{color:var(--muted);font-size:12px;line-height:1.65}
+  .track strong{color:var(--ink);display:block;margin-top:8px;font-size:12px}
+
+  /* TASK LIST */
+  .task-list{background:#fff;border:1px solid var(--line)}
+  .task-list-head{background:var(--navy);color:#fff;padding:16px 22px;
+    display:flex;justify-content:space-between;align-items:center}
+  .task-list-head h3{margin:0;font-size:17px;letter-spacing:-.02em}
+  .task-list-head .dri{color:var(--mint);font-family:ui-monospace,monospace;font-size:11px;font-weight:750}
+  .task-row{display:grid;grid-template-columns:1fr 160px;gap:20px;padding:16px 22px;
+    border-top:1px solid #eaeeeb;align-items:center;font-size:14px}
+  .task-row:first-of-type{border-top:0}
+  .task-row .task-name b{color:var(--ink);font-weight:700}
+  .task-row .task-name small{color:var(--muted);font-size:12px;display:block;margin-top:3px;line-height:1.55}
+  .task-row .task-owner{font-family:ui-monospace,monospace;font-size:12px;color:var(--mint-dark);
+    font-weight:700;text-align:right}
+  .task-row .task-owner.tbd{color:#a8b2b8}
+
+  /* SIMPLE LIST */
+  .list-block{background:#fff;border:1px solid var(--line);padding:26px 30px}
+  .list-block h4{margin:0 0 14px;font-size:15px;color:var(--ink);letter-spacing:-.02em}
+  .list-block ul li{padding:9px 0;font-size:14px;color:#334155;line-height:1.65;
+    border-top:1px solid #eef1ee;display:flex;gap:12px}
+  .list-block ul li:first-child{border-top:0;padding-top:0}
+  .list-block ul li::before{content:"";flex-shrink:0;width:6px;height:6px;background:var(--mint-dark);
+    margin-top:8px;border-radius:50%}
+
+  .grid-2{display:grid;grid-template-columns:1fr 1fr;gap:18px}
+  .grid-3{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
+
+  /* STATUS CHIPS */
+  .chip{display:inline-block;padding:2px 8px;font-size:11px;font-weight:700;
+    font-family:ui-monospace,monospace;letter-spacing:.02em}
+  .chip-done{background:#dcfce7;color:#166534}
+  .chip-progress{background:#e0f2fe;color:#075985}
+  .chip-todo{background:#fef3c7;color:#92400e}
+  .chip-new{background:var(--mint);color:var(--navy)}
+
+  /* STEP CARDS */
+  .step-cards{display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background:var(--line);border:1px solid var(--line);margin-top:24px}
+  .step{background:#fff;padding:30px 26px;position:relative;min-height:280px}
+  .step-num{font-family:ui-monospace,monospace;font-size:11px;color:var(--mint-dark);
+    font-weight:800;letter-spacing:.1em}
+  .step h3{margin:16px 0 14px;font-size:19px;letter-spacing:-.02em;line-height:1.3}
+  .step .step-cond{background:#eef2ef;padding:10px 14px;font-size:12px;color:#475569;
+    margin-bottom:14px;border-left:3px solid var(--mint)}
+  .step .step-cond b{color:var(--ink)}
+  .step .step-action{font-size:13px;color:#334155;line-height:1.65}
+  .step .step-action ul{margin-top:8px}
+  .step .step-action ul li{padding:4px 0;padding-left:14px;position:relative}
+  .step .step-action ul li::before{content:"·";position:absolute;left:4px;color:var(--mint-dark);font-weight:800}
+
+  /* DARK BLOCK */
+  .dark-block{background:var(--navy);color:#fff;padding:70px max(28px,50vw - 610px)}
+  .dark-block .section-label{color:var(--mint)}
+  .dark-block h2{color:#fff}
+  .dark-block .section-desc{color:#91a2b2}
+  .dark-block table{background:transparent}
+  .dark-block thead{background:#14263c}
+  .dark-block th{color:#8fa3b8}
+  .dark-block td{color:#cbd5e1;border-color:#23364c}
+  .dark-block .table-wrap{border-color:#23364c;background:transparent}
+
+  /* CODE SYSTEM GRID */
+  .code-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-top:20px}
+  .code-cell{background:#101f34;border:1px solid #23364c;padding:20px 18px}
+  .code-cell .code-range{font-family:ui-monospace,monospace;color:var(--mint);
+    font-size:12px;font-weight:800;letter-spacing:.02em}
+  .code-cell h4{color:#fff;margin:10px 0 8px;font-size:15px;font-weight:700}
+  .code-cell p{color:#8fa3b8;font-size:12px;line-height:1.6}
+  .code-cell.reserved{border-color:var(--amber-2);border-style:dashed}
+  .code-cell.reserved .code-range{color:var(--amber-2)}
+
+  /* SUBJECT GRID */
+  .subj-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:1px;background:#23364c;
+    border:1px solid #23364c;margin-top:20px}
+  .subj{background:#101f34;padding:22px 18px}
+  .subj-name{color:var(--mint);font-family:ui-monospace,monospace;font-size:11px;
+    font-weight:800;letter-spacing:.05em;text-transform:uppercase}
+  .subj h4{color:#fff;margin:8px 0 8px;font-size:15px}
+  .subj p{color:#8fa3b8;font-size:11px;line-height:1.55}
+
+  /* FOOTER */
+  footer{background:var(--navy);color:#92a3b3;padding:36px max(28px,50vw - 610px);
+    display:grid;grid-template-columns:1fr auto auto;gap:24px;align-items:center;font-size:11px}
+  footer strong{color:#edf3f4;font-size:12px}
+  footer a{color:var(--mint);font-weight:750}
+  footer p{margin:0}
+
+  /* RESPONSIVE */
+  @media (max-width:900px){
+    .tracks{grid-template-columns:1fr 1fr}
+    .step-cards{grid-template-columns:1fr}
+    .grid-2,.grid-3{grid-template-columns:1fr}
+    .code-grid{grid-template-columns:1fr 1fr}
+    .subj-grid{grid-template-columns:1fr 1fr}
+    .task-row{grid-template-columns:1fr}
+    .task-row .task-owner{text-align:left}
+    footer{grid-template-columns:1fr}
+  }
+  @media (max-width:600px){
+    .site-header nav{display:none}
+    .hero h1{font-size:36px}
+    .code-grid,.subj-grid{grid-template-columns:1fr}
+  }
+</style>
+</head>
+<body>
+
+<header class="site-header">
+  <div class="brand"><span class="brand-mark">TS</span> 예약원장 프로젝트 브리핑</div>
+  <nav>
+    <a href="#background">배경</a>
+    <a href="#timeline">타임라인</a>
+    <a href="#tracks">트랙</a>
+    <a href="#design">남은설계</a>
+    <a href="#open">미해결</a>
+    <a href="#wrap">마무리</a>
+    <a href="#handover">인계</a>
+    <a href="#reference">참고</a>
+  </nav>
+  <div class="header-status"><i></i>2026-08-13 UPDATED</div>
+</header>
+
+<!-- HERO -->
+<section class="hero" style="max-width:none;padding-left:max(28px,50vw - 610px);padding-right:max(28px,50vw - 610px)">
+  <div class="hero-grid"></div>
+  <div class="hero-copy">
+    <div class="eyebrow"><span>RESERVATION LEDGER</span><span>V2 · 5-PARTY MODEL</span><span>HANDOVER BRIEF</span></div>
+    <h1>예약원장 <em>한 곳에서</em><br>모든 돈의 흐름을 답한다</h1>
+    <p class="hero-lede">
+      "왜 이 금액이 이렇게 됐어요?"라는 모든 질문의 답이 원장 한 곳에서 나오게 —
+      예약 1건 = 가계부 1권. 5주체 × 손익/자금 잔액을 실시간으로 추적하고,
+      마감 시 전주체 합계 = 0을 지향하는 신규 시스템.
+    </p>
+    <div class="hero-meta">
+      <span><b>DRI</b>김서현</span>
+      <span><b>1차 오픈</b>2026-09 추석</span>
+      <span><b>스키마</b>svc_reservations · ledger 3종</span>
+      <span><b>모델</b>v2 · 5주체 · 코드 7종</span>
+    </div>
+  </div>
+</section>
+
+<!-- 1. 배경 -->
+<section id="background">
+  <div class="section-label">01 · Background</div>
+  <h2>왜 필요한가</h2>
+  <p class="section-desc">
+    기존은 결제 시스템에 위약금·특가·쿠폰이 뒤섞여 회계 정합성이 낮고,
+    CS 응대 시마다 담당자가 수기 계산을 반복해야 했다. 신규 원장은
+    <b>회계·정산·CS 응대의 SoT를 통일</b>하는 것을 목표로 한다.
+  </p>
+
+  <div class="callout">
+    <div class="callout-kicker">Core Promise</div>
+    <p>"왜 이 금액이 이렇게 됐어요?" 라는 모든 질문의 답이<br><em>원장 한 곳에서 나오게 만든다.</em></p>
+    <small>예약 1건 = 가계부 1권 · 5주체 손익/자금 잔액 실시간 추적 · 마감 시 전주체 합계 = 0</small>
+  </div>
+</section>
+
+<!-- 2. 타임라인 -->
+<section id="timeline">
+  <div class="section-label">02 · Progress Timeline</div>
+  <h2>지금까지 진행된 것</h2>
+  <p class="section-desc">2026-02 개념 회의부터 2026-08 회계 baseline 확정까지 6개월 진행 이력.</p>
+
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th style="width:130px">시점</th><th>마일스톤</th></tr></thead>
+      <tbody>
+        <tr><td class="mono">2026-02-13</td><td>예약원장 개념 회의 · 주체 8종 · 8개 운영 케이스 도출</td></tr>
+        <tr><td class="mono">2026-06-05</td><td><code>svc_reservations</code> 도메인에 ledger 3종 + audit 3종 배포</td></tr>
+        <tr><td class="mono">2026-06-08</td><td>신규 예약시스템 1차/2차 분리 확정 (원장 = 1차 P0)</td></tr>
+        <tr><td class="mono">2026-06-09~10</td><td>원장 v1 → v2 모델 (own/sync/pg 3분기, 815 폐기)</td></tr>
+        <tr><td class="mono">2026-06-24</td><td>v2 갱신 — 5주체(PG 추가) · <code>executed_at</code> · 정산/지급/결산 3단계</td></tr>
+        <tr><td class="mono">2026-08-10</td><td><b>회계 baseline 최종 확정</b> (코드체계 7종 × 5주체 × 손익/자금)</td></tr>
+        <tr><td class="mono">2026-08-11</td><td>3개 날짜 컬럼 확정 · 스코프 제외 항목 정리</td></tr>
+        <tr><td class="mono">2026-08-12</td><td>별도 트랙 결제수단 변경 + 다중 결제 URL <span class="chip chip-done">✅ 완료</span></td></tr>
+        <tr><td class="mono">2026-08-13</td><td>트랙 재정리 · 상문 예약관리 API 신규 정리 시작 · 예약상세 신규 화면 필요 판단</td></tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<!-- 3. 트랙 구조 -->
+<section id="tracks">
+  <div class="section-label">03 · Track Structure</div>
+  <h2>트랙 구조</h2>
+  <p class="section-desc">1차(9월 추석 오픈)를 축으로 2차·3차·별도 트랙 4단 구조.</p>
+
+  <div class="tracks">
+    <article class="track track-1">
+      <span class="track-badge">🟢 1차</span>
+      <h3>신규 예약 시스템</h3>
+      <p>9월 추석 오픈 · 원장 코어 기능</p>
+      <strong>DRI 김서현</strong>
+    </article>
+    <article class="track track-2">
+      <span class="track-badge">🟡 2차</span>
+      <h3>원장 안착 후</h3>
+      <p>행사이동 + 데이터 신규 구조 교체</p>
+      <strong>10월 이후 예상</strong>
+    </article>
+    <article class="track track-3">
+      <span class="track-badge">🟠 3차</span>
+      <h3>수동 처리</h3>
+      <p>수동 결제 등록 · 단체/VIP 예약</p>
+      <strong>후순위</strong>
+    </article>
+    <article class="track track-4">
+      <span class="track-badge">🔵 별도</span>
+      <h3>신규 예약 무관</h3>
+      <p>결제 서비스 · 공급사 정산 · 경품 · 결제수단 할인</p>
+      <strong>병렬 진행</strong>
+    </article>
+  </div>
+
+  <!-- 1차 상세 -->
+  <div class="task-list" style="margin-top:36px">
+    <div class="task-list-head">
+      <h3>🟢 1차 (9월 추석 오픈) — [Internal] 신규 예약 시스템</h3>
+      <span class="dri">DRI · 김서현</span>
+    </div>
+    <div class="task-row"><div class="task-name"><b>원장 개념 기능 추가</b><small><code>rsv_ledgers</code> 활용 · 예약 1건 = 원장 1권</small></div><div class="task-owner tbd">— 개발팀</div></div>
+    <div class="task-row"><div class="task-name"><b>인원 관리</b><small>아동/유아 특가 분담 재현 확인</small></div><div class="task-owner">상문</div></div>
+    <div class="task-row"><div class="task-name"><b>예약 금액 관리</b><small>어드민 = 분담 주체 선택 필수 (채널/플랫폼/여행사)</small></div><div class="task-owner tbd">— 개발팀</div></div>
+    <div class="task-row"><div class="task-name"><b>원장 항목 카인드 재그룹핑 + 분담 주체 매핑표</b><small>어떤 카인드를 어느 주체와 연결할지 매핑 확정</small></div><div class="task-owner">현정</div></div>
+    <div class="task-row"><div class="task-name"><b>정산 시스템 신규 API</b><small>기존 재사용 X · 신규 원장 항목 분류 기반 · 0원 결산 지향</small></div><div class="task-owner">정근</div></div>
+    <div class="task-row"><div class="task-name"><b>회계 인식 기준 정리</b><small>원장 → 회계 그룹핑 가이드</small></div><div class="task-owner">현정</div></div>
+    <div class="task-row"><div class="task-name"><b>취소위약금 결제 → 예약원장(5010) 이전</b><small>결제는 결제·환불 트랜잭션만 관리</small></div><div class="task-owner tbd">— 개발팀</div></div>
+    <div class="task-row"><div class="task-name"><b>원장조회(원장탭) 기획 다듬기 <span class="chip chip-new">기획중</span></b><small>주체별 잔액 카드 + 4개 서브탭 + 필터 + drill-down</small></div><div class="task-owner">김서현</div></div>
+    <div class="task-row"><div class="task-name"><b>예약관리 API 신규 정리 <span class="chip chip-progress">진행중</span></b><small>기능별로 하나씩 새로 재정의</small></div><div class="task-owner">상문</div></div>
+    <div class="task-row"><div class="task-name"><b>예약상세 신규 화면 개편 <span class="chip chip-new">신규</span></b><small>상문 API 기반 + 5주체·코드체계·3날짜·5010 위약금 반영</small></div><div class="task-owner">김서현 + 상문</div></div>
+    <div class="task-row"><div class="task-name"><b>타임라인·이력 + 정책 매트릭스</b><small>예약 이벤트 시계열 + 취소완료 표시 룰</small></div><div class="task-owner tbd">— 개발팀</div></div>
+  </div>
+
+  <!-- 2차 / 3차 -->
+  <div class="grid-2" style="margin-top:20px">
+    <div class="list-block">
+      <h4><span class="chip" style="background:#fef3c7;color:#92400e">🟡 2차</span> &nbsp; 원장 안착 후</h4>
+      <ul>
+        <li>행사이동 <small style="color:var(--muted)">· 관리자 취소 사유 약 20% / 25년 7,015건 흡수</small></li>
+        <li>어드민 예약데이터 신규 원장 구조 교체</li>
+        <li>www 예약데이터 신규 원장 구조 교체</li>
+        <li>파트너스 예약데이터 신규 원장 구조 교체</li>
+        <li>빅쿼리/예약지표 신규 원장 구조 대응</li>
+        <li>여행사 상태값 페이드아웃</li>
+      </ul>
+    </div>
+    <div class="list-block">
+      <h4><span class="chip" style="background:#fed7aa;color:#9a3412">🟠 3차</span> &nbsp; 수동 처리</h4>
+      <ul>
+        <li>수동 결제 등록 (여행사 수동 수금)</li>
+        <li>수동예약 처리 (단체/VIP) <small style="color:var(--muted)">· 가상 행사 인벤토리 → 정상 예약 플로우</small></li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- 별도 트랙 -->
+  <div class="table-wrap" style="margin-top:20px">
+    <table>
+      <thead><tr><th style="width:50px">#</th><th>별도 트랙 (신규 예약 무관)</th><th style="width:200px">상태 / DRI</th></tr></thead>
+      <tbody>
+        <tr><td class="mono">1</td><td>결제 수단 변경 + 다중 결제 URL</td><td><span class="chip chip-done">✅ 완료 2026-08-12</span></td></tr>
+        <tr><td class="mono">2</td><td>공급사 정산</td><td><span class="chip chip-progress">진행중</span> · 준형·경준</td></tr>
+        <tr><td class="mono">3</td><td>경품 예약 (쇼핑몰형)</td><td><span class="chip chip-todo">별도 신규</span></td></tr>
+        <tr><td class="mono">4</td><td>[User] 결제수단 할인 (쿠폰 → 할인 시스템 전환)</td><td><span class="chip chip-progress">진행중</span> · DRI 현정</td></tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<!-- 4. 남은 설계 -->
+<section id="design">
+  <div class="section-label">04 · Design To-Do</div>
+  <h2>남은 설계 (1차 안에서)</h2>
+  <p class="section-desc">원장조회 화면과 예약상세 신규 화면 두 가지가 아직 확정되지 않은 설계 지점.</p>
+
+  <div class="grid-2">
+    <div class="list-block">
+      <h4>원장조회(원장탭) 기획</h4>
+      <p style="color:var(--muted);font-size:12px;line-height:1.6;margin-bottom:14px">
+        현재 반영: 5주체 잔액 카드 · 4개 서브탭(예약금액/결제금액/정산/전체) · CSV 다운
+      </p>
+      <ul>
+        <li>날짜 컬럼 3종 기본 정렬 + 필터 스위칭</li>
+        <li>미래일자 행 시각적 구분 (예정/확정)</li>
+        <li>잔액 검증 룰 어긋날 때 알림 UI</li>
+        <li>원복(offset=500) 원행 페어링 시각화</li>
+        <li>파트너스 뷰 vs 어드민 뷰 화면 분리</li>
+        <li>동적 원장 항목 분류 (1차: 4-5개 표준 + 기타, 2차 확장)</li>
+        <li>CSV 포맷 회계팀 확정</li>
+        <li>엑셀 밀어넣기 UI 1차 포함 여부</li>
+        <li>취소완료 예약의 원장 뷰</li>
+        <li>drill-down (원장 행 ↔ 결제/정산/여행자)</li>
+      </ul>
+    </div>
+
+    <div class="list-block">
+      <h4>예약상세 신규 화면 개편</h4>
+      <p style="color:var(--muted);font-size:12px;line-height:1.6;margin-bottom:14px">
+        상문 신규 API + 5주체·코드체계·3날짜·5010 위약금 반영 → <b>화면 자체 재설계 필요</b>
+      </p>
+      <ul>
+        <li>10영역 목업 유지 vs 재배치</li>
+        <li>상문 API 매핑표 (원장·인원·금액 3영역 중심)</li>
+        <li>상단 sticky 잔액 카드 vs 원장탭 안에만</li>
+        <li>분담 주체 선택 UI (금액 추가/차감 모달)</li>
+        <li>위약금 흐름 (인원 삭제 → [+금액 추가] → 5010 프리셋)</li>
+        <li>결제 ↔ 원장 상호 참조 (drill-down)</li>
+        <li>취소완료 예약 표시 룰</li>
+        <li>파트너스 vs 어드민 컴포넌트 재활용 범위</li>
+        <li>3-view 정합성 (KDB <code>50-view-mapping.md</code>)</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<!-- 5. 미해결 -->
+<section id="open">
+  <div class="section-label">05 · Open Issues</div>
+  <h2>미해결 / 후결정</h2>
+  <p class="section-desc">현재 트랙에서 해결하지 않고 후속으로 미룬 이슈들.</p>
+
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th style="width:270px">이슈</th><th style="width:230px">상태</th><th>후속</th></tr></thead>
+      <tbody>
+        <tr><td><b>9000번대 마감 로직</b></td><td>코드만 예약, 정책 미확정</td><td>후결정 대상</td></tr>
+        <tr><td><b>채널 정산</b> (4,003 · 6,020 · 6,520)</td><td>시스템 미반영</td><td>채널 정산 트랙 별도</td></tr>
+        <tr><td><b>회계 전표 매핑</b> (7종 전표 × 11종 계정)</td><td>hj확인본 참고용</td><td>재무팀 별도 트랙</td></tr>
+        <tr><td><b>5,010 vs 5,020 정합성</b></td><td>시트 vs github docs 뒤바뀜</td><td>개발팀 확정</td></tr>
+        <tr><td><b>아동/유아 특가 분담 재현</b></td><td>신규 인원 유형 재현 가능 여부</td><td>상문 회신 대기</td></tr>
+        <tr><td><code>rsv_travelers</code> · <code>rsv_coupons</code><br>위약금·수동할인 컬럼 유무</td><td>이벤트인지 API 집계인지 미확인</td><td>BE 확인</td></tr>
+        <tr><td><b>카드사 페이백/즉시할인</b></td><td>원장 범위 외</td><td>즉시할인 도입 시 재검토</td></tr>
+        <tr><td><b>갭 귀속·마감·오버페이 등 4개 케이스</b></td><td>2026-02-13 회의 미해결</td><td>경지실 결정 필요</td></tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<!-- 6. 마무리 스코프 -->
+<section id="wrap">
+  <div class="section-label">06 · Wrap-up Scope</div>
+  <h2>서현 마무리 스코프 <span style="font-size:15px;color:var(--muted);font-weight:600">(~2026-08-31)</span></h2>
+  <p class="section-desc">
+    "이것까지 하고 나머지는 인계" — 개발팀 작업 진행에 맞춰 서현이 직접 수행할 QA/검증 3단계.
+    각 스텝은 앞 스텝의 개발 산출물이 있어야 시작 가능한 순차 구조.
+  </p>
+
+  <div class="step-cards">
+    <article class="step">
+      <div class="step-num">STEP 01</div>
+      <h3>기존 예약관리 기능 ↔ 신규 원장 호환 QA</h3>
+      <div class="step-cond">
+        <b>조건 ·</b> 개발팀이 기존 예약관리 기능(인원/금액/취소위약금/결제 등)을
+        신규 원장 시스템 스키마·이벤트에 맞춰 호환 작업 완료 후
+      </div>
+      <div class="step-action">
+        서현 액션 · 기능별 QA 수행
+        <ul>
+          <li>원장 이벤트가 의도대로 찍히는지</li>
+          <li>잔액 검증(고객 합계=0 등) 통과하는지</li>
+        </ul>
+      </div>
+    </article>
+
+    <article class="step">
+      <div class="step-num">STEP 02</div>
+      <h3>원장항목 싱크 케이스 100건 검증</h3>
+      <div class="step-cond">
+        <b>조건 ·</b> 원장 항목 카인드 재그룹핑 + 분담 주체 매핑 (현정) 반영 완료 후
+      </div>
+      <div class="step-action">
+        서현 액션 · 예시 케이스 100개 돌려서 검증
+        <ul>
+          <li>정상 결제 / 취소 / 위약금</li>
+          <li>특가 / 쿠폰 / 채널 결제 / 재정산 커버</li>
+          <li>어긋난 케이스는 개발팀 이슈로 넘김</li>
+        </ul>
+      </div>
+    </article>
+
+    <article class="step">
+      <div class="step-num">STEP 03</div>
+      <h3>트립스토어 정상 결제 마이그레이션</h3>
+      <div class="step-cond">
+        <b>조건 ·</b> Step 1·2 통과
+      </div>
+      <div class="step-action">
+        서현 액션 · own(PG 직결제) 정상 결제 케이스에 한해 신규 원장 스키마로 마이그레이션
+        <ul>
+          <li>스코프 제한: <b>정상 결제만</b></li>
+          <li>채널 결제·특수 케이스·이력은 인계</li>
+          <li>인계 문서에 스코프 명시</li>
+        </ul>
+      </div>
+    </article>
+  </div>
+</section>
+
+<!-- 7. 이후 이어서 -->
+<section>
+  <div class="section-label">07 · Next Owners</div>
+  <h2>이후 이어서 갈 것</h2>
+  <p class="section-desc">마무리 스코프 이후 다음 담당자가 이어서 진행할 항목.</p>
+
+  <div class="list-block">
+    <ul>
+      <li>채널 결제 예약 마이그레이션 (sync/pg 유형)</li>
+      <li>이력 데이터 (과거 예약) 마이그레이션</li>
+      <li>어드민·www·파트너스·BQ 데이터 신규 구조 교체 (2차)</li>
+      <li>9000번대 마감 로직 정책 확정</li>
+      <li>회계 전표 매핑 시스템 반영</li>
+      <li>5,010 vs 5,020 정합성 확정</li>
+    </ul>
+  </div>
+</section>
+
+<!-- 8. 인계 자료 -->
+<section id="handover">
+  <div class="section-label">08 · Handover Assets</div>
+  <h2>인계 자료</h2>
+
+  <div class="grid-2">
+    <div class="list-block">
+      <h4>노션 인계 페이지</h4>
+      <ul>
+        <li><code>33486ade8e7780e686e2c4df53f862b5</code><br><small style="color:var(--muted)">스코프 4: BQ 지표 / 파트너스 / www / 어드민</small></li>
+      </ul>
+    </div>
+    <div class="list-block">
+      <h4>KDB 문서 (extriber/tripstore-docs)</h4>
+      <ul>
+        <li><code>domain/reservation/50-view-mapping.md</code> ⭐<br><small style="color:var(--muted)">3-view 필드 매핑</small></li>
+        <li><code>domain/reservation/60-admin-detail-contract.md</code></li>
+        <li><code>data/metrics/20-reservation-sales-cancellation.md</code></li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="list-block" style="margin-top:18px">
+    <h4>이벤트 카탈로그 시트</h4>
+    <ul>
+      <li>Google Sheet <code>1Kz3SEU9iunR0mS_WPNtZGbWlVXSQvQjeB-GgWhgLZZg</code> · hjlee 소유<br><small style="color:var(--muted)">원장_케이스 정리_서현님260730_hj확인</small></li>
+    </ul>
+  </div>
+</section>
+
+<!-- 9. 관련 문서 -->
+<section>
+  <div class="section-label">09 · Reference Documents</div>
+  <h2>관련 문서 인덱스</h2>
+
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th style="width:320px">문서</th><th>위치</th></tr></thead>
+      <tbody>
+        <tr><td>v1 정책 (운영중)</td><td class="mono">Notion 2f486ade8e778066a2b6e7b705766d88</td></tr>
+        <tr><td>v2 정책 (운영대기)</td><td class="mono">Notion 38a86ade8e77816c9bb7d11c00d8ee4d</td></tr>
+        <tr><td>2026-02-13 개념 회의</td><td class="mono">Notion 30686ade8e778000bb09f4d8344f7500</td></tr>
+        <tr><td>2026-06-11 1차/2차 매트릭스</td><td class="mono">Notion 37d86ade8e7780dfba43df7319ae18f5</td></tr>
+        <tr><td>2026-06-24 원장 싱크2 회의록</td><td class="mono">Notion 38986ade8e7780a18b1bdf544b592776</td></tr>
+        <tr><td>어드민 v1 가이드 목업</td><td class="mono">org.paper.tripstore.me/admin/reservation-admin-v1-guide.html</td></tr>
+        <tr><td>어드민 운영 가이드 v1.3</td><td class="mono">org.paper.tripstore.me/admin/reservation-admin-operations-guide.html</td></tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<!-- REFERENCE (DARK) -->
+<div class="dark-block" id="reference">
+  <div style="max-width:1220px;margin:0 auto">
+    <div class="section-label">📚 Reference</div>
+    <h2>원장 도메인 지식</h2>
+    <p class="section-desc">
+      트랙과는 별개로, 예약원장 자체가 어떤 모델·구조를 갖는지 이해하고 싶을 때 보는 섹션.
+    </p>
+
+    <!-- A. 5주체 -->
+    <h3 style="color:#fff;margin:30px 0 8px;font-size:20px;letter-spacing:-.02em">A. 5주체 매트릭스 <small style="color:#8fa3b8;font-size:13px;font-weight:500">· 2026-08-10 확정</small></h3>
+    <p style="color:#91a2b2;font-size:14px;margin-bottom:6px">5주체 × 손익·자금 = 10컬럼. 각 이벤트가 어느 주체의 손익/자금에 얼마씩 찍히는지가 원장의 모든 것.</p>
+
+    <div class="subj-grid">
+      <div class="subj"><span class="subj-name">Customer</span><h4>고객</h4><p>결제 주체 · 위약금 대상</p></div>
+      <div class="subj"><span class="subj-name">Travel Agency</span><h4>여행사</h4><p>상품 판매 주체 · 시작 잔고 = +상품정가</p></div>
+      <div class="subj"><span class="subj-name">Platform</span><h4>회사(플랫폼)</h4><p>트립스토어 자체 손익/자금</p></div>
+      <div class="subj"><span class="subj-name">PG</span><h4>PG</h4><p>나이스/토스/카카오뱅크 하위 분류 (2026-06-24 추가)</p></div>
+      <div class="subj"><span class="subj-name">Channel</span><h4>채널</h4><p>SSG/11번가/NOL/카카오쇼핑 = 통과자금 · 손익 인식 X</p></div>
+    </div>
+
+    <!-- B. 코드체계 -->
+    <h3 style="color:#fff;margin:44px 0 8px;font-size:20px;letter-spacing:-.02em">B. 코드체계 7종</h3>
+    <p style="color:#91a2b2;font-size:14px;margin-bottom:6px">범위별 구분 · 9000번대는 코드만 예약, 시스템 반영은 후결정.</p>
+
+    <div class="code-grid">
+      <div class="code-cell"><div class="code-range">1000 ~ 1999</div><h4>고객 거래 발생</h4><p>1001 상품정가 · 1010 추가금</p></div>
+      <div class="code-cell"><div class="code-range">2000 ~ 2999</div><h4>고객 할인</h4><p>특가 · 쿠폰 · 수동할인</p></div>
+      <div class="code-cell"><div class="code-range">3000 ~ 3999</div><h4>할인 원복</h4><p>고객 할인 취소</p></div>
+      <div class="code-cell"><div class="code-range">4000 ~ 4999</div><h4>결제 거래</h4><p>4002 승인 · 4102 취소 · 4502 원복</p></div>
+      <div class="code-cell"><div class="code-range">5000 ~ 5999</div><h4>고객 거래 발생 취소</h4><p>5010/5020 위약금 (정합성 미확정)</p></div>
+      <div class="code-cell"><div class="code-range">6000 ~ 6999</div><h4>정산</h4><p>6001~6003 플랫폼 · 6010/6011 PG · 6501~6511 재정산</p></div>
+      <div class="code-cell reserved"><div class="code-range">9000 ~ 9999</div><h4>마감</h4><p>시스템 반영은 후결정 · 코드체계만 예약</p></div>
+    </div>
+
+    <!-- C. 3개 날짜 -->
+    <h3 style="color:#fff;margin:44px 0 8px;font-size:20px;letter-spacing:-.02em">C. 3개 날짜 컬럼 <small style="color:#8fa3b8;font-size:13px;font-weight:500">· 2026-08-11 확정</small></h3>
+
+    <div class="grid-3" style="margin-top:14px">
+      <div style="background:#101f34;border:1px solid #23364c;padding:22px">
+        <div style="color:var(--mint);font-family:ui-monospace,monospace;font-size:11px;font-weight:800">CREATED_AT</div>
+        <h4 style="color:#fff;margin:10px 0 8px">DB 인서트 시각</h4>
+        <p style="color:#8fa3b8;font-size:12px;line-height:1.6">기술적, 자동</p>
+      </div>
+      <div style="background:#101f34;border:1px solid #23364c;padding:22px">
+        <div style="color:var(--mint);font-family:ui-monospace,monospace;font-size:11px;font-weight:800">발생일</div>
+        <h4 style="color:#fff;margin:10px 0 8px">이벤트 발생일</h4>
+        <p style="color:#8fa3b8;font-size:12px;line-height:1.6">관리자 backdated 시 조정일 (옵션 2), 소급 X</p>
+      </div>
+      <div style="background:#101f34;border:1px solid #23364c;padding:22px">
+        <div style="color:var(--mint);font-family:ui-monospace,monospace;font-size:11px;font-weight:800">실행일</div>
+        <h4 style="color:#fff;margin:10px 0 8px">자금 실질 이동일</h4>
+        <p style="color:#8fa3b8;font-size:12px;line-height:1.6">손익 확정일 · 미래일 가능</p>
+      </div>
+    </div>
+
+    <div class="table-wrap" style="margin-top:20px">
+      <table>
+        <thead><tr><th>그룹</th><th>대상 코드</th><th>규칙</th></tr></thead>
+        <tbody>
+          <tr><td class="mono">그룹 A</td><td>1000·2000·3000·5000</td><td>3개 컬럼 동일 (이벤트 당일)</td></tr>
+          <tr><td class="mono">그룹 B</td><td>4,002 / 4,102 / 4,502</td><td>created=웹훅 · 발생=PG 거래일 · 실행=PG정산 완료일</td></tr>
+          <tr><td class="mono">그룹 C</td><td>6000번대 정산</td><td>3개 다 다름 · 정산기준일 3케이스 (①출발일+1 자동 ②관리자 취소완료 ③재출발완료)</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- D. 결제 3분기 -->
+    <h3 style="color:#fff;margin:44px 0 8px;font-size:20px;letter-spacing:-.02em">D. 결제 유형 3분기 <small style="color:#8fa3b8;font-size:13px;font-weight:500">· v2 2026-06-10</small></h3>
+
+    <div class="table-wrap" style="margin-top:14px">
+      <table>
+        <thead><tr><th style="width:130px">분기</th><th>대상</th><th style="width:130px">결제 코드</th><th>자금정산</th></tr></thead>
+        <tbody>
+          <tr><td class="mono">own</td><td>PG 직결제 · 트립스토어 직접</td><td class="mono">401</td><td>601+606+410</td></tr>
+          <tr><td class="mono">sync</td><td>SSG/11번가/NOL/카카오쇼핑</td><td class="mono">400</td><td>520 채널수수료 + 500 채널→플랫폼</td></tr>
+          <tr><td class="mono">pg</td><td>네이버쇼핑/카카오뱅크</td><td class="mono">401</td><td>601+606+410 + 520+521</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p style="color:#91a2b2;font-size:13px;margin-top:14px;line-height:1.7">
+      폐기: <code style="background:#23364c;color:#f2b84b">815</code> (채널통과자금 상쇄), <code style="background:#23364c;color:#f2b84b">816</code>
+      — 400에서 채널손익 인식 안 하므로 불필요.
+    </p>
+
+    <!-- E. 부담 룰 -->
+    <h3 style="color:#fff;margin:44px 0 8px;font-size:20px;letter-spacing:-.02em">E. 부담 룰</h3>
+    <p style="color:#91a2b2;font-size:14px;margin-bottom:14px">자금 − 손익 = 자기부담 · 자금 흐름 없는 비용/혜택</p>
+
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th style="width:200px">부담 항목</th><th>부담 주체</th></tr></thead>
+        <tbody>
+          <tr><td>여행사 할인</td><td>여행사</td></tr>
+          <tr><td>쿠폰</td><td>플랫폼</td></tr>
+          <tr><td>채널 할인</td><td>채널</td></tr>
+          <tr><td>PG수수료 · 부가세</td><td>플랫폼</td></tr>
+          <tr><td>공제금액</td><td>플랫폼 수익 / 여행사 비용 (플랫폼 마진)</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- F. DB 스키마 -->
+    <h3 style="color:#fff;margin:44px 0 8px;font-size:20px;letter-spacing:-.02em">F. DB 스키마 <small style="color:#8fa3b8;font-size:13px;font-weight:500">· 2026-06-05 svc_reservations 반영 완료</small></h3>
+
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th style="width:280px">테이블</th><th>역할</th></tr></thead>
+        <tbody>
+          <tr><td class="mono"><code style="background:#23364c;color:var(--mint)">rsv_ledgers</code> (+ _aud)</td><td>예약원장 마스터 · 1 예약 = 1 원장</td></tr>
+          <tr><td class="mono"><code style="background:#23364c;color:var(--mint)">rsv_ledger_items</code> (+ _aud)</td><td>원장 항목 = 개별 거래 기록</td></tr>
+          <tr><td class="mono"><code style="background:#23364c;color:var(--mint)">rsv_ledger_item_types</code> (+ _aud)</td><td>원장 항목 타입 마스터 (39개 코드 enum)</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p style="color:#91a2b2;font-size:13px;margin-top:14px;line-height:1.7">
+      원장 항목 추가/변경은 <code style="background:#23364c;color:var(--mint)">rsv_ledger_item_types</code> enum 등록 후 사용 (하드코딩 X).
+      모든 변경은 <code style="background:#23364c;color:var(--mint)">_aud</code> 테이블에 Envers 자동 기록.
+    </p>
+
+    <!-- G. 8개 운영 케이스 -->
+    <h3 style="color:#fff;margin:44px 0 8px;font-size:20px;letter-spacing:-.02em">G. 8개 운영 케이스 <small style="color:#8fa3b8;font-size:13px;font-weight:500">· 2026-02-13 회의</small></h3>
+
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th style="width:40px">#</th><th style="width:280px">케이스</th><th>처리 방향</th></tr></thead>
+        <tbody>
+          <tr><td class="mono">1</td><td>채널 결제 vs 트립 기록 갭</td><td>갭 레코드 명시 · 귀속 정책 (경지실)</td></tr>
+          <tr><td class="mono">2</td><td>트립 vs 채널 정산 시점 불일치</td><td>계산 vs 실행 확정 구분 (<code style="background:#23364c;color:var(--mint)">executed_at</code>)</td></tr>
+          <tr><td class="mono">3</td><td>3시간 전 유입 = 광고비 성격</td><td>채널 정산 X, 광고비 기록 (경지실)</td></tr>
+          <tr><td class="mono">4</td><td>결제수단 변경 오버페이</td><td>+/− 누적 · 최종 잔액 0 관리</td></tr>
+          <tr><td class="mono">5</td><td>예약 종결 판단</td><td>종결 status + 합계=0 체크 (경지실)</td></tr>
+          <tr><td class="mono">6</td><td>카드사 페이백/즉시할인</td><td><b style="color:var(--amber-2)">원장 범위 외</b> · 즉시할인 도입 시 재검토</td></tr>
+          <tr><td class="mono">7</td><td>마감 시 전주체 잔액=0</td><td>마감 레코드 · ERP 연계 (9000번대 후결정)</td></tr>
+          <tr><td class="mono">8</td><td>자동화 불가 = 관리자 입력</td><td>수기 입력 + 엑셀 밀어넣기</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<footer>
+  <div>
+    <span class="brand-mark">TS</span>
+    <div>
+      <strong>예약원장 프로젝트 브리핑</strong>
+      <p>2026-08-13 UPDATED · PM 김서현 · handover-ready</p>
+    </div>
+  </div>
+  <p>Related: <a href="reservation-admin-v1-guide.html">v1 가이드</a> · <a href="reservation-admin-operations-guide.html">운영 가이드 v1.3</a></p>
+  <p>Notion 인계 · <a>33486ade8e7780e686e2c4df53f862b5</a></p>
+</footer>
+
+</body>
+</html>
