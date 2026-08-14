@@ -444,6 +444,33 @@ select.select-mini { height: 30px; padding: 0 30px 0 10px; border: 1px solid #e8
 .nights-section-head .nights-total { font-size: 11px; background: #fff; color: #1d39c4; border: 1px solid #adc6ff; padding: 2px 8px; border-radius: 10px; font-weight: 700; }
 .nights-section-body { padding: 14px; }
 
+/* origin 뱃지 (TMG vs 수동) */
+.origin-badge { display: inline-flex; align-items: center; gap: 3px; font-size: 10.5px; font-weight: 700; padding: 2px 8px; border-radius: 10px; letter-spacing: -0.1px; }
+.origin-badge.tmg { background: #f9f0ff; color: #722ed1; border: 1px solid #d3adf7; }
+.origin-badge.manual { background: #fff7e6; color: #ad4e00; border: 1px solid #ffd591; }
+
+.row-menu { margin-left: auto; padding: 4px 8px; font-size: 14px; color: rgba(0,0,0,0.45); cursor: pointer; border-radius: 4px; }
+.row-menu:hover { background: rgba(0,0,0,0.05); color: rgba(0,0,0,0.85); }
+
+/* 박수 요금표 추가 모달 */
+.add-tabs { display: flex; gap: 4px; background: #fafbfc; padding: 3px; border-radius: 8px; border: 1px solid #f0f0f0; margin-bottom: 16px; }
+.add-tab { flex: 1; padding: 8px 14px; font-size: 12.5px; font-weight: 700; color: rgba(0,0,0,0.55); background: transparent; border: none; border-radius: 6px; cursor: pointer; }
+.add-tab.active { background: #1677ff; color: #fff; }
+.add-tab-body { display: none; }
+.add-tab-body.active { display: block; }
+
+.tmg-rate-item { display: flex; align-items: center; gap: 10px; padding: 10px 12px; border: 1px solid #f0f0f0; border-radius: 8px; margin-bottom: 6px; background: #fff; }
+.tmg-rate-item:hover { border-color: #adc6ff; background: #f0f5ff; }
+.tmg-rate-item .rate-id { font-size: 12px; font-weight: 800; color: #722ed1; min-width: 100px; }
+.tmg-rate-item .rate-meta { flex: 1; font-size: 11.5px; color: rgba(0,0,0,0.65); }
+.tmg-rate-item .rate-type { font-size: 10px; padding: 2px 7px; border-radius: 10px; font-weight: 700; }
+
+.form-row { display: flex; gap: 12px; margin-bottom: 12px; }
+.form-cell { flex: 1; }
+.form-cell label { display: block; font-size: 11.5px; color: rgba(0,0,0,0.55); margin-bottom: 6px; font-weight: 600; }
+.form-cell select, .form-cell input { width: 100%; height: 34px; padding: 0 10px; border: 1px solid #d9d9d9; border-radius: 6px; font-size: 13px; }
+.form-cell.readonly input { background: #fafbfc; color: rgba(0,0,0,0.55); }
+
 /* v9 — 최저가 pick 상세 모달 */
 .pick-modal-body { padding: 18px 20px; }
 .pick-context { background: #f5f6f8; border-radius: 8px; padding: 12px 14px; margin-bottom: 16px; font-size: 12px; color: rgba(0,0,0,0.75); }
@@ -882,10 +909,11 @@ select.select-mini { height: 30px; padding: 0 30px 0 10px; border: 1px solid #e8
       <div class="room-head">
         <label class="switch"><input type="checkbox" checked><span class="slider"></span></label>
         <div class="room-title">[ID : 267] Deluxe King</div>
-        <div style="display:flex; gap:6px; margin-left:12px;">
+        <div style="display:flex; gap:6px; margin-left:12px; align-items:center;">
           <span style="font-size:10.5px; background:#e6f4ff; color:#0958d9; border:1px solid #91caff; padding:2px 8px; border-radius:10px; font-weight:700;">요금표 3박 ✓</span>
           <span style="font-size:10.5px; background:#e6f4ff; color:#0958d9; border:1px solid #91caff; padding:2px 8px; border-radius:10px; font-weight:700;">요금표 4박 ✓</span>
           <span style="font-size:10.5px; background:#f5f5f5; color:rgba(0,0,0,0.35); border:1px solid #e0e0e0; padding:2px 8px; border-radius:10px; font-weight:700;">5박+ 없음</span>
+          <button class="btn btn-primary btn-sm" onclick="openAddRatesModal('267')" style="margin-left:6px; background:#1677ff; color:#fff; height:26px; padding:0 12px; font-size:11.5px; font-weight:700;">+ 박수 요금표 추가</button>
         </div>
       </div>
 
@@ -930,8 +958,10 @@ select.select-mini { height: 30px; padding: 0 30px 0 10px; border: 1px solid #e8
         <div class="nights-section-head" onclick="toggleNightsSection(this)">
           <span class="chev">▾</span>
           <span class="nights-title">3박 요금표</span>
-          <span class="nights-sub">BB · rateId 47098 · STC 5 / ALM 1 / DYN 1</span>
+          <span class="origin-badge tmg">🔗 TMG · rateId 47098</span>
+          <span class="nights-sub">BB · STC 5 / ALM 1 / DYN 1</span>
           <span class="nights-total">7 rows</span>
+          <span class="row-menu" onclick="event.stopPropagation(); alert('삭제 / 초기화 / 엑셀 재업로드 메뉴 (mockup 미구현)')">⋯</span>
         </div>
         <div class="nights-section-body">
           <div class="price-table-wrap">
@@ -966,13 +996,15 @@ select.select-mini { height: 30px; padding: 0 30px 0 10px; border: 1px solid #e8
         </div>
       </div>
 
-      <!-- ▼ 4박 요금표 섹션 -->
+      <!-- ▼ 4박 요금표 섹션 (수동 등록 예시) -->
       <div class="nights-section" data-nights="4" style="margin-top:14px;">
         <div class="nights-section-head" onclick="toggleNightsSection(this)">
           <span class="chev">▾</span>
           <span class="nights-title">4박 요금표</span>
-          <span class="nights-sub">BB · rateId 47099 · STC 4 / ALM 2 / DYN 1 · <span style="color:#1d39c4; font-weight:700;">1박당 6.8% 할인 (미니멈 스테이)</span></span>
+          <span class="origin-badge manual">✍️ 수동 · MAN-2026-0812</span>
+          <span class="nights-sub">BB · STC 7 (수동 = 항상 STATIC) · 공급사 PL마케팅 · <span style="color:#1d39c4; font-weight:700;">PB 자체 프로모션 딜</span></span>
           <span class="nights-total">7 rows</span>
+          <span class="row-menu" onclick="event.stopPropagation(); alert('삭제 / 초기화 / 엑셀 재업로드 메뉴 (mockup 미구현)')">⋯</span>
         </div>
         <div class="nights-section-body">
           <div class="price-table-wrap">
@@ -996,10 +1028,10 @@ select.select-mini { height: 30px; padding: 0 30px 0 10px; border: 1px solid #e8
               <tbody>
                 <tr><td class="check-cell"><input type="checkbox"></td><td>05/21</td><td>794USD</td><td>603,440원</td><td>647,520원</td><td>603,440원</td><td class="price-cell-click" onclick="openPickModal({date:'2026-05-21', room:'디럭스 시티뷰', meal:'BB', nights:4})"><span class="src-badge stc"><span class="src-badge-dot"></span>STC</span></td><td>10</td><td>0</td><td>10</td><td class="status-cell">예약가능</td><td class="del-cell"><button>삭제</button></td></tr>
                 <tr><td class="check-cell"><input type="checkbox"></td><td>05/22</td><td>794USD</td><td>603,440원</td><td>647,520원</td><td>603,440원</td><td class="price-cell-click" onclick="openPickModal({date:'2026-05-22', room:'디럭스 시티뷰', meal:'BB', nights:4})"><span class="src-badge stc"><span class="src-badge-dot"></span>STC</span></td><td>10</td><td>0</td><td>10</td><td class="status-cell">예약가능</td><td class="del-cell"><button>삭제</button></td></tr>
-                <tr><td class="check-cell"><input type="checkbox"></td><td>05/23</td><td>794USD</td><td>603,440원</td><td>647,520원</td><td>603,440원</td><td class="price-cell-click" onclick="openPickModal({date:'2026-05-23', room:'디럭스 시티뷰', meal:'BB', nights:4, pick:'alm'})"><span class="src-badge alm"><span class="src-badge-dot"></span>ALM</span></td><td>10</td><td>0</td><td>10</td><td class="status-cell">예약가능</td><td class="del-cell"><button>삭제</button></td></tr>
-                <tr><td class="check-cell"><input type="checkbox"></td><td>05/24</td><td>750USD</td><td>570,000원</td><td>647,520원</td><td>570,000원</td><td class="price-cell-click" onclick="openPickModal({date:'2026-05-24', room:'디럭스 시티뷰', meal:'BB', nights:4, pick:'dyn'})"><span class="src-badge dyn"><span class="src-badge-dot"></span>DYN</span></td><td>10</td><td>0</td><td>10</td><td class="status-cell">예약가능</td><td class="del-cell"><button>삭제</button></td></tr>
+                <tr><td class="check-cell"><input type="checkbox"></td><td>05/23</td><td>794USD</td><td>603,440원</td><td>647,520원</td><td>603,440원</td><td class="price-cell-click" onclick="openPickModal({date:'2026-05-23', room:'디럭스 시티뷰', meal:'BB', nights:4, pick:'manual'})"><span class="src-badge stc"><span class="src-badge-dot"></span>STC</span></td><td>10</td><td>0</td><td>10</td><td class="status-cell">예약가능</td><td class="del-cell"><button>삭제</button></td></tr>
+                <tr><td class="check-cell"><input type="checkbox"></td><td>05/24</td><td>750USD</td><td>570,000원</td><td>647,520원</td><td>570,000원</td><td class="price-cell-click" onclick="openPickModal({date:'2026-05-24', room:'디럭스 시티뷰', meal:'BB', nights:4, pick:'manual'})"><span class="src-badge stc"><span class="src-badge-dot"></span>STC</span></td><td>10</td><td>0</td><td>10</td><td class="status-cell">예약가능</td><td class="del-cell"><button>삭제</button></td></tr>
                 <tr><td class="check-cell"><input type="checkbox"></td><td>05/25</td><td>794USD</td><td>603,440원</td><td>647,520원</td><td>603,440원</td><td class="price-cell-click" onclick="openPickModal({date:'2026-05-25', room:'디럭스 시티뷰', meal:'BB', nights:4})"><span class="src-badge stc"><span class="src-badge-dot"></span>STC</span></td><td>10</td><td>0</td><td>10</td><td class="status-cell">예약가능</td><td class="del-cell"><button>삭제</button></td></tr>
-                <tr><td class="check-cell"><input type="checkbox"></td><td>05/26</td><td>794USD</td><td>603,440원</td><td>647,520원</td><td>603,440원</td><td class="price-cell-click" onclick="openPickModal({date:'2026-05-26', room:'디럭스 시티뷰', meal:'BB', nights:4, pick:'alm'})"><span class="src-badge alm"><span class="src-badge-dot"></span>ALM</span></td><td>10</td><td>0</td><td>10</td><td class="status-cell">예약가능</td><td class="del-cell"><button>삭제</button></td></tr>
+                <tr><td class="check-cell"><input type="checkbox"></td><td>05/26</td><td>794USD</td><td>603,440원</td><td>647,520원</td><td>603,440원</td><td class="price-cell-click" onclick="openPickModal({date:'2026-05-26', room:'디럭스 시티뷰', meal:'BB', nights:4, pick:'manual'})"><span class="src-badge stc"><span class="src-badge-dot"></span>STC</span></td><td>10</td><td>0</td><td>10</td><td class="status-cell">예약가능</td><td class="del-cell"><button>삭제</button></td></tr>
                 <tr><td class="check-cell"><input type="checkbox"></td><td>05/27</td><td>794USD</td><td>603,440원</td><td>647,520원</td><td>603,440원</td><td class="price-cell-click" onclick="openPickModal({date:'2026-05-27', room:'디럭스 시티뷰', meal:'BB', nights:4})"><span class="src-badge stc"><span class="src-badge-dot"></span>STC</span></td><td>10</td><td>0</td><td>10</td><td class="status-cell">예약가능</td><td class="del-cell"><button>삭제</button></td></tr>
               </tbody>
             </table>
@@ -2410,6 +2442,19 @@ function toggleNightsSection(headEl) {
   if (section) section.classList.toggle('collapsed');
 }
 
+// v9 — 박수 요금표 추가 모달
+function openAddRatesModal(roomId) {
+  document.getElementById('addRoomIdLabel').textContent = roomId;
+  document.getElementById('addRatesModal').classList.add('show');
+}
+function closeAddRatesModal() { document.getElementById('addRatesModal').classList.remove('show'); }
+function switchAddTab(el, tab) {
+  el.parentElement.querySelectorAll('.add-tab').forEach(t => t.classList.remove('active'));
+  el.classList.add('active');
+  document.querySelectorAll('.add-tab-body').forEach(b => b.classList.remove('active'));
+  document.getElementById('addTab-' + tab).classList.add('active');
+}
+
 // v9 — 최저가 pick 상세 모달
 function openPickModal(ctx) {
   const modal = document.getElementById('pickModal');
@@ -2463,6 +2508,23 @@ function openPickModal(ctx) {
         <span class="pick-cand-tag" style="background:#f5f5f5; color:rgba(0,0,0,0.5);">+6,360원 (미채택)</span>
       </div>`;
     ruleHtml = `<strong>최저가 우선 pick</strong> — 이 조합엔 STATIC이 없고, ALM(485,640원)이 DYNAMIC(492,000원)보다 저렴해서 채택. 요금은 고정, 재고만 매일 갱신.`;
+  } else if (pick === 'manual') {
+    // 수동 등록 요금표 (STATIC 단독) — 4박 요금표 케이스
+    scenarioHtml = `
+      <div class="pick-cand selected">
+        <div class="pick-cand-check">✓</div>
+        <div class="pick-cand-badge"><span class="src-badge stc"><span class="src-badge-dot"></span>STC</span></div>
+        <div class="pick-cand-price">603,440원</div>
+        <div class="pick-cand-meta">origin: <span style="color:#ad4e00; font-weight:700;">수동 · MAN-2026-0812</span> · 공급사 PL마케팅 · 등록일 2026-08-12</div>
+        <span class="pick-cand-tag">Pick — 수동 단독 source</span>
+      </div>
+      <div class="pick-cand" style="opacity:0.5;">
+        <div class="pick-cand-check"></div>
+        <div class="pick-cand-badge"><span class="src-badge stc" style="opacity:0.5;"><span class="src-badge-dot"></span>STC</span></div>
+        <div class="pick-cand-price" style="color:rgba(0,0,0,0.4);">—</div>
+        <div class="pick-cand-meta">TMG rateId 47099 (STATIC) — 이 일자에 rate 없음</div>
+      </div>`;
+    ruleHtml = `<strong>수동 등록 요금표</strong> — PB 자체 프로모션 딜 (MAN-2026-0812). 수동 등록은 항상 STATIC. TMG rateId 47099가 있어도 이 일자에는 rate 없음, 수동이 유일 source. 다른 일자에서는 TMG와 혼재 시 최저가 pick + 동가 tie-break STATIC 룰 그대로 적용.`;
   } else if (isTie) {
     // 동가 시 STATIC tie-break
     scenarioHtml = `
@@ -2530,6 +2592,100 @@ function openPickModal(ctx) {
 }
 function closePickModal() { document.getElementById('pickModal').classList.remove('show'); }
 </script>
+
+<!-- ==================== MODAL: 박수 요금표 추가 (v9) ==================== -->
+<div class="modal-overlay" id="addRatesModal">
+  <div class="modal" style="width:640px;">
+    <div class="modal-header">
+      <div class="modal-title">
+        <span class="tag" style="background:#f0f5ff; color:#1d39c4; padding:2px 8px; border-radius:10px; font-size:10px; font-weight:700; border:1px solid #adc6ff;">v9</span>
+        박수 요금표 추가 <span style="font-size:12px; color:rgba(0,0,0,0.55); font-weight:500;">— 객실 [ID: <span id="addRoomIdLabel">267</span>]</span>
+      </div>
+      <button class="modal-close" onclick="closeAddRatesModal()">×</button>
+    </div>
+    <div style="padding:18px 20px;">
+      <div class="add-tabs">
+        <button class="add-tab active" onclick="switchAddTab(this,'tmg')">🔗 TMG 매핑</button>
+        <button class="add-tab" onclick="switchAddTab(this,'manual')">✍️ 수동 신규</button>
+      </div>
+
+      <!-- TMG 매핑 탭 -->
+      <div class="add-tab-body active" id="addTab-tmg">
+        <div style="background:#f9f0ff; border:1px solid #d3adf7; padding:10px 14px; border-radius:8px; margin-bottom:14px; font-size:12px; color:#531dab; line-height:1.55;">
+          💡 TMG에서 도착한 요금표 중 이 객실에 아직 연결 안 된 rateId를 선택하세요. 대부분은 자동 매핑되지만 실패한 건은 여기서 수동 연결합니다.
+        </div>
+        <div style="display:flex; gap:8px; margin-bottom:12px;">
+          <input type="text" placeholder="rateId 또는 이름 검색" style="flex:1; height:32px; padding:0 10px; border:1px solid #d9d9d9; border-radius:6px; font-size:12px;">
+          <select style="height:32px; padding:0 26px 0 10px; border:1px solid #d9d9d9; border-radius:6px; font-size:12px;">
+            <option>박수 전체</option>
+            <option>5박</option>
+            <option>6박</option>
+            <option>7박</option>
+          </select>
+          <label style="display:flex; align-items:center; gap:4px; font-size:11.5px; color:rgba(0,0,0,0.65);"><input type="checkbox" checked> 미연결만</label>
+        </div>
+        <div style="max-height:240px; overflow-y:auto;">
+          <div class="tmg-rate-item">
+            <div class="rate-id">47100</div>
+            <div class="rate-meta"><strong>5박 · BB</strong> · 판매기간 06/01~09/30 · 조회 완료</div>
+            <span class="rate-type" style="background:#f6ffed; color:#389e0d; border:1px solid #b7eb8f;">STATIC</span>
+            <button class="btn btn-primary btn-sm" onclick="alert('rateId 47100 연결 → 5박 요금표 섹션 추가 (mockup 미구현)'); closeAddRatesModal();">연결</button>
+          </div>
+          <div class="tmg-rate-item">
+            <div class="rate-id">47101</div>
+            <div class="rate-meta"><strong>5박 · HB</strong> · 판매기간 06/01~09/30 · 조회 완료</div>
+            <span class="rate-type" style="background:#fffbe6; color:#d48806; border:1px solid #ffe58f;">ALM-DYNAMIC</span>
+            <button class="btn btn-primary btn-sm" onclick="alert('rateId 47101 연결 (mockup 미구현)'); closeAddRatesModal();">연결</button>
+          </div>
+          <div class="tmg-rate-item">
+            <div class="rate-id">47102</div>
+            <div class="rate-meta"><strong>6박 · BB</strong> · 판매기간 07/01~08/31 · 조회 대기</div>
+            <span class="rate-type" style="background:#fff1f0; color:#cf1322; border:1px solid #ffa39e;">DYNAMIC</span>
+            <button class="btn btn-primary btn-sm" onclick="alert('rateId 47102 연결 (mockup 미구현)'); closeAddRatesModal();">연결</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- 수동 신규 탭 -->
+      <div class="add-tab-body" id="addTab-manual">
+        <div style="background:#fff7e6; border:1px solid #ffd591; padding:10px 14px; border-radius:8px; margin-bottom:14px; font-size:12px; color:#874d00; line-height:1.55;">
+          💡 파트너·PB 자체 딜 등 TMG 외 요금표를 직접 등록합니다. <strong>수동 신규 = 항상 STATIC</strong> (요금·재고 고정). 자동 발급 ID는 <code style="background:#fff; padding:1px 5px; border-radius:3px; font-size:11px;">MAN-YYYY-NNNN</code> 형식.
+        </div>
+        <div class="form-row">
+          <div class="form-cell">
+            <label>박수</label>
+            <select><option>3박</option><option>4박</option><option selected>5박</option><option>6박</option><option>7박</option></select>
+          </div>
+          <div class="form-cell">
+            <label>식사</label>
+            <select><option selected>BB</option><option>HB</option><option>AI</option><option>RO</option></select>
+          </div>
+          <div class="form-cell">
+            <label>통화</label>
+            <select><option>KRW</option><option selected>USD</option><option>VND</option></select>
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-cell readonly">
+            <label>공급사 <span style="color:rgba(0,0,0,0.4); font-weight:400;">— 숙박권 지정값 자동</span></label>
+            <input type="text" value="PL마케팅" readonly>
+          </div>
+          <div class="form-cell readonly">
+            <label>source <span style="color:rgba(0,0,0,0.4); font-weight:400;">— 수동은 항상 STATIC</span></label>
+            <input type="text" value="STATIC (수동)" readonly>
+          </div>
+        </div>
+        <div style="background:#f5f6f8; border-radius:8px; padding:10px 14px; font-size:11.5px; color:rgba(0,0,0,0.65); line-height:1.6;">
+          📝 만들기 → 빈 요금표 섹션이 추가되고 담당자가 <strong>엑셀 업로드</strong> 또는 <strong>일자별 직접 입력</strong>으로 원가·판매가·재고를 채웁니다.
+        </div>
+      </div>
+    </div>
+    <div style="padding: 12px 20px; border-top: 1px solid #f0f0f0; display: flex; justify-content: flex-end; gap: 8px;">
+      <button class="btn btn-sm" onclick="closeAddRatesModal()">취소</button>
+      <button class="btn btn-primary btn-sm" onclick="alert('요금표 섹션 추가 (mockup 미구현)'); closeAddRatesModal();">만들기</button>
+    </div>
+  </div>
+</div>
 
 <!-- ==================== MODAL: 최저가 pick 상세 (v9) ==================== -->
 <div class="modal-overlay" id="pickModal">
