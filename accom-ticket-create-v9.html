@@ -1,0 +1,2509 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>숙박권 만들기 — TripStore Admin</title>
+<link href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.6/dist/web/static/pretendard.css" rel="stylesheet">
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: 'Pretendard', 'Apple SD Gothic Neo', -apple-system, sans-serif; font-size: 14px; color: rgba(0,0,0,0.88); background: #f5f6f8; }
+
+/* GNB */
+.gnb { background: #fff; height: 56px; display: flex; align-items: center; padding: 0 24px; border-bottom: 1px solid #f0f0f0; position: sticky; top: 0; z-index: 100; }
+.gnb-logo { font-weight: 800; font-size: 15px; margin-right: 32px; letter-spacing: -0.3px; }
+.gnb-logo span { color: #1677ff; }
+.gnb-menu { display: flex; gap: 0; }
+.gnb-item { color: rgba(0,0,0,0.65); padding: 0 16px; height: 56px; display: flex; align-items: center; cursor: pointer; font-size: 13px; font-weight: 500; position: relative; }
+.gnb-item.active { color: #1677ff; }
+.gnb-item.active::after { content: ''; position: absolute; bottom: 0; left: 0; right: 0; height: 2px; background: #1677ff; }
+.gnb-user { margin-left: auto; font-size: 13px; color: rgba(0,0,0,0.55); }
+
+.layout { padding: 24px 32px 60px; max-width: 1480px; margin: 0 auto; }
+.breadcrumb { font-size: 13px; color: rgba(0,0,0,0.55); margin-bottom: 8px; }
+.breadcrumb a { color: rgba(0,0,0,0.55); text-decoration: none; }
+.breadcrumb-sep { margin: 0 6px; color: rgba(0,0,0,0.25); }
+
+.page-title { font-size: 28px; font-weight: 800; margin: 6px 0 28px; letter-spacing: -0.5px; }
+
+/* CARD */
+.card { background: #fff; border-radius: 14px; padding: 28px 30px; margin-bottom: 20px; box-shadow: 0 1px 2px rgba(0,0,0,0.04); }
+.card-title { font-size: 17px; font-weight: 800; margin-bottom: 20px; display: flex; align-items: center; gap: 10px; }
+.card-title .api-tag { font-size: 10px; background: #f9f0ff; color: #722ed1; padding: 2px 7px; border-radius: 4px; font-weight: 600; border: 1px solid #d3adf7; }
+.card-title-row { display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px; }
+.card-title-row .card-title { margin-bottom: 0; }
+.card-title-actions { display: flex; gap: 6px; }
+
+/* FORM */
+.form-grid-4 { display: grid; grid-template-columns: repeat(4, 1fr); gap: 18px; }
+.form-grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 18px; }
+.form-grid-2 { display: grid; grid-template-columns: 200px 1fr; gap: 18px; align-items: end; }
+.form-grid-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 18px; margin-top: 18px; }
+
+.form-label { font-size: 12px; color: rgba(0,0,0,0.55); margin-bottom: 8px; display: block; font-weight: 500; }
+.form-label .required { color: #f5222d; margin-left: 2px; }
+
+.form-control { width: 100%; height: 44px; padding: 0 14px; border: 1px solid #e8e8e8; border-radius: 8px; font-size: 13px; font-family: inherit; outline: none; background: #fff; }
+.form-control:focus { border-color: #1677ff; box-shadow: 0 0 0 2px rgba(22,119,255,0.1); }
+.form-control[disabled] { background: #fafafa; color: rgba(0,0,0,0.55); }
+
+select.form-control { padding: 0 36px 0 14px; appearance: none; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8'%3E%3Cpath d='M0 0l6 8 6-8z' fill='%23999'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 14px center; cursor: pointer; }
+
+input[type="date"].form-control, input[type="time"].form-control { padding-right: 14px; }
+
+.field-with-btn { display: flex; gap: 6px; align-items: stretch; }
+.field-with-btn .form-control { flex: 1; }
+.field-with-btn .btn { height: 44px; flex-shrink: 0; }
+
+.input-suffix-group { position: relative; display: flex; align-items: center; }
+.input-suffix-group .form-control { padding-right: 40px; text-align: right; }
+.input-suffix-group .suffix { position: absolute; right: 14px; color: rgba(0,0,0,0.45); font-size: 13px; pointer-events: none; }
+.input-prefix-group { position: relative; display: flex; align-items: center; }
+.input-prefix-group .form-control { padding-left: 14px; }
+.input-prefix-group .form-suffix-text { color: rgba(0,0,0,0.55); margin-left: 8px; font-size: 13px; white-space: nowrap; }
+
+/* TOGGLE — 운영중/종료 */
+.toggle-pill { display: inline-flex; height: 44px; background: #fff; border: 1px solid #e8e8e8; border-radius: 8px; padding: 4px; gap: 0; align-items: center; }
+.toggle-pill button { background: transparent; border: none; padding: 0 22px; height: 36px; border-radius: 6px; font-size: 13px; font-weight: 600; cursor: pointer; color: rgba(0,0,0,0.45); font-family: inherit; }
+.toggle-pill button.active { background: #1abc9c; color: #fff; }
+
+/* SWITCH (on/off small) */
+.switch { position: relative; display: inline-block; width: 44px; height: 24px; }
+.switch input { opacity: 0; width: 0; height: 0; }
+.switch .slider { position: absolute; cursor: pointer; inset: 0; background: #ccc; transition: 0.2s; border-radius: 24px; }
+.switch .slider::before { position: absolute; content: ''; height: 18px; width: 18px; left: 3px; bottom: 3px; background: #fff; transition: 0.2s; border-radius: 50%; box-shadow: 0 1px 2px rgba(0,0,0,0.15); }
+.switch input:checked + .slider { background: #1abc9c; }
+.switch input:checked + .slider::before { transform: translateX(20px); }
+
+.onoff-pill { display: inline-flex; height: 32px; background: #fff; border: 1px solid #e8e8e8; border-radius: 6px; padding: 3px; }
+.onoff-pill button { background: transparent; border: none; padding: 0 14px; height: 26px; border-radius: 4px; font-size: 12px; cursor: pointer; color: rgba(0,0,0,0.45); font-family: inherit; font-weight: 600; }
+.onoff-pill button.active { background: #1abc9c; color: #fff; }
+
+/* BUTTON */
+.btn { height: 36px; padding: 0 16px; border-radius: 8px; font-size: 13px; font-family: inherit; cursor: pointer; border: 1px solid transparent; display: inline-flex; align-items: center; gap: 6px; transition: all 0.15s; white-space: nowrap; font-weight: 500; background: #fff; color: rgba(0,0,0,0.88); border-color: #e0e0e0; }
+.btn:hover { color: #1677ff; border-color: #1677ff; }
+.btn-primary { background: #1677ff; color: #fff; border-color: #1677ff; }
+.btn-primary:hover { background: #4096ff; color: #fff; }
+.btn-tmg { background: #722ed1; color: #fff; border-color: #722ed1; }
+.btn-tmg:hover { background: #9254de; color: #fff; border-color: #9254de; }
+.btn-sm { height: 30px; padding: 0 12px; font-size: 12px; }
+.btn-lg { height: 44px; padding: 0 22px; font-size: 14px; }
+.btn-danger { color: #cf1322; border-color: #ffccc7; }
+.btn-danger:hover { background: #fff1f0; color: #cf1322; border-color: #ff7875; }
+.btn-icon { width: 32px; height: 32px; padding: 0; justify-content: center; }
+
+/* ROOM CARD (객실 카드) */
+.room-block { border: 1px solid #e8e8e8; border-radius: 12px; padding: 22px 24px; margin-bottom: 16px; }
+.room-block.disabled { opacity: 0.55; }
+.room-head { display: flex; align-items: center; gap: 12px; margin-bottom: 18px; flex-wrap: wrap; }
+.room-head .room-title { font-size: 16px; font-weight: 700; flex: 1; }
+.room-head .switch-area { display: flex; align-items: center; gap: 10px; }
+
+.room-meta-row { display: grid; grid-template-columns: 130px 200px 200px 1fr; gap: 20px; margin-bottom: 18px; padding-bottom: 18px; border-bottom: 1px solid #f0f0f0; align-items: end; }
+.room-meta-cell { display: flex; flex-direction: column; gap: 4px; }
+.room-meta-cell .k { font-size: 11px; color: rgba(0,0,0,0.55); }
+.room-meta-cell .v { font-size: 14px; font-weight: 700; }
+.room-meta-cell .child-rate { display: flex; align-items: center; gap: 6px; font-size: 13px; }
+.room-meta-cell .child-rate input { width: 60px; height: 30px; padding: 0 8px; border: 1px solid #e8e8e8; border-radius: 4px; text-align: right; font-family: inherit; font-size: 12px; }
+
+.room-action-row { display: flex; align-items: center; gap: 12px; margin-bottom: 14px; flex-wrap: wrap; }
+.date-range { display: flex; align-items: center; gap: 6px; }
+.date-range input { height: 34px; padding: 0 10px; border: 1px solid #e8e8e8; border-radius: 6px; font-size: 12px; font-family: inherit; width: 130px; }
+.date-range input::placeholder { color: rgba(0,0,0,0.35); }
+
+/* RANGE PICKER — 30/60/90 days */
+.range-picker { display: flex; align-items: center; gap: 14px; padding: 12px 14px; background: #fafcff; border: 1px solid #e6f0ff; border-radius: 8px; margin-bottom: 14px; flex-wrap: wrap; }
+.range-picker-label { font-size: 12px; font-weight: 600; color: rgba(0,0,0,0.65); display: flex; align-items: center; gap: 6px; }
+.range-picker-label .api-tag { font-family: 'SF Mono', monospace; font-size: 10px; background: #fff; color: #722ed1; padding: 1px 6px; border-radius: 3px; border: 1px solid #d3adf7; font-weight: 600; }
+.range-btns { display: flex; gap: 6px; }
+.range-btn-sm { padding: 6px 14px; height: 34px; border: 1.5px solid #d9d9d9; background: #fff; border-radius: 6px; cursor: pointer; font-size: 13px; font-weight: 600; color: rgba(0,0,0,0.65); font-family: inherit; transition: all 0.15s; }
+.range-btn-sm:hover { border-color: #91caff; }
+.range-btn-sm.active { border-color: #1677ff; background: #e6f4ff; color: #1677ff; }
+.range-btn-sm .sub { font-size: 10px; color: rgba(0,0,0,0.45); margin-left: 4px; font-weight: 500; }
+.range-btn-sm.active .sub { color: #1677ff; }
+.range-picker .hint { font-size: 11px; color: rgba(0,0,0,0.55); flex: 1; min-width: 200px; }
+.range-picker .hint strong { color: rgba(0,0,0,0.88); }
+.btn-dark { background: #2c2c2c; color: #fff; border-color: #2c2c2c; }
+.btn-dark:hover { background: #4a4a4a; color: #fff; border-color: #4a4a4a; }
+
+.sub-action-row { display: flex; align-items: center; gap: 8px; margin-bottom: 12px; padding: 10px 0; flex-wrap: wrap; }
+.sub-action-row .selected-count { font-size: 12px; color: rgba(0,0,0,0.55); margin-right: 6px; }
+.sub-action-row .selected-count strong { color: #1677ff; }
+.sub-action-row .left { display: flex; align-items: center; gap: 6px; }
+.sub-action-row .right { display: flex; align-items: center; gap: 6px; margin-left: auto; }
+
+select.select-mini { height: 30px; padding: 0 30px 0 10px; border: 1px solid #e8e8e8; border-radius: 6px; font-size: 12px; font-family: inherit; background-color: #fff; appearance: none; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='%23999'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 10px center; cursor: pointer; min-width: 100px; }
+
+/* PRICE TABLE */
+.price-table-wrap { border: 1px solid #f0f0f0; border-radius: 10px; overflow: hidden; }
+.price-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+.price-table th { padding: 12px 14px; background: #fafafa; border-bottom: 1px solid #f0f0f0; text-align: left; font-weight: 600; color: rgba(0,0,0,0.65); font-size: 12px; white-space: nowrap; position: relative; }
+.price-table th::after { content: '⋮'; position: absolute; right: 8px; color: rgba(0,0,0,0.25); font-size: 14px; }
+.price-table th.no-divider::after { content: ''; }
+.price-table td { padding: 11px 14px; border-bottom: 1px solid #f5f5f5; }
+.price-table tbody tr:hover td { background: #fafafa; }
+.price-table .num { font-family: inherit; }
+.price-table .check-cell { width: 36px; }
+.price-table .check-cell input { accent-color: #1abc9c; cursor: pointer; }
+.price-table .status-cell { color: #1abc9c; font-weight: 600; }
+.price-table .del-cell button { height: 26px; padding: 0 12px; font-size: 11px; background: #f5f5f5; border: 1px solid #e8e8e8; color: rgba(0,0,0,0.45); border-radius: 4px; cursor: not-allowed; }
+
+/* ADDITIONAL OPTIONS */
+.option-block { border: 1px solid #e8e8e8; border-radius: 10px; padding: 18px 22px; margin-bottom: 12px; }
+.option-block-head { display: flex; align-items: center; gap: 10px; margin-bottom: 14px; }
+.option-block-head .title { font-size: 14px; font-weight: 700; }
+.option-block-body { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; }
+.option-fee-group { display: flex; align-items: center; gap: 8px; }
+.option-fee-group select { flex-shrink: 0; }
+.option-fee-group .input-suffix-group { flex: 1; }
+
+/* INFO LIST (유의사항 등) */
+.info-cols { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; }
+.info-card { border: 1px solid #e8e8e8; border-radius: 10px; padding: 18px 20px; }
+.info-card-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 14px; }
+.info-card-title { font-size: 14px; font-weight: 700; }
+.info-card-title .sub { font-size: 12px; color: rgba(0,0,0,0.45); font-weight: 400; margin-left: 4px; }
+.info-list { display: flex; flex-direction: column; gap: 6px; }
+.info-item { display: flex; align-items: center; gap: 8px; background: #f8f8f8; border-radius: 6px; padding: 10px 12px; }
+.info-item .text { flex: 1; font-size: 12px; color: rgba(0,0,0,0.75); }
+.info-item .text strong { display: block; color: rgba(0,0,0,0.88); font-weight: 700; margin-bottom: 2px; }
+.info-item .icon-btns { display: flex; gap: 4px; }
+.icon-btn { width: 24px; height: 24px; border: 1px solid #e0e0e0; background: #fff; border-radius: 4px; cursor: pointer; font-size: 11px; color: rgba(0,0,0,0.55); display: inline-flex; align-items: center; justify-content: center; }
+.icon-btn:hover { border-color: #1677ff; color: #1677ff; }
+
+/* BOTTOM ACTION BAR */
+.bottom-action { background: #fff; border-radius: 14px; padding: 18px 30px; display: flex; align-items: center; justify-content: flex-end; gap: 10px; box-shadow: 0 -2px 8px rgba(0,0,0,0.04); position: sticky; bottom: 20px; }
+
+/* TMG INFO BANNER (rate from TMG) */
+.tmg-banner { background: linear-gradient(90deg, #f9f0ff 0%, #fff 100%); border: 1px solid #d3adf7; border-radius: 10px; padding: 14px 18px; display: flex; align-items: center; gap: 14px; margin-bottom: 20px; }
+.tmg-banner .icon { width: 34px; height: 34px; border-radius: 8px; background: #722ed1; color: #fff; display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 13px; flex-shrink: 0; }
+.tmg-banner .info { flex: 1; }
+.tmg-banner .title { font-size: 13px; font-weight: 700; color: #531dab; margin-bottom: 2px; }
+.tmg-banner .desc { font-size: 12px; color: rgba(0,0,0,0.65); line-height: 1.5; }
+.tmg-banner .meta { display: flex; gap: 14px; margin-top: 4px; font-size: 11px; color: rgba(0,0,0,0.55); }
+.tmg-banner .meta strong { color: rgba(0,0,0,0.88); font-weight: 600; font-family: 'SF Mono', monospace; }
+
+/* MODAL — TMG 콘텐츠 조회 */
+.modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.5); display: none; align-items: center; justify-content: center; z-index: 1000; padding: 40px 20px; }
+.modal-overlay.show { display: flex; }
+.modal { background: #fff; border-radius: 14px; width: 1040px; max-width: 100%; max-height: 90vh; overflow-y: auto; }
+.modal-header { padding: 20px 26px 16px; border-bottom: 1px solid #f0f0f0; display: flex; align-items: center; justify-content: space-between; }
+.modal-title { font-size: 17px; font-weight: 700; display: flex; align-items: center; gap: 10px; }
+.modal-close { background: transparent; border: none; font-size: 22px; cursor: pointer; color: rgba(0,0,0,0.45); width: 32px; height: 32px; border-radius: 50%; }
+.modal-close:hover { background: #f5f5f5; }
+.modal-body { padding: 22px 26px; }
+.modal-footer { padding: 14px 26px 20px; border-top: 1px solid #f0f0f0; display: flex; justify-content: space-between; gap: 8px; background: #fafafa; align-items: center; }
+
+.content-grid { display: grid; grid-template-columns: 1fr 320px; gap: 18px; }
+.hotel-hero { background: linear-gradient(180deg, #f0f7ff 0%, #fafafa 100%); border-radius: 10px; padding: 18px; margin-bottom: 16px; }
+.hotel-hero .top { display: flex; gap: 14px; }
+.hotel-avatar { width: 90px; height: 70px; border-radius: 8px; background: linear-gradient(135deg, #91caff, #1677ff); flex-shrink: 0; display: flex; align-items: center; justify-content: center; color: #fff; font-weight: 800; font-size: 20px; }
+.hotel-name { font-size: 16px; font-weight: 700; margin-bottom: 4px; }
+.hotel-addr { font-size: 12px; color: rgba(0,0,0,0.55); }
+.hotel-stars { font-size: 12px; color: #fa8c16; margin-bottom: 4px; }
+.hotel-meta { display: flex; gap: 14px; margin-top: 12px; flex-wrap: wrap; font-size: 12px; }
+.hotel-meta-item { display: flex; flex-direction: column; }
+.hotel-meta-item .k { font-size: 10px; color: rgba(0,0,0,0.45); }
+.hotel-meta-item .v { font-weight: 600; }
+
+.content-section { margin-bottom: 16px; }
+.content-section-title { font-size: 12px; font-weight: 700; margin-bottom: 8px; display: flex; align-items: center; gap: 6px; }
+.content-section-title .field { font-family: 'SF Mono', monospace; font-size: 10px; color: rgba(0,0,0,0.45); font-weight: 500; }
+
+.img-strip { display: flex; gap: 6px; overflow-x: auto; padding-bottom: 4px; }
+.img-thumb { width: 96px; height: 72px; border-radius: 6px; flex-shrink: 0; display: flex; align-items: center; justify-content: center; font-size: 16px; color: rgba(0,0,0,0.35); }
+.img-thumb:nth-child(1) { background: linear-gradient(135deg, #91caff, #e6f4ff); }
+.img-thumb:nth-child(2) { background: linear-gradient(135deg, #d9d9d9, #f0f0f0); }
+.img-thumb:nth-child(3) { background: linear-gradient(135deg, #ffd8bf, #fff2e8); }
+.img-thumb:nth-child(4) { background: linear-gradient(135deg, #b7eb8f, #f6ffed); }
+.img-thumb:nth-child(5) { background: linear-gradient(135deg, #d3adf7, #f9f0ff); }
+.img-thumb:nth-child(6) { background: linear-gradient(135deg, #ffadd2, #fff0f6); }
+.img-thumb:nth-child(7) { background: linear-gradient(135deg, #ffd591, #fff7e6); }
+
+.room-list { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.room-card-mini { border: 1px solid #f0f0f0; border-radius: 8px; padding: 10px 12px; background: #fff; }
+.room-card-mini-name { font-size: 12px; font-weight: 700; }
+.room-card-mini-sub { font-size: 11px; color: rgba(0,0,0,0.55); margin-top: 2px; }
+.room-card-mini-meta { font-size: 11px; color: rgba(0,0,0,0.55); margin-top: 6px; padding-top: 6px; border-top: 1px dashed #f0f0f0; }
+
+.html-preview { background: #fff; border: 1px solid #f0f0f0; border-radius: 6px; padding: 10px 12px; font-size: 12px; line-height: 1.6; color: rgba(0,0,0,0.65); max-height: 90px; overflow-y: auto; }
+
+.side-panel { background: #fafafa; border-radius: 10px; padding: 16px; }
+.side-panel-title { font-size: 11px; color: rgba(0,0,0,0.45); text-transform: uppercase; letter-spacing: 0.5px; font-weight: 600; margin-bottom: 10px; }
+.side-row { display: flex; justify-content: space-between; padding: 6px 0; border-bottom: 1px dashed #f0f0f0; font-size: 12px; }
+.side-row:last-child { border-bottom: none; }
+.side-row .k { color: rgba(0,0,0,0.55); }
+.side-row .v { font-weight: 600; }
+
+.import-table { width: 100%; font-size: 12px; margin-top: 8px; }
+.import-table th { text-align: left; padding: 8px 6px; font-weight: 600; color: rgba(0,0,0,0.55); font-size: 11px; border-bottom: 1px solid #f0f0f0; }
+.import-table td { padding: 8px 6px; border-bottom: 1px solid #f5f5f5; font-size: 12px; }
+.import-check { width: 16px; height: 16px; accent-color: #1abc9c; }
+
+.tag { display: inline-flex; align-items: center; padding: 2px 8px; border-radius: 4px; font-size: 11px; font-weight: 600; }
+.tag-purple { background: #f9f0ff; color: #722ed1; border: 1px solid #d3adf7; }
+.tag-blue { background: #e6f4ff; color: #1677ff; border: 1px solid #91caff; }
+.tag-green { background: #f6ffed; color: #389e0d; border: 1px solid #b7eb8f; }
+
+.helper { font-size: 11px; color: rgba(0,0,0,0.45); margin-top: 6px; line-height: 1.5; }
+
+/* ==================== CONTENTS v6 (Rule Engine) ==================== */
+.content-banner-v6 { background: linear-gradient(135deg, #f0f7ff 0%, #e6f4ff 100%); border: 1px solid #91caff; border-radius: 10px; padding: 12px 16px; margin-bottom: 16px; display: flex; align-items: flex-start; gap: 10px; font-size: 12.5px; line-height: 1.7; color: #003a8c; }
+.content-banner-v6 strong { color: #0958d9; font-weight: 700; }
+.content-banner-v6 .icon { font-size: 16px; flex-shrink: 0; }
+
+.scope-tabs { display: flex; gap: 0; border-bottom: 2px solid #f0f0f0; margin-bottom: 16px; }
+.scope-tab { background: transparent; border: none; padding: 12px 22px; font-size: 14px; font-weight: 600; cursor: pointer; color: rgba(0,0,0,0.55); border-bottom: 2px solid transparent; margin-bottom: -2px; font-family: inherit; display: inline-flex; align-items: center; gap: 8px; transition: all 0.15s; }
+.scope-tab:hover { color: rgba(0,0,0,0.88); }
+.scope-tab.active { color: #1677ff; border-bottom-color: #1677ff; }
+.scope-count { font-size: 11px; padding: 1px 8px; border-radius: 10px; background: rgba(0,0,0,0.06); color: rgba(0,0,0,0.55); font-weight: 700; }
+.scope-tab.active .scope-count { background: #1677ff; color: #fff; }
+
+.scope-panel { display: none; }
+.scope-panel.active { display: block; }
+
+.content-filter-row { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; margin-bottom: 14px; padding: 10px 12px; background: #fafbfc; border-radius: 8px; border: 1px solid #f0f0f0; }
+.cat-chip { padding: 5px 12px; border-radius: 14px; border: 1px solid #e8e8e8; background: #fff; color: rgba(0,0,0,0.65); font-size: 12px; font-weight: 500; cursor: pointer; font-family: inherit; transition: all 0.15s; display: inline-flex; align-items: center; gap: 4px; }
+.cat-chip:hover { color: #1677ff; border-color: #91caff; }
+.cat-chip.active { color: #1677ff; border-color: #1677ff; background: #e6f4ff; font-weight: 700; }
+.cat-chip-count { font-size: 10.5px; opacity: 0.7; margin-left: 2px; }
+.filter-spacer { margin-left: auto; display: flex; gap: 6px; }
+
+.room-selector-row { display: flex; align-items: center; gap: 10px; padding: 12px 14px; background: #fff7e6; border: 1px solid #ffd591; border-radius: 8px; margin-bottom: 14px; flex-wrap: wrap; }
+.room-selector-row .label { font-size: 12px; color: #874d00; font-weight: 700; display: flex; align-items: center; gap: 5px; }
+.room-selector-row select { height: 32px; padding: 0 30px 0 10px; border: 1px solid #ffd591; border-radius: 6px; font-size: 12.5px; font-family: inherit; background: #fff; appearance: none; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='%23d48806'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 10px center; cursor: pointer; min-width: 200px; color: rgba(0,0,0,0.88); font-weight: 500; }
+.room-selector-row .matrix-toggle { margin-left: auto; display: flex; align-items: center; gap: 6px; font-size: 11.5px; color: #874d00; cursor: pointer; }
+
+.content-card-v6 { border: 1px solid #e8e8e8; border-radius: 12px; margin-bottom: 12px; background: #fff; transition: all 0.15s; overflow: hidden; }
+.content-card-v6:hover { border-color: #91caff; box-shadow: 0 2px 8px rgba(22,119,255,0.05); }
+.content-card-v6-head { padding: 14px 18px 12px; border-bottom: 1px solid #f5f5f5; }
+.content-card-title-row { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; margin-bottom: 6px; }
+.content-id { font-family: 'SF Mono', monospace; font-size: 11px; background: #f5f5f5; padding: 2px 7px; border-radius: 3px; color: rgba(0,0,0,0.55); font-weight: 500; }
+.cat-tag-v6 { display: inline-flex; align-items: center; gap: 3px; padding: 2px 8px; border-radius: 4px; font-size: 11px; font-weight: 700; }
+.cat-tag-v6.intro { background: #e6f4ff; color: #0958d9; border: 1px solid #91caff; }
+.cat-tag-v6.key { background: #fff7e6; color: #ad6800; border: 1px solid #ffd591; }
+.cat-tag-v6.benefit { background: #fff0f6; color: #c41d7f; border: 1px solid #ffadd2; }
+.cat-tag-v6.notice { background: #f5f5f5; color: rgba(0,0,0,0.65); border: 1px solid #d9d9d9; }
+.cat-tag-v6.predep { background: #f9f0ff; color: #531dab; border: 1px solid #d3adf7; }
+.cat-tag-v6.room { background: #f6ffed; color: #389e0d; border: 1px solid #b7eb8f; }
+.cat-tag-v6.flight { background: #e6fffb; color: #006d75; border: 1px solid #87e8de; }
+.status-pill { display: inline-flex; align-items: center; gap: 4px; padding: 2px 8px; border-radius: 4px; font-size: 11px; font-weight: 600; }
+.status-pill.live { background: #f6ffed; color: #389e0d; border: 1px solid #b7eb8f; }
+.status-pill.live::before { content: '●'; font-size: 8px; }
+.status-pill.draft { background: #f5f5f5; color: rgba(0,0,0,0.55); border: 1px solid #d9d9d9; }
+.status-pill.paused { background: #fff7e6; color: #d48806; border: 1px solid #ffd591; }
+.content-name-v6 { font-size: 15px; font-weight: 700; color: rgba(0,0,0,0.88); margin-bottom: 6px; }
+.content-meta-v6 { display: flex; gap: 6px; align-items: center; flex-wrap: wrap; font-size: 11.5px; color: rgba(0,0,0,0.5); }
+.content-meta-v6 .rule-chip { padding: 2px 8px; border-radius: 4px; background: #f0f7ff; color: #1677ff; font-weight: 600; border: 1px solid #d6e4ff; }
+.content-meta-v6 .rule-chip.broad { background: #fff7e6; color: #d48806; border-color: #ffd591; }
+.content-meta-v6 strong { color: rgba(0,0,0,0.75); font-weight: 700; }
+.content-meta-v6 .sep { color: rgba(0,0,0,0.2); }
+.usage-link { color: #1677ff; font-weight: 600; cursor: pointer; font-size: 11.5px; }
+.usage-link:hover { text-decoration: underline; }
+
+.content-card-v6-items { padding: 10px 18px 12px; background: #fafbfc; }
+.content-item-v6 { display: flex; gap: 10px; align-items: flex-start; padding: 8px 0; }
+.content-item-v6 + .content-item-v6 { border-top: 1px dashed #ececec; }
+.item-num { width: 22px; height: 22px; border-radius: 50%; background: #1677ff; color: #fff; font-size: 11px; font-weight: 800; display: inline-flex; align-items: center; justify-content: center; flex-shrink: 0; }
+.item-body { flex: 1; min-width: 0; }
+.item-title-v6 { font-size: 13px; font-weight: 700; color: rgba(0,0,0,0.88); margin-bottom: 3px; }
+.item-content-v6 { font-size: 12.5px; color: rgba(0,0,0,0.65); line-height: 1.55; }
+.item-content-v6 .warn { color: #d48806; font-weight: 600; }
+
+.content-card-v6-foot { padding: 10px 18px; display: flex; align-items: center; gap: 6px; background: #fff; border-top: 1px solid #f5f5f5; }
+.content-card-v6-foot .btn { height: 28px; padding: 0 10px; font-size: 11.5px; }
+.content-card-v6-foot .spacer { margin-left: auto; }
+
+/* 새 콘텐츠 작성 모달 */
+.create-modal { max-width: 720px; }
+.field-group-v6 { margin-bottom: 16px; }
+.field-label-v6 { display: block; font-size: 12px; color: rgba(0,0,0,0.65); font-weight: 700; margin-bottom: 7px; }
+.field-label-v6 .req { color: #f5222d; margin-left: 2px; }
+.field-label-v6 .hint { color: rgba(0,0,0,0.4); font-weight: 500; font-size: 11px; margin-left: 6px; }
+
+.cat-pick { display: flex; gap: 6px; flex-wrap: wrap; }
+.cat-pick-btn { padding: 6px 12px; border-radius: 16px; border: 1px solid #e8e8e8; background: #fff; color: rgba(0,0,0,0.65); font-size: 12px; font-weight: 500; cursor: pointer; font-family: inherit; }
+.cat-pick-btn:hover { color: #1677ff; border-color: #1677ff; }
+.cat-pick-btn.active { background: #1677ff; color: #fff; border-color: #1677ff; font-weight: 700; }
+
+.rule-builder { background: #fafbfc; border: 1px solid #f0f0f0; border-radius: 8px; padding: 12px 14px; }
+.rule-preset-row { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 10px; }
+.rule-preset-btn { padding: 5px 10px; border-radius: 6px; border: 1px solid #e8e8e8; background: #fff; font-size: 11.5px; cursor: pointer; font-family: inherit; color: rgba(0,0,0,0.65); }
+.rule-preset-btn:hover { color: #1677ff; border-color: #1677ff; }
+.rule-preset-btn.active { background: #e6f4ff; color: #1677ff; border-color: #1677ff; font-weight: 700; }
+.rule-condition-row { display: flex; align-items: center; gap: 6px; margin-bottom: 6px; font-size: 12px; }
+.rule-condition-row select, .rule-condition-row input { height: 30px; padding: 0 10px; border: 1px solid #d9d9d9; border-radius: 5px; font-size: 12px; font-family: inherit; background: #fff; }
+.rule-condition-row .and-label { font-size: 10.5px; color: #722ed1; font-weight: 700; padding: 2px 6px; background: #f9f0ff; border-radius: 3px; border: 1px solid #d3adf7; }
+
+.items-builder { background: #fafbfc; border: 1px solid #f0f0f0; border-radius: 8px; padding: 12px; }
+.item-row-builder { display: flex; gap: 10px; align-items: flex-start; padding: 10px; background: #fff; border: 1px solid #f0f0f0; border-radius: 6px; margin-bottom: 8px; }
+.item-row-builder .num-badge { width: 22px; height: 22px; border-radius: 50%; background: #1677ff; color: #fff; font-size: 11px; font-weight: 800; display: inline-flex; align-items: center; justify-content: center; flex-shrink: 0; margin-top: 4px; }
+.item-row-builder .item-fields { flex: 1; display: flex; flex-direction: column; gap: 6px; }
+.item-row-builder .item-fields input, .item-row-builder .item-fields textarea { width: 100%; padding: 8px 10px; border: 1px solid #e8e8e8; border-radius: 5px; font-size: 12.5px; font-family: inherit; outline: none; resize: vertical; }
+.item-row-builder .item-fields input:focus, .item-row-builder .item-fields textarea:focus { border-color: #1677ff; }
+.item-row-builder .item-fields textarea { min-height: 50px; line-height: 1.5; }
+.item-row-builder .del-item-btn { width: 24px; height: 24px; border-radius: 4px; border: 1px solid #ffa39e; background: #fff1f0; color: #cf1322; cursor: pointer; font-size: 13px; flex-shrink: 0; margin-top: 4px; font-family: inherit; }
+.item-row-builder .del-item-btn:hover { background: #cf1322; color: #fff; }
+.add-item-btn { width: 100%; padding: 8px; border: 1.5px dashed #91caff; background: #f0f7ff; color: #1677ff; border-radius: 6px; cursor: pointer; font-family: inherit; font-size: 12.5px; font-weight: 600; }
+.add-item-btn:hover { background: #e6f4ff; border-color: #1677ff; }
+
+/* 검색·연결 모달 */
+.search-modal-row { padding: 12px 16px; background: #fafbfc; border-bottom: 1px solid #f0f0f0; }
+.search-modal-table { width: 100%; border-collapse: collapse; font-size: 12.5px; }
+.search-modal-table th { padding: 10px 14px; background: #fff; border-bottom: 1px solid #f0f0f0; font-size: 11px; color: rgba(0,0,0,0.45); font-weight: 700; text-transform: uppercase; text-align: left; }
+.search-modal-table td { padding: 12px 14px; border-bottom: 1px solid #f5f5f5; vertical-align: middle; }
+.search-modal-table tbody tr:hover td { background: #f0f7ff; }
+.search-modal-table .conn-btn { height: 28px; padding: 0 12px; border-radius: 5px; font-size: 11.5px; font-weight: 600; border: 1px solid #1677ff; background: #1677ff; color: #fff; cursor: pointer; font-family: inherit; }
+.search-modal-table .conn-btn.added { background: #f6ffed; color: #389e0d; border-color: #b7eb8f; cursor: default; }
+
+/* ===== 연동 콘텐츠 정보 (인라인 callout) ===== */
+.lc-callout { background: linear-gradient(180deg,#f9f0ff 0%,#faf5ff 100%); border: 1px solid #d3adf7; border-radius: 12px; padding: 16px 20px; margin-bottom: 20px; }
+.lc-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 14px; }
+.lc-head-left { display: flex; align-items: center; gap: 12px; flex: 1; min-width: 0; }
+.lc-icon { width: 40px; height: 40px; border-radius: 10px; background: linear-gradient(135deg,#b37feb,#722ed1); display: flex; align-items: center; justify-content: center; color: #fff; font-size: 18px; flex-shrink: 0; }
+.lc-title { font-size: 15px; font-weight: 800; color: rgba(0,0,0,0.88); display: flex; align-items: center; gap: 8px; margin-bottom: 4px; }
+.lc-badge { font-family: 'SF Mono', monospace; background: #722ed1; color: #fff; padding: 2px 8px; border-radius: 4px; font-size: 10.5px; font-weight: 600; letter-spacing: 0.3px; }
+.lc-sub { font-size: 12px; color: rgba(0,0,0,0.65); line-height: 1.6; }
+.lc-sub strong { color: rgba(0,0,0,0.88); font-weight: 700; }
+.lc-sub .lc-prop-id { font-family: 'SF Mono', monospace; background: #efdbff; color: #531dab; padding: 2px 7px; border-radius: 4px; font-size: 11px; font-weight: 700; margin-right: 4px; }
+.lc-sub .lc-stars { color: #fa8c16; font-weight: 600; }
+.lc-toggle { height: 28px; padding: 0 10px; border-radius: 5px; font-size: 12px; font-weight: 600; border: 1px solid #d3adf7; background: #fff; color: #722ed1; cursor: pointer; font-family: inherit; flex-shrink: 0; }
+.lc-toggle:hover { background: #f9f0ff; }
+.lc-body { background: #fff; border: 1px solid #efdbff; border-radius: 10px; padding: 18px 20px; }
+.lc-body.collapsed { display: none; }
+
+/* ===== 연동 콘텐츠 세부 필드 스타일 (callout 내부에서 재사용) ===== */
+.cv-hero { background: linear-gradient(180deg,#f5f0ff 0%,#fafafa 100%); border: 1px solid #efdbff; border-radius: 10px; padding: 14px 16px; margin-bottom: 18px; display: flex; align-items: center; gap: 12px; }
+.cv-hero-badge { width: 52px; height: 52px; border-radius: 8px; background: linear-gradient(135deg,#b37feb,#722ed1); display: flex; align-items: center; justify-content: center; color: #fff; font-weight: 800; font-size: 13px; flex-shrink: 0; }
+.cv-hero-info { flex: 1; min-width: 0; }
+.cv-hero-name { font-size: 15px; font-weight: 700; color: rgba(0,0,0,0.88); margin-bottom: 4px; }
+.cv-hero-sub { font-size: 12px; color: rgba(0,0,0,0.55); display: flex; gap: 6px; align-items: center; flex-wrap: wrap; }
+.cv-hero-stars { color: #fa8c16; font-weight: 600; }
+.cv-hero-meta { font-size: 12px; color: rgba(0,0,0,0.55); flex-shrink: 0; }
+.cv-hero-meta strong { color: rgba(0,0,0,0.88); font-weight: 700; }
+
+.cv-section { margin-bottom: 18px; padding-bottom: 18px; border-bottom: 1px solid #f0f0f0; }
+.cv-section:last-of-type { border-bottom: none; padding-bottom: 0; margin-bottom: 0; }
+.cv-section-title { font-size: 13px; font-weight: 800; color: rgba(0,0,0,0.88); margin-bottom: 12px; display: flex; align-items: center; gap: 6px; }
+
+.cv-field { position: relative; }
+.cv-field + .cv-field { margin-top: 12px; }
+.cv-field-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 6px; }
+.cv-field-label { font-size: 11px; color: rgba(0,0,0,0.45); font-weight: 600; font-family: 'SF Mono', monospace; }
+.cv-field-value { font-size: 13px; color: rgba(0,0,0,0.88); line-height: 1.6; padding: 10px 12px; background: #fafafa; border: 1px solid #f0f0f0; border-radius: 6px; white-space: pre-wrap; }
+.cv-field-value.cv-long { max-height: 220px; overflow-y: auto; }
+
+.cv-copy-btn { display: inline-flex; align-items: center; gap: 4px; height: 24px; padding: 0 8px; border-radius: 4px; font-size: 11px; font-weight: 600; border: 1px solid #d9d9d9; background: #fff; color: rgba(0,0,0,0.65); cursor: pointer; font-family: inherit; transition: all 0.15s; }
+.cv-copy-btn:hover { border-color: #722ed1; color: #722ed1; background: #f9f0ff; }
+.cv-copy-btn.copied { border-color: #52c41a; background: #f6ffed; color: #389e0d; }
+.cv-copy-btn svg { width: 12px; height: 12px; }
+
+.cv-grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+.cv-cell { padding: 10px 12px; background: #fafafa; border: 1px solid #f0f0f0; border-radius: 6px; position: relative; }
+.cv-cell-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 4px; }
+.cv-cell-k { font-size: 10.5px; color: rgba(0,0,0,0.45); font-weight: 600; }
+.cv-cell-v { font-size: 13px; color: rgba(0,0,0,0.88); font-weight: 600; }
+.cv-cell-v.cv-empty { color: rgba(0,0,0,0.3); font-weight: 400; }
+
+.cv-policy { padding: 12px 14px; background: #fafafa; border: 1px solid #f0f0f0; border-radius: 6px; margin-bottom: 8px; }
+.cv-policy:last-child { margin-bottom: 0; }
+.cv-policy-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 6px; }
+.cv-policy-name { font-size: 13px; font-weight: 700; color: rgba(0,0,0,0.88); display: flex; align-items: center; gap: 6px; }
+.cv-policy-name::before { content: '▸'; color: #722ed1; }
+.cv-policy-desc { font-size: 12.5px; color: rgba(0,0,0,0.65); line-height: 1.6; }
+
+.cv-footer-note { font-size: 11.5px; color: rgba(0,0,0,0.55); }
+.cv-footer-note strong { color: rgba(0,0,0,0.88); font-weight: 700; }
+
+.cv-copy-toast { position: fixed; bottom: 32px; left: 50%; transform: translateX(-50%) translateY(60px); background: #389e0d; color: #fff; padding: 10px 18px; border-radius: 8px; font-size: 12.5px; font-weight: 600; box-shadow: 0 8px 24px rgba(0,0,0,0.2); z-index: 3000; opacity: 0; transition: all 0.25s ease-out; }
+.cv-copy-toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+/* v9 — source 뱃지 & 박수 탭 */
+.src-badge { display: inline-flex; align-items: center; gap: 2px; font-size: 9px; font-weight: 800; padding: 1px 4px; border-radius: 3px; line-height: 1.3; letter-spacing: 0.2px; vertical-align: middle; }
+.src-badge.stc { background: #f6ffed; color: #389e0d; border: 1px solid #b7eb8f; }
+.src-badge.alm { background: #fffbe6; color: #d48806; border: 1px solid #ffe58f; }
+.src-badge.dyn { background: #fff1f0; color: #cf1322; border: 1px solid #ffa39e; }
+.src-badge-dot { width: 6px; height: 6px; border-radius: 50%; display: inline-block; margin-right: 2px; }
+.src-badge.stc .src-badge-dot { background: #52c41a; }
+.src-badge.alm .src-badge-dot { background: #faad14; }
+.src-badge.dyn .src-badge-dot { background: #f5222d; }
+
+.cal-cell-click { cursor: pointer; transition: background 0.1s; }
+.cal-cell-click:hover { background: #e6f4ff !important; }
+.price-cell-click { cursor: pointer; }
+.price-cell-click:hover { background: #e6f4ff; }
+
+.nights-tabs { display: inline-flex; gap: 4px; background: #fafbfc; padding: 3px; border-radius: 8px; border: 1px solid #f0f0f0; margin-bottom: 10px; }
+.nights-tab { padding: 6px 14px; font-size: 12px; font-weight: 700; color: rgba(0,0,0,0.55); background: transparent; border: none; border-radius: 6px; cursor: pointer; }
+.nights-tab.active { background: #1677ff; color: #fff; }
+
+/* v9 — 최저가 pick 상세 모달 */
+.pick-modal-body { padding: 18px 20px; }
+.pick-context { background: #f5f6f8; border-radius: 8px; padding: 12px 14px; margin-bottom: 16px; font-size: 12px; color: rgba(0,0,0,0.75); }
+.pick-context strong { color: rgba(0,0,0,0.95); }
+.pick-candidates-title { font-size: 12px; font-weight: 800; color: rgba(0,0,0,0.85); margin-bottom: 8px; }
+.pick-candidates { display: flex; flex-direction: column; gap: 8px; margin-bottom: 16px; }
+.pick-cand { display: flex; align-items: center; gap: 10px; padding: 10px 14px; border: 1px solid #f0f0f0; border-radius: 8px; background: #fff; }
+.pick-cand.selected { border-color: #1677ff; background: #f0f5ff; box-shadow: 0 0 0 2px rgba(22,119,255,0.1); }
+.pick-cand-check { width: 18px; text-align: center; font-size: 13px; color: #1677ff; font-weight: 800; }
+.pick-cand-badge { min-width: 46px; }
+.pick-cand-price { font-size: 15px; font-weight: 800; color: rgba(0,0,0,0.9); min-width: 100px; }
+.pick-cand.selected .pick-cand-price { color: #1677ff; }
+.pick-cand-meta { font-size: 11px; color: rgba(0,0,0,0.55); flex: 1; }
+.pick-cand-tag { font-size: 10px; background: #e6f4ff; color: #0958d9; padding: 2px 7px; border-radius: 10px; font-weight: 700; }
+.pick-rule-box { background: #fff7e6; border: 1px solid #ffd591; border-radius: 8px; padding: 10px 14px; font-size: 11.5px; color: #874d00; line-height: 1.6; }
+.pick-rule-box strong { color: #ad4e00; }
+
+</style>
+</head>
+<body>
+
+<!-- GNB -->
+<div class="gnb">
+  <div class="gnb-logo">Tripstore<span>.Admin</span></div>
+  <div class="gnb-menu">
+    <div class="gnb-item">대시보드</div>
+    <div class="gnb-item">상품관리</div>
+    <div class="gnb-item">예약 관리</div>
+    <div class="gnb-item active">PB 관리</div>
+    <div class="gnb-item">카탈로그</div>
+    <div class="gnb-item">정산</div>
+  </div>
+  <div class="gnb-user">김서현 님</div>
+</div>
+
+<div class="layout">
+
+  <div class="breadcrumb">
+    <a href="#">PB 관리</a><span class="breadcrumb-sep">›</span>
+    <a href="#">숙박권 관리</a>
+  </div>
+  <div class="page-title">숙박권 만들기 <span style="font-size:12px; background:#f0f5ff; color:#1d39c4; border:1px solid #adc6ff; padding:3px 10px; border-radius:12px; font-weight:700; margin-left:10px; vertical-align:middle;">v9 · 박수 요금표 + 최저가 pick</span></div>
+
+  <!-- v9 정책 반영 안내 -->
+  <div style="background:#f0f5ff; border:1px solid #adc6ff; border-radius:10px; padding:12px 16px; margin-bottom:14px; font-size:12.5px; color:#1d39c4; line-height:1.6;">
+    <div style="font-weight:800; margin-bottom:4px;">📢 2026-08-14 정책 갱신 반영</div>
+    <div>① 요금표 identity = <strong>(객실 × 식사 × 박수 × 날짜)</strong> — 박수 축 신규 도입 (3박·4박 노출)<br>② <strong>최저가 우선 pick</strong> + 동가 시 STATIC tie-break — 각 셀의 최저가 옆 source 뱃지(🟢STC/🟡ALM/🔴DYN) 표시, 셀 클릭 시 후보값 상세<br>③ DYNAMIC도 패키지 상품 O — 결제 직전 재조회 + 변동 시 확인 모달로 gap 커버</div>
+  </div>
+
+  <!-- TMG 자동 채움 안내 배너 (요금표에서 진입한 경우) -->
+  <div class="tmg-banner">
+    <div class="icon">TMG</div>
+    <div class="info">
+      <div class="title">TMG 요금표에서 진입함 — 기본 정보 자동 채움</div>
+      <div class="desc">아래 필드는 TMG getDetailRates 응답값으로 자동 입력되었습니다. 객실별 판매가/재고는 <strong>상단 [재고 갱신] 버튼</strong>으로 <code style="background:#fff; padding:1px 5px; border-radius:3px; font-family:'SF Mono',monospace; font-size:11px; color:#722ed1; border:1px solid #d3adf7;">checkAvailability</code>를 일괄 조회해 채웁니다. 관리자 임의 입력 없음.</div>
+      <div class="meta">
+        <span>rateType <strong>ALM-DYNAMIC</strong></span>
+        <span>rateId <strong>47098</strong></span>
+        <span>supplier <strong>VINPEARL</strong></span>
+        <span>호텔 <strong>JW Marriott Phu Quoc</strong></span>
+        <span>박수 <strong style="color:#1d39c4;">3박 · 4박</strong></span>
+      </div>
+      <div style="font-size:11px; color:rgba(0,0,0,0.55); margin-top:6px;">요금표 identity = (숙소 <strong>2118</strong> × 객실 <strong>[다중]</strong> × 식사 <strong>BB</strong> × 박수 <strong>3박·4박</strong>) × 날짜별 rate</div>
+    </div>
+    <button class="btn btn-sm" onclick="window.location.href='tmg-rate-admin.html'">← 요금표로</button>
+  </div>
+
+  <!-- ============= 연동 콘텐츠 정보 (callout, 인라인 조회) ============= -->
+  <div class="lc-callout">
+    <div class="lc-head">
+      <div class="lc-head-left">
+        <div class="lc-icon">🔍</div>
+        <div>
+          <div class="lc-title">연동 콘텐츠 정보 <span class="lc-badge">getPropertyContent</span></div>
+          <div class="lc-sub">
+            <span class="lc-prop-id">2118</span>
+            <strong>Sea Shells Phu Quoc Hotel &amp; Spa</strong>
+            · <span class="lc-stars">★★★ 3성급</span>
+            · 즈엉동 중심가
+            · 총 252실
+            · 최종 sync <strong>2026-07-09 03:00</strong>
+          </div>
+        </div>
+      </div>
+      <button class="lc-toggle" onclick="toggleLinkedContent(this)">▾ 접기</button>
+    </div>
+    <div class="lc-body" id="lcBody">
+
+      <!-- 숙소 소개 -->
+      <div class="cv-section">
+        <div class="cv-section-title">📝 숙소 소개</div>
+        <div class="cv-field">
+          <div class="cv-field-head">
+            <span class="cv-field-label">shortDescription</span>
+            <button class="cv-copy-btn" onclick="cvCopy(this,'short')">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg>
+              복사
+            </button>
+          </div>
+          <div class="cv-field-value" id="cv-val-short">전용 해변, 야외 수영장, 즈엉동 중심가</div>
+        </div>
+        <div class="cv-field">
+          <div class="cv-field-head">
+            <span class="cv-field-label">fullDescription</span>
+            <button class="cv-copy-btn" onclick="cvCopy(this,'full')">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg>
+              복사
+            </button>
+          </div>
+          <div class="cv-field-value cv-long" id="cv-val-full">푸꾸옥 중심부에 위치한 씨쉘스 푸꾸옥 호텔 &amp; 스파는 전용 해변과 현대적인 시설을 갖춘 리조트입니다. 공항에서 차량으로 약 20분 거리에 있으며, 해변과 시내를 모두 편리하게 이용할 수 있습니다.
+
+객실과 스위트는 시티뷰와 오션뷰 타입으로 구성되어 있으며, 레스토랑, 바, 스파, 피트니스 센터, 키즈클럽, 야외 수영장 등 다양한 부대시설을 제공합니다.
+
+총 객실 수: 252실</div>
+        </div>
+      </div>
+
+      <!-- 운영 정보 -->
+      <div class="cv-section">
+        <div class="cv-section-title">🕐 운영 정보</div>
+        <div class="cv-grid-3">
+          <div class="cv-cell">
+            <div class="cv-cell-head"><span class="cv-cell-k">checkinTime</span>
+              <button class="cv-copy-btn" onclick="cvCopyText(this,'15:00')" style="height:20px; padding:0 6px; font-size:10.5px;">복사</button></div>
+            <div class="cv-cell-v">15:00</div>
+          </div>
+          <div class="cv-cell">
+            <div class="cv-cell-head"><span class="cv-cell-k">checkoutTime</span>
+              <button class="cv-copy-btn" onclick="cvCopyText(this,'12:00')" style="height:20px; padding:0 6px; font-size:10.5px;">복사</button></div>
+            <div class="cv-cell-v">12:00</div>
+          </div>
+          <div class="cv-cell">
+            <div class="cv-cell-head"><span class="cv-cell-k">hotelClass</span>
+              <button class="cv-copy-btn" onclick="cvCopyText(this,'3')" style="height:20px; padding:0 6px; font-size:10.5px;">복사</button></div>
+            <div class="cv-cell-v">★★★ 3성</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 연령 범위 -->
+      <div class="cv-section">
+        <div class="cv-section-title">👨‍👩‍👧 연령 범위</div>
+        <div class="cv-grid-3">
+          <div class="cv-cell">
+            <div class="cv-cell-head"><span class="cv-cell-k">infantAgeFrom~To</span>
+              <button class="cv-copy-btn" onclick="cvCopyText(this,'—')" style="height:20px; padding:0 6px; font-size:10.5px;">복사</button></div>
+            <div class="cv-cell-v cv-empty">— (미설정)</div>
+          </div>
+          <div class="cv-cell">
+            <div class="cv-cell-head"><span class="cv-cell-k">childAgeFrom~To</span>
+              <button class="cv-copy-btn" onclick="cvCopyText(this,'6~11')" style="height:20px; padding:0 6px; font-size:10.5px;">복사</button></div>
+            <div class="cv-cell-v">6 ~ 11세</div>
+          </div>
+          <div class="cv-cell">
+            <div class="cv-cell-head"><span class="cv-cell-k">minorAgeFrom~To</span>
+              <button class="cv-copy-btn" onclick="cvCopyText(this,'—')" style="height:20px; padding:0 6px; font-size:10.5px;">복사</button></div>
+            <div class="cv-cell-v cv-empty">— (미설정)</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 호텔 정책 -->
+      <div class="cv-section">
+        <div class="cv-section-title">📋 호텔 정책 (hotelPolicies)
+          <span style="margin-left:auto; font-size:11px; color:rgba(0,0,0,0.45); font-weight:500;">2건</span>
+        </div>
+        <div class="cv-policy">
+          <div class="cv-policy-head">
+            <div class="cv-policy-name">셔틀버스 안내</div>
+            <button class="cv-copy-btn" onclick="cvCopy(this,'policy-shuttle')">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg>
+              복사
+            </button>
+          </div>
+          <div class="cv-policy-desc" id="cv-val-policy-shuttle">8객실 미만 예약 고객은 호텔 셔틀 일정에 따라 무료 공항 픽업/샌딩 서비스를 이용할 수 있습니다. 최소 48시간 전에 예약해야 하며 좌석은 한정되어 있습니다.</div>
+        </div>
+        <div class="cv-policy">
+          <div class="cv-policy-head">
+            <div class="cv-policy-name">체크인 안내</div>
+            <button class="cv-copy-btn" onclick="cvCopy(this,'policy-checkin')">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg>
+              복사
+            </button>
+          </div>
+          <div class="cv-policy-desc" id="cv-val-policy-checkin">베트남 국적 고객은 신분증 또는 여권 원본을, 외국인은 유효한 여권과 비자를 제시해야 합니다. 예약 대표자와 체크인 고객의 이름이 일치해야 하며, 체크인 시 객실당 1박 기준 2,000,000 VND의 보증금을 현금 또는 신용카드로 예치해야 합니다.</div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ==================== 기본 정보 ==================== -->
+  <div class="card">
+    <div class="card-title">기본 정보</div>
+    <div class="form-grid-4">
+      <div>
+        <label class="form-label">공급사</label>
+        <select class="form-control">
+          <option>피크타임</option>
+          <option selected>TMG</option>
+          <option>VINPEARL (TMG 동적)</option>
+        </select>
+      </div>
+      <div>
+        <label class="form-label">숙소</label>
+        <div class="field-with-btn">
+          <input type="text" class="form-control" value="2118  JW Marriott Phu Quoc">
+          <button class="btn btn-tmg" onclick="fetchTmgContent()" title="TMG getPropertyContent 호출 → 아래 [TMG 호텔 콘텐츠] 카드에 자동 채움">📥 TMG 콘텐츠 가져오기</button>
+        </div>
+        <div class="helper">TMG getPropertyContent 호출 후 객실/이미지/정책을 일괄 가져올 수 있습니다.</div>
+      </div>
+      <div>
+        <label class="form-label">입력통화</label>
+        <select class="form-control">
+          <option>미국 달러 (USD)</option>
+          <option selected>베트남 동 (VND)</option>
+          <option>대한민국 원 (KRW)</option>
+        </select>
+      </div>
+      <div>
+        <label class="form-label">요금사용 기한</label>
+        <input type="date" class="form-control" value="2026-12-31">
+      </div>
+    </div>
+
+    <div class="form-grid-2" style="margin-top:22px;">
+      <div>
+        <label class="form-label">상태</label>
+        <div class="toggle-pill">
+          <button class="active">운영중</button>
+          <button>종료</button>
+        </div>
+      </div>
+      <div>
+        <label class="form-label">운영명</label>
+        <input type="text" class="form-control" value="TMG / JW Marriott Phu Quoc / Best Available Rate">
+      </div>
+    </div>
+  </div>
+
+  <!-- ==================== TMG 호텔 콘텐츠 (getPropertyContent) ==================== -->
+  <div class="card" id="tmg-content-card">
+    <div class="card-title-row">
+      <div class="card-title" style="display:flex; align-items:center; gap:8px;">
+        🏨 TMG 호텔 콘텐츠
+        <span class="api-tag">2.6 getPropertyContent</span>
+        <span id="tmg-content-status" style="font-size:11px; color:rgba(0,0,0,0.45); font-weight:400;">아직 가져오지 않음</span>
+      </div>
+      <div class="card-title-actions">
+        <button class="btn btn-sm" onclick="fetchTmgContent()">🔄 다시 가져오기</button>
+      </div>
+    </div>
+
+    <!-- 초기 상태 (미가져옴) -->
+    <div id="tmg-content-empty" style="padding:36px 20px; text-align:center; background:#fafafa; border:1px dashed #e8e8e8; border-radius:10px; color:rgba(0,0,0,0.55); font-size:13px;">
+      위 [📥 TMG 콘텐츠 가져오기] 버튼을 눌러 호텔 콘텐츠를 불러오세요.<br>
+      <span style="font-size:11.5px; color:rgba(0,0,0,0.4);">콘텐츠 · 운영 정보 · 정책 · 객실 정보를 자동으로 가져옵니다.</span>
+    </div>
+
+    <!-- 가져온 후 (시뮬레이션, 초기엔 숨김) -->
+    <div id="tmg-content-loaded" style="display:none;">
+
+      <!-- 호텔 헤더 -->
+      <div style="background:linear-gradient(180deg,#f0f7ff 0%,#fafafa 100%); border-radius:12px; padding:20px; margin-bottom:20px;">
+        <div style="display:flex; align-items:flex-start; gap:16px;">
+          <div style="width:120px; height:90px; border-radius:8px; background:linear-gradient(135deg,#91caff,#1677ff); display:flex; align-items:center; justify-content:center; color:#fff; font-weight:800; font-size:24px; flex-shrink:0;">JW</div>
+          <div style="flex:1;">
+            <div style="font-size:12px; color:#fa8c16; margin-bottom:4px;">★★★★★ <span style="color:rgba(0,0,0,0.55);">5성급</span></div>
+            <div style="font-size:18px; font-weight:700; margin-bottom:4px;">JW Marriott Phu Quoc Emerald Bay Resort</div>
+            <div style="font-size:12.5px; color:rgba(0,0,0,0.55); line-height:1.5;">Bãi Khem, An Thới, Phú Quốc, Kiên Giang, Việt Nam</div>
+            <div style="display:flex; gap:16px; margin-top:12px; flex-wrap:wrap;">
+              <div><span style="font-size:11px; color:rgba(0,0,0,0.45);">호텔 ID</span> <strong style="font-family:'SF Mono',monospace; font-size:13px;">2118</strong></div>
+              <div><span style="font-size:11px; color:rgba(0,0,0,0.45);">위경도</span> <strong style="font-size:13px;">10.04, 103.96</strong></div>
+              <div><span style="font-size:11px; color:rgba(0,0,0,0.45);">평점</span> <strong style="font-size:13px;">9.4 / 526건</strong></div>
+              <div><span style="font-size:11px; color:rgba(0,0,0,0.45);">연락처</span> <strong style="font-size:13px;">+84 297 384 9999</strong></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 3컬럼 그리드: 콘텐츠 / 운영 / 정책 -->
+      <div style="display:grid; grid-template-columns:1.5fr 1fr 1fr; gap:16px; margin-bottom:20px;">
+
+        <!-- 콘텐츠 -->
+        <div style="background:#fff; border:1px solid #f0f0f0; border-radius:10px; padding:16px;">
+          <div style="font-size:13px; font-weight:700; margin-bottom:10px; display:flex; align-items:center; gap:6px;">📝 콘텐츠 <span style="font-family:'SF Mono',monospace; font-size:10px; color:rgba(0,0,0,0.4); font-weight:500;">shortDescription / fullDescription / images</span></div>
+
+          <!-- 이미지 갤러리 -->
+          <div style="display:flex; gap:6px; overflow-x:auto; padding-bottom:6px; margin-bottom:10px;">
+            <div style="width:90px; height:64px; border-radius:6px; background:linear-gradient(135deg,#b5d6ff,#e6f4ff); flex-shrink:0; display:flex; align-items:center; justify-content:center; font-size:10px; color:rgba(0,0,0,0.45);">대표</div>
+            <div style="width:90px; height:64px; border-radius:6px; background:linear-gradient(135deg,#ffd8bf,#fff2e8); flex-shrink:0; display:flex; align-items:center; justify-content:center; font-size:10px; color:rgba(0,0,0,0.45);">로비</div>
+            <div style="width:90px; height:64px; border-radius:6px; background:linear-gradient(135deg,#b7eb8f,#f6ffed); flex-shrink:0; display:flex; align-items:center; justify-content:center; font-size:10px; color:rgba(0,0,0,0.45);">수영장</div>
+            <div style="width:90px; height:64px; border-radius:6px; background:linear-gradient(135deg,#d3adf7,#f9f0ff); flex-shrink:0; display:flex; align-items:center; justify-content:center; font-size:10px; color:rgba(0,0,0,0.45);">레스토랑</div>
+            <div style="width:90px; height:64px; border-radius:6px; background:linear-gradient(135deg,#ffadd2,#fff0f6); flex-shrink:0; display:flex; align-items:center; justify-content:center; font-size:10px; color:rgba(0,0,0,0.45);">바</div>
+            <div style="width:90px; height:64px; border-radius:6px; background:#f5f5f5; flex-shrink:0; display:flex; align-items:center; justify-content:center; font-size:10px; color:rgba(0,0,0,0.45);">+7</div>
+          </div>
+
+          <!-- 짧은 설명 -->
+          <div style="font-size:12px; line-height:1.6; color:rgba(0,0,0,0.75); margin-bottom:8px;">
+            <strong>요약</strong>: 베트남 푸꾸옥 비치 리조트 · 5성급 · 프라이빗 비치 · 야외 수영장 · 12개 다이닝 옵션
+          </div>
+          <!-- 상세 설명 -->
+          <div style="font-size:12px; line-height:1.6; color:rgba(0,0,0,0.65); background:#fafafa; padding:10px 12px; border-radius:6px; max-height:120px; overflow-y:auto;">
+            <strong>JW Marriott Phu Quoc Emerald Bay Resort</strong>은 베트남 푸꾸옥 남단 Khem Bay에 위치한 5성급 럭셔리 리조트입니다. 프랑스 식민지 시대 대학 캠퍼스를 모티브로 한 빌 헤이톤(Bill Bensley)의 독창적 건축이 특징이며, 프라이빗 비치·5개 수영장·12개 레스토랑/바를 보유합니다. 244개의 객실과 빌라가 있으며 신혼여행·가족여행·럭셔리 휴양 모두에 적합합니다.
+          </div>
+        </div>
+
+        <!-- 운영 -->
+        <div style="background:#fff; border:1px solid #f0f0f0; border-radius:10px; padding:16px;">
+          <div style="font-size:13px; font-weight:700; margin-bottom:10px; display:flex; align-items:center; gap:6px;">⏰ 운영 정보 <span style="font-family:'SF Mono',monospace; font-size:10px; color:rgba(0,0,0,0.4); font-weight:500;">checkin/out · class · review</span></div>
+          <div style="display:flex; flex-direction:column; gap:10px; font-size:12.5px;">
+            <div style="display:flex; justify-content:space-between; padding:6px 0; border-bottom:1px dashed #f0f0f0;"><span style="color:rgba(0,0,0,0.55);">체크인</span><strong>15:00</strong></div>
+            <div style="display:flex; justify-content:space-between; padding:6px 0; border-bottom:1px dashed #f0f0f0;"><span style="color:rgba(0,0,0,0.55);">체크아웃</span><strong>12:00</strong></div>
+            <div style="display:flex; justify-content:space-between; padding:6px 0; border-bottom:1px dashed #f0f0f0;"><span style="color:rgba(0,0,0,0.55);">호텔 등급</span><strong>5성급</strong></div>
+            <div style="display:flex; justify-content:space-between; padding:6px 0; border-bottom:1px dashed #f0f0f0;"><span style="color:rgba(0,0,0,0.55);">평점 / 리뷰</span><strong>9.4 / 526건</strong></div>
+            <div style="display:flex; justify-content:space-between; padding:6px 0;"><span style="color:rgba(0,0,0,0.55);">통화</span><strong>VND</strong></div>
+          </div>
+        </div>
+
+        <!-- 정책 -->
+        <div style="background:#fff; border:1px solid #f0f0f0; border-radius:10px; padding:16px;">
+          <div style="font-size:13px; font-weight:700; margin-bottom:10px; display:flex; align-items:center; gap:6px;">📋 정책 <span style="font-family:'SF Mono',monospace; font-size:10px; color:rgba(0,0,0,0.4); font-weight:500;">age · hotelPolicies</span></div>
+
+          <!-- 연령 정책 -->
+          <div style="margin-bottom:12px;">
+            <div style="font-size:11px; color:rgba(0,0,0,0.55); margin-bottom:6px; font-weight:600;">연령 범위</div>
+            <div style="display:flex; flex-direction:column; gap:5px; font-size:12px;">
+              <div style="display:flex; justify-content:space-between; padding:3px 0;"><span style="color:rgba(0,0,0,0.55);">유아 (infant)</span><strong>0 ~ 5세</strong></div>
+              <div style="display:flex; justify-content:space-between; padding:3px 0;"><span style="color:rgba(0,0,0,0.55);">아동 (child)</span><strong>6 ~ 11세</strong></div>
+              <div style="display:flex; justify-content:space-between; padding:3px 0;"><span style="color:rgba(0,0,0,0.55);">청소년 (minor)</span><span style="color:rgba(0,0,0,0.35);">미적용</span></div>
+            </div>
+          </div>
+
+          <!-- 호텔 정책 (hotelPolicies) -->
+          <div>
+            <div style="font-size:11px; color:rgba(0,0,0,0.55); margin-bottom:6px; font-weight:600;">호텔 정책</div>
+            <div style="background:#fafafa; border-radius:6px; padding:10px 12px; font-size:11.5px; line-height:1.5; max-height:130px; overflow-y:auto;">
+              <strong style="font-size:12px;">체크인 안내</strong><br>
+              <span style="color:rgba(0,0,0,0.65);">- 모든 투숙객은 신분증/여권 제시 필수<br>- 디포짓 요구 가능 (신용카드 권장)</span>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- 객실 섹션 -->
+      <div style="background:#fff; border:1px solid #f0f0f0; border-radius:10px; padding:16px;">
+        <div style="font-size:13px; font-weight:700; margin-bottom:12px; display:flex; align-items:center; gap:6px;">🛏 객실 정보 <span style="font-family:'SF Mono',monospace; font-size:10px; color:rgba(0,0,0,0.4); font-weight:500;">rooms[]</span> <span style="font-size:11px; color:rgba(0,0,0,0.45); font-weight:500; margin-left:auto;">총 3개 객실</span></div>
+        <div style="display:grid; grid-template-columns:repeat(3,1fr); gap:10px;">
+          <div style="border:1px solid #f0f0f0; border-radius:8px; padding:10px;">
+            <div style="width:100%; height:80px; border-radius:6px; background:linear-gradient(135deg,#ffadd2,#fff0f6); margin-bottom:8px; display:flex; align-items:center; justify-content:center; font-size:11px; color:rgba(0,0,0,0.45);">객실 이미지</div>
+            <div style="font-size:12.5px; font-weight:600; margin-bottom:3px;">Deluxe King</div>
+            <div style="font-size:11px; color:rgba(0,0,0,0.55);">2A · 최대 4명 (성인 3 + 아동 2)</div>
+            <div style="font-family:'SF Mono',monospace; font-size:10px; color:rgba(0,0,0,0.35); margin-top:4px;">ID: 75944</div>
+          </div>
+          <div style="border:1px solid #f0f0f0; border-radius:8px; padding:10px;">
+            <div style="width:100%; height:80px; border-radius:6px; background:linear-gradient(135deg,#b7eb8f,#f6ffed); margin-bottom:8px; display:flex; align-items:center; justify-content:center; font-size:11px; color:rgba(0,0,0,0.45);">객실 이미지</div>
+            <div style="font-size:12.5px; font-weight:600; margin-bottom:3px;">Deluxe Twin</div>
+            <div style="font-size:11px; color:rgba(0,0,0,0.55);">2A · 최대 5명 (성인 3 + 아동 2)</div>
+            <div style="font-family:'SF Mono',monospace; font-size:10px; color:rgba(0,0,0,0.35); margin-top:4px;">ID: 74617</div>
+          </div>
+          <div style="border:1px solid #f0f0f0; border-radius:8px; padding:10px;">
+            <div style="width:100%; height:80px; border-radius:6px; background:linear-gradient(135deg,#91caff,#e6f4ff); margin-bottom:8px; display:flex; align-items:center; justify-content:center; font-size:11px; color:rgba(0,0,0,0.45);">객실 이미지</div>
+            <div style="font-size:12.5px; font-weight:600; margin-bottom:3px;">Executive Suite</div>
+            <div style="font-size:11px; color:rgba(0,0,0,0.55);">2A · 최대 4명</div>
+            <div style="font-family:'SF Mono',monospace; font-size:10px; color:rgba(0,0,0,0.35); margin-top:4px;">ID: 76812</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 동기 메타 -->
+      <div style="margin-top:14px; padding:10px 14px; background:#fafafa; border-radius:6px; font-size:11.5px; color:rgba(0,0,0,0.55); display:flex; justify-content:space-between; align-items:center;">
+        <span>📡 마지막 조회: <strong>방금 전</strong> · language: <code style="background:#fff; padding:1px 4px; border-radius:3px;">vi</code> (베트남어 원본)</span>
+        <span style="color:rgba(0,0,0,0.4);">⚠ 한국어 노출은 svc_catalog 자체 콘텐츠와 매핑 필요</span>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ==================== 수익률 ==================== -->
+  <div class="card">
+    <div class="card-title">수익률</div>
+    <div class="form-grid-4">
+      <div>
+        <label class="form-label">수익률 설정</label>
+        <select class="form-control">
+          <option selected>직접 입력</option>
+          <option>마진 우선</option>
+          <option>할인 우선</option>
+        </select>
+      </div>
+      <div>
+        <label class="form-label">마진율</label>
+        <div class="input-suffix-group">
+          <input type="number" class="form-control" value="0">
+          <span class="suffix">%</span>
+        </div>
+      </div>
+      <div>
+        <label class="form-label">할인율 설정</label>
+        <div class="input-suffix-group">
+          <input type="number" class="form-control" value="0">
+          <span class="suffix">%</span>
+        </div>
+      </div>
+      <div>
+        <label class="form-label">확정 수익률</label>
+        <div style="height:44px; display:flex; align-items:center; font-size:14px; font-weight:700;">0%</div>
+      </div>
+    </div>
+    <div class="form-grid-4" style="margin-top:18px;">
+      <div>
+        <label class="form-label">수수료 (선택)</label>
+        <div class="input-suffix-group">
+          <input type="number" class="form-control" value="0">
+          <span class="suffix">%</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ==================== 객실/인원 별 판매가 ==================== -->
+  <div class="card">
+    <div class="card-title-row">
+      <div class="card-title">객실/인원 별 판매가</div>
+      <div class="card-title-actions">
+        <button class="btn btn-primary btn-sm" onclick="openRefreshModal()" style="background:#1677ff; color:#fff;">🔄 재고 갱신</button>
+        <button class="btn btn-sm">🔗 숙소 카탈로그 바로가기</button>
+        <button class="btn btn-sm">전 객실 엑셀 일괄 업로드</button>
+        <button class="btn btn-sm">전 객실 엑셀 양식 다운로드</button>
+      </div>
+    </div>
+
+    <!-- 객실 1 -->
+    <div class="room-block">
+      <div class="room-head">
+        <label class="switch"><input type="checkbox" checked><span class="slider"></span></label>
+        <div class="room-title">[ID : 267] Deluxe King</div>
+        <div style="display:flex; gap:6px; margin-left:12px;">
+          <span style="font-size:10.5px; background:#e6f4ff; color:#0958d9; border:1px solid #91caff; padding:2px 8px; border-radius:10px; font-weight:700;">요금표 3박 ✓</span>
+          <span style="font-size:10.5px; background:#e6f4ff; color:#0958d9; border:1px solid #91caff; padding:2px 8px; border-radius:10px; font-weight:700;">요금표 4박 ✓</span>
+          <span style="font-size:10.5px; background:#f5f5f5; color:rgba(0,0,0,0.35); border:1px solid #e0e0e0; padding:2px 8px; border-radius:10px; font-weight:700;">5박+ 없음</span>
+        </div>
+      </div>
+
+      <div class="room-meta-row">
+        <div class="room-meta-cell"><span class="k">기준 인원</span><span class="v">2인 (1박당)</span></div>
+        <div class="room-meta-cell">
+          <span class="k">아동가</span>
+          <div class="child-rate">성인기준 <input type="number" value="50"> %</div>
+        </div>
+        <div class="room-meta-cell">
+          <span class="k">예약인원 고정</span>
+          <div class="onoff-pill"><button class="active">Off</button><button>On</button></div>
+        </div>
+        <div></div>
+      </div>
+
+
+      <div class="sub-action-row">
+        <div class="left">
+          <span class="selected-count">선택된 <strong>0</strong>개</span>
+          <button class="btn btn-sm">1박요금 변경</button>
+          <button class="btn btn-sm">입고변경</button>
+          <select class="select-mini"><option>상태변경</option></select>
+        </div>
+        <div class="right">
+          <button class="btn btn-sm">초기화</button>
+          <button class="btn btn-sm">내보내기</button>
+          <button class="btn btn-sm">엑셀 양식 다운로드</button>
+          <button class="btn btn-sm">엑셀 업로드</button>
+          <button class="btn btn-primary btn-sm">+ 직접추가</button>
+        </div>
+      </div>
+
+      <!-- v9: 박수 select + 식사 필터 -->
+      <div style="display:flex; align-items:center; gap:12px; margin-bottom:8px; flex-wrap:wrap;">
+        <div style="font-size:11.5px; font-weight:700; color:rgba(0,0,0,0.75);">박수 요금표:</div>
+        <select class="nights-select" onchange="switchNightsSelect(this)" style="height:30px; padding:0 26px 0 10px; border:1px solid #adc6ff; border-radius:6px; font-size:12.5px; font-weight:700; color:#1d39c4; background:#f0f5ff url(&quot;data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='%231d39c4'/%3E%3C/svg%3E&quot;) no-repeat right 10px center; appearance:none; cursor:pointer; min-width:110px;">
+          <option value="3" selected>3박 요금표</option>
+          <option value="4">4박 요금표</option>
+        </select>
+        <div style="font-size:11.5px; color:rgba(0,0,0,0.55);">식사: <select class="select-mini" style="height:26px;"><option>BB (전체)</option><option>BB</option><option>HB</option><option>AI</option></select></div>
+        <div style="font-size:11px; color:rgba(0,0,0,0.5); margin-left:auto;">각 셀 = 최저가 pick · source 뱃지 클릭 → 후보 상세</div>
+      </div>
+
+      <div class="price-table-wrap">
+        <table class="price-table">
+          <thead>
+            <tr>
+              <th class="no-divider check-cell"><input type="checkbox"></th>
+              <th>일별</th>
+              <th>BB 3박 총요금</th>
+              <th>BB 성인 공급가</th>
+              <th>BB 성인 정가</th>
+              <th>BB 성인 판매가</th>
+              <th>source</th>
+              <th>입고</th>
+              <th>소진</th>
+              <th>재고</th>
+              <th>상태</th>
+              <th class="no-divider">삭제</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr><td class="check-cell"><input type="checkbox"></td><td>05/21</td><td>639USD</td><td>485,640원</td><td>485,640원</td><td>485,640원</td><td class="price-cell-click" onclick="openPickModal({date:'2026-05-21', room:'디럭스 시티뷰', meal:'BB', nights:3})"><span class="src-badge stc"><span class="src-badge-dot"></span>STC</span></td><td>10</td><td>0</td><td>10</td><td class="status-cell">예약가능</td><td class="del-cell"><button>삭제</button></td></tr>
+            <tr><td class="check-cell"><input type="checkbox"></td><td>05/22</td><td>639USD</td><td>485,640원</td><td>485,640원</td><td>485,640원</td><td class="price-cell-click" onclick="openPickModal({date:'2026-05-22', room:'디럭스 시티뷰', meal:'BB', nights:3})"><span class="src-badge stc"><span class="src-badge-dot"></span>STC</span></td><td>10</td><td>0</td><td>10</td><td class="status-cell">예약가능</td><td class="del-cell"><button>삭제</button></td></tr>
+            <tr><td class="check-cell"><input type="checkbox"></td><td>05/23</td><td>639USD</td><td>485,640원</td><td>485,640원</td><td>485,640원</td><td class="price-cell-click" onclick="openPickModal({date:'2026-05-23', room:'디럭스 시티뷰', meal:'BB', nights:3})"><span class="src-badge stc"><span class="src-badge-dot"></span>STC</span></td><td>10</td><td>0</td><td>10</td><td class="status-cell">예약가능</td><td class="del-cell"><button>삭제</button></td></tr>
+            <tr><td class="check-cell"><input type="checkbox"></td><td>05/24</td><td>603USD</td><td>458,280원</td><td>485,640원</td><td>458,280원</td><td class="price-cell-click" onclick="openPickModal({date:'2026-05-24', room:'디럭스 시티뷰', meal:'BB', nights:3, pick:'dyn'})"><span class="src-badge dyn"><span class="src-badge-dot"></span>DYN</span></td><td>10</td><td>0</td><td>10</td><td class="status-cell">예약가능</td><td class="del-cell"><button>삭제</button></td></tr>
+            <tr><td class="check-cell"><input type="checkbox"></td><td>05/25</td><td>639USD</td><td>485,640원</td><td>485,640원</td><td>485,640원</td><td class="price-cell-click" onclick="openPickModal({date:'2026-05-25', room:'디럭스 시티뷰', meal:'BB', nights:3, tie:true})"><span class="src-badge stc"><span class="src-badge-dot"></span>STC</span></td><td>10</td><td>0</td><td>10</td><td class="status-cell">예약가능</td><td class="del-cell"><button>삭제</button></td></tr>
+            <tr><td class="check-cell"><input type="checkbox"></td><td>05/26</td><td>639USD</td><td>485,640원</td><td>485,640원</td><td>485,640원</td><td class="price-cell-click" onclick="openPickModal({date:'2026-05-26', room:'디럭스 시티뷰', meal:'BB', nights:3, pick:'alm'})"><span class="src-badge alm"><span class="src-badge-dot"></span>ALM</span></td><td>10</td><td>0</td><td>10</td><td class="status-cell">예약가능</td><td class="del-cell"><button>삭제</button></td></tr>
+            <tr><td class="check-cell"><input type="checkbox"></td><td>05/27</td><td>639USD</td><td>485,640원</td><td>485,640원</td><td>485,640원</td><td class="price-cell-click" onclick="openPickModal({date:'2026-05-27', room:'디럭스 시티뷰', meal:'BB', nights:3})"><span class="src-badge stc"><span class="src-badge-dot"></span>STC</span></td><td>10</td><td>0</td><td>10</td><td class="status-cell">예약가능</td><td class="del-cell"><button>삭제</button></td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- 객실 2 -->
+    <div class="room-block">
+      <div class="room-head">
+        <label class="switch"><input type="checkbox" checked><span class="slider"></span></label>
+        <div class="room-title">[ID : 268] Deluxe Twin</div>
+      </div>
+      <div class="room-meta-row">
+        <div class="room-meta-cell"><span class="k">1박 기준 인원</span><span class="v">2인</span></div>
+        <div class="room-meta-cell">
+          <span class="k">아동가</span>
+          <div class="child-rate">성인기준 <input type="number" value="50"> %</div>
+        </div>
+        <div class="room-meta-cell">
+          <span class="k">예약인원 고정</span>
+          <div class="onoff-pill"><button class="active">Off</button><button>On</button></div>
+        </div>
+        <div></div>
+      </div>
+      <div style="font-size:12px; color:rgba(0,0,0,0.45); padding:6px 0;">아직 조회되지 않았습니다. 상단 [재고 갱신] 버튼을 눌러주세요.</div>
+    </div>
+
+    <!-- 객실 3 -->
+    <div class="room-block">
+      <div class="room-head">
+        <label class="switch"><input type="checkbox"><span class="slider"></span></label>
+        <div class="room-title">[ID : 269] Executive Suite</div>
+      </div>
+      <div style="font-size:12px; color:rgba(0,0,0,0.45);">스위치를 켜서 활성화하세요.</div>
+    </div>
+  </div>
+
+  <!-- ==================== 추가옵션 ==================== -->
+  <div class="card">
+    <div class="card-title">추가옵션</div>
+
+    <div class="option-block">
+      <div class="option-block-head">
+        <label class="switch"><input type="checkbox" checked><span class="slider"></span></label>
+        <div class="title">얼리체크인</div>
+      </div>
+      <div class="option-block-body">
+        <div>
+          <label class="form-label">시간</label>
+          <div style="display:flex; align-items:center; gap:8px;">
+            <input type="time" class="form-control" value="11:00" style="max-width:140px;">
+            <span style="color:rgba(0,0,0,0.55);">부터</span>
+          </div>
+        </div>
+        <div>
+          <label class="form-label">요금</label>
+          <div class="option-fee-group">
+            <select class="form-control" style="max-width:140px;"><option>1박 요금의</option><option>고정 요금</option></select>
+            <div class="input-suffix-group" style="flex:1;">
+              <input type="number" class="form-control" value="20">
+              <span class="suffix">%</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="option-block">
+      <div class="option-block-head">
+        <label class="switch"><input type="checkbox" checked><span class="slider"></span></label>
+        <div class="title">레이트체크아웃</div>
+      </div>
+      <div class="option-block-body">
+        <div>
+          <label class="form-label">시간</label>
+          <div style="display:flex; align-items:center; gap:8px;">
+            <input type="time" class="form-control" value="18:00" style="max-width:140px;">
+            <span style="color:rgba(0,0,0,0.55);">까지</span>
+          </div>
+        </div>
+        <div>
+          <label class="form-label">요금</label>
+          <div class="option-fee-group">
+            <select class="form-control" style="max-width:140px;"><option>1박 요금의</option></select>
+            <div class="input-suffix-group" style="flex:1;">
+              <input type="number" class="form-control" value="20">
+              <span class="suffix">%</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="option-block">
+      <div class="option-block-head">
+        <label class="switch"><input type="checkbox" checked><span class="slider"></span></label>
+        <div class="title">공항 픽업/샌딩</div>
+      </div>
+      <div class="option-block-body">
+        <div>
+          <label class="form-label">성인</label>
+          <div class="input-suffix-group">
+            <input type="number" class="form-control" value="22">
+            <span class="suffix">USD</span>
+          </div>
+        </div>
+        <div>
+          <label class="form-label">아동</label>
+          <div class="input-suffix-group">
+            <input type="number" class="form-control" value="22">
+            <span class="suffix">USD</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ==================== 콘텐츠 관리 v6 (Rule Engine) ==================== -->
+  <div class="card">
+    <div class="card-title-row">
+      <div class="card-title" style="display:flex; align-items:center; gap:8px;">
+        📝 콘텐츠 관리
+        <span style="font-size:10px; background:#e6f4ff; color:#0958d9; border:1px solid #91caff; padding:2px 7px; border-radius:10px; font-weight:700;">Rule Engine · v6</span>
+        <span style="font-size:10.5px; background:#f9f0ff; color:#722ed1; padding:2px 7px; border-radius:4px; font-weight:600; border:1px solid #d3adf7;">참조 방식</span>
+      </div>
+      <div class="card-title-actions">
+        <button class="btn btn-sm" onclick="window.open('http://localhost:8080/index.html', '_blank')">📋 카탈로그 콘텐츠 관리 →</button>
+      </div>
+    </div>
+
+    <!-- 안내 배너 -->
+    <div class="content-banner-v6">
+      <span class="icon">💡</span>
+      <div>
+        콘텐츠는 <strong>카탈로그에서 별도 관리</strong>되며, 이 화면에서는 <strong>"연결만"</strong> 합니다. 한 콘텐츠에 항목 N개를 묶어 등록할 수 있고, 콘텐츠 수정 시 <strong>연결된 모든 상품에 자동 반영</strong>됩니다 (참조 방식 · 카피 X).<br>
+        스코프는 두 가지: 이 <strong>숙박권 전체</strong>에 적용되는 콘텐츠 · 특정 <strong>객실/식사 조합</strong>에만 적용되는 콘텐츠. (Rule Engine — 조건 AND, 만족 콘텐츠 모두 노출)
+      </div>
+    </div>
+
+    <!-- 스코프 탭 -->
+    <div class="scope-tabs">
+      <button class="scope-tab active" onclick="switchScope('hotel', this)">🏨 숙박권 전체 적용 <span class="scope-count">5</span></button>
+      <button class="scope-tab" onclick="switchScope('room', this)">🛏️ 객실/식사 단위 적용 <span class="scope-count">7</span></button>
+    </div>
+
+    <!-- ============== 스코프 1: 숙박권 전체 적용 ============== -->
+    <div id="scope-hotel" class="scope-panel active">
+
+      <!-- 카테고리 필터 + 액션 -->
+      <div class="content-filter-row">
+        <button class="cat-chip active" onclick="filterCat(this,'all','hotel')">전체<span class="cat-chip-count">5</span></button>
+        <button class="cat-chip" onclick="filterCat(this,'intro','hotel')">🏨 소개<span class="cat-chip-count">1</span></button>
+        <button class="cat-chip" onclick="filterCat(this,'key','hotel')">⭐ 핵심 포인트<span class="cat-chip-count">1</span></button>
+        <button class="cat-chip" onclick="filterCat(this,'benefit','hotel')">🎁 스페셜 혜택<span class="cat-chip-count">1</span></button>
+        <button class="cat-chip" onclick="filterCat(this,'notice','hotel')">📋 유의사항<span class="cat-chip-count">1</span></button>
+        <button class="cat-chip" onclick="filterCat(this,'predep','hotel')">✈ 출발 전 안내<span class="cat-chip-count">1</span></button>
+        <div class="filter-spacer">
+          <button class="btn btn-sm" onclick="openSearchContentModal('hotel')">🔍 기존 콘텐츠 검색·연결</button>
+          <button class="btn btn-primary btn-sm" onclick="openCreateContentModal('hotel')">+ 새 콘텐츠 작성</button>
+        </div>
+      </div>
+
+      <!-- 콘텐츠 카드 1 — 소개 -->
+      <div class="content-card-v6" data-cat="intro">
+        <div class="content-card-v6-head">
+          <div class="content-card-title-row">
+            <span class="content-id">POST-1877</span>
+            <span class="cat-tag-v6 intro">🏨 소개</span>
+            <span class="status-pill live">운영중</span>
+          </div>
+          <div class="content-name-v6">솔바이멜리아 푸꾸옥 — 리조트 소개</div>
+          <div class="content-meta-v6">
+            <span class="rule-chip broad">적용: 이 숙박권 전체</span>
+            <span class="sep">·</span>
+            <span>항목 <strong>1개</strong></span>
+            <span class="sep">·</span>
+            <span class="usage-link">23개 상품에서 사용 중 →</span>
+          </div>
+        </div>
+        <div class="content-card-v6-items">
+          <div class="content-item-v6">
+            <span class="item-num">1</span>
+            <div class="item-body">
+              <div class="item-title-v6">리조트 소개</div>
+              <div class="item-content-v6">푸꾸옥의 청정 자연을 마주한 5성급 리조트. 1.5km 프라이빗 비치, 6개의 다이닝, 풀빌라와 비치프론트 객실을 제공합니다.</div>
+            </div>
+          </div>
+        </div>
+        <div class="content-card-v6-foot">
+          <button class="btn btn-sm" onclick="openHistoryModal(this)">🕘 버전 이력</button>
+          <button class="btn btn-sm" onclick="openEditContentModal(this)">✏ 수정</button>
+          <button class="btn btn-sm btn-danger" onclick="confirmUnlinkContent(this)">⊘ 연결 해제</button>
+          <span class="spacer"></span>
+          <button class="btn btn-sm" onclick="openAppliedModal(this)">📍 적용된 상품 보기 →</button>
+        </div>
+      </div>
+
+      <!-- 콘텐츠 카드 2 — 핵심 포인트 -->
+      <div class="content-card-v6" data-cat="key">
+        <div class="content-card-v6-head">
+          <div class="content-card-title-row">
+            <span class="content-id">POST-2104</span>
+            <span class="cat-tag-v6 key">⭐ 핵심 포인트</span>
+            <span class="status-pill live">운영중</span>
+          </div>
+          <div class="content-name-v6">JV 자체 제작 — 솔바이멜리아 추천 포인트</div>
+          <div class="content-meta-v6">
+            <span class="rule-chip broad">적용: 이 숙박권 전체</span>
+            <span class="sep">·</span>
+            <span>항목 <strong>4개</strong></span>
+            <span class="sep">·</span>
+            <span class="usage-link">18개 상품에서 사용 중 →</span>
+          </div>
+        </div>
+        <div class="content-card-v6-items">
+          <div class="content-item-v6"><span class="item-num">1</span><div class="item-body"><div class="item-title-v6">1.5km 프라이빗 비치 전면</div><div class="item-content-v6">투숙객 전용 비치 액세스, 선베드·파라솔 무료</div></div></div>
+          <div class="content-item-v6"><span class="item-num">2</span><div class="item-body"><div class="item-title-v6">5성급 풀빌라 (개인 수영장)</div><div class="item-content-v6">프레지덴셜 빌라 카테고리 한정. 24시간 버틀러 서비스 포함</div></div></div>
+          <div class="content-item-v6"><span class="item-num">3</span><div class="item-body"><div class="item-title-v6">올인클루시브 옵션</div><div class="item-content-v6">조·중·석식, 미니바, 셀렉트 와인까지 포함된 패키지 별도 운영</div></div></div>
+          <div class="content-item-v6"><span class="item-num">4</span><div class="item-body"><div class="item-title-v6">공항 ↔ 호텔 무료 픽업</div><div class="item-content-v6">3박 이상 예약 시 자동 포함</div></div></div>
+        </div>
+        <div class="content-card-v6-foot">
+          <button class="btn btn-sm" onclick="openHistoryModal(this)">🕘 버전 이력</button>
+          <button class="btn btn-sm" onclick="openEditContentModal(this)">✏ 수정</button>
+          <button class="btn btn-sm btn-danger" onclick="confirmUnlinkContent(this)">⊘ 연결 해제</button>
+          <span class="spacer"></span>
+          <button class="btn btn-sm" onclick="openAppliedModal(this)">📍 적용된 상품 보기 →</button>
+        </div>
+      </div>
+
+      <!-- 콘텐츠 카드 3 — 스페셜 혜택 (회의록 예시: 한 포스트에 항목 3개) -->
+      <div class="content-card-v6" data-cat="benefit">
+        <div class="content-card-v6-head">
+          <div class="content-card-title-row">
+            <span class="content-id">POST-2571</span>
+            <span class="cat-tag-v6 benefit">🎁 스페셜 혜택</span>
+            <span class="status-pill live">운영중</span>
+          </div>
+          <div class="content-name-v6">솔바이멜리아 — 스페셜 패키지 혜택 (3종 묶음)</div>
+          <div class="content-meta-v6">
+            <span class="rule-chip broad">적용: 이 숙박권 전체</span>
+            <span class="sep">·</span>
+            <span>항목 <strong>3개</strong></span>
+            <span class="sep">·</span>
+            <span class="usage-link">15개 상품에서 사용 중 →</span>
+          </div>
+        </div>
+        <div class="content-card-v6-items">
+          <div class="content-item-v6"><span class="item-num">1</span><div class="item-body"><div class="item-title-v6">왕복 공항 픽업/샌딩 무료</div><div class="item-content-v6">투숙 첫날 호텔 도착 시 공항 ↔ 호텔 픽업/샌딩 무료 (3박 이상 예약 시)</div></div></div>
+          <div class="content-item-v6"><span class="item-num">2</span><div class="item-body"><div class="item-title-v6">빈원더스 1회권 제공</div><div class="item-content-v6">투숙 기간 중 1회 이용 가능. <span class="warn">⚠ 2026-07-01~07-30 기간 미제공 (성수기 안내 필수)</span></div></div></div>
+          <div class="content-item-v6"><span class="item-num">3</span><div class="item-body"><div class="item-title-v6">조식 2회 + 미니바 무료</div><div class="item-content-v6">투숙 기간 중 조식 2회 무료 제공 + 객실 미니바 일부 무료</div></div></div>
+        </div>
+        <div class="content-card-v6-foot">
+          <button class="btn btn-sm" onclick="openHistoryModal(this)">🕘 버전 이력</button>
+          <button class="btn btn-sm" onclick="openEditContentModal(this)">✏ 수정</button>
+          <button class="btn btn-sm btn-danger" onclick="confirmUnlinkContent(this)">⊘ 연결 해제</button>
+          <span class="spacer"></span>
+          <button class="btn btn-sm" onclick="openAppliedModal(this)">📍 적용된 상품 보기 →</button>
+        </div>
+      </div>
+
+      <!-- 콘텐츠 카드 4 — 유의사항 -->
+      <div class="content-card-v6" data-cat="notice">
+        <div class="content-card-v6-head">
+          <div class="content-card-title-row">
+            <span class="content-id">POST-2515</span>
+            <span class="cat-tag-v6 notice">📋 유의사항</span>
+            <span class="status-pill live">운영중</span>
+          </div>
+          <div class="content-name-v6">솔바이멜리아 — 체크인/체크아웃 안내</div>
+          <div class="content-meta-v6">
+            <span class="rule-chip broad">적용: 이 숙박권 전체</span>
+            <span class="sep">·</span>
+            <span>항목 <strong>3개</strong></span>
+            <span class="sep">·</span>
+            <span class="usage-link">23개 상품에서 사용 중 →</span>
+          </div>
+        </div>
+        <div class="content-card-v6-items">
+          <div class="content-item-v6"><span class="item-num">1</span><div class="item-body"><div class="item-title-v6">체크인 16:00 / 체크아웃 12:00</div><div class="item-content-v6">얼리 체크인·레이트 체크아웃은 현지 사정에 따라 유료(별도 안내)</div></div></div>
+          <div class="content-item-v6"><span class="item-num">2</span><div class="item-body"><div class="item-title-v6">신용카드 사전 인증</div><div class="item-content-v6">체크인 시 신용카드 사전 인증 또는 보증금 USD 100 / 박 필요</div></div></div>
+          <div class="content-item-v6"><span class="item-num">3</span><div class="item-body"><div class="item-title-v6">리조트 요금 별도 청구</div><div class="item-content-v6">USD 25 / 박 (인당) — 체크아웃 시 현장 정산</div></div></div>
+        </div>
+        <div class="content-card-v6-foot">
+          <button class="btn btn-sm" onclick="openHistoryModal(this)">🕘 버전 이력</button>
+          <button class="btn btn-sm" onclick="openEditContentModal(this)">✏ 수정</button>
+          <button class="btn btn-sm btn-danger" onclick="confirmUnlinkContent(this)">⊘ 연결 해제</button>
+          <span class="spacer"></span>
+          <button class="btn btn-sm" onclick="openAppliedModal(this)">📍 적용된 상품 보기 →</button>
+        </div>
+      </div>
+
+      <!-- 콘텐츠 카드 5 — 출발 전 안내 -->
+      <div class="content-card-v6" data-cat="predep">
+        <div class="content-card-v6-head">
+          <div class="content-card-title-row">
+            <span class="content-id">POST-2890</span>
+            <span class="cat-tag-v6 predep">✈ 출발 전 안내</span>
+            <span class="status-pill draft">Draft</span>
+          </div>
+          <div class="content-name-v6">베트남 입국 — 비자/통화/날씨 가이드</div>
+          <div class="content-meta-v6">
+            <span class="rule-chip broad">적용: 이 숙박권 전체</span>
+            <span class="sep">·</span>
+            <span>항목 <strong>5개</strong></span>
+            <span class="sep">·</span>
+            <span style="color:rgba(0,0,0,0.4);">Draft — 아직 연결된 상품 없음</span>
+          </div>
+        </div>
+        <div class="content-card-v6-items">
+          <div class="content-item-v6"><span class="item-num">1</span><div class="item-body"><div class="item-title-v6">무비자 45일</div><div class="item-content-v6">한국 여권 소지자 베트남 무비자 입국 45일 (2025-08-15 시행)</div></div></div>
+          <div class="content-item-v6"><span class="item-num">2</span><div class="item-body"><div class="item-title-v6">통화 — VND / USD 병용</div><div class="item-content-v6">호텔·대형 상점은 USD 사용 가능, 일반 상점은 VND 권장</div></div></div>
+        </div>
+        <div class="content-card-v6-foot">
+          <button class="btn btn-sm" onclick="openHistoryModal(this)">🕘 버전 이력</button>
+          <button class="btn btn-sm" onclick="openEditContentModal(this)">✏ 수정</button>
+          <button class="btn btn-sm">🚀 운영중으로 게시</button>
+          <span class="spacer"></span>
+          <button class="btn btn-sm">⊘ 연결 해제</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ============== 스코프 2: 객실/식사 단위 적용 ============== -->
+    <div id="scope-room" class="scope-panel">
+
+      <!-- 객실 셀렉터 -->
+      <div class="room-selector-row">
+        <span class="label">🛏️ 객실/식사 조합 선택</span>
+        <select id="roomScopeFilter">
+          <option value="all">전체 객실 (7건)</option>
+          <option value="deluxe-city-bb">디럭스 시티뷰 · BB (1)</option>
+          <option value="deluxe-ocean-bb">디럭스 오션뷰 · BB (1)</option>
+          <option value="deluxe-ocean-hb">디럭스 오션뷰 · HB (2)</option>
+          <option value="family-bb">패밀리 스위트 · BB (1)</option>
+          <option value="presidential-ai">프레지덴셜 빌라 · AI (2)</option>
+        </select>
+        <span style="font-size:11.5px; color:#874d00;">→ 선택한 조합에 적용되는 콘텐츠만 표시</span>
+        <span class="matrix-toggle">
+          <button class="btn btn-sm">🗂 매트릭스 뷰 (객실 × 카테고리)</button>
+        </span>
+      </div>
+
+      <!-- 카테고리 필터 + 액션 -->
+      <div class="content-filter-row">
+        <button class="cat-chip active" onclick="filterCat(this,'all','room')">전체<span class="cat-chip-count">7</span></button>
+        <button class="cat-chip" onclick="filterCat(this,'room','room')">🛏️ 객실 정보<span class="cat-chip-count">4</span></button>
+        <button class="cat-chip" onclick="filterCat(this,'notice','room')">📋 유의사항<span class="cat-chip-count">2</span></button>
+        <button class="cat-chip" onclick="filterCat(this,'benefit','room')">🎁 객실 한정 혜택<span class="cat-chip-count">1</span></button>
+        <div class="filter-spacer">
+          <button class="btn btn-sm" onclick="openSearchContentModal('room')">🔍 기존 콘텐츠 검색·연결</button>
+          <button class="btn btn-primary btn-sm" onclick="openCreateContentModal('room')">+ 새 콘텐츠 작성</button>
+        </div>
+      </div>
+
+      <!-- 콘텐츠 카드 R1 — 프레지덴셜 빌라 -->
+      <div class="content-card-v6" data-cat="room">
+        <div class="content-card-v6-head">
+          <div class="content-card-title-row">
+            <span class="content-id">POST-3041</span>
+            <span class="cat-tag-v6 room">🛏️ 객실 정보</span>
+            <span class="status-pill live">운영중</span>
+          </div>
+          <div class="content-name-v6">프레지덴셜 빌라 — 풀빌라 안내</div>
+          <div class="content-meta-v6">
+            <span class="rule-chip">객실 = 프레지덴셜 빌라</span>
+            <span class="sep">AND</span>
+            <span class="rule-chip">식사 = AI</span>
+            <span class="sep">·</span>
+            <span>항목 <strong>4개</strong></span>
+            <span class="sep">·</span>
+            <span class="usage-link">6개 상품에서 사용 중 →</span>
+          </div>
+        </div>
+        <div class="content-card-v6-items">
+          <div class="content-item-v6"><span class="item-num">1</span><div class="item-body"><div class="item-title-v6">개인 수영장 + 자쿠지</div><div class="item-content-v6">120㎡ 풀빌라 — 개인 인피니티 풀 + 자쿠지 + 1.5m 데이베드</div></div></div>
+          <div class="content-item-v6"><span class="item-num">2</span><div class="item-body"><div class="item-title-v6">24시간 버틀러 서비스</div><div class="item-content-v6">전담 버틀러가 24시간 룸 서비스, 액티비티 예약, 컨시어지 대응</div></div></div>
+          <div class="content-item-v6"><span class="item-num">3</span><div class="item-body"><div class="item-title-v6">올인클루시브 다이닝</div><div class="item-content-v6">조·중·석식 풀 코스 + 미니바 무제한 + 셀렉트 와인 6종</div></div></div>
+          <div class="content-item-v6"><span class="item-num">4</span><div class="item-body"><div class="item-title-v6">전용 비치 카바나</div><div class="item-content-v6">프라이빗 비치 카바나 1동 무료 사용 (예약 시 배정)</div></div></div>
+        </div>
+        <div class="content-card-v6-foot">
+          <button class="btn btn-sm" onclick="openHistoryModal(this)">🕘 버전 이력</button>
+          <button class="btn btn-sm" onclick="openEditContentModal(this)">✏ 수정</button>
+          <button class="btn btn-sm btn-danger" onclick="confirmUnlinkContent(this)">⊘ 연결 해제</button>
+          <span class="spacer"></span>
+          <button class="btn btn-sm" onclick="openAppliedModal(this)">📍 적용된 상품 보기 →</button>
+        </div>
+      </div>
+
+      <!-- 콘텐츠 카드 R2 — 오션뷰 HB 객실 한정 혜택 -->
+      <div class="content-card-v6" data-cat="benefit">
+        <div class="content-card-v6-head">
+          <div class="content-card-title-row">
+            <span class="content-id">POST-3052</span>
+            <span class="cat-tag-v6 benefit">🎁 객실 한정 혜택</span>
+            <span class="status-pill live">운영중</span>
+          </div>
+          <div class="content-name-v6">오션뷰 HB — 디너 코스 업그레이드</div>
+          <div class="content-meta-v6">
+            <span class="rule-chip">객실 = 디럭스 오션뷰</span>
+            <span class="sep">AND</span>
+            <span class="rule-chip">식사 = HB</span>
+            <span class="sep">·</span>
+            <span>항목 <strong>2개</strong></span>
+            <span class="sep">·</span>
+            <span class="usage-link">3개 상품에서 사용 중 →</span>
+          </div>
+        </div>
+        <div class="content-card-v6-items">
+          <div class="content-item-v6"><span class="item-num">1</span><div class="item-body"><div class="item-title-v6">선셋 시그니처 디너 1회 무료</div><div class="item-content-v6">투숙 기간 중 1회, 사전 예약 필수</div></div></div>
+          <div class="content-item-v6"><span class="item-num">2</span><div class="item-body"><div class="item-title-v6">웰컴 와인 1병 인룸 제공</div><div class="item-content-v6">체크인 시 객실에 무료 와인 1병 비치</div></div></div>
+        </div>
+        <div class="content-card-v6-foot">
+          <button class="btn btn-sm" onclick="openHistoryModal(this)">🕘 버전 이력</button>
+          <button class="btn btn-sm" onclick="openEditContentModal(this)">✏ 수정</button>
+          <button class="btn btn-sm btn-danger" onclick="confirmUnlinkContent(this)">⊘ 연결 해제</button>
+          <span class="spacer"></span>
+          <button class="btn btn-sm" onclick="openAppliedModal(this)">📍 적용된 상품 보기 →</button>
+        </div>
+      </div>
+
+      <!-- 콘텐츠 카드 R3 — 패밀리 스위트 유의사항 -->
+      <div class="content-card-v6" data-cat="notice">
+        <div class="content-card-v6-head">
+          <div class="content-card-title-row">
+            <span class="content-id">POST-3068</span>
+            <span class="cat-tag-v6 notice">📋 유의사항</span>
+            <span class="status-pill live">운영중</span>
+          </div>
+          <div class="content-name-v6">패밀리 스위트 — 아동 동반 유의사항</div>
+          <div class="content-meta-v6">
+            <span class="rule-chip">객실 = 패밀리 스위트</span>
+            <span class="sep">·</span>
+            <span>항목 <strong>2개</strong></span>
+            <span class="sep">·</span>
+            <span class="usage-link">4개 상품에서 사용 중 →</span>
+          </div>
+        </div>
+        <div class="content-card-v6-items">
+          <div class="content-item-v6"><span class="item-num">1</span><div class="item-body"><div class="item-title-v6">최대 정원 4인 (성인 2 + 아동 2)</div><div class="item-content-v6">엑스트라 베드 1개 무료 제공, 추가 시 USD 25/박</div></div></div>
+          <div class="content-item-v6"><span class="item-num">2</span><div class="item-body"><div class="item-title-v6">키즈 클럽 무료 이용</div><div class="item-content-v6">4~12세 아동 대상 키즈 클럽 (09:00~17:00) 무료 이용</div></div></div>
+        </div>
+        <div class="content-card-v6-foot">
+          <button class="btn btn-sm" onclick="openHistoryModal(this)">🕘 버전 이력</button>
+          <button class="btn btn-sm" onclick="openEditContentModal(this)">✏ 수정</button>
+          <button class="btn btn-sm btn-danger" onclick="confirmUnlinkContent(this)">⊘ 연결 해제</button>
+          <span class="spacer"></span>
+          <button class="btn btn-sm" onclick="openAppliedModal(this)">📍 적용된 상품 보기 →</button>
+        </div>
+      </div>
+
+      <!-- 비어있는 객실 안내 -->
+      <div style="padding:14px 16px; background:#fafbfc; border:1px dashed #e8e8e8; border-radius:8px; font-size:12px; color:rgba(0,0,0,0.45); text-align:center; margin-top:8px;">
+        디럭스 시티뷰 · BB / 디럭스 오션뷰 · BB / 패밀리 스위트 · BB 객실에 추가 콘텐츠를 연결하려면 위 [+ 새 콘텐츠 작성] 또는 [기존 콘텐츠 검색·연결]을 사용하세요.
+      </div>
+    </div>
+  </div>
+
+  <!-- ==================== 하단 액션 ==================== -->
+  <div class="bottom-action">
+    <button class="btn" onclick="history.back()">취소</button>
+    <button class="btn">임시 저장</button>
+    <button class="btn btn-primary btn-lg">숙박권 생성</button>
+  </div>
+
+</div>
+
+
+<script>
+function fetchTmgContent() {
+  // 시뮬레이션: TMG getPropertyContent 호출 → 카드 채움
+  const empty = document.getElementById('tmg-content-empty');
+  const loaded = document.getElementById('tmg-content-loaded');
+  const status = document.getElementById('tmg-content-status');
+  status.textContent = '⏳ 가져오는 중...';
+  status.style.color = '#1677ff';
+  setTimeout(() => {
+    empty.style.display = 'none';
+    loaded.style.display = 'block';
+    status.textContent = '✅ 가져옴 (방금 전)';
+    status.style.color = '#389e0d';
+  }, 600);
+}
+function closeModal() {
+  document.querySelectorAll('.modal-overlay').forEach(m => m.classList.remove('show'));
+}
+
+function selectRangeRoom(btn, days) {
+  const group = btn.parentElement;
+  group.querySelectorAll('.range-btn-sm').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+}
+document.querySelectorAll('.modal-overlay').forEach(m => {
+  m.addEventListener('click', e => { if (e.target === m) closeModal(); });
+});
+
+// toggle pills (운영중/종료)
+document.querySelectorAll('.toggle-pill').forEach(g => {
+  g.querySelectorAll('button').forEach(b => b.addEventListener('click', () => {
+    g.querySelectorAll('button').forEach(x => x.classList.remove('active'));
+    b.classList.add('active');
+  }));
+});
+document.querySelectorAll('.onoff-pill').forEach(g => {
+  g.querySelectorAll('button').forEach(b => b.addEventListener('click', () => {
+    g.querySelectorAll('button').forEach(x => x.classList.remove('active'));
+    b.classList.add('active');
+  }));
+});
+
+// 재고 갱신 모달
+function openRefreshModal() {
+  document.getElementById('modal-refresh').classList.add('show');
+  updateRefreshDateRange();
+}
+function closeRefreshModal() {
+  document.getElementById('modal-refresh').classList.remove('show');
+}
+function setRefreshRange(days) {
+  const today = new Date();
+  const start = new Date(today); start.setDate(today.getDate() + 5); // D+5 영업일 (단순화)
+  const end = new Date(start); end.setDate(start.getDate() + days - 1);
+  document.getElementById('refresh-start').value = start.toISOString().slice(0,10);
+  document.getElementById('refresh-end').value = end.toISOString().slice(0,10);
+  document.querySelectorAll('.preset-btn').forEach(b => b.classList.remove('active'));
+  event.target.classList.add('active');
+  updateRefreshDateRange();
+}
+function updateRefreshDateRange() {
+  const s = document.getElementById('refresh-start').value;
+  const e = document.getElementById('refresh-end').value;
+  if (!s || !e) return;
+  const days = Math.round((new Date(e) - new Date(s)) / 86400000) + 1;
+  const warn = document.getElementById('refresh-warn');
+  if (days > 90) {
+    warn.textContent = `⚠ ${days}일 — 최대 90일까지만 가능합니다`;
+    warn.style.color = '#cf1322';
+  } else if (days < 1) {
+    warn.textContent = `⚠ 종료일이 시작일보다 빠릅니다`;
+    warn.style.color = '#cf1322';
+  } else {
+    warn.textContent = `선택 기간: ${days}일`;
+    warn.style.color = 'rgba(0,0,0,0.55)';
+  }
+}
+function updateCalRoomLabel() {
+  const sel = document.getElementById('calRoomSelect');
+  const lbl = document.getElementById('calRoomLabel');
+  if (sel && lbl) lbl.textContent = sel.value;
+}
+
+function executeRefresh() {
+  const rooms = Array.from(document.querySelectorAll('.refresh-room-check:checked')).map(c => c.dataset.name);
+  const s = document.getElementById('refresh-start').value;
+  const e = document.getElementById('refresh-end').value;
+  if (rooms.length === 0) { alert('조회할 객실을 1개 이상 선택하세요'); return; }
+  if (!s || !e) { alert('조회 기간을 입력하세요'); return; }
+  alert(`checkAvailability 호출\n\n객실: ${rooms.join(', ')}\n기간: ${s} ~ ${e}\n\n조회 후 일자별 판매가·재고가 채워집니다.`);
+  closeRefreshModal();
+}
+
+/* ==================== 콘텐츠 v6 — JS ==================== */
+function switchScope(scope, btn) {
+  document.querySelectorAll('.scope-tab').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  document.querySelectorAll('.scope-panel').forEach(p => p.classList.remove('active'));
+  document.getElementById('scope-' + scope).classList.add('active');
+}
+
+function filterCat(btn, cat, scope) {
+  const panel = document.getElementById('scope-' + scope);
+  panel.querySelectorAll('.cat-chip').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  panel.querySelectorAll('.content-card-v6').forEach(card => {
+    if (cat === 'all' || card.dataset.cat === cat) card.style.display = '';
+    else card.style.display = 'none';
+  });
+}
+
+let _createScope = 'hotel';
+function openCreateContentModal(scope) {
+  _createScope = scope;
+  document.getElementById('createScopeLabel').textContent = scope === 'hotel' ? '🏨 숙박권 전체 적용' : '🛏️ 객실/식사 단위 적용';
+  document.getElementById('createRoomScope').style.display = scope === 'room' ? 'block' : 'none';
+  // 항목 초기화
+  document.getElementById('itemsBuilder').innerHTML = '';
+  addItemRow();
+  // 카테고리 초기화
+  document.querySelectorAll('#createContentModal .cat-pick-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById('createContentTitle').value = '';
+  document.getElementById('createContentModal').classList.add('show');
+}
+
+function closeCreateContentModal() {
+  document.getElementById('createContentModal').classList.remove('show');
+}
+
+function pickCreateCat(btn) {
+  document.querySelectorAll('#createContentModal .cat-pick-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  // 소개/핵심포인트 선택 시 이미지 업로드 영역 표시
+  const cat = btn.dataset.cat;
+  const imgSec = document.getElementById('createImageSection');
+  if (imgSec) imgSec.style.display = (cat === 'intro' || cat === 'key') ? 'block' : 'none';
+}
+
+let _uploadedImages = [];
+function handleImageUpload(input) {
+  const preview = document.getElementById('createImagePreview');
+  Array.from(input.files).forEach((f, i) => {
+    if (_uploadedImages.length >= 5) { alert('최대 5장까지 업로드 가능합니다'); return; }
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      const idx = _uploadedImages.length + 1;
+      _uploadedImages.push({ name: f.name, url: e.target.result });
+      const wrap = document.createElement('div');
+      wrap.style.cssText = 'position:relative; width:96px; height:72px; border-radius:6px; overflow:hidden; border:2px solid #91caff;';
+      wrap.innerHTML = `
+        <img src="${e.target.result}" style="width:100%;height:100%;object-fit:cover;">
+        <span style="position:absolute; top:3px; left:3px; background:#1677ff; color:#fff; font-size:10px; font-weight:800; padding:1px 6px; border-radius:3px;">${idx}${idx===1?' · 대표':''}</span>
+        <button onclick="this.parentElement.remove()" style="position:absolute; top:3px; right:3px; width:20px; height:20px; border-radius:50%; background:rgba(0,0,0,0.6); color:#fff; border:none; cursor:pointer; font-size:11px;">×</button>
+      `;
+      preview.appendChild(wrap);
+    };
+    reader.readAsDataURL(f);
+  });
+  input.value = '';
+}
+
+function pickRulePreset(btn) {
+  document.querySelectorAll('#createContentModal .rule-preset-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+}
+
+function addItemRow() {
+  const builder = document.getElementById('itemsBuilder');
+  const idx = builder.children.length + 1;
+  const row = document.createElement('div');
+  row.className = 'item-row-builder';
+  row.innerHTML = `
+    <span class="num-badge">${idx}</span>
+    <div class="item-fields">
+      <input type="text" placeholder="항목 제목 (예: 왕복 공항 픽업/샌딩 무료)">
+      <textarea placeholder="항목 내용 (예: 투숙 첫날 공항 ↔ 호텔 픽업/샌딩 무료 — 3박 이상 예약 시)"></textarea>
+    </div>
+    <button class="del-item-btn" onclick="this.parentElement.remove(); renumberItems();" title="이 항목 삭제">×</button>
+  `;
+  builder.appendChild(row);
+}
+
+function renumberItems() {
+  document.querySelectorAll('#itemsBuilder .item-row-builder .num-badge').forEach((el, i) => el.textContent = i + 1);
+}
+
+function saveNewContent() {
+  const title = document.getElementById('createContentTitle').value.trim();
+  const cat = document.querySelector('#createContentModal .cat-pick-btn.active');
+  if (!title) { alert('콘텐츠 이름을 입력해 주세요.'); return; }
+  if (!cat) { alert('카테고리를 선택해 주세요.'); return; }
+  const itemCount = document.querySelectorAll('#itemsBuilder .item-row-builder').length;
+  alert(`콘텐츠 저장 완료\n\n• 이름: ${title}\n• 카테고리: ${cat.textContent.trim()}\n• 스코프: ${_createScope === 'hotel' ? '숙박권 전체' : '객실/식사 단위'}\n• 항목 수: ${itemCount}\n\n→ 카탈로그에 신규 콘텐츠 생성 + 이 숙박권에 자동 연결`);
+  closeCreateContentModal();
+}
+
+function openSearchContentModal(scope) {
+  _createScope = scope;
+  document.getElementById('searchScopeLabel').textContent = scope === 'hotel' ? '🏨 숙박권 전체 적용' : '🛏️ 객실/식사 단위 적용';
+  document.getElementById('searchContentModal').classList.add('show');
+}
+
+function closeSearchContentModal() {
+  document.getElementById('searchContentModal').classList.remove('show');
+}
+
+function connectContent(btn, postId, name) {
+  btn.textContent = '✓ 연결됨';
+  btn.classList.add('added');
+  btn.disabled = true;
+}
+</script>
+
+<!-- ==================== MODAL: 재고 갱신 ==================== -->
+<div class="modal-overlay" id="modal-refresh">
+  <div class="modal" style="width:560px;">
+    <div class="modal-header">
+      <div class="modal-title">
+        <span class="tag tag-purple" style="background:#f9f0ff; color:#722ed1; padding:2px 7px; border-radius:4px; font-size:10px; font-weight:600; border:1px solid #d3adf7;">checkAvailability</span>
+        재고 갱신
+      </div>
+      <button class="modal-close" onclick="closeRefreshModal()">×</button>
+    </div>
+    <div class="modal-body">
+      <div style="background:#f0f9ff; border:1px solid #d9e6f5; padding:12px 14px; border-radius:8px; margin-bottom:18px; font-size:12.5px; color:rgba(0,0,0,0.65); line-height:1.6;">
+        📋 조회할 <strong>객실</strong>과 <strong>기간</strong>을 선택하세요. <code style="background:#fff; padding:1px 5px; border-radius:3px; font-size:11px;">checkAvailability</code>가 호출되어 일자별 판매가·재고를 채웁니다.<br>
+        <span style="font-size:11.5px; color:rgba(0,0,0,0.45);">조회 가능 범위: 오늘 + 5 영업일 ~ 최대 90일 (D+90)</span>
+      </div>
+
+      <!-- 객실 선택 -->
+      <div style="margin-bottom:20px;">
+        <div style="font-size:12px; color:rgba(0,0,0,0.55); margin-bottom:10px; font-weight:600;">조회 객실 선택</div>
+        <div style="display:flex; flex-direction:column; gap:8px;">
+          <label style="display:flex; align-items:center; gap:10px; padding:10px 12px; border:1px solid #e8e8e8; border-radius:8px; cursor:pointer;">
+            <input type="checkbox" class="refresh-room-check" data-name="Deluxe King" checked>
+            <span style="flex:1; font-size:13px;"><strong>[ID : 267] Deluxe King</strong> <span style="color:rgba(0,0,0,0.45); font-size:12px;">· 2인 기준</span></span>
+            <span style="font-size:11px; color:rgba(0,0,0,0.45);">마지막 조회 12분 전</span>
+          </label>
+          <label style="display:flex; align-items:center; gap:10px; padding:10px 12px; border:1px solid #e8e8e8; border-radius:8px; cursor:pointer;">
+            <input type="checkbox" class="refresh-room-check" data-name="Deluxe Twin">
+            <span style="flex:1; font-size:13px;"><strong>[ID : 268] Deluxe Twin</strong> <span style="color:rgba(0,0,0,0.45); font-size:12px;">· 2인 기준</span></span>
+            <span style="font-size:11px; color:#fa8c16;">아직 조회 전</span>
+          </label>
+          <label style="display:flex; align-items:center; gap:10px; padding:10px 12px; border:1px solid #e8e8e8; border-radius:8px; cursor:pointer; opacity:0.5;">
+            <input type="checkbox" class="refresh-room-check" data-name="Executive Suite" disabled>
+            <span style="flex:1; font-size:13px;"><strong>[ID : 269] Executive Suite</strong> <span style="color:rgba(0,0,0,0.45); font-size:12px;">· 비활성</span></span>
+            <span style="font-size:11px; color:rgba(0,0,0,0.35);">스위치 꺼짐</span>
+          </label>
+        </div>
+      </div>
+
+      <!-- 기간 입력 -->
+      <div>
+        <div style="font-size:12px; color:rgba(0,0,0,0.55); margin-bottom:10px; font-weight:600;">조회 기간 (최대 90일)</div>
+
+        <!-- 빠른 선택 -->
+        <div style="display:flex; gap:6px; margin-bottom:10px;">
+          <button type="button" class="preset-btn btn btn-sm" onclick="setRefreshRange(30)">D+30</button>
+          <button type="button" class="preset-btn btn btn-sm active" onclick="setRefreshRange(60)" style="background:#1677ff; color:#fff; border-color:#1677ff;">D+60</button>
+          <button type="button" class="preset-btn btn btn-sm" onclick="setRefreshRange(90)">D+90 (최대)</button>
+        </div>
+
+        <!-- 직접 입력 -->
+        <div style="display:flex; align-items:center; gap:10px;">
+          <input type="date" id="refresh-start" class="form-control" style="flex:1;" value="2026-05-20" onchange="updateRefreshDateRange()">
+          <span style="color:rgba(0,0,0,0.35);">→</span>
+          <input type="date" id="refresh-end" class="form-control" style="flex:1;" value="2026-07-18" onchange="updateRefreshDateRange()">
+        </div>
+        <div id="refresh-warn" style="font-size:12px; color:rgba(0,0,0,0.55); margin-top:8px;">선택 기간: 60일</div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <div style="font-size:11.5px; color:rgba(0,0,0,0.45);">⏱ 조회 완료까지 약 5~15초 소요</div>
+      <div style="display:flex; gap:8px;">
+        <button class="btn btn-sm" onclick="closeRefreshModal()">취소</button>
+        <button class="btn btn-primary btn-sm" onclick="executeRefresh()" style="background:#1677ff; color:#fff;">🔄 조회 실행</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ==================== MODAL: 새 콘텐츠 작성 (v6) ==================== -->
+<div class="modal-overlay" id="createContentModal">
+  <div class="modal create-modal">
+    <div class="modal-header">
+      <div class="modal-title">
+        ✨ 새 콘텐츠 작성
+        <span style="font-size:10px; background:#e6f4ff; color:#0958d9; border:1px solid #91caff; padding:2px 7px; border-radius:10px; font-weight:700;">Rule Engine v6</span>
+        <span id="createScopeLabel" style="font-size:11.5px; background:#fff7e6; color:#874d00; border:1px solid #ffd591; padding:2px 7px; border-radius:4px; font-weight:600;">🏨 숙박권 전체 적용</span>
+      </div>
+      <button class="modal-close" onclick="closeCreateContentModal()">×</button>
+    </div>
+    <div class="modal-body">
+      <div style="background:#f0f7ff; border:1px solid #91caff; border-radius:8px; padding:10px 14px; margin-bottom:18px; font-size:12px; color:#003a8c; line-height:1.6;">
+        💡 작성된 콘텐츠는 <strong>카탈로그에 저장</strong>되고, 이 숙박권에 <strong>자동 연결</strong>됩니다. 다른 숙박권에서도 같은 콘텐츠를 검색·연결할 수 있어요.
+      </div>
+
+      <!-- 카테고리 -->
+      <div class="field-group-v6">
+        <label class="field-label-v6">카테고리 <span class="req">*</span></label>
+        <div class="cat-pick">
+          <button class="cat-pick-btn" data-cat="intro" onclick="pickCreateCat(this)">🏨 소개 <span style="font-size:10px; color:#1677ff; margin-left:2px;">🖼 이미지</span></button>
+          <button class="cat-pick-btn" data-cat="key" onclick="pickCreateCat(this)">⭐ 핵심 포인트 <span style="font-size:10px; color:#1677ff; margin-left:2px;">🖼 이미지</span></button>
+          <button class="cat-pick-btn" data-cat="benefit" onclick="pickCreateCat(this)">🎁 스페셜 혜택</button>
+          <button class="cat-pick-btn" data-cat="notice" onclick="pickCreateCat(this)">📋 유의사항</button>
+          <button class="cat-pick-btn" data-cat="predep" onclick="pickCreateCat(this)">✈ 출발 전 안내</button>
+          <button class="cat-pick-btn" data-cat="room" onclick="pickCreateCat(this)">🛏️ 객실 정보</button>
+          <button class="cat-pick-btn" data-cat="flight" onclick="pickCreateCat(this)">📜 항공 약관</button>
+        </div>
+      </div>
+
+      <!-- 이미지 업로드 (소개/핵심포인트만) -->
+      <div class="field-group-v6" id="createImageSection" style="display:none;">
+        <label class="field-label-v6">🖼 이미지 <span class="hint">소개·핵심포인트는 이미지 첨부 가능 (최대 5장, 5MB 이하)</span></label>
+        <div id="createImagePreview" style="display:flex; gap:8px; flex-wrap:wrap; margin-bottom:8px;"></div>
+        <label style="display:flex; align-items:center; justify-content:center; gap:8px; padding:14px; border:2px dashed #91caff; border-radius:8px; background:#f0f7ff; cursor:pointer; color:#1677ff; font-size:12.5px; font-weight:700;">
+          <span>📤 이미지 업로드 (드래그 또는 클릭)</span>
+          <input type="file" accept="image/*" multiple style="display:none;" onchange="handleImageUpload(this)">
+        </label>
+        <div style="font-size:11px; color:rgba(0,0,0,0.45); margin-top:6px; line-height:1.5;">
+          💡 1번 이미지가 카드 대표 썸네일로 사용됩니다. 항목별로 본문에 인라인 이미지도 가능 (각 항목 옆 🖼 버튼).
+        </div>
+      </div>
+
+      <!-- 콘텐츠 이름 -->
+      <div class="field-group-v6">
+        <label class="field-label-v6">콘텐츠 이름 <span class="req">*</span><span class="hint">내부 식별용 — 운영자/검색용</span></label>
+        <input type="text" id="createContentTitle" class="form-control" placeholder="예: 솔바이멜리아 — 스페셜 패키지 혜택 (3종 묶음)">
+      </div>
+
+      <!-- 적용 룰 (Rule Engine) -->
+      <div class="field-group-v6">
+        <label class="field-label-v6">적용 룰 <span class="req">*</span><span class="hint">조건은 모두 AND로 결합 · 만족 시 노출</span></label>
+        <div class="rule-builder">
+          <div style="font-size:11.5px; color:rgba(0,0,0,0.55); margin-bottom:8px; font-weight:600;">프리셋</div>
+          <div class="rule-preset-row">
+            <button class="rule-preset-btn active" onclick="pickRulePreset(this)">이 숙박권 전체</button>
+            <button class="rule-preset-btn" onclick="pickRulePreset(this)">숙박권 + 객실</button>
+            <button class="rule-preset-btn" onclick="pickRulePreset(this)">숙박권 + 식사</button>
+            <button class="rule-preset-btn" onclick="pickRulePreset(this)">숙박권 + 객실 + 식사</button>
+            <button class="rule-preset-btn" onclick="pickRulePreset(this)">기간 한정</button>
+            <button class="rule-preset-btn" onclick="pickRulePreset(this)">직접 구성 →</button>
+          </div>
+          <div id="createRoomScope" style="display:none; padding-top:6px;">
+            <div class="rule-condition-row">
+              <span style="color:rgba(0,0,0,0.55); min-width:50px;">객실</span>
+              <select>
+                <option>전체 객실</option>
+                <option>디럭스 시티뷰</option>
+                <option>디럭스 오션뷰</option>
+                <option>패밀리 스위트</option>
+                <option>프레지덴셜 빌라</option>
+              </select>
+              <span class="and-label">AND</span>
+              <span style="color:rgba(0,0,0,0.55); min-width:50px;">식사</span>
+              <select>
+                <option>전체</option>
+                <option>BB (조식)</option>
+                <option>HB (조·석식)</option>
+                <option>FB (3식)</option>
+                <option>AI (올인클루시브)</option>
+              </select>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 항목 (한 콘텐츠에 여러 항목) -->
+      <div class="field-group-v6">
+        <label class="field-label-v6">콘텐츠 항목 <span class="req">*</span><span class="hint">한 콘텐츠에 여러 항목을 묶어 등록 — 회의록 5/21 요청사항</span></label>
+        <div class="items-builder">
+          <div id="itemsBuilder"></div>
+          <button class="add-item-btn" onclick="addItemRow()">+ 항목 추가</button>
+        </div>
+      </div>
+
+      <!-- 상태 -->
+      <div class="field-group-v6">
+        <label class="field-label-v6">초기 상태</label>
+        <div style="display:flex; gap:6px;">
+          <button class="cat-pick-btn active">📝 Draft (검토 후 게시)</button>
+          <button class="cat-pick-btn">🚀 운영중 (즉시 적용)</button>
+        </div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <div style="font-size:11.5px; color:rgba(0,0,0,0.45);">콘텐츠는 카탈로그에 저장 + 이 숙박권에 자동 연결됩니다.</div>
+      <div style="display:flex; gap:8px;">
+        <button class="btn btn-sm" onclick="closeCreateContentModal()">취소</button>
+        <button class="btn btn-primary btn-sm" onclick="saveNewContent()" style="background:#1677ff; color:#fff;">저장 + 연결</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ==================== MODAL: 기존 콘텐츠 검색·연결 ==================== -->
+<div class="modal-overlay" id="searchContentModal">
+  <div class="modal" style="width:880px;">
+    <div class="modal-header">
+      <div class="modal-title">
+        🔍 기존 콘텐츠 검색·연결
+        <span id="searchScopeLabel" style="font-size:11.5px; background:#fff7e6; color:#874d00; border:1px solid #ffd591; padding:2px 7px; border-radius:4px; font-weight:600;">🏨 숙박권 전체 적용</span>
+      </div>
+      <button class="modal-close" onclick="closeSearchContentModal()">×</button>
+    </div>
+    <div class="search-modal-row">
+      <div style="display:flex; align-items:center; gap:8px; flex-wrap:wrap;">
+        <input type="text" class="form-control" placeholder="콘텐츠 이름·ID 검색" style="height:34px; flex:1; min-width:240px;">
+        <select class="form-control" style="height:34px; width:160px;">
+          <option>카테고리 전체</option>
+          <option>🏨 소개</option>
+          <option>⭐ 핵심 포인트</option>
+          <option>🎁 스페셜 혜택</option>
+          <option>📋 유의사항</option>
+          <option>✈ 출발 전 안내</option>
+          <option>🛏️ 객실 정보</option>
+        </select>
+        <select class="form-control" style="height:34px; width:140px;">
+          <option>상태 전체</option>
+          <option>운영중</option>
+          <option>Draft</option>
+        </select>
+        <button class="btn btn-primary btn-sm" style="background:#1677ff; color:#fff;">검색</button>
+      </div>
+    </div>
+    <div class="modal-body" style="padding:0; max-height:480px; overflow-y:auto;">
+      <table class="search-modal-table">
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>카테고리</th>
+            <th>콘텐츠 이름</th>
+            <th>항목</th>
+            <th>사용 중</th>
+            <th>상태</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><span class="content-id">POST-1240</span></td>
+            <td><span class="cat-tag-v6 notice">📋 유의사항</span></td>
+            <td><strong>베트남 공통 — 입국/세관 안내</strong></td>
+            <td>4개</td>
+            <td>52개 상품</td>
+            <td><span class="status-pill live">운영중</span></td>
+            <td><button class="conn-btn" onclick="connectContent(this,'POST-1240','베트남 공통 입국')">+ 연결</button></td>
+          </tr>
+          <tr>
+            <td><span class="content-id">POST-1455</span></td>
+            <td><span class="cat-tag-v6 benefit">🎁 스페셜 혜택</span></td>
+            <td><strong>JV 공통 — 얼리체크인 혜택</strong></td>
+            <td>2개</td>
+            <td>34개 상품</td>
+            <td><span class="status-pill live">운영중</span></td>
+            <td><button class="conn-btn" onclick="connectContent(this,'POST-1455','얼리체크인')">+ 연결</button></td>
+          </tr>
+          <tr>
+            <td><span class="content-id">POST-1822</span></td>
+            <td><span class="cat-tag-v6 predep">✈ 출발 전 안내</span></td>
+            <td><strong>푸꾸옥 여행지 정보 (날씨·교통)</strong></td>
+            <td>6개</td>
+            <td>18개 상품</td>
+            <td><span class="status-pill live">운영중</span></td>
+            <td><button class="conn-btn" onclick="connectContent(this,'POST-1822','푸꾸옥 여행지')">+ 연결</button></td>
+          </tr>
+          <tr>
+            <td><span class="content-id">POST-2104</span></td>
+            <td><span class="cat-tag-v6 key">⭐ 핵심 포인트</span></td>
+            <td><strong>JV 자체 제작 — 솔바이멜리아 추천 포인트</strong></td>
+            <td>4개</td>
+            <td>18개 상품</td>
+            <td><span class="status-pill live">운영중</span></td>
+            <td><button class="conn-btn added" disabled>✓ 연결됨</button></td>
+          </tr>
+          <tr>
+            <td><span class="content-id">POST-2890</span></td>
+            <td><span class="cat-tag-v6 predep">✈ 출발 전 안내</span></td>
+            <td><strong>베트남 입국 — 비자/통화/날씨 가이드</strong></td>
+            <td>5개</td>
+            <td>0 (Draft)</td>
+            <td><span class="status-pill draft">Draft</span></td>
+            <td><button class="conn-btn added" disabled>✓ 연결됨</button></td>
+          </tr>
+          <tr>
+            <td><span class="content-id">POST-3120</span></td>
+            <td><span class="cat-tag-v6 benefit">🎁 스페셜 혜택</span></td>
+            <td><strong>5박 이상 장기투숙 — 추가 혜택</strong></td>
+            <td>3개</td>
+            <td>9개 상품</td>
+            <td><span class="status-pill live">운영중</span></td>
+            <td><button class="conn-btn" onclick="connectContent(this,'POST-3120','장기투숙 혜택')">+ 연결</button></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="modal-footer">
+      <div style="font-size:11.5px; color:rgba(0,0,0,0.45);">총 6건 · 연결한 콘텐츠는 즉시 이 숙박권에 반영됩니다.</div>
+      <button class="btn btn-sm" onclick="closeSearchContentModal()">닫기</button>
+    </div>
+  </div>
+</div>
+
+<!-- ========================== POST 기능 모달 4종 ========================== -->
+
+<!-- MODAL: 버전 이력 (diff) -->
+<div class="modal-overlay" id="historyModal">
+  <div class="modal" style="width:760px;">
+    <div class="modal-header">
+      <div class="modal-title">🕘 버전 이력 <span id="histId" style="font-family:'SF Mono',monospace; font-size:12px; background:#f5f5f5; padding:2px 8px; border-radius:4px; color:rgba(0,0,0,0.55); margin-left:6px; font-weight:600;">POST-XXXX</span></div>
+      <button class="modal-close" onclick="closeHistoryModal()">×</button>
+    </div>
+    <div class="modal-body">
+      <div style="font-size:12px; color:rgba(0,0,0,0.5); margin-bottom:14px;"><strong id="histName" style="color:rgba(0,0,0,0.85); font-size:13.5px;">콘텐츠 이름</strong> — 변경 이력 (최근 → 이전)</div>
+
+      <!-- 버전 v3 (현재) -->
+      <div style="border:1.5px solid #91caff; background:#f0f7ff; border-radius:10px; padding:14px 16px; margin-bottom:10px;">
+        <div style="display:flex; align-items:center; gap:8px; margin-bottom:8px;">
+          <span style="background:#1677ff; color:#fff; padding:3px 10px; border-radius:4px; font-size:11px; font-weight:800;">v3 · 현재</span>
+          <span style="font-family:'SF Mono',monospace; font-size:11px; color:rgba(0,0,0,0.55); font-weight:600;">2026-05-26 11:18 · 서현</span>
+        </div>
+        <div style="font-size:12px; color:rgba(0,0,0,0.65); line-height:1.6;">
+          <strong style="color:#389e0d;">+ 추가:</strong> "조식 2회 + 미니바 무료" 항목 신규 추가<br>
+          <strong style="color:#d48806;">~ 수정:</strong> "빈원더스 1회권 제공" 본문 — 7월 미제공 경고 추가
+        </div>
+      </div>
+
+      <!-- 버전 v2 -->
+      <div style="border:1px solid #e8e8e8; border-radius:10px; padding:14px 16px; margin-bottom:10px;">
+        <div style="display:flex; align-items:center; gap:8px; margin-bottom:8px;">
+          <span style="background:#fafafa; color:rgba(0,0,0,0.65); padding:3px 10px; border-radius:4px; font-size:11px; font-weight:800; border:1px solid #d9d9d9;">v2</span>
+          <span style="font-family:'SF Mono',monospace; font-size:11px; color:rgba(0,0,0,0.55); font-weight:600;">2026-05-20 14:32 · 서현</span>
+          <button class="btn btn-sm" style="margin-left:auto;">↩ 이 버전으로 복구</button>
+        </div>
+        <div style="font-size:12px; color:rgba(0,0,0,0.65); line-height:1.6;">
+          <strong style="color:#389e0d;">+ 추가:</strong> "왕복 공항 픽업/샌딩 무료" 항목<br>
+          <strong style="color:#cf1322;">− 삭제:</strong> "체크아웃 1시간 연장" 항목 (사용 빈도 낮음)
+        </div>
+      </div>
+
+      <!-- 버전 v1 -->
+      <div style="border:1px solid #e8e8e8; border-radius:10px; padding:14px 16px;">
+        <div style="display:flex; align-items:center; gap:8px; margin-bottom:8px;">
+          <span style="background:#fafafa; color:rgba(0,0,0,0.65); padding:3px 10px; border-radius:4px; font-size:11px; font-weight:800; border:1px solid #d9d9d9;">v1 · 초기</span>
+          <span style="font-family:'SF Mono',monospace; font-size:11px; color:rgba(0,0,0,0.55); font-weight:600;">2026-04-12 09:15 · 서현</span>
+          <button class="btn btn-sm" style="margin-left:auto;">↩ 이 버전으로 복구</button>
+        </div>
+        <div style="font-size:12px; color:rgba(0,0,0,0.65); line-height:1.6;">
+          초기 작성 — 카탈로그 신규 등록
+        </div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <div style="font-size:11.5px; color:rgba(0,0,0,0.45);">버전 복구 시 새 버전(v4)으로 저장됩니다.</div>
+      <button class="btn btn-sm" onclick="closeHistoryModal()">닫기</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL: 콘텐츠 수정 (= 작성 모달 재활용 + 기존 값 채움) -->
+<div class="modal-overlay" id="editModal">
+  <div class="modal" style="width:720px;">
+    <div class="modal-header">
+      <div class="modal-title">✏ 콘텐츠 수정 <span id="editId" style="font-family:'SF Mono',monospace; font-size:12px; background:#f5f5f5; padding:2px 8px; border-radius:4px; color:rgba(0,0,0,0.55); margin-left:6px; font-weight:600;">POST-XXXX</span></div>
+      <button class="modal-close" onclick="closeEditModal()">×</button>
+    </div>
+    <div class="modal-body">
+      <div style="background:#f0f7ff; border:1px solid #91caff; border-radius:8px; padding:10px 14px; margin-bottom:16px; font-size:12px; color:#003a8c; line-height:1.6;">
+        💡 수정 사항은 <strong>새 버전(v+1)</strong>으로 저장되고, 이 콘텐츠를 참조하는 모든 상품에 자동 반영됩니다. 기존 예약 건은 스냅샷이라 영향 없음.
+      </div>
+      <div class="field-group-v6">
+        <label class="field-label-v6">콘텐츠 이름</label>
+        <input type="text" id="editName" class="form-control" value="">
+      </div>
+      <div class="field-group-v6">
+        <label class="field-label-v6">항목 (편집 가능)</label>
+        <div id="editItemsBuilder" class="items-builder"></div>
+        <button class="add-item-btn" onclick="addEditItem()">+ 항목 추가</button>
+      </div>
+      <div class="field-group-v6">
+        <label class="field-label-v6">변경 사유 <span class="hint">변경 이력에 기록</span></label>
+        <input type="text" id="editReason" class="form-control" placeholder="예: 7월 빈원더스 미제공 정책 추가">
+      </div>
+    </div>
+    <div class="modal-footer">
+      <div style="font-size:11.5px; color:rgba(0,0,0,0.45);">저장 시 새 버전으로 기록 + 연결된 모든 상품 자동 반영</div>
+      <div style="display:flex; gap:8px;">
+        <button class="btn btn-sm" onclick="closeEditModal()">취소</button>
+        <button class="btn btn-primary btn-sm" onclick="saveContentEdit()" style="background:#1677ff; color:#fff;">새 버전으로 저장</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL: 연결 해제 확인 -->
+<div class="modal-overlay" id="unlinkModal">
+  <div class="modal" style="width:480px;">
+    <div class="modal-header">
+      <div class="modal-title" style="color:#cf1322;">⊘ 연결 해제 확인</div>
+      <button class="modal-close" onclick="closeUnlinkModal()">×</button>
+    </div>
+    <div class="modal-body">
+      <div style="background:#fff1f0; border:1px solid #ffa39e; border-radius:8px; padding:12px 14px; margin-bottom:14px;">
+        <div style="font-size:13px; color:#a8071a; font-weight:700; margin-bottom:4px;"><span id="unlinkName">콘텐츠 이름</span> 연결 해제</div>
+        <div style="font-size:11.5px; color:#a8071a; line-height:1.5;">이 숙박권에서만 연결이 해제됩니다. 카탈로그의 콘텐츠 자체는 삭제되지 않으며 다른 숙박권 연결은 유지됩니다.</div>
+      </div>
+      <div style="font-size:12px; color:rgba(0,0,0,0.65); line-height:1.65;">
+        <strong>영향 범위</strong><br>
+        · 이 숙박권으로 자동생성된 신규 PB 상품에 해당 콘텐츠가 더 이상 포함되지 않습니다.<br>
+        · 이미 라이브 노출 중인 상품은 다음 새벽 배치(03:00)부터 반영됩니다.<br>
+        · 기존 예약 건의 콘텐츠는 스냅샷이라 영향 없음.
+      </div>
+    </div>
+    <div class="modal-footer">
+      <div style="font-size:11.5px; color:rgba(0,0,0,0.45);">변경 이력에 기록됨</div>
+      <div style="display:flex; gap:8px;">
+        <button class="btn btn-sm" onclick="closeUnlinkModal()">취소</button>
+        <button class="btn btn-primary btn-sm" onclick="confirmUnlink()" style="background:#cf1322; color:#fff; border-color:#cf1322;">⊘ 연결 해제</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL: 적용된 상품 보기 -->
+<div class="modal-overlay" id="appliedModal">
+  <div class="modal" style="width:920px;">
+    <div class="modal-header">
+      <div class="modal-title">📍 적용된 PB 상품 <span id="appliedId" style="font-family:'SF Mono',monospace; font-size:12px; background:#f5f5f5; padding:2px 8px; border-radius:4px; color:rgba(0,0,0,0.55); margin-left:6px; font-weight:600;">POST-XXXX</span></div>
+      <button class="modal-close" onclick="closeAppliedModal()">×</button>
+    </div>
+    <div class="modal-body">
+      <div style="font-size:12px; color:rgba(0,0,0,0.55); margin-bottom:14px;"><strong id="appliedName" style="color:rgba(0,0,0,0.85); font-size:13.5px;">콘텐츠 이름</strong> — 이 콘텐츠가 참조된 PB 상품 목록</div>
+      <div style="display:flex; gap:6px; flex-wrap:wrap; margin-bottom:12px;">
+        <span class="tag tag-blue">전체 23건</span>
+        <span class="tag tag-green">라이브 19건</span>
+        <span class="tag tag-orange">미노출 3건</span>
+        <span class="tag tag-red">탈락 1건</span>
+      </div>
+      <table style="width:100%; border-collapse:collapse; font-size:12.5px;">
+        <thead>
+          <tr style="background:#fafbfc; border-bottom:1px solid #f0f0f0;">
+            <th style="padding:10px 14px; text-align:left; font-size:10.5px; color:rgba(0,0,0,0.45); font-weight:700; letter-spacing:0.3px; text-transform:uppercase;">상품 ID</th>
+            <th style="padding:10px 14px; text-align:left; font-size:10.5px; color:rgba(0,0,0,0.45); font-weight:700; letter-spacing:0.3px; text-transform:uppercase;">상품명</th>
+            <th style="padding:10px 14px; text-align:left; font-size:10.5px; color:rgba(0,0,0,0.45); font-weight:700; letter-spacing:0.3px; text-transform:uppercase;">출발</th>
+            <th style="padding:10px 14px; text-align:right; font-size:10.5px; color:rgba(0,0,0,0.45); font-weight:700; letter-spacing:0.3px; text-transform:uppercase;">판매가</th>
+            <th style="padding:10px 14px; text-align:left; font-size:10.5px; color:rgba(0,0,0,0.45); font-weight:700; letter-spacing:0.3px; text-transform:uppercase;">상태</th>
+            <th style="padding:10px 14px;"></th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr style="border-bottom:1px solid #f5f5f5;"><td style="padding:11px 14px;"><span style="font-family:'SF Mono',monospace; font-size:11px; background:#f5f5f5; padding:1px 6px; border-radius:3px; color:rgba(0,0,0,0.55); font-weight:600;">PB-58241</span></td><td style="padding:11px 14px; font-weight:700;">푸꾸옥 솔바이멜리아 5일 (오션뷰 BB)</td><td style="padding:11px 14px;">2026.06.05</td><td style="padding:11px 14px; text-align:right; font-weight:700; font-variant-numeric:tabular-nums;">₩892,000</td><td style="padding:11px 14px;"><span class="tag tag-green">라이브</span></td><td style="padding:11px 14px; text-align:right;"><a href="pb-live-products.html" class="btn btn-sm">상품 →</a></td></tr>
+          <tr style="border-bottom:1px solid #f5f5f5;"><td style="padding:11px 14px;"><span style="font-family:'SF Mono',monospace; font-size:11px; background:#f5f5f5; padding:1px 6px; border-radius:3px; color:rgba(0,0,0,0.55); font-weight:600;">PB-58245</span></td><td style="padding:11px 14px; font-weight:700;">푸꾸옥 솔바이멜리아 5일 (오션뷰 HB)</td><td style="padding:11px 14px;">2026.06.12</td><td style="padding:11px 14px; text-align:right; font-weight:700; font-variant-numeric:tabular-nums;">₩1,124,000</td><td style="padding:11px 14px;"><span class="tag tag-green">라이브</span></td><td style="padding:11px 14px; text-align:right;"><a href="pb-live-products.html" class="btn btn-sm">상품 →</a></td></tr>
+          <tr style="border-bottom:1px solid #f5f5f5;"><td style="padding:11px 14px;"><span style="font-family:'SF Mono',monospace; font-size:11px; background:#f5f5f5; padding:1px 6px; border-radius:3px; color:rgba(0,0,0,0.55); font-weight:600;">PB-58259</span></td><td style="padding:11px 14px; font-weight:700;">푸꾸옥 솔바이멜리아 5일 (패밀리 BB)</td><td style="padding:11px 14px;">2026.06.20</td><td style="padding:11px 14px; text-align:right; font-weight:700; font-variant-numeric:tabular-nums;">₩1,486,000</td><td style="padding:11px 14px;"><span class="tag tag-orange">미노출(R3)</span></td><td style="padding:11px 14px; text-align:right;"><a href="pb-live-products.html" class="btn btn-sm">상품 →</a></td></tr>
+          <tr style="border-bottom:1px solid #f5f5f5;"><td style="padding:11px 14px;"><span style="font-family:'SF Mono',monospace; font-size:11px; background:#f5f5f5; padding:1px 6px; border-radius:3px; color:rgba(0,0,0,0.55); font-weight:600;">PB-58302</span></td><td style="padding:11px 14px; font-weight:700;">푸꾸옥 솔바이멜리아 + 빈원더스 6일</td><td style="padding:11px 14px;">2026.07.04</td><td style="padding:11px 14px; text-align:right; font-weight:700; font-variant-numeric:tabular-nums;">₩1,684,000</td><td style="padding:11px 14px;"><span class="tag tag-red">탈락(R2)</span></td><td style="padding:11px 14px; text-align:right;"><a href="autogen-reject-pool.html" class="btn btn-sm">탈락 풀 →</a></td></tr>
+          <tr><td style="padding:11px 14px;"><span style="font-family:'SF Mono',monospace; font-size:11px; background:#f5f5f5; padding:1px 6px; border-radius:3px; color:rgba(0,0,0,0.55); font-weight:600;">PB-58451</span></td><td style="padding:11px 14px; font-weight:700;">푸꾸옥 솔바이멜리아 4일 (프레지덴셜 AI)</td><td style="padding:11px 14px;">2026.07.18</td><td style="padding:11px 14px; text-align:right; font-weight:700; font-variant-numeric:tabular-nums;">₩4,892,000</td><td style="padding:11px 14px;"><span class="tag tag-green">라이브</span></td><td style="padding:11px 14px; text-align:right;"><a href="pb-live-products.html" class="btn btn-sm">상품 →</a></td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="modal-footer">
+      <div style="font-size:11.5px; color:rgba(0,0,0,0.45);">전체 23건 중 5건 표시 · <a href="pb-live-products.html" style="color:#1677ff;">라이브 상품 관리에서 더 보기 →</a></div>
+      <button class="btn btn-sm" onclick="closeAppliedModal()">닫기</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL: 연동 콘텐츠 정보 조회 (deprecated — 인라인 callout으로 대체됨) -->
+<div class="modal-overlay" id="contentViewModal" style="display:none !important;" onclick="if(event.target===this) closeContentViewModal()">
+  <div class="modal" style="width:760px;">
+    <div class="modal-header">
+      <div class="modal-title" style="color:#722ed1;">🔍 연동 콘텐츠 정보 조회</div>
+      <button class="modal-close" onclick="closeContentViewModal()">×</button>
+    </div>
+    <div class="modal-body">
+
+      <!-- 숙소 헤더 -->
+      <div class="cv-hero">
+        <div class="cv-hero-badge">2118</div>
+        <div class="cv-hero-info">
+          <div class="cv-hero-name">Sea Shells Phu Quoc Hotel &amp; Spa</div>
+          <div class="cv-hero-sub">
+            <span class="cv-hero-stars">★★★ 3성급</span>
+            <span>·</span>
+            <span>즈엉동 중심가</span>
+            <span>·</span>
+            <span>카탈로그 숙소 · TMG getPropertyContent 연동</span>
+          </div>
+        </div>
+        <div class="cv-hero-meta">총 <strong>252</strong>실</div>
+      </div>
+
+      <!-- 숙소 소개 -->
+      <div class="cv-section">
+        <div class="cv-section-title">📝 숙소 소개</div>
+        <div class="cv-field">
+          <div class="cv-field-head">
+            <span class="cv-field-label">shortDescription</span>
+            <button class="cv-copy-btn" onclick="cvCopy(this,'short')">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg>
+              복사
+            </button>
+          </div>
+          <div class="cv-field-value" id="cv-val-short">전용 해변, 야외 수영장, 즈엉동 중심가</div>
+        </div>
+        <div class="cv-field">
+          <div class="cv-field-head">
+            <span class="cv-field-label">fullDescription</span>
+            <button class="cv-copy-btn" onclick="cvCopy(this,'full')">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg>
+              복사
+            </button>
+          </div>
+          <div class="cv-field-value cv-long" id="cv-val-full">푸꾸옥 중심부에 위치한 씨쉘스 푸꾸옥 호텔 &amp; 스파는 전용 해변과 현대적인 시설을 갖춘 리조트입니다. 공항에서 차량으로 약 20분 거리에 있으며, 해변과 시내를 모두 편리하게 이용할 수 있습니다.
+
+객실과 스위트는 시티뷰와 오션뷰 타입으로 구성되어 있으며, 레스토랑, 바, 스파, 피트니스 센터, 키즈클럽, 야외 수영장 등 다양한 부대시설을 제공합니다.
+
+총 객실 수: 252실</div>
+        </div>
+      </div>
+
+      <!-- 운영 정보 -->
+      <div class="cv-section">
+        <div class="cv-section-title">🕐 운영 정보</div>
+        <div class="cv-grid-3">
+          <div class="cv-cell">
+            <div class="cv-cell-head">
+              <span class="cv-cell-k">checkinTime</span>
+              <button class="cv-copy-btn" onclick="cvCopyText(this,'15:00')" style="height:20px; padding:0 6px; font-size:10.5px;">복사</button>
+            </div>
+            <div class="cv-cell-v">15:00</div>
+          </div>
+          <div class="cv-cell">
+            <div class="cv-cell-head">
+              <span class="cv-cell-k">checkoutTime</span>
+              <button class="cv-copy-btn" onclick="cvCopyText(this,'12:00')" style="height:20px; padding:0 6px; font-size:10.5px;">복사</button>
+            </div>
+            <div class="cv-cell-v">12:00</div>
+          </div>
+          <div class="cv-cell">
+            <div class="cv-cell-head">
+              <span class="cv-cell-k">hotelClass</span>
+              <button class="cv-copy-btn" onclick="cvCopyText(this,'3')" style="height:20px; padding:0 6px; font-size:10.5px;">복사</button>
+            </div>
+            <div class="cv-cell-v">★★★ 3성</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 연령 범위 -->
+      <div class="cv-section">
+        <div class="cv-section-title">👨‍👩‍👧 연령 범위</div>
+        <div class="cv-grid-3">
+          <div class="cv-cell">
+            <div class="cv-cell-head">
+              <span class="cv-cell-k">infantAgeFrom~To</span>
+              <button class="cv-copy-btn" onclick="cvCopyText(this,'—')" style="height:20px; padding:0 6px; font-size:10.5px;">복사</button>
+            </div>
+            <div class="cv-cell-v cv-empty">— (미설정)</div>
+          </div>
+          <div class="cv-cell">
+            <div class="cv-cell-head">
+              <span class="cv-cell-k">childAgeFrom~To</span>
+              <button class="cv-copy-btn" onclick="cvCopyText(this,'6~11')" style="height:20px; padding:0 6px; font-size:10.5px;">복사</button>
+            </div>
+            <div class="cv-cell-v">6 ~ 11세</div>
+          </div>
+          <div class="cv-cell">
+            <div class="cv-cell-head">
+              <span class="cv-cell-k">minorAgeFrom~To</span>
+              <button class="cv-copy-btn" onclick="cvCopyText(this,'—')" style="height:20px; padding:0 6px; font-size:10.5px;">복사</button>
+            </div>
+            <div class="cv-cell-v cv-empty">— (미설정)</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 호텔 정책 -->
+      <div class="cv-section">
+        <div class="cv-section-title">📋 호텔 정책 (hotelPolicies)
+          <span style="margin-left:auto; font-size:11px; color:rgba(0,0,0,0.45); font-weight:500;">2건</span>
+        </div>
+        <div class="cv-policy">
+          <div class="cv-policy-head">
+            <div class="cv-policy-name">셔틀버스 안내</div>
+            <button class="cv-copy-btn" onclick="cvCopy(this,'policy-shuttle')">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg>
+              복사
+            </button>
+          </div>
+          <div class="cv-policy-desc" id="cv-val-policy-shuttle">8객실 미만 예약 고객은 호텔 셔틀 일정에 따라 무료 공항 픽업/샌딩 서비스를 이용할 수 있습니다. 최소 48시간 전에 예약해야 하며 좌석은 한정되어 있습니다.</div>
+        </div>
+        <div class="cv-policy">
+          <div class="cv-policy-head">
+            <div class="cv-policy-name">체크인 안내</div>
+            <button class="cv-copy-btn" onclick="cvCopy(this,'policy-checkin')">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg>
+              복사
+            </button>
+          </div>
+          <div class="cv-policy-desc" id="cv-val-policy-checkin">베트남 국적 고객은 신분증 또는 여권 원본을, 외국인은 유효한 여권과 비자를 제시해야 합니다. 예약 대표자와 체크인 고객의 이름이 일치해야 하며, 체크인 시 객실당 1박 기준 2,000,000 VND의 보증금을 현금 또는 신용카드로 예치해야 합니다.</div>
+        </div>
+      </div>
+
+    </div>
+    <div class="modal-footer">
+      <div class="cv-footer-note">📡 데이터 소스: TMG getPropertyContent · 최종 sync <strong>2026-07-09 03:00</strong></div>
+      <button class="btn btn-primary btn-sm" onclick="closeContentViewModal()">닫기</button>
+    </div>
+  </div>
+</div>
+
+<div class="cv-copy-toast" id="cvCopyToast">✓ 복사되었습니다</div>
+
+<script>
+/* ===== 연동 콘텐츠 정보 (인라인 callout) ===== */
+function toggleLinkedContent(btn) {
+  const body = document.getElementById('lcBody');
+  if (!body) return;
+  const collapsed = body.classList.toggle('collapsed');
+  btn.textContent = collapsed ? '▸ 펼치기' : '▾ 접기';
+}
+function openContentViewModal() { /* deprecated */ }
+function closeContentViewModal() { /* deprecated */ }
+function cvCopy(btn, key) {
+  const el = document.getElementById('cv-val-' + key);
+  const text = el ? el.innerText : '';
+  cvCopyText(btn, text);
+}
+function cvCopyText(btn, text) {
+  if (navigator.clipboard && navigator.clipboard.writeText) {
+    navigator.clipboard.writeText(text).then(() => cvFlashCopied(btn));
+  } else {
+    const ta = document.createElement('textarea');
+    ta.value = text; document.body.appendChild(ta); ta.select();
+    try { document.execCommand('copy'); } catch(e) {}
+    document.body.removeChild(ta);
+    cvFlashCopied(btn);
+  }
+}
+function cvFlashCopied(btn) {
+  const original = btn.innerHTML;
+  btn.classList.add('copied');
+  btn.innerHTML = '✓ 복사됨';
+  const toast = document.getElementById('cvCopyToast');
+  if (toast) {
+    toast.classList.add('show');
+    setTimeout(() => toast.classList.remove('show'), 1400);
+  }
+  setTimeout(() => { btn.classList.remove('copied'); btn.innerHTML = original; }, 1400);
+}
+</script>
+
+<script>
+/* ========== POST 기능 모달 JS ========== */
+let _activeCardEl = null;
+
+function getCardContext(btn) {
+  const card = btn.closest('.content-card-v6');
+  return {
+    el: card,
+    id: card.querySelector('.content-id')?.textContent || 'POST-?',
+    name: card.querySelector('.content-name-v6')?.textContent || '콘텐츠'
+  };
+}
+
+function openHistoryModal(btn) {
+  const c = getCardContext(btn);
+  document.getElementById('histId').textContent = c.id;
+  document.getElementById('histName').textContent = c.name;
+  document.getElementById('historyModal').classList.add('show');
+}
+function closeHistoryModal() { document.getElementById('historyModal').classList.remove('show'); }
+
+function openEditContentModal(btn) {
+  const c = getCardContext(btn);
+  _activeCardEl = c.el;
+  document.getElementById('editId').textContent = c.id;
+  document.getElementById('editName').value = c.name;
+  // 기존 항목 불러오기 (카드의 item-title-v6 / item-content-v6를 기반으로)
+  const builder = document.getElementById('editItemsBuilder');
+  builder.innerHTML = '';
+  c.el.querySelectorAll('.content-item-v6').forEach((it, idx) => {
+    const title = it.querySelector('.item-title-v6')?.textContent || '';
+    const body = it.querySelector('.item-content-v6')?.textContent || '';
+    const row = document.createElement('div');
+    row.className = 'item-row-builder';
+    row.innerHTML = `<span class="num-badge">${idx+1}</span><div class="item-fields"><input type="text" value="${title.replace(/"/g,'&quot;')}" placeholder="항목 제목"><textarea placeholder="항목 내용">${body}</textarea></div><button class="del-item-btn" onclick="this.parentElement.remove();">×</button>`;
+    builder.appendChild(row);
+  });
+  if (builder.children.length === 0) addEditItem();
+  document.getElementById('editReason').value = '';
+  document.getElementById('editModal').classList.add('show');
+}
+function closeEditModal() { document.getElementById('editModal').classList.remove('show'); _activeCardEl = null; }
+function addEditItem() {
+  const builder = document.getElementById('editItemsBuilder');
+  const idx = builder.children.length + 1;
+  const row = document.createElement('div');
+  row.className = 'item-row-builder';
+  row.innerHTML = `<span class="num-badge">${idx}</span><div class="item-fields"><input type="text" placeholder="항목 제목"><textarea placeholder="항목 내용"></textarea></div><button class="del-item-btn" onclick="this.parentElement.remove();">×</button>`;
+  builder.appendChild(row);
+}
+function saveContentEdit() {
+  const name = document.getElementById('editName').value.trim();
+  const reason = document.getElementById('editReason').value.trim();
+  if (!name) { alert('콘텐츠 이름을 입력해 주세요'); return; }
+  if (!reason) { if (!confirm('변경 사유를 비워두고 저장할까요? (이력 추적이 어려워집니다)')) return; }
+  alert(`✓ 새 버전으로 저장 완료\n\n변경 사유: ${reason || '(미기재)'}\n→ 연결된 모든 상품에 자동 반영`);
+  closeEditModal();
+}
+
+function confirmUnlinkContent(btn) {
+  const c = getCardContext(btn);
+  _activeCardEl = c.el;
+  document.getElementById('unlinkName').textContent = c.name + ' (' + c.id + ')';
+  document.getElementById('unlinkModal').classList.add('show');
+}
+function closeUnlinkModal() { document.getElementById('unlinkModal').classList.remove('show'); _activeCardEl = null; }
+function confirmUnlink() {
+  if (_activeCardEl) {
+    _activeCardEl.style.transition = 'opacity 0.3s';
+    _activeCardEl.style.opacity = '0';
+    setTimeout(() => { _activeCardEl?.remove(); _activeCardEl = null; }, 300);
+  }
+  closeUnlinkModal();
+  alert('⊘ 연결 해제 완료 — 변경 이력에 기록됨');
+}
+
+function openAppliedModal(btn) {
+  const c = getCardContext(btn);
+  document.getElementById('appliedId').textContent = c.id;
+  document.getElementById('appliedName').textContent = c.name;
+  document.getElementById('appliedModal').classList.add('show');
+}
+function closeAppliedModal() { document.getElementById('appliedModal').classList.remove('show'); }
+
+// v9 — 박수 요금표 select 전환 (mockup 시각 데모용)
+function switchNightsSelect(el) {
+  const nights = el.value;
+  const block = el.closest('.room-block');
+  const th = block?.querySelector('.price-table thead tr th:nth-child(3)');
+  if (th) th.textContent = `BB ${nights}박 총요금`;
+}
+
+// v9 — 최저가 pick 상세 모달
+function openPickModal(ctx) {
+  const modal = document.getElementById('pickModal');
+  const isTie = ctx.tie === true;
+  const isPeak = ctx.peak === true;
+  const pick = ctx.pick;
+
+  document.getElementById('pickCtxDate').textContent = ctx.date;
+  document.getElementById('pickCtxCombo').textContent = `${ctx.room} · ${ctx.meal} · ${ctx.nights}박`;
+
+  // 시나리오 5종
+  let scenarioHtml = '';
+  let ruleHtml = '';
+  if (pick === 'dyn' && !isPeak) {
+    scenarioHtml = `
+      <div class="pick-cand selected">
+        <div class="pick-cand-check">✓</div>
+        <div class="pick-cand-badge"><span class="src-badge dyn"><span class="src-badge-dot"></span>DYN</span></div>
+        <div class="pick-cand-price">458,280원</div>
+        <div class="pick-cand-meta">TMG rateId 47212 · checkAvailability 06:24 조회</div>
+        <span class="pick-cand-tag">Pick — 최저가</span>
+      </div>
+      <div class="pick-cand">
+        <div class="pick-cand-check"></div>
+        <div class="pick-cand-badge"><span class="src-badge stc"><span class="src-badge-dot"></span>STC</span></div>
+        <div class="pick-cand-price">485,640원</div>
+        <div class="pick-cand-meta">TMG rateId 47098 · Webhook 06:12 갱신</div>
+        <span class="pick-cand-tag" style="background:#f5f5f5; color:rgba(0,0,0,0.5);">+27,360원 (미채택)</span>
+      </div>`;
+    ruleHtml = `<strong>최저가 우선 pick</strong> — DYNAMIC 458,280원이 STATIC 485,640원보다 저렴해서 채택. 다이나믹 요금은 결제 직전 재조회 + 변동 시 확인 모달로 gap 커버.`;
+  } else if (pick === 'alm') {
+    scenarioHtml = `
+      <div class="pick-cand selected">
+        <div class="pick-cand-check">✓</div>
+        <div class="pick-cand-badge"><span class="src-badge alm"><span class="src-badge-dot"></span>ALM</span></div>
+        <div class="pick-cand-price">485,640원</div>
+        <div class="pick-cand-meta">TMG rateId 47155 · 요금 고정 · 재고 06:24 조회</div>
+        <span class="pick-cand-tag">Pick — 최저가 (STATIC 없음)</span>
+      </div>
+      <div class="pick-cand" style="opacity:0.5;">
+        <div class="pick-cand-check"></div>
+        <div class="pick-cand-badge"><span class="src-badge stc" style="opacity:0.5;"><span class="src-badge-dot"></span>STC</span></div>
+        <div class="pick-cand-price" style="color:rgba(0,0,0,0.4);">—</div>
+        <div class="pick-cand-meta">해당 조합에 STATIC 요금표 없음</div>
+      </div>
+      <div class="pick-cand">
+        <div class="pick-cand-check"></div>
+        <div class="pick-cand-badge"><span class="src-badge dyn"><span class="src-badge-dot"></span>DYN</span></div>
+        <div class="pick-cand-price">492,000원</div>
+        <div class="pick-cand-meta">TMG rateId 47212 · checkAvailability 06:24 조회</div>
+        <span class="pick-cand-tag" style="background:#f5f5f5; color:rgba(0,0,0,0.5);">+6,360원 (미채택)</span>
+      </div>`;
+    ruleHtml = `<strong>최저가 우선 pick</strong> — 이 조합엔 STATIC이 없고, ALM(485,640원)이 DYNAMIC(492,000원)보다 저렴해서 채택. 요금은 고정, 재고만 매일 갱신.`;
+  } else if (isTie) {
+    // 동가 시 STATIC tie-break
+    scenarioHtml = `
+      <div class="pick-cand selected">
+        <div class="pick-cand-check">✓</div>
+        <div class="pick-cand-badge"><span class="src-badge stc"><span class="src-badge-dot"></span>STC</span></div>
+        <div class="pick-cand-price">485,640원</div>
+        <div class="pick-cand-meta">TMG rateId 47098 · Webhook 06:12 갱신</div>
+        <span class="pick-cand-tag">Pick — 동가 tie-break</span>
+      </div>
+      <div class="pick-cand">
+        <div class="pick-cand-check"></div>
+        <div class="pick-cand-badge"><span class="src-badge dyn"><span class="src-badge-dot"></span>DYN</span></div>
+        <div class="pick-cand-price">485,640원</div>
+        <div class="pick-cand-meta">TMG rateId 47212 · checkAvailability 06:24 조회</div>
+        <span class="pick-cand-tag" style="background:#f5f5f5; color:rgba(0,0,0,0.5);">동가 (미채택)</span>
+      </div>`;
+    ruleHtml = `<strong>Tie-break 룰 적용</strong> — 두 후보의 가격이 동일(485,640원)해서 <strong>STATIC 우선</strong> 룰로 선택. STATIC은 예약 후 가격 변동이 없어 결제 안정성이 확보됨.`;
+  } else if (isPeak) {
+    // 성수기 - DYNAMIC이 유일 or 최저가
+    scenarioHtml = `
+      <div class="pick-cand selected">
+        <div class="pick-cand-check">✓</div>
+        <div class="pick-cand-badge"><span class="src-badge dyn"><span class="src-badge-dot"></span>DYN</span></div>
+        <div class="pick-cand-price">620,000원</div>
+        <div class="pick-cand-meta">TMG rateId 47212 · checkAvailability 06:24 조회</div>
+        <span class="pick-cand-tag">Pick — 최저가</span>
+      </div>
+      <div class="pick-cand">
+        <div class="pick-cand-check"></div>
+        <div class="pick-cand-badge"><span class="src-badge stc"><span class="src-badge-dot"></span>STC</span></div>
+        <div class="pick-cand-price">680,000원</div>
+        <div class="pick-cand-meta">TMG rateId 47098 · Webhook 06:12 갱신</div>
+        <span class="pick-cand-tag" style="background:#f5f5f5; color:rgba(0,0,0,0.5);">+60,000원 (미채택)</span>
+      </div>`;
+    ruleHtml = `<strong>최저가 우선 pick</strong> — DYNAMIC 620,000원이 STATIC 680,000원보다 저렴해서 채택. 결제 직전 재조회 + 변동 시 확인 모달로 gap 커버.`;
+  } else {
+    // 일반 (source 하나만 or 최저가 pick)
+    scenarioHtml = `
+      <div class="pick-cand selected">
+        <div class="pick-cand-check">✓</div>
+        <div class="pick-cand-badge"><span class="src-badge stc"><span class="src-badge-dot"></span>STC</span></div>
+        <div class="pick-cand-price">485,640원</div>
+        <div class="pick-cand-meta">TMG rateId 47098 · Webhook 06:12 갱신</div>
+        <span class="pick-cand-tag">Pick — 단독 source</span>
+      </div>
+      <div class="pick-cand" style="opacity:0.5;">
+        <div class="pick-cand-check"></div>
+        <div class="pick-cand-badge"><span class="src-badge alm" style="opacity:0.5;"><span class="src-badge-dot"></span>ALM</span></div>
+        <div class="pick-cand-price" style="color:rgba(0,0,0,0.4);">—</div>
+        <div class="pick-cand-meta">해당 조합에 ALM 요금표 없음</div>
+      </div>
+      <div class="pick-cand" style="opacity:0.5;">
+        <div class="pick-cand-check"></div>
+        <div class="pick-cand-badge"><span class="src-badge dyn" style="opacity:0.5;"><span class="src-badge-dot"></span>DYN</span></div>
+        <div class="pick-cand-price" style="color:rgba(0,0,0,0.4);">—</div>
+        <div class="pick-cand-meta">해당 조합에 DYNAMIC 요금표 없음</div>
+      </div>`;
+    ruleHtml = `이 조합은 <strong>STATIC 단독 source</strong>. 다른 source가 있으면 최저가 우선, 동가 시 STATIC 우선 룰이 적용됨.`;
+  }
+
+  document.getElementById('pickCandidates').innerHTML = scenarioHtml;
+  document.getElementById('pickRule').innerHTML = ruleHtml;
+  modal.classList.add('show');
+}
+function closePickModal() { document.getElementById('pickModal').classList.remove('show'); }
+</script>
+
+<!-- ==================== MODAL: 최저가 pick 상세 (v9) ==================== -->
+<div class="modal-overlay" id="pickModal">
+  <div class="modal" style="width:540px;">
+    <div class="modal-header">
+      <div class="modal-title">
+        <span class="tag" style="background:#f0f5ff; color:#1d39c4; padding:2px 8px; border-radius:10px; font-size:10px; font-weight:700; border:1px solid #adc6ff;">v9</span>
+        최저가 pick 상세
+      </div>
+      <button class="modal-close" onclick="closePickModal()">×</button>
+    </div>
+    <div class="pick-modal-body">
+      <div class="pick-context">
+        📅 <strong id="pickCtxDate">2026-05-24</strong> · 🛏️ <strong id="pickCtxCombo">디럭스 시티뷰 · BB · 3박</strong><br>
+        <span style="color:rgba(0,0,0,0.55);">이 조합에 대해 TMG가 준 source별 후보값과 pick 이유를 표시합니다.</span>
+      </div>
+      <div class="pick-candidates-title">source별 후보값</div>
+      <div class="pick-candidates" id="pickCandidates"></div>
+      <div class="pick-rule-box">💡 <span id="pickRule"></span></div>
+    </div>
+    <div style="padding: 12px 20px; border-top: 1px solid #f0f0f0; display: flex; justify-content: flex-end; gap: 8px;">
+      <button class="btn btn-sm" onclick="closePickModal()">닫기</button>
+      <button class="btn btn-primary btn-sm" onclick="alert('수동 override는 별도 정책 필요 — v9 mockup에서는 미구현'); closePickModal();">수동 override</button>
+    </div>
+  </div>
+</div>
+
+</body>
+</html>
