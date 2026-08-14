@@ -433,9 +433,16 @@ select.select-mini { height: 30px; padding: 0 30px 0 10px; border: 1px solid #e8
 .price-cell-click { cursor: pointer; }
 .price-cell-click:hover { background: #e6f4ff; }
 
-.nights-tabs { display: inline-flex; gap: 4px; background: #fafbfc; padding: 3px; border-radius: 8px; border: 1px solid #f0f0f0; margin-bottom: 10px; }
-.nights-tab { padding: 6px 14px; font-size: 12px; font-weight: 700; color: rgba(0,0,0,0.55); background: transparent; border: none; border-radius: 6px; cursor: pointer; }
-.nights-tab.active { background: #1677ff; color: #fff; }
+/* v9 UX B — 박수별 요금표 세로 배치 (섹션 collapsible) */
+.nights-section { border: 1px solid #e6ecf5; border-radius: 10px; overflow: hidden; background: #fff; }
+.nights-section-head { display: flex; align-items: center; gap: 10px; padding: 10px 14px; background: linear-gradient(180deg, #f0f5ff 0%, #f5f8ff 100%); border-bottom: 1px solid #e6ecf5; cursor: pointer; user-select: none; }
+.nights-section-head .chev { display: inline-block; font-size: 11px; color: #1d39c4; width: 12px; transition: transform 0.15s; }
+.nights-section.collapsed .chev { transform: rotate(-90deg); }
+.nights-section.collapsed .nights-section-body { display: none; }
+.nights-section-head .nights-title { font-size: 13px; font-weight: 800; color: #1d39c4; letter-spacing: -0.3px; }
+.nights-section-head .nights-sub { font-size: 11.5px; color: rgba(0,0,0,0.55); flex: 1; }
+.nights-section-head .nights-total { font-size: 11px; background: #fff; color: #1d39c4; border: 1px solid #adc6ff; padding: 2px 8px; border-radius: 10px; font-weight: 700; }
+.nights-section-body { padding: 14px; }
 
 /* v9 — 최저가 pick 상세 모달 */
 .pick-modal-body { padding: 18px 20px; }
@@ -483,7 +490,7 @@ select.select-mini { height: 30px; padding: 0 30px 0 10px; border: 1px solid #e8
   <!-- v9 정책 반영 안내 -->
   <div style="background:#f0f5ff; border:1px solid #adc6ff; border-radius:10px; padding:12px 16px; margin-bottom:14px; font-size:12.5px; color:#1d39c4; line-height:1.6;">
     <div style="font-weight:800; margin-bottom:4px;">📢 2026-08-14 정책 갱신 반영</div>
-    <div>① 요금표 identity = <strong>(객실 × 식사 × 박수 × 날짜)</strong> — 박수 축 신규 도입 (3박·4박 노출)<br>② <strong>최저가 우선 pick</strong> + 동가 시 STATIC tie-break — 각 셀의 최저가 옆 source 뱃지(🟢STC/🟡ALM/🔴DYN) 표시, 셀 클릭 시 후보값 상세<br>③ DYNAMIC도 패키지 상품 O — 결제 직전 재조회 + 변동 시 확인 모달로 gap 커버</div>
+    <div>① 요금표 identity = <strong>(객실 × 식사 × 박수 × 날짜)</strong> — 박수 축 신규 도입, 박수별 요금표를 <strong>세로 배치</strong>로 함께 관리 (3박·4박)<br>② <strong>최저가 우선 pick</strong> + 동가 시 STATIC tie-break — 각 셀의 최저가 옆 source 뱃지(🟢STC/🟡ALM/🔴DYN) 표시, 셀 클릭 시 후보값 상세<br>③ DYNAMIC도 패키지 상품 O — 결제 직전 재조회 + 변동 시 확인 모달로 gap 커버<br>④ 박수별 total price 독립 저장 → <strong>1박×N 재조합 없음</strong> (미니멈 스테이·서플먼트 자동 반영, 7/30 회의 우려 해소)</div>
   </div>
 
   <!-- TMG 자동 채움 안내 배너 (요금표에서 진입한 경우) -->
@@ -912,45 +919,92 @@ select.select-mini { height: 30px; padding: 0 30px 0 10px; border: 1px solid #e8
         </div>
       </div>
 
-      <!-- v9: 박수 select + 식사 필터 -->
+      <!-- v9: 식사 필터만 (박수는 아래 섹션별 세로 배치) -->
       <div style="display:flex; align-items:center; gap:12px; margin-bottom:8px; flex-wrap:wrap;">
-        <div style="font-size:11.5px; font-weight:700; color:rgba(0,0,0,0.75);">박수 요금표:</div>
-        <select class="nights-select" onchange="switchNightsSelect(this)" style="height:30px; padding:0 26px 0 10px; border:1px solid #adc6ff; border-radius:6px; font-size:12.5px; font-weight:700; color:#1d39c4; background:#f0f5ff url(&quot;data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='%231d39c4'/%3E%3C/svg%3E&quot;) no-repeat right 10px center; appearance:none; cursor:pointer; min-width:110px;">
-          <option value="3" selected>3박 요금표</option>
-          <option value="4">4박 요금표</option>
-        </select>
         <div style="font-size:11.5px; color:rgba(0,0,0,0.55);">식사: <select class="select-mini" style="height:26px;"><option>BB (전체)</option><option>BB</option><option>HB</option><option>AI</option></select></div>
-        <div style="font-size:11px; color:rgba(0,0,0,0.5); margin-left:auto;">각 셀 = 최저가 pick · source 뱃지 클릭 → 후보 상세</div>
+        <div style="font-size:11px; color:rgba(0,0,0,0.5); margin-left:auto;">각 셀 = 최저가 pick · source 뱃지 클릭 → 후보 상세 · 박수별 요금표는 독립 저장 (미니멈 스테이·서플먼트 자동 반영)</div>
       </div>
 
-      <div class="price-table-wrap">
-        <table class="price-table">
-          <thead>
-            <tr>
-              <th class="no-divider check-cell"><input type="checkbox"></th>
-              <th>일별</th>
-              <th>BB 3박 총요금</th>
-              <th>BB 성인 공급가</th>
-              <th>BB 성인 정가</th>
-              <th>BB 성인 판매가</th>
-              <th>source</th>
-              <th>입고</th>
-              <th>소진</th>
-              <th>재고</th>
-              <th>상태</th>
-              <th class="no-divider">삭제</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr><td class="check-cell"><input type="checkbox"></td><td>05/21</td><td>639USD</td><td>485,640원</td><td>485,640원</td><td>485,640원</td><td class="price-cell-click" onclick="openPickModal({date:'2026-05-21', room:'디럭스 시티뷰', meal:'BB', nights:3})"><span class="src-badge stc"><span class="src-badge-dot"></span>STC</span></td><td>10</td><td>0</td><td>10</td><td class="status-cell">예약가능</td><td class="del-cell"><button>삭제</button></td></tr>
-            <tr><td class="check-cell"><input type="checkbox"></td><td>05/22</td><td>639USD</td><td>485,640원</td><td>485,640원</td><td>485,640원</td><td class="price-cell-click" onclick="openPickModal({date:'2026-05-22', room:'디럭스 시티뷰', meal:'BB', nights:3})"><span class="src-badge stc"><span class="src-badge-dot"></span>STC</span></td><td>10</td><td>0</td><td>10</td><td class="status-cell">예약가능</td><td class="del-cell"><button>삭제</button></td></tr>
-            <tr><td class="check-cell"><input type="checkbox"></td><td>05/23</td><td>639USD</td><td>485,640원</td><td>485,640원</td><td>485,640원</td><td class="price-cell-click" onclick="openPickModal({date:'2026-05-23', room:'디럭스 시티뷰', meal:'BB', nights:3})"><span class="src-badge stc"><span class="src-badge-dot"></span>STC</span></td><td>10</td><td>0</td><td>10</td><td class="status-cell">예약가능</td><td class="del-cell"><button>삭제</button></td></tr>
-            <tr><td class="check-cell"><input type="checkbox"></td><td>05/24</td><td>603USD</td><td>458,280원</td><td>485,640원</td><td>458,280원</td><td class="price-cell-click" onclick="openPickModal({date:'2026-05-24', room:'디럭스 시티뷰', meal:'BB', nights:3, pick:'dyn'})"><span class="src-badge dyn"><span class="src-badge-dot"></span>DYN</span></td><td>10</td><td>0</td><td>10</td><td class="status-cell">예약가능</td><td class="del-cell"><button>삭제</button></td></tr>
-            <tr><td class="check-cell"><input type="checkbox"></td><td>05/25</td><td>639USD</td><td>485,640원</td><td>485,640원</td><td>485,640원</td><td class="price-cell-click" onclick="openPickModal({date:'2026-05-25', room:'디럭스 시티뷰', meal:'BB', nights:3, tie:true})"><span class="src-badge stc"><span class="src-badge-dot"></span>STC</span></td><td>10</td><td>0</td><td>10</td><td class="status-cell">예약가능</td><td class="del-cell"><button>삭제</button></td></tr>
-            <tr><td class="check-cell"><input type="checkbox"></td><td>05/26</td><td>639USD</td><td>485,640원</td><td>485,640원</td><td>485,640원</td><td class="price-cell-click" onclick="openPickModal({date:'2026-05-26', room:'디럭스 시티뷰', meal:'BB', nights:3, pick:'alm'})"><span class="src-badge alm"><span class="src-badge-dot"></span>ALM</span></td><td>10</td><td>0</td><td>10</td><td class="status-cell">예약가능</td><td class="del-cell"><button>삭제</button></td></tr>
-            <tr><td class="check-cell"><input type="checkbox"></td><td>05/27</td><td>639USD</td><td>485,640원</td><td>485,640원</td><td>485,640원</td><td class="price-cell-click" onclick="openPickModal({date:'2026-05-27', room:'디럭스 시티뷰', meal:'BB', nights:3})"><span class="src-badge stc"><span class="src-badge-dot"></span>STC</span></td><td>10</td><td>0</td><td>10</td><td class="status-cell">예약가능</td><td class="del-cell"><button>삭제</button></td></tr>
-          </tbody>
-        </table>
+      <!-- ▼ 3박 요금표 섹션 -->
+      <div class="nights-section" data-nights="3">
+        <div class="nights-section-head" onclick="toggleNightsSection(this)">
+          <span class="chev">▾</span>
+          <span class="nights-title">3박 요금표</span>
+          <span class="nights-sub">BB · rateId 47098 · STC 5 / ALM 1 / DYN 1</span>
+          <span class="nights-total">7 rows</span>
+        </div>
+        <div class="nights-section-body">
+          <div class="price-table-wrap">
+            <table class="price-table">
+              <thead>
+                <tr>
+                  <th class="no-divider check-cell"><input type="checkbox"></th>
+                  <th>일별</th>
+                  <th>BB 3박 총요금</th>
+                  <th>BB 성인 공급가</th>
+                  <th>BB 성인 정가</th>
+                  <th>BB 성인 판매가</th>
+                  <th>source</th>
+                  <th>입고</th>
+                  <th>소진</th>
+                  <th>재고</th>
+                  <th>상태</th>
+                  <th class="no-divider">삭제</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr><td class="check-cell"><input type="checkbox"></td><td>05/21</td><td>639USD</td><td>485,640원</td><td>485,640원</td><td>485,640원</td><td class="price-cell-click" onclick="openPickModal({date:'2026-05-21', room:'디럭스 시티뷰', meal:'BB', nights:3})"><span class="src-badge stc"><span class="src-badge-dot"></span>STC</span></td><td>10</td><td>0</td><td>10</td><td class="status-cell">예약가능</td><td class="del-cell"><button>삭제</button></td></tr>
+                <tr><td class="check-cell"><input type="checkbox"></td><td>05/22</td><td>639USD</td><td>485,640원</td><td>485,640원</td><td>485,640원</td><td class="price-cell-click" onclick="openPickModal({date:'2026-05-22', room:'디럭스 시티뷰', meal:'BB', nights:3})"><span class="src-badge stc"><span class="src-badge-dot"></span>STC</span></td><td>10</td><td>0</td><td>10</td><td class="status-cell">예약가능</td><td class="del-cell"><button>삭제</button></td></tr>
+                <tr><td class="check-cell"><input type="checkbox"></td><td>05/23</td><td>639USD</td><td>485,640원</td><td>485,640원</td><td>485,640원</td><td class="price-cell-click" onclick="openPickModal({date:'2026-05-23', room:'디럭스 시티뷰', meal:'BB', nights:3})"><span class="src-badge stc"><span class="src-badge-dot"></span>STC</span></td><td>10</td><td>0</td><td>10</td><td class="status-cell">예약가능</td><td class="del-cell"><button>삭제</button></td></tr>
+                <tr><td class="check-cell"><input type="checkbox"></td><td>05/24</td><td>603USD</td><td>458,280원</td><td>485,640원</td><td>458,280원</td><td class="price-cell-click" onclick="openPickModal({date:'2026-05-24', room:'디럭스 시티뷰', meal:'BB', nights:3, pick:'dyn'})"><span class="src-badge dyn"><span class="src-badge-dot"></span>DYN</span></td><td>10</td><td>0</td><td>10</td><td class="status-cell">예약가능</td><td class="del-cell"><button>삭제</button></td></tr>
+                <tr><td class="check-cell"><input type="checkbox"></td><td>05/25</td><td>639USD</td><td>485,640원</td><td>485,640원</td><td>485,640원</td><td class="price-cell-click" onclick="openPickModal({date:'2026-05-25', room:'디럭스 시티뷰', meal:'BB', nights:3, tie:true})"><span class="src-badge stc"><span class="src-badge-dot"></span>STC</span></td><td>10</td><td>0</td><td>10</td><td class="status-cell">예약가능</td><td class="del-cell"><button>삭제</button></td></tr>
+                <tr><td class="check-cell"><input type="checkbox"></td><td>05/26</td><td>639USD</td><td>485,640원</td><td>485,640원</td><td>485,640원</td><td class="price-cell-click" onclick="openPickModal({date:'2026-05-26', room:'디럭스 시티뷰', meal:'BB', nights:3, pick:'alm'})"><span class="src-badge alm"><span class="src-badge-dot"></span>ALM</span></td><td>10</td><td>0</td><td>10</td><td class="status-cell">예약가능</td><td class="del-cell"><button>삭제</button></td></tr>
+                <tr><td class="check-cell"><input type="checkbox"></td><td>05/27</td><td>639USD</td><td>485,640원</td><td>485,640원</td><td>485,640원</td><td class="price-cell-click" onclick="openPickModal({date:'2026-05-27', room:'디럭스 시티뷰', meal:'BB', nights:3})"><span class="src-badge stc"><span class="src-badge-dot"></span>STC</span></td><td>10</td><td>0</td><td>10</td><td class="status-cell">예약가능</td><td class="del-cell"><button>삭제</button></td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- ▼ 4박 요금표 섹션 -->
+      <div class="nights-section" data-nights="4" style="margin-top:14px;">
+        <div class="nights-section-head" onclick="toggleNightsSection(this)">
+          <span class="chev">▾</span>
+          <span class="nights-title">4박 요금표</span>
+          <span class="nights-sub">BB · rateId 47099 · STC 4 / ALM 2 / DYN 1 · <span style="color:#1d39c4; font-weight:700;">1박당 6.8% 할인 (미니멈 스테이)</span></span>
+          <span class="nights-total">7 rows</span>
+        </div>
+        <div class="nights-section-body">
+          <div class="price-table-wrap">
+            <table class="price-table">
+              <thead>
+                <tr>
+                  <th class="no-divider check-cell"><input type="checkbox"></th>
+                  <th>일별</th>
+                  <th>BB 4박 총요금</th>
+                  <th>BB 성인 공급가</th>
+                  <th>BB 성인 정가</th>
+                  <th>BB 성인 판매가</th>
+                  <th>source</th>
+                  <th>입고</th>
+                  <th>소진</th>
+                  <th>재고</th>
+                  <th>상태</th>
+                  <th class="no-divider">삭제</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr><td class="check-cell"><input type="checkbox"></td><td>05/21</td><td>794USD</td><td>603,440원</td><td>647,520원</td><td>603,440원</td><td class="price-cell-click" onclick="openPickModal({date:'2026-05-21', room:'디럭스 시티뷰', meal:'BB', nights:4})"><span class="src-badge stc"><span class="src-badge-dot"></span>STC</span></td><td>10</td><td>0</td><td>10</td><td class="status-cell">예약가능</td><td class="del-cell"><button>삭제</button></td></tr>
+                <tr><td class="check-cell"><input type="checkbox"></td><td>05/22</td><td>794USD</td><td>603,440원</td><td>647,520원</td><td>603,440원</td><td class="price-cell-click" onclick="openPickModal({date:'2026-05-22', room:'디럭스 시티뷰', meal:'BB', nights:4})"><span class="src-badge stc"><span class="src-badge-dot"></span>STC</span></td><td>10</td><td>0</td><td>10</td><td class="status-cell">예약가능</td><td class="del-cell"><button>삭제</button></td></tr>
+                <tr><td class="check-cell"><input type="checkbox"></td><td>05/23</td><td>794USD</td><td>603,440원</td><td>647,520원</td><td>603,440원</td><td class="price-cell-click" onclick="openPickModal({date:'2026-05-23', room:'디럭스 시티뷰', meal:'BB', nights:4, pick:'alm'})"><span class="src-badge alm"><span class="src-badge-dot"></span>ALM</span></td><td>10</td><td>0</td><td>10</td><td class="status-cell">예약가능</td><td class="del-cell"><button>삭제</button></td></tr>
+                <tr><td class="check-cell"><input type="checkbox"></td><td>05/24</td><td>750USD</td><td>570,000원</td><td>647,520원</td><td>570,000원</td><td class="price-cell-click" onclick="openPickModal({date:'2026-05-24', room:'디럭스 시티뷰', meal:'BB', nights:4, pick:'dyn'})"><span class="src-badge dyn"><span class="src-badge-dot"></span>DYN</span></td><td>10</td><td>0</td><td>10</td><td class="status-cell">예약가능</td><td class="del-cell"><button>삭제</button></td></tr>
+                <tr><td class="check-cell"><input type="checkbox"></td><td>05/25</td><td>794USD</td><td>603,440원</td><td>647,520원</td><td>603,440원</td><td class="price-cell-click" onclick="openPickModal({date:'2026-05-25', room:'디럭스 시티뷰', meal:'BB', nights:4})"><span class="src-badge stc"><span class="src-badge-dot"></span>STC</span></td><td>10</td><td>0</td><td>10</td><td class="status-cell">예약가능</td><td class="del-cell"><button>삭제</button></td></tr>
+                <tr><td class="check-cell"><input type="checkbox"></td><td>05/26</td><td>794USD</td><td>603,440원</td><td>647,520원</td><td>603,440원</td><td class="price-cell-click" onclick="openPickModal({date:'2026-05-26', room:'디럭스 시티뷰', meal:'BB', nights:4, pick:'alm'})"><span class="src-badge alm"><span class="src-badge-dot"></span>ALM</span></td><td>10</td><td>0</td><td>10</td><td class="status-cell">예약가능</td><td class="del-cell"><button>삭제</button></td></tr>
+                <tr><td class="check-cell"><input type="checkbox"></td><td>05/27</td><td>794USD</td><td>603,440원</td><td>647,520원</td><td>603,440원</td><td class="price-cell-click" onclick="openPickModal({date:'2026-05-27', room:'디럭스 시티뷰', meal:'BB', nights:4})"><span class="src-badge stc"><span class="src-badge-dot"></span>STC</span></td><td>10</td><td>0</td><td>10</td><td class="status-cell">예약가능</td><td class="del-cell"><button>삭제</button></td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
       </div>
     </div>
 
@@ -2350,12 +2404,10 @@ function openAppliedModal(btn) {
 }
 function closeAppliedModal() { document.getElementById('appliedModal').classList.remove('show'); }
 
-// v9 — 박수 요금표 select 전환 (mockup 시각 데모용)
-function switchNightsSelect(el) {
-  const nights = el.value;
-  const block = el.closest('.room-block');
-  const th = block?.querySelector('.price-table thead tr th:nth-child(3)');
-  if (th) th.textContent = `BB ${nights}박 총요금`;
+// v9 UX B — 박수 요금표 섹션 접기/펴기
+function toggleNightsSection(headEl) {
+  const section = headEl.closest('.nights-section');
+  if (section) section.classList.toggle('collapsed');
 }
 
 // v9 — 최저가 pick 상세 모달
